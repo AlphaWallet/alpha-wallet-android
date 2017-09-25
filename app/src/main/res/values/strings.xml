@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Wal</string>
+    <string name="balance">Balance</string>
+    <string name="title_home">Home</string>
+    <string name="title_import">Import</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="default_network">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>
+    <!--<string name="default_network">https://kovan.infura.io</string>-->
+    <!-- <string name="default_network">https://infuranet.infura.io/llyrtzQ3YhkdESt2Fzrk</string> -->
+    <!-- <string name="default_network">https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->
+    <string name="default_address">0x14385e875471d22b6ad8a91ccf0f3577335ee367</string>
+    <string name="default_password">password</string>
+</resources>

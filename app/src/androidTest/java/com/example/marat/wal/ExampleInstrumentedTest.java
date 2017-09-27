@@ -3,9 +3,21 @@ package com.example.marat.wal;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
+
+import com.example.marat.wal.model.ESTransaction;
+import com.example.marat.wal.model.ESTransactionListResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +32,5 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws Exception {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
-
-        assertEquals("com.example.marat.wal", appContext.getPackageName());
     }
 }

@@ -11,39 +11,33 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.marat.wal.model.ESTransaction;
+import com.example.marat.wal.model.ESTransactionListResponse;
+
 import org.ethereum.geth.Account;
-import org.ethereum.geth.Address;
-import org.ethereum.geth.BigInt;
-import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.response.EthAccounts;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.protocol.core.methods.response.EthGetBlockTransactionCountByHash;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.EthTransaction;
-import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.infura.InfuraHttpService;
-import org.web3j.protocol.parity.Parity;
-import org.web3j.protocol.parity.ParityFactory;
-import org.web3j.protocol.parity.methods.response.PersonalUnlockAccount;
 import org.web3j.utils.Numeric;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -215,23 +209,93 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void testEtherscanService() throws Exception {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(getString(R.string.etherscan_url))
+                .build();
+
+        EtherscanService service = retrofit.create(EtherscanService.class);
+
+        Call<ESTransactionListResponse> call =
+                service.getTransactionList(
+                        "account",
+                        "txlist",
+                        getString(R.string.default_address),
+                        "4021100",
+                        "4021122",
+                        "asc",
+                        getString(R.string.etherscan_api_key)
+                    );
+
+
+        Log.d("INFO", "Request query:" + call.request().url().query());
+        call.enqueue(new Callback<ESTransactionListResponse>() {
+
+            @Override
+
+            public void onResponse(Call<ESTransactionListResponse> call, Response<ESTransactionListResponse> response) {
+
+                List<ESTransaction> transactions = response.body().getTransactionList();
+
+                //recyclerView.setAdapter(new MoviesAdapter(movies, R.layout.list_item_movie, getApplicationContext()));
+
+                Log.d("INFO", "Number of transactions: " + transactions.size());
+                Log.d("INFO", "Last transaction block number: " + transactions.get(0).getBlockNumber());
+                Log.d("INFO", "First transaction block number: " + transactions.get(transactions.size() - 1).getBlockNumber());
+
+            }
+
+            @Override
+            public void onFailure(Call<ESTransactionListResponse> call, Throwable t) {
+                Log.e("ERROR", t.toString());
+            }
+        });
+    }
+
     private class GetTransactionsTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(getString(R.string.default_network)));
-                EthTransaction res = web3
-                        .ethGetTransactionByHash("0x67229d5a27a6405d74fbb6ac20a57f64c6b4263f6d5c89a497aa25bcc531bcb9")
-                        .sendAsync()
-                        .get();
-                Transaction tx = res.getTransaction();
-                Log.d("INFO", "From: " + tx.getFrom());
-                Log.d("INFO", "To: " + tx.getTo());
-                Log.d("INFO", "Value: " + tx.getValue());
-                Log.d("INFO", "Gas price: " + tx.getGasPrice());
-                Log.d("INFO", "Gas: " + tx.getGas());
+                testEtherscanService();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            /*try {
+                Web3j web3j = Web3jFactory.build(new InfuraHttpService(getString(R.string.default_network)));
+
+                EthBlock ethBlock = web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false)
+                        .send();
+
+                BigInteger latestBlockNumber = ethBlock.getBlock().getNumber();
+                Log.d("INFO", "Block number: " + latestBlockNumber.toString());
+                Observable observable = web3j.transactionObservable();
+                Log.d("INFO", "Created observable: " + observable.toString());
+
+                Subscriber<Object> subscriber = new Subscriber<Object>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("INFO", "Completed");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("INFO", "MyObserver error: " + e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+
+                        Log.d("INFO", "onNext: " + o.toString());
+                    }
+                };
+                Log.d("INFO", "Created observer");
+
+                Subscription subscription = observable.subscribe(subscriber);
+
             } catch (Exception e) {
                 Log.d("ERROR", e.toString());
-            }
+            }*/
             return null;
         }
     }
@@ -264,7 +328,6 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

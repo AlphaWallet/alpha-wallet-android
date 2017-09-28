@@ -117,7 +117,12 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
             mValues.get(position).getTimeStamp();
             String sign = mValues.get(position).getTo().equals(mAddress) ? "+" : "-";
             BigDecimal value = new BigDecimal(str_value).divide(new BigDecimal("1000000000000000000"));
-            holder.mValueView.setText(sign + value.toString());
+
+            if (mValues.get(position).getValue() == "0") {
+                holder.mValueView.setText(value.toString());
+            } else {
+                holder.mValueView.setText(sign + value.toString());
+            }
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override

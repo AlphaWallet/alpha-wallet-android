@@ -30,26 +30,18 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
                     return true;
                 case R.id.navigation_import:
-                    mTextMessage.setText(R.string.title_import);
-                    Intent intent = new Intent(MainActivity.this, ItemListActivity.class);
-                    startActivity(intent);
+                    controller.navigateToImportWallet(MainActivity.this);
                     return true;
-                case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
+                case R.id.navigation_create:
+                    controller.navigateToCreateWallet(MainActivity.this);
                     return true;
             }
             return false;
         }
 
     };
-
-    public void navigate(View view) {
-        Intent intent = new Intent(MainActivity.this, ItemListActivity.class);
-        startActivity(intent);
-    }
 
     /*public void showBalance(View view) {
         controller.showBalance(view);
@@ -81,13 +73,35 @@ public class MainActivity extends AppCompatActivity {
     */
 
     @Override
+    public void onResume() {
+        super .onResume();
+
+        // Update account list
+        controller.loadViewModels();
+
+        LinearLayout linear_layout = (LinearLayout) findViewById(R.id.linear_layout);
+        linear_layout.removeAllViews();
+
+        List<VMAccount> accounts = controller.getAccounts();
+        for (VMAccount acc : accounts) {
+            Button b = new Button(this);
+            b.setText(acc.getAddress());
+            b.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    controller.navigateToWallet(MainActivity.this, v);
+                }
+            });
+            linear_layout.addView(b);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);*/
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         controller = Controller.get();
         controller.init(this.getApplicationContext());

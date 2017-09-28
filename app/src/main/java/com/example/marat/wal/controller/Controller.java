@@ -1,9 +1,11 @@
 package com.example.marat.wal.controller;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -12,6 +14,7 @@ import com.example.marat.wal.R;
 import com.example.marat.wal.model.ESTransaction;
 import com.example.marat.wal.model.ESTransactionListResponse;
 import com.example.marat.wal.model.VMAccount;
+import com.example.marat.wal.views.CreateAccountActivity;
 import com.example.marat.wal.views.ItemListActivity;
 import com.example.marat.wal.views.MainActivity;
 
@@ -31,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,6 +50,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Controller {
     private static Controller mInstance;
 
+    private static String TAG = "CONTROLLER";
+
     private Context mAppContext;
     private EtherStore mEtherStore;
     private String mKeystoreBaseDir;
@@ -58,7 +64,6 @@ public class Controller {
     Map<String, Long> mBalances;
 
     // Views
-    Context context;
     MainActivity mHomeActivity;
     ItemListActivity mWalletActivity;
 
@@ -92,7 +97,11 @@ public class Controller {
 
         // Dummy data
         mAccounts.add(new VMAccount(getString(R.string.default_address), 42));
-        mTransactions.put(getString(R.string.default_address), new ArrayList<ESTransaction>());
+        mAccounts.add(new VMAccount("0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a", 32));
+
+        for (VMAccount a : mAccounts) {
+            mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
+        }
 
     }
 
@@ -116,15 +125,42 @@ public class Controller {
         Intent intent = new Intent(context, ItemListActivity.class);
         intent.putExtra("address", address);
         context.startActivity(intent);
+    }
 
+    public void navigateToCreateWallet(Context context) {
+        Intent intent = new Intent(context, CreateAccountActivity.class);
+        context.startActivity(intent);
+    }
+
+    public void navigateToImportWallet(Context context) {
+        /*TextView b = (TextView) view;
+        String address = (String) b.getText();
+        Intent intent = new Intent(context, ItemListActivity.class);
+        context.startActivity(intent);*/
+    }
+
+    public void clickCreateAccount(Activity activity, String name, String password) {
+        Log.d(TAG, String.format("Create account '%s' with pwd '%s", name, password));
+        VMAccount account = createAccount(password);
+
+        mAccounts.add(account);
+        mTransactions.put(account.getAddress(), new ArrayList<ESTransaction>());
+
+        activity.finish();
     }
 
     public void showBalance(View view) {
         new GetBalanceTask().execute();
     }
 
-    public void createAccount(View view) {
-        new CreateAccountTask().execute();
+    public VMAccount createAccount(String password) {
+        try {
+            String address = new CreateAccountTask().execute(password).get();
+            return new VMAccount(address, 42); //TODO get balance tooo
+        } catch (Exception e) {
+            Log.d(TAG, e.toString());
+        }
+        return null;
     }
 
     public void importAccount(View view) { new ImportAccountTask().execute(); }
@@ -189,16 +225,17 @@ public class Controller {
         }
     }
 
-    private class CreateAccountTask extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String... params) {
+    private class CreateAccountTask extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... passwords) {
             Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
+            String address = "";
             try {
-                Account account = mEtherStore.createAccount(getString(R.string.default_password));
-                Log.d("INFO", "Generated account: " + account.getAddress().getHex().toString());
+                Account account = mEtherStore.createAccount(passwords[0]);
+                address = account.getAddress().getHex().toString();
             } catch (Exception e) {
                 Log.d("ERROR", "Error generating wallet: " + e.toString());
             }
-            return null;
+            return address;
         }
     }
 
@@ -273,7 +310,7 @@ public class Controller {
                                 "txlist",
                                 address,
                                 "0",
-                                "asc",
+                                "desc",
                                 getString(R.string.etherscan_api_key)
                         );
 

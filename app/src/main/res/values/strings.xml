@@ -3,7 +3,7 @@
     <string name="balance">Balance</string>
     <string name="title_home">Home</string>
     <string name="title_import">Import</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_create">Create</string>
     <string name="title_item_list">Items</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="infura_url">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>
@@ -14,4 +14,19 @@
     <string name="default_password">password</string>
     <string name="etherscan_api_key">ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V</string>
     <string name="etherscan_url">https://kovan.etherscan.io</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_create_wallet">Create Wallet</string>
+
+    <!-- Strings related to account creation -->
+    <string name="prompt_email">Account name</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Create</string>
+    <string name="action_sign_in_short">Create</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
 </resources>

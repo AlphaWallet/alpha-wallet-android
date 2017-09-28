@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.marat.wal.MainActivity">
+    tools:context="com.example.marat.wal.views.MainActivity">
 
     <FrameLayout
         android:id="@+id/content"
@@ -15,6 +15,7 @@
         android:layout_weight="0.53">
 
         <LinearLayout
+            android:id="@+id/linear_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -33,54 +34,6 @@
                 android:layout_height="wrap_content"
                 android:text="Navigate"
                 android:onClick="navigate"/>
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Show balance"
-                android:onClick="showBalance"/>
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Create account"
-                android:onClick="createAccount"/>
-            <Button
-                android:id="@+id/button5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Import account"
-                android:onClick="importAccount"/>
-            <Button
-                android:id="@+id/button6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Export account"
-                android:onClick="exportAccount"/>
-            <Button
-                android:id="@+id/button7"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Send transaction"
-                android:onClick="sendTransaction"/>
-            <Button
-                android:id="@+id/button8"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Get transactions"
-                android:onClick="getTransactions"/>
-            <Button
-                android:id="@+id/button9"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Check job status"
-                android:onClick="checkStatus"/>
-            <Button
-                android:id="@+id/button10"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Get accounts"
-                android:onClick="getAccounts"/>
 
         </LinearLayout>
 

@@ -6,10 +6,10 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_item_list">Items</string>
     <string name="title_item_detail">Item Detail</string>
-    <!--<string name="default_network">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->
-    <string name="default_network">http://kovan.etherscan.io</string>
+    <string name="infura_url">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>
     <!-- <string name="default_network">https://infuranet.infura.io/llyrtzQ3YhkdESt2Fzrk</string> -->
     <!-- <string name="default_network">https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->
+    <!--<string name="default_address">0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a</string>-->
     <string name="default_address">0x14385e875471d22b6ad8a91ccf0f3577335ee367</string>
     <string name="default_password">password</string>
     <string name="etherscan_api_key">ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V</string>

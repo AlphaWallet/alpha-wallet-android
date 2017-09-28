@@ -1,4 +1,4 @@
-package com.example.marat.wal;
+package com.example.marat.wal.views;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,13 +9,20 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 
+import com.example.marat.wal.R;
+import com.example.marat.wal.controller.Controller;
+import com.example.marat.wal.controller.OnTaskCompleted;
 import com.example.marat.wal.dummy.DummyContent;
+import com.example.marat.wal.model.ESTransaction;
+import com.example.marat.wal.views.ItemDetailActivity;
+import com.example.marat.wal.views.ItemDetailFragment;
 
 import java.util.List;
 
@@ -27,22 +34,28 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class ItemListActivity extends AppCompatActivity {
+public class ItemListActivity extends AppCompatActivity implements OnTaskCompleted {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private boolean mTwoPane;
+    private static String TAG = "ITEM_LIST_ACTIVITY";
+    private String mAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
+        Bundle extras = getIntent().getExtras();
+        mAddress = extras.getString("address");
+        Log.d(TAG, "Address: " + mAddress);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
+        toolbar.setTitle(mAddress);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -67,15 +80,22 @@ public class ItemListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
+        Controller controller = Controller.get();
+        List<ESTransaction> txns = controller.getTransactions(mAddress);
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(txns));
+    }
+
+    @Override
+    public void onTaskCompleted() {
+        // Populate transactions
     }
 
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<DummyContent.DummyItem> mValues;
+        private final List<ESTransaction> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<DummyContent.DummyItem> items) {
+        public SimpleItemRecyclerViewAdapter(List<ESTransaction> items) {
             mValues = items;
         }
 
@@ -89,15 +109,15 @@ public class ItemListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
+            holder.mIdView.setText(mValues.get(position).getBlockNumber());
+            //holder.mContentView.setText(mValues.get(position).getBlockNumber());
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
-                        arguments.putString(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                        arguments.putString(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.getBlockNumber());
                         ItemDetailFragment fragment = new ItemDetailFragment();
                         fragment.setArguments(arguments);
                         getSupportFragmentManager().beginTransaction()
@@ -106,7 +126,7 @@ public class ItemListActivity extends AppCompatActivity {
                     } else {
                         Context context = v.getContext();
                         Intent intent = new Intent(context, ItemDetailActivity.class);
-                        intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                        intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.getBlockNumber());
 
                         context.startActivity(intent);
                     }
@@ -122,19 +142,19 @@ public class ItemListActivity extends AppCompatActivity {
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mIdView;
-            public final TextView mContentView;
-            public DummyContent.DummyItem mItem;
+            //public final TextView mContentView;
+            public ESTransaction mItem;
 
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
                 mIdView = (TextView) view.findViewById(R.id.id);
-                mContentView = (TextView) view.findViewById(R.id.content);
+                // mContentView = (TextView) view.findViewById(R.id.content);
             }
 
             @Override
             public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
+                return super.toString(); //+ " '" + mContentView.getText() + "'";
             }
         }
     }

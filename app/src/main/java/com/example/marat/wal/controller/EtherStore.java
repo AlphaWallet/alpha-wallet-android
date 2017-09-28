@@ -1,4 +1,4 @@
-package com.example.marat.wal;
+package com.example.marat.wal.controller;
 
 import android.security.KeyChain;
 import android.util.Log;

@@ -1,4 +1,4 @@
-package com.example.marat.wal;
+package com.example.marat.wal.views;
 
 import android.app.Activity;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.marat.wal.R;
 import com.example.marat.wal.dummy.DummyContent;
 
 /**

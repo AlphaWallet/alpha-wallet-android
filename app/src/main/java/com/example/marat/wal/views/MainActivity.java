@@ -1,7 +1,6 @@
-package com.example.marat.wal;
+package com.example.marat.wal.views;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -13,6 +12,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.marat.wal.R;
 import com.example.marat.wal.controller.Controller;
 import com.example.marat.wal.model.VMAccount;
 
@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void navigate(View view) {
-        //TODO: Start wallet detail page with selected wallet id
         Intent intent = new Intent(MainActivity.this, ItemListActivity.class);
         startActivity(intent);
     }
@@ -90,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);*/
 
-        controller = new Controller(this);
+        controller = Controller.get();
+        controller.init(this.getApplicationContext());
+        controller.loadViewModels();
 
         LinearLayout linear_layout = (LinearLayout) findViewById(R.id.linear_layout);
 
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             b.setText(acc.getAddress());
             b.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    navigate(v);
+                    controller.navigateToWallet(MainActivity.this, v);
                 }
             });
             linear_layout.addView(b);

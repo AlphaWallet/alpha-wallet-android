@@ -1,4 +1,4 @@
-package com.example.marat.wal;
+package com.example.marat.wal.controller;
 
 import com.example.marat.wal.model.ESTransactionListResponse;
 
@@ -19,7 +19,6 @@ public interface EtherscanService {
                                                              @Query("action") String action,
                                                              @Query("address") String address,
                                                              @Query("startBlock") String startBlock,
-                                                             @Query("endBlock") String endBlock,
                                                              @Query("sort") String sort,
                                                              @Query("apikey") String apikey);
 }

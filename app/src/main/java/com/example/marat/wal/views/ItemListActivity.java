@@ -57,7 +57,7 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(mAddress);
+        getSupportActionBar().setTitle(mAddress);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -118,7 +118,7 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
             String sign = mValues.get(position).getTo().equals(mAddress) ? "+" : "-";
             BigDecimal value = new BigDecimal(str_value).divide(new BigDecimal("1000000000000000000"));
 
-            if (mValues.get(position).getValue() == "0") {
+            if (mValues.get(position).getValue().equals("0")) {
                 holder.mValueView.setText(value.toString());
             } else {
                 holder.mValueView.setText(sign + value.toString());

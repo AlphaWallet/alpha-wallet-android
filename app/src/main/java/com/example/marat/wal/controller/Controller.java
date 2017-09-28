@@ -17,6 +17,7 @@ import com.example.marat.wal.model.VMAccount;
 import com.example.marat.wal.views.CreateAccountActivity;
 import com.example.marat.wal.views.ItemListActivity;
 import com.example.marat.wal.views.MainActivity;
+import com.example.marat.wal.views.SendActivity;
 
 import org.ethereum.geth.Account;
 import org.web3j.protocol.Web3j;
@@ -129,6 +130,11 @@ public class Controller {
 
     public void navigateToCreateWallet(Context context) {
         Intent intent = new Intent(context, CreateAccountActivity.class);
+        context.startActivity(intent);
+    }
+
+    public void navigateToSend(Context context) {
+        Intent intent = new Intent(context, SendActivity.class);
         context.startActivity(intent);
     }
 

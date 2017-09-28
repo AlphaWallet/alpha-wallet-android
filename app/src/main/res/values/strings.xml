@@ -1,10 +1,11 @@
 <resources>
-    <string name="app_name">Wal</string>
+    <string name="app_name">Trust</string>
     <string name="balance">Balance</string>
-    <string name="title_home">Home</string>
+    <string name="title_send">Send</string>
+    <string name="title_receive">Receive</string>
     <string name="title_import">Import</string>
     <string name="title_create">Create</string>
-    <string name="title_item_list">Items</string>
+    <string name="title_account">Accounts</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="infura_url">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>
     <!-- <string name="default_network">https://infuranet.infura.io/llyrtzQ3YhkdESt2Fzrk</string> -->

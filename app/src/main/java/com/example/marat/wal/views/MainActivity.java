@@ -29,7 +29,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.navigation_home:
+                case R.id.navigation_send:
+                    controller.navigateToSend(MainActivity.this);
                     return true;
                 case R.id.navigation_import:
                     controller.navigateToImportWallet(MainActivity.this);

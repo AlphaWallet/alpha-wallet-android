@@ -28,7 +28,7 @@
         </activity>
         <activity
             android:name=".views.ItemListActivity"
-            android:label="@string/title_item_list"
+            android:label="@string/title_account"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.ItemDetailActivity"
@@ -41,7 +41,10 @@
         </activity>
         <activity
             android:name=".views.CreateAccountActivity"
-            android:label="@string/title_activity_create_wallet"></activity>
+            android:label="@string/title_activity_create_wallet" />
+        <activity
+            android:name=".views.SendActivity"
+            android:label="@string/title_send"/>
     </application>
 
 </manifest>

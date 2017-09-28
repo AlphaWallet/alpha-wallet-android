@@ -24,6 +24,8 @@ import com.example.marat.wal.model.ESTransaction;
 import com.example.marat.wal.views.ItemDetailActivity;
 import com.example.marat.wal.views.ItemDetailFragment;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -111,6 +113,11 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
             holder.mItem = mValues.get(position);
             holder.mIdView.setText(mValues.get(position).getBlockNumber());
             //holder.mContentView.setText(mValues.get(position).getBlockNumber());
+            String str_value = mValues.get(position).getValue();
+            mValues.get(position).getTimeStamp();
+            String sign = mValues.get(position).getTo().equals(mAddress) ? "+" : "-";
+            BigDecimal value = new BigDecimal(str_value).divide(new BigDecimal("1000000000000000000"));
+            holder.mValueView.setText(sign + value.toString());
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -143,6 +150,8 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
             public final View mView;
             public final TextView mIdView;
             //public final TextView mContentView;
+            public final TextView mValueView;
+
             public ESTransaction mItem;
 
             public ViewHolder(View view) {
@@ -150,6 +159,7 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
                 mView = view;
                 mIdView = (TextView) view.findViewById(R.id.id);
                 // mContentView = (TextView) view.findViewById(R.id.content);
+                mValueView = (TextView) view.findViewById(R.id.value);
             }
 
             @Override

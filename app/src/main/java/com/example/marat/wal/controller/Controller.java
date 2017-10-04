@@ -144,6 +144,11 @@ public class Controller {
         return txns;
     }
 
+    public void navigateToAccountList(Context context) {
+        Intent intent = new Intent(context, AccountListActivity.class);
+        context.startActivity(intent);
+    }
+
     public void navigateToWallet(Context context, View view) {
         TextView b = (TextView) view;
         String address = (String) b.getText();

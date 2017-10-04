@@ -11,6 +11,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -49,16 +51,21 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         setContentView(R.layout.activity_transaction_list);
 
         mController = Controller.get();
+        mController.init(this);
+        mController.loadViewModels();
 
-        Bundle extras = getIntent().getExtras();
-        mAddress = extras.getString("address");
+        //Bundle extras = getIntent().getExtras();
+        //mAddress = extras.getString("address");
+        List<VMAccount> accounts = mController.getAccounts();
 
-        VMAccount account = mController.getAccount(mAddress);
+        VMAccount account = accounts.get(0);
+        mAddress = account.getAddress();
         Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
+        toolbar.inflateMenu(R.menu.toolbar_menu);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +87,18 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mController.navigateToAccountList(this);
+        return true;
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {

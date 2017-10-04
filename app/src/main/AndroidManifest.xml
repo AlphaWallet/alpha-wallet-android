@@ -23,6 +23,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -43,7 +44,7 @@
             android:label="@string/title_send" />
         <activity
             android:name=".views.AccountListActivity"
-            android:label="@string/title_activity_account_list"
+            android:label="@string/title_account_list"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

@@ -52,11 +52,15 @@ public class Controller {
 
     private static String TAG = "CONTROLLER";
 
+    // Services
     private Context mAppContext;
     private EtherStore mEtherStore;
-    private String mKeystoreBaseDir;
     private Retrofit mRetrofit;
     private EtherscanService mEtherscanService;
+
+    // State
+    private String mKeystoreBaseDir;
+    private String mCurrentAddress;
 
     // View models
     ArrayList<VMAccount> mAccounts;
@@ -64,7 +68,7 @@ public class Controller {
     Map<String, Long> mBalances;
 
     // Views
-    AccountListActivity mHomeActivity;
+    AccountListActivity mAccountListActivity;
     TransactionListActivity mWalletActivity;
 
     public static Controller get() {
@@ -107,6 +111,10 @@ public class Controller {
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());
+        }
+
+        if (mAccounts.size() > 0) {
+            setCurrentAddress(mAccounts.get(0).getAddress());
         }
 
         for (VMAccount a : mAccounts) {
@@ -212,6 +220,14 @@ public class Controller {
 
     private String getString(int resId) {
         return mAppContext.getString(resId);
+    }
+
+    public void setCurrentAddress(String currentAddress) {
+        this.mCurrentAddress = currentAddress;
+    }
+
+    public VMAccount getCurrentAccount() {
+        return this.getAccount(mCurrentAddress);
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {

@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,9 +55,8 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
 
         //Bundle extras = getIntent().getExtras();
         //mAddress = extras.getString("address");
-        List<VMAccount> accounts = mController.getAccounts();
 
-        VMAccount account = accounts.get(0);
+        VMAccount account = mController.getCurrentAccount();
         mAddress = account.getAddress();
         Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
 
@@ -67,12 +65,11 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
         toolbar.inflateMenu(R.menu.toolbar_menu);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.send_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                mController.navigateToSend(TransactionListActivity.this);
             }
         });
 
@@ -88,6 +85,16 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             mTwoPane = true;
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        VMAccount account = mController.getCurrentAccount();
+        mAddress = account.getAddress();
+        getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

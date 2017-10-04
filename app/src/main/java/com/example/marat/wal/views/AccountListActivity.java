@@ -1,6 +1,5 @@
 package com.example.marat.wal.views;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -18,7 +17,7 @@ import com.example.marat.wal.model.VMAccount;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class AccountListActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private Controller controller;
@@ -30,13 +29,13 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_send:
-                    controller.navigateToSend(MainActivity.this);
+                    controller.navigateToSend(AccountListActivity.this);
                     return true;
                 case R.id.navigation_import:
-                    controller.navigateToImportWallet(MainActivity.this);
+                    controller.navigateToImportWallet(AccountListActivity.this);
                     return true;
                 case R.id.navigation_create:
-                    controller.navigateToCreateWallet(MainActivity.this);
+                    controller.navigateToCreateWallet(AccountListActivity.this);
                     return true;
             }
             return false;
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             b.setText(acc.getAddress());
             b.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    controller.navigateToWallet(MainActivity.this, v);
+                    controller.navigateToWallet(AccountListActivity.this, v);
                 }
             });
             linear_layout.addView(b);
@@ -99,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.account_list);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -116,13 +115,13 @@ public class MainActivity extends AppCompatActivity {
             b.setText(acc.getAddress());
             b.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    controller.navigateToWallet(MainActivity.this, v);
+                    controller.navigateToWallet(AccountListActivity.this, v);
                 }
             });
             linear_layout.addView(b);
         }
 
-        Log.d("INFO", "MainActivity.onCreate");
+        Log.d("INFO", "AccountListActivity.onCreate");
     }
 
 }

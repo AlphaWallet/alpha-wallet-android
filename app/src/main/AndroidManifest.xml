@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".views.MainActivity"
+            android:name=".views.AccountListActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,17 +27,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".views.ItemListActivity"
+            android:name=".views.TransactionListActivity"
             android:label="@string/title_account"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.ItemDetailActivity"
+            android:name=".views.TransactionDetailActivity"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".views.ItemListActivity"
+            android:parentActivityName=".views.TransactionListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.marat.wal.views.ItemListActivity" />
+                android:value="com.example.marat.wal.views.TransactionListActivity" />
         </activity>
         <activity
             android:name=".views.CreateAccountActivity"

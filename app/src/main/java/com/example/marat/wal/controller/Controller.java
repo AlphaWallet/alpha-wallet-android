@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -14,9 +13,9 @@ import com.example.marat.wal.R;
 import com.example.marat.wal.model.ESTransaction;
 import com.example.marat.wal.model.ESTransactionListResponse;
 import com.example.marat.wal.model.VMAccount;
+import com.example.marat.wal.views.AccountListActivity;
 import com.example.marat.wal.views.CreateAccountActivity;
-import com.example.marat.wal.views.ItemListActivity;
-import com.example.marat.wal.views.MainActivity;
+import com.example.marat.wal.views.TransactionListActivity;
 import com.example.marat.wal.views.SendActivity;
 
 import org.ethereum.geth.Account;
@@ -34,10 +33,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,8 +64,8 @@ public class Controller {
     Map<String, Long> mBalances;
 
     // Views
-    MainActivity mHomeActivity;
-    ItemListActivity mWalletActivity;
+    AccountListActivity mHomeActivity;
+    TransactionListActivity mWalletActivity;
 
     public static Controller get() {
         if (mInstance == null) {
@@ -150,7 +147,7 @@ public class Controller {
     public void navigateToWallet(Context context, View view) {
         TextView b = (TextView) view;
         String address = (String) b.getText();
-        Intent intent = new Intent(context, ItemListActivity.class);
+        Intent intent = new Intent(context, TransactionListActivity.class);
         intent.putExtra("address", address);
         context.startActivity(intent);
     }
@@ -168,7 +165,7 @@ public class Controller {
     public void navigateToImportWallet(Context context) {
         /*TextView b = (TextView) view;
         String address = (String) b.getText();
-        Intent intent = new Intent(context, ItemListActivity.class);
+        Intent intent = new Intent(context, TransactionListActivity.class);
         context.startActivity(intent);*/
     }
 

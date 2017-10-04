@@ -9,5 +9,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="com.example.marat.wal.views.ItemListActivity"
-    tools:listitem="@layout/item_list_content" />
+    tools:context="com.example.marat.wal.views.TransactionListActivity"
+    tools:listitem="@layout/transaction_list_content" />

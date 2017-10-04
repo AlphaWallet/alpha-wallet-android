@@ -14,11 +14,11 @@ import com.example.marat.wal.dummy.DummyContent;
 
 /**
  * A fragment representing a single Item detail screen.
- * This fragment is either contained in a {@link ItemListActivity}
- * in two-pane mode (on tablets) or a {@link ItemDetailActivity}
+ * This fragment is either contained in a {@link TransactionListActivity}
+ * in two-pane mode (on tablets) or a {@link TransactionDetailActivity}
  * on handsets.
  */
-public class ItemDetailFragment extends Fragment {
+public class TransactionDetailFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -34,7 +34,7 @@ public class ItemDetailFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemDetailFragment() {
+    public TransactionDetailFragment() {
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.item_detail, container, false);
+        View rootView = inflater.inflate(R.layout.transaction_detail, container, false);
 
         // Show the dummy content as text in a TextView.
         if (mItem != null) {

@@ -4,6 +4,7 @@ import android.security.KeyChain;
 import android.util.Log;
 
 import org.ethereum.geth.Account;
+import org.ethereum.geth.Accounts;
 import org.ethereum.geth.Address;
 import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
@@ -14,6 +15,8 @@ import org.web3j.abi.datatypes.generated.Int64;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marat on 9/22/17.
@@ -22,11 +25,12 @@ import java.nio.charset.StandardCharsets;
 public class EtherStore {
 
     private KeyChain keyChain;
-
     private KeyStore ks;
+    private static String TAG = "EtherStore";
 
     public EtherStore(String filesDir) {
         ks = new KeyStore(filesDir + "/keystore", Geth.LightScryptN, Geth.LightScryptP);
+        Log.d(TAG, "Created KeyStore with %s accounts".format(Long.toString(ks.getAccounts().size())));
     }
 
     public Account createAccount(String password) throws Exception {
@@ -69,5 +73,20 @@ public class EtherStore {
         ks.lock(signer.getAddress());
 
         return signed.encodeRLP();
+    }
+
+    public Account getAccount(String address) throws Exception {
+        Accounts accounts = ks.getAccounts();
+        return accounts.get(Long.decode(address));
+    }
+
+    public List<Account> getAccounts() throws Exception {
+        List<Account> out = new ArrayList<>();
+        Accounts accounts = ks.getAccounts();
+
+        for (long i = 0; i < accounts.size(); i++) {
+            out.add(accounts.get(i));
+        }
+        return out;
     }
 }

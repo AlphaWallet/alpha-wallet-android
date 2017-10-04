@@ -1,23 +1,29 @@
 package com.example.marat.wal.model;
 
+import java.math.BigInteger;
+
 /**
  * Created by marat on 9/26/17.
  */
 
 public class VMAccount {
     private String mAddress;
-    private int mBalance;
+    private BigInteger mBalanceInWei;
 
-    public VMAccount(String mAddress, int mBalance) {
+    public VMAccount(String mAddress, String balanceInWei) {
         this.mAddress = mAddress;
-        this.mBalance = mBalance;
+        this.mBalanceInWei = new BigInteger(balanceInWei);
     }
 
     public String getAddress() {
         return mAddress;
     }
 
-    public int getBalance() {
-        return mBalance;
+    public BigInteger getBalance() {
+        return mBalanceInWei;
+    }
+
+    public void setBalance(BigInteger wei) {
+        mBalanceInWei = wei;
     }
 }

@@ -30,9 +30,11 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.infura.InfuraHttpService;
 import org.web3j.utils.Numeric;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -96,20 +98,45 @@ public class Controller {
         mTransactions = new HashMap<>();
         mBalances = new HashMap<>();
 
-        // Dummy data
-        mAccounts.add(new VMAccount(getString(R.string.default_address), 42));
-        mAccounts.add(new VMAccount("0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a", 32));
+        // Dummy data TODO remove
+        //mAccounts.add(new VMAccount(getString(R.string.default_address), "0"));
+        //mAccounts.add(new VMAccount("0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a", "0"));
+
+        try {
+            List<Account> ksAccounts = mEtherStore.getAccounts();
+
+            for (Account a: ksAccounts) {
+                mAccounts.add(new VMAccount(a.getAddress().getHex(), "0"));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
 
         for (VMAccount a : mAccounts) {
             mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
         }
-
     }
 
     public void loadViewModels() {
+        // Get transactions
         for (VMAccount a : mAccounts) {
             new GetTransactionsTask(a.getAddress()).execute();
         }
+
+        // Get balances
+        for (VMAccount a : mAccounts) {
+            new GetBalanceTask(a).execute();
+        }
+    }
+
+    public VMAccount getAccount(String address) {
+        VMAccount out = null;
+        for (VMAccount a : mAccounts) {
+            if (a.getAddress().equals(address)) {
+                out = a;
+            }
+        }
+        return out;
     }
 
     public List<ESTransaction> getTransactions(String address) {
@@ -155,14 +182,16 @@ public class Controller {
         activity.finish();
     }
 
-    public void showBalance(View view) {
-        new GetBalanceTask().execute();
+    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password) {
+        Log.d(TAG, String.format("Send ETH: %s, %s, %s, %s", from, to, ethAmount, password));
+        new SendTransactionTask(from, to, EthToWei(ethAmount), password).execute();
+        sendActivity.finish();
     }
 
     public VMAccount createAccount(String password) {
         try {
             String address = new CreateAccountTask().execute(password).get();
-            return new VMAccount(address, 42); //TODO get balance tooo
+            return new VMAccount(address, "0");
         } catch (Exception e) {
             Log.d(TAG, e.toString());
         }
@@ -173,10 +202,6 @@ public class Controller {
 
     public void exportAccount(View view) {
         new ExportAccountTask().execute();
-    }
-
-    public void sendTransaction(View view) {
-        new SendTransactionTask().execute();
     }
 
     public List<VMAccount> getAccounts() {
@@ -202,17 +227,26 @@ public class Controller {
     }
 
     private class GetBalanceTask extends AsyncTask<Void, Void, Void> {
+        private VMAccount mAccount;
+
+        public GetBalanceTask(VMAccount account) {
+            this.mAccount = account;
+        }
+
         protected Void doInBackground(Void... params) {
             try {
                 Web3j web3 = Web3jFactory.build(new InfuraHttpService(getString(R.string.infura_url)));
                 EthGetBalance ethGetBalance = web3
-                        .ethGetBalance(getString(R.string.default_address), DefaultBlockParameterName.LATEST)
+                        .ethGetBalance(mAccount.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
                         .get();
                 BigInteger wei = ethGetBalance.getBalance();
-                Log.d("INFO", "balance: " + wei);
+                Log.d(TAG, "balance: " + wei);
+
+                mAccount.setBalance(wei);
+
             } catch (Exception e) {
-                Log.d("ERROR", e.toString());
+                Log.e(TAG, e.toString());
             }
             return null;
         }
@@ -258,25 +292,37 @@ public class Controller {
         }
     }
 
+    // "{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}"
+
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
+        private String fromAddress;
+        private String toAddress;
+        private String wei;
+        private String password;
+
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password) {
+            this.fromAddress = fromAddress;
+            this.toAddress = toAddress;
+            this.wei = wei;
+            this.password = password;
+        }
+
         protected Void doInBackground(Void... params) {
             try {
                 Web3j web3j = Web3jFactory.build(new InfuraHttpService(getString(R.string.infura_url)));
 
-                String storeJson = "{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}";
-                Account fromAccount = mEtherStore.importKeyStore(storeJson, getString(R.string.default_password));
-                Log.d("INFO", "Imported account: " + fromAccount.getAddress().getHex());
-
-                String password = getString(R.string.default_password);
-                Account toAccount = mEtherStore.createAccount(password);
-                Log.d("INFO", "Created account: " + toAccount.getAddress().getHex().toString());
+                Account fromAccount = mEtherStore.getAccount(fromAddress);
+                if (fromAccount == null) {
+                    Log.e(TAG, "Can't find account by from address: " + fromAddress);
+                    return null;
+                }
 
                 EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-                        toAccount.getAddress().getHex().toString(), DefaultBlockParameterName.LATEST).sendAsync().get();
+                        fromAddress, DefaultBlockParameterName.LATEST).sendAsync().get();
                 BigInteger nonce = ethGetTransactionCount.getTransactionCount();
                 Log.d("INFO", "New account nonce:" + new Long(nonce.longValue()).toString());
 
-                byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAccount.getAddress().getHex().toString(), nonce.longValue());
+                byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, nonce.longValue());
                 String hexValue = Numeric.toHexString(signedMessage);
 
                 Log.d("INFO", "Sent transaction: " + hexValue);
@@ -285,17 +331,19 @@ public class Controller {
                         .ethSendRawTransaction(hexValue)
                         .sendAsync()
                         .get();
+
                 String result = raw.getTransactionHash();
+                Log.d(TAG, "Transaction hash %s".format(result));
 
                 if (raw.hasError()) {
-                    Log.d("INFO", "Transaction error message: " + raw.getError().getMessage());
-                    Log.d("INFO", "Transaction error data: " + raw.getError().getData());
+                    Log.d(TAG, "Transaction error message: " + raw.getError().getMessage());
+                    Log.d(TAG, "Transaction error data: " + raw.getError().getData());
                 }
-                Log.d("INFO", "Transaction JSON-RPC"+ raw.getJsonrpc());
-                Log.d("INFO", "Transaction result: " + raw.getResult());
-                Log.d("INFO", "Transaction hash: " + raw.getTransactionHash());
+                Log.d(TAG, "Transaction JSON-RPC"+ raw.getJsonrpc());
+                Log.d(TAG, "Transaction result: " + raw.getResult());
+                Log.d(TAG, "Transaction hash: " + raw.getTransactionHash());
             } catch (Exception e) {
-                Log.d("ERROR", e.toString());
+                Log.e(TAG, e.toString());
             }
             return null;
         }
@@ -351,5 +399,17 @@ public class Controller {
             }
             return null;
         }
+    }
+
+    private static String weiInEth = "1000000000000000000";
+
+    public static String WeiToEth(String wei) {
+        BigDecimal eth = new BigDecimal(wei).divide(new BigDecimal(weiInEth));
+        return eth.toString();
+    }
+
+    public static String EthToWei(String eth) {
+        BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(weiInEth));
+        return wei.toString();
     }
 }

@@ -21,6 +21,7 @@ import com.example.marat.wal.controller.Controller;
 import com.example.marat.wal.controller.OnTaskCompleted;
 import com.example.marat.wal.dummy.DummyContent;
 import com.example.marat.wal.model.ESTransaction;
+import com.example.marat.wal.model.VMAccount;
 import com.example.marat.wal.views.ItemDetailActivity;
 import com.example.marat.wal.views.ItemDetailFragment;
 
@@ -45,19 +46,24 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
     private boolean mTwoPane;
     private static String TAG = "ITEM_LIST_ACTIVITY";
     private String mAddress = "";
+    private Controller mController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
+        mController = Controller.get();
+
         Bundle extras = getIntent().getExtras();
         mAddress = extras.getString("address");
-        Log.d(TAG, "Address: " + mAddress);
+
+        VMAccount account = mController.getAccount(mAddress);
+        Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(mAddress);
+        getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -113,15 +119,15 @@ public class ItemListActivity extends AppCompatActivity implements OnTaskComplet
             holder.mItem = mValues.get(position);
             holder.mIdView.setText(mValues.get(position).getBlockNumber());
             //holder.mContentView.setText(mValues.get(position).getBlockNumber());
-            String str_value = mValues.get(position).getValue();
+            String wei = mValues.get(position).getValue();
             mValues.get(position).getTimeStamp();
             String sign = mValues.get(position).getTo().equals(mAddress) ? "+" : "-";
-            BigDecimal value = new BigDecimal(str_value).divide(new BigDecimal("1000000000000000000"));
+            String eth = Controller.WeiToEth(wei);
 
             if (mValues.get(position).getValue().equals("0")) {
-                holder.mValueView.setText(value.toString());
+                holder.mValueView.setText(eth);
             } else {
-                holder.mValueView.setText(sign + value.toString());
+                holder.mValueView.setText(sign + eth);
             }
 
             holder.mView.setOnClickListener(new View.OnClickListener() {

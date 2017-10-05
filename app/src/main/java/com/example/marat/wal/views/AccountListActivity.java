@@ -1,22 +1,15 @@
 package com.example.marat.wal.views;
 
-import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +18,6 @@ import com.example.marat.wal.R;
 
 import com.example.marat.wal.controller.Controller;
 import com.example.marat.wal.model.VMAccount;
-import com.example.marat.wal.views.dummy.DummyContent;
 
 import java.util.List;
 
@@ -66,6 +58,24 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+
+        FloatingActionButton create_fab = (FloatingActionButton) findViewById(R.id.create_fab);
+        create_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mController.navigateToCreateAccount(AccountListActivity.this);
+            }
+        });
+
+        /*
+        FloatingActionButton import_fab = (FloatingActionButton) findViewById(R.id.import_fab);
+        import_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mController.navigateToImportAccount(AccountListActivity.this);
+            }
+        });
+        */
     }
 
     @Override
@@ -73,6 +83,7 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
         Toast.makeText(AccountListActivity.this, "Delete dialog callback " + password, Toast.LENGTH_SHORT).show();
         try {
             mController.deleteAccount(address, password);
+            setupRecyclerView((RecyclerView) mRecyclerView);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
             Toast.makeText(AccountListActivity.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();

@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -23,11 +22,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +67,7 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_wallet);
+        setContentView(R.layout.activity_create_account);
 
         mController = Controller.get();
 
@@ -92,7 +90,11 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                mController.clickCreateAccount(CreateAccountActivity.this, "account name", mPasswordView.getText().toString());
+                try {
+                    mController.clickCreateAccount(CreateAccountActivity.this, "account name", mPasswordView.getText().toString());
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

@@ -44,21 +44,18 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     private String mAddress = "";
     private Controller mController;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_transaction_list);
-
-        mController = Controller.get();
-        mController.init(this);
-        mController.loadViewModels();
-
-        //Bundle extras = getIntent().getExtras();
-        //mAddress = extras.getString("address");
-
+    protected void init() {
         VMAccount account = mController.getCurrentAccount();
-        mAddress = account.getAddress();
-        Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
+        if (account != null) {
+            mAddress = account.getAddress();
+            Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
+        } else {
+            //Intent intent = new Intent(this, CreateAccountActivity.class);
+            //this.startActivity(intent);
+
+            mAddress ="0xDEADBEEF";
+            account = new VMAccount(mAddress, "0");
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -87,12 +84,25 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     }
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_transaction_list);
+
+        mController = Controller.get();
+        mController.init(this);
+        mController.loadViewModels();
+
+        //Bundle extras = getIntent().getExtras();
+        //mAddress = extras.getString("address");
+
+        init();
+
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-
-        VMAccount account = mController.getCurrentAccount();
-        mAddress = account.getAddress();
-        getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
+        init();
     }
 
 

@@ -103,6 +103,19 @@ public class Controller {
         //mAccounts.add(new VMAccount(getString(R.string.default_address), "0"));
         //mAccounts.add(new VMAccount("0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a", "0"));
 
+        loadAccounts();
+
+        if (mAccounts.size() > 0) {
+            setCurrentAddress(mAccounts.get(0).getAddress());
+        }
+
+        for (VMAccount a : mAccounts) {
+            mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
+        }
+    }
+
+    private List<VMAccount> loadAccounts() {
+        mAccounts = new ArrayList<>();
         try {
             List<Account> ksAccounts = mEtherStore.getAccounts();
 
@@ -112,14 +125,7 @@ public class Controller {
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
-
-        if (mAccounts.size() > 0) {
-            setCurrentAddress(mAccounts.get(0).getAddress());
-        }
-
-        for (VMAccount a : mAccounts) {
-            mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
-        }
+        return mAccounts;
     }
 
     public void loadViewModels() {
@@ -165,7 +171,7 @@ public class Controller {
         context.startActivity(intent);
     }
 
-    public void navigateToCreateWallet(Context context) {
+    public void navigateToCreateAccount(Context context) {
         Intent intent = new Intent(context, CreateAccountActivity.class);
         context.startActivity(intent);
     }
@@ -175,19 +181,23 @@ public class Controller {
         context.startActivity(intent);
     }
 
-    public void navigateToImportWallet(Context context) {
+    public void navigateToImportAccount(Context context) {
         /*TextView b = (TextView) view;
         String address = (String) b.getText();
         Intent intent = new Intent(context, TransactionListActivity.class);
         context.startActivity(intent);*/
     }
 
-    public void clickCreateAccount(Activity activity, String name, String password) {
+    public void clickCreateAccount(Activity activity, String name, String password) throws Exception {
         Log.d(TAG, String.format("Create account '%s' with pwd '%s", name, password));
         VMAccount account = createAccount(password);
 
         mAccounts.add(account);
         mTransactions.put(account.getAddress(), new ArrayList<ESTransaction>());
+
+        if (mEtherStore.getAccounts().size() == 0) {
+            setCurrentAddress(account.getAddress());
+        }
 
         activity.finish();
     }
@@ -232,6 +242,7 @@ public class Controller {
 
     public void deleteAccount(String address, String password) throws Exception {
         mEtherStore.deleteAccount(address, password);
+        loadAccounts();
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {

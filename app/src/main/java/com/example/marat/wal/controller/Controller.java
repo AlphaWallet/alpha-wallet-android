@@ -230,6 +230,10 @@ public class Controller {
         return this.getAccount(mCurrentAddress);
     }
 
+    public void deleteAccount(String address, String password) throws Exception {
+        mEtherStore.deleteAccount(address, password);
+    }
+
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {

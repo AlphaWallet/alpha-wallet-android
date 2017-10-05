@@ -131,4 +131,7 @@
     <string name="action_select_account">select account</string>
     <string name="title_account_list">Accounts</string>
     <string name="title_account_detail">Account Detail</string>
+    <string name="account_delete">delete</string>
+    <string name="cancel">cancel</string>
+    <string name="confirm_delete_account">Delete account?</string>
 </resources>

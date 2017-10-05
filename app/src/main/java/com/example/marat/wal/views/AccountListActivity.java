@@ -1,18 +1,25 @@
 package com.example.marat.wal.views;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.marat.wal.R;
 
@@ -23,16 +30,13 @@ import com.example.marat.wal.views.dummy.DummyContent;
 import java.util.List;
 
 /**
- * An activity representing a list of Accounts. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link AccountDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
+ * Activity representing a list of accounts
  */
-public class AccountListActivity extends AppCompatActivity {
+public class AccountListActivity extends AppCompatActivity implements DeleteAccountDialogFragment.DeleteAccountDialogListener {
 
     private Controller mController;
+    private View mRecyclerView;
+    private static String TAG = "AccountListActivity";
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -51,9 +55,9 @@ public class AccountListActivity extends AppCompatActivity {
 
         mController = Controller.get();
 
-        View recyclerView = findViewById(R.id.account_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        mRecyclerView = findViewById(R.id.account_list);
+        assert mRecyclerView != null;
+        setupRecyclerView((RecyclerView) mRecyclerView);
 
         if (findViewById(R.id.account_detail_container) != null) {
             // The detail container view will be present only in the
@@ -64,6 +68,17 @@ public class AccountListActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onDialogPositiveClick(String address, String password) {
+        Toast.makeText(AccountListActivity.this, "Delete dialog callback " + password, Toast.LENGTH_SHORT).show();
+        try {
+            mController.deleteAccount(address, password);
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+            Toast.makeText(AccountListActivity.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(mController.getAccounts()));
     }
@@ -71,7 +86,7 @@ public class AccountListActivity extends AppCompatActivity {
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<VMAccount> mValues;
+        private List<VMAccount> mValues;
 
         public SimpleItemRecyclerViewAdapter(List<VMAccount> items) {
             mValues = items;
@@ -108,6 +123,7 @@ public class AccountListActivity extends AppCompatActivity {
             public final View mView;
             public final TextView mIdView;
             public final TextView mContentView;
+            public final ImageButton mImageButton;
             public VMAccount mItem;
 
             public ViewHolder(View view) {
@@ -115,6 +131,20 @@ public class AccountListActivity extends AppCompatActivity {
                 mView = view;
                 mIdView = (TextView) view.findViewById(R.id.id);
                 mContentView = (TextView) view.findViewById(R.id.content);
+                mImageButton = (ImageButton) view.findViewById(R.id.delete_button);
+
+                mImageButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Log.d(TAG, "Delete " + mItem.getAddress());
+                        Toast.makeText(AccountListActivity.this, "Delete button pressed", Toast.LENGTH_SHORT).show();
+
+                        DeleteAccountDialogFragment dialog = new DeleteAccountDialogFragment();
+                        dialog.setAddress(mItem.getAddress()); // must carry address
+
+                        dialog.show(getSupportFragmentManager(), "DeleteAccountDialogFragment");
+                    }
+                });
+
             }
 
             @Override

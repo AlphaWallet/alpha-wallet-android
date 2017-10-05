@@ -54,7 +54,8 @@ public class EtherStore {
         return new String(data);
     }
 
-    public void deleteAccount(Account account, String password) throws Exception {
+    public void deleteAccount(String address, String password) throws Exception {
+        Account account = getAccount(address);
         ks.deleteAccount(account, password);
     }
 
@@ -77,7 +78,12 @@ public class EtherStore {
 
     public Account getAccount(String address) throws Exception {
         Accounts accounts = ks.getAccounts();
-        return accounts.get(Long.decode(address));
+        for (long i = 0; i < accounts.size(); i++) {
+            if (accounts.get(i).getAddress().getHex().equals(address)) {
+                return accounts.get(i);
+            }
+        }
+        return null;
     }
 
     public List<Account> getAccounts() throws Exception {

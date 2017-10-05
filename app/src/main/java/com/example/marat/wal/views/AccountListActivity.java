@@ -138,7 +138,8 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             public final View mView;
             public final TextView mIdView;
             public final TextView mContentView;
-            public final ImageButton mImageButton;
+            public final ImageButton mDeleteButton;
+            public final ImageButton mExportButton;
             public VMAccount mItem;
 
             public ViewHolder(View view) {
@@ -146,9 +147,9 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 mView = view;
                 mIdView = (TextView) view.findViewById(R.id.id);
                 mContentView = (TextView) view.findViewById(R.id.content);
-                mImageButton = (ImageButton) view.findViewById(R.id.delete_button);
+                mDeleteButton = (ImageButton) view.findViewById(R.id.delete_button);
 
-                mImageButton.setOnClickListener(new View.OnClickListener() {
+                mDeleteButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Log.d(TAG, "Delete " + mItem.getAddress());
                         Toast.makeText(AccountListActivity.this, "Delete button pressed", Toast.LENGTH_SHORT).show();
@@ -160,6 +161,14 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                     }
                 });
 
+                mExportButton = (ImageButton) view.findViewById(R.id.export_button);
+                mExportButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Log.d(TAG, "Export " + mItem.getAddress());
+                        Toast.makeText(AccountListActivity.this, "Export button pressed", Toast.LENGTH_SHORT).show();
+                        mController.navigateToExportAccount(AccountListActivity.this, mItem.getAddress());
+                    }
+                });
             }
 
             @Override

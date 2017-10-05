@@ -49,6 +49,10 @@
         <activity
             android:name=".views.ImportAccountActivity"
             android:label="@string/title_activity_import_account"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".views.ExportAccountActivity"
+            android:label="@string/title_activity_export_account"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

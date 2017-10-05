@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.marat.wal.R;
 import com.example.marat.wal.model.ESTransaction;
@@ -15,6 +16,7 @@ import com.example.marat.wal.model.ESTransactionListResponse;
 import com.example.marat.wal.model.VMAccount;
 import com.example.marat.wal.views.AccountListActivity;
 import com.example.marat.wal.views.CreateAccountActivity;
+import com.example.marat.wal.views.ExportAccountActivity;
 import com.example.marat.wal.views.ImportAccountActivity;
 import com.example.marat.wal.views.TransactionListActivity;
 import com.example.marat.wal.views.SendActivity;
@@ -242,6 +244,22 @@ public class Controller {
     public void deleteAccount(String address, String password) throws Exception {
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
+    }
+
+    public void navigateToExportAccount(Context context, String address) {
+        Intent intent = new Intent(context, ExportAccountActivity.class);
+        intent.putExtra(getString(R.string.address_key), address);
+        context.startActivity(intent);
+    }
+
+    public String clickExportAccount(Context context, String address, String password) {
+        try {
+            Account account = mEtherStore.getAccount(address);
+            return mEtherStore.exportAccount(account, password);
+        } catch (Exception e) {
+            Toast.makeText(context, "Failed to export account " + e.toString(), Toast.LENGTH_SHORT);
+        }
+        return "";
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {

@@ -93,7 +93,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         mController.loadViewModels();
 
         //Bundle extras = getIntent().getExtras();
-        //mAddress = extras.getString("address");
+        //mAddressText = extras.getString("address");
 
         init();
 

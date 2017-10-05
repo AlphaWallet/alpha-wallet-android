@@ -17,12 +17,22 @@
             android:id="@+id/id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.80"
+            android:layout_weight="0.70"
             android:layout_margin="@dimen/text_margin"
             android:ellipsize="middle"
             android:textIsSelectable="true"
             android:textSize="12dp"
             android:textAppearance="?attr/textAppearanceListItem" />
+
+        <ImageButton
+            android:id="@+id/export_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.10"
+            android:src="@drawable/ic_share_black_24dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
         <ImageButton
             android:id="@+id/delete_button"

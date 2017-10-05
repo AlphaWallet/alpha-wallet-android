@@ -137,4 +137,9 @@
     <string name="title_activity_import_account">ImportAccountActivity</string>
     <string name="hint_keystore">keystore</string>
     <string name="action_import">Import</string>
+    <string name="title_activity_export_account">ExportAccountActivity</string>
+    <string name="action_export">Export</string>
+    <string name="address_key">ADDRESS</string>
+    <string name="message_save_this">Keep this someplace safe</string>
+    <string name="ok">ok</string>
 </resources>

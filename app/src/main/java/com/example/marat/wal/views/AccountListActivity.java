@@ -67,7 +67,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             }
         });
 
-        /*
         FloatingActionButton import_fab = (FloatingActionButton) findViewById(R.id.import_fab);
         import_fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,7 +74,12 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 mController.navigateToImportAccount(AccountListActivity.this);
             }
         });
-        */
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupRecyclerView((RecyclerView) mRecyclerView);
     }
 
     @Override

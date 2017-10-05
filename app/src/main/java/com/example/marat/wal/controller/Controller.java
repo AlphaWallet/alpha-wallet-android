@@ -15,6 +15,7 @@ import com.example.marat.wal.model.ESTransactionListResponse;
 import com.example.marat.wal.model.VMAccount;
 import com.example.marat.wal.views.AccountListActivity;
 import com.example.marat.wal.views.CreateAccountActivity;
+import com.example.marat.wal.views.ImportAccountActivity;
 import com.example.marat.wal.views.TransactionListActivity;
 import com.example.marat.wal.views.SendActivity;
 
@@ -182,10 +183,8 @@ public class Controller {
     }
 
     public void navigateToImportAccount(Context context) {
-        /*TextView b = (TextView) view;
-        String address = (String) b.getText();
-        Intent intent = new Intent(context, TransactionListActivity.class);
-        context.startActivity(intent);*/
+        Intent intent = new Intent(context, ImportAccountActivity.class);
+        context.startActivity(intent);
     }
 
     public void clickCreateAccount(Activity activity, String name, String password) throws Exception {
@@ -202,6 +201,12 @@ public class Controller {
         activity.finish();
     }
 
+    public void clickImport(ImportAccountActivity importAccountActivity, String keystore, String password) {
+        Log.d(TAG, String.format("Import account %s, %s", keystore, password));
+        new ImportAccountTask(keystore, password).execute();
+        importAccountActivity.finish();
+    }
+
     public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s, %s", from, to, ethAmount, password));
         new SendTransactionTask(from, to, EthToWei(ethAmount), password).execute();
@@ -216,12 +221,6 @@ public class Controller {
             Log.d(TAG, e.toString());
         }
         return null;
-    }
-
-    public void importAccount(View view) { new ImportAccountTask().execute(); }
-
-    public void exportAccount(View view) {
-        new ExportAccountTask().execute();
     }
 
     public List<VMAccount> getAccounts() {
@@ -286,10 +285,20 @@ public class Controller {
     }
 
     private class ImportAccountTask extends AsyncTask<String, Void, Void> {
+
+        private final String keystoreJson;
+        private final String password;
+
+        public ImportAccountTask(String keystoreJson, String password) {
+            this.keystoreJson = keystoreJson;
+            this.password = password;
+        }
+
         protected Void doInBackground(String... params) {
             try {
-                String storeJson = "{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}";
-                Account account = mEtherStore.importKeyStore(storeJson, getString(R.string.default_password));
+                //{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}
+                Account account = mEtherStore.importKeyStore(keystoreJson, password);
+                loadAccounts();
                 Log.d("INFO", "Imported account: " + account.getAddress().getHex());
             } catch (Exception e) {
                 Log.d("ERROR", e.toString());

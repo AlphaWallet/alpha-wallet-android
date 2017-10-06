@@ -146,4 +146,6 @@
     <string name="keystore_keyword">KEYSTORE</string>
     <string name="prompt_confirm_password">Confirm password</string>
     <string name="menu_refresh">Refresh</string>
+    <string name="sent">Sent</string>
+    <string name="received">Received</string>
 </resources>

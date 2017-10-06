@@ -2,6 +2,7 @@ package com.example.marat.wal.views;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,7 +26,9 @@ import com.example.marat.wal.controller.OnTaskCompleted;
 import com.example.marat.wal.model.ESTransaction;
 import com.example.marat.wal.model.VMAccount;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * An activity representing a list of Items. This activity
@@ -155,6 +159,13 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         // Populate transactions
     }
 
+    private String getDate(long time) {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(time*1000);
+        String date = DateFormat.format("MM/dd/yy H:mm:ss zzz", cal).toString();
+        return date;
+    }
+
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
@@ -174,11 +185,26 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).getBlockNumber());
+
+            boolean isSent = holder.mItem.getFrom().toLowerCase().equals(mAddress.toLowerCase());
             //holder.mContentView.setText(mValues.get(position).getBlockNumber());
             String wei = holder.mItem.getValue();
             holder.mItem.getTimeStamp();
-            String sign = holder.mItem.getTo().equals(mAddress) ? "+" : "-";
+
+            String sign = "+";
+            holder.mDateView.setText(getDate(Long.decode(holder.mItem.getTimeStamp())));
+
+            if (isSent) {
+                holder.mSentOrReceived.setText(getString(R.string.sent));
+                holder.mValueView.setTextColor(Color.RED);
+                holder.mAddressView.setText(holder.mItem.getTo());
+                sign = "-";
+            } else {
+                holder.mSentOrReceived.setText(getString(R.string.received));
+                holder.mAddressView.setText(holder.mItem.getFrom());
+                sign = "+";
+                holder.mValueView.setTextColor(Color.GREEN);
+            }
             String eth = Controller.WeiToEth(wei);
 
             if (holder.mItem.getValue().equals("0")) {
@@ -216,7 +242,9 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
-            public final TextView mIdView;
+            public final TextView mSentOrReceived;
+            public final TextView mAddressView;
+            public final TextView mDateView;
             //public final TextView mContentView;
             public final TextView mValueView;
 
@@ -225,7 +253,9 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
-                mIdView = (TextView) view.findViewById(R.id.id);
+                mSentOrReceived = (TextView) view.findViewById(R.id.sent_or_received);
+                mAddressView = (TextView) view.findViewById(R.id.transaction_address);
+                mDateView = (TextView) view.findViewById(R.id.date);
                 // mContentView = (TextView) view.findViewById(R.id.content);
                 mValueView = (TextView) view.findViewById(R.id.value);
             }

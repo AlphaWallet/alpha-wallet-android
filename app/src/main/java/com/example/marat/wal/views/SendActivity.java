@@ -7,7 +7,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.marat.wal.R;
 import com.example.marat.wal.controller.Controller;
@@ -40,12 +39,12 @@ public class SendActivity extends AppCompatActivity {
             account_names.add(a.getAddress());
         }
 
-        mFromSpinner = (Spinner) findViewById(R.id.from);
+        mFromSpinner = (Spinner) findViewById(R.id.transaction_address);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, account_names);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mFromSpinner.setAdapter(adapter);
 
-        mTo = (EditText) findViewById(R.id.to);
+        mTo = (EditText) findViewById(R.id.date);
         mAmount = (EditText) findViewById(R.id.amount);
         mPassword = (EditText) findViewById(R.id.password);
 

@@ -1,0 +1,1 @@
+# Trust Wallet for Android

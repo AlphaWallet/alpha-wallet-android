@@ -131,16 +131,18 @@ public class Controller {
         return mAccounts;
     }
 
-    public void loadViewModels() {
+    public void loadViewModels(final OnTaskCompleted listener) {
         // Get transactions
-        for (VMAccount a : mAccounts) {
-            new GetTransactionsTask(a.getAddress()).execute();
-        }
+        new GetTransactionsTask(mAccounts, new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted() {
+                Log.d(TAG, "Finished loading transactions");
 
-        // Get balances
-        for (VMAccount a : mAccounts) {
-            new GetBalanceTask(a).execute();
-        }
+                // ... and then get balances
+                new GetBalancesTask(mAccounts, listener).execute();
+            }
+        }).execute();
+
     }
 
     public VMAccount getAccount(String address) {
@@ -262,6 +264,10 @@ public class Controller {
         return "";
     }
 
+    public void refreshTransactions(TransactionListActivity txnList, OnTaskCompleted listener) {
+        new GetTransactionsTask(mAccounts, listener).execute();
+    }
+
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
@@ -276,28 +282,37 @@ public class Controller {
         }
     }
 
-    private class GetBalanceTask extends AsyncTask<Void, Void, Void> {
-        private VMAccount mAccount;
+    private class GetBalancesTask extends AsyncTask<Void, Void, Void> {
+        private List<VMAccount> mAccounts;
+        private OnTaskCompleted mListener;
 
-        public GetBalanceTask(VMAccount account) {
-            this.mAccount = account;
+        public GetBalancesTask(List<VMAccount> accounts, OnTaskCompleted listener) {
+            this.mAccounts = accounts;
+            this.mListener = listener;
         }
 
-        protected Void doInBackground(Void... params) {
+        private void getBalance(VMAccount account) {
             try {
                 Web3j web3 = Web3jFactory.build(new InfuraHttpService(getString(R.string.infura_url)));
                 EthGetBalance ethGetBalance = web3
-                        .ethGetBalance(mAccount.getAddress(), DefaultBlockParameterName.LATEST)
+                        .ethGetBalance(account.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
                         .get();
                 BigInteger wei = ethGetBalance.getBalance();
                 Log.d(TAG, "balance: " + wei);
 
-                mAccount.setBalance(wei);
+                account.setBalance(wei);
 
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
+        }
+
+        protected Void doInBackground(Void... params) {
+            for (VMAccount a: mAccounts) {
+                getBalance(a);
+            }
+            mListener.onTaskCompleted();
             return null;
         }
     }
@@ -419,13 +434,16 @@ public class Controller {
     }
 
     private class GetTransactionsTask extends AsyncTask<Void, Void, Void> {
-        private final String address;
+        private final List<VMAccount> mAccounts;
+        private final OnTaskCompleted mListener;
 
-        public GetTransactionsTask(String address) {
-            this.address = address;
+        public GetTransactionsTask(List<VMAccount> accounts, OnTaskCompleted listener) {
+            this.mAccounts = accounts;
+            this.mListener = listener;
         }
 
-        protected Void doInBackground(Void... args) {
+        private void fetchTransactionsForAddress(VMAccount account) {
+            final String address = account.getAddress();
             try {
                 Call<ESTransactionListResponse> call =
                         mEtherscanService.getTransactionList(
@@ -466,6 +484,13 @@ public class Controller {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        protected Void doInBackground(Void... args) {
+            for (VMAccount a : mAccounts) {
+                fetchTransactionsForAddress(a);
+            }
+            mListener.onTaskCompleted();
             return null;
         }
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -43,6 +44,52 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     private static String TAG = "ITEM_LIST_ACTIVITY";
     private String mAddress = "";
     private Controller mController;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RecyclerView mRecyclerView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_transaction_list);
+
+        mController = Controller.get();
+        mController.init(this);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.item_list);
+        assert mRecyclerView != null;
+        setupRecyclerView(mRecyclerView);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.send_fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mController.navigateToSend(TransactionListActivity.this);
+            }
+        });
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener(){
+                    @Override
+                    public void onRefresh() {
+                        Log.d(TAG, "onRefresh has been called.");
+                        fetchModelsAndReinit();
+                    }
+                }
+        );
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        fetchModelsAndReinit();
+    }
+
+    private void fetchModelsAndReinit() {
+        mController.loadViewModels(new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted() {
+                asyncInit();
+            }
+        });
+    }
 
     protected void init() {
         VMAccount account = mController.getCurrentAccount();
@@ -62,41 +109,21 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
         toolbar.inflateMenu(R.menu.toolbar_menu);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.send_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mController.navigateToSend(TransactionListActivity.this);
-            }
-        });
-
-        View recyclerView = findViewById(R.id.item_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
-
-        if (findViewById(R.id.item_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
+        refreshTransactions();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_transaction_list);
+    private void asyncInit() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                init();
+            }
+        });
+    }
 
-        mController = Controller.get();
-        mController.init(this);
-        mController.loadViewModels();
-
-        //Bundle extras = getIntent().getExtras();
-        //mAddressText = extras.getString("address");
-
-        init();
-
+    private void refreshTransactions() {
+        setupRecyclerView(mRecyclerView);
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -104,7 +131,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         super.onResume();
         init();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

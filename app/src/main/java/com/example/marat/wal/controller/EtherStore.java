@@ -59,10 +59,12 @@ public class EtherStore {
         ks.deleteAccount(account, password);
     }
 
-    public byte[] signTransaction(Account signer, String signerPassword, String toAddress, long nonce) throws Exception {
+    public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce) throws Exception {
+        BigInt value = new BigInt(Long.decode(wei));
+
         Transaction tx = new Transaction(
                 nonce, new Address(toAddress),
-                new BigInt(0), new BigInt(30000), new BigInt(0), null); // Random empty transaction
+                value, new BigInt(90000), new BigInt(0), null); // Random empty transaction
 
         BigInt chain = new BigInt(42); // Chain identifier of the main net
 

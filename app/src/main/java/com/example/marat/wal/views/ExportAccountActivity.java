@@ -1,5 +1,8 @@
 package com.example.marat.wal.views;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -8,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.marat.wal.R;
@@ -41,18 +43,32 @@ public class ExportAccountActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String keystoreJson = mController.clickExportAccount(ExportAccountActivity.this, mAddress, mPasswordText.getText().toString());
-                showKeystore(keystoreJson);
+                if (keystoreJson.isEmpty()) {
+                    Toast.makeText(ExportAccountActivity.this, "Unable to export", Toast.LENGTH_SHORT).show();
+                } else {
+                    showKeystore(keystoreJson);
+                }
             }
         });
     }
 
-    private void showKeystore(String keystoreJson) {
+    private void showKeystore(final String keystoreJson) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(keystoreJson)
                 .setTitle(getString(R.string.message_save_this));
 
-        // Add the button
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        // Add the buttons
+        builder.setPositiveButton(R.string.copy, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(getString(R.string.keystore_keyword), keystoreJson);
+                clipboard.setPrimaryClip(clip);
+
+                Toast.makeText(ExportAccountActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 finish();
             }

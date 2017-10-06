@@ -365,6 +365,7 @@ public class Controller {
             this.toAddress = toAddress;
             this.wei = wei;
             this.password = password;
+            Log.d(TAG, "SendTransaction %s %s %s".format(fromAddress, toAddress, wei));
         }
 
         protected Void doInBackground(Void... params) {
@@ -382,8 +383,13 @@ public class Controller {
                 BigInteger nonce = ethGetTransactionCount.getTransactionCount();
                 Log.d("INFO", "New account nonce:" + new Long(nonce.longValue()).toString());
 
-                byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, nonce.longValue());
-                String hexValue = Numeric.toHexString(signedMessage);
+                String hexValue = "0xDEADBEEF";
+                try {
+                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, nonce.longValue());
+                    hexValue = Numeric.toHexString(signedMessage);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error signing " + e.toString());
+                }
 
                 Log.d("INFO", "Sent transaction: " + hexValue);
 
@@ -392,8 +398,11 @@ public class Controller {
                         .sendAsync()
                         .get();
 
+                if (raw.hasError()) {
+                    Log.e(TAG, raw.getError().getMessage());
+                }
                 String result = raw.getTransactionHash();
-                Log.d(TAG, "Transaction hash %s".format(result));
+                Log.d(TAG, "Transaction hash " + result);
 
                 if (raw.hasError()) {
                     Log.d(TAG, "Transaction error message: " + raw.getError().getMessage());
@@ -462,6 +471,7 @@ public class Controller {
     }
 
     private static String weiInEth = "1000000000000000000";
+    private static String gweiInEth = "1000000000";
 
     public static String WeiToEth(String wei) {
         BigDecimal eth = new BigDecimal(wei).divide(new BigDecimal(weiInEth));
@@ -470,6 +480,13 @@ public class Controller {
 
     public static String EthToWei(String eth) {
         BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(weiInEth));
-        return wei.toString();
+        Log.d(TAG, "Eth to wei: " + wei.toBigInteger().toString());
+        return wei.toBigInteger().toString();
+    }
+
+    public static String EthToGwei(String eth) {
+        BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(gweiInEth));
+        Log.d(TAG, "Eth to Gwei: " + wei.toBigInteger().toString());
+        return wei.toBigInteger().toString();
     }
 }

@@ -61,6 +61,7 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
 
     // UI references.
     private EditText mPasswordView;
+    private EditText mConfirmPassword;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -75,6 +76,7 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
+        mConfirmPassword = (EditText) findViewById(R.id.confirm_password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -90,10 +92,14 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    mController.clickCreateAccount(CreateAccountActivity.this, "account name", mPasswordView.getText().toString());
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_SHORT).show();
+                if (mPasswordView.getText().toString().equals(mConfirmPassword.getText().toString())) {
+                    try {
+                        mController.clickCreateAccount(CreateAccountActivity.this, "account name", mPasswordView.getText().toString());
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(CreateAccountActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                 }
             }
         });

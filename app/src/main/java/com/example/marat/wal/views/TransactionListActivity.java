@@ -150,12 +150,12 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             holder.mItem = mValues.get(position);
             holder.mIdView.setText(mValues.get(position).getBlockNumber());
             //holder.mContentView.setText(mValues.get(position).getBlockNumber());
-            String wei = mValues.get(position).getValue();
-            mValues.get(position).getTimeStamp();
-            String sign = mValues.get(position).getTo().equals(mAddress) ? "+" : "-";
+            String wei = holder.mItem.getValue();
+            holder.mItem.getTimeStamp();
+            String sign = holder.mItem.getTo().equals(mAddress) ? "+" : "-";
             String eth = Controller.WeiToEth(wei);
 
-            if (mValues.get(position).getValue().equals("0")) {
+            if (holder.mItem.getValue().equals("0")) {
                 holder.mValueView.setText(eth);
             } else {
                 holder.mValueView.setText(sign + eth);

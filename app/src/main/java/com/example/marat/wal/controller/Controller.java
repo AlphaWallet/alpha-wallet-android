@@ -311,7 +311,10 @@ public class Controller {
     }
 
     public static String GetDate(long time) {
-        return null;
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(time*1000);
+        String date = DateFormat.format("MM/dd/yy H:mm:ss zzz", cal).toString();
+        return date;
     }
 
     public List<VMNetwork> getNetworks() {

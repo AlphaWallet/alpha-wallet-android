@@ -17,6 +17,7 @@
         android:layout_height="wrap_content"
         android:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
         android:textSize="9dp"
+        android:textIsSelectable="true"
         android:textAppearance="?attr/textAppearanceListItemSmall" />
 
     <TextView
@@ -32,6 +33,7 @@
         android:layout_height="wrap_content"
         android:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
         android:textSize="9dp"
+        android:textIsSelectable="true"
         android:textAppearance="?attr/textAppearanceListItemSmall" />
 
     <TextView

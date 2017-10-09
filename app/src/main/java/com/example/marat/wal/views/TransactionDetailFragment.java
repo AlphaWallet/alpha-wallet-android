@@ -106,7 +106,7 @@ public class TransactionDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.gas_fee)).setText(mItem.getGas());
             ((TextView) rootView.findViewById(R.id.confirmation)).setText(mItem.getConfirmations());
             ((TextView) rootView.findViewById(R.id.txn_hash)).setText(mItem.getHash());
-            ((TextView) rootView.findViewById(R.id.txn_time)).setText(mItem.getTimeStamp());
+            ((TextView) rootView.findViewById(R.id.txn_time)).setText(Controller.GetDate(Long.decode(mItem.getTimeStamp())));
             ((TextView) rootView.findViewById(R.id.block_hash)).setText(mItem.getBlockHash());
 
         }

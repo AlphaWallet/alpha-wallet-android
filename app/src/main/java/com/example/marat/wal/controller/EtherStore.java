@@ -10,11 +10,8 @@ import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
-import org.web3j.abi.datatypes.generated.Int64;
 
-import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +63,7 @@ public class EtherStore {
                 nonce, new Address(toAddress),
                 value, new BigInt(90000), new BigInt(0), null); // Random empty transaction
 
-        BigInt chain = new BigInt(42); // Chain identifier of the main net
+        BigInt chain = new BigInt(Controller.get().getCurrentNetwork().getChainId()); // Chain identifier of the main net
 
         // Sign a transaction with a single authorization
         //Transaction signed = ks.signTxPassphrase(signer, signerPassword, tx, chain);

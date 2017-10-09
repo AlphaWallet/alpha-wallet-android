@@ -7,14 +7,6 @@
     <string name="title_create">Create</string>
     <string name="title_account">Accounts</string>
     <string name="title_item_detail">Item Detail</string>
-    <string name="infura_url">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>
-    <!-- <string name="default_network">https://infuranet.infura.io/llyrtzQ3YhkdESt2Fzrk</string> -->
-    <!-- <string name="default_network">https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->
-    <!--<string name="default_address">0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a</string>-->
-    <string name="default_address">0x14385e875471d22b6ad8a91ccf0f3577335ee367</string>
-    <string name="default_password">password</string>
-    <string name="etherscan_api_key">ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V</string>
-    <string name="etherscan_url">https://kovan.etherscan.io</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_create_wallet">Create Wallet</string>
 
@@ -128,7 +120,7 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
-    <string name="action_select_account">select account</string>
+    <string name="action_select_account">Select account</string>
     <string name="title_account_list">Accounts</string>
     <string name="title_account_detail">Account Detail</string>
     <string name="account_delete">delete</string>
@@ -148,4 +140,16 @@
     <string name="menu_refresh">Refresh</string>
     <string name="sent">Sent</string>
     <string name="received">Received</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="network_label">Network:</string>
+
+    <!-- TODO remove -->
+    <!--<string name="infura_url">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->
+    <!-- <string name="default_network">https://infuranet.infura.io/llyrtzQ3YhkdESt2Fzrk</string> -->
+    <!-- <string name="default_network">https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->
+    <!--<string name="default_address">0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a</string>-->
+    <!--<string name="default_address">0x14385e875471d22b6ad8a91ccf0f3577335ee367</string>-->
+    <!--<string name="default_password">password</string>-->
+    <!--<string name="etherscan_api_key">ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V</string>-->
+    <!--<string name="etherscan_url">https://kovan.etherscan.io</string>-->
 </resources>

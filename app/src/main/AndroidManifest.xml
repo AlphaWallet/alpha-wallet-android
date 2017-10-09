@@ -53,7 +53,10 @@
         <activity
             android:name=".views.ExportAccountActivity"
             android:label="@string/title_activity_export_account"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".views.SettingsActivity"
+            android:label="@string/title_activity_settings" />
     </application>
 
 </manifest>

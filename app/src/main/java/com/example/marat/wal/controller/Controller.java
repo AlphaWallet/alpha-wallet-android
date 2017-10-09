@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -14,10 +15,12 @@ import com.example.marat.wal.R;
 import com.example.marat.wal.model.ESTransaction;
 import com.example.marat.wal.model.ESTransactionListResponse;
 import com.example.marat.wal.model.VMAccount;
+import com.example.marat.wal.model.VMNetwork;
 import com.example.marat.wal.views.AccountListActivity;
 import com.example.marat.wal.views.CreateAccountActivity;
 import com.example.marat.wal.views.ExportAccountActivity;
 import com.example.marat.wal.views.ImportAccountActivity;
+import com.example.marat.wal.views.SettingsActivity;
 import com.example.marat.wal.views.TransactionListActivity;
 import com.example.marat.wal.views.SendActivity;
 
@@ -36,8 +39,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -65,8 +70,10 @@ public class Controller {
     // State
     private String mKeystoreBaseDir;
     private String mCurrentAddress;
+    private VMNetwork mCurrentNetwork;
 
     // View models
+    ArrayList<VMNetwork> mNetworks;
     ArrayList<VMAccount> mAccounts;
     Map<String, List<ESTransaction>> mTransactions;
     Map<String, Long> mBalances;
@@ -92,9 +99,16 @@ public class Controller {
 
         mEtherStore = new EtherStore(mKeystoreBaseDir);
 
+        // Create networks list
+        mNetworks = new ArrayList<>();
+        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
+        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://mainnet.etherscan.io", "?", 1));
+        setCurrentNetwork(mNetworks.get(0).getName());
+
+        // Setup service
         mRetrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(getString(R.string.etherscan_url))
+                .baseUrl(mCurrentNetwork.getEtherscanUrl())
                 .build();
 
         mEtherscanService = mRetrofit.create(EtherscanService.class);
@@ -164,16 +178,13 @@ public class Controller {
         return txns;
     }
 
-    public void navigateToAccountList(Context context) {
-        Intent intent = new Intent(context, AccountListActivity.class);
+    public void navigateToSettings(Context context) {
+        Intent intent = new Intent(context, SettingsActivity.class);
         context.startActivity(intent);
     }
 
-    public void navigateToWallet(Context context, View view) {
-        TextView b = (TextView) view;
-        String address = (String) b.getText();
-        Intent intent = new Intent(context, TransactionListActivity.class);
-        intent.putExtra("address", address);
+    public void navigateToAccountList(Context context) {
+        Intent intent = new Intent(context, AccountListActivity.class);
         context.startActivity(intent);
     }
 
@@ -244,6 +255,19 @@ public class Controller {
         return this.getAccount(mCurrentAddress);
     }
 
+    public void setCurrentNetwork(String name) {
+        for (VMNetwork n : mNetworks) {
+            if (n.getName().equals(name)) {
+                mCurrentNetwork = n;
+                break;
+            }
+        }
+    }
+
+    public VMNetwork getCurrentNetwork() {
+        return mCurrentNetwork;
+    }
+
     public void deleteAccount(String address, String password) throws Exception {
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
@@ -286,10 +310,18 @@ public class Controller {
         return null;
     }
 
+    public static String GetDate(long time) {
+        return null;
+    }
+
+    public List<VMNetwork> getNetworks() {
+        return mNetworks;
+    }
+
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(getString(R.string.infura_url)));
+                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
                 Web3ClientVersion web3ClientVersion = web3.web3ClientVersion().sendAsync().get();
                 String clientVersion = web3ClientVersion.getWeb3ClientVersion();
                 Log.d("INFO", "web3 client version: " + clientVersion);
@@ -311,7 +343,7 @@ public class Controller {
 
         private void getBalance(VMAccount account) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(getString(R.string.infura_url)));
+                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
                 EthGetBalance ethGetBalance = web3
                         .ethGetBalance(account.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
@@ -372,19 +404,7 @@ public class Controller {
         }
     }
 
-    private class ExportAccountTask extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String... params) {
-            try {
-                Account account = mEtherStore.createAccount(getString(R.string.default_password));
-                String accountJson = mEtherStore.exportAccount(account, getString(R.string.default_password));
-                Log.d("INFO", accountJson);
-            } catch (Exception e) {
-                Log.d("ERROR", e.toString());
-            }
-            return null;
-        }
-    }
-
+    // TODO remove
     // "{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}"
 
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
@@ -403,7 +423,7 @@ public class Controller {
 
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3j = Web3jFactory.build(new InfuraHttpService(getString(R.string.infura_url)));
+                Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
 
                 Account fromAccount = mEtherStore.getAccount(fromAddress);
                 if (fromAccount == null) {
@@ -470,7 +490,7 @@ public class Controller {
                                 address,
                                 "0",
                                 "desc",
-                                getString(R.string.etherscan_api_key)
+                                mCurrentNetwork.getEtherscanApiKey()
                         );
 
 

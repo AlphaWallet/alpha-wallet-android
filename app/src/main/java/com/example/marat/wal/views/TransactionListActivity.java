@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,9 +25,7 @@ import com.example.marat.wal.controller.OnTaskCompleted;
 import com.example.marat.wal.model.ESTransaction;
 import com.example.marat.wal.model.VMAccount;
 
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * An activity representing a list of Items. This activity
@@ -110,7 +107,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(mAddress.substring(0, 5) + ": " + Controller.WeiToEth(account.getBalance().toString(), 5) + " ETH");
-        toolbar.inflateMenu(R.menu.toolbar_menu);
+        toolbar.inflateMenu(R.menu.transaction_list_menu);
 
         refreshTransactions();
     }
@@ -137,13 +134,20 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        getMenuInflater().inflate(R.menu.transaction_list_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        mController.navigateToAccountList(this);
+        switch (item.getItemId()) {
+            case R.id.action_select_account:
+                mController.navigateToAccountList(this);
+                break;
+            case R.id.action_settings:
+                mController.navigateToSettings(this);
+                break;
+        }
         return true;
     }
 
@@ -156,13 +160,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     @Override
     public void onTaskCompleted() {
         // Populate transactions
-    }
-
-    private String getDate(long time) {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(time*1000);
-        String date = DateFormat.format("MM/dd/yy H:mm:ss zzz", cal).toString();
-        return date;
     }
 
     public class SimpleItemRecyclerViewAdapter
@@ -185,7 +182,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
 
-            holder.mDateView.setText(getDate(Long.decode(holder.mItem.getTimeStamp())));
+            holder.mDateView.setText(Controller.GetDate(Long.decode(holder.mItem.getTimeStamp())));
 
             boolean isSent = holder.mItem.getFrom().toLowerCase().equals(mAddress.toLowerCase());
             String wei = holder.mItem.getValue();
@@ -247,7 +244,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
                 mSentOrReceived = (TextView) view.findViewById(R.id.sent_or_received);
                 mAddressView = (TextView) view.findViewById(R.id.transaction_address);
                 mDateView = (TextView) view.findViewById(R.id.date);
-                // mBalanceView = (TextView) view.findViewById(R.id.content);
                 mValueView = (TextView) view.findViewById(R.id.value);
             }
 

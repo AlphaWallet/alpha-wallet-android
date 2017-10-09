@@ -149,6 +149,14 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 mBalanceView = (TextView) view.findViewById(R.id.value);
                 mDeleteButton = (ImageButton) view.findViewById(R.id.delete_button);
 
+                mAddressView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mController.setCurrentAddress(mItem.getAddress());
+                        AccountListActivity.this.finish();
+                    }
+                });
+
                 mDeleteButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Log.d(TAG, "Delete " + mItem.getAddress());

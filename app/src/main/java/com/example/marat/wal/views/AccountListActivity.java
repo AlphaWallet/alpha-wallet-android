@@ -117,8 +117,8 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).getAddress());
-            holder.mContentView.setText(Controller.WeiToEth(mValues.get(position).getBalance().toString()));
+            holder.mAddressView.setText(mValues.get(position).getAddress());
+            holder.mBalanceView.setText(Controller.WeiToEth(holder.mItem.getBalance().toString(), 4));
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -136,8 +136,8 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
-            public final TextView mIdView;
-            public final TextView mContentView;
+            public final TextView mAddressView;
+            public final TextView mBalanceView;
             public final ImageButton mDeleteButton;
             public final ImageButton mExportButton;
             public VMAccount mItem;
@@ -145,8 +145,8 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
-                mIdView = (TextView) view.findViewById(R.id.id);
-                mContentView = (TextView) view.findViewById(R.id.content);
+                mAddressView = (TextView) view.findViewById(R.id.address);
+                mBalanceView = (TextView) view.findViewById(R.id.value);
                 mDeleteButton = (ImageButton) view.findViewById(R.id.delete_button);
 
                 mDeleteButton.setOnClickListener(new View.OnClickListener() {
@@ -173,7 +173,7 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
 
             @Override
             public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
+                return super.toString() + " '" + mBalanceView.getText() + "'";
             }
         }
     }

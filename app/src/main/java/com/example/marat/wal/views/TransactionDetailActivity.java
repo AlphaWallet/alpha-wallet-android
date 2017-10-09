@@ -28,15 +28,6 @@ public class TransactionDetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.send_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -56,8 +47,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(TransactionDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(TransactionDetailFragment.ARG_ITEM_ID));
+            arguments.putString(TransactionDetailFragment.ARG_TXN_HASH,
+                    getIntent().getStringExtra(TransactionDetailFragment.ARG_TXN_HASH));
             TransactionDetailFragment fragment = new TransactionDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -77,7 +68,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            NavUtils.navigateUpTo(this, new Intent(this, TransactionListActivity.class));
+            //NavUtils.navigateUpTo(this, new Intent(this, TransactionListActivity.class));
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

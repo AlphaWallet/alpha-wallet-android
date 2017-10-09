@@ -44,7 +44,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
-    private boolean mTwoPane;
     private static String TAG = "ITEM_LIST_ACTIVITY";
     private String mAddress = "";
     private Controller mController;
@@ -110,7 +109,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(mAddress.substring(0, 5) + " ETH " + Controller.WeiToEth(account.getBalance().toString()));
+        getSupportActionBar().setTitle(mAddress.substring(0, 5) + ": " + Controller.WeiToEth(account.getBalance().toString(), 5) + " ETH");
         toolbar.inflateMenu(R.menu.toolbar_menu);
 
         refreshTransactions();
@@ -186,13 +185,13 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
 
-            boolean isSent = holder.mItem.getFrom().toLowerCase().equals(mAddress.toLowerCase());
-            //holder.mContentView.setText(mValues.get(position).getBlockNumber());
-            String wei = holder.mItem.getValue();
-            holder.mItem.getTimeStamp();
-
-            String sign = "+";
             holder.mDateView.setText(getDate(Long.decode(holder.mItem.getTimeStamp())));
+
+            boolean isSent = holder.mItem.getFrom().toLowerCase().equals(mAddress.toLowerCase());
+            String wei = holder.mItem.getValue();
+
+            // TODO deduplicate with TransactionDetailFragment.java
+            String sign = "+";
 
             if (isSent) {
                 holder.mSentOrReceived.setText(getString(R.string.sent));
@@ -205,6 +204,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
                 sign = "+";
                 holder.mValueView.setTextColor(Color.GREEN);
             }
+
             String eth = Controller.WeiToEth(wei);
 
             if (holder.mItem.getValue().equals("0")) {
@@ -216,21 +216,12 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(TransactionDetailFragment.ARG_ITEM_ID, holder.mItem.getBlockNumber());
-                        TransactionDetailFragment fragment = new TransactionDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.item_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, TransactionDetailActivity.class);
-                        intent.putExtra(TransactionDetailFragment.ARG_ITEM_ID, holder.mItem.getBlockNumber());
+                    Context context = v.getContext();
+                    Intent intent = new Intent(context, TransactionDetailActivity.class);
+                    intent.putExtra(TransactionDetailFragment.ARG_TXN_HASH, holder.mItem.getHash());
+                    intent.putExtra(TransactionDetailFragment.ARG_ADDRESS, mAddress);
 
-                        context.startActivity(intent);
-                    }
+                    context.startActivity(intent);
                 }
             });
         }
@@ -245,7 +236,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             public final TextView mSentOrReceived;
             public final TextView mAddressView;
             public final TextView mDateView;
-            //public final TextView mContentView;
+            //public final TextView mBalanceView;
             public final TextView mValueView;
 
             public ESTransaction mItem;
@@ -256,13 +247,13 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
                 mSentOrReceived = (TextView) view.findViewById(R.id.sent_or_received);
                 mAddressView = (TextView) view.findViewById(R.id.transaction_address);
                 mDateView = (TextView) view.findViewById(R.id.date);
-                // mContentView = (TextView) view.findViewById(R.id.content);
+                // mBalanceView = (TextView) view.findViewById(R.id.content);
                 mValueView = (TextView) view.findViewById(R.id.value);
             }
 
             @Override
             public String toString() {
-                return super.toString(); //+ " '" + mContentView.getText() + "'";
+                return super.toString(); //+ " '" + mBalanceView.getText() + "'";
             }
         }
     }

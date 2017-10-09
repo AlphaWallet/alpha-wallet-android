@@ -34,6 +34,7 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -266,6 +267,23 @@ public class Controller {
 
     public void refreshTransactions(TransactionListActivity txnList, OnTaskCompleted listener) {
         new GetTransactionsTask(mAccounts, listener).execute();
+    }
+
+    public ESTransaction findTransaction(String address, String txn_hash) {
+        List<ESTransaction> txns = mTransactions.get(address);
+
+        if (txns == null) {
+            Log.e(TAG, "Can't find transactions with given address: " + address);
+            return null;
+        }
+
+        for (ESTransaction txn : txns) {
+            if (txn.getHash().equals(txn_hash)) {
+                return txn;
+            }
+        }
+
+        return null;
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
@@ -501,6 +519,13 @@ public class Controller {
     public static String WeiToEth(String wei) {
         BigDecimal eth = new BigDecimal(wei).divide(new BigDecimal(weiInEth));
         return eth.toString();
+    }
+
+    public static String WeiToEth(String wei, int sigFig) {
+        BigDecimal eth = new BigDecimal(wei).divide(new BigDecimal(weiInEth));
+        int scale = sigFig - eth.precision() + eth.scale();
+        BigDecimal eth_scaled = eth.setScale(scale, RoundingMode.HALF_UP);
+        return eth_scaled.toString();
     }
 
     public static String EthToWei(String eth) {

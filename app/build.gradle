@@ -40,6 +40,7 @@ dependencies {
     compile 'org.ethereum:geth:1.7.0'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.github.apl-devs:appintro:v4.2.2'
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
     compile 'com.android.support:support-vector-drawable:26.+'

@@ -18,13 +18,14 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 
-        <android.support.design.widget.TextInputLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/date"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:imeActionId="@+id/login"
                 android:imeActionLabel="@string/prompt_to"
@@ -33,7 +34,14 @@
                 android:inputType="text"
                 android:maxLines="1" />
 
-        </android.support.design.widget.TextInputLayout>
+            <ImageButton
+                android:id="@+id/scan_barcode_button"
+                android:src="@mipmap/qr_code_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -78,6 +86,17 @@
             android:layout_marginTop="16dp"
             android:text="@string/action_send"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/result_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_barcode_captured"
+            android:textSize="22sp"
+            android:freezesText="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"/>
 
     </LinearLayout>
 

@@ -18,9 +18,9 @@ public class IntroActivity extends AppIntro {
 
         // Instead of fragments, you can also use our default slide
         // Just set a title, description, background and image. AppIntro will do the rest.
-        addSlide(AppIntroFragment.newInstance("Private & Secure", "Private keys never leave your device.", R.mipmap.onboarding_lock, Color.WHITE));
-        addSlide(AppIntroFragment.newInstance("Fast", "Fast", R.mipmap.onboarding_rocket, Color.WHITE));
-        addSlide(AppIntroFragment.newInstance("Open source", "Open source", R.mipmap.onboarding_open_source, Color.WHITE));
+        addSlide(AppIntroFragment.newInstance("Private & Secure", null, "Private keys never leave your device.", null, R.mipmap.onboarding_lock, Color.WHITE, Color.BLACK, Color.BLACK));
+        addSlide(AppIntroFragment.newInstance("Fast", null, "Fast", null, R.mipmap.onboarding_rocket, Color.WHITE, Color.BLACK, Color.BLACK));
+        addSlide(AppIntroFragment.newInstance("Open source", null, "Open source", null, R.mipmap.onboarding_open_source, Color.WHITE, Color.BLACK, Color.BLACK));
 
         // OPTIONAL METHODS
         // Override bar/separator color.

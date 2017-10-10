@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".views.TransactionListActivity"
-            android:label="@string/title_account"
+            android:label="@string/title_trust"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

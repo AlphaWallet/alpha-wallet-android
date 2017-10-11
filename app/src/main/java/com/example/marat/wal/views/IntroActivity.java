@@ -30,7 +30,7 @@ public class IntroActivity extends AppIntro {
         // Hide Skip/Done button.
         //showSkipButton(true);
         //setProgressButtonEnabled(false);
-        showSkipButton(false);
+        showSkipButton(true);
         setProgressButtonEnabled(true);
 
         // Turn vibration on and set intensity.
@@ -42,7 +42,8 @@ public class IntroActivity extends AppIntro {
     @Override
     public void onSkipPressed(Fragment currentFragment) {
         super.onSkipPressed(currentFragment);
-        // Do something when users tap on Skip button.
+
+        finish();
     }
 
     @Override

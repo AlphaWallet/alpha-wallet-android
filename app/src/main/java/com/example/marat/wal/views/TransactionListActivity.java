@@ -185,6 +185,9 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_receive:
+                mController.navigateToReceive(this);
+                break;
             case R.id.action_select_account:
                 mController.navigateToAccountList(this);
                 break;

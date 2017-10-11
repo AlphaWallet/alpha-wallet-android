@@ -1,103 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout android:id="@+id/email_login_form"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.marat.wal.views.SendActivity">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-        android:id="@+id/email_login_form"
-        android:layout_width="368dp"
+    <Spinner
+        android:id="@+id/transaction_address"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="8dp">
+        android:orientation="horizontal">
 
-        <Spinner
-            android:id="@+id/transaction_address"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-
-        <RelativeLayout
+        <EditText
+            android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:imeActionId="@+id/login"
+            android:imeActionLabel="@string/prompt_to"
+            android:imeOptions="actionUnspecified"
+            android:hint="@string/prompt_to"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/scan_barcode_button"
+            android:inputType="text"
+            android:maxLines="1" />
 
-            <EditText
-                android:id="@+id/date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:imeActionId="@+id/login"
-                android:imeActionLabel="@string/prompt_to"
-                android:imeOptions="actionUnspecified"
-                android:hint="@string/prompt_to"
-                android:inputType="text"
-                android:maxLines="1" />
+        <ImageButton
+            android:id="@+id/scan_barcode_button"
+            android:src="@mipmap/qr_code_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            />
 
-            <ImageButton
-                android:id="@+id/scan_barcode_button"
-                android:src="@mipmap/qr_code_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </RelativeLayout>
+    </RelativeLayout>
 
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-            <EditText
-                android:id="@+id/amount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeActionId="@+id/login"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionUnspecified"
-                android:hint="@string/prompt_amount"
-                android:inputType="numberDecimal"
-                android:maxLines="1" />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeActionId="@+id/login"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionUnspecified"
-                android:hint="@string/prompt_password"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:singleLine="true" />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <Button
-            android:id="@+id/send_button"
-            style="?android:textAppearanceSmall"
+        <EditText
+            android:id="@+id/amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/action_send"
-            android:textStyle="bold" />
+            android:imeActionId="@+id/login"
+            android:imeActionLabel="@string/action_sign_in_short"
+            android:imeOptions="actionUnspecified"
+            android:hint="@string/prompt_amount"
+            android:inputType="numberDecimal"
+            android:maxLines="1" />
 
-        <TextView
-            android:id="@+id/result_textview"
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/no_barcode_captured"
-            android:textSize="22sp"
-            android:freezesText="true"
-            android:layout_centerVertical="true"
-            android:gravity="center"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+            android:imeActionId="@+id/login"
+            android:imeActionLabel="@string/action_sign_in_short"
+            android:imeOptions="actionUnspecified"
+            android:hint="@string/prompt_password"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            android:singleLine="true" />
 
-    </LinearLayout>
+    </android.support.design.widget.TextInputLayout>
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/send_button"
+        style="?android:textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/action_send"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/result_textview"
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/no_barcode_captured"
+        android:textSize="22sp"
+        android:freezesText="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+
+</LinearLayout>

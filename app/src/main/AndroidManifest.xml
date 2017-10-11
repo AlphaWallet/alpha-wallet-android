@@ -59,13 +59,14 @@
         <activity
             android:name=".views.SettingsActivity"
             android:label="@string/title_activity_settings" />
-
-        <activity android:name=".views.IntroActivity"
+        <activity
+            android:name=".views.IntroActivity"
             android:label="@string/app_intro"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.barcode.BarcodeCaptureActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity android:name=".views.ReceiveActivity"></activity>
     </application>
 
 </manifest>

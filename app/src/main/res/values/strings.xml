@@ -153,6 +153,7 @@
     <string name="no_barcode_captured">no barcode captured</string>
     <string name="scan_barcode_button">Scan</string>
     <string name="barcode_error_format">Invalid barcode format: %s</string>
+    <string name="action_receive">Receive</string>
 
     <!-- TODO remove -->
     <!--<string name="infura_url">https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk</string>-->

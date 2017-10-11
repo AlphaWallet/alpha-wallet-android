@@ -20,6 +20,7 @@ import com.example.marat.wal.views.AccountListActivity;
 import com.example.marat.wal.views.CreateAccountActivity;
 import com.example.marat.wal.views.ExportAccountActivity;
 import com.example.marat.wal.views.ImportAccountActivity;
+import com.example.marat.wal.views.ReceiveActivity;
 import com.example.marat.wal.views.SettingsActivity;
 import com.example.marat.wal.views.TransactionListActivity;
 import com.example.marat.wal.views.SendActivity;
@@ -195,6 +196,11 @@ public class Controller {
 
     public void navigateToSend(Context context) {
         Intent intent = new Intent(context, SendActivity.class);
+        context.startActivity(intent);
+    }
+
+    public void navigateToReceive(Context context) {
+        Intent intent = new Intent(context, ReceiveActivity.class);
         context.startActivity(intent);
     }
 

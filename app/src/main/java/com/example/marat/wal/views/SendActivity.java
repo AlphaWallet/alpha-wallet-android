@@ -14,9 +14,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.marat.wal.R;
 import com.example.marat.wal.controller.Controller;
+import com.example.marat.wal.controller.Utils;
 import com.example.marat.wal.model.VMAccount;
 import com.example.marat.wal.views.barcode.BarcodeCaptureActivity;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -24,6 +26,8 @@ import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SendActivity extends AppCompatActivity {
 
@@ -88,14 +92,21 @@ public class SendActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == BARCODE_READER_REQUEST_CODE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+
+                    String extracted_address = Utils.extractAddressFromQrString(barcode.displayValue);
+                    if (extracted_address == null) {
+                        Toast.makeText(this, "QR code doesn't contain account address", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Point[] p = barcode.cornerPoints;
-                    mTo.setText(barcode.displayValue);
+                    mTo.setText(extracted_address);
                 } else mResultTextView.setText(R.string.no_barcode_captured);
             } else Log.e(LOG_TAG, String.format(getString(R.string.barcode_error_format),
                     CommonStatusCodes.getStatusCodeString(resultCode)));

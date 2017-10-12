@@ -20,6 +20,8 @@ import com.google.zxing.common.BitMatrix;
 
 public class ReceiveActivity extends AppCompatActivity {
 
+    final static String ETHEREUM_PREFIX = "ethereum:";
+
     ImageView imageView;
     Button button;
     TextView addressTextView;
@@ -52,7 +54,7 @@ public class ReceiveActivity extends AppCompatActivity {
                 AddressTextValue = addressTextView.getText().toString();
 
                 try {
-                    bitmap = TextToImageEncode(AddressTextValue);
+                    bitmap = TextToImageEncode(ETHEREUM_PREFIX + AddressTextValue);
 
                     imageView.setImageBitmap(bitmap);
 

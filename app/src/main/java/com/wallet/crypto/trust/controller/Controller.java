@@ -279,7 +279,7 @@ public class Controller {
 
     public void navigateToExportAccount(Context context, String address) {
         Intent intent = new Intent(context, ExportAccountActivity.class);
-        intent.putExtra(getString(R.string.address_key), address);
+        intent.putExtra(getString(R.string.address_keyword), address);
         context.startActivity(intent);
     }
 

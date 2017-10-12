@@ -177,7 +177,7 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 mDeleteButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Log.d(TAG, "Delete " + mItem.getAddress());
-                        Toast.makeText(AccountListActivity.this, "Delete button pressed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountListActivity.this, "Delete generateButton pressed", Toast.LENGTH_SHORT).show();
 
                         DeleteAccountDialogFragment dialog = new DeleteAccountDialogFragment();
                         dialog.setAddress(mItem.getAddress()); // must carry address
@@ -190,7 +190,7 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 mExportButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Log.d(TAG, "Export " + mItem.getAddress());
-                        Toast.makeText(AccountListActivity.this, "Export button pressed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountListActivity.this, "Export generateButton pressed", Toast.LENGTH_SHORT).show();
                         mController.navigateToExportAccount(AccountListActivity.this, mItem.getAddress());
                     }
                 });

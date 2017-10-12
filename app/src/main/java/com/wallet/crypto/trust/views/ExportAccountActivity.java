@@ -38,7 +38,7 @@ public class ExportAccountActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mAddress = getIntent().getStringExtra(getString(R.string.address_key));
+        mAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
 
         getSupportActionBar().setTitle(getString(R.string.action_export) + mAddress);
 

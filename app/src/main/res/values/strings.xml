@@ -131,9 +131,9 @@
     <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
     <string name="action_export">Export</string>
-    <string name="address_key">ADDRESS</string>
+    <string name="address_keyword">ADDRESS</string>
     <string name="message_save_this">Keep this someplace safe</string>
-    <string name="copy">Copy to Clipboard</string>
+    <string name="copy">Copy to clipboard</string>
     <string name="close">Close</string>
     <string name="keystore_keyword">KEYSTORE</string>
     <string name="prompt_confirm_password">Confirm password</string>

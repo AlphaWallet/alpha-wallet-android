@@ -25,7 +25,7 @@ public class IntroActivity extends AppIntro {
         setBarColor(Color.parseColor("#3F51B5"));
         setSeparatorColor(Color.parseColor("#2196F3"));
 
-        // Hide Skip/Done button.
+        // Hide Skip/Done generateButton.
         //showSkipButton(true);
         //setProgressButtonEnabled(false);
         showSkipButton(true);
@@ -47,7 +47,7 @@ public class IntroActivity extends AppIntro {
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
-        // Do something when users tap on Done button.
+        // Do something when users tap on Done generateButton.
         finish();
     }
 

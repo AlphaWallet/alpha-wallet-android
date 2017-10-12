@@ -19,9 +19,17 @@
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Generate QR code"
-        android:id="@+id/button"
+        android:text="@string/copy"
+        android:id="@+id/copy_button"
         android:layout_below="@+id/addressTextView"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Generate QR code"
+        android:id="@+id/generate_button"
+        android:layout_below="@+id/copy_button"
         android:layout_centerHorizontal="true" />
 
     <ImageView
@@ -30,7 +38,7 @@
         android:id="@+id/imageView"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_below="@+id/button"
+        android:layout_below="@+id/generate_button"
         />
 
 </RelativeLayout>

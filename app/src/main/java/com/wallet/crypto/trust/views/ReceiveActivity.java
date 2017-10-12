@@ -1,5 +1,8 @@
 package com.wallet.crypto.trust.views;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.graphics.Bitmap;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
@@ -23,7 +27,8 @@ public class ReceiveActivity extends AppCompatActivity {
     final static String ETHEREUM_PREFIX = "ethereum:";
 
     ImageView imageView;
-    Button button;
+    Button generateButton;
+    Button copyButton;
     TextView addressTextView;
     String AddressTextValue;
     Thread thread ;
@@ -41,13 +46,25 @@ public class ReceiveActivity extends AppCompatActivity {
 
         imageView = (ImageView)findViewById(R.id.imageView);
         addressTextView = (TextView)findViewById(R.id.addressTextView);
-        button = (Button)findViewById(R.id.button);
+        generateButton = (Button)findViewById(R.id.generate_button);
+        copyButton = findViewById(R.id.copy_button);
 
         VMAccount account = Controller.get().getCurrentAccount();
 
         addressTextView.setText(account.getAddress());
 
-        button.setOnClickListener(new View.OnClickListener() {
+        copyButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(getString(R.string.address_keyword), addressTextView.getText().toString());
+                clipboard.setPrimaryClip(clip);
+
+                Toast.makeText(ReceiveActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        generateButton.setOnClickListener(new View.OnClickListener() {
                               @Override
                               public void onClick(View view) {
 

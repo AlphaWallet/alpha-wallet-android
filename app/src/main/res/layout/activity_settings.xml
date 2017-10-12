@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.marat.wal.views.SendActivity">
+    tools:context="com.wallet.crypto.trust.views.SendActivity">
 
     <LinearLayout
         android:id="@+id/settings"

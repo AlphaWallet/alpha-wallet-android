@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_import"
+        android:icon="@drawable/ic_import_export_black_24dp"
+        android:title="@string/title_import" />
+
+    <item
+        android:id="@+id/action_create"
+        android:icon="@drawable/ic_add_circle_black_24dp"
+        android:title="@string/title_create" />
+</menu>

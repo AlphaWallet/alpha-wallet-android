@@ -63,14 +63,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         assert mRecyclerView != null;
         setupRecyclerView(mRecyclerView);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.send_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mController.navigateToSend(TransactionListActivity.this);
-            }
-        });
-
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener(){
@@ -193,6 +185,12 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
                 break;
             case R.id.action_settings:
                 mController.navigateToSettings(this);
+                break;
+            case R.id.navigation_send:
+                mController.navigateToSend(TransactionListActivity.this);
+                break;
+            case R.id.navigation_receive:
+                mController.navigateToSend(TransactionListActivity.this);
                 break;
         }
         return true;

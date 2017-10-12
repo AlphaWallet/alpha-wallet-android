@@ -65,22 +65,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
-
-        FloatingActionButton create_fab = (FloatingActionButton) findViewById(R.id.create_fab);
-        create_fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mController.navigateToCreateAccount(AccountListActivity.this);
-            }
-        });
-
-        FloatingActionButton import_fab = (FloatingActionButton) findViewById(R.id.import_fab);
-        import_fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mController.navigateToImportAccount(AccountListActivity.this);
-            }
-        });
     }
 
     @Override
@@ -103,12 +87,18 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            finish();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_import:
+                mController.navigateToImportAccount(this);
+                break;
+            case R.id.action_create:
+                mController.navigateToCreateAccount(this);
+                break;
+            case android.R.id.home:
+                finish();
+                break;
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {

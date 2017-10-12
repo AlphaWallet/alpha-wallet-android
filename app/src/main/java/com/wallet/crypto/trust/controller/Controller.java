@@ -221,10 +221,9 @@ public class Controller {
         activity.finish();
     }
 
-    public void clickImport(ImportAccountActivity importAccountActivity, String keystore, String password) {
+    public void clickImport(String keystore, String password, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Import account %s, %s", keystore, password));
-        new ImportAccountTask(keystore, password).execute();
-        importAccountActivity.finish();
+        new ImportAccountTask(keystore, password, listener).execute();
     }
 
     public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password) {
@@ -378,21 +377,23 @@ public class Controller {
 
         private final String keystoreJson;
         private final String password;
+        private final OnTaskCompleted listener;
 
-        public ImportAccountTask(String keystoreJson, String password) {
+        public ImportAccountTask(String keystoreJson, String password, OnTaskCompleted listener) {
             this.keystoreJson = keystoreJson;
             this.password = password;
+            this.listener = listener;
         }
 
         protected Void doInBackground(String... params) {
             try {
-                //{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}
                 Account account = mEtherStore.importKeyStore(keystoreJson, password);
                 loadAccounts();
                 Log.d("INFO", "Imported account: " + account.getAddress().getHex());
             } catch (Exception e) {
                 Log.d("ERROR", e.toString());
             }
+            listener.onTaskCompleted();
             return null;
         }
     }

@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
+import com.wallet.crypto.trust.controller.OnTaskCompleted;
 
 public class ImportAccountActivity extends AppCompatActivity {
 
@@ -40,7 +41,21 @@ public class ImportAccountActivity extends AppCompatActivity {
         mImportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mController.clickImport(ImportAccountActivity.this, mKeystore.getText().toString(), mPassword.getText().toString());
+                mController.clickImport(
+                    mKeystore.getText().toString(),
+                    mPassword.getText().toString(),
+                    new OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted() {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ImportAccountActivity.this.finish();
+                                }
+                            });
+                        }
+                    }
+                );
             }
         });
     }

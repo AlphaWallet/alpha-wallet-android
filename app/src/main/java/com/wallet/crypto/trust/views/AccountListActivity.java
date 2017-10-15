@@ -2,6 +2,7 @@ package com.wallet.crypto.trust.views;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -38,6 +39,24 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
      */
     private boolean mTwoPane;
 
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_import:
+                    mController.navigateToImportAccount(AccountListActivity.this);
+                    break;
+                case R.id.action_create:
+                    mController.navigateToCreateAccount(AccountListActivity.this);
+                    break;
+            }
+            return false;
+        }
+
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +72,9 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
         }
 
         mController = Controller.get();
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mRecyclerView = findViewById(R.id.account_list);
         assert mRecyclerView != null;
@@ -78,6 +100,10 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
         Toast.makeText(AccountListActivity.this, "Delete dialog callback " + password, Toast.LENGTH_SHORT).show();
         try {
             mController.deleteAccount(address, password);
+            if (mController.getCurrentAccount() == null) {
+                finish(); // Don't show account list if there are no accounts,
+                          // go to main view which will ask to create a new account
+            }
             setupRecyclerView((RecyclerView) mRecyclerView);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
@@ -88,12 +114,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_import:
-                mController.navigateToImportAccount(this);
-                break;
-            case R.id.action_create:
-                mController.navigateToCreateAccount(this);
-                break;
             case android.R.id.home:
                 finish();
                 break;

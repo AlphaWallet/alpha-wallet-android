@@ -5,6 +5,6 @@ package com.wallet.crypto.trust.controller;
  */
 
 public interface OnTaskCompleted {
-    void onTaskCompleted();
+    void onTaskCompleted(TaskResult result);
 }
 

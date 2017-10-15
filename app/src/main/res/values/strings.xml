@@ -8,7 +8,7 @@
     <string name="title_account">Accounts</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="title_activity_main2">Main2Activity</string>
-    <string name="title_activity_create_account">Create Account</string>
+    <string name="title_activity_create_account">New Wallet</string>
 
     <!-- Strings related to account creation -->
     <string name="prompt_email">Account name</string>

@@ -3,6 +3,7 @@ package com.wallet.crypto.trust.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
@@ -66,6 +67,7 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
     private EditText mConfirmPassword;
     private View mProgressView;
     private View mLoginFormView;
+    private Button mImportButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +115,14 @@ public class CreateAccountActivity extends AppCompatActivity implements LoaderCa
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        mImportButton = findViewById(R.id.import_account_button);
+        mImportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mController.navigateToImportAccount(CreateAccountActivity.this);
+            }
+        });
     }
 
     private void populateAutoComplete() {

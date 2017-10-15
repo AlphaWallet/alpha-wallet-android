@@ -8,10 +8,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
 import com.wallet.crypto.trust.controller.OnTaskCompleted;
+import com.wallet.crypto.trust.controller.TaskResult;
+import com.wallet.crypto.trust.controller.TaskStatus;
 
 public class ImportAccountActivity extends AppCompatActivity {
 
@@ -46,11 +49,16 @@ public class ImportAccountActivity extends AppCompatActivity {
                     mPassword.getText().toString(),
                     new OnTaskCompleted() {
                         @Override
-                        public void onTaskCompleted() {
+                        public void onTaskCompleted(final TaskResult result) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    ImportAccountActivity.this.finish();
+                                    if (result.getStatus() == TaskStatus.SUCCESS) {
+                                        ImportAccountActivity.this.finish();
+                                        mController.navigateToAccountList();
+                                    } else {
+                                        Toast.makeText(ImportAccountActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             });
                         }

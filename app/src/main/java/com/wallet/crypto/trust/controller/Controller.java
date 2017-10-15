@@ -149,7 +149,7 @@ public class Controller {
         // Get transactions
         new GetTransactionsTask(mAccounts, new OnTaskCompleted() {
             @Override
-            public void onTaskCompleted() {
+            public void onTaskCompleted(TaskResult result) {
                 Log.d(TAG, "Finished loading transactions");
 
                 // ... and then get balances
@@ -182,6 +182,11 @@ public class Controller {
         context.startActivity(intent);
     }
 
+    public void navigateToAccountList() {
+        Intent intent = new Intent(mAppContext, AccountListActivity.class);
+        mAppContext.startActivity(intent);
+    }
+
     public void navigateToAccountList(Context context) {
         Intent intent = new Intent(context, AccountListActivity.class);
         context.startActivity(intent);
@@ -209,12 +214,13 @@ public class Controller {
 
     public void clickCreateAccount(Activity activity, String name, String password) throws Exception {
         Log.d(TAG, String.format("Create account '%s' with pwd '%s", name, password));
+        boolean firstAccount = mAccounts.size() == 0;
         VMAccount account = createAccount(password);
 
         mAccounts.add(account);
         mTransactions.put(account.getAddress(), new ArrayList<ESTransaction>());
 
-        if (mEtherStore.getAccounts().size() == 0) {
+        if (firstAccount) {
             setCurrentAddress(account.getAddress());
         }
 
@@ -368,7 +374,7 @@ public class Controller {
             for (VMAccount a: mAccounts) {
                 getBalance(a);
             }
-            mListener.onTaskCompleted();
+            mListener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, ""));
             return null;
         }
     }
@@ -390,10 +396,11 @@ public class Controller {
                 Account account = mEtherStore.importKeyStore(keystoreJson, password);
                 loadAccounts();
                 Log.d("INFO", "Imported account: " + account.getAddress().getHex());
+                listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
             } catch (Exception e) {
                 Log.d("ERROR", e.toString());
+                listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Failed to import wallet: '%s'".format(e.getMessage())));
             }
-            listener.onTaskCompleted();
             return null;
         }
     }
@@ -536,7 +543,7 @@ public class Controller {
             for (VMAccount a : mAccounts) {
                 fetchTransactionsForAddress(a);
             }
-            mListener.onTaskCompleted();
+            mListener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Fetched transactions for all accounts."));
             return null;
         }
     }

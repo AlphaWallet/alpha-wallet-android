@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
 import com.wallet.crypto.trust.controller.OnTaskCompleted;
+import com.wallet.crypto.trust.controller.TaskResult;
 import com.wallet.crypto.trust.model.ESTransaction;
 import com.wallet.crypto.trust.model.VMAccount;
 
@@ -37,7 +39,7 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class TransactionListActivity extends AppCompatActivity implements OnTaskCompleted {
+public class TransactionListActivity extends AppCompatActivity {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -49,6 +51,24 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
 
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_receive:
+                    mController.navigateToReceive(TransactionListActivity.this);
+                    break;
+                case R.id.navigation_send:
+                    mController.navigateToSend(TransactionListActivity.this);
+                    break;
+            }
+            return false;
+        }
+
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +78,9 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
 
         mController = Controller.get();
         mController.init(this);
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.item_list);
         assert mRecyclerView != null;
@@ -81,7 +104,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     private void fetchModelsAndReinit() {
         mController.loadViewModels(new OnTaskCompleted() {
             @Override
-            public void onTaskCompleted() {
+            public void onTaskCompleted(TaskResult result) {
                 asyncInit();
             }
         });
@@ -93,9 +116,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
             mAddress = account.getAddress();
             Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
         } else {
-            //Intent intent = new Intent(this, CreateAccountActivity.class);
-            //this.startActivity(intent);
-
             mAddress ="0xDEADBEEF";
             account = new VMAccount(mAddress, "0");
         }
@@ -136,7 +156,7 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
                     SharedPreferences.Editor e = getPrefs.edit();
 
                     //  Edit preference to make it false because we don't want this to run again
-                    e.putBoolean("firstStart", true);
+                    e.putBoolean("firstStart", false);
 
                     //  Apply changes
                     e.apply();
@@ -165,7 +185,12 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
     @Override
     public void onResume() {
         super.onResume();
+
         init();
+
+        if (mController.getCurrentAccount() == null) {
+            mController.navigateToCreateAccount(this);
+        }
     }
 
     @Override
@@ -200,11 +225,6 @@ public class TransactionListActivity extends AppCompatActivity implements OnTask
         Controller controller = Controller.get();
         List<ESTransaction> txns = controller.getTransactions(mAddress);
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(txns));
-    }
-
-    @Override
-    public void onTaskCompleted() {
-        // Populate transactions
     }
 
     public class SimpleItemRecyclerViewAdapter

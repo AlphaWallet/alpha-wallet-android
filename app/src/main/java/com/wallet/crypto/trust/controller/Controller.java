@@ -232,10 +232,9 @@ public class Controller {
         new ImportAccountTask(keystore, password, listener).execute();
     }
 
-    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password) {
+    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s, %s", from, to, ethAmount, password));
-        new SendTransactionTask(from, to, EthToWei(ethAmount), password).execute();
-        sendActivity.finish();
+        new SendTransactionTask(from, to, EthToWei(ethAmount), password, listener).execute();
     }
 
     public VMAccount createAccount(String password) {
@@ -419,20 +418,19 @@ public class Controller {
         }
     }
 
-    // TODO remove
-    // "{\"address\":\"aa3cc54d7f10fa3a1737e4997ba27c34f330ce16\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"94119190a98a3e6fd0512c1e170d2a632907192a54d4a355768dec5eb0818db7\",\"cipherparams\":{\"iv\":\"4e5fea1dbb06694c6809d379f736c2e2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"0b92da3c8548156453b2a5960f16cdef9f365c49e44c3f3f9a9ee3544a0ef16b\"},\"mac\":\"08700b32aad5ca0b0ffd55001db36606ff52ee3d94f762176bb1269d27074bb9\"},\"id\":\"1e7a1a79-9ce9-47c9-b764-fed548766c65\",\"version\":3}"
-
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
         private String fromAddress;
         private String toAddress;
         private String wei;
         private String password;
+        private OnTaskCompleted listener;
 
-        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password) {
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, OnTaskCompleted listener) {
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.wei = wei;
             this.password = password;
+            this.listener = listener;
             Log.d(TAG, "SendTransaction %s %s %s".format(fromAddress, toAddress, wei));
         }
 
@@ -457,6 +455,8 @@ public class Controller {
                     hexValue = Numeric.toHexString(signedMessage);
                 } catch (Exception e) {
                     Log.e(TAG, "Error signing " + e.toString());
+                    listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Error signing: " + e.toString()));
+                    return null;
                 }
 
                 Log.d("INFO", "Sent transaction: " + hexValue);
@@ -466,22 +466,24 @@ public class Controller {
                         .sendAsync()
                         .get();
 
-                if (raw.hasError()) {
-                    Log.e(TAG, raw.getError().getMessage());
-                }
                 String result = raw.getTransactionHash();
                 Log.d(TAG, "Transaction hash " + result);
 
                 if (raw.hasError()) {
                     Log.d(TAG, "Transaction error message: " + raw.getError().getMessage());
                     Log.d(TAG, "Transaction error data: " + raw.getError().getData());
+                    listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + raw.getError().getMessage()));
+                    return null;
                 }
                 Log.d(TAG, "Transaction JSON-RPC"+ raw.getJsonrpc());
                 Log.d(TAG, "Transaction result: " + raw.getResult());
                 Log.d(TAG, "Transaction hash: " + raw.getTransactionHash());
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
+                listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + e.toString()));
+                return null;
             }
+            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Payment sent"));
             return null;
         }
     }

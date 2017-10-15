@@ -18,6 +18,9 @@ import android.widget.Toast;
 
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
+import com.wallet.crypto.trust.controller.OnTaskCompleted;
+import com.wallet.crypto.trust.controller.TaskResult;
+import com.wallet.crypto.trust.controller.TaskStatus;
 import com.wallet.crypto.trust.controller.Utils;
 import com.wallet.crypto.trust.model.VMAccount;
 import com.wallet.crypto.trust.views.barcode.BarcodeCaptureActivity;
@@ -61,11 +64,6 @@ public class SendActivity extends AppCompatActivity {
             account_names.add(a.getAddress());
         }
 
-        mFromSpinner = (Spinner) findViewById(R.id.transaction_address);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, account_names);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mFromSpinner.setAdapter(adapter);
-
         mTo = (EditText) findViewById(R.id.date);
         mAmount = (EditText) findViewById(R.id.amount);
         mPassword = (EditText) findViewById(R.id.password);
@@ -74,7 +72,25 @@ public class SendActivity extends AppCompatActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mController.clickSend(SendActivity.this, mFromSpinner.getSelectedItem().toString(), mTo.getText().toString(), mAmount.getText().toString(), mPassword.getText().toString());
+                mController.clickSend(
+                    SendActivity.this,
+                    mController.getCurrentAccount().getAddress(),
+                    mTo.getText().toString(),
+                    mAmount.getText().toString(), mPassword.getText().toString(),
+                    new OnTaskCompleted() {
+                        public void onTaskCompleted(final TaskResult result) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (result.getStatus() == TaskStatus.SUCCESS) {
+                                        SendActivity.this.finish();
+                                    }
+                                    Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    }
+                );
             }
         });
 

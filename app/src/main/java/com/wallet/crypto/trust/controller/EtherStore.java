@@ -59,9 +59,15 @@ public class EtherStore {
     public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce) throws Exception {
         BigInt value = new BigInt(Long.decode(wei));
 
+        BigInt gasPrice = new BigInt(0);
+        gasPrice.setString("15000000000", 10); // price, base
+
         Transaction tx = new Transaction(
                 nonce, new Address(toAddress),
-                value, new BigInt(90000), new BigInt(0), null); // Random empty transaction
+                value,
+                new BigInt(90000), // gas limit
+                gasPrice,
+                null); // data
 
         BigInt chain = new BigInt(Controller.get().getCurrentNetwork().getChainId()); // Chain identifier of the main net
 

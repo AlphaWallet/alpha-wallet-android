@@ -39,24 +39,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
      */
     private boolean mTwoPane;
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_import:
-                    mController.navigateToImportAccount(AccountListActivity.this);
-                    break;
-                case R.id.action_create:
-                    mController.navigateToCreateAccount(AccountListActivity.this);
-                    break;
-            }
-            return false;
-        }
-
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,20 +55,17 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
 
         mController = Controller.get();
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
         mRecyclerView = findViewById(R.id.account_list);
         assert mRecyclerView != null;
         setupRecyclerView((RecyclerView) mRecyclerView);
 
-        if (findViewById(R.id.account_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mController.navigateToCreateAccount(AccountListActivity.this);
+            }
+        });
     }
 
     @Override

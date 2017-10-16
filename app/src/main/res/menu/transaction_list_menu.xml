@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_receive"
         android:icon="@drawable/ic_swap_horiz_white_24dp"
-        android:title="@string/action_receive"
+        android:title="@string/action_request"
         android:orderInCategory="80"
         app:showAsAction="never"/>
 

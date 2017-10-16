@@ -63,8 +63,7 @@ public class Controller {
     // Services
     private Context mAppContext;
     private EtherStore mEtherStore;
-    private Retrofit mRetrofit;
-    private EtherscanService mEtherscanService;
+    private Map<String, EtherscanService> mEtherscanServices;
 
     // State
     private String mKeystoreBaseDir;
@@ -100,25 +99,17 @@ public class Controller {
 
         // Create networks list
         mNetworks = new ArrayList<>();
+
         mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
-        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://mainnet.etherscan.io", "?", 1));
+        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
+        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
+        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 1));
+
         setCurrentNetwork(mNetworks.get(0).getName());
-
-        // Setup service
-        mRetrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(mCurrentNetwork.getEtherscanUrl())
-                .build();
-
-        mEtherscanService = mRetrofit.create(EtherscanService.class);
 
         mAccounts = new ArrayList<>();
         mTransactions = new HashMap<>();
         mBalances = new HashMap<>();
-
-        // Dummy data TODO remove
-        //mAccounts.add(new VMAccount(getString(R.string.default_address), "0"));
-        //mAccounts.add(new VMAccount("0x5DD0b5D02cD574412Ad58dD84A2F402cc25e320a", "0"));
 
         loadAccounts();
 
@@ -129,6 +120,10 @@ public class Controller {
         for (VMAccount a : mAccounts) {
             mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
         }
+    }
+
+    private EtherscanService getCurrentEtherscanService() {
+        return mEtherscanServices.get(mCurrentAddress);
     }
 
     private List<VMAccount> loadAccounts() {
@@ -279,6 +274,11 @@ public class Controller {
     public void deleteAccount(String address, String password) throws Exception {
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
+        if (address.equals(mCurrentAddress)) {
+            if (mAccounts.size() > 0) {
+                mCurrentAddress = mAccounts.get(0).getAddress();
+            }
+        }
     }
 
     public void navigateToExportAccount(Context context, String address) {
@@ -500,8 +500,18 @@ public class Controller {
         private void fetchTransactionsForAddress(VMAccount account) {
             final String address = account.getAddress();
             try {
+
+                Retrofit mRetrofit = new Retrofit.Builder()
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .baseUrl(mCurrentNetwork.getEtherscanUrl())
+                        .build();
+
+                EtherscanService service = mRetrofit.create(EtherscanService.class);
+
+                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + mCurrentNetwork.getEtherscanApiKey());
+
                 Call<ESTransactionListResponse> call =
-                        mEtherscanService.getTransactionList(
+                        service.getTransactionList(
                                 "account",
                                 "txlist",
                                 address,

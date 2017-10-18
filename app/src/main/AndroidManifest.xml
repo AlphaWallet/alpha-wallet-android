@@ -23,11 +23,6 @@
             android:name=".views.TransactionListActivity"
             android:label="@string/title_trust"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".views.TransactionDetailActivity"
@@ -67,6 +62,14 @@
             android:name=".views.barcode.BarcodeCaptureActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity android:name=".views.ReceiveActivity" />
+        <activity
+            android:name=".views.SplashActivity"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

@@ -166,11 +166,9 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 mDeleteButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Log.d(TAG, "Delete " + mItem.getAddress());
-                        Toast.makeText(AccountListActivity.this, "Delete generateButton pressed", Toast.LENGTH_SHORT).show();
 
                         DeleteAccountDialogFragment dialog = new DeleteAccountDialogFragment();
                         dialog.setAddress(mItem.getAddress()); // must carry address
-
                         dialog.show(getSupportFragmentManager(), "DeleteAccountDialogFragment");
                     }
                 });

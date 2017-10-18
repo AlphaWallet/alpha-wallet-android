@@ -71,9 +71,6 @@ public class EtherStore {
 
         BigInt chain = new BigInt(Controller.get().getCurrentNetwork().getChainId()); // Chain identifier of the main net
 
-        // Sign a transaction with a single authorization
-        //Transaction signed = ks.signTxPassphrase(signer, signerPassword, tx, chain);
-
         ks.unlock(signer, signerPassword);
         Transaction signed = ks.signTx(signer, tx, chain);
         ks.lock(signer.getAddress());

@@ -66,5 +66,6 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_delete_account">Delete account</string>
+    <string name="no_transactions">No Transactions.\nSwipe down to refresh.</string>
 
 </resources>

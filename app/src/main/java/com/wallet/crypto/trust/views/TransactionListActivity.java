@@ -125,7 +125,7 @@ public class TransactionListActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(mAddress.substring(0, 5) + ": " + Controller.WeiToEth(account.getBalance().toString(), 5) + " ETH");
         toolbar.inflateMenu(R.menu.transaction_list_menu);
 
-        refreshTransactions();
+        refreshTransactions(mAddress);
     }
 
     private void showIntro() {
@@ -177,8 +177,17 @@ public class TransactionListActivity extends AppCompatActivity {
         });
     }
 
-    private void refreshTransactions() {
-        setupRecyclerView(mRecyclerView);
+    private void refreshTransactions(String address) {
+        View swipe_view = findViewById(R.id.swiperefresh);
+
+        if (mController.getTransactions(address).size() == 0) {
+            findViewById(R.id.no_transactions_text).setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.no_transactions_text).setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            setupRecyclerView(mRecyclerView);
+        }
         mSwipeRefreshLayout.setRefreshing(false);
     }
 

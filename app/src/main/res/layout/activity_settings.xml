@@ -1,34 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wallet.crypto.trust.views.SendActivity">
+    tools:context="com.wallet.crypto.trust.views.SettingsActivity">
 
-    <LinearLayout
-        android:id="@+id/settings"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp"
-        android:orientation="vertical" >
-
-        <Button
-            android:id="@+id/export_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/action_export" />
-
-        <TextView
-            android:id="@+id/network_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/network_label"
-            android:textAppearance="?attr/textAppearanceListItem" />
-
-        <Spinner
-            android:id="@+id/network_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

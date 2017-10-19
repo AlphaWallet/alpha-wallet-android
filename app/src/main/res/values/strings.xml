@@ -40,7 +40,7 @@
     <string name="hint_keystore">keystore</string>
     <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
-    <string name="action_export">Export</string>
+    <string name="action_export">Export private key</string>
     <string name="address_keyword">ADDRESS</string>
     <string name="message_save_this">Keep this someplace safe</string>
     <string name="copy">Copy to clipboard</string>
@@ -51,7 +51,7 @@
     <string name="sent">Sent</string>
     <string name="received">Received</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="network_label">Network:</string>
+    <string name="network_label">RPC server</string>
     <string name="app_intro">Intro</string>
 
     <string name="title_trust">Trust</string>
@@ -67,5 +67,17 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_delete_account">Delete account</string>
     <string name="no_transactions">No Transactions.\nSwipe down to refresh.</string>
+    <string name="twitter">Twitter</string>
+    <string name="telegram">Telegram Group</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_community">Community</string>
+    <string name="title_opensource">Open source development</string>
+    <string name="title_source_code">Source code</string>
+    <string name="title_report_bug">Report a bug</string>
+    <string name="title_rate">Rate us on Play Store</string>
+    <string name="title_support">Support</string>
+    <string name="title_donate">Donate</string>
 
 </resources>

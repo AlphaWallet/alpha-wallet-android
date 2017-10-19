@@ -3,11 +3,15 @@ package com.wallet.crypto.trust.views;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
@@ -18,7 +22,9 @@ import java.util.List;
 
 public class SettingsActivity extends AppCompatActivity {
 
+    final static String TAG = "SETTINGS";
     Spinner mNetworkSpinner;
+    Button mExportButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +67,14 @@ public class SettingsActivity extends AppCompatActivity {
                 // your code here
             }
 
+        });
+
+        mExportButton = findViewById(R.id.export_button);
+        mExportButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.d(TAG, "Export " + mController.getCurrentAccount().getAddress());
+                mController.navigateToExportAccount(SettingsActivity.this, mController.getCurrentAccount().getAddress());
+            }
         });
     }
 

@@ -27,18 +27,10 @@
         android:textSize="12dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/export_button"
+        android:layout_toLeftOf="@+id/delete_button"
         android:maxLines="1"
         android:singleLine="true"
         android:ellipsize="end" />
-
-    <ImageButton
-        android:id="@+id/export_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_share_black_24dp"
-        android:layout_centerHorizontal="true"
-        android:layout_toLeftOf="@+id/delete_button" />
 
     <ImageButton
         android:id="@+id/delete_button"

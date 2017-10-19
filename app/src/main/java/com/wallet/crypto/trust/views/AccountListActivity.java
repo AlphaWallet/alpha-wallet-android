@@ -144,7 +144,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             public final TextView mAddressView;
             public final TextView mBalanceView;
             public final ImageButton mDeleteButton;
-            public final ImageButton mExportButton;
             public VMAccount mItem;
 
             public ViewHolder(View view) {
@@ -169,15 +168,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                         DeleteAccountDialogFragment dialog = new DeleteAccountDialogFragment();
                         dialog.setAddress(mItem.getAddress()); // must carry address
                         dialog.show(getSupportFragmentManager(), "DeleteAccountDialogFragment");
-                    }
-                });
-
-                mExportButton = (ImageButton) view.findViewById(R.id.export_button);
-                mExportButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        Log.d(TAG, "Export " + mItem.getAddress());
-                        Toast.makeText(AccountListActivity.this, "Export generateButton pressed", Toast.LENGTH_SHORT).show();
-                        mController.navigateToExportAccount(AccountListActivity.this, mItem.getAddress());
                     }
                 });
             }

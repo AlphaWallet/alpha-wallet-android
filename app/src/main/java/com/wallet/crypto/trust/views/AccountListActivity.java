@@ -76,7 +76,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
 
     @Override
     public void onDialogPositiveClick(String address, String password) {
-        Toast.makeText(AccountListActivity.this, "Delete dialog callback " + password, Toast.LENGTH_SHORT).show();
         try {
             mController.deleteAccount(address, password);
             if (mController.getCurrentAccount() == null) {
@@ -86,7 +85,7 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
             setupRecyclerView((RecyclerView) mRecyclerView);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
-            Toast.makeText(AccountListActivity.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(AccountListActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

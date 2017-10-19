@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
@@ -62,7 +61,7 @@ public class Controller {
     private static String TAG = "CONTROLLER";
 
     // Services
-    private TransactionListActivity mMainActivity;
+    private Context mAppContext;
     private EtherStore mEtherStore;
     private Map<String, EtherscanService> mEtherscanServices;
 
@@ -81,10 +80,6 @@ public class Controller {
     AccountListActivity mAccountListActivity;
     TransactionListActivity mWalletActivity;
 
-    // Backgroud task
-    private int mInterval = 10000;
-    private Handler mHandler;
-
     public static Controller get() {
         if (mInstance == null) {
             mInstance = new Controller();
@@ -96,9 +91,9 @@ public class Controller {
 
     public void init(Context appContext) {
 
-        mMainActivity = (TransactionListActivity) appContext;
+        mAppContext = appContext;
 
-        mKeystoreBaseDir = mMainActivity.getFilesDir() + "/keystore";
+        mKeystoreBaseDir = mAppContext.getFilesDir() + "/keystore";
 
         mEtherStore = new EtherStore(mKeystoreBaseDir);
 
@@ -106,9 +101,9 @@ public class Controller {
         mNetworks = new ArrayList<>();
 
         mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
+        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
+        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
         mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 1));
-        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 3));
-        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 4));
 
         setCurrentNetwork(mNetworks.get(0).getName());
 
@@ -125,29 +120,10 @@ public class Controller {
         for (VMAccount a : mAccounts) {
             mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
         }
-
-        mHandler = new Handler();
-        startRepeatingTask();
     }
 
-    Runnable mStatusChecker = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                Log.d(TAG, "Periodic task");
-                mMainActivity.fetchModelsAndReinit();
-            } finally {
-                mHandler.postDelayed(mStatusChecker, mInterval);
-            }
-        }
-    };
-
-    void startRepeatingTask() {
-        mStatusChecker.run();
-    }
-
-    void stopRepeatingTask() {
-        mHandler.removeCallbacks(mStatusChecker);
+    private EtherscanService getCurrentEtherscanService() {
+        return mEtherscanServices.get(mCurrentAddress);
     }
 
     private List<VMAccount> loadAccounts() {
@@ -202,8 +178,8 @@ public class Controller {
     }
 
     public void navigateToAccountList() {
-        Intent intent = new Intent(mMainActivity, AccountListActivity.class);
-        mMainActivity.startActivity(intent);
+        Intent intent = new Intent(mAppContext, AccountListActivity.class);
+        mAppContext.startActivity(intent);
     }
 
     public void navigateToAccountList(Context context) {
@@ -232,7 +208,7 @@ public class Controller {
     }
 
     public void clickCreateAccount(Activity activity, String name, String password) throws Exception {
-        Log.d(TAG, String.format("Create account '%s'", name));
+        Log.d(TAG, String.format("Create account '%s' with pwd '%s", name, password));
         boolean firstAccount = mAccounts.size() == 0;
         VMAccount account = createAccount(password);
 
@@ -247,12 +223,12 @@ public class Controller {
     }
 
     public void clickImport(String keystore, String password, OnTaskCompleted listener) {
-        Log.d(TAG, String.format("Import account %s", keystore));
+        Log.d(TAG, String.format("Import account %s, %s", keystore, password));
         new ImportAccountTask(keystore, password, listener).execute();
     }
 
     public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password, OnTaskCompleted listener) {
-        Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
+        Log.d(TAG, String.format("Send ETH: %s, %s, %s, %s", from, to, ethAmount, password));
         new SendTransactionTask(from, to, EthToWei(ethAmount), password, listener).execute();
     }
 
@@ -271,7 +247,7 @@ public class Controller {
     }
 
     private String getString(int resId) {
-        return mMainActivity.getString(resId);
+        return mAppContext.getString(resId);
     }
 
     public void setCurrentAddress(String currentAddress) {
@@ -568,7 +544,6 @@ public class Controller {
                     @Override
                     public void onFailure(Call<ESTransactionListResponse> call, Throwable t) {
                         Log.e("ERROR", t.toString());
-                        Toast.makeText(mMainActivity, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {

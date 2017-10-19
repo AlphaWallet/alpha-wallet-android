@@ -3,13 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_receive"
-        android:icon="@drawable/ic_swap_horiz_white_24dp"
-        android:title="@string/action_request"
-        android:orderInCategory="80"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_select_account"
         android:icon="@drawable/ic_swap_horiz_white_24dp"
         android:title="@string/action_select_account"

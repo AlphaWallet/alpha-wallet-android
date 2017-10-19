@@ -101,7 +101,7 @@ public class TransactionListActivity extends AppCompatActivity {
         fetchModelsAndReinit();
     }
 
-    private void fetchModelsAndReinit() {
+    public void fetchModelsAndReinit() {
         mController.loadViewModels(new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(TaskResult result) {
@@ -211,9 +211,6 @@ public class TransactionListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_receive:
-                mController.navigateToReceive(this);
-                break;
             case R.id.action_select_account:
                 mController.navigateToAccountList(this);
                 break;

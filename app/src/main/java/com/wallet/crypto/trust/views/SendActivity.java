@@ -58,15 +58,14 @@ public class SendActivity extends AppCompatActivity {
 
         List<VMAccount> accounts = mController.getAccounts();
 
-        List<String> account_names = new ArrayList<String>();
-
-        for (VMAccount a: accounts) {
-            account_names.add(a.getAddress());
-        }
-
         mTo = (EditText) findViewById(R.id.date);
         mAmount = (EditText) findViewById(R.id.amount);
         mPassword = (EditText) findViewById(R.id.password);
+
+        String toAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
+        if (toAddress != null) {
+            mTo.setText(toAddress);
+        }
 
         Button mSendButton = (Button) findViewById(R.id.send_button);
         mSendButton.setOnClickListener(new View.OnClickListener() {

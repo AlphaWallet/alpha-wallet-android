@@ -48,20 +48,19 @@
 
         </PreferenceCategory>
 
-        <!--
         <PreferenceCategory
             android:title="@string/title_support"
             android:key="pref_rate" >
 
+            <!--
             <Preference
-                android:key="pref_twitter"
-                android:title="@string/title_rate" />
+                android:key="pref_rate"
+                android:title="@string/title_rate" /> -->
 
-            <Preference
-                android:key="pref_telegram"
-                android:title="@string/title_donate" />
+            <Preference android:key="pref_donate"
+                android:title="@string/title_donate">
+            </Preference>
 
         </PreferenceCategory>
-        -->
 
 </PreferenceScreen>

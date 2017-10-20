@@ -22,6 +22,17 @@ public class SettingsFragment extends PreferenceFragment {
 
         mController = Controller.get();
 
+        final Preference donate = findPreference("pref_donate");
+
+        donate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                mController.navigateToSend(getActivity(), "0x9f8284ce2cf0c8ce10685f537b1fff418104a317");
+                return false;
+            }
+        });
+
         final Preference export = findPreference("pref_export");
 
         export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

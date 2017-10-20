@@ -221,6 +221,12 @@ public class Controller {
         context.startActivity(intent);
     }
 
+    public void navigateToSend(Context context, String to_address) {
+        Intent intent = new Intent(context, SendActivity.class);
+        intent.putExtra(getString(R.string.address_keyword), to_address);
+        context.startActivity(intent);
+    }
+
     public void navigateToReceive(Context context) {
         Intent intent = new Intent(context, ReceiveActivity.class);
         context.startActivity(intent);

@@ -60,6 +60,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Controller {
     private static Controller mInstance;
+    private static boolean mInited = false;
 
     private static String TAG = "CONTROLLER";
 
@@ -97,6 +98,11 @@ public class Controller {
     protected Controller() { }
 
     public void init(Context appContext) {
+
+        if (mInited) {
+            return;
+        }
+        mInited = true;
 
         mMainActivity = (TransactionListActivity) appContext;
 

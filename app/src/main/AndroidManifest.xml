@@ -22,7 +22,8 @@
         <activity
             android:name=".views.TransactionListActivity"
             android:label="@string/title_trust"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize"></activity>
         <activity
             android:name=".views.TransactionDetailActivity"
             android:label="@string/title_item_detail"

@@ -101,6 +101,12 @@ public class TransactionListActivity extends AppCompatActivity {
         fetchModelsAndReinit();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mController.onStop();
+    }
+
     public void fetchModelsAndReinit() {
         mController.loadViewModels(new OnTaskCompleted() {
             @Override
@@ -199,6 +205,8 @@ public class TransactionListActivity extends AppCompatActivity {
 
         if (mController.getCurrentAccount() == null) {
             mController.navigateToCreateAccount(this);
+        } else {
+            mController.onResume();
         }
     }
 

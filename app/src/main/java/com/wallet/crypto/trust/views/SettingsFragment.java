@@ -1,17 +1,24 @@
 package com.wallet.crypto.trust.views;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+
 import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
 import com.wallet.crypto.trust.model.VMNetwork;
 
 import java.util.List;
 
-public class SettingsFragment extends PreferenceFragment {
+import static android.R.attr.key;
+
+public class SettingsFragment extends PreferenceFragment
+        implements SharedPreferences.OnSharedPreferenceChangeListener{
     private Controller mController;
+    private SharedPreferences preferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +64,22 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
+
+        preferences = PreferenceManager
+                .getDefaultSharedPreferences(getActivity());
+        preferences
+                .registerOnSharedPreferenceChangeListener(SettingsFragment.this);
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                                          String key) {
+        if (key.equals("pref_rpcServer")) {
+            Preference rpcServerPref = findPreference(key);
+            // Set summary
+            String selectedRpcServer = sharedPreferences.getString(key, "");
+            rpcServerPref.setSummary(selectedRpcServer);
+            mController.setCurrentNetwork(selectedRpcServer);
+        }
     }
 
     private void setRpcServerPreferenceData(ListPreference lp) {
@@ -74,8 +97,11 @@ public class SettingsFragment extends PreferenceFragment {
             entryValues[ii] = networks.get(ii).getName();
         }
 
+        String currentValue = mController.getCurrentNetwork().getName();
+
         lp.setEntries(entries);
-        lp.setDefaultValue(entryValues[0]);
+        lp.setDefaultValue(currentValue);
+        lp.setSummary(currentValue);
         lp.setEntryValues(entryValues);
     }
 }

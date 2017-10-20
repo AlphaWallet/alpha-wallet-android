@@ -4,8 +4,10 @@ package com.wallet.crypto.trust.controller;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
@@ -110,7 +112,15 @@ public class Controller {
         mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 3));
         mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 4));
 
-        setCurrentNetwork(mNetworks.get(0).getName());
+        // Load current from app preferences
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mMainActivity);
+        String rpcServerName = sharedPref.getString("pref_rpcServer", "");
+
+        if (rpcServerName != null) {
+            setCurrentNetwork(rpcServerName);
+        } else {
+            setCurrentNetwork(mNetworks.get(0).getName());
+        }
 
         mAccounts = new ArrayList<>();
         mTransactions = new HashMap<>();
@@ -127,7 +137,14 @@ public class Controller {
         }
 
         mHandler = new Handler();
+    }
+
+    public void onResume() {
         startRepeatingTask();
+    }
+
+    public void onStop() {
+        stopRepeatingTask();
     }
 
     Runnable mStatusChecker = new Runnable() {
@@ -289,11 +306,15 @@ public class Controller {
     }
 
     public void setCurrentNetwork(String name) {
+        VMNetwork previous = mCurrentNetwork;
         for (VMNetwork n : mNetworks) {
             if (n.getName().equals(name)) {
                 mCurrentNetwork = n;
                 break;
             }
+        }
+        if (previous != mCurrentNetwork) {
+            mMainActivity.fetchModelsAndReinit();
         }
     }
 
@@ -583,6 +604,9 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... args) {
+            if (mAccounts == null) {
+                return null;
+            }
             for (VMAccount a : mAccounts) {
                 fetchTransactionsForAddress(a);
             }

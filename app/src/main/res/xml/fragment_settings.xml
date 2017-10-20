@@ -18,13 +18,15 @@
             android:title="@string/title_opensource"
             android:key="pref_opensource_links" >
 
-            <Preference
-                android:key="pref_source_code"
-                android:title="@string/title_source_code" />
+            <Preference android:title="@string/title_source_code">
+                <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/TrustWallet/trust-wallet-android" />
+            </Preference>
 
-            <Preference
-                android:key="pref_report_bug"
-                android:title="@string/title_report_bug" />
+            <Preference android:title="@string/title_report_bug">
+                <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/TrustWallet/trust-wallet-android/issues/new" />
+            </Preference>
 
         </PreferenceCategory>
 
@@ -32,13 +34,17 @@
             android:title="@string/title_community"
             android:key="pref_community_links" >
 
-            <Preference
-                android:key="pref_twitter"
-                android:title="@string/twitter" />
+            <Preference android:title="@string/twitter">
+                <intent android:action="android.intent.action.VIEW"
+                    android:data="https://twitter.com/trustwalletapp" />
 
-            <Preference
-                android:key="pref_telegram"
-                android:title="@string/telegram" />
+            </Preference>
+
+
+            <Preference android:title="@string/telegram" >
+                <intent android:action="android.intent.action.VIEW"
+                    android:data="https://t.me/joinchat/AAMtrQ_wtd918mm_mU0BRQ" />
+            </Preference>
 
         </PreferenceCategory>
 

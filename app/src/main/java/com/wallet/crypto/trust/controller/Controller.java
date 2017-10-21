@@ -194,7 +194,7 @@ public class Controller {
             List<Account> ksAccounts = mEtherStore.getAccounts();
 
             for (Account a: ksAccounts) {
-                mAccounts.add(new VMAccount(a.getAddress().getHex(), "0"));
+                mAccounts.add(new VMAccount(a.getAddress().getHex().toLowerCase(), "0"));
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());

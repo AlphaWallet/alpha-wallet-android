@@ -40,7 +40,7 @@ public class ExportAccountActivity extends AppCompatActivity {
 
         mAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
 
-        getSupportActionBar().setTitle(getString(R.string.action_export) + mAddress);
+        getSupportActionBar().setTitle(getString(R.string.action_export) + ": " + mAddress.substring(5));
 
         mController = Controller.get();
 

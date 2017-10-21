@@ -252,7 +252,7 @@ public class TransactionListActivity extends AppCompatActivity {
                 holder.mSentOrReceived.setText(getString(R.string.received));
                 holder.mAddressView.setText(holder.mItem.getFrom());
                 sign = "+";
-                holder.mValueView.setTextColor(Color.GREEN);
+                holder.mValueView.setTextColor(getResources().getColor(R.color.green));
             }
 
             String eth = Controller.WeiToEth(wei);

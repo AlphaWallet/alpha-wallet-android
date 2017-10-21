@@ -58,7 +58,9 @@
         <activity
             android:name=".views.barcode.BarcodeCaptureActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:name=".views.ReceiveActivity" />
+        <activity
+            android:name=".views.RequestActivity"
+            android:label="@string/title_request"/>
         <activity
             android:name=".views.SplashActivity"
             android:theme="@style/SplashTheme">

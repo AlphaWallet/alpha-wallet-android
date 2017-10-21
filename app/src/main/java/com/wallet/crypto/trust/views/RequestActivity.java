@@ -3,10 +3,12 @@ package com.wallet.crypto.trust.views;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -22,9 +24,10 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
-public class ReceiveActivity extends AppCompatActivity {
+public class RequestActivity extends AppCompatActivity {
 
     final static String ETHEREUM_PREFIX = "ethereum:";
+    private static final String TAG = "REQUEST_ACTIVITY";
 
     ImageView imageView;
     Button generateButton;
@@ -32,12 +35,12 @@ public class ReceiveActivity extends AppCompatActivity {
     TextView addressTextView;
     String AddressTextValue;
     Thread thread ;
-    public final static int QRcodeWidth = 200 ;
+    public final static int QRcodeWidth = 500 ;
     Bitmap bitmap ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_receive);
+        setContentView(R.layout.activity_request);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -46,7 +49,6 @@ public class ReceiveActivity extends AppCompatActivity {
 
         imageView = (ImageView)findViewById(R.id.imageView);
         addressTextView = (TextView)findViewById(R.id.addressTextView);
-        generateButton = (Button)findViewById(R.id.generate_button);
         copyButton = findViewById(R.id.copy_button);
 
         VMAccount account = Controller.get().getCurrentAccount();
@@ -60,29 +62,12 @@ public class ReceiveActivity extends AppCompatActivity {
                 ClipData clip = ClipData.newPlainText(getString(R.string.address_keyword), addressTextView.getText().toString());
                 clipboard.setPrimaryClip(clip);
 
-                Toast.makeText(ReceiveActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RequestActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
             }
         });
 
-        generateButton.setOnClickListener(new View.OnClickListener() {
-                              @Override
-                              public void onClick(View view) {
-
-                AddressTextValue = addressTextView.getText().toString();
-
-                try {
-                    bitmap = TextToImageEncode(ETHEREUM_PREFIX + AddressTextValue);
-
-                    imageView.setImageBitmap(bitmap);
-
-                } catch (WriterException e) {
-                    e.printStackTrace();
-                }
-
-        }
-    });
+        new GenerateQRCodeTask(ETHEREUM_PREFIX + AddressTextValue).execute();
     }
-
 
     Bitmap TextToImageEncode(String Value) throws WriterException {
         BitMatrix bitMatrix;
@@ -126,5 +111,31 @@ public class ReceiveActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class GenerateQRCodeTask extends AsyncTask<Void,Void,Void> {
+
+        String address;
+
+        public GenerateQRCodeTask(String address) {
+            this.address = address;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                final Bitmap qrCode = TextToImageEncode(address);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView.setImageBitmap(qrCode);
+                    }
+                });
+            } catch (WriterException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            return null;
+        }
     }
 }

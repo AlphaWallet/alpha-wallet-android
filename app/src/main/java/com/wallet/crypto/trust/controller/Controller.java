@@ -24,7 +24,7 @@ import com.wallet.crypto.trust.views.AccountListActivity;
 import com.wallet.crypto.trust.views.CreateAccountActivity;
 import com.wallet.crypto.trust.views.ExportAccountActivity;
 import com.wallet.crypto.trust.views.ImportAccountActivity;
-import com.wallet.crypto.trust.views.ReceiveActivity;
+import com.wallet.crypto.trust.views.RequestActivity;
 import com.wallet.crypto.trust.views.SettingsActivity;
 import com.wallet.crypto.trust.views.TransactionListActivity;
 import com.wallet.crypto.trust.views.SendActivity;
@@ -266,7 +266,7 @@ public class Controller {
     }
 
     public void navigateToReceive(Context context) {
-        Intent intent = new Intent(context, ReceiveActivity.class);
+        Intent intent = new Intent(context, RequestActivity.class);
         context.startActivity(intent);
     }
 

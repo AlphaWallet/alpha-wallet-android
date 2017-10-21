@@ -59,6 +59,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Controller {
+    private static final String PREF_CURRENT_ADDRESS = "pref_current_address";
     private static Controller mInstance;
     private static boolean mInited = false;
 
@@ -68,6 +69,7 @@ public class Controller {
     private TransactionListActivity mMainActivity;
     private EtherStore mEtherStore;
     private Map<String, EtherscanService> mEtherscanServices;
+    private SharedPreferences mPreferences;
 
     // State
     private String mKeystoreBaseDir;
@@ -108,6 +110,8 @@ public class Controller {
 
         mKeystoreBaseDir = mMainActivity.getFilesDir() + "/keystore";
 
+        mPreferences = mMainActivity.getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+
         mEtherStore = new EtherStore(mKeystoreBaseDir);
 
         // Create networks list
@@ -122,9 +126,11 @@ public class Controller {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mMainActivity);
         String rpcServerName = sharedPref.getString("pref_rpcServer", "");
 
-        if (rpcServerName != null) {
+        if (rpcServerName != null && existsNetwork(rpcServerName)) {
+            Log.d(TAG, "Loaded rpcServerName from preferences " + rpcServerName);
             setCurrentNetwork(rpcServerName);
         } else {
+            Log.d(TAG, "Setting default rpc server " + mNetworks.get(0).getName());
             setCurrentNetwork(mNetworks.get(0).getName());
         }
 
@@ -135,7 +141,10 @@ public class Controller {
         loadAccounts();
 
         if (mAccounts.size() > 0) {
-            setCurrentAddress(mAccounts.get(0).getAddress());
+            mCurrentAddress = mPreferences.getString(PREF_CURRENT_ADDRESS, null);
+            if (mCurrentAddress == null) {
+                setCurrentAddress(mAccounts.get(0).getAddress());
+            }
         }
 
         for (VMAccount a : mAccounts) {
@@ -305,10 +314,25 @@ public class Controller {
 
     public void setCurrentAddress(String currentAddress) {
         this.mCurrentAddress = currentAddress;
+
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(PREF_CURRENT_ADDRESS, currentAddress);
+        editor.commit();
     }
 
     public VMAccount getCurrentAccount() {
         return this.getAccount(mCurrentAddress);
+    }
+
+    public boolean existsNetwork(String name) {
+        boolean exists = false;
+        for (VMNetwork n : mNetworks) {
+            if (n.getName().equals(name)) {
+                exists = true;
+                break;
+            }
+        }
+        return exists;
     }
 
     public void setCurrentNetwork(String name) {
@@ -319,6 +343,7 @@ public class Controller {
                 break;
             }
         }
+        assert(mCurrentNetwork != null);
         if (previous != mCurrentNetwork) {
             mMainActivity.fetchModelsAndReinit();
         }

@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -124,15 +125,8 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
             holder.mAddressView.setText(mValues.get(position).getAddress());
-            holder.mBalanceView.setText(Controller.WeiToEth(holder.mItem.getBalance().toString(), 4));
 
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mController.setCurrentAddress(holder.mItem.getAddress());
-                    AccountListActivity.this.finish();
-                }
-            });
+            holder.checkItem();
         }
 
         @Override
@@ -143,7 +137,7 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mAddressView;
-            public final TextView mBalanceView;
+            public final RadioButton mRadioButton;
             public final ImageButton mDeleteButton;
             public VMAccount mItem;
 
@@ -151,13 +145,16 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 super(view);
                 mView = view;
                 mAddressView = (TextView) view.findViewById(R.id.address);
-                mBalanceView = (TextView) view.findViewById(R.id.value);
+
+                mRadioButton = view.findViewById(R.id.radio);
                 mDeleteButton = (ImageButton) view.findViewById(R.id.delete_button);
 
-                mAddressView.setOnClickListener(new View.OnClickListener() {
+                mRadioButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        Log.d(TAG, "Selected account " + mItem.getAddress());
                         mController.setCurrentAddress(mItem.getAddress());
+                        notifyDataSetChanged();
                         AccountListActivity.this.finish();
                     }
                 });
@@ -173,9 +170,18 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                 });
             }
 
+            public void checkItem() {
+                boolean selected = false;
+                VMAccount currentAccount = mController.getCurrentAccount();
+                if (currentAccount != null) {
+                    selected = currentAccount.getAddress().equals(mItem.getAddress());
+                }
+                mRadioButton.setChecked(selected);
+            }
+
             @Override
             public String toString() {
-                return super.toString() + " '" + mBalanceView.getText() + "'";
+                return super.toString() + " '" + mAddressView.getText() + "'";
             }
         }
     }

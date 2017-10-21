@@ -3,30 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp"
+    android:padding="8dp"
     android:descendantFocusability="blocksDescendants">
 
-    <TextView
-        android:id="@+id/value"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:text="2.036"
-        android:textIsSelectable="true"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:layout_below="@+id/address"
-        android:layout_alignParentLeft="true"
-        android:maxLines="1"/>
+    <RadioButton
+        android:id="@+id/radio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"/>
 
     <TextView
         android:id="@+id/address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="0XDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
+        android:text="0XDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
         android:textAppearance="?attr/textAppearanceListItem"
         android:textIsSelectable="true"
         android:textSize="12dp"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/radio"
         android:layout_toLeftOf="@+id/delete_button"
         android:maxLines="1"
         android:singleLine="true"
@@ -37,6 +33,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_delete_forever_black_24dp"
+        android:background="@null"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true" />
 
 </RelativeLayout>

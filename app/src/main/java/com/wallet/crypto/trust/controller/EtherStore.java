@@ -39,10 +39,13 @@ public class EtherStore {
         return ks.getAccounts().size() > 0;
     }
 
+    public boolean hasAddress(String address) {
+        return ks.hasAddress(new Address(address));
+    }
+
     public Account importKeyStore(String storeJson, String password) throws Exception {
         byte[] data = storeJson.getBytes(Charset.forName("UTF-8"));
         Account newAccount = ks.importKey(data, password, password);
-        //TODO: store account password in keychain
         return newAccount;
     }
 
@@ -81,7 +84,7 @@ public class EtherStore {
     public Account getAccount(String address) throws Exception {
         Accounts accounts = ks.getAccounts();
         for (long i = 0; i < accounts.size(); i++) {
-            if (accounts.get(i).getAddress().getHex().equals(address)) {
+            if (accounts.get(i).getAddress().getHex().toLowerCase().equals(address.toLowerCase())) {
                 return accounts.get(i);
             }
         }

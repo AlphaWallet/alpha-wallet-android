@@ -79,5 +79,8 @@
     <string name="title_rate">Rate us on Play Store</string>
     <string name="title_support">Support</string>
     <string name="title_donate">Donate</string>
+    <string name="account_already_imported">Account with this address already exists</string>
+    <string name="message_delete_account">Permanently deleting account. Make sure that it has been exported and stored elsewhere.</string>
+    <string name="error_import">Error importing keystore</string>
 
 </resources>

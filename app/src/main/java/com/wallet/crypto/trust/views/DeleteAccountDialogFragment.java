@@ -57,7 +57,7 @@ public class DeleteAccountDialogFragment extends DialogFragment {
         final View view = inflater.inflate(R.layout.account_delete_dialog, null);
 
         TextView addressText = view.findViewById(R.id.address);
-        addressText.setText("Delete account: " + mAddress);
+        addressText.setText(getString(R.string.message_delete_account));
         builder.setView(view)
                 // Add action buttons
                 .setPositiveButton(R.string.account_delete, new DialogInterface.OnClickListener() {

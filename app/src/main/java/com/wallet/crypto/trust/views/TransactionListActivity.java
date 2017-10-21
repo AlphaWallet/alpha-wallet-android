@@ -71,10 +71,9 @@ public class TransactionListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_list);
-
-        showIntro();
 
         mController = Controller.get();
         mController.init(this);
@@ -103,6 +102,7 @@ public class TransactionListActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "onStop");
         super.onStop();
         mController.onStop();
     }
@@ -117,6 +117,7 @@ public class TransactionListActivity extends AppCompatActivity {
     }
 
     protected void init() {
+        Log.d(TAG, "init");
         VMAccount account = mController.getCurrentAccount();
         if (account != null) {
             mAddress = account.getAddress();
@@ -132,46 +133,6 @@ public class TransactionListActivity extends AppCompatActivity {
         toolbar.inflateMenu(R.menu.transaction_list_menu);
 
         refreshTransactions(mAddress);
-    }
-
-    private void showIntro() {
-        //  Declare a new thread to do a preference check
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //  Initialize SharedPreferences
-                SharedPreferences getPrefs = PreferenceManager
-                        .getDefaultSharedPreferences(getBaseContext());
-
-                //  Create a new boolean and preference and set it to true
-                boolean isFirstStart = getPrefs.getBoolean("firstStart", true);
-
-                //  If the activity has never started before...
-                if (isFirstStart) {
-
-                    //  Launch app intro
-                    final Intent i = new Intent(TransactionListActivity.this, IntroActivity.class);
-
-                    runOnUiThread(new Runnable() {
-                        @Override public void run() {
-                            startActivity(i);
-                        }
-                    });
-
-                    //  Make a new preferences editor
-                    SharedPreferences.Editor e = getPrefs.edit();
-
-                    //  Edit preference to make it false because we don't want this to run again
-                    e.putBoolean("firstStart", false);
-
-                    //  Apply changes
-                    e.apply();
-                }
-            }
-        });
-
-        // Start the thread
-        t.start();
     }
 
     private void asyncInit() {
@@ -199,14 +160,27 @@ public class TransactionListActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
+
         super.onResume();
 
         init();
+        Log.d(TAG, "mController.getAccounts().size() " + mController.getAccounts().size());
 
-        if (mController.getCurrentAccount() == null) {
-            mController.navigateToCreateAccount(this);
+        if (mController.getAccounts().size() == 0) {
+            Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);
+            this.startActivityForResult(intent, Controller.IMPORT_ACCOUNT_REQUEST);
+            finish();
         } else {
             mController.onResume();
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Controller.IMPORT_ACCOUNT_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                this.finish();
+            }
         }
     }
 

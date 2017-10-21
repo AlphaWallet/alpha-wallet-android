@@ -78,9 +78,10 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
     public void onDialogPositiveClick(String address, String password) {
         try {
             mController.deleteAccount(address, password);
-            if (mController.getCurrentAccount() == null) {
+            if (mController.getAccounts().size() == 0) {
                 finish(); // Don't show account list if there are no accounts,
                           // go to main view which will ask to create a new account
+                return;
             }
             setupRecyclerView((RecyclerView) mRecyclerView);
         } catch (Exception e) {

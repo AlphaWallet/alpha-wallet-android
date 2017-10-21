@@ -54,8 +54,8 @@ public class ImportAccountActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     if (result.getStatus() == TaskStatus.SUCCESS) {
+                                        setResult(RESULT_OK);
                                         ImportAccountActivity.this.finish();
-                                        mController.navigateToAccountList();
                                     } else {
                                         Toast.makeText(ImportAccountActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
                                     }

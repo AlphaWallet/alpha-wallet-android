@@ -63,6 +63,8 @@ public class Controller {
     private static Controller mInstance;
     private static boolean mInited = false;
 
+    public static final int IMPORT_ACCOUNT_REQUEST = 1;
+
     private static String TAG = "CONTROLLER";
 
     // Services
@@ -140,6 +142,7 @@ public class Controller {
 
         loadAccounts();
 
+        mCurrentAddress = null;
         if (mAccounts.size() > 0) {
             mCurrentAddress = mPreferences.getString(PREF_CURRENT_ADDRESS, null);
             if (mCurrentAddress == null) {
@@ -264,9 +267,9 @@ public class Controller {
         context.startActivity(intent);
     }
 
-    public void navigateToImportAccount(Context context) {
-        Intent intent = new Intent(context, ImportAccountActivity.class);
-        context.startActivity(intent);
+    public void navigateToImportAccount(CreateAccountActivity parentActivity) {
+        Intent intent = new Intent(parentActivity, ImportAccountActivity.class);
+        parentActivity.startActivityForResult(intent, IMPORT_ACCOUNT_REQUEST);
     }
 
     public void clickCreateAccount(Activity activity, String name, String password) throws Exception {
@@ -279,8 +282,10 @@ public class Controller {
 
         if (firstAccount) {
             setCurrentAddress(account.getAddress());
+            Intent intent = new Intent(activity.getApplicationContext(), TransactionListActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity.getApplicationContext().startActivity(intent);
         }
-
         activity.finish();
     }
 

@@ -13,10 +13,6 @@ import android.widget.TextView;
 
 import com.wallet.crypto.trust.R;
 
-/**
- * Created by marat on 10/4/17.
- */
-
 public class DeleteAccountDialogFragment extends DialogFragment {
 
     private String mAddress;

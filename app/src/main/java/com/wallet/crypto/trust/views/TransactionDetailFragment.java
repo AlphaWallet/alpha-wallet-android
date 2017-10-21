@@ -15,12 +15,6 @@ import com.wallet.crypto.trust.R;
 import com.wallet.crypto.trust.controller.Controller;
 import com.wallet.crypto.trust.model.ESTransaction;
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a {@link TransactionListActivity}
- * in two-pane mode (on tablets) or a {@link TransactionDetailActivity}
- * on handsets.
- */
 public class TransactionDetailFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment

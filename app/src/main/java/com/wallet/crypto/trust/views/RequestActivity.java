@@ -30,19 +30,16 @@ public class RequestActivity extends AppCompatActivity {
     private static final String TAG = "REQUEST_ACTIVITY";
 
     ImageView imageView;
-    Button generateButton;
     Button copyButton;
     TextView addressTextView;
-    String AddressTextValue;
-    Thread thread ;
     public final static int QRcodeWidth = 500 ;
-    Bitmap bitmap ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request);
 
         ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(getString(R.string.title_request));
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -66,7 +63,7 @@ public class RequestActivity extends AppCompatActivity {
             }
         });
 
-        new GenerateQRCodeTask(ETHEREUM_PREFIX + AddressTextValue).execute();
+        new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.get().getCurrentAccount().getAddress() + "?value=0").execute();
     }
 
     Bitmap TextToImageEncode(String Value) throws WriterException {
@@ -114,17 +111,16 @@ public class RequestActivity extends AppCompatActivity {
     }
 
     private class GenerateQRCodeTask extends AsyncTask<Void,Void,Void> {
+        String value;
 
-        String address;
-
-        public GenerateQRCodeTask(String address) {
-            this.address = address;
+        public GenerateQRCodeTask(String value) {
+            this.value = value;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                final Bitmap qrCode = TextToImageEncode(address);
+                final Bitmap qrCode = TextToImageEncode(value);
 
                 runOnUiThread(new Runnable() {
                     @Override

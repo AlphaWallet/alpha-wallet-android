@@ -8,10 +8,19 @@
     >
 
     <TextView
+        android:id="@+id/addressLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/message_this_is_your_address"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        />
+    <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/addressTextView"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/addressLabel"
         android:layout_centerHorizontal="true"
         android:gravity="center"
         />
@@ -26,12 +35,11 @@
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="500dp"
         android:id="@+id/imageView"
         android:src="@drawable/ic_autorenew_black_24dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_below="@+id/copy_button"
         />
 
 </RelativeLayout>

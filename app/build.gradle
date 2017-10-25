@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
     defaultConfig {
-        applicationId "com.wallet.crypto.trust"
+        applicationId "com.wallet.crypto.trustapp"
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1

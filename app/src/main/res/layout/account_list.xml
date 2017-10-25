@@ -9,5 +9,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="com.wallet.crypto.trust.views.AccountListActivity"
+    tools:context="com.wallet.crypto.trustapp.views.AccountListActivity"
     tools:listitem="@layout/account_list_content" />

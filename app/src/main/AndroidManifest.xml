@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.wallet.crypto.trust">
+    package="com.wallet.crypto.trustapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -20,49 +20,49 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".views.TransactionListActivity"
+            android:name="com.wallet.crypto.trustapp.views.TransactionListActivity"
             android:label="@string/title_trust"
             android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="orientation|screenSize"></activity>
         <activity
-            android:name=".views.TransactionDetailActivity"
+            android:name="com.wallet.crypto.trustapp.views.TransactionDetailActivity"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".views.TransactionListActivity"
+            android:parentActivityName="com.wallet.crypto.trustapp.views.TransactionListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.wallet.crypto.trust.views.TransactionListActivity" />
+                android:value="com.wallet.crypto.trustapp.views.TransactionListActivity" />
         </activity>
         <activity
-            android:name=".views.CreateAccountActivity"
+            android:name="com.wallet.crypto.trustapp.views.CreateAccountActivity"
             android:label="@string/title_activity_create_account" />
         <activity
-            android:name=".views.SendActivity"
+            android:name="com.wallet.crypto.trustapp.views.SendActivity"
             android:label="@string/title_send" />
         <activity
-            android:name=".views.AccountListActivity"
+            android:name="com.wallet.crypto.trustapp.views.AccountListActivity"
             android:label="@string/title_account_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.ImportAccountActivity"
+            android:name="com.wallet.crypto.trustapp.views.ImportAccountActivity"
             android:label="@string/title_activity_import_account"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.ExportAccountActivity"
+            android:name="com.wallet.crypto.trustapp.views.ExportAccountActivity"
             android:label="@string/title_activity_export_account"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.IntroActivity"
+            android:name="com.wallet.crypto.trustapp.views.IntroActivity"
             android:label="@string/app_intro"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.barcode.BarcodeCaptureActivity"
+            android:name="com.wallet.crypto.trustapp.views.barcode.BarcodeCaptureActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
-            android:name=".views.RequestActivity"
+            android:name="com.wallet.crypto.trustapp.views.RequestActivity"
             android:label="@string/title_request"/>
         <activity
-            android:name=".views.SplashActivity"
+            android:name="com.wallet.crypto.trustapp.views.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -71,11 +71,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".views.SettingsActivity"
+            android:name="com.wallet.crypto.trustapp.views.SettingsActivity"
             android:label="@string/title_activity_settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.wallet.crypto.trust.views.TransactionListActivity" />
+                android:value="com.wallet.crypto.trustapp.views.TransactionListActivity" />
         </activity>
     </application>
 

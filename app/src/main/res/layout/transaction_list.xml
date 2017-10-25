@@ -16,7 +16,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="com.wallet.crypto.trust.views.TransactionListActivity"
+        tools:context="com.wallet.crypto.trustapp.views.TransactionListActivity"
         tools:listitem="@layout/transaction_list_content" />
 
 </android.support.v4.widget.SwipeRefreshLayout>

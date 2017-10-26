@@ -83,5 +83,6 @@
     <string name="message_delete_account">Permanently deleting account. Make sure that it has been exported and stored elsewhere.</string>
     <string name="error_import">Error importing keystore</string>
     <string name="message_this_is_your_address">Ethereum wallet address</string>
+    <string name="min_pwd_length">Password must be at least %d chars long</string>
 
 </resources>

@@ -75,8 +75,13 @@ public class TransactionDetailFragment extends Fragment {
                 color = Color.GREEN;
             }
 
-            String eth = Controller.WeiToEth(wei, 5);
-            Log.d(TAG, eth);
+            String eth = "0";
+            try {
+                eth = Controller.WeiToEth(wei, 5);
+                Log.d(TAG, eth);
+            } catch (Exception e) {
+                Log.e(TAG, "Error WeiToEth");
+            }
 
             if (!eth.equals("0")) {
                 eth = sign + eth;

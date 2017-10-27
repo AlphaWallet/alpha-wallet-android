@@ -312,7 +312,12 @@ public class Controller {
 
     public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
-        new SendTransactionTask(from, to, EthToWei(ethAmount), password, listener).execute();
+        try {
+            String wei = EthToWei(ethAmount);
+            new SendTransactionTask(from, to, wei, password, listener).execute();
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending transaction: ", e);
+        }
     }
 
     public VMAccount createAccount(String password) {
@@ -675,20 +680,20 @@ public class Controller {
         return eth.toString();
     }
 
-    public static String WeiToEth(String wei, int sigFig) {
+    public static String WeiToEth(String wei, int sigFig) throws Exception {
         BigDecimal eth = new BigDecimal(wei).divide(new BigDecimal(weiInEth));
         int scale = sigFig - eth.precision() + eth.scale();
         BigDecimal eth_scaled = eth.setScale(scale, RoundingMode.HALF_UP);
         return eth_scaled.toString();
     }
 
-    public static String EthToWei(String eth) {
+    public static String EthToWei(String eth) throws Exception {
         BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(weiInEth));
         Log.d(TAG, "Eth to wei: " + wei.toBigInteger().toString());
         return wei.toBigInteger().toString();
     }
 
-    public static String EthToGwei(String eth) {
+    public static String EthToGwei(String eth) throws Exception {
         BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(gweiInEth));
         Log.d(TAG, "Eth to Gwei: " + wei.toBigInteger().toString());
         return wei.toBigInteger().toString();

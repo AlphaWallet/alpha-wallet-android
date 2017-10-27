@@ -25,6 +25,8 @@ import com.wallet.crypto.trustapp.views.barcode.BarcodeCaptureActivity;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
+import org.ethereum.geth.Address;
+
 import java.util.List;
 
 public class SendActivity extends AppCompatActivity {
@@ -67,6 +69,26 @@ public class SendActivity extends AppCompatActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                // Validate input fields
+                boolean inputValid = true;
+
+                final String to = mTo.getText().toString();
+                if (!isAddressValid(to)) {
+                    mTo.setError("Invalid address");
+                    inputValid = false;
+                }
+
+                final String amount = mAmount.getText().toString();
+                if (!isInt(amount)) {
+                    mAmount.setError("Must be an integer");
+                    inputValid = false;
+                }
+
+                if (!inputValid) {
+                    return;
+                }
+
                 mController.clickSend(
                     SendActivity.this,
                     mController.getCurrentAccount().getAddress(),
@@ -101,6 +123,22 @@ public class SendActivity extends AppCompatActivity {
         });
     }
 
+    boolean isAddressValid(String address) {
+        try {
+            new Address(address);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    boolean isInt(String value) {
+        if (value.matches("\\d+")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

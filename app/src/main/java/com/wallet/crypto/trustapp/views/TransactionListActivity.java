@@ -118,7 +118,12 @@ public class TransactionListActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(mAddress.substring(0, 5) + ": " + Controller.WeiToEth(account.getBalance().toString(), 5) + " ETH");
+        try {
+            String balance = Controller.WeiToEth(account.getBalance().toString(), 5);
+            getSupportActionBar().setTitle(mAddress.substring(0, 5) + "... : " + balance + " ETH");
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating balance: ", e);
+        }
         toolbar.inflateMenu(R.menu.transaction_list_menu);
 
         refreshTransactions(mAddress);

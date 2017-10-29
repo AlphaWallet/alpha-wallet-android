@@ -2,7 +2,7 @@
     <string name="app_name">Trust</string>
     <string name="balance">Balance</string>
     <string name="title_send">Send</string>
-    <string name="title_request">Request</string>
+    <string name="title_request">My Address</string>
     <string name="title_import">Import</string>
     <string name="title_create">Create</string>
     <string name="title_account">Accounts</string>
@@ -61,7 +61,7 @@
     <string name="no_barcode_captured">no barcode captured</string>
     <string name="scan_barcode_button">Scan</string>
     <string name="barcode_error_format">Invalid barcode format: %s</string>
-    <string name="action_request">Request</string>
+    <string name="action_request">My Address</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>

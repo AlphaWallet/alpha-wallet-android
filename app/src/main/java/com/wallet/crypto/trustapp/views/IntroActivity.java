@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 
 import com.wallet.crypto.trustapp.R;
 import com.github.paolorotolo.appintro.AppIntro;
@@ -16,13 +17,14 @@ public class IntroActivity extends AppIntro {
 
         // Instead of fragments, you can also use our default slide
         // Just set a title, description, background and image. AppIntro will do the rest.
-        addSlide(AppIntroFragment.newInstance("Private & Secure", null, "Private keys never leave your device.", null, R.mipmap.onboarding_lock, Color.WHITE, Color.BLACK, Color.BLACK));
-        addSlide(AppIntroFragment.newInstance("Fully Transparent", null, "Code is open sourced (GPL-3.0 license) and fully audited.", null, R.mipmap.onboarding_open_source, Color.WHITE, Color.BLACK, Color.BLACK));
-        addSlide(AppIntroFragment.newInstance("Ultra reliable", null, "The fastest Ethereum wallet experience on mobile.", null, R.mipmap.onboarding_rocket, Color.WHITE, Color.BLACK, Color.BLACK));
+        int fontColor = ContextCompat.getColor(this, R.color.colorPrimaryDark);
+        addSlide(AppIntroFragment.newInstance("Private & Secure", null, "Private keys never leave your device.", null, R.mipmap.onboarding_lock, Color.WHITE, fontColor, fontColor));
+        addSlide(AppIntroFragment.newInstance("Fully Transparent", null, "Code is open sourced (GPL-3.0 license) and fully audited.", null, R.mipmap.onboarding_open_source, Color.WHITE, fontColor, fontColor));
+        addSlide(AppIntroFragment.newInstance("Ultra reliable", null, "The fastest Ethereum wallet experience on mobile.", null, R.mipmap.onboarding_rocket, Color.WHITE, fontColor, fontColor));
 
         // OPTIONAL METHODS
         // Override bar/separator color.
-        setBarColor(Color.parseColor("#3F51B5"));
+        setBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         //setSeparatorColor(Color.parseColor("#2196F3"));
 
         // Hide Skip/Done generateButton.

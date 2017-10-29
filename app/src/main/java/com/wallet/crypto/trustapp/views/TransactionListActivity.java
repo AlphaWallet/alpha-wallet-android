@@ -239,7 +239,7 @@ public class TransactionListActivity extends AppCompatActivity {
 
             if (isSent) {
                 holder.mSentOrReceived.setText(getString(R.string.sent));
-                holder.mValueView.setTextColor(Color.RED);
+                holder.mValueView.setTextColor(getResources().getColor(R.color.red));
                 holder.mAddressView.setText(holder.mItem.getTo());
                 sign = "-";
             } else {

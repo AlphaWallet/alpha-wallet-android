@@ -111,9 +111,6 @@ public class TransactionListActivity extends AppCompatActivity {
         if (account != null) {
             mAddress = account.getAddress();
             Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
-        } else {
-            mAddress ="0xDEADBEEF";
-            account = new VMAccount(mAddress, "0");
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

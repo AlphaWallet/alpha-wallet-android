@@ -147,9 +147,11 @@ public class Controller {
 
         mCurrentAddress = null;
         if (mAccounts.size() > 0) {
-            mCurrentAddress = mPreferences.getString(PREF_CURRENT_ADDRESS, null);
-            if (mCurrentAddress == null) {
+            String cachedAddress = mPreferences.getString(PREF_CURRENT_ADDRESS, null);
+            if (getAccount(cachedAddress) == null) {
                 setCurrentAddress(mAccounts.get(0).getAddress());
+            } else {
+                setCurrentAddress(cachedAddress);
             }
         }
 

@@ -40,7 +40,7 @@ public class ExportAccountActivity extends AppCompatActivity {
 
         mAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
 
-        getSupportActionBar().setTitle(getString(R.string.action_export) + ": " + mAddress.substring(5));
+        getSupportActionBar().setTitle(getString(R.string.action_export) + ": " + mAddress.substring(0, 5));
 
         mController = Controller.get();
 
@@ -72,12 +72,13 @@ public class ExportAccountActivity extends AppCompatActivity {
                 clipboard.setPrimaryClip(clip);
 
                 Toast.makeText(ExportAccountActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
         builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                finish();
+
             }
         });
 

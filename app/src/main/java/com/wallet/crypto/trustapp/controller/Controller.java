@@ -28,6 +28,7 @@ import com.wallet.crypto.trustapp.views.RequestActivity;
 import com.wallet.crypto.trustapp.views.SettingsActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
+import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
 import org.web3j.protocol.Web3j;
@@ -63,6 +64,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Controller {
     private static final String PREF_CURRENT_ADDRESS = "pref_current_address";
+    public static final String KEY_ADDRESS = "key_address";
+    public static final String KEY_PASSWORD = "key_password";
     private static Controller mInstance;
     private static boolean mInited = false;
 
@@ -285,12 +288,18 @@ public class Controller {
         mAccounts.add(account);
         mTransactions.put(account.getAddress(), new ArrayList<ESTransaction>());
 
-        if (firstAccount) {
+        Intent intent = new Intent(activity.getApplicationContext(), WarningBackupActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(KEY_ADDRESS, account.getAddress());
+        intent.putExtra(KEY_PASSWORD, password);
+        activity.getApplicationContext().startActivity(intent);
+
+        /*if (firstAccount) {
             setCurrentAddress(account.getAddress());
             Intent intent = new Intent(activity.getApplicationContext(), TransactionListActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.getApplicationContext().startActivity(intent);
-        }
+        }*/
         activity.finish();
     }
 

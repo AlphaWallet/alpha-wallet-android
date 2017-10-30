@@ -8,4 +8,5 @@
     <color name="colorWhite">#FFFFFFFF</color>
     <color name="QRCodeBlackColor">#FF000000</color>
     <color name="QRCodeWhiteColor">#FFFFFFFF</color>
+    <color name="black">#313849</color>
 </resources>

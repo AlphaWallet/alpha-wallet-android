@@ -2,8 +2,10 @@ package com.wallet.crypto.trustapp.views;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -41,8 +43,9 @@ public class WarningBackupActivity extends AppCompatActivity {
                 if (keystoreJson.isEmpty()) {
                     Toast.makeText(WarningBackupActivity.this, "Unable to export", Toast.LENGTH_SHORT).show();
                 } else {
-                    showKeystore(keystoreJson);
+                    controller.shareKeystore(WarningBackupActivity.this, keystoreJson);
                 }
+                finish();
             }
         });
 
@@ -62,31 +65,5 @@ public class WarningBackupActivity extends AppCompatActivity {
                         .setNegativeButton(android.R.string.no, null).show();
             }
         });
-    }
-
-    private void showKeystore(final String keystoreJson) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(keystoreJson)
-                .setTitle(getString(R.string.message_save_this));
-
-        // Add the buttons
-        builder.setPositiveButton(R.string.copy, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getString(R.string.keystore_keyword), keystoreJson);
-                clipboard.setPrimaryClip(clip);
-
-                Toast.makeText(WarningBackupActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
-
-        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 }

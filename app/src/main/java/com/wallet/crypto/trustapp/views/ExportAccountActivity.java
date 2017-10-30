@@ -53,37 +53,11 @@ public class ExportAccountActivity extends AppCompatActivity {
                 if (keystoreJson.isEmpty()) {
                     Toast.makeText(ExportAccountActivity.this, "Unable to export", Toast.LENGTH_SHORT).show();
                 } else {
-                    showKeystore(keystoreJson);
+                    mController.shareKeystore(ExportAccountActivity.this, keystoreJson);
                 }
-            }
-        });
-    }
-
-    private void showKeystore(final String keystoreJson) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(keystoreJson)
-                .setTitle(getString(R.string.message_save_this));
-
-        // Add the buttons
-        builder.setPositiveButton(R.string.copy, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getString(R.string.keystore_keyword), keystoreJson);
-                clipboard.setPrimaryClip(clip);
-
-                Toast.makeText(ExportAccountActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
-
-        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     @Override

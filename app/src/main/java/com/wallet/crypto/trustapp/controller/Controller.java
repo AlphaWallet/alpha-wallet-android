@@ -448,6 +448,14 @@ public class Controller {
         return mNetworks;
     }
 
+    public void shareKeystore(Context context, String keystoreJson) {
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, keystoreJson);
+        context.startActivity(Intent.createChooser(sharingIntent, "Share via"));
+    }
+
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {

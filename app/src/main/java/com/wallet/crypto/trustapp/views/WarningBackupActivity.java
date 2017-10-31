@@ -40,12 +40,13 @@ public class WarningBackupActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String keystoreJson = controller.clickExportAccount(WarningBackupActivity.this, mAddress, mPassword);
+
                 if (keystoreJson.isEmpty()) {
                     Toast.makeText(WarningBackupActivity.this, "Unable to export", Toast.LENGTH_SHORT).show();
+                    finish();
                 } else {
                     controller.shareKeystore(WarningBackupActivity.this, keystoreJson);
                 }
-                finish();
             }
         });
 
@@ -60,10 +61,30 @@ public class WarningBackupActivity extends AppCompatActivity {
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface dialog, int whichButton) {
+                                if (controller.getAccounts().size() == 1) {
+                                    Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    getApplicationContext().startActivity(intent);
+                                }
+
                                 WarningBackupActivity.this.finish();
                             }})
                         .setNegativeButton(android.R.string.no, null).show();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Controller.SHARE_RESULT) {
+            if (Controller.get().getAccounts().size() == 1) {
+                Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+
+            }
+
+            finish();
+        }
     }
 }

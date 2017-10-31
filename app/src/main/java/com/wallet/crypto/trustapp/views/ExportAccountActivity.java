@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -44,8 +45,8 @@ public class ExportAccountActivity extends AppCompatActivity {
 
         mController = Controller.get();
 
-        mPasswordText = (EditText) findViewById(R.id.export_password);
-        mExportButton = (Button) findViewById(R.id.export_account_button);
+        mPasswordText = findViewById(R.id.export_password);
+        mExportButton = findViewById(R.id.export_account_button);
         mExportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,9 +56,22 @@ public class ExportAccountActivity extends AppCompatActivity {
                 } else {
                     mController.shareKeystore(ExportAccountActivity.this, keystoreJson);
                 }
-                finish();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Controller.SHARE_RESULT) {
+            if (Controller.get().getAccounts().size() == 1) {
+                Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+
+            }
+
+            finish();
+        }
     }
 
     @Override

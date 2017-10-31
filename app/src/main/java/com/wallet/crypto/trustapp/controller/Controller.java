@@ -70,6 +70,7 @@ public class Controller {
     private static boolean mInited = false;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
+    public static final int SHARE_RESULT = 2;
 
     private static String TAG = "CONTROLLER";
 
@@ -294,12 +295,9 @@ public class Controller {
         intent.putExtra(KEY_PASSWORD, password);
         activity.getApplicationContext().startActivity(intent);
 
-        /*if (firstAccount) {
+        if (firstAccount) {
             setCurrentAddress(account.getAddress());
-            Intent intent = new Intent(activity.getApplicationContext(), TransactionListActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            activity.getApplicationContext().startActivity(intent);
-        }*/
+        }
         activity.finish();
     }
 
@@ -448,12 +446,13 @@ public class Controller {
         return mNetworks;
     }
 
-    public void shareKeystore(Context context, String keystoreJson) {
+    public void shareKeystore(Activity parent, String keystoreJson) {
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
         sharingIntent.putExtra(Intent.EXTRA_TEXT, keystoreJson);
-        context.startActivity(Intent.createChooser(sharingIntent, "Share via"));
+
+        parent.startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), SHARE_RESULT);
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {

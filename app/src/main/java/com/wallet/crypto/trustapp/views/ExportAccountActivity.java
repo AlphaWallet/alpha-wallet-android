@@ -63,14 +63,17 @@ public class ExportAccountActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Controller.SHARE_RESULT) {
-            if (Controller.get().getAccounts().size() == 1) {
-                Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getApplicationContext().startActivity(intent);
+            if (resultCode == RESULT_OK) {
+                // Open up transactions if this is a newly created account
+                /*if (Controller.get().getAccounts().size() == 1) {
+                    Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getApplicationContext().startActivity(intent);
 
+                }*/
+
+                finish();
             }
-
-            finish();
         }
     }
 

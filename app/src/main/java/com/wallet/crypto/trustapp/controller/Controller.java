@@ -348,7 +348,7 @@ public class Controller {
     }
 
     public void setCurrentAddress(String currentAddress) {
-        this.mCurrentAddress = currentAddress;
+        this.mCurrentAddress = currentAddress.toLowerCase();
 
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(PREF_CURRENT_ADDRESS, currentAddress);

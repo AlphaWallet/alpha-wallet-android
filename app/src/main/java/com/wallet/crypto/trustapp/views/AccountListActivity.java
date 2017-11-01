@@ -1,8 +1,11 @@
 package com.wallet.crypto.trustapp.views;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -27,7 +30,7 @@ import java.util.List;
 /**
  * Activity representing a list of accounts
  */
-public class AccountListActivity extends AppCompatActivity implements DeleteAccountDialogFragment.DeleteAccountDialogListener {
+public class AccountListActivity extends AppCompatActivity {
 
     private Controller mController;
     private View mRecyclerView;
@@ -72,22 +75,6 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
     protected void onResume() {
         super.onResume();
         setupRecyclerView((RecyclerView) mRecyclerView);
-    }
-
-    @Override
-    public void onDialogPositiveClick(String address, String password) {
-        try {
-            mController.deleteAccount(address, password);
-            if (mController.getAccounts().size() == 0) {
-                finish(); // Don't show account list if there are no accounts,
-                          // go to main view which will ask to create a new account
-                return;
-            }
-            setupRecyclerView((RecyclerView) mRecyclerView);
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-            Toast.makeText(AccountListActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -162,9 +149,28 @@ public class AccountListActivity extends AppCompatActivity implements DeleteAcco
                     public void onClick(View v) {
                         Log.d(TAG, "Delete " + mItem.getAddress());
 
-                        DeleteAccountDialogFragment dialog = new DeleteAccountDialogFragment();
-                        dialog.setAddress(mItem.getAddress()); // must carry address
-                        dialog.show(getSupportFragmentManager(), "DeleteAccountDialogFragment");
+                        new AlertDialog.Builder(AccountListActivity.this)
+                                .setTitle(getString(R.string.title_watchout))
+                                .setMessage(getString(R.string.confirm_delete_account))
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        try {
+                                            mController.deleteAccount(mAddressView.getText().toString());
+                                            if (mController.getAccounts().size() == 0) {
+                                                finish(); // Don't show account list if there are no accounts,
+                                                          // go to main view which will ask to create a new account
+                                                return;
+                                            }
+                                            setupRecyclerView((RecyclerView) mRecyclerView);
+                                        } catch (Exception e) {
+                                            Toast.makeText(AccountListActivity.this,
+                                                getString(R.string.error_deleting_account) + " " + e.getLocalizedMessage(),
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    }})
+                                .setNegativeButton(android.R.string.no, null).show();
                     }
                 });
             }

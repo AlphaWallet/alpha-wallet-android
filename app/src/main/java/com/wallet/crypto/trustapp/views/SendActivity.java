@@ -35,7 +35,6 @@ public class SendActivity extends AppCompatActivity {
 
     private EditText mTo;
     private EditText mAmount;
-    private EditText mPassword;
     private static final String LOG_TAG = SendActivity.class.getSimpleName();
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -56,9 +55,8 @@ public class SendActivity extends AppCompatActivity {
 
         List<VMAccount> accounts = mController.getAccounts();
 
-        mTo = (EditText) findViewById(R.id.date);
-        mAmount = (EditText) findViewById(R.id.amount);
-        mPassword = (EditText) findViewById(R.id.password);
+        mTo = findViewById(R.id.date);
+        mAmount = findViewById(R.id.amount);
 
         String toAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
         if (toAddress != null) {
@@ -93,7 +91,7 @@ public class SendActivity extends AppCompatActivity {
                     SendActivity.this,
                     mController.getCurrentAccount().getAddress(),
                     mTo.getText().toString(),
-                    mAmount.getText().toString(), mPassword.getText().toString(),
+                    mAmount.getText().toString(),
                     new OnTaskCompleted() {
                         public void onTaskCompleted(final TaskResult result) {
                             runOnUiThread(new Runnable() {

@@ -40,7 +40,7 @@
     <string name="hint_keystore">keystore</string>
     <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
-    <string name="action_export">Export private key</string>
+    <string name="action_export">Backup private key</string>
     <string name="address_keyword">ADDRESS</string>
     <string name="message_save_this">Keep this someplace safe</string>
     <string name="copy">Copy to clipboard</string>
@@ -91,5 +91,11 @@
     <string name="message_no_backup">No backup, no Ethereum.</string>
     <string name="unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
     <string name="title_watchout">Watch out!</string>
+    <string name="error_deleting_account">Error deleting account</string>
+    <string name="error_passwords_must_match">Passwords must match.</string>
+    <string name="label_confirm_new_password">Confirm new password</string>
+    <string name="label_new_password">New password</string>
+    <string name="title_backup">Backup</string>
+    <string name="action_backup">Backup</string>
 
 </resources>

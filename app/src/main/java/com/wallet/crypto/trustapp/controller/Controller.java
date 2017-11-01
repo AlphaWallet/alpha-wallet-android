@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -319,10 +320,11 @@ public class Controller {
         new ImportAccountTask(keystore, password, listener).execute();
     }
 
-    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, String password, OnTaskCompleted listener) {
+    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
+            String password = PasswordManager.getPassword(from, mMainActivity);
             new SendTransactionTask(from, to, wei, password, listener).execute();
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
@@ -388,7 +390,8 @@ public class Controller {
         return mCurrentNetwork;
     }
 
-    public void deleteAccount(String address, String password) throws Exception {
+    public void deleteAccount(String address) throws Exception {
+        String password = PasswordManager.getPassword(address, mMainActivity);
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
         if (address.equals(mCurrentAddress)) {
@@ -398,18 +401,19 @@ public class Controller {
         }
     }
 
-    public void navigateToExportAccount(Context context, String address) {
-        Intent intent = new Intent(context, ExportAccountActivity.class);
+    public void navigateToExportAccount(Activity parent, String address) {
+        Intent intent = new Intent(parent, ExportAccountActivity.class);
         intent.putExtra(getString(R.string.address_keyword), address);
-        context.startActivity(intent);
+        parent.startActivityForResult(intent, SHARE_RESULT);
     }
 
-    public String clickExportAccount(Context context, String address, String password) {
+    public String clickExportAccount(Context context, String address, String new_password) {
         try {
             Account account = mEtherStore.getAccount(address);
-            return mEtherStore.exportAccount(account, password);
+            String account_password = PasswordManager.getPassword(address, mMainActivity);
+            return mEtherStore.exportAccount(account, account_password, new_password);
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to export account " + e.toString(), Toast.LENGTH_SHORT);
+            Toast.makeText(context, "Failed to export account " + e.getMessage(), Toast.LENGTH_SHORT);
         }
         return "";
     }
@@ -453,6 +457,10 @@ public class Controller {
         sharingIntent.putExtra(Intent.EXTRA_TEXT, keystoreJson);
 
         parent.startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), SHARE_RESULT);
+    }
+
+    public static String generatePassphrase() {
+        return UUID.randomUUID().toString();
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
@@ -519,6 +527,7 @@ public class Controller {
         protected Void doInBackground(String... params) {
             try {
                 Account account = mEtherStore.importKeyStore(keystoreJson, password);
+                PasswordManager.setPassword(account.getAddress().getHex().toLowerCase(), password, mMainActivity);
                 loadAccounts();
                 Log.d("INFO", "Imported account: " + account.getAddress().getHex());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
@@ -536,7 +545,9 @@ public class Controller {
             String address = "";
             try {
                 Account account = mEtherStore.createAccount(passwords[0]);
-                address = account.getAddress().getHex().toString();
+                address = account.getAddress().getHex().toString().toLowerCase();
+
+                PasswordManager.setPassword(address, passwords[0], mMainActivity);
             } catch (Exception e) {
                 Log.d("ERROR", "Error generating wallet: " + e.toString());
             }
@@ -690,8 +701,9 @@ public class Controller {
         }
     }
 
-    private static String weiInEth = "1000000000000000000";
+    private static String weiInEth  = "1000000000000000000";
     private static String gweiInEth = "1000000000";
+    private static String weiInGwei = "1000000000";
 
     public static String WeiToEth(String wei) {
         BigDecimal eth = new BigDecimal(wei).divide(new BigDecimal(weiInEth));
@@ -703,6 +715,11 @@ public class Controller {
         int scale = sigFig - eth.precision() + eth.scale();
         BigDecimal eth_scaled = eth.setScale(scale, RoundingMode.HALF_UP);
         return eth_scaled.toString();
+    }
+
+    public static String WeiToGwei(String wei) {
+        BigDecimal gwei = new BigDecimal(wei).divide(new BigDecimal(weiInGwei));
+        return gwei.toString();
     }
 
     public static String EthToWei(String eth) throws Exception {

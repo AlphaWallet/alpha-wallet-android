@@ -49,8 +49,8 @@ public class EtherStore {
         return newAccount;
     }
 
-    public String exportAccount(Account account, String password) throws Exception {
-        byte[] data = ks.exportKey(account, password, password);
+    public String exportAccount(Account account, String password, String new_password) throws Exception {
+        byte[] data = ks.exportKey(account, password, new_password);
         return new String(data);
     }
 

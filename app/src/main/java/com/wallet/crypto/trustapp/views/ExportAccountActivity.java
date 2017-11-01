@@ -21,17 +21,19 @@ import com.wallet.crypto.trustapp.controller.Controller;
 
 public class ExportAccountActivity extends AppCompatActivity {
 
+    private static final int MIN_PASSWORD_LENGTH = 1;
     private Controller mController;
 
     private String mAddress;
     private EditText mPasswordText;
+    private EditText mConfirmPasswordText;
     private Button mExportButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export_account);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
@@ -41,15 +43,33 @@ public class ExportAccountActivity extends AppCompatActivity {
 
         mAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
 
-        getSupportActionBar().setTitle(getString(R.string.action_export) + ": " + mAddress.substring(0, 5));
+        getSupportActionBar().setTitle(getString(R.string.title_backup) + ": " + mAddress.substring(0, 5) + "...");
 
         mController = Controller.get();
 
         mPasswordText = findViewById(R.id.export_password);
+        mConfirmPasswordText = findViewById(R.id.confirm_password);
         mExportButton = findViewById(R.id.export_account_button);
         mExportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                final String pwd = mPasswordText.getText().toString();
+                if (!isPasswordLongEnough(pwd)) {
+                    mPasswordText.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
+                }
+
+                final String pwdConfirm = mConfirmPasswordText.getText().toString();
+                if (!isPasswordLongEnough(pwdConfirm)) {
+                    mConfirmPasswordText.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
+                } else if (!pwd.equals(pwdConfirm)) {
+                    mConfirmPasswordText.setError(getString(R.string.error_passwords_must_match));
+                }
+
+                if (!isPasswordLongEnough(pwd) || !isPasswordLongEnough(pwdConfirm) || !pwd.equals(pwdConfirm)) {
+                    return;
+                }
+
                 String keystoreJson = mController.clickExportAccount(ExportAccountActivity.this, mAddress, mPasswordText.getText().toString());
                 if (keystoreJson.isEmpty()) {
                     Toast.makeText(ExportAccountActivity.this, "Unable to export", Toast.LENGTH_SHORT).show();
@@ -60,18 +80,15 @@ public class ExportAccountActivity extends AppCompatActivity {
         });
     }
 
+    boolean isPasswordLongEnough(String password) {
+        return password.length() >= MIN_PASSWORD_LENGTH;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Controller.SHARE_RESULT) {
             if (resultCode == RESULT_OK) {
-                // Open up transactions if this is a newly created account
-                /*if (Controller.get().getAccounts().size() == 1) {
-                    Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplicationContext().startActivity(intent);
-
-                }*/
-
+                setResult(RESULT_OK);
                 finish();
             }
         }

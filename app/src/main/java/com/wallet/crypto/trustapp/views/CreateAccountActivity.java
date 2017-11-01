@@ -29,10 +29,6 @@ public class CreateAccountActivity extends AppCompatActivity {
     private static final int MIN_PASSWORD_LENGTH = 4;
 
     // UI references.
-    private EditText mPasswordView;
-    private EditText mConfirmPassword;
-    private View mProgressView;
-    private View mLoginFormView;
     private Button mImportButton;
 
     @Override
@@ -52,51 +48,19 @@ public class CreateAccountActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mConfirmPassword = (EditText) findViewById(R.id.confirm_password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Button mCreateAccountButton = (Button) findViewById(R.id.create_account_button);
+        Button mCreateAccountButton = findViewById(R.id.create_account_button);
         mCreateAccountButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String pwd = mPasswordView.getText().toString();
-                if (!isPasswordLongEnough(pwd)) {
-                    mPasswordView.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
-                }
+                final String generatedPassphrase = Controller.generatePassphrase();
 
-                final String pwdConfirm = mConfirmPassword.getText().toString();
-                if (!isPasswordLongEnough(pwdConfirm)) {
-                    mConfirmPassword.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
-                }
-
-                if (!isPasswordLongEnough(pwd) || !isPasswordLongEnough(pwdConfirm)) {
-                    return;
-                }
-
-                if (mPasswordView.getText().toString().equals(mConfirmPassword.getText().toString())) {
-                    try {
-                        mController.clickCreateAccount(CreateAccountActivity.this, "account name", mPasswordView.getText().toString());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(CreateAccountActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                try {
+                    mController.clickCreateAccount(CreateAccountActivity.this, "account name", generatedPassphrase);
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_LONG).show();
                 }
             }
         });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
 
         mImportButton = findViewById(R.id.import_account_button);
         mImportButton.setOnClickListener(new View.OnClickListener() {

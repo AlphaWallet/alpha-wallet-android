@@ -35,7 +35,7 @@
     <string name="title_account_detail">Account Detail</string>
     <string name="account_delete">delete</string>
     <string name="cancel">cancel</string>
-    <string name="confirm_delete_account">Delete account?</string>
+    <string name="confirm_delete_account">Make sure that you have a backup of this account.</string>
     <string name="title_activity_import_account">ImportAccountActivity</string>
     <string name="hint_keystore">keystore</string>
     <string name="action_import">Import</string>
@@ -65,7 +65,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
-    <string name="title_delete_account">Delete account</string>
+    <string name="title_delete_account">Are you sure you want to delete account?</string>
     <string name="no_transactions">No Transactions.\nSwipe down to refresh.</string>
     <string name="twitter">Twitter</string>
     <string name="telegram">Telegram Group</string>

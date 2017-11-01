@@ -150,9 +150,9 @@ public class AccountListActivity extends AppCompatActivity {
                         Log.d(TAG, "Delete " + mItem.getAddress());
 
                         new AlertDialog.Builder(AccountListActivity.this)
-                                .setTitle(getString(R.string.title_watchout))
+                                .setTitle(getString(R.string.title_delete_account))
                                 .setMessage(getString(R.string.confirm_delete_account))
-                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setIcon(R.drawable.ic_warning_black_24dp)
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                                     public void onClick(DialogInterface dialog, int whichButton) {

@@ -418,10 +418,6 @@ public class Controller {
         return "";
     }
 
-    public void refreshTransactions(TransactionListActivity txnList, OnTaskCompleted listener) {
-        new GetTransactionsTask(mAccounts, listener).execute();
-    }
-
     public ESTransaction findTransaction(String address, String txn_hash) {
         List<ESTransaction> txns = mTransactions.get(address);
 

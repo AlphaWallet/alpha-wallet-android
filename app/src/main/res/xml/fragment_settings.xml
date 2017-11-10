@@ -6,24 +6,29 @@
 
         <Preference
             android:key="pref_export"
+            android:icon="@mipmap/settings_backup"
             android:title="@string/action_export"
             android:summary="Keep it secure and never share it with anyone."/>
 
         <ListPreference
             android:key="pref_rpcServer"
             android:title="@string/network_label"
+            android:icon="@mipmap/settings_server"
             android:dialogTitle="@string/network_label" />
 
         <PreferenceCategory
             android:title="@string/title_opensource"
             android:key="pref_opensource_links" >
 
-            <Preference android:title="@string/title_source_code">
+            <Preference
+                android:title="@string/title_source_code"
+                android:icon="@mipmap/settings_open_source">
                 <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/TrustWallet/trust-wallet-android" />
             </Preference>
 
-            <Preference android:title="@string/title_report_bug">
+            <Preference android:title="@string/title_report_bug"
+                        android:icon="@mipmap/settings_bug">
                 <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/TrustWallet/trust-wallet-android/issues/new" />
             </Preference>
@@ -34,14 +39,17 @@
             android:title="@string/title_community"
             android:key="pref_community_links" >
 
-            <Preference android:title="@string/twitter">
+            <Preference
+                android:title="@string/twitter"
+                android:icon="@mipmap/settings_twitter">
                 <intent android:action="android.intent.action.VIEW"
                     android:data="https://twitter.com/trustwalletapp" />
 
             </Preference>
 
-
-            <Preference android:title="@string/telegram" >
+            <Preference
+                android:title="@string/telegram"
+                android:icon="@mipmap/settings_telegram">
                 <intent android:action="android.intent.action.VIEW"
                     android:data="https://t.me/joinchat/AAMtrQ_wtd918mm_mU0BRQ" />
             </Preference>
@@ -50,14 +58,17 @@
 
         <PreferenceCategory
             android:title="@string/title_support"
-            android:key="pref_rate" >
+            android:key="pref_rate"
+            >
 
             <!--
             <Preference
                 android:key="pref_rate"
                 android:title="@string/title_rate" /> -->
 
-            <Preference android:key="pref_donate"
+            <Preference
+                android:key="pref_donate"
+                android:icon="@mipmap/settings_donate"
                 android:title="@string/title_donate">
             </Preference>
 

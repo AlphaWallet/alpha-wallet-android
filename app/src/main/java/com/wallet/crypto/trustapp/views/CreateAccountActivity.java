@@ -40,7 +40,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         mController = Controller.get();
 
-        if (mController.getAccounts().size() == 0) {
+        if (mController.getAccountNumber() == 0) {
             showIntro();
         }
 

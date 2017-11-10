@@ -345,6 +345,10 @@ public class Controller {
         return mAccounts;
     }
 
+    public int getAccountNumber() {
+        return mAccounts == null ? 0 : mAccounts.size();
+    }
+
     private String getString(int resId) {
         return mMainActivity.getString(resId);
     }

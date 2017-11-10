@@ -49,7 +49,7 @@ public class WarningBackupActivity extends AppCompatActivity {
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                if (controller.getAccountNumber() == 1) {
+                                if (controller.getNumberOfAccounts() == 1) {
                                     Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     getApplicationContext().startActivity(intent);

@@ -2,7 +2,6 @@ package com.wallet.crypto.trustapp.views;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -65,16 +64,16 @@ public class TransactionListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_transaction_list);
 
         mController = Controller.get();
-        mController.init(this);
+        mController.init(getApplicationContext(), this);
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.item_list);
+        mRecyclerView = findViewById(R.id.item_list);
         assert mRecyclerView != null;
         setupRecyclerView(mRecyclerView);
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout = findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener(){
                     @Override
@@ -111,17 +110,17 @@ public class TransactionListActivity extends AppCompatActivity {
         if (account != null) {
             mAddress = account.getAddress();
             Log.d(TAG, "Address: %s, Balance: %s".format(mAddress, account.getBalance().toString()));
-        }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        try {
-            String balance = Controller.WeiToEth(account.getBalance().toString(), 5);
-            getSupportActionBar().setTitle(mAddress.substring(0, 5) + "... : " + balance + " ETH");
-        } catch (Exception e) {
-            Log.e(TAG, "Error updating balance: ", e);
+            try {
+                String balance = Controller.WeiToEth(account.getBalance().toString(), 5);
+                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle(mAddress.substring(0, 5) + "... : " + balance + " ETH");
+                toolbar.inflateMenu(R.menu.transaction_list_menu);
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating balance: ", e);
+            }
         }
-        toolbar.inflateMenu(R.menu.transaction_list_menu);
 
         refreshTransactions(mAddress);
     }
@@ -136,8 +135,6 @@ public class TransactionListActivity extends AppCompatActivity {
     }
 
     private void refreshTransactions(String address) {
-        View swipe_view = findViewById(R.id.swiperefresh);
-
         if (mController.getTransactions(address).size() == 0) {
             findViewById(R.id.no_transactions_text).setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
@@ -156,7 +153,7 @@ public class TransactionListActivity extends AppCompatActivity {
         super.onResume();
 
         init();
-        Log.d(TAG, "mController.getAccounts().size() " + mController.getAccounts().size());
+        Log.d(TAG, "Number of accounts: " + mController.getNumberOfAccounts());
 
         if (mController.getAccounts().size() == 0) {
             Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);

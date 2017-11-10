@@ -5,14 +5,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
@@ -40,7 +36,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         mController = Controller.get();
 
-        if (mController.getAccountNumber() == 0) {
+        if (mController.getNumberOfAccounts() == 0) {
             showIntro();
         }
 

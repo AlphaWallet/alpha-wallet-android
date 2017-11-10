@@ -75,10 +75,10 @@ public class Controller {
 
     private static String TAG = "CONTROLLER";
 
+    private Context mAppContext;
+
     // Services
-    private TransactionListActivity mMainActivity;
     private EtherStore mEtherStore;
-    private Map<String, EtherscanService> mEtherscanServices;
     private SharedPreferences mPreferences;
 
     // State
@@ -87,14 +87,12 @@ public class Controller {
     private VMNetwork mCurrentNetwork;
 
     // View models
-    ArrayList<VMNetwork> mNetworks;
-    ArrayList<VMAccount> mAccounts;
-    Map<String, List<ESTransaction>> mTransactions;
-    Map<String, Long> mBalances;
+    private ArrayList<VMNetwork> mNetworks;
+    private ArrayList<VMAccount> mAccounts;
+    private Map<String, List<ESTransaction>> mTransactions;
 
     // Views
-    AccountListActivity mAccountListActivity;
-    TransactionListActivity mWalletActivity;
+    private TransactionListActivity mTransactionListActivity;
 
     // Backgroud task
     private int mInterval = 10000;
@@ -109,18 +107,19 @@ public class Controller {
 
     protected Controller() { }
 
-    public void init(Context appContext) {
+    public void init(Context appContext, TransactionListActivity activity) {
 
         if (mInited) {
             return;
         }
         mInited = true;
 
-        mMainActivity = (TransactionListActivity) appContext;
+        mAppContext = appContext;
+        mTransactionListActivity = activity;
 
-        mKeystoreBaseDir = mMainActivity.getFilesDir() + "/keystore";
+        mKeystoreBaseDir = mAppContext.getFilesDir() + "/keystore";
 
-        mPreferences = mMainActivity.getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+        mPreferences = mAppContext.getSharedPreferences("MyPref", 0); // 0 - for private mode
 
         mEtherStore = new EtherStore(mKeystoreBaseDir);
 
@@ -133,7 +132,7 @@ public class Controller {
         mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 4));
 
         // Load current from app preferences
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mMainActivity);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
         String rpcServerName = sharedPref.getString("pref_rpcServer", "");
 
         if (rpcServerName != null && existsNetwork(rpcServerName)) {
@@ -146,7 +145,6 @@ public class Controller {
 
         mAccounts = new ArrayList<>();
         mTransactions = new HashMap<>();
-        mBalances = new HashMap<>();
 
         loadAccounts();
 
@@ -175,12 +173,17 @@ public class Controller {
         stopRepeatingTask();
     }
 
+    public void setTransactionListActivity(TransactionListActivity activity) {
+        assert(mTransactionListActivity == null); // this should only be done once
+        mTransactionListActivity = activity;
+    }
+
     Runnable mStatusChecker = new Runnable() {
         @Override
         public void run() {
             try {
                 Log.d(TAG, "Periodic task");
-                mMainActivity.fetchModelsAndReinit();
+                mTransactionListActivity.fetchModelsAndReinit();
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }
@@ -244,11 +247,6 @@ public class Controller {
     public void navigateToSettings(Context context) {
         Intent intent = new Intent(context, SettingsActivity.class);
         context.startActivity(intent);
-    }
-
-    public void navigateToAccountList() {
-        Intent intent = new Intent(mMainActivity, AccountListActivity.class);
-        mMainActivity.startActivity(intent);
     }
 
     public void navigateToAccountList(Context context) {
@@ -324,7 +322,7 @@ public class Controller {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
-            String password = PasswordManager.getPassword(from, mMainActivity);
+            String password = PasswordManager.getPassword(from, mAppContext);
             new SendTransactionTask(from, to, wei, password, listener).execute();
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
@@ -345,12 +343,12 @@ public class Controller {
         return mAccounts;
     }
 
-    public int getAccountNumber() {
+    public int getNumberOfAccounts() {
         return mAccounts == null ? 0 : mAccounts.size();
     }
 
     private String getString(int resId) {
-        return mMainActivity.getString(resId);
+        return mAppContext.getString(resId);
     }
 
     public void setCurrentAddress(String currentAddress) {
@@ -386,7 +384,7 @@ public class Controller {
         }
         assert(mCurrentNetwork != null);
         if (previous != mCurrentNetwork) {
-            mMainActivity.fetchModelsAndReinit();
+            mTransactionListActivity.fetchModelsAndReinit();
         }
     }
 
@@ -395,7 +393,7 @@ public class Controller {
     }
 
     public void deleteAccount(String address) throws Exception {
-        String password = PasswordManager.getPassword(address, mMainActivity);
+        String password = PasswordManager.getPassword(address, mAppContext);
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
         if (address.equals(mCurrentAddress)) {
@@ -414,7 +412,7 @@ public class Controller {
     public String clickExportAccount(Context context, String address, String new_password) {
         try {
             Account account = mEtherStore.getAccount(address);
-            String account_password = PasswordManager.getPassword(address, mMainActivity);
+            String account_password = PasswordManager.getPassword(address, mAppContext);
             return mEtherStore.exportAccount(account, account_password, new_password);
         } catch (Exception e) {
             Toast.makeText(context, "Failed to export account " + e.getMessage(), Toast.LENGTH_SHORT);
@@ -527,7 +525,7 @@ public class Controller {
         protected Void doInBackground(String... params) {
             try {
                 Account account = mEtherStore.importKeyStore(keystoreJson, password);
-                PasswordManager.setPassword(account.getAddress().getHex().toLowerCase(), password, mMainActivity);
+                PasswordManager.setPassword(account.getAddress().getHex().toLowerCase(), password, mAppContext);
                 loadAccounts();
                 Log.d("INFO", "Imported account: " + account.getAddress().getHex());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
@@ -547,7 +545,7 @@ public class Controller {
                 Account account = mEtherStore.createAccount(passwords[0]);
                 address = account.getAddress().getHex().toString().toLowerCase();
 
-                PasswordManager.setPassword(address, passwords[0], mMainActivity);
+                PasswordManager.setPassword(address, passwords[0], mAppContext);
             } catch (Exception e) {
                 Log.d("ERROR", "Error generating wallet: " + e.toString());
             }
@@ -679,7 +677,7 @@ public class Controller {
                     @Override
                     public void onFailure(Call<ESTransactionListResponse> call, Throwable t) {
                         Log.e("ERROR", t.toString());
-                        Toast.makeText(mMainActivity, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mAppContext, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {

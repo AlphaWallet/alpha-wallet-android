@@ -658,19 +658,17 @@ public class Controller {
                 call.enqueue(new Callback<ESTransactionListResponse>() {
 
                     @Override
-
                     public void onResponse(Call<ESTransactionListResponse> call, Response<ESTransactionListResponse> response) {
-
-                        List<ESTransaction> transactions = response.body().getTransactionList();
-
-                        mTransactions.put(address, transactions);
-
-                        //recyclerView.setAdapter(new MoviesAdapter(movies, R.layout.list_item_movie, getApplicationContext()));
-
-                        Log.d("INFO", "Number of transactions: " + transactions.size());
-                        if (transactions.size() > 0) {
-                            Log.d("INFO", "Last transaction block number: " + transactions.get(0).getBlockNumber());
-                            Log.d("INFO", "First transaction block number: " + transactions.get(transactions.size() - 1).getBlockNumber());
+                        try {
+                            List<ESTransaction> transactions = response.body().getTransactionList();
+                            mTransactions.put(address, transactions);
+                            Log.d("INFO", "Number of transactions: " + transactions.size());
+                            if (transactions.size() > 0) {
+                                Log.d("INFO", "Last transaction block number: " + transactions.get(0).getBlockNumber());
+                                Log.d("INFO", "First transaction block number: " + transactions.get(transactions.size() - 1).getBlockNumber());
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getLocalizedMessage());
                         }
                     }
 

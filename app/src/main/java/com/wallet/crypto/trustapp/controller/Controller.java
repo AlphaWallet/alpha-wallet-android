@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -459,6 +461,17 @@ public class Controller {
 
     public static String generatePassphrase() {
         return UUID.randomUUID().toString();
+    }
+
+    public String getVersion() {
+        String version = "N/A";
+        try {
+            PackageInfo pInfo = mAppContext.getPackageManager().getPackageInfo(mAppContext.getPackageName(), 0);
+            version = pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return version;
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {

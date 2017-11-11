@@ -97,5 +97,8 @@
     <string name="label_new_password">New password</string>
     <string name="title_backup">Backup</string>
     <string name="action_backup">Backup</string>
+    <string name="title_privacy_policy">Privacy Policy</string>
+    <string name="title_terms">Terms and Conditions</string>
+    <string name="title_version">Version</string>
 
 </resources>

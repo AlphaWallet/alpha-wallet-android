@@ -72,6 +72,26 @@
                 android:title="@string/title_donate">
             </Preference>
 
+            <Preference
+                android:title="@string/title_privacy_policy"
+                android:icon="@mipmap/settings_privacy_policy">
+                <intent android:action="android.intent.action.VIEW"
+                    android:data="https://trustwalletapp.com/privacy-policy.html" />
+            </Preference>
+
+            <Preference
+                android:title="@string/title_terms"
+                android:icon="@mipmap/settings_terms">
+                <intent android:action="android.intent.action.VIEW"
+                    android:data="https://trustwalletapp.com/terms.html" />
+            </Preference>
+
+            <Preference
+                android:title="@string/title_version"
+                android:key="pref_version"
+                android:iconSpaceReserved="true">
+            </Preference>
+
         </PreferenceCategory>
 
 </PreferenceScreen>

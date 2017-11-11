@@ -1,6 +1,8 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -62,6 +64,11 @@ public class SettingsFragment extends PreferenceFragment
                 return false;
             }
         });
+
+        String versionString = Controller.get().getVersion();
+
+        Preference version = findPreference("pref_version");
+        version.setSummary(versionString);
 
         preferences = PreferenceManager
                 .getDefaultSharedPreferences(getActivity());

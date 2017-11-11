@@ -474,6 +474,16 @@ public class Controller {
         return version;
     }
 
+    public String EthToUsd(String balance) {
+        long ethToUsd = 300;
+        try {
+            return new BigDecimal(balance).multiply(new BigDecimal(ethToUsd)).toString();
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting ETH to USD");
+        }
+        return "0";
+    }
+
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {

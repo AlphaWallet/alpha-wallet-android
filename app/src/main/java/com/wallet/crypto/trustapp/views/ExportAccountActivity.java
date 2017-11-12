@@ -45,7 +45,7 @@ public class ExportAccountActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(getString(R.string.title_backup) + ": " + mAddress.substring(0, 5) + "...");
 
-        mController = Controller.get();
+        mController = Controller.with(getApplicationContext());
 
         mPasswordText = findViewById(R.id.export_password);
         mConfirmPasswordText = findViewById(R.id.confirm_password);

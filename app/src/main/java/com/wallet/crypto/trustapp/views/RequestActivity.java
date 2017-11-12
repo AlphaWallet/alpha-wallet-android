@@ -48,7 +48,7 @@ public class RequestActivity extends AppCompatActivity {
         addressTextView = (TextView)findViewById(R.id.addressTextView);
         copyButton = findViewById(R.id.copy_button);
 
-        VMAccount account = Controller.get().getCurrentAccount();
+        VMAccount account = Controller.with(getApplicationContext()).getCurrentAccount();
 
         addressTextView.setText(account.getAddress());
 
@@ -63,7 +63,7 @@ public class RequestActivity extends AppCompatActivity {
             }
         });
 
-        new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.get().getCurrentAccount().getAddress() + "?value=0").execute();
+        new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.with(getApplicationContext()).getCurrentAccount().getAddress() + "?value=0").execute();
     }
 
     Bitmap TextToImageEncode(String Value) throws WriterException {

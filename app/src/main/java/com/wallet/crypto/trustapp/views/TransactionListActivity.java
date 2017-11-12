@@ -63,7 +63,7 @@ public class TransactionListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_list);
 
-        mController = Controller.get();
+        mController = Controller.with(getApplicationContext());
         mController.init(getApplicationContext(), this);
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
@@ -199,7 +199,7 @@ public class TransactionListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        Controller controller = Controller.get();
+        Controller controller = Controller.with(getApplicationContext());
         List<ESTransaction> txns = controller.getTransactions(mAddress);
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(txns));
     }

@@ -24,8 +24,10 @@ public class EtherStore {
     private KeyChain keyChain;
     private KeyStore ks;
     private static String TAG = "EtherStore";
+    private Controller mController;
 
-    public EtherStore(String filesDir) {
+    public EtherStore(String filesDir, Controller controller) {
+        mController = controller;
         ks = new KeyStore(filesDir + "/keystore", Geth.LightScryptN, Geth.LightScryptP);
         Log.d(TAG, "Created KeyStore with %s accounts".format(Long.toString(ks.getAccounts().size())));
     }
@@ -72,7 +74,7 @@ public class EtherStore {
                 gasPrice,
                 null); // data
 
-        BigInt chain = new BigInt(Controller.get().getCurrentNetwork().getChainId()); // Chain identifier of the main net
+        BigInt chain = new BigInt(mController.getCurrentNetwork().getChainId()); // Chain identifier of the main net
 
         ks.unlock(signer, signerPassword);
         Transaction signed = ks.signTx(signer, tx, chain);

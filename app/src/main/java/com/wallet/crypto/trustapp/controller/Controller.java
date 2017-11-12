@@ -100,14 +100,20 @@ public class Controller {
     private int mInterval = 10000;
     private Handler mHandler;
 
-    public static Controller get() {
+    public static Controller with(Context context) {
         if (mInstance == null) {
-            mInstance = new Controller();
+            synchronized (Controller.class) {
+                if (mInstance == null) {
+                    mInstance = new Controller(context.getApplicationContext());
+                }
+            }
         }
         return mInstance;
     }
 
-    protected Controller() { }
+    protected Controller(Context context) {
+        mAppContext = context;
+    }
 
     public void init(Context appContext, TransactionListActivity activity) {
 
@@ -123,7 +129,7 @@ public class Controller {
 
         mPreferences = mAppContext.getSharedPreferences("MyPref", 0); // 0 - for private mode
 
-        mEtherStore = new EtherStore(mKeystoreBaseDir);
+        mEtherStore = new EtherStore(mKeystoreBaseDir, this);
 
         // Create networks list
         mNetworks = new ArrayList<>();

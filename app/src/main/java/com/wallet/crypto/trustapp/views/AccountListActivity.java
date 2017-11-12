@@ -56,7 +56,7 @@ public class AccountListActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mController = Controller.get();
+        mController = Controller.with(getApplicationContext());
 
         mRecyclerView = findViewById(R.id.account_list);
         assert mRecyclerView != null;

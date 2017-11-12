@@ -1,4 +1,4 @@
-# Trust - Ethereum Wallet for Android :iphone:
+# :iphone: Trust - Ethereum Wallet for Android :iphone:
 
 [![License](https://img.shields.io/badge/license-GPL3-green.svg?style=flat)](https://github.com/fastlane/fastlane/blob/master/LICENSE)
 
@@ -8,7 +8,6 @@ Welcome to Trust's open source Android app!
 
 1. [Download](https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp) from Google Play Store.
 2. Clone this repository.
-...
 
 ## Contributing
 

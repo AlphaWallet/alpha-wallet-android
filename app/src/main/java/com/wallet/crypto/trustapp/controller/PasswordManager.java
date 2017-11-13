@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -58,6 +59,12 @@ public final class PasswordManager {
     static {
         System.loadLibrary("native-lib");
     }
+
+    // These key and iv were compromised after being committed to the public github repo.
+    // To migrate old clients, we will first attempt to decrypt using these keys.
+    // TODO: remove once all 1.3.2 clients have upgraded
+    private final static String legacyKey = "35TheTru5tWa11ets3cr3tK3y377123!";
+    private final static String legacyIv = "8201va0184a0md8i";
 
     public static native String getKeyStringFromNative();
     public static native String getIvStringFromNative();
@@ -121,6 +128,18 @@ public final class PasswordManager {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final byte[] encryptedPassword = Base64.decode(sharedPreferences.getString(address + "-pwd", null), Base64.DEFAULT);
 
+        // Attempt to decrypt using legacy key/iv to migrate old clients
+        // TODO: remove once all clients have upgraded from 1.3.2
+        SecretKey oldKey = new SecretKeySpec(legacyKey.getBytes("UTF-8"), "AES");
+        IvParameterSpec oldIv = new IvParameterSpec(legacyIv.getBytes("UTF-8"));
+        try {
+            final String decryptedPassword = decrypt(encryptedPassword, oldKey, oldIv);
+            return decryptedPassword;
+        } catch (Exception e) {
+            Log.e("PASSMAN", e.getMessage());
+        }
+
+        // If decryption fails, it is most likely because this is a new client
         // decrypt password
         SecretKey key = new SecretKeySpec(getKeyStringFromNative().getBytes("UTF-8"), "AES");
         IvParameterSpec iv = new IvParameterSpec(getIvStringFromNative().getBytes("UTF-8"));

@@ -1,13 +1,17 @@
 # :iphone: Trust - Ethereum Wallet for Android :iphone:
 
+[![Build Status](https://travis-ci.org/TrustWallet/trust-wallet-android.svg?branch=master)](https://travis-ci.org/TrustWallet/trust-wallet-android)
 [![License](https://img.shields.io/badge/license-GPL3-green.svg?style=flat)](https://github.com/fastlane/fastlane/blob/master/LICENSE)
 
 Welcome to Trust's open source Android app!
 
 ## Getting Started
 
-1. [Download](https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp) from Google Play Store.
+1. Install latest Android Studio.
 2. Clone this repository.
+3. Build and run.
+
+Try the [app](https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp) on Google Play Store.
 
 ## Contributing
 

@@ -63,7 +63,7 @@ public class RequestActivity extends AppCompatActivity {
             }
         });
 
-        new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.with(getApplicationContext()).getCurrentAccount().getAddress() + "?value=0").execute();
+        new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0").execute();
     }
 
     Bitmap TextToImageEncode(String Value) throws WriterException {

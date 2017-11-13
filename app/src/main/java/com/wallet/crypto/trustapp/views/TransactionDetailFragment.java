@@ -41,7 +41,7 @@ public class TransactionDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Controller mController = Controller.with(getActivity().getApplicationContext());
+        Controller mController = Controller.with(getActivity());
 
         Log.d(TAG, getArguments().toString());
 

@@ -51,7 +51,7 @@ public class SendActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mController = Controller.with(getApplicationContext());
+        mController = Controller.with(this);
 
         List<VMAccount> accounts = mController.getAccounts();
 

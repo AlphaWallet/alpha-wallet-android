@@ -23,7 +23,7 @@ public class WarningBackupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_warning_backup);
 
-        final Controller controller = Controller.with(getApplicationContext());
+        final Controller controller = Controller.with(this);
 
         mAddress = this.getIntent().getStringExtra(Controller.KEY_ADDRESS);
         mPassword = this.getIntent().getStringExtra(Controller.KEY_PASSWORD);
@@ -66,7 +66,7 @@ public class WarningBackupActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Controller.SHARE_RESULT) {
             if (resultCode == RESULT_OK) {
-                if (Controller.with(getApplicationContext()).getAccounts().size() == 1) {
+                if (Controller.with(this).getAccounts().size() == 1) {
                     Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getApplicationContext().startActivity(intent);

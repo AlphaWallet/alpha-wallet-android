@@ -34,7 +34,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
 
-        mController = Controller.with(getApplicationContext());
+        mController = Controller.with(this);
 
         if (mController.getNumberOfAccounts() == 0) {
             showIntro();

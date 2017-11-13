@@ -35,7 +35,7 @@ public class ImportAccountActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mController = Controller.with(getApplicationContext());
+        mController = Controller.with(this);
 
         mKeystore = (EditText) findViewById(R.id.import_keystore);
         mPassword = (EditText) findViewById(R.id.import_password);

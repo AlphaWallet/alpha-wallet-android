@@ -27,7 +27,7 @@ public class SettingsFragment extends PreferenceFragment
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.fragment_settings);
 
-        mController = Controller.with(getActivity().getApplicationContext());
+        mController = Controller.with(getActivity());
 
         final Preference donate = findPreference("pref_donate");
 
@@ -65,7 +65,7 @@ public class SettingsFragment extends PreferenceFragment
             }
         });
 
-        String versionString = Controller.with(getActivity().getApplicationContext()).getVersion();
+        String versionString = Controller.with(getActivity()).getVersion();
 
         Preference version = findPreference("pref_version");
         version.setSummary(versionString);

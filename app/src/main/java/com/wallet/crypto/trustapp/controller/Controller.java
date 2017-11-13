@@ -113,9 +113,10 @@ public class Controller {
 
     protected Controller(Context context) {
         mAppContext = context;
+        init(context);
     }
 
-    public void init(Context appContext, TransactionListActivity activity) {
+    public void init(Context appContext) {
 
         if (mInited) {
             return;
@@ -123,7 +124,6 @@ public class Controller {
         mInited = true;
 
         mAppContext = appContext;
-        mTransactionListActivity = activity;
 
         mKeystoreBaseDir = mAppContext.getFilesDir() + "/keystore";
 
@@ -182,7 +182,6 @@ public class Controller {
     }
 
     public void setTransactionListActivity(TransactionListActivity activity) {
-        assert(mTransactionListActivity == null); // this should only be done once
         mTransactionListActivity = activity;
     }
 
@@ -192,6 +191,8 @@ public class Controller {
             try {
                 Log.d(TAG, "Periodic task");
                 mTransactionListActivity.fetchModelsAndReinit();
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to fetch update mTransactionListActivity");
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }
@@ -392,7 +393,9 @@ public class Controller {
         }
         assert(mCurrentNetwork != null);
         if (previous != mCurrentNetwork) {
-            mTransactionListActivity.fetchModelsAndReinit();
+            if (mTransactionListActivity != null) { // may not be set yet
+                mTransactionListActivity.fetchModelsAndReinit();
+            }
         }
     }
 

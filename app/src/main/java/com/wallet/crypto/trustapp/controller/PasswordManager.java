@@ -77,6 +77,36 @@ public final class PasswordManager {
      */
 
     /**
+     * Encrypts the password and sets it into the shared preferences using legacy key and iv.
+     * @param password
+     * @param context
+     * @throws NoSuchPaddingException
+     * @throws BadPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws IllegalBlockSizeException
+     * @throws UnsupportedEncodingException
+     * @throws InvalidKeyException
+     * @throws InvalidKeySpecException
+     * @throws InvalidAlgorithmParameterException
+     */
+    public static void setPasswordLegacy(final String address, final String password, final Context context)
+            throws NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException,
+            IllegalBlockSizeException, UnsupportedEncodingException, InvalidKeyException,
+            InvalidKeySpecException, InvalidAlgorithmParameterException
+    {
+        // encrypt password
+        SecretKey key = new SecretKeySpec(legacyKey.getBytes("UTF-8"), "AES");
+        IvParameterSpec iv = new IvParameterSpec(legacyIv.getBytes("UTF-8"));
+        final byte[] encryptedPassword = encrypt(password, key, iv);
+
+        // save in shared preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(address + "-pwd", Base64.encodeToString(encryptedPassword, Base64.DEFAULT));
+        editor.commit();
+    }
+
+    /**
      * Encrypts the password and sets it into the shared preferences.
      * @param password
      * @param context

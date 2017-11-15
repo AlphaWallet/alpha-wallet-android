@@ -18,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.model.CMTicker;
 import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
@@ -81,6 +82,7 @@ public class Controller {
 
     // Services
     private EtherStore mEtherStore;
+    private CoinmarketService mCoinmarketService;
     private SharedPreferences mPreferences;
 
     // State
@@ -92,11 +94,12 @@ public class Controller {
     private ArrayList<VMNetwork> mNetworks;
     private ArrayList<VMAccount> mAccounts;
     private Map<String, List<ESTransaction>> mTransactions;
+    private CMTicker mEthTicker = null; // if null, no data available
 
     // Views
     private TransactionListActivity mTransactionListActivity;
 
-    // Backgroud task
+    // Background task
     private int mInterval = 10000;
     private Handler mHandler;
 
@@ -196,6 +199,8 @@ public class Controller {
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }
+
+            fetchEthereumTicker();
         }
     };
 
@@ -483,16 +488,6 @@ public class Controller {
         return version;
     }
 
-    public String EthToUsd(String balance) {
-        long ethToUsd = 300;
-        try {
-            return new BigDecimal(balance).multiply(new BigDecimal(ethToUsd)).toString();
-        } catch (Exception e) {
-            Log.e(TAG, "Error converting ETH to USD");
-        }
-        return "0";
-    }
-
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
@@ -655,6 +650,46 @@ public class Controller {
         }
     }
 
+    private void fetchEthereumTicker() {
+        try {
+
+            Retrofit mRetrofit = new Retrofit.Builder()
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .baseUrl("https://api.coinmarketcap.com")
+                    .build();
+
+            CoinmarketService service = mRetrofit.create(CoinmarketService.class);
+
+            Call<List<CMTicker>> call =
+                    service.getEthereumPrice();
+
+            Log.d("INFO", "Request query:" + call.request().url().query());
+            call.enqueue(new Callback<List<CMTicker>>() {
+
+                @Override
+                public void onResponse(Call<List<CMTicker>> call, Response<List<CMTicker>> response) {
+                    try {
+                        List<CMTicker> tickers = response.body();
+                        Log.d("INFO", "Number of transactions: " + tickers.size());
+                        if (tickers.size() == 1) {
+                            mEthTicker = tickers.get(0);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getLocalizedMessage());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<CMTicker>> call, Throwable t) {
+                    Log.e("ERROR", t.toString());
+                    Toast.makeText(mAppContext, "Error contacting ether price service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private class GetTransactionsTask extends AsyncTask<Void, Void, Void> {
         private final List<VMAccount> mAccounts;
         private final OnTaskCompleted mListener;
@@ -743,6 +778,20 @@ public class Controller {
         int scale = sigFig - eth.precision() + eth.scale();
         BigDecimal eth_scaled = eth.setScale(scale, RoundingMode.HALF_UP);
         return eth_scaled.toString();
+    }
+
+    public String EthToUsd(String balance) {
+        if (mEtherStore == null) {
+            return null;
+        }
+        try {
+            BigDecimal usd = new BigDecimal(balance).multiply(new BigDecimal(mEthTicker.getPriceUsd()));
+            usd = usd.setScale(2, RoundingMode.CEILING);
+            return usd.toString();
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting ETH to USD");
+        }
+        return null;
     }
 
     public static String WeiToGwei(String wei) {

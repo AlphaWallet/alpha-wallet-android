@@ -115,8 +115,17 @@ public class TransactionListActivity extends AppCompatActivity {
                 String balance = Controller.WeiToEth(account.getBalance().toString(), 5);
                 Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                 setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle(balance + " ETH");
-                getSupportActionBar().setSubtitle(mAddress);
+
+                String usd = Controller.with(this).EthToUsd(balance);
+                // Conversion data may not be available, in which case, hide it
+                if (usd != null) {
+                    getSupportActionBar().setTitle("$" + usd);
+                    getSupportActionBar().setSubtitle(balance + " ETH");
+                } else {
+                    getSupportActionBar().setTitle(balance + " ETH");
+                    getSupportActionBar().setSubtitle(mAddress);
+                }
+
                 toolbar.inflateMenu(R.menu.transaction_list_menu);
             } catch (Exception e) {
                 Log.e(TAG, "Error updating balance: ", e);

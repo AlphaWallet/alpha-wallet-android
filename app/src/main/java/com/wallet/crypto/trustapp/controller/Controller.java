@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -92,6 +93,7 @@ public class Controller {
 
     // View models
     private ArrayList<VMNetwork> mNetworks;
+    private ArrayList<String> mEtherscanKeys;
     private ArrayList<VMAccount> mAccounts;
     private Map<String, List<ESTransaction>> mTransactions;
     private CMTicker mEthTicker = null; // if null, no data available
@@ -134,13 +136,19 @@ public class Controller {
 
         mEtherStore = new EtherStore(mKeystoreBaseDir, this);
 
+        // Create etherscan key list
+        mEtherscanKeys = new ArrayList<>();
+        mEtherscanKeys.add("{etherscan_key1}");
+        mEtherscanKeys.add("{etherscan_key2}");
+        mEtherscanKeys.add("{etherscan_key3}");
+
         // Create networks list
         mNetworks = new ArrayList<>();
 
-        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 1));
-        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
-        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 3));
-        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 4));
+        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", 1));
+        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", 42));
+        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", 3));
+        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", 4));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -580,6 +588,14 @@ public class Controller {
         }
     }
 
+    // Randomize etherscan key selection stay below rate limit
+    private String getRandomEtherscanKey() {
+        assert(mEtherscanKeys.size() > 0);
+
+        final int random = new Random().nextInt(mEtherscanKeys.size());
+        return mEtherscanKeys.get(random);
+    }
+
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
         private String fromAddress;
         private String toAddress;
@@ -719,7 +735,7 @@ public class Controller {
                                 address,
                                 "0",
                                 "desc",
-                                mCurrentNetwork.getEtherscanApiKey()
+                                getRandomEtherscanKey()
                         );
 
 

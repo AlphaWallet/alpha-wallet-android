@@ -71,8 +71,6 @@ public class RequestActivity extends AppCompatActivity {
         } catch(Exception e) {
             Log.d(TAG, e.getMessage());
         }
-
-        //new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0").execute();
     }
 
     Bitmap TextToImageEncode(String Value) throws WriterException {

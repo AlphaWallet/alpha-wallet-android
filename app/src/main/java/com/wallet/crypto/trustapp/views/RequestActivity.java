@@ -16,10 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
@@ -63,7 +65,14 @@ public class RequestActivity extends AppCompatActivity {
             }
         });
 
-        new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0").execute();
+        try {
+            final Bitmap qrCode = TextToImageEncode(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0");
+            imageView.setImageBitmap(qrCode);
+        } catch(Exception e) {
+            Log.d(TAG, e.getMessage());
+        }
+
+        //new GenerateQRCodeTask(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0").execute();
     }
 
     Bitmap TextToImageEncode(String Value) throws WriterException {
@@ -79,24 +88,10 @@ public class RequestActivity extends AppCompatActivity {
 
             return null;
         }
-        int bitMatrixWidth = bitMatrix.getWidth();
 
-        int bitMatrixHeight = bitMatrix.getHeight();
+        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+        Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
 
-        int[] pixels = new int[bitMatrixWidth * bitMatrixHeight];
-
-        for (int y = 0; y < bitMatrixHeight; y++) {
-            int offset = y * bitMatrixWidth;
-
-            for (int x = 0; x < bitMatrixWidth; x++) {
-
-                pixels[offset + x] = bitMatrix.get(x, y) ?
-                        getResources().getColor(R.color.QRCodeBlackColor):getResources().getColor(R.color.QRCodeWhiteColor);
-            }
-        }
-        Bitmap bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444);
-
-        bitmap.setPixels(pixels, 0, QRcodeWidth, 0, 0, bitMatrixWidth, bitMatrixHeight);
         return bitmap;
     }
 

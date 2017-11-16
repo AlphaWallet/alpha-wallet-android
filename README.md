@@ -9,7 +9,8 @@ Welcome to Trust's open source Android app!
 
 1. Install latest Android Studio (>=3.0 RC 2).
 2. Clone this repository.
-3. Build and run.
+3. Register with etherscan.io and populate the API keys in Controller.java
+4. Build and run.
 
 Try the [app](https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp) on Google Play Store.
 

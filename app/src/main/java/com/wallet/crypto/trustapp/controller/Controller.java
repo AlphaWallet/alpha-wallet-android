@@ -726,7 +726,8 @@ public class Controller {
 
                 EtherscanService service = mRetrofit.create(EtherscanService.class);
 
-                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + mCurrentNetwork.getEtherscanApiKey());
+                final String etherscanKey = getRandomEtherscanKey();
+                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + etherscanKey);
 
                 Call<ESTransactionListResponse> call =
                         service.getTransactionList(
@@ -735,7 +736,7 @@ public class Controller {
                                 address,
                                 "0",
                                 "desc",
-                                getRandomEtherscanKey()
+                                etherscanKey
                         );
 
 

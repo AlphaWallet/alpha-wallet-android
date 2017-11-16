@@ -51,6 +51,9 @@ public class TransactionListActivity extends AppCompatActivity {
                 case R.id.navigation_send:
                     mController.navigateToSend(TransactionListActivity.this);
                     break;
+                case R.id.navigation_tokens:
+                    mController.navigateToTokenList(TransactionListActivity.this);
+                    break;
             }
             return false;
         }

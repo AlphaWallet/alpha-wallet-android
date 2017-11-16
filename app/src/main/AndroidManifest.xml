@@ -7,8 +7,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Allows unlocking your device and activating its screen so UI tests can succeed -->
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Allows for storing and retrieving screenshots -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -90,6 +90,10 @@
         <activity
             android:name=".views.WarningBackupActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".views.TokenListActivity"
+            android:label="@string/title_activity_token_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

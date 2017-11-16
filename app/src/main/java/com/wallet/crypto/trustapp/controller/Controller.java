@@ -29,6 +29,7 @@ import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
 import com.wallet.crypto.trustapp.views.SettingsActivity;
+import com.wallet.crypto.trustapp.views.TokenListActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
@@ -264,6 +265,12 @@ public class Controller {
             return new ArrayList<>();
         }
         return txns;
+    }
+
+    public void navigateToTokenList(Context context) {
+        Intent intent = new Intent(context, TokenListActivity.class);
+        intent.putExtra(KEY_ADDRESS, getCurrentAccount().getAddress());
+        context.startActivity(intent);
     }
 
     public void navigateToSettings(Context context) {

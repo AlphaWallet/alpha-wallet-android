@@ -100,5 +100,7 @@
     <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_terms">Terms and Conditions</string>
     <string name="title_version">Version</string>
+    <string name="title_activity_token_list">Tokens</string>
+    <string name="title_tokens">My Tokens</string>
 
 </resources>

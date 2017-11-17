@@ -73,7 +73,6 @@ public class Controller {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_PASSWORD = "key_password";
     private static Controller mInstance;
-    private static boolean mInited = false;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
     public static final int SHARE_RESULT = 2;
@@ -103,7 +102,7 @@ public class Controller {
     private TransactionListActivity mTransactionListActivity;
 
     // Background task
-    private int mInterval = 10000;
+    private int mInterval = 10000; // ms
     private Handler mHandler;
 
     public static Controller with(Context context) {
@@ -123,11 +122,6 @@ public class Controller {
     }
 
     public void init(Context appContext) {
-
-        if (mInited) {
-            return;
-        }
-        mInited = true;
 
         mAppContext = appContext;
 

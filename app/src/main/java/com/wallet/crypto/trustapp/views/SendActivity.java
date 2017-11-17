@@ -78,8 +78,8 @@ public class SendActivity extends AppCompatActivity {
                 }
 
                 final String amount = mAmount.getText().toString();
-                if (!isInt(amount)) {
-                    mAmount.setError("Must be an integer");
+                if (!isValidEthAmount(amount)) {
+                    mAmount.setError("Invalid ETH amount");
                     inputValid = false;
                 }
 
@@ -130,10 +130,11 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    boolean isInt(String value) {
-        if (value.matches("\\d+")) {
-            return true;
-        } else {
+    boolean isValidEthAmount(String eth) {
+        try {
+            String wei = Controller.EthToWei(eth);
+            return wei != null;
+        } catch (Exception e) {
             return false;
         }
     }

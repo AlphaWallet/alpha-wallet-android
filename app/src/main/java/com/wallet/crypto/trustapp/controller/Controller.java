@@ -27,9 +27,9 @@ import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
+import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.SettingsActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
-import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
@@ -40,7 +40,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
-import org.web3j.protocol.infura.InfuraHttpService;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -477,7 +477,7 @@ public class Controller {
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
                 Web3ClientVersion web3ClientVersion = web3.web3ClientVersion().sendAsync().get();
                 String clientVersion = web3ClientVersion.getWeb3ClientVersion();
                 Log.d("INFO", "web3 client version: " + clientVersion);
@@ -499,7 +499,7 @@ public class Controller {
 
         private void getBalance(VMAccount account) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
                 EthGetBalance ethGetBalance = web3
                         .ethGetBalance(account.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
@@ -584,7 +584,7 @@ public class Controller {
 
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3j = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
 
                 Account fromAccount = mEtherStore.getAccount(fromAddress);
                 if (fromAccount == null) {

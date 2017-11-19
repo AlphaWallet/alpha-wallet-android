@@ -119,7 +119,10 @@ public class TokenListActivity extends AppCompatActivity {
 
             holder.mNameView.setText(info.getName());
             holder.mSymbolView.setText(info.getSymbol());
-            holder.mBalanceView.setText(new BigDecimal(token.getBalance() / Math.pow(10, info.getDecimals())).setScale(2, RoundingMode.HALF_UP).toString());
+            BigDecimal balance = new BigDecimal(token.getBalance());
+            balance = balance.setScale(2, RoundingMode.HALF_UP);
+            balance = balance.divide(new BigDecimal(Math.pow(10, info.getDecimals())));
+            holder.mBalanceView.setText(balance.toString());
         }
 
         @Override

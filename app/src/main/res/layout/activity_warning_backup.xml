@@ -15,6 +15,7 @@
         android:layout_marginBottom="8dp"
         android:text="Do it later"
         app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/Widget.AppCompat.Button"
          />
 
     <Button

@@ -14,8 +14,9 @@
         android:id="@+id/token_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
         app:layoutManager="LinearLayoutManager"
         tools:context="com.wallet.crypto.trustapp.views.TokenListActivity"
         tools:listitem="@layout/token_list_content" />

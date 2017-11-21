@@ -1,13 +1,42 @@
 package com.wallet.crypto.trustapp.entity;
 
-import java.math.BigInteger;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Account {
+public class Account implements Parcelable {
     public final String address;
-    public final BigInteger balanceInWei;
 
-	public Account(String address, BigInteger balanceInWei) {
+	public Account(String address) {
 		this.address = address;
-		this.balanceInWei = balanceInWei;
+	}
+
+	private Account(Parcel in) {
+		address = in.readString();
+	}
+
+	public static final Creator<Account> CREATOR = new Creator<Account>() {
+		@Override
+		public Account createFromParcel(Parcel in) {
+			return new Account(in);
+		}
+
+		@Override
+		public Account[] newArray(int size) {
+			return new Account[size];
+		}
+	};
+
+	public boolean sameAddress(String address) {
+		return this.address.equals(address);
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+		parcel.writeString(address);
 	}
 }

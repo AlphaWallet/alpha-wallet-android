@@ -185,7 +185,7 @@ public class Controller {
         public void run() {
             try {
                 Log.d(TAG, "Periodic task");
-                mTransactionListActivity.fetchModelsAndReinit();
+	            mTransactionListActivity.fetchModelsAndReinit();
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }

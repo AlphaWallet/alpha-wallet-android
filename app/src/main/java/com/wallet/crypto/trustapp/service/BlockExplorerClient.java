@@ -3,7 +3,7 @@ package com.wallet.crypto.trustapp.service;
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.repository.EtheriumNetworkRepositoryType;
+import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
@@ -22,14 +22,14 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 
 	private final OkHttpClient httpClient;
 	private final Gson gson;
-	private final EtheriumNetworkRepositoryType networkRepository;
+	private final EthereumNetworkRepositoryType networkRepository;
 
 	private EtherScanApiClient etherScanApiClient;
 
 	public BlockExplorerClient(
 			OkHttpClient httpClient,
 			Gson gson,
-			EtheriumNetworkRepositoryType networkRepository) {
+			EthereumNetworkRepositoryType networkRepository) {
 		this.httpClient = httpClient;
 		this.gson = gson;
 		this.networkRepository = networkRepository;
@@ -66,7 +66,7 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 	}
 
 	private interface EtherScanApiClient {
-		@GET("/api/?module=account&action=txlist&startBlock=0&sort=desc")
+		@GET("/api/?module=account&action=txlist&startBlock=0&sort=desc") // TODO: startBlock - it's pagination. Not work now
 		Observable<Response<EtherScanResponse>> fetchTransactions(
 				@Query("address") String address,
 				@Query("apikey") String apiKey);

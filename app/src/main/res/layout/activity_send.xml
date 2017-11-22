@@ -43,7 +43,6 @@
             android:layout_height="wrap_content"
             android:imeActionLabel="@string/action_sign_in_short"
             android:imeOptions="actionUnspecified"
-            android:hint="@string/prompt_amount"
             android:inputType="numberDecimal"
             android:maxLines="1" />
 

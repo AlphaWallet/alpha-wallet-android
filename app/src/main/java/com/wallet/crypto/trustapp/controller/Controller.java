@@ -35,9 +35,21 @@ import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Int256;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCompileSolidity;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -49,6 +61,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -341,12 +354,33 @@ public class Controller {
         new ImportAccountTask(keystore, password, listener).execute();
     }
 
-    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, OnTaskCompleted listener) {
+    public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
             String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, to, wei, password, listener).execute();
+            new SendTransactionTask(from, to, wei, password, null, listener).execute();
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending transaction: ", e);
+        }
+    }
+
+    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, int decimals, OnTaskCompleted listener) {
+        Log.d(TAG, String.format("Send tokens: %s, %s, %s", from, to, tokenAmount));
+        try {
+            BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long)Math.pow(10, decimals))).toBigInteger();
+
+            List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(nTokens));
+
+            List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() { });
+
+            Function function = new Function("transfer", params, returnTypes);
+            String encodedFunction = FunctionEncoder.encode(function);
+            byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+
+            String password = PasswordManager.getPassword(from, mAppContext);
+            new SendTransactionTask(from, contractAddress, "0", password, data, listener).execute();
+
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
@@ -497,6 +531,29 @@ public class Controller {
         return version;
     }
 
+    private class SendTokensTask extends AsyncTask<Void, Void, Void> {
+        String encodedFunction;
+
+        public SendTokensTask(String encodedFunction) {
+            this.encodedFunction = encodedFunction;
+        }
+
+        protected Void doInBackground(Void... params) {
+            Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+            /*
+            Transaction transaction = Transaction.createFunctionCallTransaction(
+                    from, gasPrice, gasLimit, contractAddress, amount, encodedFunction);
+
+            org.web3j.protocol.core.methods.response.EthSendTransaction transactionResponse =
+                    web3.ethSendTransaction(transaction).sendAsync().get();
+
+            String transactionHash = transactionResponse.getTransactionHash();
+            String password = PasswordManager.getPassword(from, mAppContext);
+            */
+            return null;
+        }
+    }
+
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
@@ -602,13 +659,15 @@ public class Controller {
         private String toAddress;
         private String wei;
         private String password;
+        private byte[] data;
         private OnTaskCompleted listener;
 
-        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, OnTaskCompleted listener) {
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, byte[] data, OnTaskCompleted listener) {
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.wei = wei;
             this.password = password;
+            this.data = data;
             this.listener = listener;
             Log.d(TAG, "SendTransaction %s %s %s".format(fromAddress, toAddress, wei));
         }
@@ -630,7 +689,7 @@ public class Controller {
 
                 String hexValue = "0xDEADBEEF";
                 try {
-                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, nonce.longValue());
+                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, data, nonce.longValue());
                     hexValue = Numeric.toHexString(signedMessage);
                 } catch (Exception e) {
                     Log.e(TAG, "Error signing " + e.toString());

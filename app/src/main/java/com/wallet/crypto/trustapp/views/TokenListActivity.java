@@ -115,7 +115,7 @@ public class TokenListActivity extends AppCompatActivity {
             holder.mItem = mValues.get(position);
 
             EPToken token = holder.mItem;
-            EPTokenInfo info = token.getTokenInfo();
+            final EPTokenInfo info = token.getTokenInfo();
 
             try {
                 holder.mNameView.setText(info.getName());
@@ -126,6 +126,20 @@ public class TokenListActivity extends AppCompatActivity {
                 balance = info.getDecimals() > 0 ? balance.divide(decimalDivisor) : balance;
                 balance = balance.setScale(2, RoundingMode.HALF_UP);
                 holder.mBalanceView.setText(balance.toString());
+
+                holder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Context context = v.getContext();
+                        Intent intent = new Intent(context, SendActivity.class);
+                        intent.putExtra(SendActivity.EXTRA_SENDING_TOKENS, true);
+                        intent.putExtra(SendActivity.EXTRA_CONTRACT_ADDRESS, info.getAddress());
+                        intent.putExtra(SendActivity.EXTRA_SYMBOL, info.getSymbol());
+                        intent.putExtra(SendActivity.EXTRA_DECIMALS, info.getDecimals());
+
+                        context.startActivity(intent);
+                    }
+                });
             } catch (Exception e) {
                 holder.mNameView.setText("N/A");
                 holder.mSymbolView.setText("N/A");

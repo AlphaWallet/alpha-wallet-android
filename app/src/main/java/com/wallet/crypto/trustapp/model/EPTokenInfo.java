@@ -24,6 +24,9 @@ import com.google.gson.annotations.SerializedName;
 */
 
 public class EPTokenInfo {
+    @SerializedName("address")
+    private String address;
+
     @SerializedName("name")
     private String name;
 
@@ -32,6 +35,10 @@ public class EPTokenInfo {
 
     @SerializedName("decimals")
     private int decimals;
+
+    public String getAddress() {
+        return address;
+    }
 
     public String getName() {
         return name;

@@ -25,7 +25,7 @@ public class AccountTest {
 
     @Test
     public void deleteAccountTest() {
-        Controller controller = Controller.get();
+        Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
         VMAccount account = controller.createAccount("test password");
         assert(account != null);
 
@@ -40,7 +40,7 @@ public class AccountTest {
 
     @Test
     public void createAccountTest() {
-        Controller controller = Controller.get();
+        Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
         VMAccount account = controller.createAccount("test password");
         assert(account != null);
     }

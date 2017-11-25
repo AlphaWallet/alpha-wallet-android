@@ -10,6 +10,7 @@ import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
+import org.web3j.protocol.core.methods.request.RawTransaction;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -24,8 +25,10 @@ public class EtherStore {
 //    private KeyChain keyChain;
     private KeyStore ks;
     private static String TAG = "EtherStore";
+    private Controller mController;
 
-    public EtherStore(String filesDir) {
+    public EtherStore(String filesDir, Controller controller) {
+        mController = controller;
         ks = new KeyStore(filesDir + "/keystore", Geth.LightScryptN, Geth.LightScryptP);
         Log.d(TAG, "Created KeyStore with %s accounts".format(Long.toString(ks.getAccounts().size())));
     }
@@ -59,20 +62,20 @@ public class EtherStore {
         ks.deleteAccount(account, password);
     }
 
-    public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce) throws Exception {
+    public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, byte[] data, long nonce) throws Exception {
         BigInt value = new BigInt(Long.decode(wei));
 
         BigInt gasPrice = new BigInt(0);
-        gasPrice.setString("15000000000", 10); // price, base
+        gasPrice.setString("1000000000", 10); // price, base
 
         Transaction tx = new Transaction(
                 nonce, new Address(toAddress),
                 value,
                 new BigInt(90000), // gas limit
                 gasPrice,
-                null); // data
+                data); // data
 
-        BigInt chain = new BigInt(Controller.get().getCurrentNetwork().getChainId()); // Chain identifier of the main net
+        BigInt chain = new BigInt(mController.getCurrentNetwork().getChainId()); // Chain identifier of the main net
 
         ks.unlock(signer, signerPassword);
         Transaction signed = ks.signTx(signer, tx, chain);

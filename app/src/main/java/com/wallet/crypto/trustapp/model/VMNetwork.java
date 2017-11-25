@@ -8,14 +8,12 @@ public class VMNetwork {
     private String name;
     private String infuraUrl;
     private String etherscanUrl;
-    private String etherscanApiKey;
     private int chainId;
 
-    public VMNetwork(String name, String infuraUrl, String etherscanUrl, String etherscanApiKey, int chainId) {
+    public VMNetwork(String name, String infuraUrl, String etherscanUrl, int chainId) {
         this.name = name;
         this.infuraUrl = infuraUrl;
         this.etherscanUrl = etherscanUrl;
-        this.etherscanApiKey = etherscanApiKey;
         this.chainId = chainId;
     }
 
@@ -30,10 +28,6 @@ public class VMNetwork {
 
     public String getEtherscanUrl() {
         return etherscanUrl;
-    }
-
-    public String getEtherscanApiKey() {
-        return etherscanApiKey;
     }
 
     public int getChainId() {

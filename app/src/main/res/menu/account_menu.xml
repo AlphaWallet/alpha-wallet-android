@@ -7,7 +7,11 @@
         android:title="@string/title_send" />
     <item
         android:id="@+id/navigation_receive"
-        android:icon="@drawable/ic_add_circle_black_24dp"
+        android:icon="@mipmap/qr_code_icon"
         android:title="@string/title_request" />
+    <item
+        android:id="@+id/navigation_tokens"
+        android:icon="@drawable/token_icon"
+        android:title="@string/title_tokens" />
 
 </menu>

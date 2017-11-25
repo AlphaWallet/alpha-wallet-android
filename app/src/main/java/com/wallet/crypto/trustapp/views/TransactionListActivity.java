@@ -51,6 +51,9 @@ public class TransactionListActivity extends AppCompatActivity {
                 case R.id.navigation_send:
                     mController.navigateToSend(TransactionListActivity.this);
                     break;
+                case R.id.navigation_tokens:
+                    mController.navigateToTokenList(TransactionListActivity.this);
+                    break;
             }
             return false;
         }
@@ -63,8 +66,8 @@ public class TransactionListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_list);
 
-        mController = Controller.get();
-        mController.init(getApplicationContext(), this);
+        mController = Controller.with(getApplicationContext());
+        mController.setTransactionListActivity(this);
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -115,7 +118,17 @@ public class TransactionListActivity extends AppCompatActivity {
                 String balance = Controller.WeiToEth(account.getBalance().toString(), 5);
                 Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                 setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle(mAddress.substring(0, 5) + "... : " + balance + " ETH");
+
+                String usd = Controller.with(this).EthToUsd(balance);
+                // Conversion data may not be available, in which case, hide it
+                if (usd != null) {
+                    getSupportActionBar().setTitle("$" + usd);
+                    getSupportActionBar().setSubtitle(balance + " ETH");
+                } else {
+                    getSupportActionBar().setTitle(balance + " ETH");
+                    getSupportActionBar().setSubtitle(mAddress);
+                }
+
                 toolbar.inflateMenu(R.menu.transaction_list_menu);
             } catch (Exception e) {
                 Log.e(TAG, "Error updating balance: ", e);
@@ -198,7 +211,7 @@ public class TransactionListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        Controller controller = Controller.get();
+        Controller controller = Controller.with(this);
         List<ESTransaction> txns = controller.getTransactions(mAddress);
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(txns));
     }

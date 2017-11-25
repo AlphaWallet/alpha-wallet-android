@@ -38,8 +38,17 @@ public class SendActivity extends AppCompatActivity {
     private static final String LOG_TAG = SendActivity.class.getSimpleName();
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
+    public static final String EXTRA_SENDING_TOKENS = "extra_sending_tokens";
+    public static final String EXTRA_CONTRACT_ADDRESS = "extra_contract_address";
+    public static final String EXTRA_SYMBOL = "extra_symbol";
+    public static final String EXTRA_DECIMALS = "extra_decimals";
+
     private TextView mResultTextView;
 
+    private boolean mSendingTokens = false;
+    private String mContractAddress;
+    private String mSymbol;
+    private int mDecimals;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +60,7 @@ public class SendActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mController = Controller.get();
+        mController = Controller.with(this);
 
         List<VMAccount> accounts = mController.getAccounts();
 
@@ -61,6 +70,20 @@ public class SendActivity extends AppCompatActivity {
         String toAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
         if (toAddress != null) {
             mTo.setText(toAddress);
+        }
+
+        mContractAddress = getIntent().getStringExtra(EXTRA_CONTRACT_ADDRESS);
+        mDecimals = getIntent().getIntExtra(EXTRA_DECIMALS, -1);
+        mSymbol = getIntent().getStringExtra(EXTRA_SYMBOL);
+        mSendingTokens = getIntent().getBooleanExtra(EXTRA_SENDING_TOKENS, false);
+
+        assert(!mSendingTokens || (mSendingTokens && mDecimals > -1 && mContractAddress != null));
+
+        EditText amountView = findViewById(R.id.amount);
+        if (mSendingTokens && mSymbol != null) {
+            amountView.setHint(mSymbol + " amount");
+        } else {
+            amountView.setHint("ETH amount");
         }
 
         Button mSendButton = (Button) findViewById(R.id.send_button);
@@ -78,8 +101,8 @@ public class SendActivity extends AppCompatActivity {
                 }
 
                 final String amount = mAmount.getText().toString();
-                if (!isInt(amount)) {
-                    mAmount.setError("Must be an integer");
+                if (!isValidEthAmount(amount)) {
+                    mAmount.setError("Invalid amount");
                     inputValid = false;
                 }
 
@@ -87,25 +110,47 @@ public class SendActivity extends AppCompatActivity {
                     return;
                 }
 
-                mController.clickSend(
-                    SendActivity.this,
-                    mController.getCurrentAccount().getAddress(),
-                    mTo.getText().toString(),
-                    mAmount.getText().toString(),
-                    new OnTaskCompleted() {
-                        public void onTaskCompleted(final TaskResult result) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (result.getStatus() == TaskStatus.SUCCESS) {
-                                        SendActivity.this.finish();
-                                    }
-                                    Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                if (mSendingTokens) {
+                    mController.clickSendTokens(
+                            mController.getCurrentAccount().getAddress(),
+                            mTo.getText().toString(),
+                            mContractAddress,
+                            mAmount.getText().toString(),
+                            mDecimals,
+                            new OnTaskCompleted() {
+                                public void onTaskCompleted(final TaskResult result) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (result.getStatus() == TaskStatus.SUCCESS) {
+                                                SendActivity.this.finish();
+                                            }
+                                            Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                    }
-                );
+                            }
+                    );
+                } else {
+                    mController.clickSend(
+                            mController.getCurrentAccount().getAddress(),
+                            mTo.getText().toString(),
+                            mAmount.getText().toString(),
+                            new OnTaskCompleted() {
+                                public void onTaskCompleted(final TaskResult result) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (result.getStatus() == TaskStatus.SUCCESS) {
+                                                SendActivity.this.finish();
+                                            }
+                                            Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }
+                    );
+                }
             }
         });
 
@@ -130,10 +175,11 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    boolean isInt(String value) {
-        if (value.matches("\\d+")) {
-            return true;
-        } else {
+    boolean isValidEthAmount(String eth) {
+        try {
+            String wei = Controller.EthToWei(eth);
+            return wei != null;
+        } catch (Exception e) {
             return false;
         }
     }

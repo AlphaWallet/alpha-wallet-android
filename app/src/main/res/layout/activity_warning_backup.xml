@@ -15,7 +15,8 @@
         android:layout_marginBottom="8dp"
         android:text="Do it later"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
+        style="@style/Widget.AppCompat.Button"
+         />
 
     <Button
         android:id="@+id/backup_button"
@@ -25,7 +26,7 @@
         android:layout_marginBottom="8dp"
         android:text="Backup Wallet"
         app:layout_constraintBottom_toTopOf="@+id/later_button"
-        tools:layout_editor_absoluteX="0dp" />
+         />
 
     <TextView
         android:id="@+id/textView"
@@ -38,7 +39,7 @@
         app:layout_constraintBottom_toTopOf="@+id/backup_button"
         app:layout_constraintTop_toBottomOf="@+id/textView3"
         app:layout_constraintVertical_bias="0.067"
-        tools:layout_editor_absoluteX="0dp" />
+         />
 
     <ImageView
         android:id="@+id/imageView2"

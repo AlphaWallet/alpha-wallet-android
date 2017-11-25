@@ -3,53 +3,43 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp"
     android:weightSum="2">
 
-    <TextView
-        android:id="@+id/sent_or_received"
+    <ImageView
+        android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:maxLines="1"
-        android:text="Sent"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:layout_alignParentTop="true"
+        android:src="@mipmap/token_logo"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
-        android:id="@+id/transaction_address"
+        android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="11dp"
         android:layout_weight="1"
         android:maxLines="1"
-        android:text="0xDEADBEEF"
+        android:text="Trust"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:layout_below="@+id/sent_or_received"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_toRightOf="@id/logo"
+        android:layout_alignParentTop="true" />
 
     <TextView
-        android:id="@+id/date"
+        android:id="@+id/symbol"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="11dp"
+        android:layout_toRightOf="@id/logo"
+        android:layout_below="@+id/name"
         android:layout_weight="1"
         android:maxLines="1"
-        android:text="0xDEADBEEF"
+        android:text="TRST"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:layout_below="@+id/transaction_address"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:textSize="11dp" />
 
     <TextView
-        android:id="@+id/value"
+        android:id="@+id/balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+10"
-        android:textColor="@color/colorAccent"
         android:layout_weight="1"
         android:layout_marginRight="13dp"
         android:layout_marginEnd="13dp"

@@ -18,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.model.CMTicker;
 import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
@@ -29,13 +30,26 @@ import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.SettingsActivity;
+import com.wallet.crypto.trustapp.views.TokenListActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Int256;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCompileSolidity;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -47,11 +61,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -70,7 +86,6 @@ public class Controller {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_PASSWORD = "key_password";
     private static Controller mInstance;
-    private static boolean mInited = false;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
     public static final int SHARE_RESULT = 2;
@@ -81,6 +96,7 @@ public class Controller {
 
     // Services
     private EtherStore mEtherStore;
+    private CoinmarketService mCoinmarketService;
     private SharedPreferences mPreferences;
 
     // State
@@ -90,48 +106,57 @@ public class Controller {
 
     // View models
     private ArrayList<VMNetwork> mNetworks;
+    private ArrayList<String> mEtherscanKeys;
     private ArrayList<VMAccount> mAccounts;
     private Map<String, List<ESTransaction>> mTransactions;
+    private CMTicker mEthTicker = null; // if null, no data available
 
     // Views
     private TransactionListActivity mTransactionListActivity;
 
-    // Backgroud task
-    private int mInterval = 10000;
+    // Background task
+    private int mInterval = 10000; // ms
     private Handler mHandler;
 
-    public static Controller get() {
+    public static Controller with(Context context) {
         if (mInstance == null) {
-            mInstance = new Controller();
+            synchronized (Controller.class) {
+                if (mInstance == null) {
+                    mInstance = new Controller(context.getApplicationContext());
+                }
+            }
         }
         return mInstance;
     }
 
-    protected Controller() { }
+    protected Controller(Context context) {
+        mAppContext = context;
+        init(context);
+    }
 
-    public void init(Context appContext, TransactionListActivity activity) {
-
-        if (mInited) {
-            return;
-        }
-        mInited = true;
+    public void init(Context appContext) {
 
         mAppContext = appContext;
-        mTransactionListActivity = activity;
 
         mKeystoreBaseDir = mAppContext.getFilesDir() + "/keystore";
 
         mPreferences = mAppContext.getSharedPreferences("MyPref", 0); // 0 - for private mode
 
-        mEtherStore = new EtherStore(mKeystoreBaseDir);
+        mEtherStore = new EtherStore(mKeystoreBaseDir, this);
+
+        // Create etherscan key list
+        mEtherscanKeys = new ArrayList<>();
+        mEtherscanKeys.add("{etherscan_key1}");
+        mEtherscanKeys.add("{etherscan_key2}");
+        mEtherscanKeys.add("{etherscan_key3}");
 
         // Create networks list
         mNetworks = new ArrayList<>();
 
-        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 1));
-        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 42));
-        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 3));
-        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", "ZVU87DFQYV2TPJQKRJDITS42MW58GUEZ4V", 4));
+        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", 1));
+        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", 42));
+        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", 3));
+        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", 4));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -176,7 +201,6 @@ public class Controller {
     }
 
     public void setTransactionListActivity(TransactionListActivity activity) {
-        assert(mTransactionListActivity == null); // this should only be done once
         mTransactionListActivity = activity;
     }
 
@@ -185,10 +209,14 @@ public class Controller {
         public void run() {
             try {
                 Log.d(TAG, "Periodic task");
-	            mTransactionListActivity.fetchModelsAndReinit();
+                mTransactionListActivity.fetchModelsAndReinit();
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to fetch update mTransactionListActivity");
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }
+
+            fetchEthereumTicker();
         }
     };
 
@@ -244,6 +272,12 @@ public class Controller {
             return new ArrayList<>();
         }
         return txns;
+    }
+
+    public void navigateToTokenList(Context context) {
+        Intent intent = new Intent(context, TokenListActivity.class);
+        intent.putExtra(KEY_ADDRESS, getCurrentAccount().getAddress());
+        context.startActivity(intent);
     }
 
     public void navigateToSettings(Context context) {
@@ -320,12 +354,33 @@ public class Controller {
         new ImportAccountTask(keystore, password, listener).execute();
     }
 
-    public void clickSend(SendActivity sendActivity, String from, String to, String ethAmount, OnTaskCompleted listener) {
+    public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
             String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, to, wei, password, listener).execute();
+            new SendTransactionTask(from, to, wei, password, null, listener).execute();
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending transaction: ", e);
+        }
+    }
+
+    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, int decimals, OnTaskCompleted listener) {
+        Log.d(TAG, String.format("Send tokens: %s, %s, %s", from, to, tokenAmount));
+        try {
+            BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long)Math.pow(10, decimals))).toBigInteger();
+
+            List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(nTokens));
+
+            List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() { });
+
+            Function function = new Function("transfer", params, returnTypes);
+            String encodedFunction = FunctionEncoder.encode(function);
+            byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+
+            String password = PasswordManager.getPassword(from, mAppContext);
+            new SendTransactionTask(from, contractAddress, "0", password, data, listener).execute();
+
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
@@ -386,7 +441,9 @@ public class Controller {
         }
         assert(mCurrentNetwork != null);
         if (previous != mCurrentNetwork) {
-            mTransactionListActivity.fetchModelsAndReinit();
+            if (mTransactionListActivity != null) { // may not be set yet
+                mTransactionListActivity.fetchModelsAndReinit();
+            }
         }
     }
 
@@ -472,6 +529,29 @@ public class Controller {
             e.printStackTrace();
         }
         return version;
+    }
+
+    private class SendTokensTask extends AsyncTask<Void, Void, Void> {
+        String encodedFunction;
+
+        public SendTokensTask(String encodedFunction) {
+            this.encodedFunction = encodedFunction;
+        }
+
+        protected Void doInBackground(Void... params) {
+            Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+            /*
+            Transaction transaction = Transaction.createFunctionCallTransaction(
+                    from, gasPrice, gasLimit, contractAddress, amount, encodedFunction);
+
+            org.web3j.protocol.core.methods.response.EthSendTransaction transactionResponse =
+                    web3.ethSendTransaction(transaction).sendAsync().get();
+
+            String transactionHash = transactionResponse.getTransactionHash();
+            String password = PasswordManager.getPassword(from, mAppContext);
+            */
+            return null;
+        }
     }
 
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
@@ -566,18 +646,28 @@ public class Controller {
         }
     }
 
+    // Randomize etherscan key selection stay below rate limit
+    private String getRandomEtherscanKey() {
+        assert(mEtherscanKeys.size() > 0);
+
+        final int random = new Random().nextInt(mEtherscanKeys.size());
+        return mEtherscanKeys.get(random);
+    }
+
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
         private String fromAddress;
         private String toAddress;
         private String wei;
         private String password;
+        private byte[] data;
         private OnTaskCompleted listener;
 
-        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, OnTaskCompleted listener) {
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, byte[] data, OnTaskCompleted listener) {
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.wei = wei;
             this.password = password;
+            this.data = data;
             this.listener = listener;
             Log.d(TAG, "SendTransaction %s %s %s".format(fromAddress, toAddress, wei));
         }
@@ -599,7 +689,7 @@ public class Controller {
 
                 String hexValue = "0xDEADBEEF";
                 try {
-                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, nonce.longValue());
+                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, data, nonce.longValue());
                     hexValue = Numeric.toHexString(signedMessage);
                 } catch (Exception e) {
                     Log.e(TAG, "Error signing " + e.toString());
@@ -636,6 +726,46 @@ public class Controller {
         }
     }
 
+    private void fetchEthereumTicker() {
+        try {
+
+            Retrofit mRetrofit = new Retrofit.Builder()
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .baseUrl("https://api.coinmarketcap.com")
+                    .build();
+
+            CoinmarketService service = mRetrofit.create(CoinmarketService.class);
+
+            Call<List<CMTicker>> call =
+                    service.getEthereumPrice();
+
+            Log.d("INFO", "Request query:" + call.request().url().query());
+            call.enqueue(new Callback<List<CMTicker>>() {
+
+                @Override
+                public void onResponse(Call<List<CMTicker>> call, Response<List<CMTicker>> response) {
+                    try {
+                        List<CMTicker> tickers = response.body();
+                        Log.d("INFO", "Number of transactions: " + tickers.size());
+                        if (tickers.size() == 1) {
+                            mEthTicker = tickers.get(0);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getLocalizedMessage());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<CMTicker>> call, Throwable t) {
+                    Log.e("ERROR", t.toString());
+                    Toast.makeText(mAppContext, "Error contacting ether price service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private class GetTransactionsTask extends AsyncTask<Void, Void, Void> {
         private final List<VMAccount> mAccounts;
         private final OnTaskCompleted mListener;
@@ -656,7 +786,8 @@ public class Controller {
 
                 EtherscanService service = mRetrofit.create(EtherscanService.class);
 
-                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + mCurrentNetwork.getEtherscanApiKey());
+                final String etherscanKey = getRandomEtherscanKey();
+                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + etherscanKey);
 
                 Call<ESTransactionListResponse> call =
                         service.getTransactionList(
@@ -665,7 +796,7 @@ public class Controller {
                                 address,
                                 "0",
                                 "desc",
-                                mCurrentNetwork.getEtherscanApiKey()
+                                etherscanKey
                         );
 
 
@@ -724,6 +855,20 @@ public class Controller {
         int scale = sigFig - eth.precision() + eth.scale();
         BigDecimal eth_scaled = eth.setScale(scale, RoundingMode.HALF_UP);
         return eth_scaled.toString();
+    }
+
+    public String EthToUsd(String balance) {
+        if (mEtherStore == null) {
+            return null;
+        }
+        try {
+            BigDecimal usd = new BigDecimal(balance).multiply(new BigDecimal(mEthTicker.getPriceUsd()));
+            usd = usd.setScale(2, RoundingMode.CEILING);
+            return usd.toString();
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting ETH to USD");
+        }
+        return null;
     }
 
     public static String WeiToGwei(String wei) {

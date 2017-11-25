@@ -1,6 +1,5 @@
 package com.wallet.crypto.trustapp.controller;
 
-import android.security.KeyChain;
 import android.util.Log;
 
 import org.ethereum.geth.Account;
@@ -10,7 +9,6 @@ import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;

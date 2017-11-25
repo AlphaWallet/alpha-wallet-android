@@ -51,7 +51,8 @@ public interface AccountKeystoreService {
 			String signerPassword,
 			String toAddress,
 			String wei,
-			long nonce);
+			long nonce,
+			long chainId);
 
 	/**
 	 * Check if there is an address in the keystore

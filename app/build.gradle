@@ -45,12 +45,13 @@ android {
 project.ext {
     retrofitVersion = "2.3.0"
     okhttpVersion = "3.9.0"
-    supportVersion = "27.0.0"
+    supportVersion = "27.0.1"
     web3jVersion = "3.1.1-android"
     gethVersion = "1.7.0"
     gsonVersion = "2.8.2"
     rxJavaVersion = "2.1.6"
     rxAndroidVersion = "2.0.1"
+    daggerVersion = "2.11"
 }
 
 dependencies {
@@ -79,6 +80,15 @@ dependencies {
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$project.rxAndroidVersion"
+    // Dagger 2
+    // Dagger core
+    implementation "com.google.dagger:dagger:$project.daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-compiler:$project.daggerVersion"
+    // Dagger Android
+    implementation "com.google.dagger:dagger-android-support:$project.daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-android-processor:$project.daggerVersion"
+    // if you are not using support library, include this instead
+    implementation "com.google.dagger:dagger-android:$project.daggerVersion"
     // Tests
     testImplementation "junit:junit:4.12"
     androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {

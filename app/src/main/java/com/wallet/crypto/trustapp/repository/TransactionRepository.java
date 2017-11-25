@@ -81,7 +81,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					.send();
 			return ethGetTransactionCount.getTransactionCount();
 		})
-		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, wei, nonce.longValue()))
+		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, wei, nonce.longValue(), networkRepository.getDefaultNetwork().chainId))
 		.flatMapCompletable(signedMessage -> Completable.fromAction(() -> {
 			EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))

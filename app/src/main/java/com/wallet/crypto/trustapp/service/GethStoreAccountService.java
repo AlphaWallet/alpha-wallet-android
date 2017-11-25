@@ -1,6 +1,5 @@
 package com.wallet.crypto.trustapp.service;
 
-import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.entity.Account;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 
@@ -62,7 +61,7 @@ public class GethStoreAccountService implements AccountKeystoreService {
 	}
 
 	@Override
-	public Single<byte[]> signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce) {
+	public Single<byte[]> signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce, long chainId) {
 		return Single.fromCallable(new Callable<byte[]>() {
 			@Override
 			public byte[] call() throws Exception {
@@ -77,7 +76,7 @@ public class GethStoreAccountService implements AccountKeystoreService {
 						gasPrice,
 						null); // data
 
-				BigInt chain = new BigInt(Controller.get().getCurrentNetwork().getChainId()); // Chain identifier of the main net
+				BigInt chain = new BigInt(chainId); // Chain identifier of the main net
 				org.ethereum.geth.Account gethAccount = findAccount(signer.address);
 				keyStore.unlock(gethAccount, signerPassword);
 				Transaction signed = keyStore.signTx(gethAccount, tx, chain);

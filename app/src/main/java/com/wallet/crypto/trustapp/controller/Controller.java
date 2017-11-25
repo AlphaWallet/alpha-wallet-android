@@ -36,20 +36,15 @@ import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
 import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCompileSolidity;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -539,7 +534,7 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... params) {
-            Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+            Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
             /*
             Transaction transaction = Transaction.createFunctionCallTransaction(
                     from, gasPrice, gasLimit, contractAddress, amount, encodedFunction);

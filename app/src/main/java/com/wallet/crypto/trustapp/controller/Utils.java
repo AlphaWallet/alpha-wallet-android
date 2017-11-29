@@ -8,13 +8,13 @@ import java.util.regex.Pattern;
  */
 
 public class Utils {
-    static final Pattern qrPattern = Pattern.compile("^ethereum:(0x[0-9a-f]{40,})([?]value=[0-9]{1,10})?");
+    static final Pattern qrPattern = Pattern.compile("^(ethereum:)?(0x[0-9a-f]{40})([?]value=[0-9]{1,10})?$");
 
     public static String extractAddressFromQrString(String qrString) {
 
         Matcher m = qrPattern.matcher(qrString);
         if (m.find()) {
-            return m.group(1);
+            return m.group(2);
         }
         return null;
     }

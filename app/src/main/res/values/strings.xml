@@ -107,5 +107,6 @@
     <string name="message_importing_private_key">Importing private key. One moment.</string>
     <string name="tab_keystore">Keystore</string>
     <string name="tab_private_key">Private key</string>
+    <string name="action_transaction_detail">More details</string>
 
 </resources>

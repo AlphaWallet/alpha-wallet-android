@@ -8,6 +8,7 @@ import org.ethereum.geth.Address;
 import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
+import org.ethereum.geth.Log;
 import org.ethereum.geth.Transaction;
 
 import java.io.File;
@@ -18,11 +19,11 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
-public class GethStoreAccountService implements AccountKeystoreService {
+public class GethKeystoreAccountService implements AccountKeystoreService {
 
 	private final KeyStore keyStore;
 
-	public GethStoreAccountService(File keyStoreFile) {
+	public GethKeystoreAccountService(File keyStoreFile) {
 		// TODO: filesDir + "/keystore"
 		keyStore = new KeyStore(keyStoreFile.getAbsolutePath(), Geth.LightScryptN, Geth.LightScryptP);
 	}
@@ -98,6 +99,7 @@ public class GethStoreAccountService implements AccountKeystoreService {
 		return Single.fromCallable(() -> {
 			Accounts accounts = keyStore.getAccounts();
 			int len = (int) accounts.size();
+			android.util.Log.d("ACCOUNT_FETCH", "Len: " + len);
 			Account[] result = new Account[len];
 
 			for (int i = 0; i < len; i++) {
@@ -105,7 +107,8 @@ public class GethStoreAccountService implements AccountKeystoreService {
 				result[i] = new Account(gethAccount.getAddress().getHex().toLowerCase());
 			}
 			return result;
-		}).subscribeOn(Schedulers.io());
+		})
+		.subscribeOn(Schedulers.io());
 	}
 
 	private org.ethereum.geth.Account findAccount(String address) throws ServiceException {
@@ -113,7 +116,8 @@ public class GethStoreAccountService implements AccountKeystoreService {
 		int len = (int) accounts.size();
 		for (int i = 0; i < len; i++) {
 			try {
-				if (accounts.get(i).getAddress().getHex().equals(address)) {
+				android.util.Log.d("ACCOUNT_FIND", "Address: " + accounts.get(i).getAddress().getHex());
+				if (accounts.get(i).getAddress().getHex().equalsIgnoreCase(address)) {
 					return accounts.get(i);
 				}
 			} catch (Exception ex) {

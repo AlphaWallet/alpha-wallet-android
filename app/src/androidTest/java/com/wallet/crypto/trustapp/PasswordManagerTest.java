@@ -6,7 +6,6 @@ import android.support.test.InstrumentationRegistry;
 import com.wallet.crypto.trustapp.controller.PasswordManager;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;

@@ -16,7 +16,7 @@ import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.BlockExplorerClient;
 import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
-import com.wallet.crypto.trustapp.service.GethStoreAccountService;
+import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 
 import java.io.File;
 
@@ -27,7 +27,7 @@ import dagger.Provides;
 import okhttp3.OkHttpClient;
 
 @Module
-class RepositoriesModule {
+public class RepositoriesModule {
 	@Singleton
 	@Provides
 	PreferenceRepositoryType providePreferenceRepository(Context context) {
@@ -38,7 +38,7 @@ class RepositoriesModule {
 	@Provides
 	AccountKeystoreService provideAccountKeyStoreService(Context context) {
 		File file = new File(context.getFilesDir(), "keystore");
-		return new GethStoreAccountService(file);
+		return new GethKeystoreAccountService(file);
 	}
 
 	@Singleton

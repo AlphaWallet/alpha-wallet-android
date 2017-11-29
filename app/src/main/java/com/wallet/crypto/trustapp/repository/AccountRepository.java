@@ -30,8 +30,7 @@ public class AccountRepository implements AccountRepositoryType {
 
 	@Override
 	public Single<Account[]> fetchAccounts() {
-		return accountKeystoreService
-				.fetchAccounts();
+		return accountKeystoreService.fetchAccounts();
 	}
 
 	@Override

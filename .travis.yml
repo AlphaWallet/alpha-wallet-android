@@ -33,7 +33,7 @@ before_install:
   - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "${ANDROID_HOME}/licenses/android-sdk-license"
   - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> "${ANDROID_HOME}/licenses/android-sdk-license"
   - cat "${ANDROID_HOME}/licenses/android-sdk-license"
-  - export NDK_VERSION=r12e
+  - export NDK_VERSION=r12
   - curl -L http://dl.google.com/android/ndk/android-ndk-${NDK_VERSION}-linux-x86_64.bin -O
   - chmod u+x android-ndk-${NDK_VERSION}-linux-x86_64.bin
   - ./android-ndk-${NDK_VERSION}-linux-x86_64.bin > /dev/null

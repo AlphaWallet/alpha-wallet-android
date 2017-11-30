@@ -1,4 +1,7 @@
-language: android
+languages:
+  - android
+  - cpp
+sudo: true
 android:
   components:
     # Uncomment the lines below if you want to
@@ -15,6 +18,11 @@ android:
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
     - sys-img-armeabi-v7a-android-26
+
+addons:
+  apt:
+    packages:
+      - cmake
 
 licenses:
   - 'android-sdk-preview-license-.+'

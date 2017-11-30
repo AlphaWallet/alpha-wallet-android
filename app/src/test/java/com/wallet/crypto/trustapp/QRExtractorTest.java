@@ -31,16 +31,12 @@ public class QRExtractorTest {
         extractedString = Utils.extractAddressFromQrString("0x0000000000000000000000000000000000000000?value=0");
         assertTrue("0x0000000000000000000000000000000000000000".equals(extractedString));
 
+        // Address with a different protocol
+        extractedString = Utils.extractAddressFromQrString("omg:0x0000000000000000000000000000000000000000");
+        assertTrue("0x0000000000000000000000000000000000000000".equals(extractedString));
+
         // Negative: address too long
         extractedString = Utils.extractAddressFromQrString("0x0000000000000000000000000000000000000000123");
-        assertTrue(extractedString == null);
-
-        // Negative: address too long
-        extractedString = Utils.extractAddressFromQrString("notethereum:0x0000000000000000000000000000000000000000123");
-        assertTrue(extractedString == null);
-
-        // Negative: invalid prefix
-        extractedString = Utils.extractAddressFromQrString("notethereum:0x0000000000000000000000000000000000000000");
         assertTrue(extractedString == null);
 
         // Negative: invalid postfix

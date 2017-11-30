@@ -26,6 +26,7 @@ licenses:
   - 'google-gdk-license-.+'
 
 before_install:
+  - echo yes | sdkmanager "cmake;3.6.3155560"
   - git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
   - export ANDROID_NDK_HOME=$HOME/android-ndk-root
 

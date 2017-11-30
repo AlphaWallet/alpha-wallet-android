@@ -1,6 +1,4 @@
-languages:
-  - android
-  - cpp
+language: android
 sudo: true
 android:
   components:
@@ -15,14 +13,12 @@ android:
     # The SDK version used to compile your project
     - android-26
 
+    - extra-android-m2repository
+    - extra-google-android-support
+
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
     - sys-img-armeabi-v7a-android-26
-
-addons:
-  apt:
-    packages:
-      - cmake
 
 licenses:
   - 'android-sdk-preview-license-.+'

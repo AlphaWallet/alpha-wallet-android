@@ -7,15 +7,15 @@ package com.wallet.crypto.trustapp.model;
 public class VMNetwork {
     private String name;
     private String symbol;
-    private String infuraUrl;
-    private String etherscanUrl;
+    private String rpcServerUrl;
+    private String backendUrl;
     private int chainId;
 
-    public VMNetwork(String name, String symbol, String infuraUrl, String etherscanUrl, int chainId) {
+    public VMNetwork(String name, String symbol, String rpcServerUrl, String backendUrl, int chainId) {
         this.name = name;
         this.symbol = symbol;
-        this.infuraUrl = infuraUrl;
-        this.etherscanUrl = etherscanUrl;
+        this.rpcServerUrl = rpcServerUrl;
+        this.backendUrl = backendUrl;
         this.chainId = chainId;
     }
 
@@ -27,11 +27,11 @@ public class VMNetwork {
     public String getSymbol() { return symbol; }
 
     public String getRpcUrl() {
-        return infuraUrl;
+        return rpcServerUrl;
     }
 
-    public String getEtherscanUrl() {
-        return etherscanUrl;
+    public String getBackendUrl() {
+        return backendUrl;
     }
 
     public int getChainId() {

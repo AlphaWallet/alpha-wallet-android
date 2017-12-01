@@ -11,12 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
-import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.TRTransaction;
 
 public class TransactionDetailFragment extends Fragment implements View.OnClickListener {
@@ -118,7 +116,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
     }
 
     public void goToMoreDetails () {
-        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getEtherscanUrl() + "/tx/" + mItem.getHash());
+        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getBackendUrl() + "/tx/" + mItem.getHash());
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
         startActivity(launchBrowser);
     }

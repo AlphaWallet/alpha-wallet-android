@@ -835,13 +835,13 @@ public class Controller {
 
                 Retrofit mRetrofit = new Retrofit.Builder()
                         .addConverterFactory(GsonConverterFactory.create())
-                        .baseUrl(mCurrentNetwork.getEtherscanUrl())
+                        .baseUrl(mCurrentNetwork.getBackendUrl())
                         .build();
 
                 TrustRayService service = mRetrofit.create(TrustRayService.class);
 
                 final String etherscanKey = getRandomEtherscanKey();
-                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + etherscanKey);
+                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getBackendUrl() + ", " + etherscanKey);
 
                 Call<TRTransactionListResponse> call =
                         service.getTransactionList(address,"50");

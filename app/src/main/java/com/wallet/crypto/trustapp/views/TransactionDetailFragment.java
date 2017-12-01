@@ -25,7 +25,6 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
      */
     public static final String ARG_TXN_HASH = "item_id";
     public static final String ARG_ADDRESS = "address";
-    private static final String URL_ETHERSCAN_TXN_BASE = "https://etherscan.io/tx/";
 
     private static final String TAG = "TXN_DETAIL_FRAG";
 
@@ -92,7 +91,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
             }
 
             if (appBarLayout != null) {
-                appBarLayout.setTitle(eth + " ETH");
+                appBarLayout.setTitle(eth + " " + mController.getCurrentNetwork().getSymbol());
             }
         }
     }

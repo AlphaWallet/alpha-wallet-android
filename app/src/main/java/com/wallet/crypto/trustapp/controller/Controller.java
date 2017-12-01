@@ -155,7 +155,7 @@ public class Controller {
 
         mNetworks.add(new VMNetwork("mainnet", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", 1));
         mNetworks.add(new VMNetwork("kovan", "ETH-kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", 42));
-        mNetworks.add(new VMNetwork("oracles", "POA", "oraclesrpcserver", "http://oracles.trustwalletapp.com", 2));
+        mNetworks.add(new VMNetwork("oracles", "POA", "http://testnet.oracles.org:4000", "http://oracles.trustwalletapp.com", 12648430));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -361,7 +361,6 @@ public class Controller {
     }
 
     public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
-        Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
             String password = PasswordManager.getPassword(from, mAppContext);

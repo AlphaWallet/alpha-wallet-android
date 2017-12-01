@@ -83,7 +83,7 @@ public class SendActivity extends AppCompatActivity {
         if (mSendingTokens && mSymbol != null) {
             amountView.setHint(mSymbol + " amount");
         } else {
-            amountView.setHint("ETH amount");
+            amountView.setHint(mController.getCurrentNetwork().getSymbol() + " amount");
         }
 
         Button mSendButton = (Button) findViewById(R.id.send_button);

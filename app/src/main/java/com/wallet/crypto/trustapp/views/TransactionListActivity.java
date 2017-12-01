@@ -123,9 +123,9 @@ public class TransactionListActivity extends AppCompatActivity {
                 // Conversion data may not be available, in which case, hide it
                 if (usd != null) {
                     getSupportActionBar().setTitle("$" + usd);
-                    getSupportActionBar().setSubtitle(balance + " ETH");
+                    getSupportActionBar().setSubtitle(balance + " " + mController.getCurrentNetwork().getSymbol());
                 } else {
-                    getSupportActionBar().setTitle(balance + " ETH");
+                    getSupportActionBar().setTitle(balance + " " + mController.getCurrentNetwork().getSymbol());
                     getSupportActionBar().setSubtitle(mAddress);
                 }
 

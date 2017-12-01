@@ -26,7 +26,7 @@ public class VMNetwork {
 
     public String getSymbol() { return symbol; }
 
-    public String getInfuraUrl() {
+    public String getRpcUrl() {
         return infuraUrl;
     }
 

@@ -65,6 +65,9 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$project.okhttpVersion"
     implementation "com.google.code.gson:gson:$project.gsonVersion"
 
+    implementation "android.arch.lifecycle:runtime:1.0.3"
+    implementation "android.arch.lifecycle:extensions:1.0.0"
+
     implementation "com.android.support:appcompat-v7:$project.supportVersion"
     implementation "com.android.support:design:$project.supportVersion"
     implementation "com.android.support:support-vector-drawable:$project.supportVersion"

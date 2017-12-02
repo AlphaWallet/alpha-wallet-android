@@ -1,18 +1,20 @@
-package io.video.weapp.viewmodel;
+package com.wallet.crypto.trustapp.viewmodel;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
-import io.reactivex.disposables.Disposable;
-import io.video.weapp.entity.ApiException;
-import io.video.weapp.entity.ErrorEnvelope;
+import com.wallet.crypto.trustapp.C;
+import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
+import com.wallet.crypto.trustapp.entity.ServiceException;
 
+import io.reactivex.disposables.Disposable;
 
 public class BaseViewModel extends ViewModel {
 
-	public final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
-	public final MutableLiveData<Boolean> progress = new MutableLiveData<>();
+	protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
+	protected final MutableLiveData<Boolean> progress = new MutableLiveData<>();
 	protected Disposable disposable;
 
 	@Override
@@ -26,10 +28,20 @@ public class BaseViewModel extends ViewModel {
 		}
 	}
 
+	public LiveData<ErrorEnvelope> error() {
+		return error;
+	}
+
+	public LiveData<Boolean> progress() {
+		return progress;
+	}
+
 	protected void onError(Throwable t) {
-		if (t instanceof ApiException) {
-			error.setValue(((ApiException) t).error);
+		if (t instanceof ServiceException) {
+			error.setValue(((ServiceException) t).error);
 		} else {
+			error.setValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+			// TODO: Add dialog with offer send error log to developers: notify about error.
 			Log.d("SESSION", "Err", t);
 		}
 	}

@@ -1,10 +1,9 @@
-package io.video.weapp.ui.widget;
+package com.wallet.crypto.trustapp.widget;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -13,7 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import io.video.weapp.R;
+import com.wallet.crypto.trustapp.R;
 
 public class SystemView extends FrameLayout implements View.OnClickListener {
 	private ProgressBar progress;
@@ -52,11 +51,6 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 		emptyBox = view.findViewById(R.id.empty_box);
 	}
 
-	public void showProgress() {
-		errorBox.setVisibility(GONE);
-		progress.setVisibility(VISIBLE);
-	}
-
 	public void showProgress(boolean shouldShow) {
 		if (shouldShow) {
 			showProgress();
@@ -65,12 +59,21 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 		}
 	}
 
-	public void hideProgress() {
-		progress.setVisibility(GONE);
+	public void showProgress() {
+		setVisibility(VISIBLE);
+		errorBox.setVisibility(GONE);
+		progress.setVisibility(VISIBLE);
 	}
 
-	public void showError(@Nullable String message, @Nullable View.OnClickListener onTryAgain) {
+	public void hideProgress() {
+		errorBox.setVisibility(GONE);
+		progress.setVisibility(GONE);
+		setVisibility(GONE);
+	}
+
+	public void showError(@Nullable String message, @Nullable OnClickListener onTryAgain) {
 		hideProgress();
+		setVisibility(VISIBLE);
 		errorBox.setVisibility(VISIBLE);
 
 		if (TextUtils.isEmpty(message)) {
@@ -84,6 +87,8 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 	}
 
 	public void hideError() {
+		setVisibility(GONE);
+		progress.setVisibility(GONE);
 		errorBox.setVisibility(GONE);
 	}
 

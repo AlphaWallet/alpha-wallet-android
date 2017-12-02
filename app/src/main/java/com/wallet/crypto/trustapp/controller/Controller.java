@@ -25,7 +25,7 @@ import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
-import com.wallet.crypto.trustapp.views.AccountListActivity;
+import com.wallet.crypto.trustapp.ui.AccountsManageActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
@@ -37,6 +37,7 @@ import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
+import org.ethereum.geth.KeyStore;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -72,9 +73,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
 /**
  * Created by marat on 9/26/17.
@@ -192,6 +190,10 @@ public class Controller {
         mHandler = new Handler();
     }
 
+    public KeyStore getEtherStore() {
+    	return mEtherStore.ks;
+    }
+
     public void onResume() {
         startRepeatingTask();
     }
@@ -286,7 +288,7 @@ public class Controller {
     }
 
     public void navigateToAccountList(Context context) {
-        Intent intent = new Intent(context, AccountListActivity.class);
+        Intent intent = new Intent(context, AccountsManageActivity.class);
         context.startActivity(intent);
     }
 

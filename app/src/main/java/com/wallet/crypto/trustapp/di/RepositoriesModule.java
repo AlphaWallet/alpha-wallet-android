@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.di;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.repository.AccountRepository;
 import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
@@ -37,8 +38,10 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	AccountKeystoreService provideAccountKeyStoreService(Context context) {
-		File file = new File(context.getFilesDir(), "keystore");
-		return new GethKeystoreAccountService(file);
+		// TODO: KeyStore lock File. Use prepared keystore by migration in process.
+		// File file = new File(context.getFilesDir(), "keystore");
+		// return new GethKeystoreAccountService(file);
+		return new GethKeystoreAccountService(Controller.with(context).getEtherStore());
 	}
 
 	@Singleton

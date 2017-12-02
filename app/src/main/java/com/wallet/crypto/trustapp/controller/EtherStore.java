@@ -21,7 +21,7 @@ import java.util.List;
 public class EtherStore {
 
 //    private KeyChain keyChain;
-    private KeyStore ks;
+    public final KeyStore ks;
     private static String TAG = "EtherStore";
     private Controller mController;
 

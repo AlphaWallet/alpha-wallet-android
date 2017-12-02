@@ -8,12 +8,10 @@ import org.ethereum.geth.Address;
 import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
-import org.ethereum.geth.Log;
 import org.ethereum.geth.Transaction;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -24,8 +22,11 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 	private final KeyStore keyStore;
 
 	public GethKeystoreAccountService(File keyStoreFile) {
-		// TODO: filesDir + "/keystore"
 		keyStore = new KeyStore(keyStoreFile.getAbsolutePath(), Geth.LightScryptN, Geth.LightScryptP);
+	}
+
+	public GethKeystoreAccountService(KeyStore keyStore) {
+		this.keyStore = keyStore;
 	}
 
 	@Override
@@ -63,28 +64,25 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 
 	@Override
 	public Single<byte[]> signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce, long chainId) {
-		return Single.fromCallable(new Callable<byte[]>() {
-			@Override
-			public byte[] call() throws Exception {
-				BigInt value = new BigInt(Long.decode(wei));
-				BigInt gasPrice = new BigInt(0);
-				gasPrice.setString("15000000000", 10); // price, base
-				Transaction tx = new Transaction(
-						nonce,
-						new Address(toAddress),
-						value,
-						new BigInt(90000), // gas limit
-						gasPrice,
-						null); // data
+		return Single.fromCallable(() -> {
+			BigInt value = new BigInt(Long.decode(wei));
+			BigInt gasPrice = new BigInt(0);
+			gasPrice.setString("15000000000", 10); // price, base
+			Transaction tx = new Transaction(
+					nonce,
+					new Address(toAddress),
+					value,
+					new BigInt(90000), // gas limit
+					gasPrice,
+					null); // data
 
-				BigInt chain = new BigInt(chainId); // Chain identifier of the main net
-				org.ethereum.geth.Account gethAccount = findAccount(signer.address);
-				keyStore.unlock(gethAccount, signerPassword);
-				Transaction signed = keyStore.signTx(gethAccount, tx, chain);
-				keyStore.lock(gethAccount.getAddress());
+			BigInt chain = new BigInt(chainId); // Chain identifier of the main net
+			org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+			keyStore.unlock(gethAccount, signerPassword);
+			Transaction signed = keyStore.signTx(gethAccount, tx, chain);
+			keyStore.lock(gethAccount.getAddress());
 
-				return signed.encodeRLP();
-			}
+			return signed.encodeRLP();
 		})
 		.subscribeOn(Schedulers.io());
 	}
@@ -99,7 +97,6 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 		return Single.fromCallable(() -> {
 			Accounts accounts = keyStore.getAccounts();
 			int len = (int) accounts.size();
-			android.util.Log.d("ACCOUNT_FETCH", "Len: " + len);
 			Account[] result = new Account[len];
 
 			for (int i = 0; i < len; i++) {

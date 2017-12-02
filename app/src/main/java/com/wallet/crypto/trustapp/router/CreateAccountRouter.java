@@ -1,4 +1,13 @@
 package com.wallet.crypto.trustapp.router;
 
-class CreateAccountRouter {
+import android.content.Context;
+import android.content.Intent;
+
+import com.wallet.crypto.trustapp.views.CreateAccountActivity;
+
+public class CreateAccountRouter {
+	public void open(Context context) {
+		Intent intent = new Intent(context, CreateAccountActivity.class);
+		context.startActivity(intent);
+	}
 }

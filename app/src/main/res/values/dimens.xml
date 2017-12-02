@@ -6,4 +6,20 @@
     <dimen name="app_bar_height">200dp</dimen>
     <dimen name="item_width">200dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+	<dimen name="small_padding">4dp</dimen>
+	<dimen name="normal_padding">8dp</dimen>
+	<dimen name="big_padding">16dp</dimen>
+	<dimen name="half_large_padding">32dp</dimen>
+	<dimen name="large_padding">64dp</dimen>
+
+	<dimen name="small_margin">4dp</dimen>
+	<dimen name="normal_margin">8dp</dimen>
+	<dimen name="big_margin">16dp</dimen>
+	<dimen name="half_large_margin">32dp</dimen>
+	<dimen name="large_margin">64dp</dimen>
+
+	<dimen name="small_text">12sp</dimen>
+	<dimen name="normal_text">16sp</dimen>
+	<dimen name="title_text">26sp</dimen>
 </resources>

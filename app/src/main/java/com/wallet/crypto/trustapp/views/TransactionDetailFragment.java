@@ -1,7 +1,9 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,19 +11,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.model.ESTransaction;
 
-public class TransactionDetailFragment extends Fragment {
+public class TransactionDetailFragment extends Fragment implements View.OnClickListener {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
      */
     public static final String ARG_TXN_HASH = "item_id";
     public static final String ARG_ADDRESS = "address";
+    private static final String URL_ETHERSCAN_TXN_BASE = "https://etherscan.io/tx/";
 
     private static final String TAG = "TXN_DETAIL_FRAG";
 
@@ -107,9 +111,24 @@ public class TransactionDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.txn_hash)).setText(mItem.getHash());
             ((TextView) rootView.findViewById(R.id.txn_time)).setText(Controller.GetDate(Long.decode(mItem.getTimeStamp())));
             ((TextView) rootView.findViewById(R.id.block_hash)).setText(mItem.getBlockHash());
-
+            rootView.findViewById(R.id.more_detail).setOnClickListener(this);
         }
 
         return rootView;
+    }
+
+    public void goToMoreDetails () {
+        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getEtherscanUrl() + "/tx/" + mItem.getHash());
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.more_detail:
+                goToMoreDetails();
+                break;
+        }
     }
 }

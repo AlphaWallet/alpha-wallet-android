@@ -37,16 +37,14 @@ public class AccountsManageViewModel extends BaseViewModel {
 	}
 
 	public void setDefaultAccount(Account account) {
-		accountRepository
+		disposable = accountRepository
 				.setCurrentAccount(account)
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(() -> {
-					onDefaultAccountChanged(account);
-				}, this::onError);
+				.subscribe(() -> onDefaultAccountChanged(account), this::onError);
 	}
 
 	public void deleteAccount(Account account, String password) {
-		accountRepository
+		disposable = accountRepository
 				.deleteAccount(account.address, password)
 				.andThen(accountRepository.fetchAccounts())
 				.observeOn(AndroidSchedulers.mainThread())
@@ -56,7 +54,7 @@ public class AccountsManageViewModel extends BaseViewModel {
 	private void onFetchAccounts(Account[] items) {
 		progress.postValue(false);
 		accounts.postValue(items);
-		accountRepository
+		disposable = accountRepository
 				.getCurrentAccount()
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this::onDefaultAccountChanged, this::onError);
@@ -69,7 +67,7 @@ public class AccountsManageViewModel extends BaseViewModel {
 
 	public void fetchAccounts() {
 		progress.postValue(true);
-		accountRepository
+		disposable = accountRepository
 				.fetchAccounts()
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this::onFetchAccounts, this::onError);

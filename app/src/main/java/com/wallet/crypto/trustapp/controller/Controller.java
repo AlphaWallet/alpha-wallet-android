@@ -25,6 +25,8 @@ import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
+import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
+import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
 import com.wallet.crypto.trustapp.ui.AccountsManageActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ExportAccountActivity;
@@ -95,11 +97,11 @@ public class Controller {
     // Services
     private EtherStore mEtherStore;
     private CoinmarketService mCoinmarketService;
-    private SharedPreferences mPreferences;
+    private PreferenceRepositoryType mPreferences;
 
     // State
     private String mKeystoreBaseDir;
-    private String mCurrentAddress;
+//    private String mCurrentAddress;
     private VMNetwork mCurrentNetwork;
 
     // View models
@@ -138,7 +140,7 @@ public class Controller {
 
         mKeystoreBaseDir = mAppContext.getFilesDir() + "/keystore";
 
-        mPreferences = mAppContext.getSharedPreferences("MyPref", 0); // 0 - for private mode
+        mPreferences = new SharedPreferenceRepository(mAppContext);
 
         mEtherStore = new EtherStore(mKeystoreBaseDir, this);
 
@@ -173,9 +175,8 @@ public class Controller {
 
         loadAccounts();
 
-        mCurrentAddress = null;
         if (mAccounts.size() > 0) {
-            String cachedAddress = mPreferences.getString(PREF_CURRENT_ADDRESS, null);
+            String cachedAddress = mPreferences.getCurrentAccountAddress();
             if (getAccount(cachedAddress) == null) {
                 setCurrentAddress(mAccounts.get(0).getAddress());
             } else {
@@ -230,7 +231,7 @@ public class Controller {
         mHandler.removeCallbacks(mStatusChecker);
     }
 
-    private List<VMAccount> loadAccounts() {
+    public List<VMAccount> loadAccounts() {
         mAccounts = new ArrayList<>();
         try {
             List<Account> ksAccounts = mEtherStore.getAccounts();
@@ -418,15 +419,11 @@ public class Controller {
     }
 
     public void setCurrentAddress(String currentAddress) {
-        this.mCurrentAddress = currentAddress.toLowerCase();
-
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(PREF_CURRENT_ADDRESS, currentAddress);
-        editor.commit();
+        mPreferences.setCurrentAccountAddress(currentAddress);
     }
 
     public VMAccount getCurrentAccount() {
-        return this.getAccount(mCurrentAddress);
+        return this.getAccount(mPreferences.getCurrentAccountAddress());
     }
 
     public boolean existsNetwork(String name) {
@@ -464,9 +461,9 @@ public class Controller {
         String password = PasswordManager.getPassword(address, mAppContext);
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
-        if (address.equals(mCurrentAddress)) {
+        if (address.equals(mPreferences.getCurrentAccountAddress())) {
             if (mAccounts.size() > 0) {
-                mCurrentAddress = mAccounts.get(0).getAddress();
+                mPreferences.setCurrentAccountAddress(mAccounts.get(0).getAddress());
             }
         }
     }

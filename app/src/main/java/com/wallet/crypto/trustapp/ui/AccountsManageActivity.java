@@ -4,9 +4,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
@@ -22,7 +24,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class AccountsManageActivity extends BaseActivity {
+public class AccountsManageActivity extends BaseActivity implements View.OnClickListener {
 
 	@Inject
 	AccountsManageViewModelFactory accountsManageViewModelFactory;
@@ -30,9 +32,8 @@ public class AccountsManageActivity extends BaseActivity {
 
 	private AccountsManageAdapter adapter;
 
-	private RecyclerView list;
 	private SystemView systemView;
-	private FloatingActionButton addAction;
+	private AlertDialog dialog;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,8 +46,8 @@ public class AccountsManageActivity extends BaseActivity {
 
 		adapter = new AccountsManageAdapter(this::onSetAccountDefault, this::onDeleteAccount);
 		systemView = findViewById(R.id.system_view);
-		addAction = findViewById(R.id.fab);
-		list = findViewById(R.id.list);
+		FloatingActionButton addAction = findViewById(R.id.fab);
+		RecyclerView list = findViewById(R.id.list);
 		list.setLayoutManager(new LinearLayoutManager(this));
 		list.setAdapter(adapter);
 
@@ -58,10 +59,19 @@ public class AccountsManageActivity extends BaseActivity {
 		viewModel.accounts().observe(this, this::onFetchAccount);
 		viewModel.defaultAccount().observe(this, this::onChangeDefaultAccount);
 
-		addAction.setOnClickListener(this::onAddAccount);
+		addAction.setOnClickListener(this);
 	}
 
-	private void onAddAccount(View view) {
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		if (dialog != null && dialog.isShowing()) {
+			dialog.dismiss();
+		}
+	}
+
+	private void onAddAccount() {
 		viewModel.createAccount(this);
 	}
 
@@ -70,7 +80,11 @@ public class AccountsManageActivity extends BaseActivity {
 	}
 
 	private void onFetchAccount(Account[] accounts) {
-		adapter.setAccounts(accounts);
+		if (accounts == null || accounts.length == 0) {
+			finish(); // Show create account screen // TODO: Bad solution. More good start create account activity with special flag.
+		} else {
+			adapter.setAccounts(accounts);
+		}
 	}
 
 	private void onProgress(Boolean shouldShowProgress) {
@@ -78,10 +92,15 @@ public class AccountsManageActivity extends BaseActivity {
 	}
 
 	private void onError(ErrorEnvelope errorEnvelope) {
-		systemView.showError(errorEnvelope.message, this::onTryAgain);
+		if (adapter.getItemCount() == 0) {
+			systemView.showError(errorEnvelope.message, this);
+		} else {
+			Toast.makeText(getApplicationContext(), errorEnvelope.message, Toast.LENGTH_SHORT)
+					.show();
+		}
 	}
 
-	private void onTryAgain(View view) {
+	private void onTryAgain() {
 		viewModel.fetchAccounts();
 	}
 
@@ -90,11 +109,38 @@ public class AccountsManageActivity extends BaseActivity {
 	}
 
 	private void onDeleteAccount(Account account) {
-		try {
-			viewModel.deleteAccount(account, PasswordManager.getPassword(account.address, this));
-		} catch (Exception ex) {
-			onError(new ErrorEnvelope(C.ErrorCode.CANT_GET_STORE_PASSWORD, null));
-			ex.printStackTrace();
+		dialog = new AlertDialog.Builder(this)
+			.setTitle(getString(R.string.title_delete_account))
+			.setMessage(getString(R.string.confirm_delete_account))
+			.setIcon(R.drawable.ic_warning_black_24dp)
+			.setPositiveButton(android.R.string.yes, (dialog, btn) -> {
+				try {
+					viewModel.deleteAccount(
+							account,
+							PasswordManager.getPassword(account.address, getApplicationContext()));
+					// todo: reload account list in controller.
+				} catch (Exception ex) {
+					String errorMessage = getString(
+							R.string.error_deleting_account_with_details, ex.getLocalizedMessage());
+					onError(new ErrorEnvelope(
+							C.ErrorCode.CANT_GET_STORE_PASSWORD, errorMessage));
+					ex.printStackTrace();
+				}
+			})
+			.setNegativeButton(android.R.string.no, null)
+			.create();
+		dialog.show();
+	}
+
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+			case R.id.fab: {
+				onAddAccount();
+			} break;
+			case R.id.try_again: {
+				onTryAgain();
+			} break;
 		}
 	}
 }

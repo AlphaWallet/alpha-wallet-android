@@ -10,15 +10,18 @@ import com.wallet.crypto.trustapp.R;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-	protected void toolbar() {
+	protected Toolbar toolbar() {
 		Toolbar toolbar = findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		toolbar.setTitle(getTitle());
+		if (toolbar != null) {
+			setSupportActionBar(toolbar);
+			toolbar.setTitle(getTitle());
+		}
 
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+		return toolbar;
 	}
 
 	@Override

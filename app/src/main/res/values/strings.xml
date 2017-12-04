@@ -92,6 +92,7 @@
     <string name="unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
     <string name="title_watchout">Watch out!</string>
     <string name="error_deleting_account">Error deleting account</string>
+    <string name="error_deleting_account_with_details">Error deleting account %s</string>
     <string name="error_passwords_must_match">Passwords must match.</string>
     <string name="label_confirm_new_password">Confirm new password</string>
     <string name="label_new_password">New password</string>

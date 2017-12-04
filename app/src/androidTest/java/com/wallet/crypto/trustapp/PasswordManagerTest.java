@@ -3,10 +3,9 @@ package com.wallet.crypto.trustapp;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 
-import com.wallet.crypto.trustapp.controller.PasswordManager;
+import com.wallet.pwd.trustapp.PasswordManager;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;

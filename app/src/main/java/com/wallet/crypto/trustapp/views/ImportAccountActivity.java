@@ -1,6 +1,11 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -8,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
@@ -18,9 +24,8 @@ import com.wallet.crypto.trustapp.controller.TaskStatus;
 
 public class ImportAccountActivity extends AppCompatActivity {
 
-    private EditText mKeystore;
-    private EditText mPassword;
-    private Controller mController;
+    private final int KEYSTORE_POSITION = 0;
+    private final int PRIVATE_KEY_POSITION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,37 +40,17 @@ public class ImportAccountActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mController = Controller.with(this);
+        ViewPager viewPager = findViewById(R.id.viewPager);
 
-        mKeystore = (EditText) findViewById(R.id.import_keystore);
-        mPassword = (EditText) findViewById(R.id.import_password);
+        //set adapter to your ViewPager
+        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager()));
 
-        Button mImportButton = (Button) findViewById(R.id.import_account_button);
-        mImportButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mController.clickImport(
-                    mKeystore.getText().toString(),
-                    mPassword.getText().toString(),
-                    new OnTaskCompleted() {
-                        @Override
-                        public void onTaskCompleted(final TaskResult result) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (result.getStatus() == TaskStatus.SUCCESS) {
-                                        setResult(RESULT_OK);
-                                        ImportAccountActivity.this.finish();
-                                    } else {
-                                        Toast.makeText(ImportAccountActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                        }
-                    }
-                );
-            }
-        });
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+
+        tabLayout.setupWithViewPager(viewPager);
+
+        viewPager.setCurrentItem(KEYSTORE_POSITION);
+
     }
 
     @Override
@@ -76,5 +61,58 @@ public class ImportAccountActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    class TabPagerAdapter extends FragmentPagerAdapter {
+
+        public TabPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        // Return fragment with respect to position.
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+
+                case KEYSTORE_POSITION: {
+                    return new ImportKeystoreFragment();
+                }
+
+                case PRIVATE_KEY_POSITION: {
+                    return new ImportPrivateKeyFragment();
+                }
+
+            }
+
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        // This method returns the title of the tab according to its position.
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+
+                case KEYSTORE_POSITION: {
+                    String keystore = getResources().getString(R.string.tab_keystore);
+
+                    return keystore;
+                }
+
+                case PRIVATE_KEY_POSITION: {
+                    String privateKey = getResources().getString(R.string.tab_private_key);
+
+                    return privateKey;
+                }
+
+            }
+
+            return null;
+        }
+
     }
 }

@@ -6,6 +6,7 @@
     <color name="green">#2fbb4f</color>
     <color name="red">#f7506c</color>
     <color name="colorWhite">#FFFFFFFF</color>
+    <color name="semitransparentWhite">#AAFFFFFF</color>
     <color name="QRCodeBlackColor">#FF000000</color>
     <color name="QRCodeWhiteColor">#FFFFFFFF</color>
     <color name="black">#313849</color>

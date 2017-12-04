@@ -37,7 +37,7 @@
     <string name="cancel">cancel</string>
     <string name="confirm_delete_account">Make sure that you have a backup of this account.</string>
     <string name="title_activity_import_account">ImportAccountActivity</string>
-    <string name="hint_keystore">keystore</string>
+    <string name="hint_keystore">Keystore</string>
     <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
     <string name="action_export">Backup private key</string>
@@ -102,5 +102,11 @@
     <string name="title_version">Version</string>
     <string name="title_activity_token_list">Tokens</string>
     <string name="title_tokens">My Tokens</string>
+    <string name="prompt_private_key">Private key</string>
+    <string name="error_import_private_key">Error importing private key</string>
+    <string name="message_importing_private_key">Importing private key. One moment.</string>
+    <string name="tab_keystore">Keystore</string>
+    <string name="tab_private_key">Private key</string>
+    <string name="action_transaction_detail">More details</string>
 
 </resources>

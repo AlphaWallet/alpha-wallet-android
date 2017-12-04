@@ -2,7 +2,9 @@ package com.wallet.crypto.trustapp.controller;
 
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -33,23 +35,19 @@ import com.wallet.crypto.trustapp.views.TokenListActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
+import com.wallet.pwd.trustapp.PasswordManager;
 
 import org.ethereum.geth.Account;
 import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCompileSolidity;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -75,6 +73,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
 /**
  * Created by marat on 9/26/17.
@@ -354,6 +355,13 @@ public class Controller {
         new ImportAccountTask(keystore, password, listener).execute();
     }
 
+    public void clickImportPrivateKey(Activity activity, String privateKey, OnTaskCompleted listener) {
+        Log.d(TAG, "Import account by private key");
+        final String password = Controller.generatePassphrase();
+
+        new ImportPrivateKeyTask(activity, privateKey, password, listener).execute();
+    }
+
     public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
@@ -600,6 +608,57 @@ public class Controller {
             }
             mListener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, ""));
             return null;
+        }
+    }
+
+    private class ImportPrivateKeyTask extends AsyncTask<Void, Void, Void> {
+
+        private final String privateKey;
+        private final String password;
+        private final OnTaskCompleted listener;
+        private ProgressDialog dialog;
+
+
+        public ImportPrivateKeyTask(Activity activity, String privateKey, String password, OnTaskCompleted listener) {
+            this.privateKey = privateKey;
+            this.password = password;
+            this.listener = listener;
+            dialog = new ProgressDialog(activity);
+            dialog.setCancelable(false);
+            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    ImportPrivateKeyTask.this.cancel(true);
+                }
+            });
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage(getString(R.string.message_importing_private_key));
+            dialog.show();
+        }
+
+        protected Void doInBackground(Void... params) {
+            //android.os.Process.setThreadPriority(Thread.MAX_PRIORITY);
+            String keystore = "";
+            try {
+                keystore = EtherStoreUtils.convertPrivateKeyToKeystoreJson(privateKey, password);
+            } catch (Exception e) {
+                listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, getString(R.string.error_import_private_key)));
+            }
+
+            clickImport(keystore, password, listener);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            // do UI work here
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
         }
     }
 

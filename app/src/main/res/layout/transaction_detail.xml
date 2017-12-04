@@ -5,6 +5,13 @@
     android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <TextView
         android:id="@+id/from_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -110,5 +117,17 @@
         android:text="4238793"
         android:textSize="9dp"
         android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+    <Button
+        android:id="@+id/more_detail"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/action_transaction_detail"
+        android:clickable="true"
+        android:autoLink="web"
+        android:cursorVisible="true"
+        android:linksClickable="true" />
 
 </LinearLayout>

@@ -35,6 +35,7 @@ import com.wallet.crypto.trustapp.views.TokenListActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
+import com.wallet.pwd.trustapp.PasswordManager;
 
 import org.ethereum.geth.Account;
 import org.web3j.abi.FunctionEncoder;

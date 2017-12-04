@@ -30,6 +30,9 @@ android {
         //exclude 'META-INF/license'
         //exclude 'META-INF/license.txt'
     }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {

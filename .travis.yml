@@ -25,5 +25,11 @@ licenses:
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
 
+install:
+  - true
+
+script:
+  - ./gradlew build
+
 after_success:
   - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)

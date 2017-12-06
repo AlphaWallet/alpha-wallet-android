@@ -108,12 +108,14 @@
     <string name="tab_keystore">Keystore</string>
     <string name="tab_private_key">Private key</string>
     <string name="action_transaction_detail">More details</string>
-	<string name="lock_title">Lock screen</string>
-	<string name="lock_body">Secure lock screen hasn\'t set up. To continue working with this app, please go to Settings and set a lock screen method.</string>
-	<string name="lock_settings">Lock settings</string>
-	<string name="lock_exit">Exit</string>
-	<string name="unlock_screen_title_android">Unlock screen</string>
-	<string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
-	<string name="sending_progress">Sending...</string>
+    <string name="lock_title">Lock screen</string>
+    <string name="lock_body">Secure lock screen hasn\'t set up. To continue working with this app, please go to Settings and set a lock screen method.</string>
+    <string name="lock_settings">Lock settings</string>
+    <string name="lock_exit">Exit</string>
+    <string name="unlock_screen_title_android">Unlock screen</string>
+    <string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
+    <string name="sending_progress">Sending...</string>
+    <string name="gas_limit">Gas Limit</string>
+    <string name="gas_price">Gas Price (Wei)</string>
 
 </resources>

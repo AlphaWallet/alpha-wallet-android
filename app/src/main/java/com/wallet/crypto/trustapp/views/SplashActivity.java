@@ -14,7 +14,7 @@ public class SplashActivity extends AppCompatActivity {
 
         // Start home activity
 
-        startActivity(new Intent(SplashActivity.this, TransactionListActivity.class));
+        startActivity(new Intent(this, TransactionListActivity.class));
 
         // close splash activity
 

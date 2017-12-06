@@ -66,7 +66,7 @@ public class EtherStore {
         BigInt value = new BigInt(Long.decode(wei));
 
         BigInt gasPrice = new BigInt(0);
-        gasPrice.setString("1000000000", 10); // price, base
+        gasPrice.setString("21000000000", 10); // price, base
 
         Transaction tx = new Transaction(
                 nonce, new Address(toAddress),

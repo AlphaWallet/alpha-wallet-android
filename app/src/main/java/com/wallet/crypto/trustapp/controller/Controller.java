@@ -362,18 +362,18 @@ public class Controller {
         new ImportPrivateKeyTask(activity, privateKey, password, listener).execute();
     }
 
-    public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
+    public void clickSend(String from, String to, String ethAmount, String gasLimit, String gasPrice, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
             String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, to, wei, password, null, listener).execute();
+            new SendTransactionTask(from, to, wei, gasLimit, gasPrice, password, null, listener).execute();
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
     }
 
-    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, int decimals, OnTaskCompleted listener) {
+    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, String gasLimit, String gasPrice, int decimals, OnTaskCompleted listener) {
         Log.d(TAG, String.format("Send tokens: %s, %s, %s", from, to, tokenAmount));
         try {
             BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long)Math.pow(10, decimals))).toBigInteger();
@@ -387,7 +387,7 @@ public class Controller {
             byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
 
             String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, contractAddress, "0", password, data, listener).execute();
+	    new SendTransactionTask(from, contractAddress, "0", gasLimit, gasPrice, password, data, listener).execute();
 
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
@@ -717,14 +717,18 @@ public class Controller {
         private String fromAddress;
         private String toAddress;
         private String wei;
+        private String gasLimit;
+        private String gasPrice;
         private String password;
         private byte[] data;
         private OnTaskCompleted listener;
 
-        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, byte[] data, OnTaskCompleted listener) {
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String gasLimit, String gasPrice, String password, byte[] data, OnTaskCompleted listener) {
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.wei = wei;
+            this.gasLimit = gasLimit;
+            this.gasPrice = gasPrice;
             this.password = password;
             this.data = data;
             this.listener = listener;
@@ -748,7 +752,7 @@ public class Controller {
 
                 String hexValue = "0xDEADBEEF";
                 try {
-                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, data, nonce.longValue());
+                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, gasLimit, gasPrice, data, nonce.longValue());
                     hexValue = Numeric.toHexString(signedMessage);
                 } catch (Exception e) {
                     Log.e(TAG, "Error signing " + e.toString());

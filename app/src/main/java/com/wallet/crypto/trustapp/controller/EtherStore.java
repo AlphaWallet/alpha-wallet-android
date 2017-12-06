@@ -33,6 +33,33 @@ public class EtherStore {
         Log.d(TAG, "Created KeyStore with %s accounts".format(Long.toString(ks.getAccounts().size())));
     }
 
+    public static int getMinGasLimit() {
+        return 21000;
+    }
+
+    public static int getDefaultGasLimit() {
+        return 90000;
+    }
+
+    public static int getMaxGasLimit() {
+        return 300000;
+    }
+
+    // Wei
+    public static long getDefaultGasPrice() {
+        return 30000000000L;
+    }
+
+    // Wei
+    public static long getMinGasFee() {
+        return 21000000000L;
+    }
+
+    // Wei
+    public static long getMaxGasFee() {
+        return 100000000000000000L;
+    }
+
     public Account createAccount(String password) throws Exception {
         Account account = ks.newAccount(password);
         return account;
@@ -62,16 +89,16 @@ public class EtherStore {
         ks.deleteAccount(account, password);
     }
 
-    public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, byte[] data, long nonce) throws Exception {
+    public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, String limit, String price, byte[] data, long nonce) throws Exception {
         BigInt value = new BigInt(Long.decode(wei));
 
         BigInt gasPrice = new BigInt(0);
-        gasPrice.setString("30000000000", 10); // price, base
+        gasPrice.setString(price, 10); // price, base
 
         Transaction tx = new Transaction(
                 nonce, new Address(toAddress),
                 value,
-                new BigInt(90000), // gas limit
+                new BigInt(Long.parseLong(limit)), // gas limit
                 gasPrice,
                 data); // data
 

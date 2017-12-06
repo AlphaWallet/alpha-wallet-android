@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
+import com.wallet.crypto.trustapp.controller.EtherStore;
 import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.controller.TaskStatus;
@@ -28,13 +29,12 @@ import com.google.android.gms.vision.barcode.Barcode;
 import org.ethereum.geth.Address;
 
 import java.util.List;
+import java.math.BigInteger;
 
 public class SendActivity extends AppCompatActivity {
 
     private Controller mController;
 
-    private EditText mTo;
-    private EditText mAmount;
     private static final String LOG_TAG = SendActivity.class.getSimpleName();
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -42,6 +42,11 @@ public class SendActivity extends AppCompatActivity {
     public static final String EXTRA_CONTRACT_ADDRESS = "extra_contract_address";
     public static final String EXTRA_SYMBOL = "extra_symbol";
     public static final String EXTRA_DECIMALS = "extra_decimals";
+
+    private EditText mTo;
+    private EditText mAmount;
+    private EditText mGasLimit;
+    private EditText mGasPrice;
 
     private TextView mResultTextView;
 
@@ -86,7 +91,13 @@ public class SendActivity extends AppCompatActivity {
             amountView.setHint("ETH amount");
         }
 
-        Button mSendButton = (Button) findViewById(R.id.send_button);
+        mGasLimit = findViewById(R.id.gas_limit_text);
+        mGasLimit.setText(Integer.toString(EtherStore.getDefaultGasLimit()));
+
+        mGasPrice = findViewById(R.id.gas_price_text);
+        mGasPrice.setText(Long.toString(EtherStore.getDefaultGasPrice()));
+
+        Button mSendButton = findViewById(R.id.send_button);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,49 +117,71 @@ public class SendActivity extends AppCompatActivity {
                     inputValid = false;
                 }
 
+		final String gasLimit = mGasLimit.getText().toString();
+		if (!isValidGasLimit(gasLimit)) {
+		    mGasLimit.setError("Invalid gas limit");
+		    inputValid = false;
+		}
+
+		final String gasPrice = mGasPrice.getText().toString();
+		if (!isValidGasPrice(gasPrice)) {
+		    mGasPrice.setError("Invalid gas price");
+		    inputValid = false;
+		}
+
+		if (!isValidGasFee(gasLimit, gasPrice)) {
+		    mGasLimit.setError("Resulting gas fee is invalid");
+		    mGasPrice.setError("Resulting gas fee is invalid");
+		    inputValid = false;
+		}
+
                 if (!inputValid) {
                     return;
                 }
 
                 if (mSendingTokens) {
                     mController.clickSendTokens(
-                            mController.getCurrentAccount().getAddress(),
-                            mTo.getText().toString(),
-                            mContractAddress,
-                            mAmount.getText().toString(),
-                            mDecimals,
-                            new OnTaskCompleted() {
-                                public void onTaskCompleted(final TaskResult result) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (result.getStatus() == TaskStatus.SUCCESS) {
-                                                SendActivity.this.finish();
-                                            }
-                                            Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                        mController.getCurrentAccount().getAddress(),
+                        mTo.getText().toString(),
+                        mContractAddress,
+                        mAmount.getText().toString(),
+                        mGasLimit.getText().toString(),
+                        mGasPrice.getText().toString(),
+                        mDecimals,
+                        new OnTaskCompleted() {
+                            public void onTaskCompleted(final TaskResult result) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (result.getStatus() == TaskStatus.SUCCESS) {
+                                            SendActivity.this.finish();
                                         }
-                                    });
-                                }
+                                        Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
                             }
+                        }
                     );
                 } else {
                     mController.clickSend(
-                            mController.getCurrentAccount().getAddress(),
-                            mTo.getText().toString(),
-                            mAmount.getText().toString(),
-                            new OnTaskCompleted() {
-                                public void onTaskCompleted(final TaskResult result) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (result.getStatus() == TaskStatus.SUCCESS) {
-                                                SendActivity.this.finish();
-                                            }
-                                            Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                        mController.getCurrentAccount().getAddress(),
+                        mTo.getText().toString(),
+                        mAmount.getText().toString(),
+                        mGasLimit.getText().toString(),
+                        mGasPrice.getText().toString(),
+                        new OnTaskCompleted() {
+                            public void onTaskCompleted(final TaskResult result) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (result.getStatus() == TaskStatus.SUCCESS) {
+                                            SendActivity.this.finish();
                                         }
-                                    });
-                                }
+                                        Toast.makeText(SendActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
                             }
+                        }
                     );
                 }
             }
@@ -179,6 +212,40 @@ public class SendActivity extends AppCompatActivity {
         try {
             String wei = Controller.EthToWei(eth);
             return wei != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    boolean isValidGasLimit(String limit) {
+	    try {
+	        long l = Long.parseLong(limit);
+	        // Though no bound exists on gas price, it has to be at least within the bounds of the fee
+	        return l >= EtherStore.getMinGasLimit() && l <= EtherStore.getMaxGasLimit();
+        } catch (Exception e) {
+	        return false;
+        }
+    }
+
+    boolean isValidGasPrice(String price) {
+        try {
+            long l = Long.parseLong(price);
+            return l >= EtherStore.getMinGasFee() && l <= EtherStore.getMaxGasFee();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    boolean isValidGasFee(String limit, String price) {
+        try {
+            BigInteger biLimit = new BigInteger(limit);
+            BigInteger biPrice = new BigInteger(price);
+            BigInteger fee = biLimit.multiply(biPrice);
+
+            BigInteger minFee = BigInteger.valueOf(EtherStore.getMinGasFee());
+            BigInteger maxFee = BigInteger.valueOf(EtherStore.getMaxGasFee());
+
+            return fee.compareTo(minFee) == 1 && fee.compareTo(maxFee) == -1;
         } catch (Exception e) {
             return false;
         }

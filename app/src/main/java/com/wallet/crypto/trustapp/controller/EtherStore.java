@@ -51,6 +51,11 @@ public class EtherStore {
     }
 
     // Wei
+    public static long getTokenGasLimit() {
+        return 144000;
+    }
+
+    // Wei
     public static long getMinGasFee() {
         return 21000000000L;
     }

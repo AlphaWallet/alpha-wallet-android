@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -785,6 +786,7 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... params) {
+            String txn_hash;
             try {
                 Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
 
@@ -817,6 +819,7 @@ public class Controller {
                         .get();
 
                 String result = raw.getTransactionHash();
+
                 Log.d(TAG, "Transaction hash " + result);
 
                 if (raw.hasError()) {
@@ -825,15 +828,17 @@ public class Controller {
                     listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + raw.getError().getMessage()));
                     return null;
                 }
+
                 Log.d(TAG, "Transaction JSON-RPC"+ raw.getJsonrpc());
                 Log.d(TAG, "Transaction result: " + raw.getResult());
                 Log.d(TAG, "Transaction hash: " + raw.getTransactionHash());
+                txn_hash = raw.getTransactionHash();
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + e.toString()));
                 return null;
             }
-            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Payment sent"));
+            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Transaction hash: " + txn_hash));
             return null;
         }
     }

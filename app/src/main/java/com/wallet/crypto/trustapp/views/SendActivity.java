@@ -1,6 +1,7 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -89,10 +90,14 @@ public class SendActivity extends AppCompatActivity {
         }
 
         mGasLimit = findViewById(R.id.gas_limit_text);
-        mGasLimit.setText(Integer.toString(EtherStore.getDefaultGasLimit()));
+        if (mSendingTokens) {
+            mGasLimit.setText(Long.toString(EtherStore.getTokenGasLimit()));
+        } else {
+            mGasLimit.setText(Integer.toString(EtherStore.getDefaultGasLimit()));
+        }
 
-		mGasPrice = findViewById(R.id.gas_price_text);
-		mGasPrice.setText(Long.toString(EtherStore.getDefaultGasPrice()));
+        mGasPrice = findViewById(R.id.gas_price_text);
+        mGasPrice.setText(Long.toString(EtherStore.getDefaultGasPrice()));
 
         Button mSendButton = findViewById(R.id.send_button);
         mSendButton.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +127,6 @@ public class SendActivity extends AppCompatActivity {
 
 	private void onSendClick() {
 		// Validate input fields
-		showSendProgress();
 		boolean inputValid = true;
 		final String to = mTo.getText().toString();
 		if (!isAddressValid(to)) {
@@ -156,6 +160,8 @@ public class SendActivity extends AppCompatActivity {
 		if (!inputValid) {
 			return;
 		}
+
+        showSendProgress();
 		try {
 			if (mSendingTokens) {
 				mController.clickSendTokens(
@@ -307,11 +313,22 @@ public class SendActivity extends AppCompatActivity {
 
 	    @Override
 	    public void run() {
-		    if (result.getStatus() == TaskStatus.SUCCESS) {
-			    finish();
-		    }
 		    hideSendProgress();
-		    Toast.makeText(getApplicationContext(), result.getMessage(), Toast.LENGTH_LONG).show();
+
+            AlertDialog alertDialog = new AlertDialog.Builder(SendActivity.this).create();
+            if (result.getStatus() == TaskStatus.SUCCESS) {
+                alertDialog.setTitle("Sent");
+            } else {
+                alertDialog.setTitle("Error");
+            }
+            alertDialog.setMessage(result.getMessage());
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
 	    }
     }
 }

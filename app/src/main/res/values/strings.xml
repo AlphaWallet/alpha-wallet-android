@@ -18,7 +18,6 @@
 
     <!-- String related to sending -->
     <string name="prompt_to">To</string>
-    <string name="prompt_amount">ETH Amount</string>
     <string name="action_send">Send</string>
 
     <string name="error_invalid_email">This email address is invalid</string>

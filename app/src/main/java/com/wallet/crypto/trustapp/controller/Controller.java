@@ -21,8 +21,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.model.CMTicker;
-import com.wallet.crypto.trustapp.model.ESTransaction;
-import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
+import com.wallet.crypto.trustapp.model.TRTransaction;
+import com.wallet.crypto.trustapp.model.TRTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
 import com.wallet.crypto.trustapp.views.AccountListActivity;
@@ -52,6 +52,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.infura.InfuraHttpService;
 import org.web3j.utils.Numeric;
 
@@ -73,9 +74,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
 /**
  * Created by marat on 9/26/17.
@@ -109,7 +107,7 @@ public class Controller {
     private ArrayList<VMNetwork> mNetworks;
     private ArrayList<String> mEtherscanKeys;
     private ArrayList<VMAccount> mAccounts;
-    private Map<String, List<ESTransaction>> mTransactions;
+    private Map<String, List<TRTransaction>> mTransactions;
     private CMTicker mEthTicker = null; // if null, no data available
 
     // Views
@@ -154,10 +152,9 @@ public class Controller {
         // Create networks list
         mNetworks = new ArrayList<>();
 
-        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", 1));
-        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", 42));
-        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", 3));
-        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", 4));
+        mNetworks.add(new VMNetwork("mainnet", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/", 1));
+        mNetworks.add(new VMNetwork("kovan", "ETH-kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", 42));
+        mNetworks.add(new VMNetwork("oracles", "POA", "http://testnet.oracles.org:8545/", "https://oracles.trustwalletapp.com", 12648430));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -187,7 +184,7 @@ public class Controller {
         }
 
         for (VMAccount a : mAccounts) {
-            mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
+            mTransactions.put(a.getAddress(), new ArrayList<TRTransaction>());
         }
 
         mHandler = new Handler();
@@ -267,8 +264,8 @@ public class Controller {
         return out;
     }
 
-    public List<ESTransaction> getTransactions(String address) {
-        List<ESTransaction> txns = mTransactions.get(address);
+    public List<TRTransaction> getTransactions(String address) {
+        List<TRTransaction> txns = mTransactions.get(address);
         if (txns == null) {
             return new ArrayList<>();
         }
@@ -323,7 +320,7 @@ public class Controller {
         VMAccount account = createAccount(password);
 
         mAccounts.add(account);
-        mTransactions.put(account.getAddress(), new ArrayList<ESTransaction>());
+        mTransactions.put(account.getAddress(), new ArrayList<TRTransaction>());
 
         Intent intent = new Intent(activity.getApplicationContext(), WarningBackupActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -363,7 +360,6 @@ public class Controller {
     }
 
     public void clickSend(String from, String to, String ethAmount, String gasLimit, String gasPrice, OnTaskCompleted listener) {
-        Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
             String wei = EthToWei(ethAmount);
             String password = PasswordManager.getPassword(from, mAppContext);
@@ -487,15 +483,15 @@ public class Controller {
         return "";
     }
 
-    public ESTransaction findTransaction(String address, String txn_hash) {
-        List<ESTransaction> txns = mTransactions.get(address);
+    public TRTransaction findTransaction(String address, String txn_hash) {
+        List<TRTransaction> txns = mTransactions.get(address);
 
         if (txns == null) {
             Log.e(TAG, "Can't find transactions with given address: " + address);
             return null;
         }
 
-        for (ESTransaction txn : txns) {
+        for (TRTransaction txn : txns) {
             if (txn.getHash().equals(txn_hash)) {
                 return txn;
             }
@@ -547,7 +543,7 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... params) {
-            Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+            Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
             /*
             Transaction transaction = Transaction.createFunctionCallTransaction(
                     from, gasPrice, gasLimit, contractAddress, amount, encodedFunction);
@@ -565,7 +561,7 @@ public class Controller {
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
                 Web3ClientVersion web3ClientVersion = web3.web3ClientVersion().sendAsync().get();
                 String clientVersion = web3ClientVersion.getWeb3ClientVersion();
                 Log.d("INFO", "web3 client version: " + clientVersion);
@@ -587,7 +583,7 @@ public class Controller {
 
         private void getBalance(VMAccount account) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getRpcUrl()));
                 EthGetBalance ethGetBalance = web3
                         .ethGetBalance(account.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
@@ -737,7 +733,7 @@ public class Controller {
 
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getRpcUrl()));
 
                 Account fromAccount = mEtherStore.getAccount(fromAddress);
                 if (fromAccount == null) {
@@ -844,32 +840,24 @@ public class Controller {
 
                 Retrofit mRetrofit = new Retrofit.Builder()
                         .addConverterFactory(GsonConverterFactory.create())
-                        .baseUrl(mCurrentNetwork.getEtherscanUrl())
+                        .baseUrl(mCurrentNetwork.getBackendUrl())
                         .build();
 
-                EtherscanService service = mRetrofit.create(EtherscanService.class);
+                TrustRayService service = mRetrofit.create(TrustRayService.class);
 
                 final String etherscanKey = getRandomEtherscanKey();
-                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + etherscanKey);
+                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getBackendUrl() + ", " + etherscanKey);
 
-                Call<ESTransactionListResponse> call =
-                        service.getTransactionList(
-                                "account",
-                                "txlist",
-                                address,
-                                "0",
-                                "desc",
-                                etherscanKey
-                        );
-
+                Call<TRTransactionListResponse> call =
+                        service.getTransactionList(address,"50");
 
                 Log.d("INFO", "Request query:" + call.request().url().query());
-                call.enqueue(new Callback<ESTransactionListResponse>() {
+                call.enqueue(new Callback<TRTransactionListResponse>() {
 
                     @Override
-                    public void onResponse(Call<ESTransactionListResponse> call, Response<ESTransactionListResponse> response) {
+                    public void onResponse(Call<TRTransactionListResponse> call, Response<TRTransactionListResponse> response) {
                         try {
-                            List<ESTransaction> transactions = response.body().getTransactionList();
+                            List<TRTransaction> transactions = response.body().getTransactionList();
                             mTransactions.put(address, transactions);
                             Log.d("INFO", "Number of transactions: " + transactions.size());
                             if (transactions.size() > 0) {
@@ -882,7 +870,7 @@ public class Controller {
                     }
 
                     @Override
-                    public void onFailure(Call<ESTransactionListResponse> call, Throwable t) {
+                    public void onFailure(Call<TRTransactionListResponse> call, Throwable t) {
                         Log.e("ERROR", t.toString());
                         Toast.makeText(mAppContext, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
                     }

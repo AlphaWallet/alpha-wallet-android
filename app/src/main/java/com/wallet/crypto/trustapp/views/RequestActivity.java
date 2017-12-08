@@ -28,7 +28,6 @@ import com.google.zxing.common.BitMatrix;
 
 public class RequestActivity extends AppCompatActivity {
 
-    final static String ETHEREUM_PREFIX = "ethereum:";
     private static final String TAG = "REQUEST_ACTIVITY";
 
     ImageView imageView;
@@ -66,7 +65,7 @@ public class RequestActivity extends AppCompatActivity {
         });
 
         try {
-            final Bitmap qrCode = TextToImageEncode(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0");
+            final Bitmap qrCode = TextToImageEncode(Controller.with(this).getCurrentAccount().getAddress());
             imageView.setImageBitmap(qrCode);
         } catch(Exception e) {
             Log.d(TAG, e.getMessage());

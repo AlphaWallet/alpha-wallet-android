@@ -11,12 +11,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
-import com.wallet.crypto.trustapp.model.ESTransaction;
+import com.wallet.crypto.trustapp.model.TRTransaction;
 
 public class TransactionDetailFragment extends Fragment implements View.OnClickListener {
     /**
@@ -25,14 +24,13 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
      */
     public static final String ARG_TXN_HASH = "item_id";
     public static final String ARG_ADDRESS = "address";
-    private static final String URL_ETHERSCAN_TXN_BASE = "https://etherscan.io/tx/";
 
     private static final String TAG = "TXN_DETAIL_FRAG";
 
     /**
      * The dummy content this fragment is presenting.
      */
-    private ESTransaction mItem;
+    private TRTransaction mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -92,7 +90,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
             }
 
             if (appBarLayout != null) {
-                appBarLayout.setTitle(eth + " ETH");
+                appBarLayout.setTitle(eth + " " + mController.getCurrentNetwork().getSymbol());
             }
         }
     }
@@ -107,10 +105,10 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
             ((TextView) rootView.findViewById(R.id.from)).setText(mItem.getFrom());
             ((TextView) rootView.findViewById(R.id.to)).setText(mItem.getTo());
             ((TextView) rootView.findViewById(R.id.gas_fee)).setText(Controller.WeiToGwei(mItem.getGasUsed()));
-            ((TextView) rootView.findViewById(R.id.confirmation)).setText(mItem.getConfirmations());
+            ((TextView) rootView.findViewById(R.id.confirmation)).setText(mItem.getBlockNumber());
             ((TextView) rootView.findViewById(R.id.txn_hash)).setText(mItem.getHash());
             ((TextView) rootView.findViewById(R.id.txn_time)).setText(Controller.GetDate(Long.decode(mItem.getTimeStamp())));
-            ((TextView) rootView.findViewById(R.id.block_hash)).setText(mItem.getBlockHash());
+            ((TextView) rootView.findViewById(R.id.block_hash)).setText("N/A");
             rootView.findViewById(R.id.more_detail).setOnClickListener(this);
         }
 
@@ -118,7 +116,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
     }
 
     public void goToMoreDetails () {
-        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getEtherscanUrl() + "/tx/" + mItem.getHash());
+        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getBackendUrl() + "/tx/" + mItem.getHash());
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
         startActivity(launchBrowser);
     }

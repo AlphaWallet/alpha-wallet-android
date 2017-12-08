@@ -105,7 +105,6 @@ public class Controller {
 
     // View models
     private ArrayList<VMNetwork> mNetworks;
-    private ArrayList<String> mEtherscanKeys;
     private ArrayList<VMAccount> mAccounts;
     private Map<String, List<TRTransaction>> mTransactions;
     private CMTicker mEthTicker = null; // if null, no data available
@@ -143,18 +142,12 @@ public class Controller {
 
         mEtherStore = new EtherStore(mKeystoreBaseDir, this);
 
-        // Create etherscan key list
-        mEtherscanKeys = new ArrayList<>();
-        mEtherscanKeys.add("{etherscan_key1}");
-        mEtherscanKeys.add("{etherscan_key2}");
-        mEtherscanKeys.add("{etherscan_key3}");
-
         // Create networks list
         mNetworks = new ArrayList<>();
 
         mNetworks.add(new VMNetwork("mainnet", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/", 1));
         mNetworks.add(new VMNetwork("kovan", "ETH-kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", 42));
-        mNetworks.add(new VMNetwork("oracles", "POA", "http://testnet.oracles.org:8545/", "https://oracles.trustwalletapp.com", 12648430));
+        //mNetworks.add(new VMNetwork("oracles", "POA", "http://testnet.oracles.org:8545/", "https://oracles.trustwalletapp.com", 12648430));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -701,14 +694,6 @@ public class Controller {
         }
     }
 
-    // Randomize etherscan key selection stay below rate limit
-    private String getRandomEtherscanKey() {
-        assert(mEtherscanKeys.size() > 0);
-
-        final int random = new Random().nextInt(mEtherscanKeys.size());
-        return mEtherscanKeys.get(random);
-    }
-
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
         private String fromAddress;
         private String toAddress;
@@ -844,9 +829,6 @@ public class Controller {
                         .build();
 
                 TrustRayService service = mRetrofit.create(TrustRayService.class);
-
-                final String etherscanKey = getRandomEtherscanKey();
-                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getBackendUrl() + ", " + etherscanKey);
 
                 Call<TRTransactionListResponse> call =
                         service.getTransactionList(address,"50");

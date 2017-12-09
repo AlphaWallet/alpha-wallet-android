@@ -127,7 +127,7 @@ public class SendActivity extends AppCompatActivity {
         });
 
         final TextView gasPriceText = findViewById(R.id.gas_price_text);
-        final int minGasPrice = (int)(EtherStore.getMinGasFee()/weiInGwei);
+        final int minGasPrice = (int)(EtherStore.getMinGasPrice()/weiInGwei);
         mGasPrice = findViewById(R.id.gas_price_slider);
         mGasPrice.setMax((int)(EtherStore.getMaxGasFee() / EtherStore.getMaxGasLimit() / weiInGwei - minGasPrice));
         gasPriceSelected = (int)(EtherStore.getDefaultGasPrice() / weiInGwei);
@@ -278,7 +278,7 @@ public class SendActivity extends AppCompatActivity {
 
     boolean isValidGasPrice(int price) {
         try {
-            return price*weiInGwei >= EtherStore.getMinGasFee() && price*weiInGwei <= EtherStore.getMaxGasFee();
+            return price*weiInGwei >= EtherStore.getMinGasPrice() && price*weiInGwei <= EtherStore.getMaxGasFee();
         } catch (Exception e) {
             return false;
         }

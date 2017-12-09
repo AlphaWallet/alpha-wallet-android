@@ -108,6 +108,6 @@
     <string name="tab_private_key">Private key</string>
     <string name="action_transaction_detail">More details</string>
     <string name="gas_limit">Gas Limit</string>
-    <string name="gas_price">Gas Price (Wei)</string>
+    <string name="gas_price">Gas Price (Gwei)</string>
 
 </resources>

@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,8 +46,12 @@ public class SendActivity extends AppCompatActivity {
 
     private EditText mTo;
     private EditText mAmount;
-    private EditText mGasLimit;
-    private EditText mGasPrice;
+    private SeekBar mGasLimit;
+    private SeekBar mGasPrice;
+
+    private int gasLimitSelected;
+    private int gasPriceSelected; //Gwei
+    private static long weiInGwei = 1000000000;
 
     private TextView mResultTextView;
 
@@ -91,11 +96,59 @@ public class SendActivity extends AppCompatActivity {
             amountView.setHint(mController.getCurrentNetwork().getSymbol() + " amount");
         }
 
-        mGasLimit = findViewById(R.id.gas_limit_text);
-        mGasLimit.setText(Integer.toString(EtherStore.getDefaultGasLimit()));
+        final TextView gasLimitText = findViewById(R.id.gas_limit_text);
+        mGasLimit = findViewById(R.id.gas_limit_slider);
+        mGasLimit.setMax(EtherStore.getMaxGasLimit() - EtherStore.getMinGasLimit());
+        if (mSendingTokens) {
+            gasLimitSelected = EtherStore.getTokenGasLimit();
+        } else {
+            gasLimitSelected = EtherStore.getDefaultGasLimit();
+        }
+        mGasLimit.setProgress(gasLimitSelected - EtherStore.getMinGasLimit());
+        mGasLimit.refreshDrawableState();
+        gasLimitText.setText("" + (gasLimitSelected));
+        mGasLimit.setOnSeekBarChangeListener(
+            new SeekBar.OnSeekBarChangeListener() {
+                 @Override
+                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                     progress = progress / 100;
+                     progress = progress * 100;
+                     gasLimitSelected = progress + EtherStore.getMinGasLimit();
+                     gasLimitText.setText("" + (gasLimitSelected));
+                 }
 
-        mGasPrice = findViewById(R.id.gas_price_text);
-        mGasPrice.setText(Long.toString(EtherStore.getDefaultGasPrice()));
+                 @Override
+                 public void onStartTrackingTouch(SeekBar seekBar) {
+                 }
+
+                 @Override
+                 public void onStopTrackingTouch(SeekBar seekBar) {
+                 }
+        });
+
+        final TextView gasPriceText = findViewById(R.id.gas_price_text);
+        final int minGasPrice = (int)(EtherStore.getMinGasFee()/weiInGwei);
+        mGasPrice = findViewById(R.id.gas_price_slider);
+        mGasPrice.setMax((int)(EtherStore.getMaxGasFee() / EtherStore.getMaxGasLimit() / weiInGwei - minGasPrice));
+        gasPriceSelected = (int)(EtherStore.getDefaultGasPrice() / weiInGwei);
+        mGasPrice.setProgress((int)(EtherStore.getDefaultGasPrice()/weiInGwei - minGasPrice));
+        gasPriceText.setText("" + (gasPriceSelected));
+        mGasPrice.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        gasPriceSelected = progress + minGasPrice;
+                        gasPriceText.setText("" + (gasPriceSelected));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
 
         Button mSendButton = findViewById(R.id.send_button);
         mSendButton.setOnClickListener(new View.OnClickListener() {
@@ -117,21 +170,18 @@ public class SendActivity extends AppCompatActivity {
                     inputValid = false;
                 }
 
-		final String gasLimit = mGasLimit.getText().toString();
-		if (!isValidGasLimit(gasLimit)) {
-		    mGasLimit.setError("Invalid gas limit");
+		if (!isValidGasLimit(gasLimitSelected)) {
+            Toast.makeText(SendActivity.this, "Invalid gas limit: " + gasLimitSelected, Toast.LENGTH_LONG).show();
 		    inputValid = false;
 		}
 
-		final String gasPrice = mGasPrice.getText().toString();
-		if (!isValidGasPrice(gasPrice)) {
-		    mGasPrice.setError("Invalid gas price");
+		if (!isValidGasPrice(gasPriceSelected)) {
+            Toast.makeText(SendActivity.this, "Invalid gas price: " + gasPriceSelected, Toast.LENGTH_LONG).show();
 		    inputValid = false;
 		}
 
-		if (!isValidGasFee(gasLimit, gasPrice)) {
-		    mGasLimit.setError("Resulting gas fee is invalid");
-		    mGasPrice.setError("Resulting gas fee is invalid");
+		if (!isValidGasFee(Integer.toString(gasLimitSelected), Long.toString(gasPriceSelected*weiInGwei))) {
+            Toast.makeText(SendActivity.this, "Gas fee (limit*price) is invalid", Toast.LENGTH_LONG).show();
 		    inputValid = false;
 		}
 
@@ -145,8 +195,8 @@ public class SendActivity extends AppCompatActivity {
                         mTo.getText().toString(),
                         mContractAddress,
                         mAmount.getText().toString(),
-                        mGasLimit.getText().toString(),
-                        mGasPrice.getText().toString(),
+                        Integer.toString(gasLimitSelected),
+                        Long.toString(gasPriceSelected*weiInGwei),
                         mDecimals,
                         new OnTaskCompleted() {
                             public void onTaskCompleted(final TaskResult result) {
@@ -167,8 +217,8 @@ public class SendActivity extends AppCompatActivity {
                         mController.getCurrentAccount().getAddress(),
                         mTo.getText().toString(),
                         mAmount.getText().toString(),
-                        mGasLimit.getText().toString(),
-                        mGasPrice.getText().toString(),
+                        Integer.toString(gasLimitSelected),
+                        Long.toString(gasPriceSelected*weiInGwei),
                         new OnTaskCompleted() {
                             public void onTaskCompleted(final TaskResult result) {
                                 runOnUiThread(new Runnable() {
@@ -217,9 +267,8 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    boolean isValidGasLimit(String limit) {
+    boolean isValidGasLimit(int l) {
 	    try {
-	        long l = Long.parseLong(limit);
 	        // Though no bound exists on gas price, it has to be at least within the bounds of the fee
 	        return l >= EtherStore.getMinGasLimit() && l <= EtherStore.getMaxGasLimit();
         } catch (Exception e) {
@@ -227,10 +276,9 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    boolean isValidGasPrice(String price) {
+    boolean isValidGasPrice(int price) {
         try {
-            long l = Long.parseLong(price);
-            return l >= EtherStore.getMinGasFee() && l <= EtherStore.getMaxGasFee();
+            return price*weiInGwei >= EtherStore.getMinGasFee() && price*weiInGwei <= EtherStore.getMaxGasFee();
         } catch (Exception e) {
             return false;
         }

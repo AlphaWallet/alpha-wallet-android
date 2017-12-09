@@ -116,7 +116,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
     }
 
     public void goToMoreDetails () {
-        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getBackendUrl() + "/tx/" + mItem.getHash());
+        Uri uriUrl = Uri.parse(Controller.with(getActivity()).getCurrentNetwork().getEtherscanUrl() + "/tx/" + mItem.getHash());
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
         startActivity(launchBrowser);
     }

@@ -145,9 +145,10 @@ public class Controller {
         // Create networks list
         mNetworks = new ArrayList<>();
 
-        mNetworks.add(new VMNetwork("mainnet", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/", 1));
-        mNetworks.add(new VMNetwork("kovan", "ETH-kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", 42));
-        mNetworks.add(new VMNetwork("ropsten", "ETH-ropsten", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", 3));
+        mNetworks.add(new VMNetwork("mainnet", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
+                "https://etherscan.io/", 1));
+        mNetworks.add(new VMNetwork("kovan", "ETH-kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", 42));
+        mNetworks.add(new VMNetwork("ropsten", "ETH-ropsten", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", 3));
         //mNetworks.add(new VMNetwork("oracles", "POA", "http://testnet.oracles.org:8545/", "https://oracles.trustwalletapp.com", 12648430));
 
         // Load current from app preferences

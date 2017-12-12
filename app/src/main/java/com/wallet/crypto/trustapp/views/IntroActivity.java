@@ -1,14 +1,14 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 
-import com.wallet.crypto.trustapp.R;
 import com.github.paolorotolo.appintro.AppIntro;
 import com.github.paolorotolo.appintro.AppIntroFragment;
+import com.wallet.crypto.trustapp.R;
 
 public class IntroActivity extends AppIntro {
     @Override

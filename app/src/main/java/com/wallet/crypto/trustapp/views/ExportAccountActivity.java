@@ -1,7 +1,5 @@
 package com.wallet.crypto.trustapp.views;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,10 +8,12 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
@@ -21,86 +21,49 @@ import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.util.KS;
 
-public class ExportAccountActivity extends AppCompatActivity {
+public class ExportAccountActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final int MIN_PASSWORD_LENGTH = 1;
-    private Controller mController;
+	public static final String ADDRESS_KEY = "account_address";
+	public static final int SHARE_REQUEST_CODE = 1;
 
-    private String mAddress;
-    private EditText mPasswordText;
-    private EditText mConfirmPasswordText;
-    private Button mExportButton;
+	private static final int MIN_PASSWORD_LENGTH = 1;
 
-    @Override
+	public static void open(Context context, String accountAddress) {
+    	Intent intent = new Intent(context, ExportAccountActivity.class);
+    	intent.putExtra(ADDRESS_KEY, accountAddress);
+    	context.startActivity(intent);
+    }
+
+    private String accountAddress;
+
+    private EditText passwordTxt;
+    private EditText confirmPasswordTxt;
+
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_export_account);
+
+		accountAddress = getIntent().getStringExtra(ADDRESS_KEY);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getString(R.string.activity_title_backup, accountAddress.substring(0, 5)));
         }
 
-        mAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
-
-        getSupportActionBar().setTitle(getString(R.string.title_backup) + ": " + mAddress.substring(0, 5) + "...");
-
-        mController = Controller.with(this);
-
-        mPasswordText = findViewById(R.id.export_password);
-        mConfirmPasswordText = findViewById(R.id.confirm_password);
-        mExportButton = findViewById(R.id.export_account_button);
-        mExportButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                final String pwd = mPasswordText.getText().toString();
-                if (!isPasswordLongEnough(pwd)) {
-                    mPasswordText.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
-                }
-
-                final String pwdConfirm = mConfirmPasswordText.getText().toString();
-                if (!isPasswordLongEnough(pwdConfirm)) {
-                    mConfirmPasswordText.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
-                } else if (!pwd.equals(pwdConfirm)) {
-                    mConfirmPasswordText.setError(getString(R.string.error_passwords_must_match));
-                }
-
-                if (!isPasswordLongEnough(pwd) || !isPasswordLongEnough(pwdConfirm) || !pwd.equals(pwdConfirm)) {
-                    return;
-                }
-
-	            String keystoreJson = null;
-	            try {
-		            keystoreJson = mController.clickExportAccount(ExportAccountActivity.this, mAddress, mPasswordText.getText().toString());
-		            if (keystoreJson.isEmpty()) {
-			            Toast.makeText(ExportAccountActivity.this, "Unable to export", Toast.LENGTH_SHORT).show();
-		            } else {
-			            mController.shareKeystore(ExportAccountActivity.this, keystoreJson);
-		            }
-	            } catch (ServiceErrorException e) {
-		            if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
-			            KS.showAuthenticationScreen(ExportAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
-		            }
-	            }
-            }
+        passwordTxt = findViewById(R.id.password);
+        confirmPasswordTxt = findViewById(R.id.confirm_password);
+        confirmPasswordTxt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+	        @Override
+	        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		        return false;
+	        }
         });
-    }
-
-    boolean isPasswordLongEnough(String password) {
-        return password.length() >= MIN_PASSWORD_LENGTH;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Controller.SHARE_RESULT) {
-            if (resultCode == RESULT_OK) {
-                setResult(RESULT_OK);
-                finish();
-            }
-        }
+		findViewById(R.id.export_account_button).setOnClickListener(this);
     }
 
     @Override
@@ -112,4 +75,92 @@ public class ExportAccountActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SHARE_REQUEST_CODE) {
+			if (resultCode == RESULT_OK) {
+				setResult(RESULT_OK);
+				finish();
+			} else {
+				new AlertDialog.Builder(this)
+						.setMessage(R.string.do_manage_make_backup)
+						.setPositiveButton(R.string.yes_continue, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								setResult(RESULT_OK);
+								finish();
+							}
+						})
+						.setNegativeButton(R.string.no_repeat, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								onExport();
+							}
+						})
+						.show();
+			}
+		} else if (requestCode == Controller.UNLOCK_SCREEN_REQUEST) {
+			if (resultCode == RESULT_OK) {
+				onExport();
+			} else {
+				showError(getString(R.string.unable_unblock_device));
+			}
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		onExport();
+	}
+
+	public void onExport() {
+		final String password = passwordTxt.getText().toString();
+		final String passwordConfirm = confirmPasswordTxt.getText().toString();
+		if (isPasswordValid(password, passwordConfirm)) {
+			try {
+				String jsonData = Controller.with(this).exportAccount(accountAddress, password);
+				if (!TextUtils.isEmpty(jsonData)) {
+					openShareDialog(jsonData);
+				} else {
+					showError("Unable to export");
+				}
+			} catch (ServiceErrorException e) {
+				if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+					KS.showAuthenticationScreen(ExportAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
+				} else {
+					showError("Failed to export account " + e.getMessage());
+				}
+			}
+		}
+	}
+
+	private void openShareDialog(String jsonData) {
+		Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+		sharingIntent.setType("text/plain");
+		sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
+		sharingIntent.putExtra(Intent.EXTRA_TEXT, jsonData);
+		startActivityForResult(
+				Intent.createChooser(sharingIntent, "Share via"),
+				SHARE_REQUEST_CODE);
+	}
+
+	private void showError(String message) {
+		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+	}
+
+	private boolean isPasswordValid(String password, String passwordConfirm) {
+    	boolean isValid = true;
+		if (password.length() < MIN_PASSWORD_LENGTH) {
+			passwordTxt.setError(String.format(getString(R.string.min_pwd_length), MIN_PASSWORD_LENGTH));
+			isValid = false;
+		}
+
+
+		if (!password.equals(passwordConfirm)) {
+			confirmPasswordTxt.setError(getString(R.string.error_passwords_must_match));
+			isValid = false;
+		}
+		return isValid;
+	}
 }

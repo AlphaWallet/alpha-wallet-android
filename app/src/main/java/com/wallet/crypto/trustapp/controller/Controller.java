@@ -32,10 +32,10 @@ import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
+import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.SettingsActivity;
 import com.wallet.crypto.trustapp.views.TokenListActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
-import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
 
 import org.ethereum.geth.Account;
@@ -88,7 +88,7 @@ public class Controller {
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
     public static final int UNLOCK_SCREEN_REQUEST = 1001;
-    public static final int SHARE_RESULT = 2;
+//    public static final int SHARE_RESULT = 2;
 
     private static String TAG = "CONTROLLER";
 
@@ -486,24 +486,22 @@ public class Controller {
         }
     }
 
-    public void navigateToExportAccount(Activity parent, String address) {
-        Intent intent = new Intent(parent, ExportAccountActivity.class);
-        intent.putExtra(getString(R.string.address_keyword), address);
-        parent.startActivityForResult(intent, SHARE_RESULT);
-    }
+//    public void navigateToExportAccount(Activity parent, String address) {
+//        Intent intent = new Intent(parent, ExportAccountActivity.class);
+//        intent.putExtra(getString(R.string.address_keyword), address);
+//        parent.startActivityForResult(intent, SHARE_RESULT);
+//    }
 
-    public String clickExportAccount(Context context, String address, String new_password) throws ServiceErrorException {
+    public String exportAccount(String address, String newPassword) throws ServiceErrorException {
         try {
 	        Account account = mEtherStore.getAccount(address);
-//            String account_password = PasswordManager.getPassword(address, mAppContext);
-	        String account_password = new String(KS.get(mAppContext, address.toLowerCase()));
-	        return mEtherStore.exportAccount(account, account_password, new_password);
+	        String accountPassword = new String(KS.get(mAppContext, address.toLowerCase()));
+	        return mEtherStore.exportAccount(account, accountPassword, newPassword);
         } catch (ServiceErrorException ex) {
         	throw ex;
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to export account " + e.getMessage(), Toast.LENGTH_SHORT);
+        	throw new ServiceErrorException(ServiceErrorException.UNKNOWN_ERROR, e.getMessage());
         }
-        return "";
     }
 
     public ESTransaction findTransaction(String address, String txn_hash) {
@@ -532,15 +530,6 @@ public class Controller {
 
     public List<VMNetwork> getNetworks() {
         return mNetworks;
-    }
-
-    public void shareKeystore(Activity parent, String keystoreJson) {
-        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, keystoreJson);
-
-        parent.startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), SHARE_RESULT);
     }
 
     public static String generatePassphrase() {

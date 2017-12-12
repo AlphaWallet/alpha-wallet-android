@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -67,7 +68,9 @@ public class CreateAccountActivity extends AppCompatActivity {
 		try {
 			mController.clickCreateAccount(CreateAccountActivity.this, "account name", generatedPassphrase);
 		} catch (Exception e) {
-			if (e instanceof ServiceErrorException) {
+			Log.d("CREATE_ACC", "Error", e);
+			if (e instanceof ServiceErrorException
+					&& ((ServiceErrorException) e).code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
 				KS.showAuthenticationScreen(CreateAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
 			} else {
 				Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_LONG).show();

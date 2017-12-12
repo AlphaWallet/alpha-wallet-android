@@ -41,7 +41,6 @@
     <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
     <string name="action_export">Backup private key</string>
-    <string name="address_keyword">ADDRESS</string>
     <string name="message_save_this">Keep this someplace safe</string>
     <string name="copy">Copy to clipboard</string>
     <string name="close">Close</string>
@@ -95,7 +94,7 @@
     <string name="error_passwords_must_match">Passwords must match.</string>
     <string name="label_confirm_new_password">Confirm new password</string>
     <string name="label_new_password">New password</string>
-    <string name="title_backup">Backup</string>
+    <string name="activity_title_backup">Backup: %s…</string>
     <string name="action_backup">Backup</string>
     <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_terms">Terms and Conditions</string>
@@ -108,14 +107,21 @@
     <string name="tab_keystore">Keystore</string>
     <string name="tab_private_key">Private key</string>
     <string name="action_transaction_detail">More details</string>
-    <string name="lock_title">Lock screen</string>
-    <string name="lock_body">Secure lock screen hasn\'t set up. To continue working with this app, please go to Settings and set a lock screen method.</string>
-    <string name="lock_settings">Lock settings</string>
-    <string name="lock_exit">Exit</string>
-    <string name="unlock_screen_title_android">Unlock screen</string>
-    <string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
-    <string name="sending_progress">Sending...</string>
+	<string name="lock_title">Lock screen</string>
+	<string name="lock_body">Secure lock screen hasn\'t set up. It is not safe.</string>
+	<string name="lock_settings">Lock settings</string>
+	<string name="lock_exit">Exit</string>
+	<string name="unlock_screen_title_android">Unlock screen</string>
+	<string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
+	<string name="sending_progress">Sending...</string>
+
+	<string name="backup_new_password_text">Think of a password that will be installed on the backup.\nThe password will be available for this account.</string>
+	<string name="do_manage_make_backup">Did you manage to make a backup?</string>
+	<string name="yes_continue">Yes, continue</string>
+	<string name="no_repeat">No, repeat</string>
+	<string name="unable_unblock_device">Unable to unlock the device.</string>
     <string name="gas_limit">Gas Limit</string>
     <string name="gas_price">Gas Price (Wei)</string>
+	<string name="skip">Skip</string>
 
 </resources>

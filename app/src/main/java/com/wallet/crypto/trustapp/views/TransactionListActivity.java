@@ -6,7 +6,9 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
@@ -178,7 +179,11 @@ public class TransactionListActivity extends AppCompatActivity {
 
 
         KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager != null && !keyguardManager.isDeviceSecure()) {
+	    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        if (keyguardManager != null
+		        && !keyguardManager.isDeviceSecure()
+		        && pref.getBoolean("should_show_security_alert", true)) {
+        	pref.edit().putBoolean("should_show_security_alert", false).apply();
 	        new AlertDialog.Builder(this)
 			        .setTitle(R.string.lock_title)
 			        .setMessage(R.string.lock_body)
@@ -189,10 +194,9 @@ public class TransactionListActivity extends AppCompatActivity {
 					        startActivity(intent);
 				        }
 			        })
-			        .setNegativeButton(R.string.lock_exit, new DialogInterface.OnClickListener() {
+			        .setNegativeButton(R.string.skip, new DialogInterface.OnClickListener() {
 				        @Override
 				        public void onClick(DialogInterface dialog, int which) {
-					        System.exit(0);
 				        }
 			        })
 			        .show();

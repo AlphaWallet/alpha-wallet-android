@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
@@ -25,17 +26,17 @@ import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
+import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.crypto.trustapp.views.AccountListActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
+import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.SettingsActivity;
 import com.wallet.crypto.trustapp.views.TokenListActivity;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
-import com.wallet.crypto.trustapp.views.SendActivity;
 import com.wallet.crypto.trustapp.views.WarningBackupActivity;
-import com.wallet.pwd.trustapp.PasswordManager;
 
 import org.ethereum.geth.Account;
 import org.web3j.abi.FunctionEncoder;
@@ -74,9 +75,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
-
 /**
  * Created by marat on 9/26/17.
  * Controller class which contains all business logic
@@ -89,7 +87,8 @@ public class Controller {
     private static Controller mInstance;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
-    public static final int SHARE_RESULT = 2;
+    public static final int UNLOCK_SCREEN_REQUEST = 1001;
+//    public static final int SHARE_RESULT = 2;
 
     private static String TAG = "CONTROLLER";
 
@@ -362,46 +361,62 @@ public class Controller {
         new ImportPrivateKeyTask(activity, privateKey, password, listener).execute();
     }
 
-    public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
+    public void clickSend(String from, String to, String ethAmount, String gasLimit, String gasPrice, OnTaskCompleted listener) throws ServiceErrorException {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
-            String wei = EthToWei(ethAmount);
-            String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, to, wei, password, null, listener).execute();
+	        String wei = EthToWei(ethAmount);
+//            String password = PasswordManager.getPassword(from, mAppContext);
+	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        new SendTransactionTask(from, to, wei, gasLimit, gasPrice, password, null, listener).execute();
+        } catch (ServiceErrorException ex) {
+	        Log.e(TAG, "Error sending transaction: ", ex);
+        	throw ex;
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
     }
 
-    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, int decimals, OnTaskCompleted listener) {
+    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, String gasLimit, String gasPrice, int decimals, OnTaskCompleted listener) throws ServiceErrorException {
         Log.d(TAG, String.format("Send tokens: %s, %s, %s", from, to, tokenAmount));
         try {
-            BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long)Math.pow(10, decimals))).toBigInteger();
+	        BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long) Math.pow(10, decimals))).toBigInteger();
 
-            List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(nTokens));
+	        List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(nTokens));
 
-            List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() { });
+	        List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {
+	        });
 
-            Function function = new Function("transfer", params, returnTypes);
-            String encodedFunction = FunctionEncoder.encode(function);
-            byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+	        Function function = new Function("transfer", params, returnTypes);
+	        String encodedFunction = FunctionEncoder.encode(function);
+	        byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
 
-            String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, contractAddress, "0", password, data, listener).execute();
-
+//            String password = PasswordManager.getPassword(from, mAppContext);
+	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        new SendTransactionTask(from, contractAddress, "0", gasLimit, gasPrice, password, data, listener).execute();
+        } catch (ServiceErrorException ex) {
+        	throw ex;
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
     }
 
-    public VMAccount createAccount(String password) {
-        try {
-            String address = new CreateAccountTask().execute(password).get();
-            return new VMAccount(address, "0");
-        } catch (Exception e) {
-            Log.d(TAG, e.toString());
-        }
-        return null;
+    public VMAccount createAccount(String password) throws Exception {
+	    Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
+	    String address = null;
+	    VMAccount result = null;
+	    try {
+		    Account account = mEtherStore.createAccount(password);
+		    address = account.getAddress().getHex().toLowerCase();
+		    KS.put(mAppContext, address, password);
+		    result = new VMAccount(address, "0");
+		    return result;
+	    } finally {
+		    if (result == null && !TextUtils.isEmpty(address)) {
+			    try {
+				    mEtherStore.deleteAccount(address, password);
+			    } catch (Exception e) { /* Quietly */ }
+		    }
+	    }
     }
 
     public List<VMAccount> getAccounts() {
@@ -460,7 +475,8 @@ public class Controller {
     }
 
     public void deleteAccount(String address) throws Exception {
-        String password = PasswordManager.getPassword(address, mAppContext);
+//        String password = PasswordManager.getPassword(address, mAppContext);
+	    String password = new String(KS.get(mAppContext, address.toLowerCase()));
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
         if (address.equals(mCurrentAddress)) {
@@ -470,21 +486,22 @@ public class Controller {
         }
     }
 
-    public void navigateToExportAccount(Activity parent, String address) {
-        Intent intent = new Intent(parent, ExportAccountActivity.class);
-        intent.putExtra(getString(R.string.address_keyword), address);
-        parent.startActivityForResult(intent, SHARE_RESULT);
-    }
+//    public void navigateToExportAccount(Activity parent, String address) {
+//        Intent intent = new Intent(parent, ExportAccountActivity.class);
+//        intent.putExtra(getString(R.string.address_keyword), address);
+//        parent.startActivityForResult(intent, SHARE_RESULT);
+//    }
 
-    public String clickExportAccount(Context context, String address, String new_password) {
+    public String exportAccount(String address, String newPassword) throws ServiceErrorException {
         try {
-            Account account = mEtherStore.getAccount(address);
-            String account_password = PasswordManager.getPassword(address, mAppContext);
-            return mEtherStore.exportAccount(account, account_password, new_password);
+	        Account account = mEtherStore.getAccount(address);
+	        String accountPassword = new String(KS.get(mAppContext, address.toLowerCase()));
+	        return mEtherStore.exportAccount(account, accountPassword, newPassword);
+        } catch (ServiceErrorException ex) {
+        	throw ex;
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to export account " + e.getMessage(), Toast.LENGTH_SHORT);
+        	throw new ServiceErrorException(ServiceErrorException.UNKNOWN_ERROR, e.getMessage());
         }
-        return "";
     }
 
     public ESTransaction findTransaction(String address, String txn_hash) {
@@ -513,15 +530,6 @@ public class Controller {
 
     public List<VMNetwork> getNetworks() {
         return mNetworks;
-    }
-
-    public void shareKeystore(Activity parent, String keystoreJson) {
-        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, keystoreJson);
-
-        parent.startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), SHARE_RESULT);
     }
 
     public static String generatePassphrase() {
@@ -675,12 +683,25 @@ public class Controller {
         }
 
         protected Void doInBackground(String... params) {
+        	String address = null;
             try {
-                Account account = mEtherStore.importKeyStore(keystoreJson, password);
-                PasswordManager.setPassword(account.getAddress().getHex().toLowerCase(), password, mAppContext);
-                loadAccounts();
-                Log.d("INFO", "Imported account: " + account.getAddress().getHex());
-                listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
+	            Account account = mEtherStore.importKeyStore(keystoreJson, password);
+	            address = account.getAddress().getHex().toLowerCase();
+	            KS.put(mAppContext, address, password);
+	            loadAccounts();
+	            Log.d("INFO", "Imported account: " + account.getAddress().getHex());
+	            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
+            } catch (ServiceErrorException e) {
+
+            	if (!TextUtils.isEmpty(address)) {
+            		try {
+			            mEtherStore.deleteAccount(address, password);
+		            } catch (Exception ex) {};
+	            }
+
+            	if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+		            listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, ""));
+	            }
             } catch (Exception e) {
                 Log.d("ERROR", e.toString());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Failed to import wallet: '%s'".format(e.getMessage())));
@@ -689,21 +710,38 @@ public class Controller {
         }
     }
 
-    private class CreateAccountTask extends AsyncTask<String, Void, String> {
-        protected String doInBackground(String... passwords) {
-            Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
-            String address = "";
-            try {
-                Account account = mEtherStore.createAccount(passwords[0]);
-                address = account.getAddress().getHex().toString().toLowerCase();
-
-                PasswordManager.setPassword(address, passwords[0], mAppContext);
-            } catch (Exception e) {
-                Log.d("ERROR", "Error generating wallet: " + e.toString());
-            }
-            return address;
-        }
-    }
+//    private class CreateAccountTask extends AsyncTask<String, Void, String> {
+//	    private final OnTaskCompleted listener;
+//
+//	    public CreateAccountTask(OnTaskCompleted listener) {
+//		    this.listener = listener;
+//	    }
+//
+//        protected String doInBackground(String... passwords) {
+//            Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
+//            String address = "";
+//            try {
+//	            Account account = mEtherStore.createAccount(passwords[0]);
+//	            address = account.getAddress().getHex().toString().toLowerCase();
+//	            KS.put(mAppContext, address, passwords[0]);
+//            } catch (ServiceErrorException ex) {
+//	            if (!TextUtils.isEmpty(address)) {
+//		            try {
+//			            mEtherStore.deleteAccount(address, passwords[0]);
+//		            } catch (Exception e) { /* Quietly */ }
+//	            }
+//
+//	            if (ex.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+//		            listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "USER_NOT_AUTHENTICATED"));
+//	            }
+//	            address = null;
+//            } catch (Exception e) {
+//                Log.d("ERROR", "Error generating wallet: " + e.toString());
+//                address = null;
+//            }
+//            return address;
+//        }
+//    }
 
     // Randomize etherscan key selection stay below rate limit
     private String getRandomEtherscanKey() {
@@ -717,14 +755,18 @@ public class Controller {
         private String fromAddress;
         private String toAddress;
         private String wei;
+        private String gasLimit;
+        private String gasPrice;
         private String password;
         private byte[] data;
         private OnTaskCompleted listener;
 
-        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, byte[] data, OnTaskCompleted listener) {
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String gasLimit, String gasPrice, String password, byte[] data, OnTaskCompleted listener) {
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.wei = wei;
+            this.gasLimit = gasLimit;
+            this.gasPrice = gasPrice;
             this.password = password;
             this.data = data;
             this.listener = listener;
@@ -748,7 +790,7 @@ public class Controller {
 
                 String hexValue = "0xDEADBEEF";
                 try {
-                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, data, nonce.longValue());
+                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, gasLimit, gasPrice, data, nonce.longValue());
                     hexValue = Numeric.toHexString(signedMessage);
                 } catch (Exception e) {
                     Log.e(TAG, "Error signing " + e.toString());

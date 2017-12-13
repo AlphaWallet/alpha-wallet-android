@@ -1,8 +1,8 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -14,7 +14,7 @@ public class SplashActivity extends AppCompatActivity {
 
         // Start home activity
 
-        startActivity(new Intent(SplashActivity.this, TransactionListActivity.class));
+        startActivity(new Intent(this, TransactionListActivity.class));
 
         // close splash activity
 

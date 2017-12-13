@@ -34,7 +34,7 @@ public class WarningBackupActivity extends AppCompatActivity {
         mBackupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.navigateToExportAccount(WarningBackupActivity.this, mAddress);
+                ExportAccountActivity.open(getApplicationContext(), mAddress);
             }
         });
 
@@ -64,15 +64,13 @@ public class WarningBackupActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Controller.SHARE_RESULT) {
+        if (requestCode == ExportAccountActivity.SHARE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 if (Controller.with(this).getAccounts().size() == 1) {
                     Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getApplicationContext().startActivity(intent);
-
                 }
-
                 finish();
             }
         }

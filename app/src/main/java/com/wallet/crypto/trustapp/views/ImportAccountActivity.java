@@ -10,17 +10,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.controller.Controller;
-import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
-import com.wallet.crypto.trustapp.controller.TaskResult;
-import com.wallet.crypto.trustapp.controller.TaskStatus;
 
 public class ImportAccountActivity extends AppCompatActivity {
 

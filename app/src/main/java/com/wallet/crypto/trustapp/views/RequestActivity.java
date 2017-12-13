@@ -3,11 +3,11 @@ package com.wallet.crypto.trustapp.views;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,15 +16,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.model.VMAccount;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
 
 public class RequestActivity extends AppCompatActivity {
 

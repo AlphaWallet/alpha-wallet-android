@@ -6,7 +6,9 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -22,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
@@ -32,6 +33,7 @@ import com.wallet.crypto.trustapp.model.ESTransaction;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.crypto.trustapp.util.PMMigrateHelper;
+import com.wallet.crypto.trustapp.util.RootUtil;
 
 import java.util.List;
 
@@ -169,55 +171,74 @@ public class TransactionListActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume");
-
         super.onResume();
 
         init();
-        Log.d(TAG, "Number of accounts: " + mController.getNumberOfAccounts());
+	    checkGuard();
+	    checkRoot();
 
-
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager != null && !keyguardManager.isDeviceSecure()) {
-	        new AlertDialog.Builder(this)
-			        .setTitle(R.string.lock_title)
-			        .setMessage(R.string.lock_body)
-			        .setPositiveButton(R.string.lock_settings, new DialogInterface.OnClickListener() {
-				        @Override
-				        public void onClick(DialogInterface dialog, int which) {
-					        Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
-					        startActivity(intent);
-				        }
-			        })
-			        .setNegativeButton(R.string.lock_exit, new DialogInterface.OnClickListener() {
-				        @Override
-				        public void onClick(DialogInterface dialog, int which) {
-					        System.exit(0);
-				        }
-			        })
-			        .show();
-        } else {
-	        if (mController.getAccounts().size() == 0) {
-		        Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);
-		        this.startActivityForResult(intent, Controller.IMPORT_ACCOUNT_REQUEST);
-		        finish();
-	        } else {
-		        mController.onResume();
-		        try {
-			        PMMigrateHelper.migrate(this);
-		        } catch (ServiceErrorException e) {
-			        if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
-				        KS.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
-			        } else {
-				        Toast.makeText(this, "Could not process passwords.", Toast.LENGTH_LONG)
-						        .show();
-			        }
-		        }
-	        }
-        }
+	    if (mController.getAccounts().size() == 0) {
+		    Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);
+		    this.startActivityForResult(intent, Controller.IMPORT_ACCOUNT_REQUEST);
+		    finish();
+	    } else {
+		    mController.onResume();
+		    try {
+			    PMMigrateHelper.migrate(this);
+		    } catch (ServiceErrorException e) {
+			    if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+				    KS.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
+			    } else {
+				    Toast.makeText(this, "Could not process passwords.", Toast.LENGTH_LONG)
+						    .show();
+			    }
+		    }
+	    }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	private void checkRoot() {
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (RootUtil.isDeviceRooted() && pref.getBoolean("should_show_root_warning", true)) {
+			pref.edit().putBoolean("should_show_root_warning", false).apply();
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.root_title)
+					.setMessage(R.string.root_body)
+					.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					})
+					.show();
+		}
+	}
+
+	private void checkGuard() {
+		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (keyguardManager != null
+				&& !keyguardManager.isDeviceSecure()
+				&& pref.getBoolean("should_show_security_warning", true)) {
+			pref.edit().putBoolean("should_show_security_warning", false).apply();
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.lock_title)
+					.setMessage(R.string.lock_body)
+					.setPositiveButton(R.string.lock_settings, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
+							startActivity(intent);
+						}
+					})
+					.setNegativeButton(R.string.skip, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					})
+					.show();
+		}
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Controller.IMPORT_ACCOUNT_REQUEST) {
             if (resultCode == RESULT_OK) {
                 this.finish();

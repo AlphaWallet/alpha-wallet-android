@@ -46,7 +46,6 @@ public class KS {
 
 	private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
 	private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
-	private static final int AUTH_DURATION_SEC = 600;
 	private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
 	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
 
@@ -77,8 +76,7 @@ public class KS {
 						KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
 						.setBlockModes(BLOCK_MODE)
 						.setKeySize(256)
-						.setUserAuthenticationRequired(true)
-						.setUserAuthenticationValidityDurationSeconds(AUTH_DURATION_SEC)
+						.setUserAuthenticationRequired(false)
 						.setRandomizedEncryptionRequired(true)
 						.setEncryptionPaddings(PADDING)
 						.build());

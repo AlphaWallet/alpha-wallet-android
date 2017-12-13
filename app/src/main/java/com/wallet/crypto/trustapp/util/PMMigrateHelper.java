@@ -18,7 +18,6 @@ public class PMMigrateHelper {
 				String address = key.replace("-pwd", "");
 				try {
 					KS.put(context, address.toLowerCase(), PasswordManager.getPassword(address, context));
-					pref.edit().remove(key).apply();
 				} catch (ServiceErrorException ex) {
 					throw ex;
 				} catch (Exception ex) {

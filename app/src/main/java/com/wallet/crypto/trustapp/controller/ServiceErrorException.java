@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 public class ServiceErrorException extends Exception {
 
+	public static final int UNKNOWN_ERROR = -1;
 	public static final int INVALID_DATA = 1;
 	public static final int KEY_STORE_ERROR = 1001;
 	public static final int FAIL_TO_SAVE_IV_FILE = 1002;

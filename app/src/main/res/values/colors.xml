@@ -5,7 +5,7 @@
     <color name="colorAccent">#2e91db</color>
     <color name="green">#2fbb4f</color>
     <color name="red">#f7506c</color>
-    <color name="colorWhite">#FFFFFFFF</color>
+    <color name="white">#ffffff</color>
     <color name="semitransparentWhite">#AAFFFFFF</color>
     <color name="QRCodeBlackColor">#FF000000</color>
     <color name="QRCodeWhiteColor">#FFFFFFFF</color>

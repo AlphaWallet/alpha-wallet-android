@@ -111,5 +111,6 @@
     <string name="action_transaction_detail">More details</string>
 	<string name="empty"/>
 	<string name="try_again">Try again</string>
+	<string name="already_have_account">Already have a wallet?</string>
 
 </resources>

@@ -22,7 +22,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     private Controller mController;
 
     // Constant
-    private static final int MIN_PASSWORD_LENGTH = 4;
+//    private static final int MIN_PASSWORD_LENGTH = 4;
 
     // UI references.
     private Button mImportButton;
@@ -108,9 +108,9 @@ public class CreateAccountActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isPasswordLongEnough(String password) {
-        return password.length() >= MIN_PASSWORD_LENGTH;
-    }
+//    private boolean isPasswordLongEnough(String password) {
+//        return password.length() >= MIN_PASSWORD_LENGTH;
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

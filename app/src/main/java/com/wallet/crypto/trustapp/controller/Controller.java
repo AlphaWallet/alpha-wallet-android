@@ -719,6 +719,7 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... params) {
+            String txnHash = "";
             try {
                 Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getRpcUrl()));
 
@@ -762,12 +763,13 @@ public class Controller {
                 Log.d(TAG, "Transaction JSON-RPC"+ raw.getJsonrpc());
                 Log.d(TAG, "Transaction result: " + raw.getResult());
                 Log.d(TAG, "Transaction hash: " + raw.getTransactionHash());
+                txnHash = raw.getTransactionHash();
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + e.toString()));
                 return null;
             }
-            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Payment sent"));
+            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Payment sent: " + txnHash));
             return null;
         }
     }

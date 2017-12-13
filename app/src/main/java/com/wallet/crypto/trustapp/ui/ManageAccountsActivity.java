@@ -3,11 +3,14 @@ package com.wallet.crypto.trustapp.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.C;
@@ -24,7 +27,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class AccountsManageActivity extends BaseActivity implements View.OnClickListener {
+public class ManageAccountsActivity extends BaseActivity implements View.OnClickListener {
 
 	@Inject
 	AccountsManageViewModelFactory accountsManageViewModelFactory;
@@ -48,6 +51,7 @@ public class AccountsManageActivity extends BaseActivity implements View.OnClick
 		systemView = findViewById(R.id.system_view);
 		FloatingActionButton addAction = findViewById(R.id.fab);
 		RecyclerView list = findViewById(R.id.list);
+
 		list.setLayoutManager(new LinearLayoutManager(this));
 		list.setAdapter(adapter);
 
@@ -72,7 +76,10 @@ public class AccountsManageActivity extends BaseActivity implements View.OnClick
 	}
 
 	private void onAddAccount() {
-		viewModel.createAccount(this);
+//		viewModel.createAccount(this);
+		BottomSheetDialog dialog = new BottomSheetDialog(this);
+		dialog.setContentView(R.layout.layout_add_account);
+		dialog.show();
 	}
 
 	private void onChangeDefaultAccount(Account account) {

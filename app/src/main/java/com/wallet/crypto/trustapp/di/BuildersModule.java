@@ -1,6 +1,6 @@
 package com.wallet.crypto.trustapp.di;
 
-import com.wallet.crypto.trustapp.ui.AccountsManageActivity;
+import com.wallet.crypto.trustapp.ui.ManageAccountsActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -9,6 +9,6 @@ import dagger.android.ContributesAndroidInjector;
 public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AccountsManageModule.class)
-	abstract AccountsManageActivity bindAccountsManageModule();
+	abstract ManageAccountsActivity bindAccountsManageModule();
 
 }

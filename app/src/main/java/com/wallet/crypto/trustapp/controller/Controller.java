@@ -27,7 +27,7 @@ import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
-import com.wallet.crypto.trustapp.ui.AccountsManageActivity;
+import com.wallet.crypto.trustapp.ui.ManageAccountsActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
@@ -289,7 +289,7 @@ public class Controller {
     }
 
     public void navigateToAccountList(Context context) {
-        Intent intent = new Intent(context, AccountsManageActivity.class);
+        Intent intent = new Intent(context, ManageAccountsActivity.class);
         context.startActivity(intent);
     }
 

@@ -112,5 +112,7 @@
 	<string name="empty"/>
 	<string name="try_again">Try again</string>
 	<string name="already_have_account">Already have a wallet?</string>
+	<string name="title_add_account">Add account</string>
+	<string name="action_create_new_account">Create new account</string>
 
 </resources>

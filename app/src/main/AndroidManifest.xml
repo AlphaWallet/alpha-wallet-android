@@ -56,7 +56,7 @@
             android:label="@string/title_account_list"
             android:theme="@style/AppTheme.NoActionBar" />-->
 	    <activity
-            android:name=".ui.AccountsManageActivity"
+            android:name=".ui.ManageAccountsActivity"
             android:label="@string/title_account_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

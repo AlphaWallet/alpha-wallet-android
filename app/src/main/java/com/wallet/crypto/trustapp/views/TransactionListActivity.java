@@ -30,6 +30,7 @@ import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.model.ESTransaction;
+import com.wallet.crypto.trustapp.model.TRTransaction;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.crypto.trustapp.util.PMMigrateHelper;
@@ -133,9 +134,9 @@ public class TransactionListActivity extends AppCompatActivity {
                 // Conversion data may not be available, in which case, hide it
                 if (usd != null) {
                     getSupportActionBar().setTitle("$" + usd);
-                    getSupportActionBar().setSubtitle(balance + " ETH");
+                    getSupportActionBar().setSubtitle(balance + " " + mController.getCurrentNetwork().getSymbol());
                 } else {
-                    getSupportActionBar().setTitle(balance + " ETH");
+                    getSupportActionBar().setTitle(balance + " " + mController.getCurrentNetwork().getSymbol());
                     getSupportActionBar().setSubtitle(mAddress);
                 }
 
@@ -277,16 +278,16 @@ public class TransactionListActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         Controller controller = Controller.with(this);
-        List<ESTransaction> txns = controller.getTransactions(mAddress);
+        List<TRTransaction> txns = controller.getTransactions(mAddress);
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(txns));
     }
 
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<ESTransaction> mValues;
+        private final List<TRTransaction> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<ESTransaction> items) {
+        public SimpleItemRecyclerViewAdapter(List<TRTransaction> items) {
             mValues = items;
         }
 
@@ -352,10 +353,9 @@ public class TransactionListActivity extends AppCompatActivity {
             public final TextView mSentOrReceived;
             public final TextView mAddressView;
             public final TextView mDateView;
-            //public final TextView mBalanceView;
             public final TextView mValueView;
 
-            public ESTransaction mItem;
+            public TRTransaction mItem;
 
             public ViewHolder(View view) {
                 super(view);

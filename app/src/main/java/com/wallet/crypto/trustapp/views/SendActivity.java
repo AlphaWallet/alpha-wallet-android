@@ -1,6 +1,7 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,7 @@ import com.wallet.crypto.trustapp.views.barcode.BarcodeCaptureActivity;
 
 import org.ethereum.geth.Address;
 
+import java.util.List;
 import java.math.BigInteger;
 
 public class SendActivity extends AppCompatActivity {
@@ -45,12 +48,16 @@ public class SendActivity extends AppCompatActivity {
     public static final String EXTRA_SYMBOL = "extra_symbol";
     public static final String EXTRA_DECIMALS = "extra_decimals";
 
-	private final Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
-	private EditText mTo;
-	private EditText mAmount;
-	private EditText mGasLimit;
-	private EditText mGasPrice;
+    private EditText mTo;
+    private EditText mAmount;
+    private SeekBar mGasLimit;
+    private SeekBar mGasPrice;
+
+    private int gasLimitSelected;
+    private int gasPriceSelected; //Gwei
+    private static long weiInGwei = 1000000000;
 
     private TextView mResultTextView;
 
@@ -72,7 +79,7 @@ public class SendActivity extends AppCompatActivity {
 	    mController = Controller.with(this);
 	    mTo = findViewById(R.id.date);
         mAmount = findViewById(R.id.amount);
-        String toAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
+        String toAddress = getIntent().getStringExtra(Controller.KEY_ADDRESS);
         if (toAddress != null) {
             mTo.setText(toAddress);
         }
@@ -80,25 +87,74 @@ public class SendActivity extends AppCompatActivity {
         mDecimals = getIntent().getIntExtra(EXTRA_DECIMALS, -1);
         mSymbol = getIntent().getStringExtra(EXTRA_SYMBOL);
         mSendingTokens = getIntent().getBooleanExtra(EXTRA_SENDING_TOKENS, false);
+
         assert(!mSendingTokens || (mSendingTokens && mDecimals > -1 && mContractAddress != null));
 
         if (mSendingTokens && mSymbol != null) {
             mAmount.setHint(mSymbol + " amount");
         } else {
-	        mAmount.setHint("ETH amount");
+            mAmount.setHint(mController.getCurrentNetwork().getSymbol() + " amount");
         }
 
-        mGasLimit = findViewById(R.id.gas_limit_text);
-        mGasLimit.setText(Integer.toString(EtherStore.getDefaultGasLimit()));
+        final TextView gasLimitText = findViewById(R.id.gas_limit_text);
+        mGasLimit = findViewById(R.id.gas_limit_slider);
+        mGasLimit.setMax(EtherStore.getMaxGasLimit() - EtherStore.getMinGasLimit());
+        if (mSendingTokens) {
+            gasLimitSelected = EtherStore.getTokenGasLimit();
+        } else {
+            gasLimitSelected = EtherStore.getDefaultGasLimit();
+        }
+        mGasLimit.setProgress(gasLimitSelected - EtherStore.getMinGasLimit());
+        mGasLimit.refreshDrawableState();
+        gasLimitText.setText("" + (gasLimitSelected));
+        mGasLimit.setOnSeekBarChangeListener(
+            new SeekBar.OnSeekBarChangeListener() {
+                 @Override
+                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                     progress = progress / 100;
+                     progress = progress * 100;
+                     gasLimitSelected = progress + EtherStore.getMinGasLimit();
+                     gasLimitText.setText("" + (gasLimitSelected));
+                 }
 
-		mGasPrice = findViewById(R.id.gas_price_text);
-		mGasPrice.setText(Long.toString(EtherStore.getDefaultGasPrice()));
+                 @Override
+                 public void onStartTrackingTouch(SeekBar seekBar) {
+                 }
+
+                 @Override
+                 public void onStopTrackingTouch(SeekBar seekBar) {
+                 }
+        });
+
+        final TextView gasPriceText = findViewById(R.id.gas_price_text);
+        final int minGasPrice = (int)(EtherStore.getMinGasPrice()/weiInGwei);
+        mGasPrice = findViewById(R.id.gas_price_slider);
+        mGasPrice.setMax((int)(EtherStore.getMaxGasFee() / EtherStore.getMaxGasLimit() / weiInGwei - minGasPrice));
+        gasPriceSelected = (int)(EtherStore.getDefaultGasPrice() / weiInGwei);
+        mGasPrice.setProgress((int)(EtherStore.getDefaultGasPrice()/weiInGwei - minGasPrice));
+        gasPriceText.setText("" + (gasPriceSelected));
+        mGasPrice.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        gasPriceSelected = progress + minGasPrice;
+                        gasPriceText.setText("" + (gasPriceSelected));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
 
         Button mSendButton = findViewById(R.id.send_button);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-				onSendClick();
+                onSendClick();
             }
         });
 
@@ -122,7 +178,6 @@ public class SendActivity extends AppCompatActivity {
 
 	private void onSendClick() {
 		// Validate input fields
-		showSendProgress();
 		boolean inputValid = true;
 		final String to = mTo.getText().toString();
 		if (!isAddressValid(to)) {
@@ -135,27 +190,26 @@ public class SendActivity extends AppCompatActivity {
 			inputValid = false;
 		}
 
-		final String gasLimit = mGasLimit.getText().toString();
-		if (!isValidGasLimit(gasLimit)) {
-		    mGasLimit.setError("Invalid gas limit");
-		    inputValid = false;
+        if (!isValidGasLimit(gasLimitSelected)) {
+            Toast.makeText(SendActivity.this, "Invalid gas limit: " + gasLimitSelected, Toast.LENGTH_LONG).show();
+            inputValid = false;
         }
 
-        final String gasPrice = mGasPrice.getText().toString();
-		if (!isValidGasPrice(gasPrice)) {
-		    mGasPrice.setError("Invalid gas price");
-		    inputValid = false;
+        if (!isValidGasPrice(gasPriceSelected)) {
+            Toast.makeText(SendActivity.this, "Invalid gas price: " + gasPriceSelected, Toast.LENGTH_LONG).show();
+            inputValid = false;
         }
 
-        if (!isValidGasFee(gasLimit, gasPrice)) {
-            mGasLimit.setError("Resulting gas fee is invalid");
-		    mGasPrice.setError("Resulting gas fee is invalid");
-		    inputValid = false;
+        if (!isValidGasFee(Integer.toString(gasLimitSelected), Long.toString(gasPriceSelected * weiInGwei))) {
+            Toast.makeText(SendActivity.this, "Gas fee (limit*price) is invalid", Toast.LENGTH_LONG).show();
+            inputValid = false;
         }
 
 		if (!inputValid) {
 			return;
 		}
+
+        showSendProgress();
 		try {
 			if (mSendingTokens) {
 				mController.clickSendTokens(
@@ -163,8 +217,8 @@ public class SendActivity extends AppCompatActivity {
 						mTo.getText().toString(),
 						mContractAddress,
 						mAmount.getText().toString(),
-						mGasLimit.getText().toString(),
-						mGasPrice.getText().toString(),
+                        Integer.toString(gasLimitSelected),
+                        Long.toString(gasPriceSelected * weiInGwei),
 						mDecimals,
 						onSendCompleteListener);
 			} else {
@@ -172,8 +226,8 @@ public class SendActivity extends AppCompatActivity {
 						mController.getCurrentAccount().getAddress(),
 						mTo.getText().toString(),
 						mAmount.getText().toString(),
-                        mGasLimit.getText().toString(),
-                        mGasPrice.getText().toString(),
+                        Integer.toString(gasLimitSelected),
+                        Long.toString(gasPriceSelected * weiInGwei),
 						onSendCompleteListener);
 			}
 		} catch (ServiceErrorException ex) {
@@ -202,20 +256,18 @@ public class SendActivity extends AppCompatActivity {
         }
     }
 
-    boolean isValidGasLimit(String limit) {
-	    try {
-	        long l = Long.parseLong(limit);
-	        // Though no bound exists on gas price, it has to be at least within the bounds of the fee
-	        return l >= EtherStore.getMinGasLimit() && l <= EtherStore.getMaxGasLimit();
+    boolean isValidGasLimit(int l) {
+        try {
+	    // Though no bound exists on gas price, it has to be at least within the bounds of the fee
+	    return l >= EtherStore.getMinGasLimit() && l <= EtherStore.getMaxGasLimit();
         } catch (Exception e) {
 	        return false;
         }
     }
 
-    boolean isValidGasPrice(String price) {
+    boolean isValidGasPrice(int price) {
         try {
-            long l = Long.parseLong(price);
-            return l >= EtherStore.getMinGasFee() && l <= EtherStore.getMaxGasFee();
+            return price*weiInGwei >= EtherStore.getMinGasPrice() && price*weiInGwei <= EtherStore.getMaxGasFee();
         } catch (Exception e) {
             return false;
         }
@@ -307,11 +359,22 @@ public class SendActivity extends AppCompatActivity {
 
 	    @Override
 	    public void run() {
-		    if (result.getStatus() == TaskStatus.SUCCESS) {
-			    finish();
-		    }
 		    hideSendProgress();
-		    Toast.makeText(getApplicationContext(), result.getMessage(), Toast.LENGTH_LONG).show();
+
+            AlertDialog alertDialog = new AlertDialog.Builder(SendActivity.this).create();
+            if (result.getStatus() == TaskStatus.SUCCESS) {
+                alertDialog.setTitle("Sent");
+            } else {
+                alertDialog.setTitle("Error");
+            }
+            alertDialog.setMessage(result.getMessage());
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
 	    }
     }
 }

@@ -27,7 +27,6 @@ import com.wallet.crypto.trustapp.model.VMAccount;
 
 public class RequestActivity extends AppCompatActivity {
 
-    final static String ETHEREUM_PREFIX = "ethereum:";
     private static final String TAG = "REQUEST_ACTIVITY";
 
     ImageView imageView;
@@ -57,7 +56,7 @@ public class RequestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getString(R.string.address_keyword), addressTextView.getText().toString());
+                ClipData clip = ClipData.newPlainText(Controller.KEY_ADDRESS, addressTextView.getText().toString());
                 clipboard.setPrimaryClip(clip);
 
                 Toast.makeText(RequestActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
@@ -65,7 +64,7 @@ public class RequestActivity extends AppCompatActivity {
         });
 
         try {
-            final Bitmap qrCode = TextToImageEncode(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0");
+            final Bitmap qrCode = TextToImageEncode(Controller.with(this).getCurrentAccount().getAddress());
             imageView.setImageBitmap(qrCode);
         } catch(Exception e) {
             Log.d(TAG, e.getMessage());

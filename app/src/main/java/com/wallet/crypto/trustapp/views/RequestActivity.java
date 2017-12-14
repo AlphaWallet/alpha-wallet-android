@@ -56,7 +56,7 @@ public class RequestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getString(R.string.address_keyword), addressTextView.getText().toString());
+                ClipData clip = ClipData.newPlainText(Controller.KEY_ADDRESS, addressTextView.getText().toString());
                 clipboard.setPrimaryClip(clip);
 
                 Toast.makeText(RequestActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();

@@ -104,7 +104,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.from)).setText(mItem.getFrom());
             ((TextView) rootView.findViewById(R.id.to)).setText(mItem.getTo());
-            ((TextView) rootView.findViewById(R.id.gas_fee)).setText(Controller.WeiToGwei(mItem.getGasUsed()));
+            ((TextView) rootView.findViewById(R.id.gas_fee)).setText(mItem.getGasUsed());
             //((TextView) rootView.findViewById(R.id.confirmation)).setText("TBD");
             ((TextView) rootView.findViewById(R.id.txn_hash)).setText(mItem.getHash());
             ((TextView) rootView.findViewById(R.id.txn_time)).setText(Controller.GetDate(Long.decode(mItem.getTimeStamp())));

@@ -79,7 +79,7 @@ public class SendActivity extends AppCompatActivity {
 	    mController = Controller.with(this);
 	    mTo = findViewById(R.id.date);
         mAmount = findViewById(R.id.amount);
-        String toAddress = getIntent().getStringExtra(getString(R.string.address_keyword));
+        String toAddress = getIntent().getStringExtra(Controller.KEY_ADDRESS);
         if (toAddress != null) {
             mTo.setText(toAddress);
         }

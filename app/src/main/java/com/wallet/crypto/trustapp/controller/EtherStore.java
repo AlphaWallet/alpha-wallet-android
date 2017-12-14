@@ -50,18 +50,21 @@ public class EtherStore {
     }
 
     // Wei
-    public static long getTokenGasLimit() {
-        return 144000;
-    }
-
-    // Wei
     public static long getMinGasFee() {
         return 21000000000L;
     }
 
     // Wei
     public static long getMaxGasFee() {
-        return 100000000000000000L;
+        return 20000000000000000L;
+    }
+
+    public static int getTokenGasLimit() {
+        return 144000;
+    }
+
+    public static long getMinGasPrice() {
+        return 1000000000;
     }
 
     public Account createAccount(String password) throws Exception {

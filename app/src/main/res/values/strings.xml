@@ -18,7 +18,6 @@
 
     <!-- String related to sending -->
     <string name="prompt_to">To</string>
-    <string name="prompt_amount">ETH Amount</string>
     <string name="action_send">Send</string>
 
     <string name="error_invalid_email">This email address is invalid</string>
@@ -107,23 +106,23 @@
     <string name="tab_keystore">Keystore</string>
     <string name="tab_private_key">Private key</string>
     <string name="action_transaction_detail">More details</string>
-	<string name="lock_title">Lock screen</string>
-	<string name="lock_body">Secure lock screen hasn\'t set up. It is not safe.</string>
-	<string name="lock_settings">Lock settings</string>
-	<string name="lock_exit">Exit</string>
-	<string name="unlock_screen_title_android">Unlock screen</string>
-	<string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
-	<string name="sending_progress">Sending...</string>
+    <string name="lock_title">Lock screen</string>
+    <string name="lock_body">Secure lock screen hasn\'t set up. It is not safe.</string>
+    <string name="lock_settings">Lock settings</string>
+    <string name="lock_exit">Exit</string>
+    <string name="unlock_screen_title_android">Unlock screen</string>
+    <string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
+    <string name="sending_progress">Sending...</string>
 
-	<string name="backup_new_password_text">Think of a password that will be installed on the backup.\nThe password will be available for this account.</string>
-	<string name="do_manage_make_backup">Did you manage to make a backup?</string>
-	<string name="yes_continue">Yes, continue</string>
-	<string name="no_repeat">No, repeat</string>
-	<string name="unable_unblock_device">Unable to unlock the device.</string>
+    <string name="backup_new_password_text">Think of a password that will be installed on the backup.\nThe password will be available for this account.</string>
+    <string name="do_manage_make_backup">Did you manage to make a backup?</string>
+    <string name="yes_continue">Yes, continue</string>
+    <string name="no_repeat">No, repeat</string>
+    <string name="unable_unblock_device">Unable to unlock the device.</string>
     <string name="gas_limit">Gas Limit</string>
     <string name="gas_price">Gas Price (Wei)</string>
-	<string name="skip">Skip</string>
-	<string name="root_title">DEVICE SECURITY COMPROMISED</string>
-	<string name="root_body">Any \'rooted\' app can access Trust\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
+    <string name="skip">Skip</string>
+    <string name="root_title">DEVICE SECURITY COMPROMISED</string>
+    <string name="root_body">Any \'rooted\' app can access Trust\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
 
 </resources>

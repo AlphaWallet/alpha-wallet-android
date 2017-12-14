@@ -34,7 +34,7 @@ public class WarningBackupActivity extends AppCompatActivity {
         mBackupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ExportAccountActivity.open(getApplicationContext(), mAddress);
+                ExportAccountActivity.open(WarningBackupActivity.this, mAddress);
             }
         });
 

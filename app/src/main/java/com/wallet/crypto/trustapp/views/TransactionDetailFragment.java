@@ -109,7 +109,13 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
             ((TextView) rootView.findViewById(R.id.txn_hash)).setText(mItem.getHash());
             ((TextView) rootView.findViewById(R.id.txn_time)).setText(Controller.GetDate(Long.decode(mItem.getTimeStamp())));
             ((TextView) rootView.findViewById(R.id.block_number)).setText(mItem.getBlockNumber());
-            rootView.findViewById(R.id.more_detail).setOnClickListener(this);
+
+            Controller mController = Controller.with(getActivity());
+            if (mController.getCurrentNetwork().getEtherscanUrl() == null) {
+                rootView.findViewById(R.id.more_detail).setVisibility(View.INVISIBLE);
+            } else {
+                rootView.findViewById(R.id.more_detail).setOnClickListener(this);
+            }
         }
 
         return rootView;

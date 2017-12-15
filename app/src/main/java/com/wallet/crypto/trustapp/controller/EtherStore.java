@@ -97,7 +97,8 @@ public class EtherStore {
     }
 
     public byte[] signTransaction(Account signer, String signerPassword, String toAddress, String wei, String limit, String price, byte[] data, long nonce) throws Exception {
-        BigInt value = new BigInt(Long.decode(wei));
+        BigInt value = new BigInt(0);
+        value.setString(wei, 10);
 
         BigInt gasPrice = new BigInt(0);
         gasPrice.setString(price, 10); // price, base

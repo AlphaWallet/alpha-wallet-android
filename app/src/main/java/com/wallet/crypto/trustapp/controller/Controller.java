@@ -150,9 +150,10 @@ public class Controller {
 
         mNetworks.add(new VMNetwork("Ethereum", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
                 "https://etherscan.io/", 1));
+        mNetworks.add(new VMNetwork("POA Network", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", 99));
+        //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", 99));
         mNetworks.add(new VMNetwork("Kovan (Test)", "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", 42));
         mNetworks.add(new VMNetwork("Ropsten (Test)", "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", 3));
-        //mNetworks.add(new VMNetwork("oracles", "POA", "http://testnet.oracles.org:8545/", "https://oracles.trustwalletapp.com", 12648430));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);

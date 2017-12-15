@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -30,7 +29,6 @@ import com.wallet.crypto.trustapp.model.VMNetwork;
 import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.crypto.trustapp.views.AccountListActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
-import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
@@ -68,7 +66,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -149,11 +146,11 @@ public class Controller {
         mNetworks = new ArrayList<>();
 
         mNetworks.add(new VMNetwork("Ethereum", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
-                "https://etherscan.io/", 1));
-        mNetworks.add(new VMNetwork("POA Network", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, 99));
-        //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", 99));
-        mNetworks.add(new VMNetwork("Kovan (Test)", "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", 42));
-        mNetworks.add(new VMNetwork("Ropsten (Test)", "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", 3));
+                "https://etherscan.io/", "ethereum", 1));
+        mNetworks.add(new VMNetwork("POA Network", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99));
+        //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
+        mNetworks.add(new VMNetwork("Kovan (Test)", "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42));
+        mNetworks.add(new VMNetwork("Ropsten (Test)", "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -831,7 +828,7 @@ public class Controller {
             CoinmarketService service = mRetrofit.create(CoinmarketService.class);
 
             Call<List<CMTicker>> call =
-                    service.getEthereumPrice();
+                    service.getTickerPrice(getCurrentNetwork().getTicker());
 
             Log.d("INFO", "Request query:" + call.request().url().query());
             call.enqueue(new Callback<List<CMTicker>>() {

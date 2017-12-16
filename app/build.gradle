@@ -22,8 +22,8 @@ android {
         applicationId "com.wallet.crypto.trustapp"
         minSdkVersion 23
         targetSdkVersion 26
-        versionCode 24
-        versionName "1.3.20"
+        versionCode 25
+        versionName "1.3.21"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true

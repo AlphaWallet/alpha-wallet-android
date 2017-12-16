@@ -5,13 +5,13 @@
     <string name="title_request">My Address</string>
     <string name="title_import">Import</string>
     <string name="title_create">Create</string>
-    <string name="title_account">Accounts</string>
+    <string name="title_account">Wallets</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_create_account">New Wallet</string>
 
     <!-- Strings related to account creation -->
-    <string name="prompt_email">Account name</string>
+    <string name="prompt_email">Wallet name</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Create</string>
     <string name="action_sign_in_short">Create</string>
@@ -29,12 +29,12 @@
     </string>
     <string name="title_activity_account_list">AccountListActivity</string>
     <string name="action_settings">Settings</string>
-    <string name="action_select_account">Accounts</string>
-    <string name="title_account_list">Accounts</string>
-    <string name="title_account_detail">Account Detail</string>
+    <string name="action_select_account">Wallets</string>
+    <string name="title_account_list">Wallets</string>
+    <string name="title_account_detail">Wallet Detail</string>
     <string name="account_delete">delete</string>
     <string name="cancel">cancel</string>
-    <string name="confirm_delete_account">Make sure that you have a backup of this account.</string>
+    <string name="confirm_delete_account">Make sure that you have a backup of this wallet.</string>
     <string name="title_activity_import_account">ImportAccountActivity</string>
     <string name="hint_keystore">Keystore</string>
     <string name="action_import">Import</string>
@@ -63,7 +63,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
-    <string name="title_delete_account">Are you sure you want to delete account?</string>
+    <string name="title_delete_account">Are you sure you want to delete wallet?</string>
     <string name="no_transactions">No Transactions.\nSwipe down to refresh.</string>
     <string name="twitter">Twitter</string>
     <string name="telegram">Telegram Group</string>
@@ -77,8 +77,8 @@
     <string name="title_rate">Rate us on Play Store</string>
     <string name="title_support">Support</string>
     <string name="title_donate">Donate</string>
-    <string name="account_already_imported">Account with this address already exists</string>
-    <string name="message_delete_account">Permanently deleting account. Make sure that it has been exported and stored elsewhere.</string>
+    <string name="account_already_imported">Wallet with this address already exists</string>
+    <string name="message_delete_account">Permanently deleting wallet. Make sure that it has been exported and stored elsewhere.</string>
     <string name="error_import">Error importing keystore</string>
     <string name="message_this_is_your_address">Ethereum wallet address</string>
     <string name="min_pwd_length">Password must be at least %d chars long</string>
@@ -89,7 +89,7 @@
     <string name="message_no_backup">No backup, no Ethereum.</string>
     <string name="unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
     <string name="title_watchout">Watch out!</string>
-    <string name="error_deleting_account">Error deleting account</string>
+    <string name="error_deleting_account">Error deleting wallet</string>
     <string name="error_passwords_must_match">Passwords must match.</string>
     <string name="label_confirm_new_password">Confirm new password</string>
     <string name="label_new_password">New password</string>
@@ -114,7 +114,7 @@
     <string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
     <string name="sending_progress">Sending...</string>
 
-    <string name="backup_new_password_text">Think of a password that will be installed on the backup.\nThe password will be available for this account.</string>
+    <string name="backup_new_password_text">Think of a password that will be installed on the backup.\nThe password will be available for this wallet.</string>
     <string name="do_manage_make_backup">Did you manage to make a backup?</string>
     <string name="yes_continue">Yes, continue</string>
     <string name="no_repeat">No, repeat</string>

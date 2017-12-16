@@ -4,11 +4,13 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -28,11 +30,13 @@ import com.wallet.crypto.trustapp.model.VMAccount;
 public class RequestActivity extends AppCompatActivity {
 
     private static final String TAG = "REQUEST_ACTIVITY";
+    private static final double QR_CODE_WIDTH_RATIO = 0.9;
 
     ImageView imageView;
     Button copyButton;
     TextView addressTextView;
-    public final static int QRcodeWidth = 500 ;
+    private int QRcodeWidth = 500;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +47,12 @@ public class RequestActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        QRcodeWidth = (int) (size.x * QR_CODE_WIDTH_RATIO);
+        Log.d("QR WIDTH", Integer.toString(QRcodeWidth));
 
         imageView = (ImageView)findViewById(R.id.imageView);
         addressTextView = (TextView)findViewById(R.id.addressTextView);

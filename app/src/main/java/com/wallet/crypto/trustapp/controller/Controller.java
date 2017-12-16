@@ -150,11 +150,11 @@ public class Controller {
         mNetworks = new ArrayList<>();
 
         mNetworks.add(new VMNetwork(ETHEREUM, "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
-                "https://etherscan.io/", "ethereum", 1));
-        mNetworks.add(new VMNetwork(POA, "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99));
+                "https://etherscan.io/", "ethereum", 1, false));
+        mNetworks.add(new VMNetwork(POA, "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99, true));
         //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
-        mNetworks.add(new VMNetwork(KOVAN, "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42));
-        mNetworks.add(new VMNetwork(ROPSTEN, "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3));
+        mNetworks.add(new VMNetwork(KOVAN, "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42, true));
+        mNetworks.add(new VMNetwork(ROPSTEN, "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3, true));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);

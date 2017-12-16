@@ -180,7 +180,7 @@ public class TransactionListActivity extends AppCompatActivity {
 	    checkGuard();
 	    checkRoot();
 
-	    if (Controller.with(this).getCurrentNetwork().getName().equals(Controller.POA)) {
+	    if (Controller.with(this).getCurrentNetwork().isTest()) {
 		    navigation.getMenu().removeItem(R.id.navigation_tokens);
 	    } else if (navigation.getMenu().findItem(R.id.navigation_tokens) == null) {
 		    MenuItem item = navigation.getMenu()

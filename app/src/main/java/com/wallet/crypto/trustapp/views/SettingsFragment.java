@@ -103,6 +103,7 @@ public class SettingsFragment extends PreferenceFragment
 
         lp.setEntries(entries);
         lp.setDefaultValue(currentValue);
+        lp.setValue(currentValue);
         lp.setSummary(currentValue);
         lp.setEntryValues(entryValues);
     }

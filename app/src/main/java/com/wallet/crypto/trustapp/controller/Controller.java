@@ -449,6 +449,7 @@ public class Controller {
 
     public void setCurrentNetwork(String name) {
         VMNetwork previous = mCurrentNetwork;
+        mEthTicker = null;
         for (VMNetwork n : mNetworks) {
             if (n.getName().equals(name)) {
                 mCurrentNetwork = n;

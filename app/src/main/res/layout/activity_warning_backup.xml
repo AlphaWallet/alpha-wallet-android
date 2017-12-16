@@ -37,7 +37,7 @@
         android:text="@string/backup_warning_text"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/backup_button"
-        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/backup_title"
         app:layout_constraintVertical_bias="0.067"
          />
 
@@ -54,7 +54,7 @@
         app:srcCompat="@mipmap/backup_warning" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/backup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"

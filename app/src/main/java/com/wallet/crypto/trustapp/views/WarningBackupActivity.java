@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
@@ -29,6 +30,9 @@ public class WarningBackupActivity extends AppCompatActivity {
         mPassword = this.getIntent().getStringExtra(Controller.KEY_PASSWORD);
         assert(!mAddress.isEmpty());
         assert(!mPassword.isEmpty());
+
+        final TextView mBackupTitle = findViewById(R.id.backup_title);
+        mBackupTitle.setText(getString(R.string.message_no_backup).replace("Ethereum", controller.getCurrentNetwork().getSymbol()));
 
         mBackupButton = findViewById(R.id.backup_button);
         mBackupButton.setOnClickListener(new View.OnClickListener() {

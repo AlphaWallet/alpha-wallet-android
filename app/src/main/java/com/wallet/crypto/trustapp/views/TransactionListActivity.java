@@ -321,11 +321,11 @@ public class TransactionListActivity extends AppCompatActivity {
 
             holder.mDateView.setText(Controller.GetDate(Long.decode(holder.mItem.getTimeStamp())));
 
-            String from = txn.getFrom();
-            String to = txn.getTo();
-            String symbol = mController.getCurrentNetwork().getSymbol();
-            String valueStr = txn.getValue();
-            long decimals = Controller.ETHER_DECIMALS;
+            String from;
+            String to;
+            String symbol;
+            String valueStr;
+            long decimals;
 
             // If operations include token transfer, display token transfer instead
             boolean isTokenTransfer = false;
@@ -340,15 +340,12 @@ public class TransactionListActivity extends AppCompatActivity {
                 valueStr = op.getValue();
                 isTokenTransfer = true;
             } catch (Exception ex) {
-                // quietly
-            }
-
-            if (!isTokenTransfer) {
+                // default to ether transaction
                 from = txn.getFrom();
                 to = txn.getTo();
-                decimals = Controller.ETHER_DECIMALS;
                 symbol = mController.getCurrentNetwork().getSymbol();
                 valueStr = txn.getValue();
+                decimals = Controller.ETHER_DECIMALS;
             }
 
             boolean isSent = from.toLowerCase().equals(mAddress.toLowerCase());

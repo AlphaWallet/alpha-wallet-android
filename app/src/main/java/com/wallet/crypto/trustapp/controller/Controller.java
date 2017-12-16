@@ -53,7 +53,6 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.protocol.infura.InfuraHttpService;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -589,7 +588,7 @@ public class Controller {
 
         private void getBalance(VMAccount account) {
             try {
-                Web3j web3 = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getRpcUrl()));
+                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
                 EthGetBalance ethGetBalance = web3
                         .ethGetBalance(account.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
@@ -762,7 +761,7 @@ public class Controller {
         protected Void doInBackground(Void... params) {
             String txnHash = "";
             try {
-                Web3j web3j = Web3jFactory.build(new InfuraHttpService(mCurrentNetwork.getRpcUrl()));
+                Web3j web3j = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
 
                 Account fromAccount = mEtherStore.getAccount(fromAddress);
                 if (fromAccount == null) {

@@ -56,7 +56,7 @@ dependencies {
     androidTestCompile('tools.fastlane:screengrab:1.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'org.web3j:core-android:2.2.1'
+    compile 'org.web3j:core:3.1.1-android'
     compile 'org.ethereum:geth:1.7.0'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'

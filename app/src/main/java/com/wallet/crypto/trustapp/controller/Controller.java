@@ -79,6 +79,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Controller {
+	public static final String ETHEREUM = "Ethereum";
+	public static final String POA = "POA Network";
+	public static final String KOVAN = "Kovan (Test)";
+	public static final String ROPSTEN = "Ropsten (Test)";
+
     private static final String PREF_CURRENT_ADDRESS = "pref_current_address";
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_PASSWORD = "key_password";
@@ -144,12 +149,12 @@ public class Controller {
         // Create networks list
         mNetworks = new ArrayList<>();
 
-        mNetworks.add(new VMNetwork("Ethereum", "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
+        mNetworks.add(new VMNetwork(ETHEREUM, "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
                 "https://etherscan.io/", "ethereum", 1));
-        mNetworks.add(new VMNetwork("POA Network", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99));
+        mNetworks.add(new VMNetwork(POA, "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99));
         //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
-        mNetworks.add(new VMNetwork("Kovan (Test)", "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42));
-        mNetworks.add(new VMNetwork("Ropsten (Test)", "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3));
+        mNetworks.add(new VMNetwork(KOVAN, "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42));
+        mNetworks.add(new VMNetwork(ROPSTEN, "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);

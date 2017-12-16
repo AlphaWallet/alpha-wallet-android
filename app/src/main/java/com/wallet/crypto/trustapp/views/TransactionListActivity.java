@@ -49,6 +49,7 @@ public class TransactionListActivity extends AppCompatActivity {
     private Controller mController;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+	private BottomNavigationView navigation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -71,7 +72,7 @@ public class TransactionListActivity extends AppCompatActivity {
 
     };
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
@@ -80,8 +81,9 @@ public class TransactionListActivity extends AppCompatActivity {
         mController = Controller.with(getApplicationContext());
         mController.setTransactionListActivity(this);
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
 
         mRecyclerView = findViewById(R.id.item_list);
         assert mRecyclerView != null;
@@ -177,6 +179,14 @@ public class TransactionListActivity extends AppCompatActivity {
         init();
 	    checkGuard();
 	    checkRoot();
+
+	    if (Controller.with(this).getCurrentNetwork().getName().equals(Controller.POA)) {
+		    navigation.getMenu().removeItem(R.id.navigation_tokens);
+	    } else if (navigation.getMenu().findItem(R.id.navigation_tokens) == null) {
+		    MenuItem item = navigation.getMenu()
+				    .add(0, R.id.navigation_tokens, Menu.NONE, R.string.title_tokens);
+		    item.setIcon(R.drawable.token_icon);
+	    }
 
 	    if (mController.getAccounts().size() == 0) {
 		    Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);

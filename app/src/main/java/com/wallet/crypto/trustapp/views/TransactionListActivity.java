@@ -30,15 +30,21 @@ import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.model.ESTransaction;
+import com.wallet.crypto.trustapp.model.TRContract;
+import com.wallet.crypto.trustapp.model.TROperation;
 import com.wallet.crypto.trustapp.model.TRTransaction;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.crypto.trustapp.util.PMMigrateHelper;
 import com.wallet.crypto.trustapp.util.RootUtil;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class TransactionListActivity extends AppCompatActivity {
+
+    private static final int SIGNIFICANT_FIGURES = 3;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -311,11 +317,41 @@ public class TransactionListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
+            TRTransaction txn = holder.mItem;
 
             holder.mDateView.setText(Controller.GetDate(Long.decode(holder.mItem.getTimeStamp())));
 
-            boolean isSent = holder.mItem.getFrom().toLowerCase().equals(mAddress.toLowerCase());
-            String wei = holder.mItem.getValue();
+            String from = txn.getFrom();
+            String to = txn.getTo();
+            String symbol = mController.getCurrentNetwork().getSymbol();
+            String valueStr = txn.getValue();
+            long decimals = Controller.ETHER_DECIMALS;
+
+            // If operations include token transfer, display token transfer instead
+            boolean isTokenTransfer = false;
+            List<TROperation> operations = holder.mItem.getOperations();
+
+            try {
+                TROperation op = operations.get(0);
+                from = op.getFrom();
+                to = op.getTo();
+                symbol = op.getContract().getSymbol();
+                decimals = Long.parseLong(op.getContract().getDecimals());
+                valueStr = op.getValue();
+                isTokenTransfer = true;
+            } catch (Exception ex) {
+                // quietly
+            }
+
+            if (!isTokenTransfer) {
+                from = txn.getFrom();
+                to = txn.getTo();
+                decimals = Controller.ETHER_DECIMALS;
+                symbol = mController.getCurrentNetwork().getSymbol();
+                valueStr = txn.getValue();
+            }
+
+            boolean isSent = from.toLowerCase().equals(mAddress.toLowerCase());
 
             // TODO deduplicate with TransactionDetailFragment.java
             String sign = "+";
@@ -323,22 +359,35 @@ public class TransactionListActivity extends AppCompatActivity {
             if (isSent) {
                 holder.mSentOrReceived.setText(getString(R.string.sent));
                 holder.mValueView.setTextColor(getResources().getColor(R.color.red));
-                holder.mAddressView.setText(holder.mItem.getTo());
+                holder.mAddressView.setText(to);
                 sign = "-";
             } else {
                 holder.mSentOrReceived.setText(getString(R.string.received));
-                holder.mAddressView.setText(holder.mItem.getFrom());
+                holder.mAddressView.setText(from);
                 sign = "+";
                 holder.mValueView.setTextColor(getResources().getColor(R.color.green));
             }
 
-            String eth = Controller.WeiToEth(wei);
-
-            if (holder.mItem.getValue().equals("0")) {
-                holder.mValueView.setText(eth);
-            } else {
-                holder.mValueView.setText(sign + eth);
+            if (isTokenTransfer) {
+                holder.mSentOrReceived.setText(getString(R.string.transfer) + " " + symbol);
             }
+
+            // Perform decimal conversion
+            BigDecimal value = new BigDecimal(valueStr);
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, decimals));
+            value = value.divide(decimalDivisor);
+            int scale = SIGNIFICANT_FIGURES - value.precision() + value.scale();
+            BigDecimal scaledValue = value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros();
+
+            String valueText;
+
+            if (valueStr.equals("0")) {
+                valueText = "0 " + symbol;
+            } else {
+                valueText = sign + scaledValue.toPlainString() + " " + symbol;
+            }
+
+            holder.mValueView.setText(valueText);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override

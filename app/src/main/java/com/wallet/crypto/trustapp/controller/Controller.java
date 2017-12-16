@@ -87,6 +87,7 @@ public class Controller {
     private static final String PREF_CURRENT_ADDRESS = "pref_current_address";
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_PASSWORD = "key_password";
+    public static final long ETHER_DECIMALS = 18;
     private static Controller mInstance;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;

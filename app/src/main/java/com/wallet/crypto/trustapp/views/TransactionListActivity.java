@@ -90,7 +90,6 @@ public class TransactionListActivity extends AppCompatActivity {
         navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-
         mRecyclerView = findViewById(R.id.item_list);
         assert mRecyclerView != null;
         setupRecyclerView(mRecyclerView);

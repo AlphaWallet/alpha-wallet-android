@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -91,6 +92,8 @@ public class Controller {
     public static final String KEY_PASSWORD = "key_password";
     public static final long ETHER_DECIMALS = 18;
     private static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
+    private static final String CHANGELLY_REFERRAL_ID = "968d4f0f0bf9";
+    private static final String SHAPESHIFT_PUBLIC_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
     private static Controller mInstance;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
@@ -555,15 +558,31 @@ public class Controller {
         builder.setTitle(R.string.title_deposit);
 
         ArrayList<String> depositOptions = new ArrayList<>();
-        depositOptions.add("Coinbase");
+
+        final List<String> names = new ArrayList<>();
+        final List<String> urls = new ArrayList<>();
+
+        names.add("Coinbase");
+        urls.add("https://buy.coinbase.com/widget?code={widgetCode}&amount={amount}&address={address}&crypto_currency={cryptoCurrency}");
+
+        //names.add("Shapeshift (Crypto only)");
+        //urls.add("https://shapeshift.io/shifty.html?destination={address}&output={cryptoCurrency}&amount={amount}&apiKey={publicKey}");
+
+        //names.add("Changelly");
+        //urls.add("https://changelly.com/widget/v1?auth=email&from=BTC&to={cryptoCurrency}&merchant_id={referralID}&address={address}&amount={amount}&ref_id={referralID}&color=00cf70");
+
+        assert(names.size() == urls.size());
+
+        for (String name : names) {
+            depositOptions.add("via " + name);
+        }
 
         //list of items
-        String[] items = depositOptions.toArray(new String[1]);
+        String[] items = depositOptions.toArray(new String[names.size()]);
         builder.setSingleChoiceItems(items, 0,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // item selected logic
                     }
                 });
 
@@ -572,15 +591,21 @@ public class Controller {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String url = "https://buy.coinbase.com/widget?code={widgetCode}&amount={amount}&address={address}&crypto_currency={cryptoCurrency}";
+                        int selection = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
 
-                        url = url.replace("{widgetCode}", COINBASE_WIDGET_CODE);
-                        url = url.replace("{amount}", "0");
-                        url = url.replace("{address}", getCurrentAccount().getAddress());
-                        url = url.replace("{cryptoCurrency}", getCurrentNetwork().getSymbol());
+                        if (selection >= 0 && selection < names.size()) {
+                            String url = new String(urls.get(selection));
 
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        mAppContext.startActivity(browserIntent);
+                            url = url.replace("{widgetCode}", COINBASE_WIDGET_CODE);
+                            url = url.replace("{amount}", "0");
+                            url = url.replace("{address}", getCurrentAccount().getAddress());
+                            url = url.replace("{referralID}", CHANGELLY_REFERRAL_ID);
+                            url = url.replace("{publicKey}", SHAPESHIFT_PUBLIC_KEY);
+                            url = url.replace("{cryptoCurrency}", getCurrentNetwork().getSymbol());
+
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            mAppContext.startActivity(browserIntent);
+                        }
                     }
                 });
 

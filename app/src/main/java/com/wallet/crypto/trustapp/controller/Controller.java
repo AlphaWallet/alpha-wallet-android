@@ -553,7 +553,7 @@ public class Controller {
         return version;
     }
 
-    public void depositMoney(Context context) {
+    public void depositMoney(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.title_deposit);
 
@@ -578,7 +578,7 @@ public class Controller {
         }
 
         //list of items
-        String[] items = depositOptions.toArray(new String[names.size()]);
+        final String[] items = depositOptions.toArray(new String[names.size()]);
         builder.setSingleChoiceItems(items, 0,
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -604,7 +604,7 @@ public class Controller {
                             url = url.replace("{cryptoCurrency}", getCurrentNetwork().getSymbol());
 
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            mAppContext.startActivity(browserIntent);
+                            context.startActivity(browserIntent);
                         }
                     }
                 });

@@ -273,13 +273,12 @@ public class TransactionListActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.transaction_list_menu, menu);
 
         for (int i = 0; i < menu.size(); i++) {
-            //TODO uncomment after fix
             if (menu.getItem(i).getItemId() == R.id.action_deposit) {
-            /*    if (mController.getCurrentNetwork().getName().equals(Controller.ETHEREUM)) {
+                if (mController.getCurrentNetwork().getName().equals(Controller.ETHEREUM)) {
                     menu.getItem(i).setVisible(true);
-                } else {*/
+                } else {
                     menu.getItem(i).setVisible(false);
-                //}
+                }
             }
         }
 

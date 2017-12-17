@@ -153,6 +153,8 @@ public class TransactionListActivity extends AppCompatActivity {
             }
         }
 
+        invalidateOptionsMenu(); // recreate menu to hide deposit option
+
         refreshTransactions(mAddress);
     }
 
@@ -269,12 +271,26 @@ public class TransactionListActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.transaction_list_menu, menu);
+
+        for (int i = 0; i < menu.size(); i++) {
+            if (menu.getItem(i).getItemId() == R.id.action_deposit) {
+                if (mController.getCurrentNetwork().getName().equals(Controller.ETHEREUM)) {
+                    menu.getItem(i).setVisible(true);
+                } else {
+                    menu.getItem(i).setVisible(false);
+                }
+            }
+        }
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_deposit:
+                mController.depositMoney(this);
+                break;
             case R.id.action_select_account:
                 mController.navigateToAccountList(this);
                 break;

@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -88,6 +90,7 @@ public class Controller {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_PASSWORD = "key_password";
     public static final long ETHER_DECIMALS = 18;
+    private static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     private static Controller mInstance;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
@@ -545,6 +548,54 @@ public class Controller {
             e.printStackTrace();
         }
         return version;
+    }
+
+    public void depositMoney(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.title_deposit);
+
+        ArrayList<String> depositOptions = new ArrayList<>();
+        depositOptions.add("Coinbase");
+
+        //list of items
+        String[] items = depositOptions.toArray(new String[1]);
+        builder.setSingleChoiceItems(items, 0,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // item selected logic
+                    }
+                });
+
+        String positiveText = getString(R.string.action_buy);
+        builder.setPositiveButton(positiveText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String url = "https://buy.coinbase.com/widget?code={widgetCode}&amount={amount}&address={address}&crypto_currency={cryptoCurrency}";
+
+                        url = url.replace("{widgetCode}", COINBASE_WIDGET_CODE);
+                        url = url.replace("{amount}", "0");
+                        url = url.replace("{address}", getCurrentAccount().getAddress());
+                        url = url.replace("{cryptoCurrency}", getCurrentNetwork().getSymbol());
+
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        mAppContext.startActivity(browserIntent);
+                    }
+                });
+
+        String negativeText = getString(android.R.string.cancel);
+        builder.setNegativeButton(negativeText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // negative button logic
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        // display dialog
+        dialog.show();
     }
 
     private class SendTokensTask extends AsyncTask<Void, Void, Void> {

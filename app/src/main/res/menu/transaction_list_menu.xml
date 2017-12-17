@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_deposit"
         android:icon="@drawable/ic_attach_money_white_24dp"
-        android:title="@string/action_deposit"
+        android:title="@string/action_buy"
         android:orderInCategory="80"
         app:showAsAction="always"/>
 

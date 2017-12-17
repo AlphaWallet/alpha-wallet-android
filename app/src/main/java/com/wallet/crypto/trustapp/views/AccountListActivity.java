@@ -108,7 +108,12 @@ public class AccountListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mAddressView.setText(mValues.get(position).getAddress());
+            String address = mValues.get(position).getAddress();
+            holder.mAddressView.setText(address);
+
+            if (address.equals(mController.getCurrentAccount().getAddress())) {
+                holder.mDeleteButton.setVisibility(View.INVISIBLE);
+            }
 
             holder.checkItem();
         }

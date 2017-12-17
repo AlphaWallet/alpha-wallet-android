@@ -52,7 +52,11 @@ public class RequestActivity extends AppCompatActivity {
         Point size = new Point();
         display.getSize(size);
         QRcodeWidth = (int) (size.x * QR_CODE_WIDTH_RATIO);
-        Log.d("QR WIDTH", Integer.toString(QRcodeWidth));
+
+        final Controller controller = Controller.with(this);
+
+        TextView addressLabel = findViewById(R.id.addressLabel);
+        addressLabel.setText(getString(R.string.message_this_is_your_address).replace("Ethereum", controller.getCurrentNetwork().getName()));
 
         imageView = (ImageView)findViewById(R.id.imageView);
         addressTextView = (TextView)findViewById(R.id.addressTextView);

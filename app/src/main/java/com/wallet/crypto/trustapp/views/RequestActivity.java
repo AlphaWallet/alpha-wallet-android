@@ -3,12 +3,14 @@ package com.wallet.crypto.trustapp.views;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -16,25 +18,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.model.VMAccount;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
 
 public class RequestActivity extends AppCompatActivity {
 
-    final static String ETHEREUM_PREFIX = "ethereum:";
     private static final String TAG = "REQUEST_ACTIVITY";
+    private static final double QR_CODE_WIDTH_RATIO = 0.9;
 
     ImageView imageView;
     Button copyButton;
     TextView addressTextView;
-    public final static int QRcodeWidth = 500 ;
+    private int QRcodeWidth = 500;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +47,16 @@ public class RequestActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        QRcodeWidth = (int) (size.x * QR_CODE_WIDTH_RATIO);
+
+        final Controller controller = Controller.with(this);
+
+        TextView addressLabel = findViewById(R.id.addressLabel);
+        addressLabel.setText(getString(R.string.message_this_is_your_address).replace("Ethereum", controller.getCurrentNetwork().getName()));
 
         imageView = (ImageView)findViewById(R.id.imageView);
         addressTextView = (TextView)findViewById(R.id.addressTextView);
@@ -58,7 +70,7 @@ public class RequestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getString(R.string.address_keyword), addressTextView.getText().toString());
+                ClipData clip = ClipData.newPlainText(Controller.KEY_ADDRESS, addressTextView.getText().toString());
                 clipboard.setPrimaryClip(clip);
 
                 Toast.makeText(RequestActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
@@ -66,7 +78,7 @@ public class RequestActivity extends AppCompatActivity {
         });
 
         try {
-            final Bitmap qrCode = TextToImageEncode(ETHEREUM_PREFIX + Controller.with(this).getCurrentAccount().getAddress() + "?value=0");
+            final Bitmap qrCode = TextToImageEncode(Controller.with(this).getCurrentAccount().getAddress());
             imageView.setImageBitmap(qrCode);
         } catch(Exception e) {
             Log.d(TAG, e.getMessage());

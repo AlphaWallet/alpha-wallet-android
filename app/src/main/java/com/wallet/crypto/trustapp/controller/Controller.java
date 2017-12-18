@@ -9,9 +9,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,15 +24,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.model.CMTicker;
-import com.wallet.crypto.trustapp.model.ESTransaction;
-import com.wallet.crypto.trustapp.model.ESTransactionListResponse;
+import com.wallet.crypto.trustapp.model.TRTransaction;
+import com.wallet.crypto.trustapp.model.TRTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
+import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.views.AccountListActivity;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
 import com.wallet.crypto.trustapp.ui.ManageAccountsActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
-import com.wallet.crypto.trustapp.views.ExportAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
 import com.wallet.crypto.trustapp.views.SendActivity;
@@ -67,7 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -82,13 +86,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Controller {
+	public static final String ETHEREUM = "Ethereum";
+	public static final String POA = "POA Network";
+	public static final String KOVAN = "Kovan (Test)";
+	public static final String ROPSTEN = "Ropsten (Test)";
+
     private static final String PREF_CURRENT_ADDRESS = "pref_current_address";
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_PASSWORD = "key_password";
+    public static final long ETHER_DECIMALS = 18;
+    private static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
+    private static final String CHANGELLY_REFERRAL_ID = "968d4f0f0bf9";
+    private static final String SHAPESHIFT_PUBLIC_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
     private static Controller mInstance;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
-    public static final int SHARE_RESULT = 2;
+    public static final int UNLOCK_SCREEN_REQUEST = 1001;
+//    public static final int SHARE_RESULT = 2;
 
     private static String TAG = "CONTROLLER";
 
@@ -106,9 +120,8 @@ public class Controller {
 
     // View models
     private ArrayList<VMNetwork> mNetworks;
-    private ArrayList<String> mEtherscanKeys;
     private ArrayList<VMAccount> mAccounts;
-    private Map<String, List<ESTransaction>> mTransactions;
+    private Map<String, List<TRTransaction>> mTransactions;
     private CMTicker mEthTicker = null; // if null, no data available
 
     // Views
@@ -144,19 +157,15 @@ public class Controller {
 
         mEtherStore = new EtherStore(mKeystoreBaseDir, this);
 
-        // Create etherscan key list
-        mEtherscanKeys = new ArrayList<>();
-        mEtherscanKeys.add("{etherscan_key1}");
-        mEtherscanKeys.add("{etherscan_key2}");
-        mEtherscanKeys.add("{etherscan_key3}");
-
         // Create networks list
         mNetworks = new ArrayList<>();
 
-        mNetworks.add(new VMNetwork("mainnet", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.etherscan.io", 1));
-        mNetworks.add(new VMNetwork("kovan", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.etherscan.io", 42));
-        mNetworks.add(new VMNetwork("ropstein", "https://ropstein.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropstein.etherscan.io", 3));
-        mNetworks.add(new VMNetwork("rinkeby", "https://rinkeby.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://rinkeby.etherscan.io", 4));
+        mNetworks.add(new VMNetwork(ETHEREUM, "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
+                "https://etherscan.io/", "ethereum", 1, false));
+        mNetworks.add(new VMNetwork(POA, "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99, true));
+        //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
+        mNetworks.add(new VMNetwork(KOVAN, "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42, true));
+        mNetworks.add(new VMNetwork(ROPSTEN, "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3, true));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -185,7 +194,7 @@ public class Controller {
         }
 
         for (VMAccount a : mAccounts) {
-            mTransactions.put(a.getAddress(), new ArrayList<ESTransaction>());
+            mTransactions.put(a.getAddress(), new ArrayList<TRTransaction>());
         }
 
         mHandler = new Handler();
@@ -269,8 +278,8 @@ public class Controller {
         return out;
     }
 
-    public List<ESTransaction> getTransactions(String address) {
-        List<ESTransaction> txns = mTransactions.get(address);
+    public List<TRTransaction> getTransactions(String address) {
+        List<TRTransaction> txns = mTransactions.get(address);
         if (txns == null) {
             return new ArrayList<>();
         }
@@ -305,7 +314,7 @@ public class Controller {
 
     public void navigateToSend(Context context, String to_address) {
         Intent intent = new Intent(context, SendActivity.class);
-        intent.putExtra(getString(R.string.address_keyword), to_address);
+        intent.putExtra(Controller.KEY_ADDRESS, to_address);
         context.startActivity(intent);
     }
 
@@ -325,7 +334,7 @@ public class Controller {
         VMAccount account = createAccount(password);
 
         mAccounts.add(account);
-        mTransactions.put(account.getAddress(), new ArrayList<ESTransaction>());
+        mTransactions.put(account.getAddress(), new ArrayList<TRTransaction>());
 
         Intent intent = new Intent(activity.getApplicationContext(), WarningBackupActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -364,46 +373,62 @@ public class Controller {
         new ImportPrivateKeyTask(activity, privateKey, password, listener).execute();
     }
 
-    public void clickSend(String from, String to, String ethAmount, OnTaskCompleted listener) {
+    public void clickSend(String from, String to, String ethAmount, String gasLimit, String gasPrice, OnTaskCompleted listener) throws ServiceErrorException {
         Log.d(TAG, String.format("Send ETH: %s, %s, %s", from, to, ethAmount));
         try {
-            String wei = EthToWei(ethAmount);
-            String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, to, wei, password, null, listener).execute();
+	        String wei = EthToWei(ethAmount);
+//            String password = PasswordManager.getPassword(from, mAppContext);
+	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        new SendTransactionTask(from, to, wei, gasLimit, gasPrice, password, null, listener).execute();
+        } catch (ServiceErrorException ex) {
+	        Log.e(TAG, "Error sending transaction: ", ex);
+        	throw ex;
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
     }
 
-    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, int decimals, OnTaskCompleted listener) {
+    public void clickSendTokens(String from, String to, String contractAddress, String tokenAmount, String gasLimit, String gasPrice, int decimals, OnTaskCompleted listener) throws ServiceErrorException {
         Log.d(TAG, String.format("Send tokens: %s, %s, %s", from, to, tokenAmount));
         try {
-            BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long)Math.pow(10, decimals))).toBigInteger();
+	        BigInteger nTokens = new BigDecimal(tokenAmount).multiply(BigDecimal.valueOf((long) Math.pow(10, decimals))).toBigInteger();
 
-            List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(nTokens));
+	        List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(nTokens));
 
-            List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() { });
+	        List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {
+	        });
 
-            Function function = new Function("transfer", params, returnTypes);
-            String encodedFunction = FunctionEncoder.encode(function);
-            byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+	        Function function = new Function("transfer", params, returnTypes);
+	        String encodedFunction = FunctionEncoder.encode(function);
+	        byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
 
-            String password = PasswordManager.getPassword(from, mAppContext);
-            new SendTransactionTask(from, contractAddress, "0", password, data, listener).execute();
-
+//            String password = PasswordManager.getPassword(from, mAppContext);
+	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        new SendTransactionTask(from, contractAddress, "0", gasLimit, gasPrice, password, data, listener).execute();
+        } catch (ServiceErrorException ex) {
+        	throw ex;
         } catch (Exception e) {
             Log.e(TAG, "Error sending transaction: ", e);
         }
     }
 
-    public VMAccount createAccount(String password) {
-        try {
-            String address = new CreateAccountTask().execute(password).get();
-            return new VMAccount(address, "0");
-        } catch (Exception e) {
-            Log.d(TAG, e.toString());
-        }
-        return null;
+    public VMAccount createAccount(String password) throws Exception {
+	    Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
+	    String address = null;
+	    VMAccount result = null;
+	    try {
+		    Account account = mEtherStore.createAccount(password);
+		    address = account.getAddress().getHex().toLowerCase();
+		    KS.put(mAppContext, address, password);
+		    result = new VMAccount(address, "0");
+		    return result;
+	    } finally {
+		    if (result == null && !TextUtils.isEmpty(address)) {
+			    try {
+				    mEtherStore.deleteAccount(address, password);
+			    } catch (Exception e) { /* Quietly */ }
+		    }
+	    }
     }
 
     public List<VMAccount> getAccounts() {
@@ -439,6 +464,7 @@ public class Controller {
 
     public void setCurrentNetwork(String name) {
         VMNetwork previous = mCurrentNetwork;
+        mEthTicker = null;
         for (VMNetwork n : mNetworks) {
             if (n.getName().equals(name)) {
                 mCurrentNetwork = n;
@@ -458,7 +484,8 @@ public class Controller {
     }
 
     public void deleteAccount(String address) throws Exception {
-        String password = PasswordManager.getPassword(address, mAppContext);
+//        String password = PasswordManager.getPassword(address, mAppContext);
+	    String password = new String(KS.get(mAppContext, address.toLowerCase()));
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
         if (address.equals(mPreferences.getCurrentAccountAddress())) {
@@ -468,32 +495,33 @@ public class Controller {
         }
     }
 
-    public void navigateToExportAccount(Activity parent, String address) {
-        Intent intent = new Intent(parent, ExportAccountActivity.class);
-        intent.putExtra(getString(R.string.address_keyword), address);
-        parent.startActivityForResult(intent, SHARE_RESULT);
-    }
+//    public void navigateToExportAccount(Activity parent, String address) {
+//        Intent intent = new Intent(parent, ExportAccountActivity.class);
+//        intent.putExtra(getString(R.string.address_keyword), address);
+//        parent.startActivityForResult(intent, SHARE_RESULT);
+//    }
 
-    public String clickExportAccount(Context context, String address, String new_password) {
+    public String exportAccount(String address, String newPassword) throws ServiceErrorException {
         try {
-            Account account = mEtherStore.getAccount(address);
-            String account_password = PasswordManager.getPassword(address, mAppContext);
-            return mEtherStore.exportAccount(account, account_password, new_password);
+	        Account account = mEtherStore.getAccount(address);
+	        String accountPassword = new String(KS.get(mAppContext, address.toLowerCase()));
+	        return mEtherStore.exportAccount(account, accountPassword, newPassword);
+        } catch (ServiceErrorException ex) {
+        	throw ex;
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to export account " + e.getMessage(), Toast.LENGTH_SHORT);
+        	throw new ServiceErrorException(ServiceErrorException.UNKNOWN_ERROR, e.getMessage());
         }
-        return "";
     }
 
-    public ESTransaction findTransaction(String address, String txn_hash) {
-        List<ESTransaction> txns = mTransactions.get(address);
+    public TRTransaction findTransaction(String address, String txn_hash) {
+        List<TRTransaction> txns = mTransactions.get(address);
 
         if (txns == null) {
             Log.e(TAG, "Can't find transactions with given address: " + address);
             return null;
         }
 
-        for (ESTransaction txn : txns) {
+        for (TRTransaction txn : txns) {
             if (txn.getHash().equals(txn_hash)) {
                 return txn;
             }
@@ -513,15 +541,6 @@ public class Controller {
         return mNetworks;
     }
 
-    public void shareKeystore(Activity parent, String keystoreJson) {
-        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, keystoreJson);
-
-        parent.startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), SHARE_RESULT);
-    }
-
     public static String generatePassphrase() {
         return UUID.randomUUID().toString();
     }
@@ -537,6 +556,76 @@ public class Controller {
         return version;
     }
 
+    public void depositMoney(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.title_deposit);
+
+        ArrayList<String> depositOptions = new ArrayList<>();
+
+        final List<String> names = new ArrayList<>();
+        final List<String> urls = new ArrayList<>();
+
+        names.add("Coinbase");
+        urls.add("https://buy.coinbase.com/widget?code={widgetCode}&amount={amount}&address={address}&crypto_currency={cryptoCurrency}");
+
+        //names.add("Shapeshift (Crypto only)");
+        //urls.add("https://shapeshift.io/shifty.html?destination={address}&output={cryptoCurrency}&amount={amount}&apiKey={publicKey}");
+
+        //names.add("Changelly");
+        //urls.add("https://changelly.com/widget/v1?auth=email&from=BTC&to={cryptoCurrency}&merchant_id={referralID}&address={address}&amount={amount}&ref_id={referralID}&color=00cf70");
+
+        assert(names.size() == urls.size());
+
+        for (String name : names) {
+            depositOptions.add("via " + name);
+        }
+
+        //list of items
+        String[] items = depositOptions.toArray(new String[names.size()]);
+        builder.setSingleChoiceItems(items, 0,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+        String positiveText = getString(R.string.action_buy);
+        builder.setPositiveButton(positiveText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int selection = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+
+                        if (selection >= 0 && selection < names.size()) {
+                            String url = new String(urls.get(selection));
+
+                            url = url.replace("{widgetCode}", COINBASE_WIDGET_CODE);
+                            url = url.replace("{amount}", "0");
+                            url = url.replace("{address}", getCurrentAccount().getAddress());
+                            url = url.replace("{referralID}", CHANGELLY_REFERRAL_ID);
+                            url = url.replace("{publicKey}", SHAPESHIFT_PUBLIC_KEY);
+                            url = url.replace("{cryptoCurrency}", getCurrentNetwork().getSymbol());
+
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            mAppContext.startActivity(browserIntent);
+                        }
+                    }
+                });
+
+        String negativeText = getString(android.R.string.cancel);
+        builder.setNegativeButton(negativeText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // negative button logic
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        // display dialog
+        dialog.show();
+    }
+
     private class SendTokensTask extends AsyncTask<Void, Void, Void> {
         String encodedFunction;
 
@@ -545,7 +634,7 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... params) {
-            Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
+            Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
             /*
             Transaction transaction = Transaction.createFunctionCallTransaction(
                     from, gasPrice, gasLimit, contractAddress, amount, encodedFunction);
@@ -563,7 +652,7 @@ public class Controller {
     private class GetWeb3ClientVersionTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {
-                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
                 Web3ClientVersion web3ClientVersion = web3.web3ClientVersion().sendAsync().get();
                 String clientVersion = web3ClientVersion.getWeb3ClientVersion();
                 Log.d("INFO", "web3 client version: " + clientVersion);
@@ -585,7 +674,7 @@ public class Controller {
 
         private void getBalance(VMAccount account) {
             try {
-                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3 = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
                 EthGetBalance ethGetBalance = web3
                         .ethGetBalance(account.getAddress(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
@@ -673,12 +762,25 @@ public class Controller {
         }
 
         protected Void doInBackground(String... params) {
+        	String address = null;
             try {
-                Account account = mEtherStore.importKeyStore(keystoreJson, password);
-                PasswordManager.setPassword(account.getAddress().getHex().toLowerCase(), password, mAppContext);
-                loadAccounts();
-                Log.d("INFO", "Imported account: " + account.getAddress().getHex());
-                listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
+	            Account account = mEtherStore.importKeyStore(keystoreJson, password);
+	            address = account.getAddress().getHex().toLowerCase();
+	            KS.put(mAppContext, address, password);
+	            loadAccounts();
+	            Log.d("INFO", "Imported account: " + account.getAddress().getHex());
+	            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
+            } catch (ServiceErrorException e) {
+
+            	if (!TextUtils.isEmpty(address)) {
+            		try {
+			            mEtherStore.deleteAccount(address, password);
+		            } catch (Exception ex) {};
+	            }
+
+            	if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+		            listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, ""));
+	            }
             } catch (Exception e) {
                 Log.d("ERROR", e.toString());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Failed to import wallet: '%s'".format(e.getMessage())));
@@ -687,42 +789,55 @@ public class Controller {
         }
     }
 
-    private class CreateAccountTask extends AsyncTask<String, Void, String> {
-        protected String doInBackground(String... passwords) {
-            Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
-            String address = "";
-            try {
-                Account account = mEtherStore.createAccount(passwords[0]);
-                address = account.getAddress().getHex().toString().toLowerCase();
-
-                PasswordManager.setPassword(address, passwords[0], mAppContext);
-            } catch (Exception e) {
-                Log.d("ERROR", "Error generating wallet: " + e.toString());
-            }
-            return address;
-        }
-    }
-
-    // Randomize etherscan key selection stay below rate limit
-    private String getRandomEtherscanKey() {
-        assert(mEtherscanKeys.size() > 0);
-
-        final int random = new Random().nextInt(mEtherscanKeys.size());
-        return mEtherscanKeys.get(random);
-    }
+//    private class CreateAccountTask extends AsyncTask<String, Void, String> {
+//	    private final OnTaskCompleted listener;
+//
+//	    public CreateAccountTask(OnTaskCompleted listener) {
+//		    this.listener = listener;
+//	    }
+//
+//        protected String doInBackground(String... passwords) {
+//            Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
+//            String address = "";
+//            try {
+//	            Account account = mEtherStore.createAccount(passwords[0]);
+//	            address = account.getAddress().getHex().toString().toLowerCase();
+//	            KS.put(mAppContext, address, passwords[0]);
+//            } catch (ServiceErrorException ex) {
+//	            if (!TextUtils.isEmpty(address)) {
+//		            try {
+//			            mEtherStore.deleteAccount(address, passwords[0]);
+//		            } catch (Exception e) { /* Quietly */ }
+//	            }
+//
+//	            if (ex.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+//		            listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "USER_NOT_AUTHENTICATED"));
+//	            }
+//	            address = null;
+//            } catch (Exception e) {
+//                Log.d("ERROR", "Error generating wallet: " + e.toString());
+//                address = null;
+//            }
+//            return address;
+//        }
+//    }
 
     private class SendTransactionTask extends AsyncTask<Void, Void, Void> {
         private String fromAddress;
         private String toAddress;
         private String wei;
+        private String gasLimit;
+        private String gasPrice;
         private String password;
         private byte[] data;
         private OnTaskCompleted listener;
 
-        public SendTransactionTask(String fromAddress, String toAddress, String wei, String password, byte[] data, OnTaskCompleted listener) {
+        public SendTransactionTask(String fromAddress, String toAddress, String wei, String gasLimit, String gasPrice, String password, byte[] data, OnTaskCompleted listener) {
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.wei = wei;
+            this.gasLimit = gasLimit;
+            this.gasPrice = gasPrice;
             this.password = password;
             this.data = data;
             this.listener = listener;
@@ -730,8 +845,9 @@ public class Controller {
         }
 
         protected Void doInBackground(Void... params) {
+            String txnHash = "";
             try {
-                Web3j web3j = Web3jFactory.build(new HttpService(mCurrentNetwork.getInfuraUrl()));
+                Web3j web3j = Web3jFactory.build(new HttpService(mCurrentNetwork.getRpcUrl()));
 
                 Account fromAccount = mEtherStore.getAccount(fromAddress);
                 if (fromAccount == null) {
@@ -746,7 +862,7 @@ public class Controller {
 
                 String hexValue = "0xDEADBEEF";
                 try {
-                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, data, nonce.longValue());
+                    byte[] signedMessage = mEtherStore.signTransaction(fromAccount, password, toAddress, wei, gasLimit, gasPrice, data, nonce.longValue());
                     hexValue = Numeric.toHexString(signedMessage);
                 } catch (Exception e) {
                     Log.e(TAG, "Error signing " + e.toString());
@@ -762,6 +878,7 @@ public class Controller {
                         .get();
 
                 String result = raw.getTransactionHash();
+
                 Log.d(TAG, "Transaction hash " + result);
 
                 if (raw.hasError()) {
@@ -770,15 +887,17 @@ public class Controller {
                     listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + raw.getError().getMessage()));
                     return null;
                 }
+
                 Log.d(TAG, "Transaction JSON-RPC"+ raw.getJsonrpc());
                 Log.d(TAG, "Transaction result: " + raw.getResult());
                 Log.d(TAG, "Transaction hash: " + raw.getTransactionHash());
+                txnHash = raw.getTransactionHash();
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
                 listener.onTaskCompleted(new TaskResult(TaskStatus.FAILURE, "Transaction error: " + e.toString()));
                 return null;
             }
-            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Payment sent"));
+            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, txnHash));
             return null;
         }
     }
@@ -794,7 +913,7 @@ public class Controller {
             CoinmarketService service = mRetrofit.create(CoinmarketService.class);
 
             Call<List<CMTicker>> call =
-                    service.getEthereumPrice();
+                    service.getTickerPrice(getCurrentNetwork().getTicker());
 
             Log.d("INFO", "Request query:" + call.request().url().query());
             call.enqueue(new Callback<List<CMTicker>>() {
@@ -838,32 +957,21 @@ public class Controller {
 
                 Retrofit mRetrofit = new Retrofit.Builder()
                         .addConverterFactory(GsonConverterFactory.create())
-                        .baseUrl(mCurrentNetwork.getEtherscanUrl())
+                        .baseUrl(mCurrentNetwork.getBackendUrl())
                         .build();
 
-                EtherscanService service = mRetrofit.create(EtherscanService.class);
+                TrustRayService service = mRetrofit.create(TrustRayService.class);
 
-                final String etherscanKey = getRandomEtherscanKey();
-                Log.d(TAG, "Using etherscan service: " + mCurrentNetwork.getName() + ", " + mCurrentNetwork.getEtherscanUrl() + ", " + etherscanKey);
-
-                Call<ESTransactionListResponse> call =
-                        service.getTransactionList(
-                                "account",
-                                "txlist",
-                                address,
-                                "0",
-                                "desc",
-                                etherscanKey
-                        );
-
+                Call<TRTransactionListResponse> call =
+                        service.getTransactionList(address,"50");
 
                 Log.d("INFO", "Request query:" + call.request().url().query());
-                call.enqueue(new Callback<ESTransactionListResponse>() {
+                call.enqueue(new Callback<TRTransactionListResponse>() {
 
                     @Override
-                    public void onResponse(Call<ESTransactionListResponse> call, Response<ESTransactionListResponse> response) {
+                    public void onResponse(Call<TRTransactionListResponse> call, Response<TRTransactionListResponse> response) {
                         try {
-                            List<ESTransaction> transactions = response.body().getTransactionList();
+                            List<TRTransaction> transactions = response.body().getTransactionList();
                             mTransactions.put(address, transactions);
                             Log.d("INFO", "Number of transactions: " + transactions.size());
                             if (transactions.size() > 0) {
@@ -876,7 +984,7 @@ public class Controller {
                     }
 
                     @Override
-                    public void onFailure(Call<ESTransactionListResponse> call, Throwable t) {
+                    public void onFailure(Call<TRTransactionListResponse> call, Throwable t) {
                         Log.e("ERROR", t.toString());
                         Toast.makeText(mAppContext, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
                     }

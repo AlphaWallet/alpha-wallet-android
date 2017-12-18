@@ -37,15 +37,15 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.views.camera.CameraSource;
-import com.wallet.crypto.trustapp.views.camera.CameraSourcePreview;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.views.camera.CameraSource;
+import com.wallet.crypto.trustapp.views.camera.CameraSourcePreview;
 
 import java.io.IOException;
 

@@ -1,10 +1,10 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-
-import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
+import com.wallet.crypto.trustapp.controller.ServiceErrorException;
+import com.wallet.crypto.trustapp.util.KS;
 
 /**
  * A login screen that offers login via email/password.
@@ -48,13 +50,7 @@ public class CreateAccountActivity extends AppCompatActivity {
         mCreateAccountButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String generatedPassphrase = Controller.generatePassphrase();
-
-                try {
-                    mController.clickCreateAccount(CreateAccountActivity.this, "account name", generatedPassphrase);
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_LONG).show();
-                }
+                onCreateAccount();
             }
         });
 
@@ -67,7 +63,22 @@ public class CreateAccountActivity extends AppCompatActivity {
         });
     }
 
-    private void showIntro() {
+	private void onCreateAccount() {
+		final String generatedPassphrase = Controller.generatePassphrase();
+		try {
+			mController.clickCreateAccount(CreateAccountActivity.this, "account name", generatedPassphrase);
+		} catch (Exception e) {
+			Log.d("CREATE_ACC", "Error", e);
+			if (e instanceof ServiceErrorException
+					&& ((ServiceErrorException) e).code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+				KS.showAuthenticationScreen(CreateAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
+			} else {
+				Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_LONG).show();
+			}
+		}
+	}
+
+	private void showIntro() {
         //  Declare a new thread to do a preference check
         Thread t = new Thread(new Runnable() {
             @Override
@@ -105,6 +116,12 @@ public class CreateAccountActivity extends AppCompatActivity {
                 }
                 this.finish();
             }
+        } else if (requestCode == Controller.UNLOCK_SCREEN_REQUEST) {
+        	if (resultCode == RESULT_OK) {
+        		onCreateAccount();
+	        } else {
+        		finish();
+	        }
         }
     }
 

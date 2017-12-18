@@ -12,7 +12,7 @@ public class Utils {
 
     public static String extractAddressFromQrString(String qrString) {
 
-        Matcher m = qrPattern.matcher(qrString);
+        Matcher m = qrPattern.matcher(qrString.toLowerCase());
         if (m.find()) {
             return m.group(2);
         }

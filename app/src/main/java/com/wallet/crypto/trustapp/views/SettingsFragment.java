@@ -1,8 +1,6 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -45,8 +43,7 @@ public class SettingsFragment extends PreferenceFragment
         export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-
-                mController.navigateToExportAccount(getActivity(), mController.getCurrentAccount().getAddress());
+	            ExportAccountActivity.open(getContext(), mController.getCurrentAccount().getAddress());
                 return false;
             }
         });
@@ -106,6 +103,7 @@ public class SettingsFragment extends PreferenceFragment
 
         lp.setEntries(entries);
         lp.setDefaultValue(currentValue);
+        lp.setValue(currentValue);
         lp.setSummary(currentValue);
         lp.setEntryValues(entryValues);
     }

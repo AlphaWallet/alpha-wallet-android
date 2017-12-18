@@ -47,7 +47,7 @@
         android:id="@+id/gas_fee_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Gas Fee"
+        android:text="@string/gas_fee_title"
         android:textAppearance="?attr/textAppearanceListItem" />
 
     <TextView
@@ -58,6 +58,7 @@
         android:textSize="9dp"
         android:textAppearance="?attr/textAppearanceListItemSmall" />
 
+    <!-- TODO
     <TextView
         android:id="@+id/confirmation_title"
         android:layout_width="wrap_content"
@@ -72,6 +73,7 @@
         android:text="107443"
         android:textSize="9dp"
         android:textAppearance="?attr/textAppearanceListItemSmall" />
+        -->
 
     <TextView
         android:id="@+id/txn_hash_title"
@@ -111,7 +113,7 @@
         android:textAppearance="?attr/textAppearanceListItem" />
 
     <TextView
-        android:id="@+id/block_hash"
+        android:id="@+id/block_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="4238793"

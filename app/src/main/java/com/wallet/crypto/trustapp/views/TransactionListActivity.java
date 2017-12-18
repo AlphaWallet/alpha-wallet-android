@@ -1,8 +1,14 @@
 package com.wallet.crypto.trustapp.views;
 
+import android.app.AlertDialog;
+import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,18 +22,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
+import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.model.ESTransaction;
+import com.wallet.crypto.trustapp.model.TRContract;
+import com.wallet.crypto.trustapp.model.TROperation;
+import com.wallet.crypto.trustapp.model.TRTransaction;
 import com.wallet.crypto.trustapp.model.VMAccount;
+import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.util.PMMigrateHelper;
+import com.wallet.crypto.trustapp.util.RootUtil;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class TransactionListActivity extends AppCompatActivity {
+
+    private static final int SIGNIFICANT_FIGURES = 3;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -38,6 +55,7 @@ public class TransactionListActivity extends AppCompatActivity {
     private Controller mController;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+	private BottomNavigationView navigation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -60,7 +78,7 @@ public class TransactionListActivity extends AppCompatActivity {
 
     };
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
@@ -69,7 +87,7 @@ public class TransactionListActivity extends AppCompatActivity {
         mController = Controller.with(getApplicationContext());
         mController.setTransactionListActivity(this);
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mRecyclerView = findViewById(R.id.item_list);
@@ -123,9 +141,9 @@ public class TransactionListActivity extends AppCompatActivity {
                 // Conversion data may not be available, in which case, hide it
                 if (usd != null) {
                     getSupportActionBar().setTitle("$" + usd);
-                    getSupportActionBar().setSubtitle(balance + " ETH");
+                    getSupportActionBar().setSubtitle(balance + " " + mController.getCurrentNetwork().getSymbol());
                 } else {
-                    getSupportActionBar().setTitle(balance + " ETH");
+                    getSupportActionBar().setTitle(balance + " " + mController.getCurrentNetwork().getSymbol());
                     getSupportActionBar().setSubtitle(mAddress);
                 }
 
@@ -134,6 +152,8 @@ public class TransactionListActivity extends AppCompatActivity {
                 Log.e(TAG, "Error updating balance: ", e);
             }
         }
+
+        invalidateOptionsMenu(); // recreate menu to hide deposit option
 
         refreshTransactions(mAddress);
     }
@@ -161,39 +181,116 @@ public class TransactionListActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume");
-
         super.onResume();
 
         init();
-        Log.d(TAG, "Number of accounts: " + mController.getNumberOfAccounts());
+	    checkGuard();
+	    checkRoot();
 
-        if (mController.getAccounts().size() == 0) {
-            Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);
-            this.startActivityForResult(intent, Controller.IMPORT_ACCOUNT_REQUEST);
-            finish();
-        } else {
-            mController.onResume();
-        }
+	    if (Controller.with(this).getCurrentNetwork().isTest()) {
+		    navigation.getMenu().removeItem(R.id.navigation_tokens);
+	    } else if (navigation.getMenu().findItem(R.id.navigation_tokens) == null) {
+		    MenuItem item = navigation.getMenu()
+				    .add(0, R.id.navigation_tokens, Menu.NONE, R.string.title_tokens);
+		    item.setIcon(R.drawable.token_icon);
+	    }
+
+	    if (mController.getAccounts().size() == 0) {
+		    Intent intent = new Intent(getApplicationContext(), CreateAccountActivity.class);
+		    this.startActivityForResult(intent, Controller.IMPORT_ACCOUNT_REQUEST);
+		    finish();
+	    } else {
+		    mController.onResume();
+		    try {
+			    PMMigrateHelper.migrate(this);
+		    } catch (ServiceErrorException e) {
+			    if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
+				    KS.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
+			    } else {
+				    Toast.makeText(this, "Could not process passwords.", Toast.LENGTH_LONG)
+						    .show();
+			    }
+		    }
+	    }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	private void checkRoot() {
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (RootUtil.isDeviceRooted() && pref.getBoolean("should_show_root_warning", true)) {
+			pref.edit().putBoolean("should_show_root_warning", false).apply();
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.root_title)
+					.setMessage(R.string.root_body)
+					.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					})
+					.show();
+		}
+	}
+
+	private void checkGuard() {
+		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (keyguardManager != null
+				&& !keyguardManager.isDeviceSecure()
+				&& pref.getBoolean("should_show_security_warning", true)) {
+			pref.edit().putBoolean("should_show_security_warning", false).apply();
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.lock_title)
+					.setMessage(R.string.lock_body)
+					.setPositiveButton(R.string.lock_settings, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
+							startActivity(intent);
+						}
+					})
+					.setNegativeButton(R.string.skip, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					})
+					.show();
+		}
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Controller.IMPORT_ACCOUNT_REQUEST) {
             if (resultCode == RESULT_OK) {
                 this.finish();
             }
+        } else if (requestCode == Controller.UNLOCK_SCREEN_REQUEST) {
+        	if (resultCode == RESULT_OK) {
+
+	        }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.transaction_list_menu, menu);
+
+        for (int i = 0; i < menu.size(); i++) {
+            if (menu.getItem(i).getItemId() == R.id.action_deposit) {
+                if (mController.getCurrentNetwork().getName().equals(Controller.ETHEREUM)) {
+                    menu.getItem(i).setVisible(true);
+                } else {
+                    menu.getItem(i).setVisible(false);
+                }
+            }
+        }
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_deposit:
+                mController.depositMoney(this);
+                break;
             case R.id.action_select_account:
                 mController.navigateToAccountList(this);
                 break;
@@ -212,16 +309,16 @@ public class TransactionListActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         Controller controller = Controller.with(this);
-        List<ESTransaction> txns = controller.getTransactions(mAddress);
+        List<TRTransaction> txns = controller.getTransactions(mAddress);
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(txns));
     }
 
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<ESTransaction> mValues;
+        private final List<TRTransaction> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<ESTransaction> items) {
+        public SimpleItemRecyclerViewAdapter(List<TRTransaction> items) {
             mValues = items;
         }
 
@@ -235,11 +332,38 @@ public class TransactionListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
+            TRTransaction txn = holder.mItem;
 
             holder.mDateView.setText(Controller.GetDate(Long.decode(holder.mItem.getTimeStamp())));
 
-            boolean isSent = holder.mItem.getFrom().toLowerCase().equals(mAddress.toLowerCase());
-            String wei = holder.mItem.getValue();
+            String from;
+            String to;
+            String symbol;
+            String valueStr;
+            long decimals;
+
+            // If operations include token transfer, display token transfer instead
+            boolean isTokenTransfer = false;
+            List<TROperation> operations = holder.mItem.getOperations();
+
+            try {
+                TROperation op = operations.get(0);
+                from = op.getFrom();
+                to = op.getTo();
+                symbol = op.getContract().getSymbol();
+                decimals = Long.parseLong(op.getContract().getDecimals());
+                valueStr = op.getValue();
+                isTokenTransfer = true;
+            } catch (Exception ex) {
+                // default to ether transaction
+                from = txn.getFrom();
+                to = txn.getTo();
+                symbol = mController.getCurrentNetwork().getSymbol();
+                valueStr = txn.getValue();
+                decimals = Controller.ETHER_DECIMALS;
+            }
+
+            boolean isSent = from.toLowerCase().equals(mAddress.toLowerCase());
 
             // TODO deduplicate with TransactionDetailFragment.java
             String sign = "+";
@@ -247,22 +371,35 @@ public class TransactionListActivity extends AppCompatActivity {
             if (isSent) {
                 holder.mSentOrReceived.setText(getString(R.string.sent));
                 holder.mValueView.setTextColor(getResources().getColor(R.color.red));
-                holder.mAddressView.setText(holder.mItem.getTo());
+                holder.mAddressView.setText(to);
                 sign = "-";
             } else {
                 holder.mSentOrReceived.setText(getString(R.string.received));
-                holder.mAddressView.setText(holder.mItem.getFrom());
+                holder.mAddressView.setText(from);
                 sign = "+";
                 holder.mValueView.setTextColor(getResources().getColor(R.color.green));
             }
 
-            String eth = Controller.WeiToEth(wei);
-
-            if (holder.mItem.getValue().equals("0")) {
-                holder.mValueView.setText(eth);
-            } else {
-                holder.mValueView.setText(sign + eth);
+            if (isTokenTransfer) {
+                holder.mSentOrReceived.setText(getString(R.string.transfer) + " " + symbol);
             }
+
+            // Perform decimal conversion
+            BigDecimal value = new BigDecimal(valueStr);
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, decimals));
+            value = value.divide(decimalDivisor);
+            int scale = SIGNIFICANT_FIGURES - value.precision() + value.scale();
+            BigDecimal scaledValue = value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros();
+
+            String valueText;
+
+            if (valueStr.equals("0")) {
+                valueText = "0 " + symbol;
+            } else {
+                valueText = sign + scaledValue.toPlainString() + " " + symbol;
+            }
+
+            holder.mValueView.setText(valueText);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -287,10 +424,9 @@ public class TransactionListActivity extends AppCompatActivity {
             public final TextView mSentOrReceived;
             public final TextView mAddressView;
             public final TextView mDateView;
-            //public final TextView mBalanceView;
             public final TextView mValueView;
 
-            public ESTransaction mItem;
+            public TRTransaction mItem;
 
             public ViewHolder(View view) {
                 super(view);

@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
@@ -30,11 +31,14 @@ public class WarningBackupActivity extends AppCompatActivity {
         assert(!mAddress.isEmpty());
         assert(!mPassword.isEmpty());
 
+        final TextView mBackupTitle = findViewById(R.id.backup_title);
+        mBackupTitle.setText(getString(R.string.message_no_backup).replace("Ethereum", controller.getCurrentNetwork().getSymbol()));
+
         mBackupButton = findViewById(R.id.backup_button);
         mBackupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.navigateToExportAccount(WarningBackupActivity.this, mAddress);
+                ExportAccountActivity.open(WarningBackupActivity.this, mAddress);
             }
         });
 
@@ -64,15 +68,13 @@ public class WarningBackupActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Controller.SHARE_RESULT) {
+        if (requestCode == ExportAccountActivity.SHARE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 if (Controller.with(this).getAccounts().size() == 1) {
                     Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getApplicationContext().startActivity(intent);
-
                 }
-
                 finish();
             }
         }

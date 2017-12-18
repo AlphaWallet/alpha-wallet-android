@@ -12,6 +12,8 @@ import android.widget.TextView;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 
+import static com.wallet.crypto.trustapp.views.ExportAccountActivity.ADDRESS_KEY;
+
 public class WarningBackupActivity extends AppCompatActivity {
 
     Button mBackupButton;
@@ -38,7 +40,9 @@ public class WarningBackupActivity extends AppCompatActivity {
         mBackupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ExportAccountActivity.open(WarningBackupActivity.this, mAddress);
+	            Intent intent = new Intent(WarningBackupActivity.this, ExportAccountActivity.class);
+	            intent.putExtra(ADDRESS_KEY, mAddress);
+	            startActivityForResult(intent, ExportAccountActivity.SHARE_REQUEST_CODE);
             }
         });
 
@@ -56,7 +60,7 @@ public class WarningBackupActivity extends AppCompatActivity {
                                 if (controller.getNumberOfAccounts() == 1) {
                                     Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    getApplicationContext().startActivity(intent);
+                                    startActivity(intent);
                                 }
 
                                 WarningBackupActivity.this.finish();
@@ -70,10 +74,10 @@ public class WarningBackupActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ExportAccountActivity.SHARE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                if (Controller.with(this).getAccounts().size() == 1) {
+                if (Controller.with(this).getAccounts().size() > 0) {
                     Intent intent = new Intent(getApplicationContext(), TransactionListActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplicationContext().startActivity(intent);
+                    startActivity(intent);
                 }
                 finish();
             }

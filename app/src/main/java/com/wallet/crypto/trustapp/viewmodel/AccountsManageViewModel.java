@@ -5,25 +5,39 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import com.wallet.crypto.trustapp.entity.Account;
-import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
-import com.wallet.crypto.trustapp.router.CreateAccountRouter;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import com.wallet.crypto.trustapp.interact.CreateAccountInteract;
+import com.wallet.crypto.trustapp.interact.DeleteAccountInteract;
+import com.wallet.crypto.trustapp.interact.FetchAccountsInteract;
+import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
+import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
+import com.wallet.crypto.trustapp.router.ImportAccountRouter;
 
 public class AccountsManageViewModel extends BaseViewModel {
 
-	private final AccountRepositoryType accountRepository;
-	private final CreateAccountRouter createAccountRouter;
+	private final CreateAccountInteract createAccountInteract;
+	private final SetDefaultAccountInteract setDefaultAccountInteract;
+	private final DeleteAccountInteract deleteAccountInteract;
+	private final FetchAccountsInteract fetchAccountsInteract;
+	private final FindDefaultAccountInteract findDefaultAccountInteract;
+
+	private final ImportAccountRouter importAccountRouter;
 
 	private final MutableLiveData<Account[]> accounts = new MutableLiveData<>();
 	private final MutableLiveData<Account> defaultAccount = new MutableLiveData<>();
 
-
 	AccountsManageViewModel(
-			AccountRepositoryType accountRepository, CreateAccountRouter createAccountRouter) {
-		this.accountRepository = accountRepository;
-		this.createAccountRouter = createAccountRouter;
+			CreateAccountInteract createAccountInteract,
+			SetDefaultAccountInteract setDefaultAccountInteract,
+			DeleteAccountInteract deleteAccountInteract,
+			FetchAccountsInteract fetchAccountsInteract,
+			FindDefaultAccountInteract findDefaultAccountInteract,
+			ImportAccountRouter importAccountRouter) {
+		this.createAccountInteract = createAccountInteract;
+		this.setDefaultAccountInteract = setDefaultAccountInteract;
+		this.deleteAccountInteract = deleteAccountInteract;
+		this.fetchAccountsInteract = fetchAccountsInteract;
+		this.findDefaultAccountInteract = findDefaultAccountInteract;
+		this.importAccountRouter = importAccountRouter;
 
 		fetchAccounts();
 	}
@@ -37,26 +51,22 @@ public class AccountsManageViewModel extends BaseViewModel {
 	}
 
 	public void setDefaultAccount(Account account) {
-		disposable = accountRepository
-				.setCurrentAccount(account)
-				.observeOn(AndroidSchedulers.mainThread())
+		disposable = setDefaultAccountInteract
+				.set(account)
 				.subscribe(() -> onDefaultAccountChanged(account), this::onError);
 	}
 
-	public void deleteAccount(Account account, String password) {
-		disposable = accountRepository
-				.deleteAccount(account.address, password)
-				.andThen(accountRepository.fetchAccounts())
-				.observeOn(AndroidSchedulers.mainThread())
+	public void deleteAccount(Account account) {
+		disposable = deleteAccountInteract
+				.delete(account)
 				.subscribe(this::onFetchAccounts, this::onError);
 	}
 
 	private void onFetchAccounts(Account[] items) {
 		progress.postValue(false);
 		accounts.postValue(items);
-		disposable = accountRepository
-				.getCurrentAccount()
-				.observeOn(AndroidSchedulers.mainThread())
+		disposable = findDefaultAccountInteract
+				.find()
 				.subscribe(this::onDefaultAccountChanged, this::onError);
 	}
 
@@ -67,13 +77,19 @@ public class AccountsManageViewModel extends BaseViewModel {
 
 	public void fetchAccounts() {
 		progress.postValue(true);
-		disposable = accountRepository
-				.fetchAccounts()
-				.observeOn(AndroidSchedulers.mainThread())
+		disposable = fetchAccountsInteract
+				.fetch()
 				.subscribe(this::onFetchAccounts, this::onError);
 	}
 
-	public void createAccount(Context context) {
-		createAccountRouter.open(context);
+	public void newAccount() {
+		progress.setValue(true);
+		createAccountInteract
+				.create()
+				.subscribe(a -> fetchAccounts(), this::onError);
+	}
+
+	public void importAccount(Context context) {
+		importAccountRouter.open(context);
 	}
 }

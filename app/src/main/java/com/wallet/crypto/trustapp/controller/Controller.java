@@ -800,7 +800,7 @@ public class Controller {
 //            Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
 //            String address = "";
 //            try {
-//	            Account account = mEtherStore.createAccount(passwords[0]);
+//	            Account account = mEtherStore.create(passwords[0]);
 //	            address = account.getAddress().getHex().toString().toLowerCase();
 //	            KS.put(mAppContext, address, passwords[0]);
 //            } catch (ServiceErrorException ex) {

@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.App;
+import com.wallet.crypto.trustapp.repository.KSPasswordStore;
+import com.wallet.crypto.trustapp.repository.PasswordStore;
 
 import javax.inject.Singleton;
 
@@ -28,5 +30,11 @@ public class ToolsModule {
 	@Provides
 	OkHttpClient okHttpClient() {
 		return new OkHttpClient();
+	}
+
+	@Singleton
+	@Provides
+	PasswordStore passwordStore(Context context) {
+		return new KSPasswordStore(context);
 	}
 }

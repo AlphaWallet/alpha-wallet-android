@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.ui.widget.AddAccountView;
 
 public class SystemView extends FrameLayout implements View.OnClickListener {
 	private ProgressBar progress;
@@ -61,17 +62,20 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 
 	public void showProgress() {
 		setVisibility(VISIBLE);
+		emptyBox.setVisibility(GONE);
 		errorBox.setVisibility(GONE);
 		progress.setVisibility(VISIBLE);
 	}
 
 	public void hideProgress() {
+		emptyBox.setVisibility(GONE);
 		errorBox.setVisibility(GONE);
 		progress.setVisibility(GONE);
 		setVisibility(GONE);
 	}
 
 	public void showError(@Nullable String message, @Nullable OnClickListener onTryAgain) {
+		emptyBox.setVisibility(GONE);
 		hideProgress();
 		setVisibility(VISIBLE);
 		errorBox.setVisibility(VISIBLE);
@@ -88,6 +92,7 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 
 	public void hideError() {
 		setVisibility(GONE);
+		emptyBox.setVisibility(GONE);
 		progress.setVisibility(GONE);
 		errorBox.setVisibility(GONE);
 	}
@@ -102,8 +107,14 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 	}
 
 	public void showEmpty(@LayoutRes int emptyLayout) {
-		LayoutInflater.from(getContext())
-				.inflate(emptyLayout, emptyBox, true);
+		showEmpty(LayoutInflater.from(getContext())
+				.inflate(emptyLayout, emptyBox, false));
+	}
+
+	public void showEmpty(View view) {
+		emptyBox.setVisibility(VISIBLE);
+		emptyBox.removeAllViews();
+		emptyBox.addView(view);
 	}
 
 	@Override

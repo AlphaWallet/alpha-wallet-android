@@ -7,14 +7,13 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	>
 	<android.support.design.widget.CoordinatorLayout
-
 		android:fitsSystemWindows="true"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		>
 		<include layout="@layout/layout_app_bar" />
-		<FrameLayout
-			android:id="@+id/list_box"
+		<android.support.v4.widget.SwipeRefreshLayout
+			android:id="@+id/refresh_layout"
 			app:layout_behavior="@string/appbar_scrolling_view_behavior"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
@@ -24,7 +23,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				/>
-		</FrameLayout>
+		</android.support.v4.widget.SwipeRefreshLayout>
 		<android.support.design.widget.FloatingActionButton
 			android:id="@+id/fab"
 			app:srcCompat="@drawable/ic_add_white_24dp"
@@ -33,14 +32,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			/>
-		<!--<FrameLayout-->
-			<!--android:id="@+id/add_account_box"-->
-			<!--app:layout_behavior="android.support.design.widget.BottomSheetBehavior"-->
-			<!--android:layout_width="match_parent"-->
-			<!--android:layout_height="wrap_content"-->
-			<!--&gt;-->
-			<!--<include layout="@layout/layout_add_account" />-->
-		<!--</FrameLayout>-->
 		<com.wallet.crypto.trustapp.widget.SystemView
 			android:id="@+id/system_view"
 			android:background="@android:color/white"

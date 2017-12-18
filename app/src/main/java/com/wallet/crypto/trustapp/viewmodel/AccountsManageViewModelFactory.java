@@ -4,24 +4,50 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
-import com.wallet.crypto.trustapp.router.CreateAccountRouter;
+import com.wallet.crypto.trustapp.interact.CreateAccountInteract;
+import com.wallet.crypto.trustapp.interact.DeleteAccountInteract;
+import com.wallet.crypto.trustapp.interact.FetchAccountsInteract;
+import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
+import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
+import com.wallet.crypto.trustapp.router.ImportAccountRouter;
+
+import javax.inject.Inject;
 
 public class AccountsManageViewModelFactory implements ViewModelProvider.Factory {
 
-	private final AccountRepositoryType accountRepository;
-	private final CreateAccountRouter createAccountRouter;
+	private final CreateAccountInteract createAccountInteract;
+	private final SetDefaultAccountInteract setDefaultAccountInteract;
+	private final DeleteAccountInteract deleteAccountInteract;
+	private final FetchAccountsInteract fetchAccountsInteract;
+	private final FindDefaultAccountInteract findDefaultAccountInteract;
 
+	private final ImportAccountRouter importAccountRouter;
+
+	@Inject
 	public AccountsManageViewModelFactory(
-			AccountRepositoryType accountRepository,
-			CreateAccountRouter createAccountRouter) {
-		this.accountRepository = accountRepository;
-		this.createAccountRouter = createAccountRouter;
+			CreateAccountInteract createAccountInteract,
+			SetDefaultAccountInteract setDefaultAccountInteract,
+			DeleteAccountInteract deleteAccountInteract,
+			FetchAccountsInteract fetchAccountsInteract,
+			FindDefaultAccountInteract findDefaultAccountInteract,
+			ImportAccountRouter importAccountRouter) {
+		this.createAccountInteract = createAccountInteract;
+		this.setDefaultAccountInteract = setDefaultAccountInteract;
+		this.deleteAccountInteract = deleteAccountInteract;
+		this.fetchAccountsInteract = fetchAccountsInteract;
+		this.findDefaultAccountInteract = findDefaultAccountInteract;
+		this.importAccountRouter = importAccountRouter;
 	}
 
 	@NonNull
 	@Override
 	public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-		return (T) new AccountsManageViewModel(accountRepository, createAccountRouter);
+		return (T) new AccountsManageViewModel(
+				createAccountInteract,
+				setDefaultAccountInteract,
+				deleteAccountInteract,
+				fetchAccountsInteract,
+				findDefaultAccountInteract,
+				importAccountRouter);
 	}
 }

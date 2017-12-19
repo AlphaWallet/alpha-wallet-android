@@ -28,7 +28,7 @@ import com.wallet.crypto.trustapp.model.TRTransaction;
 import com.wallet.crypto.trustapp.model.TRTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
-import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 import com.wallet.crypto.trustapp.views.AccountListActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
@@ -67,7 +67,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -371,7 +370,7 @@ public class Controller {
         try {
 	        String wei = EthToWei(ethAmount);
 //            String password = PasswordManager.getPassword(from, mAppContext);
-	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        String password = new String(PasswordStoreFactory.get(mAppContext, from.toLowerCase()));
 	        new SendTransactionTask(from, to, wei, gasLimit, gasPrice, password, null, listener).execute();
         } catch (ServiceErrorException ex) {
 	        Log.e(TAG, "Error sending transaction: ", ex);
@@ -396,7 +395,7 @@ public class Controller {
 	        byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
 
 //            String password = PasswordManager.getPassword(from, mAppContext);
-	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        String password = new String(PasswordStoreFactory.get(mAppContext, from.toLowerCase()));
 	        new SendTransactionTask(from, contractAddress, "0", gasLimit, gasPrice, password, data, listener).execute();
         } catch (ServiceErrorException ex) {
         	throw ex;
@@ -412,7 +411,7 @@ public class Controller {
 	    try {
 		    Account account = mEtherStore.createAccount(password);
 		    address = account.getAddress().getHex().toLowerCase();
-		    KS.put(mAppContext, address, password);
+		    PasswordStoreFactory.put(mAppContext, address, password);
 		    result = new VMAccount(address, "0");
 		    return result;
 	    } finally {
@@ -482,7 +481,7 @@ public class Controller {
 
     public void deleteAccount(String address) throws Exception {
 //        String password = PasswordManager.getPassword(address, mAppContext);
-	    String password = new String(KS.get(mAppContext, address.toLowerCase()));
+	    String password = new String(PasswordStoreFactory.get(mAppContext, address.toLowerCase()));
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
         if (address.equals(mCurrentAddress)) {
@@ -501,7 +500,7 @@ public class Controller {
     public String exportAccount(String address, String newPassword) throws ServiceErrorException {
         try {
 	        Account account = mEtherStore.getAccount(address);
-	        String accountPassword = new String(KS.get(mAppContext, address.toLowerCase()));
+	        String accountPassword = new String(PasswordStoreFactory.get(mAppContext, address.toLowerCase()));
 	        return mEtherStore.exportAccount(account, accountPassword, newPassword);
         } catch (ServiceErrorException ex) {
         	throw ex;
@@ -763,7 +762,7 @@ public class Controller {
             try {
 	            Account account = mEtherStore.importKeyStore(keystoreJson, password);
 	            address = account.getAddress().getHex().toLowerCase();
-	            KS.put(mAppContext, address, password);
+	            PasswordStoreFactory.put(mAppContext, address, password);
 	            loadAccounts();
 	            Log.d("INFO", "Imported account: " + account.getAddress().getHex());
 	            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
@@ -924,7 +923,7 @@ public class Controller {
                             mEthTicker = tickers.get(0);
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, e.getLocalizedMessage());
+                        Log.e(TAG, "Err:", e);
                     }
                 }
 

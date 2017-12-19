@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
+//import android.preference.PreferenceFragment;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
@@ -43,7 +44,7 @@ public class SettingsFragment extends PreferenceFragment
         export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-	            ExportAccountActivity.open(getContext(), mController.getCurrentAccount().getAddress());
+	            ExportAccountActivity.open(getActivity(), mController.getCurrentAccount().getAddress());
                 return false;
             }
         });

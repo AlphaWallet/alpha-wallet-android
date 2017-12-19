@@ -1,12 +1,12 @@
 package com.wallet.crypto.trustapp.views;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -28,12 +28,11 @@ import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.controller.TaskStatus;
 import com.wallet.crypto.trustapp.controller.Utils;
-import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 import com.wallet.crypto.trustapp.views.barcode.BarcodeCaptureActivity;
 
 import org.ethereum.geth.Address;
 
-import java.util.List;
 import java.math.BigInteger;
 
 public class SendActivity extends AppCompatActivity {
@@ -233,7 +232,7 @@ public class SendActivity extends AppCompatActivity {
 		} catch (ServiceErrorException ex) {
 			hideSendProgress();
 			if (ex.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
-				KS.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
+				PasswordStoreFactory.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
 			}
 		}
 	}

@@ -48,7 +48,8 @@ public class AccountRepository implements AccountRepositoryType {
 
 	@Override
 	public Single<Account> createAccount(String password) {
-		return accountKeystoreService.createAccount(password);
+		return accountKeystoreService
+				.createAccount(password);
 	}
 
 	@Override

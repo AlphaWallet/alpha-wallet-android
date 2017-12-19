@@ -77,8 +77,8 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 	public void showError(@Nullable String message, @Nullable OnClickListener onTryAgain) {
 		emptyBox.setVisibility(GONE);
 		hideProgress();
-		setVisibility(VISIBLE);
 		errorBox.setVisibility(VISIBLE);
+		setVisibility(VISIBLE);
 
 		if (TextUtils.isEmpty(message)) {
 			this.message.setVisibility(GONE);
@@ -112,9 +112,11 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 	}
 
 	public void showEmpty(View view) {
+		hideError();
 		emptyBox.setVisibility(VISIBLE);
 		emptyBox.removeAllViews();
 		emptyBox.addView(view);
+		setVisibility(VISIBLE);
 	}
 
 	@Override

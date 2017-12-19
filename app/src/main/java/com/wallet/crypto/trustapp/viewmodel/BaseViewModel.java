@@ -40,7 +40,7 @@ public class BaseViewModel extends ViewModel {
 		if (t instanceof ServiceException) {
 			error.setValue(((ServiceException) t).error);
 		} else {
-			error.setValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+			error.setValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, t));
 			// TODO: Add dialog with offer send error log to developers: notify about error.
 			Log.d("SESSION", "Err", t);
 		}

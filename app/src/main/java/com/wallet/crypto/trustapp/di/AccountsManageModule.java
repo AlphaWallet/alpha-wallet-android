@@ -7,11 +7,9 @@ import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
 import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.router.CreateAccountRouter;
 import com.wallet.crypto.trustapp.router.ImportAccountRouter;
 import com.wallet.crypto.trustapp.viewmodel.AccountsManageViewModelFactory;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -35,8 +33,9 @@ class AccountsManageModule {
 	}
 
 	@Provides
-	CreateAccountInteract provideCreateAccountInteract(AccountRepositoryType accountRepository) {
-		return new CreateAccountInteract(accountRepository);
+	CreateAccountInteract provideCreateAccountInteract(
+			AccountRepositoryType accountRepository, PasswordStore passwordStore) {
+		return new CreateAccountInteract(accountRepository, passwordStore);
 	}
 
 	@Provides

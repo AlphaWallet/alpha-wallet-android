@@ -20,7 +20,7 @@ public class DeleteAccountInteract {
 	}
 
 	public Single<Account[]> delete(Account account) {
-		return Single.fromCallable(() -> passwordStore.getPassword(account))
+		return passwordStore.getPassword(account)
 				.flatMapCompletable(password -> accountRepository.deleteAccount(account.address, password))
 				.andThen(accountRepository.fetchAccounts())
 				.observeOn(AndroidSchedulers.mainThread());

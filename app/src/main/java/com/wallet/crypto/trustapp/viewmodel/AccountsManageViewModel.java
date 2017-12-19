@@ -67,7 +67,7 @@ public class AccountsManageViewModel extends BaseViewModel {
 		accounts.postValue(items);
 		disposable = findDefaultAccountInteract
 				.find()
-				.subscribe(this::onDefaultAccountChanged, this::onError);
+				.subscribe(this::onDefaultAccountChanged, t -> {});
 	}
 
 	private void onDefaultAccountChanged(Account account) {
@@ -86,7 +86,11 @@ public class AccountsManageViewModel extends BaseViewModel {
 		progress.setValue(true);
 		createAccountInteract
 				.create()
-				.subscribe(a -> fetchAccounts(), this::onError);
+				.subscribe(this::fetchAccounts, this::onNewAccountError);
+	}
+
+	private void onNewAccountError(Throwable throwable) {
+
 	}
 
 	public void importAccount(Context context) {

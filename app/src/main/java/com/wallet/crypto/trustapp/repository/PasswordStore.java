@@ -1,9 +1,12 @@
 package com.wallet.crypto.trustapp.repository;
 
-import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.Account;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
+
 public interface PasswordStore {
-	String getPassword(Account account) throws ServiceErrorException;
-	boolean setPassword(Account account, String password) throws ServiceErrorException;
+	Single<String> getPassword(Account account);
+	Completable setPassword(Account account, String password);
+	Single<String> generatePassword();
 }

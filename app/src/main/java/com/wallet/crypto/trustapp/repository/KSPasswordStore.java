@@ -2,9 +2,13 @@ package com.wallet.crypto.trustapp.repository;
 
 import android.content.Context;
 
-import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.Account;
 import com.wallet.crypto.trustapp.util.KS;
+
+import java.util.UUID;
+
+import io.reactivex.Completable;
+import io.reactivex.Single;
 
 public class KSPasswordStore implements PasswordStore {
 
@@ -15,12 +19,17 @@ public class KSPasswordStore implements PasswordStore {
 	}
 
 	@Override
-	public String getPassword(Account account) throws ServiceErrorException {
-		return new String(KS.get(context, account.address));
+	public Single<String> getPassword(Account account) {
+		return Single.fromCallable(() -> new String(KS.get(context, account.address)));
 	}
 
 	@Override
-	public boolean setPassword(Account account, String password) throws ServiceErrorException {
-		return KS.put(context, account.address, password);
+	public Completable setPassword(Account account, String password) {
+		return Completable.fromAction(() -> KS.put(context, account.address, password));
+	}
+
+	@Override
+	public Single<String> generatePassword() {
+		return Single.just(UUID.randomUUID().toString());
 	}
 }

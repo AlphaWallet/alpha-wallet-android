@@ -26,7 +26,10 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class ManageAccountsActivity extends BaseActivity implements View.OnClickListener, AddAccountView.OnNewAccountClickListener, AddAccountView.OnImportAccountClickListener {
+public class ManageAccountsActivity extends BaseActivity implements
+		View.OnClickListener,
+		AddAccountView.OnNewAccountClickListener,
+		AddAccountView.OnImportAccountClickListener {
 
 	@Inject
 	AccountsManageViewModelFactory accountsManageViewModelFactory;
@@ -66,6 +69,8 @@ public class ManageAccountsActivity extends BaseActivity implements View.OnClick
 		viewModel.accounts().observe(this, this::onFetchAccount);
 		viewModel.defaultAccount().observe(this, this::onChangeDefaultAccount);
 
+		refreshLayout.setOnRefreshListener(viewModel::fetchAccounts);
+
 		addAction.setOnClickListener(this);
 	}
 
@@ -86,7 +91,7 @@ public class ManageAccountsActivity extends BaseActivity implements View.OnClick
 				onAddAccount();
 			} break;
 			case R.id.try_again: {
-				onTryAgain();
+				viewModel.fetchAccounts();
 			} break;
 		}
 	}
@@ -123,6 +128,7 @@ public class ManageAccountsActivity extends BaseActivity implements View.OnClick
 			addAccountView.setOnNewAccountClickListener(this);
 			addAccountView.setOnImportAccountClickListener(this);
 			systemView.showEmpty(addAccountView);
+			adapter.setAccounts(new Account[0]);
 		} else {
 			addAction.setVisibility(View.VISIBLE);
 			adapter.setAccounts(accounts);
@@ -130,11 +136,9 @@ public class ManageAccountsActivity extends BaseActivity implements View.OnClick
 	}
 
 	private void onProgress(Boolean shouldShowProgress) {
-		if (adapter.getItemCount() > 0) {
-			refreshLayout.setRefreshing(true);
-		} else {
-			systemView.showProgress(shouldShowProgress);
-		}
+		boolean isEmptyList = adapter.getItemCount() == 0;
+		refreshLayout.setRefreshing(!isEmptyList && shouldShowProgress);
+		systemView.showProgress(isEmptyList && shouldShowProgress);
 	}
 
 	private void onError(ErrorEnvelope errorEnvelope) {
@@ -144,10 +148,6 @@ public class ManageAccountsActivity extends BaseActivity implements View.OnClick
 			Toast.makeText(getApplicationContext(), errorEnvelope.message, Toast.LENGTH_SHORT)
 					.show();
 		}
-	}
-
-	private void onTryAgain() {
-		viewModel.fetchAccounts();
 	}
 
 	private void onSetAccountDefault(Account account) {

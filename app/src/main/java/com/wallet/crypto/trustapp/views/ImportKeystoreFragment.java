@@ -14,7 +14,7 @@ import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.controller.TaskStatus;
-import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -62,7 +62,7 @@ public class ImportKeystoreFragment extends Fragment {
                                             getActivity().finish();
                                         } else {
 	                                        if ("USER_NOT_AUTHENTICATED".equalsIgnoreCase(result.getMessage())) {
-		                                        KS.showAuthenticationScreen(getContext(), Controller.UNLOCK_SCREEN_REQUEST);
+		                                        PasswordStoreFactory.showAuthenticationScreen(getContext(), Controller.UNLOCK_SCREEN_REQUEST);
 	                                        } else {
 		                                        Toast.makeText(getActivity(), result.getMessage(), Toast.LENGTH_SHORT).show();
 	                                        }

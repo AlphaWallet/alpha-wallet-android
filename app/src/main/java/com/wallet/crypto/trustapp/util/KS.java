@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.util;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -41,7 +42,8 @@ import static com.wallet.crypto.trustapp.controller.ServiceErrorException.KEY_IS
 import static com.wallet.crypto.trustapp.controller.ServiceErrorException.KEY_STORE_ERROR;
 import static com.wallet.crypto.trustapp.controller.ServiceErrorException.USER_NOT_AUTHENTICATED;
 
-public class KS {
+@TargetApi(23)
+class KS {
 	private static final String TAG = "KS";
 
 	private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
@@ -215,7 +217,7 @@ public class KS {
 		return false;
 	}
 
-	public synchronized static void removeAliasAndFiles(Context context, String alias, String dataFileName, String ivFileName) {
+	private synchronized static void removeAliasAndFiles(Context context, String alias, String dataFileName, String ivFileName) {
 		KeyStore keyStore;
 		try {
 			keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
@@ -228,7 +230,7 @@ public class KS {
 		}
 	}
 
-	public static byte[] readBytesFromStream(InputStream in) {
+	private static byte[] readBytesFromStream(InputStream in) {
 		// this dynamically extends to take the bytes you read
 		ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 		// this is storage overwritten on each iteration with bytes
@@ -271,8 +273,8 @@ public class KS {
 		return bytes;
 	}
 
-	public static boolean put(Context context, String address, String password) throws ServiceErrorException {
-		return setData(context, password.getBytes(), address, address, address+"iv");
+	public static void put(Context context, String address, String password) throws ServiceErrorException {
+		setData(context, password.getBytes(), address, address, address+"iv");
 	}
 
 	public static byte[] get(Context context, String address) throws ServiceErrorException {

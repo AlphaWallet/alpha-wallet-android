@@ -9,6 +9,7 @@ import com.wallet.crypto.trustapp.interact.DeleteAccountInteract;
 import com.wallet.crypto.trustapp.interact.FetchAccountsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
+import com.wallet.crypto.trustapp.router.ExportAccountRouter;
 import com.wallet.crypto.trustapp.router.ImportAccountRouter;
 
 import javax.inject.Inject;
@@ -22,6 +23,7 @@ public class AccountsManageViewModelFactory implements ViewModelProvider.Factory
 	private final FindDefaultAccountInteract findDefaultAccountInteract;
 
 	private final ImportAccountRouter importAccountRouter;
+	private final ExportAccountRouter exportAccountRouter;
 
 	@Inject
 	public AccountsManageViewModelFactory(
@@ -30,13 +32,15 @@ public class AccountsManageViewModelFactory implements ViewModelProvider.Factory
 			DeleteAccountInteract deleteAccountInteract,
 			FetchAccountsInteract fetchAccountsInteract,
 			FindDefaultAccountInteract findDefaultAccountInteract,
-			ImportAccountRouter importAccountRouter) {
+			ImportAccountRouter importAccountRouter,
+			ExportAccountRouter exportAccountRouter) {
 		this.createAccountInteract = createAccountInteract;
 		this.setDefaultAccountInteract = setDefaultAccountInteract;
 		this.deleteAccountInteract = deleteAccountInteract;
 		this.fetchAccountsInteract = fetchAccountsInteract;
 		this.findDefaultAccountInteract = findDefaultAccountInteract;
 		this.importAccountRouter = importAccountRouter;
+		this.exportAccountRouter = exportAccountRouter;
 	}
 
 	@NonNull
@@ -48,6 +52,7 @@ public class AccountsManageViewModelFactory implements ViewModelProvider.Factory
 				deleteAccountInteract,
 				fetchAccountsInteract,
 				findDefaultAccountInteract,
-				importAccountRouter);
+				importAccountRouter,
+				exportAccountRouter);
 	}
 }

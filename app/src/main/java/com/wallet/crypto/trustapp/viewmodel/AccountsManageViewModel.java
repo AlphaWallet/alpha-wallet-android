@@ -1,8 +1,8 @@
 package com.wallet.crypto.trustapp.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
 
 import com.wallet.crypto.trustapp.entity.Account;
 import com.wallet.crypto.trustapp.interact.CreateAccountInteract;
@@ -10,9 +10,13 @@ import com.wallet.crypto.trustapp.interact.DeleteAccountInteract;
 import com.wallet.crypto.trustapp.interact.FetchAccountsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
+import com.wallet.crypto.trustapp.router.ExportAccountRouter;
 import com.wallet.crypto.trustapp.router.ImportAccountRouter;
 
 public class AccountsManageViewModel extends BaseViewModel {
+
+	public static final int IMPORT_REQUEST = 1001;
+	public static final int EXPORT_REQUEST = 1002;
 
 	private final CreateAccountInteract createAccountInteract;
 	private final SetDefaultAccountInteract setDefaultAccountInteract;
@@ -21,9 +25,12 @@ public class AccountsManageViewModel extends BaseViewModel {
 	private final FindDefaultAccountInteract findDefaultAccountInteract;
 
 	private final ImportAccountRouter importAccountRouter;
+	private final ExportAccountRouter exportAccountRouter;
 
 	private final MutableLiveData<Account[]> accounts = new MutableLiveData<>();
 	private final MutableLiveData<Account> defaultAccount = new MutableLiveData<>();
+	private final MutableLiveData<Account> createdAccount = new MutableLiveData<>();
+	private final MutableLiveData<Account> addedAccount = new MutableLiveData<>();
 
 	AccountsManageViewModel(
 			CreateAccountInteract createAccountInteract,
@@ -31,13 +38,15 @@ public class AccountsManageViewModel extends BaseViewModel {
 			DeleteAccountInteract deleteAccountInteract,
 			FetchAccountsInteract fetchAccountsInteract,
 			FindDefaultAccountInteract findDefaultAccountInteract,
-			ImportAccountRouter importAccountRouter) {
+			ImportAccountRouter importAccountRouter,
+			ExportAccountRouter exportAccountRouter) {
 		this.createAccountInteract = createAccountInteract;
 		this.setDefaultAccountInteract = setDefaultAccountInteract;
 		this.deleteAccountInteract = deleteAccountInteract;
 		this.fetchAccountsInteract = fetchAccountsInteract;
 		this.findDefaultAccountInteract = findDefaultAccountInteract;
 		this.importAccountRouter = importAccountRouter;
+		this.exportAccountRouter = exportAccountRouter;
 
 		fetchAccounts();
 	}
@@ -86,14 +95,29 @@ public class AccountsManageViewModel extends BaseViewModel {
 		progress.setValue(true);
 		createAccountInteract
 				.create()
-				.subscribe(this::fetchAccounts, this::onNewAccountError);
+				.subscribe(account -> {
+					fetchAccounts();
+					createdAccount.postValue(account);
+				}, this::onNewAccountError);
+	}
+
+	public LiveData<Account> createdAccount() {
+		return createdAccount;
+	}
+
+	public LiveData<Account> addedAccount() {
+		return addedAccount;
 	}
 
 	private void onNewAccountError(Throwable throwable) {
 
 	}
 
-	public void importAccount(Context context) {
-		importAccountRouter.open(context);
+	public void backupAccount(Activity activity, Account account) {
+		exportAccountRouter.openForResult(activity, account, EXPORT_REQUEST);
+	}
+
+	public void importAccount(Activity activity) {
+		importAccountRouter.openForResult(activity, IMPORT_REQUEST);
 	}
 }

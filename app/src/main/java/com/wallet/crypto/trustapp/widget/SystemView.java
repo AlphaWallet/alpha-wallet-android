@@ -4,25 +4,32 @@ import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.ui.widget.AddAccountView;
 
 public class SystemView extends FrameLayout implements View.OnClickListener {
 	private ProgressBar progress;
 	private View errorBox;
-	private TextView message;
+	private TextView messageTxt;
 	private View tryAgain;
 
-	private OnClickListener onTryAgain;
+	private OnClickListener onTryAgainClickListener;
 	private FrameLayout emptyBox;
+
+	private SwipeRefreshLayout swipeRefreshLayout;
+	private RecyclerView recyclerView;
 
 	public SystemView(@NonNull Context context) {
 		super(context);
@@ -45,64 +52,76 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 		progress = view.findViewById(R.id.progress);
 
 		errorBox = view.findViewById(R.id.error_box);
-		message = view.findViewById(R.id.message);
+		messageTxt = view.findViewById(R.id.message);
 		tryAgain = view.findViewById(R.id.try_again);
 		tryAgain.setOnClickListener(this);
 
 		emptyBox = view.findViewById(R.id.empty_box);
 	}
 
+	public void attachSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout) {
+		this.swipeRefreshLayout = swipeRefreshLayout;
+	}
+
+	public void attachRecyclerView(@Nullable RecyclerView recyclerView) {
+		this.recyclerView = recyclerView;
+	}
+
+	private void hide() {
+		hideAllComponents();
+		setVisibility(GONE);
+	}
+
+	private void hideAllComponents() {
+		if (swipeRefreshLayout != null && swipeRefreshLayout.isRefreshing()) {
+			swipeRefreshLayout.setRefreshing(false);
+		}
+		emptyBox.setVisibility(GONE);
+		errorBox.setVisibility(GONE);
+		progress.setVisibility(GONE);
+		setVisibility(VISIBLE);
+	}
+
 	public void showProgress(boolean shouldShow) {
 		if (shouldShow) {
-			showProgress();
+			if (swipeRefreshLayout != null
+					&& recyclerView != null
+					&& recyclerView.getAdapter() != null
+					&& recyclerView.getAdapter().getItemCount() > 0) {
+				hide();
+				swipeRefreshLayout.setRefreshing(true);
+			} else {
+				hideAllComponents();
+				progress.setVisibility(VISIBLE);
+			}
 		} else {
-			hideProgress();
+			hide();
 		}
 	}
 
-	public void showProgress() {
-		setVisibility(VISIBLE);
-		emptyBox.setVisibility(GONE);
-		errorBox.setVisibility(GONE);
-		progress.setVisibility(VISIBLE);
-	}
-
-	public void hideProgress() {
-		emptyBox.setVisibility(GONE);
-		errorBox.setVisibility(GONE);
-		progress.setVisibility(GONE);
-		setVisibility(GONE);
-	}
-
-	public void showError(@Nullable String message, @Nullable OnClickListener onTryAgain) {
-		emptyBox.setVisibility(GONE);
-		hideProgress();
-		errorBox.setVisibility(VISIBLE);
-		setVisibility(VISIBLE);
-
-		if (TextUtils.isEmpty(message)) {
-			this.message.setVisibility(GONE);
+	public void showError(@Nullable String message, @Nullable OnClickListener onTryAgainClickListener) {
+		if (recyclerView != null && recyclerView.getAdapter() != null && recyclerView.getAdapter().getItemCount() > 0) {
+			hide();
+			Snackbar.make(this,
+					TextUtils.isEmpty(message) ? getContext().getString(R.string.unknown_error) : message,
+					Snackbar.LENGTH_LONG).show();
 		} else {
-			this.message.setVisibility(VISIBLE);
-			this.message.setText(message);
-		}
-		this.onTryAgain = onTryAgain;
-		tryAgain.setVisibility(this.onTryAgain == null ? GONE : VISIBLE);
-	}
+			hideAllComponents();
+			errorBox.setVisibility(VISIBLE);
+			messageTxt.setText(message);
 
-	public void hideError() {
-		setVisibility(GONE);
-		emptyBox.setVisibility(GONE);
-		progress.setVisibility(GONE);
-		errorBox.setVisibility(GONE);
+			this.onTryAgainClickListener = onTryAgainClickListener;
+
+			messageTxt.setVisibility(TextUtils.isEmpty(message) ? GONE : VISIBLE);
+			tryAgain.setVisibility(this.onTryAgainClickListener == null ? GONE : VISIBLE);
+		}
 	}
 
 	public void showEmpty() {
 		showEmpty("");
 	}
 
-	public void showEmpty(String message) {
-		hideProgress();
+	public void showEmpty(@NonNull String message) {
 		showError(message, null);
 	}
 
@@ -112,18 +131,20 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 	}
 
 	public void showEmpty(View view) {
-		hideError();
+		hideAllComponents();
+		LayoutParams lp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		lp.gravity = Gravity.CENTER_VERTICAL;
+		view.setLayoutParams(lp);
 		emptyBox.setVisibility(VISIBLE);
 		emptyBox.removeAllViews();
 		emptyBox.addView(view);
-		setVisibility(VISIBLE);
 	}
 
 	@Override
 	public void onClick(View v) {
-		if (onTryAgain != null) {
-			hideError();
-			onTryAgain.onClick(v);
+		if (onTryAgainClickListener != null) {
+			hide();
+			onTryAgainClickListener.onClick(v);
 		}
 	}
 }

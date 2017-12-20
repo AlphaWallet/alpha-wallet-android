@@ -1,9 +1,7 @@
-package com.wallet.crypto.trustapp.ui.widget;
+package com.wallet.crypto.trustapp.widget;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.AttributeSet;
+import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,22 +13,18 @@ public class AddAccountView extends FrameLayout implements View.OnClickListener 
 	private OnNewAccountClickListener onNewAccountClickListener;
 	private OnImportAccountClickListener onImportAccountClickListener;
 
-	public AddAccountView(@NonNull Context context) {
-		this(context, null);
+	public AddAccountView(Context context) {
+		this(context, R.layout.layout_dialog_add_account);
 	}
 
-	public AddAccountView(@NonNull Context context, @Nullable AttributeSet attrs) {
-		this(context, attrs, 0);
+	public AddAccountView(Context context, @LayoutRes int layoutId) {
+		super(context);
+
+		init(layoutId);
 	}
 
-	public AddAccountView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-		super(context, attrs, defStyleAttr);
-
-		init();
-	}
-
-	private void init() {
-		LayoutInflater.from(getContext()).inflate(R.layout.layout_add_account, this, true);
+	private void init(@LayoutRes int layoutId) {
+		LayoutInflater.from(getContext()).inflate(layoutId, this, true);
 		findViewById(R.id.new_account_action).setOnClickListener(this);
 		findViewById(R.id.import_account_action).setOnClickListener(this);
 	}

@@ -134,5 +134,9 @@
 	<string name="already_have_account">Already have a wallet?</string>
 	<string name="title_add_account">Add account</string>
 	<string name="action_create_new_account">Create new account</string>
+	<string name="unknown_error">An error has occurred.</string>
+	<string name="action_backup_wallet">Backup Wallet</string>
+	<string name="action_backup_later">Do it later</string>
+	<string name="set_account_default">Do want to make a new wallet the main one?</string>
 
 </resources>

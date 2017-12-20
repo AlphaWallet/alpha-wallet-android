@@ -17,4 +17,5 @@
 
 	<color name="QRCodeBlackColor">#FF000000</color>
 	<color name="QRCodeWhiteColor">#FFFFFFFF</color>
+	<color name="title">#89000000</color>
 </resources>

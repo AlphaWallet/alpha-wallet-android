@@ -7,6 +7,7 @@ import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
 import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
+import com.wallet.crypto.trustapp.router.ExportAccountRouter;
 import com.wallet.crypto.trustapp.router.ImportAccountRouter;
 import com.wallet.crypto.trustapp.viewmodel.AccountsManageViewModelFactory;
 
@@ -23,13 +24,15 @@ class AccountsManageModule {
 			DeleteAccountInteract deleteAccountInteract,
 			FetchAccountsInteract fetchAccountsInteract,
 			FindDefaultAccountInteract findDefaultAccountInteract,
-			ImportAccountRouter importAccountRouter) {
+			ImportAccountRouter importAccountRouter,
+			ExportAccountRouter exportAccountRouter) {
 		return new AccountsManageViewModelFactory(createAccountInteract,
 				setDefaultAccountInteract,
 				deleteAccountInteract,
 				fetchAccountsInteract,
 				findDefaultAccountInteract,
-				importAccountRouter);
+				importAccountRouter,
+				exportAccountRouter);
 	}
 
 	@Provides
@@ -62,5 +65,10 @@ class AccountsManageModule {
 	@Provides
 	ImportAccountRouter provideImportAccountRouter() {
 		return new ImportAccountRouter();
+	}
+
+	@Provides
+	ExportAccountRouter provideExportAccountRouter() {
+		return new ExportAccountRouter();
 	}
 }

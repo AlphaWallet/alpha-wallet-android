@@ -4,7 +4,7 @@ import com.wallet.crypto.trustapp.entity.Account;
 import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
 
-import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.reactivex.observers.DisposableCompletableObserver;
 
 public class CreateAccountInteract {
@@ -17,14 +17,14 @@ public class CreateAccountInteract {
 		this.passwordStore = passwordStore;
 	}
 
-	public Completable create() {
+	public Single<Account> create() {
 		return passwordStore.generatePassword()
-				.flatMapCompletable(password -> accountRepository
+				.flatMap(password -> accountRepository
 						.createAccount(password)
-						.flatMapCompletable(account -> savePassword(account, password)));
+						.compose(createStream -> savePassword(createStream.blockingGet(), password)));
 	}
 
-	private Completable savePassword(Account account, String password) {
+	private Single<Account> savePassword(Account account, String password) {
 		return passwordStore
 				.setPassword(account, password)
 				.onErrorResumeNext(err -> accountRepository.deleteAccount(account.address, password)
@@ -38,6 +38,7 @@ public class CreateAccountInteract {
 							public void onError(Throwable e) {
 								observer.onError(e);
 							}
-						}));
+						}))
+				.toSingle(() -> account);
 	}
 }

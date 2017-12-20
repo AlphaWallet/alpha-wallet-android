@@ -16,12 +16,22 @@ public abstract class BaseActivity extends AppCompatActivity {
 			setSupportActionBar(toolbar);
 			toolbar.setTitle(getTitle());
 		}
+		enableDisplayHomeAsUp();
+		return toolbar;
+	}
 
+	protected void enableDisplayHomeAsUp() {
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
-		return toolbar;
+	}
+
+	protected void dissableDisplayHomeAsUp() {
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(false);
+		}
 	}
 
 	@Override

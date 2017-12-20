@@ -11,7 +11,7 @@ import com.wallet.pwd.trustapp.PasswordManager;
 public class PasswordStoreFactory {
 	public static void put(Context context, String address, String password) throws ServiceErrorException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			KS.put(context, password, address);
+			KS.put(context, address, password);
 		} else {
 			try {
 				PasswordManager.setPassword(address, password, context);

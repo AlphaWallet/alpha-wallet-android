@@ -25,6 +25,7 @@ gen/
 .gradle/
 /build
 /fastlane/metadata
+app/release
 
 # Local configuration file (sdk path, etc)
 /local.properties

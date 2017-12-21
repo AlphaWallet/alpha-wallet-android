@@ -129,7 +129,7 @@ public class TokenListActivity extends AppCompatActivity {
                 BigDecimal balance = new BigDecimal(token.getBalance());
                 BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, info.getDecimals()));
                 balance = info.getDecimals() > 0 ? balance.divide(decimalDivisor) : balance;
-                balance = balance.setScale(2, RoundingMode.HALF_UP);
+                balance = balance.setScale(TransactionListActivity.SIGNIFICANT_FIGURES, RoundingMode.HALF_UP).stripTrailingZeros();
                 holder.mBalanceView.setText(balance.toString());
 
                 holder.mView.setOnClickListener(new View.OnClickListener() {

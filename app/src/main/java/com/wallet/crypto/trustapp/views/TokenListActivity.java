@@ -72,7 +72,7 @@ public class TokenListActivity extends AppCompatActivity {
 
             EthplorerService service = retrofit.create(EthplorerService.class);
 
-            Call<EPAddressInfo> call = service.getAddressInfo(/*mAddress*/"0x60f7a1cbc59470b74b1df20b133700ec381f15d3", "freekey");
+            Call<EPAddressInfo> call = service.getAddressInfo(/*mAddress*/ mAddress, "freekey");
 
             call.enqueue(new Callback<EPAddressInfo>() {
 

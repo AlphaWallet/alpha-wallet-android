@@ -22,11 +22,13 @@ import com.wallet.crypto.trustapp.controller.EthplorerService;
 import com.wallet.crypto.trustapp.model.EPAddressInfo;
 import com.wallet.crypto.trustapp.model.EPToken;
 import com.wallet.crypto.trustapp.model.EPTokenInfo;
+import com.wallet.crypto.trustapp.util.LogInterceptor;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,32 +61,37 @@ public class TokenListActivity extends AppCompatActivity {
 
     private void setupRecyclerView(final @NonNull RecyclerView recyclerView) {
         try {
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(new LogInterceptor())
+                    .build();
             Retrofit retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
+                    .client(client)
                     .baseUrl("https://api.ethplorer.io")
                     .build();
 
             EthplorerService service = retrofit.create(EthplorerService.class);
 
-            Call<EPAddressInfo> call = service.getAddressInfo(mAddress, "freekey");
+            Call<EPAddressInfo> call = service.getAddressInfo(/*mAddress*/"0x60f7a1cbc59470b74b1df20b133700ec381f15d3", "freekey");
 
             call.enqueue(new Callback<EPAddressInfo>() {
 
                 @Override
-                public void onResponse(Call<EPAddressInfo> call, Response<EPAddressInfo> response) {
-                    try {
-                        Log.d(TAG, Integer.toString(response.body().getTokens().size()));
+                public void onResponse(@NonNull Call<EPAddressInfo> call, @NonNull Response<EPAddressInfo> response) {
+                    EPAddressInfo body = response.body();
+                    if (body != null && body.getTokens() != null && body.getTokens().size() > 0) {
                         EPAddressInfo addressInfo = response.body();
                         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(addressInfo.getTokens()));
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getLocalizedMessage());
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Tokens not found.", Toast.LENGTH_SHORT)
+                                .show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<EPAddressInfo> call, Throwable t) {
                     Log.e("ERROR", t.toString());
-                    Toast.makeText(TokenListActivity.this.getApplicationContext(), "Error contacting token service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Error contacting token service. Check internet connection.", Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {

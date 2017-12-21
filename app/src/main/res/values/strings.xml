@@ -128,5 +128,6 @@
     <string name="transfer">Transfer</string>
     <string name="action_buy">Buy</string>
     <string name="title_deposit">How would you like to buy?</string>
+    <string name="no_tokens">No tokens found.</string>
 
 </resources>

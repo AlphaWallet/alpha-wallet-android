@@ -78,12 +78,17 @@ public class TokenListActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(@NonNull Call<EPAddressInfo> call, @NonNull Response<EPAddressInfo> response) {
-                    EPAddressInfo body = response.body();
-                    if (body != null && body.getTokens() != null && body.getTokens().size() > 0) {
-                        EPAddressInfo addressInfo = response.body();
-                        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(addressInfo.getTokens()));
+                    if (response.isSuccessful()) {
+                        EPAddressInfo body = response.body();
+                        if (body != null && body.getTokens() != null && body.getTokens().size() > 0) {
+                            EPAddressInfo addressInfo = response.body();
+                            recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(addressInfo.getTokens()));
+                            findViewById(R.id.no_tokens_text).setVisibility(View.GONE);
+                        } else {
+                            findViewById(R.id.no_tokens_text).setVisibility(View.VISIBLE);
+                        }
                     } else {
-                        Toast.makeText(getApplicationContext(), "Tokens not found.", Toast.LENGTH_SHORT)
+                        Toast.makeText(getApplicationContext(), "Token service unavailable.", Toast.LENGTH_SHORT)
                                 .show();
                     }
                 }

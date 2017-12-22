@@ -58,13 +58,13 @@
 
         <PreferenceCategory
             android:title="@string/title_support"
-            android:key="pref_rate"
+            android:key="pref_support"
             >
 
-            <!--
             <Preference
                 android:key="pref_rate"
-                android:title="@string/title_rate" /> -->
+                android:icon="@mipmap/settings_rating"
+                android:title="@string/title_rate" />
 
             <Preference
                 android:key="pref_donate"

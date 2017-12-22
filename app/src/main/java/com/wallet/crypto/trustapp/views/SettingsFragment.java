@@ -1,6 +1,9 @@
 package com.wallet.crypto.trustapp.views;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -27,6 +30,17 @@ public class SettingsFragment extends PreferenceFragment
         addPreferencesFromResource(R.xml.fragment_settings);
 
         mController = Controller.with(getActivity());
+
+        final Preference rate = findPreference("pref_rate");
+
+        rate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                rateThisApp();
+                return false;
+            }
+        });
 
         final Preference donate = findPreference("pref_donate");
 
@@ -107,6 +121,22 @@ public class SettingsFragment extends PreferenceFragment
         lp.setValue(currentValue);
         lp.setSummary(currentValue);
         lp.setEntryValues(entryValues);
+    }
+
+    private void rateThisApp() {
+        Uri uri = Uri.parse("market://details?id=" + getActivity().getPackageName());
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        try {
+            startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + getActivity().getPackageName())));
+        }
     }
 }
 

@@ -43,7 +43,7 @@ import java.util.List;
 
 public class TransactionListActivity extends AppCompatActivity {
 
-    private static final int SIGNIFICANT_FIGURES = 3;
+    public static final int SIGNIFICANT_FIGURES = 3;
     private static final String PREF_SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
 
     /**

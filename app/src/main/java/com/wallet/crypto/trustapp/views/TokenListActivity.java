@@ -72,18 +72,23 @@ public class TokenListActivity extends AppCompatActivity {
 
             EthplorerService service = retrofit.create(EthplorerService.class);
 
-            Call<EPAddressInfo> call = service.getAddressInfo(/*mAddress*/"0x60f7a1cbc59470b74b1df20b133700ec381f15d3", "freekey");
+            Call<EPAddressInfo> call = service.getAddressInfo(/*mAddress*/ mAddress, "freekey");
 
             call.enqueue(new Callback<EPAddressInfo>() {
 
                 @Override
                 public void onResponse(@NonNull Call<EPAddressInfo> call, @NonNull Response<EPAddressInfo> response) {
-                    EPAddressInfo body = response.body();
-                    if (body != null && body.getTokens() != null && body.getTokens().size() > 0) {
-                        EPAddressInfo addressInfo = response.body();
-                        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(addressInfo.getTokens()));
+                    if (response.isSuccessful()) {
+                        EPAddressInfo body = response.body();
+                        if (body != null && body.getTokens() != null && body.getTokens().size() > 0) {
+                            EPAddressInfo addressInfo = response.body();
+                            recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(addressInfo.getTokens()));
+                            findViewById(R.id.no_tokens_text).setVisibility(View.GONE);
+                        } else {
+                            findViewById(R.id.no_tokens_text).setVisibility(View.VISIBLE);
+                        }
                     } else {
-                        Toast.makeText(getApplicationContext(), "Tokens not found.", Toast.LENGTH_SHORT)
+                        Toast.makeText(getApplicationContext(), "Token service unavailable.", Toast.LENGTH_SHORT)
                                 .show();
                     }
                 }
@@ -129,8 +134,8 @@ public class TokenListActivity extends AppCompatActivity {
                 BigDecimal balance = new BigDecimal(token.getBalance());
                 BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, info.getDecimals()));
                 balance = info.getDecimals() > 0 ? balance.divide(decimalDivisor) : balance;
-                balance = balance.setScale(2, RoundingMode.HALF_UP);
-                holder.mBalanceView.setText(balance.toString());
+                balance = balance.setScale(TransactionListActivity.SIGNIFICANT_FIGURES, RoundingMode.HALF_UP).stripTrailingZeros();
+                holder.mBalanceView.setText(balance.toPlainString());
 
                 holder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override

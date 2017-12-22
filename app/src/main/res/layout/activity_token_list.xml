@@ -20,6 +20,21 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_token_list" />
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView
+            android:id="@+id/no_tokens_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/no_tokens"
+            android:visibility="visible" />
+
+        <include layout="@layout/content_token_list" />
+    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

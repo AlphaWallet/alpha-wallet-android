@@ -1,0 +1,1 @@
+Awesome Ethereum Wallet with ERC20 token support

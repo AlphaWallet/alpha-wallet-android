@@ -16,6 +16,11 @@ Welcome to Trust's open source Android app!
 
 Try the [app](https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp) on Google Play Store.
 
+## Deploying with fastlane
+
+`fastlane screengrab` - take screenshots
+`fastlane listing` - update play store listing
+
 ## Contributing
 
 We intend for this project to be an educational resource: we are excited to

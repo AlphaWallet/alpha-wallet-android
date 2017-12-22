@@ -307,11 +307,4 @@ class KS {
 			Log.e(TAG, "showAuthenticationScreen: context is not activity!");
 		}
 	}
-
-    public static String generatePassword() {
-		byte bytes[] = new byte[256];
-		SecureRandom random = new SecureRandom();
-		random.nextBytes(bytes);
-		return String.valueOf(bytes);
-	}
 }

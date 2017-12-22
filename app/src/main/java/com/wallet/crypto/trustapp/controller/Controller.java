@@ -718,7 +718,7 @@ public class Controller {
         protected Void doInBackground(Void... params) {
             //android.os.Process.setThreadPriority(Thread.MAX_PRIORITY);
             String keystore = "";
-            final String password = KS.generatePassword();
+            final String password = Utils.generatePassword();
             try {
                 keystore = EtherStoreUtils.convertPrivateKeyToKeystoreJson(privateKey, password);
             } catch (Exception e) {

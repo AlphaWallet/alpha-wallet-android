@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.controller;
 
+import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,4 +20,10 @@ public class Utils {
         return null;
     }
 
+    public static String generatePassword() {
+        byte bytes[] = new byte[256];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(bytes);
+        return String.valueOf(bytes);
+    }
 }

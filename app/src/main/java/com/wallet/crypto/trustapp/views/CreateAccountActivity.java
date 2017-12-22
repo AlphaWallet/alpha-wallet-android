@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
+import com.wallet.crypto.trustapp.controller.Utils;
 import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 
 /**
@@ -64,7 +65,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
 	private void onCreateAccount() {
-		final String generatedPassphrase = KS.generatePassword();
+		final String generatedPassphrase = Utils.generatePassword();
 		try {
 			mController.clickCreateAccount(CreateAccountActivity.this, "account name", generatedPassphrase);
 		} catch (Exception e) {

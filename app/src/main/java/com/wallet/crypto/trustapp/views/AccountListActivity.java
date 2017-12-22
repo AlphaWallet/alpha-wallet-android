@@ -26,13 +26,13 @@ import com.wallet.crypto.trustapp.model.VMAccount;
 import java.util.List;
 
 /**
- * Activity representing a list of accounts
+ * Activity representing a list of wallets
  */
 public class AccountListActivity extends AppCompatActivity {
 
     private Controller mController;
     private View mRecyclerView;
-    private static String TAG = "ManageAccountsActivity";
+    private static String TAG = "ManageWalletsActivity";
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -162,7 +162,7 @@ public class AccountListActivity extends AppCompatActivity {
                                         try {
                                             mController.deleteAccount(mAddressView.getText().toString());
                                             if (mController.getAccounts().size() == 0) {
-                                                finish(); // Don't show account list if there are no accounts,
+                                                finish(); // Don't show account list if there are no wallets,
                                                           // go to main view which will ask to create a new account
                                                 return;
                                             }

@@ -16,12 +16,12 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	}
 
 	@Override
-	public String getCurrentAccountAddress() {
+	public String getCurrentWalletAddress() {
 		return pref.getString(CURRENT_ACCOUNT_ADDRESS_KEY, null);
 	}
 
 	@Override
-	public void setCurrentAccountAddress(String address) {
+	public void setCurrentWalletAddress(String address) {
 		pref.edit().putString(CURRENT_ACCOUNT_ADDRESS_KEY, address).apply();
 	}
 

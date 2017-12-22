@@ -10,10 +10,10 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Account;
-import com.wallet.crypto.trustapp.ui.widget.adapter.AccountsManageAdapter;
+import com.wallet.crypto.trustapp.entity.Wallet;
+import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsManageAdapter;
 
-public class AccountManageHolder extends BinderViewHolder<Account> implements View.OnClickListener {
+public class WalletManageHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 
 	public static final int VIEW_TYPE = 1001;
 	public final static String IS_DEFAULT_ADDITION = "is_default";
@@ -21,11 +21,11 @@ public class AccountManageHolder extends BinderViewHolder<Account> implements Vi
 	private final RadioButton defaultAction;
 	private final ImageView deleteAction;
 	private final TextView address;
-	private AccountsManageAdapter.OnSetAccountDefaultListener onSetAccountDefaultListener;
-	private AccountsManageAdapter.OnAccountDeleteListener onAccountDeleteListener;
-	private Account account;
+	private WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
+	private WalletsManageAdapter.OnWalletDeleteListener onWalletDeleteListener;
+	private Wallet wallet;
 
-	public AccountManageHolder(int resId, ViewGroup parent) {
+	public WalletManageHolder(int resId, ViewGroup parent) {
 		super(resId, parent);
 
 		defaultAction = findViewById(R.id.default_action);
@@ -37,38 +37,38 @@ public class AccountManageHolder extends BinderViewHolder<Account> implements Vi
 	}
 
 	@Override
-	public void bind(@Nullable Account data, @NonNull Bundle addition) {
-		account = null;
+	public void bind(@Nullable Wallet data, @NonNull Bundle addition) {
+		wallet = null;
 		address.setText(null);
 		defaultAction.setEnabled(false);
 		if (data == null) {
 			return;
 		}
-		this.account = data;
-		address.setText(account.address);
+		this.wallet = data;
+		address.setText(wallet.address);
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
 	}
 
-	public void setOnSetAccountDefaultListener(AccountsManageAdapter.OnSetAccountDefaultListener onSetAccountDefaultListener) {
-		this.onSetAccountDefaultListener = onSetAccountDefaultListener;
+	public void setOnSetWalletDefaultListener(WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener) {
+		this.onSetWalletDefaultListener = onSetWalletDefaultListener;
 	}
 
-	public void setOnAccountDeleteListener(AccountsManageAdapter.OnAccountDeleteListener onAccountDeleteListener) {
-		this.onAccountDeleteListener = onAccountDeleteListener;
+	public void setOnWalletDeleteListener(WalletsManageAdapter.OnWalletDeleteListener onWalletDeleteListener) {
+		this.onWalletDeleteListener = onWalletDeleteListener;
 	}
 
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.default_action: {
-				if (onSetAccountDefaultListener != null) {
-					onSetAccountDefaultListener.onSetDefault(account);
+				if (onSetWalletDefaultListener != null) {
+					onSetWalletDefaultListener.onSetDefault(wallet);
 				}
 			} break;
 			case R.id.delete_action: {
-				if (onAccountDeleteListener != null) {
-					onAccountDeleteListener.onDelete(account);
+				if (onWalletDeleteListener != null) {
+					onWalletDeleteListener.onDelete(wallet);
 				}
 			}
 		}

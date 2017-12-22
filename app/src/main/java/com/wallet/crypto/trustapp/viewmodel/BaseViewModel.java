@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.ServiceException;
@@ -36,13 +37,14 @@ public class BaseViewModel extends ViewModel {
 		return progress;
 	}
 
-	protected void onError(Throwable t) {
-		if (t instanceof ServiceException) {
-			error.setValue(((ServiceException) t).error);
+	protected void onError(Throwable throwable) {
+        Crashlytics.getInstance().core.logException(throwable);
+		if (throwable instanceof ServiceException) {
+			error.setValue(((ServiceException) throwable).error);
 		} else {
-			error.setValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, t));
+			error.setValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
 			// TODO: Add dialog with offer send error log to developers: notify about error.
-			Log.d("SESSION", "Err", t);
+			Log.d("SESSION", "Err", throwable);
 		}
 	}
 }

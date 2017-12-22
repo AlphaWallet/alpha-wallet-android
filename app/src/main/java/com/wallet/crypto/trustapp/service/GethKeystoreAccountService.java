@@ -1,6 +1,7 @@
 package com.wallet.crypto.trustapp.service;
 
-import com.wallet.crypto.trustapp.entity.Account;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 
 import org.ethereum.geth.Accounts;
@@ -9,15 +10,31 @@ import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.WalletFile;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.SingleTransformer;
 import io.reactivex.schedulers.Schedulers;
 
+import static org.web3j.crypto.Wallet.create;
+
 public class GethKeystoreAccountService implements AccountKeystoreService {
+    private static final int PRIVATE_KEY_RADIX = 16;
+    /**
+     * CPU/Memory cost parameter. Must be larger than 1, a power of 2 and less than 2^(128 * r / 8).
+     */
+    private static final int N = 1 << 9;
+    /**
+     * Parallelization parameter. Must be a positive integer less than or equal to Integer.MAX_VALUE / (128 * r * 8).
+     */
+    private static final int P = 1;
 
 	private final KeyStore keyStore;
 
@@ -30,25 +47,36 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 	}
 
 	@Override
-	public Single<Account> createAccount(String password) {
-		return Single.fromCallable(() -> new Account(
+	public Single<Wallet> createAccount(String password) {
+		return Single.fromCallable(() -> new Wallet(
 				keyStore.newAccount(password).getAddress().getHex().toLowerCase()))
 			.subscribeOn(Schedulers.io());
 	}
 
 	@Override
-	public Single<Account> importStore(String store, String password) {
+	public Single<Wallet> importKeystore(String store, String password, String newPassword) {
 		return Single.fromCallable(() -> {
-			org.ethereum.geth.Account account = keyStore.importKey(store.getBytes(Charset.forName("UTF-8")), password, password);
-			return new Account(account.getAddress().getHex().toLowerCase());
+			org.ethereum.geth.Account account = keyStore
+                    .importKey(store.getBytes(Charset.forName("UTF-8")), password, newPassword);
+			return new Wallet(account.getAddress().getHex().toLowerCase());
 		})
 		.subscribeOn(Schedulers.io());
 	}
 
-	@Override
-	public Single<String> exportAccount(Account account, String password, String newPassword) {
+    @Override
+    public Single<Wallet> importPrivateKey(String privateKey, String newPassword) {
+	    return Single.fromCallable(() -> {
+            BigInteger key = new BigInteger(privateKey, PRIVATE_KEY_RADIX);
+            ECKeyPair keypair = ECKeyPair.create(key);
+            WalletFile walletFile = create(newPassword, keypair, N, P);
+            return new ObjectMapper().writeValueAsString(walletFile);
+        }).compose(upstream -> importKeystore(upstream.blockingGet(), newPassword, newPassword));
+    }
+
+    @Override
+	public Single<String> exportAccount(Wallet wallet, String password, String newPassword) {
 		return Single
-				.fromCallable(() -> findAccount(account.address))
+				.fromCallable(() -> findAccount(wallet.address))
 				.flatMap(account1 -> Single.fromCallable(()
 						-> new String(keyStore.exportKey(account1, password, newPassword))))
 				.subscribeOn(Schedulers.io());
@@ -63,7 +91,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 	}
 
 	@Override
-	public Single<byte[]> signTransaction(Account signer, String signerPassword, String toAddress, String wei, long nonce, long chainId) {
+	public Single<byte[]> signTransaction(Wallet signer, String signerPassword, String toAddress, String wei, long nonce, long chainId) {
 		return Single.fromCallable(() -> {
 			BigInt value = new BigInt(Long.decode(wei));
 			BigInt gasPrice = new BigInt(0);
@@ -93,15 +121,15 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 	}
 
 	@Override
-	public Single<Account[]> fetchAccounts() {
+	public Single<Wallet[]> fetchAccounts() {
 		return Single.fromCallable(() -> {
 			Accounts accounts = keyStore.getAccounts();
 			int len = (int) accounts.size();
-			Account[] result = new Account[len];
+			Wallet[] result = new Wallet[len];
 
 			for (int i = 0; i < len; i++) {
 				org.ethereum.geth.Account gethAccount = accounts.get(i);
-				result[i] = new Account(gethAccount.getAddress().getHex().toLowerCase());
+				result[i] = new Wallet(gethAccount.getAddress().getHex().toLowerCase());
 			}
 			return result;
 		})
@@ -121,6 +149,6 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 				/* Quietly: interest only result, maybe next is ok. */
 			}
 		}
-		throw new ServiceException("Account with address: " + address + " not found");
+		throw new ServiceException("Wallet with address: " + address + " not found");
 	}
 }

@@ -2,7 +2,7 @@ package com.wallet.crypto.trustapp.repository;
 
 import android.content.Context;
 
-import com.wallet.crypto.trustapp.entity.Account;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.util.KS;
 
 import java.util.UUID;
@@ -19,13 +19,13 @@ public class KSPasswordStore implements PasswordStore {
 	}
 
 	@Override
-	public Single<String> getPassword(Account account) {
-		return Single.fromCallable(() -> new String(KS.get(context, account.address)));
+	public Single<String> getPassword(Wallet wallet) {
+		return Single.fromCallable(() -> new String(KS.get(context, wallet.address)));
 	}
 
 	@Override
-	public Completable setPassword(Account account, String password) {
-		return Completable.fromAction(() -> KS.put(context, account.address, password));
+	public Completable setPassword(Wallet wallet, String password) {
+		return Completable.fromAction(() -> KS.put(context, wallet.address, password));
 	}
 
 	@Override

@@ -1,15 +1,16 @@
 package com.wallet.crypto.trustapp.di;
 
-import com.wallet.crypto.trustapp.interact.CreateAccountInteract;
-import com.wallet.crypto.trustapp.interact.DeleteAccountInteract;
-import com.wallet.crypto.trustapp.interact.FetchAccountsInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultAccountInteract;
-import com.wallet.crypto.trustapp.interact.SetDefaultAccountInteract;
-import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
+import com.wallet.crypto.trustapp.interact.CreateWalletInteract;
+import com.wallet.crypto.trustapp.interact.DeleteWalletInteract;
+import com.wallet.crypto.trustapp.interact.ExportWalletInteract;
+import com.wallet.crypto.trustapp.interact.FetchWalletsInteract;
+import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
+import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.router.ExportAccountRouter;
-import com.wallet.crypto.trustapp.router.ImportAccountRouter;
-import com.wallet.crypto.trustapp.viewmodel.AccountsManageViewModelFactory;
+import com.wallet.crypto.trustapp.router.ExportWalletRouter;
+import com.wallet.crypto.trustapp.router.ImportWalletRouter;
+import com.wallet.crypto.trustapp.viewmodel.WalletsManageViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -18,57 +19,58 @@ import dagger.Provides;
 class AccountsManageModule {
 
 	@Provides
-	AccountsManageViewModelFactory provideAccountsManageViewModelFactory(
-			CreateAccountInteract createAccountInteract,
-			SetDefaultAccountInteract setDefaultAccountInteract,
-			DeleteAccountInteract deleteAccountInteract,
-			FetchAccountsInteract fetchAccountsInteract,
-			FindDefaultAccountInteract findDefaultAccountInteract,
-			ImportAccountRouter importAccountRouter,
-			ExportAccountRouter exportAccountRouter) {
-		return new AccountsManageViewModelFactory(createAccountInteract,
-				setDefaultAccountInteract,
-				deleteAccountInteract,
-				fetchAccountsInteract,
-				findDefaultAccountInteract,
-				importAccountRouter,
-				exportAccountRouter);
+    WalletsManageViewModelFactory provideAccountsManageViewModelFactory(
+			CreateWalletInteract createWalletInteract,
+			SetDefaultWalletInteract setDefaultWalletInteract,
+			DeleteWalletInteract deleteWalletInteract,
+			FetchWalletsInteract fetchWalletsInteract,
+			FindDefaultWalletInteract findDefaultWalletInteract,
+			ExportWalletInteract exportWalletInteract,
+			ImportWalletRouter importWalletRouter) {
+		return new WalletsManageViewModelFactory(createWalletInteract,
+                setDefaultWalletInteract,
+                deleteWalletInteract,
+                fetchWalletsInteract,
+                findDefaultWalletInteract,
+                exportWalletInteract,
+                importWalletRouter);
 	}
 
 	@Provides
-	CreateAccountInteract provideCreateAccountInteract(
-			AccountRepositoryType accountRepository, PasswordStore passwordStore) {
-		return new CreateAccountInteract(accountRepository, passwordStore);
+    CreateWalletInteract provideCreateAccountInteract(
+            WalletRepositoryType accountRepository, PasswordStore passwordStore) {
+		return new CreateWalletInteract(accountRepository, passwordStore);
 	}
 
 	@Provides
-	SetDefaultAccountInteract provideSetDefaultAccountInteract(AccountRepositoryType accountRepository) {
-		return new SetDefaultAccountInteract(accountRepository);
+    SetDefaultWalletInteract provideSetDefaultAccountInteract(WalletRepositoryType accountRepository) {
+		return new SetDefaultWalletInteract(accountRepository);
 	}
 
 	@Provides
-	DeleteAccountInteract provideDeleteAccountInteract(
-			AccountRepositoryType accountRepository, PasswordStore store) {
-		return new DeleteAccountInteract(accountRepository, store);
+    DeleteWalletInteract provideDeleteAccountInteract(
+            WalletRepositoryType accountRepository, PasswordStore store) {
+		return new DeleteWalletInteract(accountRepository, store);
 	}
 
 	@Provides
-	FetchAccountsInteract provideFetchAccountsInteract(AccountRepositoryType accountRepository) {
-		return new FetchAccountsInteract(accountRepository);
+    FetchWalletsInteract provideFetchAccountsInteract(WalletRepositoryType accountRepository) {
+		return new FetchWalletsInteract(accountRepository);
 	}
 
 	@Provides
-	FindDefaultAccountInteract provideFindDefaultAccountInteract(AccountRepositoryType accountRepository) {
-		return new FindDefaultAccountInteract(accountRepository);
+    FindDefaultWalletInteract provideFindDefaultAccountInteract(WalletRepositoryType accountRepository) {
+		return new FindDefaultWalletInteract(accountRepository);
 	}
 
 	@Provides
-	ImportAccountRouter provideImportAccountRouter() {
-		return new ImportAccountRouter();
-	}
+    ExportWalletInteract provideExportWalletInteract(
+            WalletRepositoryType walletRepository, PasswordStore passwordStore) {
+	    return new ExportWalletInteract(walletRepository, passwordStore);
+    }
 
 	@Provides
-	ExportAccountRouter provideExportAccountRouter() {
-		return new ExportAccountRouter();
+    ImportWalletRouter provideImportAccountRouter() {
+		return new ImportWalletRouter();
 	}
 }

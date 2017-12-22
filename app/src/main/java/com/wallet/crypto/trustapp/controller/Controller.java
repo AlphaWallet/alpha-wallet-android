@@ -29,10 +29,9 @@ import com.wallet.crypto.trustapp.model.TRTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
 import com.wallet.crypto.trustapp.util.KS;
-import com.wallet.crypto.trustapp.views.AccountListActivity;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
-import com.wallet.crypto.trustapp.ui.ManageAccountsActivity;
+import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
@@ -71,7 +70,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -185,7 +183,7 @@ public class Controller {
         loadAccounts();
 
         if (mAccounts.size() > 0) {
-            String cachedAddress = mPreferences.getCurrentAccountAddress();
+            String cachedAddress = mPreferences.getCurrentWalletAddress();
             if (getAccount(cachedAddress) == null) {
                 setCurrentAddress(mAccounts.get(0).getAddress());
             } else {
@@ -298,7 +296,7 @@ public class Controller {
     }
 
     public void navigateToAccountList(Context context) {
-        Intent intent = new Intent(context, ManageAccountsActivity.class);
+        Intent intent = new Intent(context, ManageWalletsActivity.class);
         context.startActivity(intent);
     }
 
@@ -444,11 +442,11 @@ public class Controller {
     }
 
     public void setCurrentAddress(String currentAddress) {
-        mPreferences.setCurrentAccountAddress(currentAddress);
+        mPreferences.setCurrentWalletAddress(currentAddress);
     }
 
     public VMAccount getCurrentAccount() {
-        return this.getAccount(mPreferences.getCurrentAccountAddress());
+        return this.getAccount(mPreferences.getCurrentWalletAddress());
     }
 
     public boolean existsNetwork(String name) {
@@ -488,9 +486,9 @@ public class Controller {
 	    String password = new String(KS.get(mAppContext, address.toLowerCase()));
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
-        if (address.equals(mPreferences.getCurrentAccountAddress())) {
+        if (address.equals(mPreferences.getCurrentWalletAddress())) {
             if (mAccounts.size() > 0) {
-                mPreferences.setCurrentAccountAddress(mAccounts.get(0).getAddress());
+                mPreferences.setCurrentWalletAddress(mAccounts.get(0).getAddress());
             }
         }
     }
@@ -800,13 +798,13 @@ public class Controller {
 //            Log.d("INFO", "Trying to generate wallet in " + mKeystoreBaseDir);
 //            String address = "";
 //            try {
-//	            Account account = mEtherStore.create(passwords[0]);
+//	            Wallet account = mEtherStore.create(passwords[0]);
 //	            address = account.getAddress().getHex().toString().toLowerCase();
 //	            KS.put(mAppContext, address, passwords[0]);
 //            } catch (ServiceErrorException ex) {
 //	            if (!TextUtils.isEmpty(address)) {
 //		            try {
-//			            mEtherStore.deleteAccount(address, passwords[0]);
+//			            mEtherStore.deleteWallet(address, passwords[0]);
 //		            } catch (Exception e) { /* Quietly */ }
 //	            }
 //
@@ -1001,7 +999,7 @@ public class Controller {
             for (VMAccount a : mAccounts) {
                 fetchTransactionsForAddress(a);
             }
-            mListener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Fetched transactions for all accounts."));
+            mListener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Fetched transactions for all wallets."));
             return null;
         }
     }

@@ -2,7 +2,7 @@ package com.wallet.crypto.trustapp.repository;
 
 import android.text.format.DateUtils;
 
-import com.wallet.crypto.trustapp.entity.Account;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.Transaction;
 
 import java.util.Map;
@@ -16,13 +16,13 @@ public class TransactionInMemorySource implements TransactionLocalSource {
 	private final Map<String, CacheUnit> cache = new java.util.concurrent.ConcurrentHashMap<>();
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(Account account) {
+	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
 		return Single.fromCallable(() -> {
-			CacheUnit unit = cache.get(account.address);
+			CacheUnit unit = cache.get(wallet.address);
 			Transaction[] transactions = null;
 			if (unit != null) {
 				if (System.currentTimeMillis() - unit.create > MAX_TIME_OUT) {
-					cache.remove(account.address);
+					cache.remove(wallet.address);
 				} else {
 					transactions = unit.transactions;
 				}
@@ -33,8 +33,8 @@ public class TransactionInMemorySource implements TransactionLocalSource {
 	}
 
 	@Override
-	public void putTransactions(Account account, Transaction[] transactions) {
-		cache.put(account.address, new CacheUnit(account.address, System.currentTimeMillis(), transactions));
+	public void putTransactions(Wallet wallet, Transaction[] transactions) {
+		cache.put(wallet.address, new CacheUnit(wallet.address, System.currentTimeMillis(), transactions));
 	}
 
 	private static class CacheUnit {

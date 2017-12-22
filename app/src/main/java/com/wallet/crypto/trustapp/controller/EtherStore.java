@@ -28,7 +28,7 @@ public class EtherStore {
     public EtherStore(String filesDir, Controller controller) {
         mController = controller;
         ks = new KeyStore(filesDir + "/keystore", Geth.LightScryptN, Geth.LightScryptP);
-        Log.d(TAG, "Created KeyStore with %s accounts".format(Long.toString(ks.getAccounts().size())));
+        Log.d(TAG, "Created KeyStore with %s wallets".format(Long.toString(ks.getAccounts().size())));
     }
 
     public static int getMinGasLimit() {

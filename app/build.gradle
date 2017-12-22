@@ -58,7 +58,7 @@ android {
 project.ext {
     retrofitVersion = "2.3.0"
     okhttpVersion = "3.9.0"
-    supportVersion = "27.0.1"
+    supportVersion = "27.0.2"
     web3jVersion = "3.1.1-android"
     gethVersion = "1.7.0"
     gsonVersion = "2.8.2"
@@ -88,10 +88,11 @@ dependencies {
     implementation "com.android.support:multidex:1.0.2"
     // Bar code scanning
     implementation "com.google.zxing:core:3.2.1"
-    implementation "com.google.android.gms:play-services-vision:11.6.0"
+    implementation "com.google.android.gms:play-services-vision:11.8.0"
     // Sugar
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
     implementation "com.github.apl-devs:appintro:v4.2.2"
+    implementation 'com.romandanylyk:pageindicatorview:1.0.0'
     implementation "com.journeyapps:zxing-android-embedded:3.2.0@aar"
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"

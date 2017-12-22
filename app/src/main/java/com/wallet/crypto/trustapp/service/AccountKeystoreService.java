@@ -1,6 +1,6 @@
 package com.wallet.crypto.trustapp.service;
 
-import com.wallet.crypto.trustapp.entity.Account;
+import com.wallet.crypto.trustapp.entity.Wallet;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -9,26 +9,27 @@ public interface AccountKeystoreService {
 	/**
 	 * Create account in keystore
 	 * @param password account password
-	 * @return new {@link Account}
+	 * @return new {@link Wallet}
 	 */
-	Single<Account> createAccount(String password);
+	Single<Wallet> createAccount(String password);
 
 	/**
 	 * Include new existing keystore
 	 * @param store store to include
 	 * @param password store password
-	 * @return included {@link Account} if success
+	 * @return included {@link Wallet} if success
 	 */
-	Single<Account> importStore(String store, String password);
+	Single<Wallet> importKeystore(String store, String password, String newPassword);
+    Single<Wallet> importPrivateKey(String privateKey, String newPassword);
 
 	/**
-	 * Export account to keystore
-	 * @param account account to export
-	 * @param password password from account
+	 * Export wallet to keystore
+	 * @param wallet wallet to export
+	 * @param password password from wallet
 	 * @param newPassword new password to store
 	 * @return store data
 	 */
-	Single<String> exportAccount(Account account, String password, String newPassword);
+	Single<String> exportAccount(Wallet wallet, String password, String newPassword);
 
 	/**
 	 * Delete account from keystore
@@ -39,15 +40,15 @@ public interface AccountKeystoreService {
 
 	/**
 	 * Sign transaction
-	 * @param signer {@link Account}
-	 * @param signerPassword password from {@link Account}
+	 * @param signer {@link Wallet}
+	 * @param signerPassword password from {@link Wallet}
 	 * @param toAddress transaction destination address
 	 * @param wei
 	 * @param nonce
 	 * @return sign data
 	 */
 	Single<byte[]> signTransaction(
-			Account signer,
+			Wallet signer,
 			String signerPassword,
 			String toAddress,
 			String wei,
@@ -56,13 +57,13 @@ public interface AccountKeystoreService {
 
 	/**
 	 * Check if there is an address in the keystore
-	 * @param address {@link Account} address
+	 * @param address {@link Wallet} address
 	 */
 	boolean hasAccount(String address);
 
 	/**
-	 * Return all {@link Account} from keystore
-	 * @return accounts
+	 * Return all {@link Wallet} from keystore
+	 * @return wallets
 	 */
-	Single<Account[]> fetchAccounts();
+	Single<Wallet[]> fetchAccounts();
 }

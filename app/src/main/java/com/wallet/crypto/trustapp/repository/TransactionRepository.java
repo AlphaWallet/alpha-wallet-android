@@ -1,6 +1,6 @@
 package com.wallet.crypto.trustapp.repository;
 
-import com.wallet.crypto.trustapp.entity.Account;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
@@ -39,14 +39,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(Account account) {
-		return transactionLocalSource.fetchTransaction(account)
+	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
+		return transactionLocalSource.fetchTransaction(wallet)
 				.onErrorResumeNext(Single
-						.fromObservable(blockExplorerClient.fetchTransactions(account.address))
+						.fromObservable(blockExplorerClient.fetchTransactions(wallet.address))
 						.lift(observer -> new DisposableSingleObserver<Transaction[]>() {
 							@Override
 							public void onSuccess(Transaction[] transactions) {
-								transactionLocalSource.putTransactions(account, transactions);
+								transactionLocalSource.putTransactions(wallet, transactions);
 								observer.onSuccess(transactions);
 							}
 
@@ -59,8 +59,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Maybe<Transaction> findTransaction(Account account, String transactionHash) {
-		return fetchTransaction(account)
+	public Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash) {
+		return fetchTransaction(wallet)
 				.flatMapMaybe(transactions -> {
 					for (Transaction transaction : transactions) {
 						if (transaction.hash.equals(transactionHash)) {
@@ -72,7 +72,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Completable createTransaction(Account from, String toAddress, String wei, String password) {
+	public Completable createTransaction(Wallet from, String toAddress, String wei, String password) {
 		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().infuraUrl));
 
 		return Single.fromCallable(() -> {

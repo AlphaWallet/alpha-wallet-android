@@ -3,26 +3,26 @@ package com.wallet.crypto.trustapp.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Account implements Parcelable {
+public class Wallet implements Parcelable {
     public final String address;
 
-	public Account(String address) {
+	public Wallet(String address) {
 		this.address = address;
 	}
 
-	private Account(Parcel in) {
+	private Wallet(Parcel in) {
 		address = in.readString();
 	}
 
-	public static final Creator<Account> CREATOR = new Creator<Account>() {
+	public static final Creator<Wallet> CREATOR = new Creator<Wallet>() {
 		@Override
-		public Account createFromParcel(Parcel in) {
-			return new Account(in);
+		public Wallet createFromParcel(Parcel in) {
+			return new Wallet(in);
 		}
 
 		@Override
-		public Account[] newArray(int size) {
-			return new Account[size];
+		public Wallet[] newArray(int size) {
+			return new Wallet[size];
 		}
 	};
 

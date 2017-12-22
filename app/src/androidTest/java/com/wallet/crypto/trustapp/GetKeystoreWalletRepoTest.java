@@ -5,7 +5,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import com.wallet.crypto.trustapp.entity.Account;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 
@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
-public class GetKeystoreAccountRepoTest {
+public class GetKeystoreWalletRepoTest {
 	static final String STORE_1 = "{\"address\":\"eb1a948c6cc57fedf9271626404fc04a74ddd1e6\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"6f6ba0b047f191f01df175255d0ef1eaf687905b3c22f9975d4cdec76f266d1e\",\"cipherparams\":{\"iv\":\"289195567cced5b5e6c8b18158c5f2ec\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"243df82bdd2569ecf5da25fd9db21cf5857be99ed64c7e664432f5ebef626ebe\"},\"mac\":\"87313234721b61a2c58b0d89f44847ea01df52c96fd5e3c8855efa0ecfd7ee06\"},\"id\":\"3cb467fc-7f98-435f-98e3-7f660e0368cc\",\"version\":3}";
 	static final String PASS_1 = "1234";
 	static final String ADDRESS_1 = "0xeb1a948c6cc57fedf9271626404fc04a74ddd1e6";
@@ -38,7 +38,7 @@ public class GetKeystoreAccountRepoTest {
 	}
 
 //	Single<byte[]> signTransaction(
-//			Account signer,
+//			Wallet signer,
 //			String signerPassword,
 //			String toAddress,
 //			String wei,
@@ -46,7 +46,7 @@ public class GetKeystoreAccountRepoTest {
 //			long chainId);
 	@Test
 	public void testCreateAccount() {
-		TestObserver<Account> subscriber = new TestObserver<>();
+		TestObserver<Wallet> subscriber = new TestObserver<>();
 		accountKeystoreService
 				.createAccount("1234")
 				.toObservable()
@@ -61,8 +61,8 @@ public class GetKeystoreAccountRepoTest {
 
 	@Test
 	public void testImportStore() {
-		TestObserver<Account> subscriber = accountKeystoreService
-				.importStore(STORE_1, PASS_1)
+		TestObserver<Wallet> subscriber = accountKeystoreService
+				.importKeystore(STORE_1, PASS_1)
 				.toObservable()
 				.test();
 		subscriber.awaitTerminalEvent();
@@ -85,7 +85,7 @@ public class GetKeystoreAccountRepoTest {
 				.test();
 		subscriber.awaitTerminalEvent();
 		subscriber.assertComplete();
-		TestObserver<Account[]> accountListSubscriber = accountList();
+		TestObserver<Wallet[]> accountListSubscriber = accountList();
 		accountListSubscriber.awaitTerminalEvent();
 		accountListSubscriber.assertComplete();
 		assertEquals(accountListSubscriber.valueCount(), 1);
@@ -94,11 +94,11 @@ public class GetKeystoreAccountRepoTest {
 
 	@Test
 	public void testFetchAccounts() {
-		List<Account> createdAccounts = new ArrayList<>();
+		List<Wallet> createdWallets = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
-			createdAccounts.add(createAccountStore());
+			createdWallets.add(createAccountStore());
 		}
-		TestObserver<Account[]> subscriber = accountKeystoreService
+		TestObserver<Wallet[]> subscriber = accountKeystoreService
 				.fetchAccounts()
 				.test();
 		subscriber.awaitTerminalEvent();
@@ -106,13 +106,13 @@ public class GetKeystoreAccountRepoTest {
 		assertEquals(subscriber.valueCount(), 1);
 		assertEquals(subscriber.values().get(0).length, 100);
 
-		Account[] accounts = subscriber.values().get(0);
+		Wallet[] wallets = subscriber.values().get(0);
 
 		for (int i = 0; i < 100; i++) {
-			assertTrue(createdAccounts.get(i).sameAddress(accounts[i].address));
+			assertTrue(createdWallets.get(i).sameAddress(wallets[i].address));
 		}
-		for (Account account : createdAccounts) {
-			deleteAccountStore(account.address, PASS_1);
+		for (Wallet wallet : createdWallets) {
+			deleteAccountStore(wallet.address, PASS_1);
 		}
 	}
 
@@ -120,7 +120,7 @@ public class GetKeystoreAccountRepoTest {
 	public void testExportAccountStore() {
 		importAccountStore(STORE_1, PASS_1);
 		TestObserver<String> subscriber = accountKeystoreService
-				.exportAccount(new Account(ADDRESS_1), PASS_1, PASS_1)
+				.exportAccount(new Wallet(ADDRESS_1), PASS_1, PASS_1)
 				.test();
 		subscriber.awaitTerminalEvent();
 		subscriber.assertComplete();
@@ -136,15 +136,15 @@ public class GetKeystoreAccountRepoTest {
 		deleteAccountStore(ADDRESS_1, PASS_1);
 	}
 
-	private TestObserver<Account[]> accountList() {
+	private TestObserver<Wallet[]> accountList() {
 		return accountKeystoreService
 				.fetchAccounts()
 				.test();
 	}
 
 	private void importAccountStore(String store, String password) {
-		TestObserver<Account> subscriber = accountKeystoreService
-				.importStore(store, password)
+		TestObserver<Wallet> subscriber = accountKeystoreService
+				.importKeystore(store, password)
 				.toObservable()
 				.test();
 		subscriber.awaitTerminalEvent();
@@ -159,8 +159,8 @@ public class GetKeystoreAccountRepoTest {
 				.awaitTerminalEvent();
 	}
 
-	private Account createAccountStore() {
-		TestObserver<Account> subscriber = new TestObserver<>();
+	private Wallet createAccountStore() {
+		TestObserver<Wallet> subscriber = new TestObserver<>();
 		accountKeystoreService
 				.createAccount("1234")
 				.toObservable()

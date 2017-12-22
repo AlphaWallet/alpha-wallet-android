@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.controller.Controller;
-import com.wallet.crypto.trustapp.repository.AccountRepository;
-import com.wallet.crypto.trustapp.repository.AccountRepositoryType;
+import com.wallet.crypto.trustapp.repository.WalletRepository;
+import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
@@ -18,8 +18,6 @@ import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.BlockExplorerClient;
 import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
-
-import java.io.File;
 
 import javax.inject.Singleton;
 
@@ -52,11 +50,11 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AccountRepositoryType provideAccountRepository(
+    WalletRepositoryType provideAccountRepository(
 			PreferenceRepositoryType preferenceRepositoryType,
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository) {
-		return new AccountRepository(preferenceRepositoryType, accountKeystoreService, networkRepository);
+		return new WalletRepository(preferenceRepositoryType, accountKeystoreService, networkRepository);
 	}
 
 	@Singleton

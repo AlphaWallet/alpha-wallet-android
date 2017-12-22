@@ -47,8 +47,8 @@ public class WarningBackupActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 new AlertDialog.Builder(WarningBackupActivity.this)
-                        .setTitle(getString(R.string.title_watchout))
-                        .setMessage(getString(R.string.unrecoverable_message))
+                        .setTitle(getString(R.string.title_dialog_watch_out))
+                        .setMessage(getString(R.string.dialog_message_unrecoverable_message))
                         .setIcon(R.drawable.ic_warning_black_24dp)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 

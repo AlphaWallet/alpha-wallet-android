@@ -6,9 +6,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -47,13 +44,18 @@
     </style>
 
     <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
-        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+        <item name="tabTextAppearance">@style/TabDarkTextAppearance</item>
         <item name="tabSelectedTextColor">@android:color/white</item>
     </style>
 
-    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+    <style name="TabDarkTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/semitransparentWhite</item>
+        <item name="textAllCaps">true</item>
+    </style>
+    <style name="TabLightTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="textAllCaps">true</item>
     </style>
 

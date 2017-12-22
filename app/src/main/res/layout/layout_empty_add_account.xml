@@ -1,36 +1,43 @@
 <LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:orientation="vertical"
-	android:background="@color/white"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	>
-
-	<ImageView
-		app:srcCompat="@drawable/splash_background"
-		android:layout_gravity="center_horizontal"
-		android:layout_width="128dp"
-		android:layout_height="128dp"
-		/>
-
-	<TextView
-		android:id="@+id/backup_title"
-		android:text="@string/title_add_account"
-		android:textSize="24sp"
-		android:textColor="@color/title"
-		android:fontFamily="@font/roboto_regular"
-		android:gravity="center_vertical"
-		android:layout_gravity="center_horizontal"
-		android:layout_width="wrap_content"
-		android:layout_height="56dp"
-		/>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:attrs="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <android.support.v4.view.ViewPager
+            android:id="@+id/intro"
+            android:layout_width="match_parent"
+            android:layout_height="340dp"
+            />
+        <com.rd.PageIndicatorView
+            android:id="@+id/pageIndicatorView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            app:piv_animationType="scale"
+            app:piv_dynamicCount="true"
+            app:piv_interactiveAnimation="true"
+            app:piv_selectedColor="@color/colorPrimaryDark"
+            app:piv_unselectedColor="@color/colorPrimaryDark"
+            app:piv_viewPager="@id/intro"
+            attrs:piv_padding="12dp"
+            attrs:piv_radius="8dp"
+            />
+    </FrameLayout>
 	<Button
 		android:id="@+id/new_account_action"
 		android:text="@string/action_create_new_account"
 		android:layout_gravity="center_horizontal"
-		android:layout_marginStart="8dp"
-		android:layout_marginEnd="8dp"
+		android:layout_marginTop="@dimen/big_margin"
+		android:layout_marginStart="@dimen/normal_margin"
+		android:layout_marginEnd="@dimen/normal_margin"
 		android:layout_width="220dp"
 		android:layout_height="wrap_content"
 		style="@style/Widget.AppCompat.Button.Colored"
@@ -40,8 +47,9 @@
 		android:text="@string/already_have_account"
 		android:gravity="center_horizontal|center_vertical"
 		android:layout_gravity="center_horizontal"
-		android:layout_marginStart="8dp"
-		android:layout_marginEnd="8dp"
+        android:layout_marginTop="@dimen/normal_margin"
+		android:layout_marginStart="@dimen/normal_margin"
+		android:layout_marginEnd="@dimen/normal_margin"
 		android:layout_width="220dp"
 		android:layout_height="wrap_content"
 		style="@style/Widget.AppCompat.Button"

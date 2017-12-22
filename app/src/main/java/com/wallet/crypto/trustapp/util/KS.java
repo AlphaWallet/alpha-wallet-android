@@ -25,8 +25,10 @@ import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -304,5 +306,12 @@ class KS {
 		} else {
 			Log.e(TAG, "showAuthenticationScreen: context is not activity!");
 		}
+	}
+
+    public static String generatePassword() {
+		byte bytes[] = new byte[256];
+		SecureRandom random = new SecureRandom();
+		random.nextBytes(bytes);
+		return String.valueOf(bytes);
 	}
 }

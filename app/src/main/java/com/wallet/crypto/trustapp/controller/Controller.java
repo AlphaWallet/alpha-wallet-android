@@ -67,7 +67,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -360,9 +359,8 @@ public class Controller {
 
     public void clickImportPrivateKey(Activity activity, String privateKey, OnTaskCompleted listener) {
         Log.d(TAG, "Import account by private key");
-        final String password = Controller.generatePassphrase();
 
-        new ImportPrivateKeyTask(activity, privateKey, password, listener).execute();
+        new ImportPrivateKeyTask(activity, privateKey, listener).execute();
     }
 
     public void clickSend(String from, String to, String ethAmount, String gasLimit, String gasPrice, OnTaskCompleted listener) throws ServiceErrorException {
@@ -537,10 +535,6 @@ public class Controller {
         return mNetworks;
     }
 
-    public static String generatePassphrase() {
-        return UUID.randomUUID().toString();
-    }
-
     public String getVersion() {
         String version = "N/A";
         try {
@@ -697,14 +691,12 @@ public class Controller {
     private class ImportPrivateKeyTask extends AsyncTask<Void, Void, Void> {
 
         private final String privateKey;
-        private final String password;
         private final OnTaskCompleted listener;
         private ProgressDialog dialog;
 
 
-        public ImportPrivateKeyTask(Activity activity, String privateKey, String password, OnTaskCompleted listener) {
+        public ImportPrivateKeyTask(Activity activity, String privateKey, OnTaskCompleted listener) {
             this.privateKey = privateKey;
-            this.password = password;
             this.listener = listener;
             dialog = new ProgressDialog(activity);
             dialog.setCancelable(false);
@@ -726,6 +718,7 @@ public class Controller {
         protected Void doInBackground(Void... params) {
             //android.os.Process.setThreadPriority(Thread.MAX_PRIORITY);
             String keystore = "";
+            final String password = KS.generatePassword();
             try {
                 keystore = EtherStoreUtils.convertPrivateKeyToKeystoreJson(privateKey, password);
             } catch (Exception e) {

@@ -64,7 +64,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
 	private void onCreateAccount() {
-		final String generatedPassphrase = Controller.generatePassphrase();
+		final String generatedPassphrase = KS.generatePassword();
 		try {
 			mController.clickCreateAccount(CreateAccountActivity.this, "account name", generatedPassphrase);
 		} catch (Exception e) {

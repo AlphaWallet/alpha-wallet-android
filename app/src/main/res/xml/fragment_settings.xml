@@ -40,10 +40,9 @@
             android:key="pref_community_links" >
 
             <Preference
+                android:key="pref_twitter"
                 android:title="@string/twitter"
                 android:icon="@mipmap/settings_twitter">
-                <intent android:action="android.intent.action.VIEW"
-                    android:data="https://twitter.com/trustwalletapp" />
 
             </Preference>
 

@@ -53,6 +53,26 @@ public class SettingsFragment extends PreferenceFragment
             }
         });
 
+        final Preference twitter = findPreference("pref_twitter");
+
+        twitter.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+            	Intent intent;
+                try {
+                    // get the Twitter app if possible
+                    getActivity().getPackageManager().getPackageInfo("com.twitter.android", 0);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("twitter://user?user_id=911011433147654144"));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                } catch (Exception e) {
+                    // no Twitter app, revert to browser
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/trustwalletapp"));
+                }
+                startActivity(intent);
+                return false;
+            }
+        });
+
         final Preference export = findPreference("pref_export");
 
         export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

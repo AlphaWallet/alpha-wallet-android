@@ -10,3 +10,19 @@ Trust - Ethereum wallet is built with security and ease of use in mind. We provi
 - Enjoy intuitive an interface
 
 If you’re having issues with the app, or wish to provide feedback, please send us an email at support@trustwalletapp.com or contact our community from within the app itself.
+
+What are cryptocurrencies?
+
+Cryptocurrencies are like fiat currencies such as US Dollars or British Pounds in that they are a store of value and can be used for trading. Unlike these fiat currencies they rely on cryptographic (hence crypto) algorithms to distribute the mechanism for transactions among a trustless network of peers. The network keeps tracks and verifies a distributed ledger - a record of transactions also known as a blockchain. This mechanism is secure by design so long as the majority of peers in the network are honest. The trustless nature of the blockchain reduces the necessity for centralized financial services as the user can interact with the network directly.
+
+What is a cryptocurrency wallet?
+
+A blockchain hold a distributed record of transactions. Transaction occur between account on the network to their associated address. In order for a transaction form one account to another to occur, it must be signed by a private key - a statistically-impossible-to-guess string of characters. It is the wallet's job to keep this private key secure. Usually this means securely encrypting the private key with a passphrase and a strong encryption algorithm. One can store this information on a piece of paper, but it's inconvenient. In the case of trust we will take "wallet" to mean a application which stores the private key and allows transacting on the chosen network. Some wallets similar to Trust are myetherwallet, Jaxx and Trezor.
+
+Why Ethereum?
+
+Ethereum (ETH) is a popular cryptocurrency similar to bitcoin (BTC), litecoin (LTC). Unlike those currencies Ethereum introduces the concept of a "generic blockchain" via smart contracts. Instead of just sending and receiving a single cryptocurrency (ether), on Ethereum one can run arbitrary code (distributed application or DApp) which executes on the network. If you're not excited yet, you should read that again. These smart contracts can perform all sorts of functions from acting as insurance brokers to exchanging digital assets (e.g. tokens and cryptokittens). What makes Ethereum exciting is that its value grows together with the value of its smart contracts.
+
+What are tokens and ICOs?
+
+One particular example of a smart contract is a token contract. It is used in ICOs (initial coin offerring) to allow its users to buy a stake in a project. The stake is measured in tokens - similar to shares. The ERC20 standard defines the interface to a token contract which allows the transfer of tokens, balance checking and total supply.

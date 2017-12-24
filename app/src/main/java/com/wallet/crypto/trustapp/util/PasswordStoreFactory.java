@@ -8,6 +8,8 @@ import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.pwd.trustapp.PasswordManager;
 
+import java.security.SecureRandom;
+
 public class PasswordStoreFactory {
 	public static void put(Context context, String address, String password) throws ServiceErrorException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -37,5 +39,12 @@ public class PasswordStoreFactory {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			KS.showAuthenticationScreen(context, unlockScreenRequest);
 		}
+	}
+
+	public static String generatePassword() {
+		byte bytes[] = new byte[256];
+		SecureRandom random = new SecureRandom();
+		random.nextBytes(bytes);
+		return String.valueOf(bytes);
 	}
 }

@@ -66,6 +66,11 @@
                 android:title="@string/title_rate" />
 
             <Preference
+                android:key="pref_email"
+                android:icon="@mipmap/settings_email"
+                android:title="@string/title_email" />
+
+            <Preference
                 android:key="pref_donate"
                 android:icon="@mipmap/settings_donate"
                 android:title="@string/title_donate">

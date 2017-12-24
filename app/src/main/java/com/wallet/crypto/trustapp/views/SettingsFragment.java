@@ -42,6 +42,22 @@ public class SettingsFragment extends PreferenceFragment
             }
         });
 
+        final Preference email = findPreference("pref_email");
+
+        email.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                Intent mailto = new Intent(Intent.ACTION_SEND);
+                mailto.setType("message/rfc822") ; // use from live device
+                mailto.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@trustwalletapp.com"});
+                mailto.putExtra(Intent.EXTRA_SUBJECT,"Android support question");
+                mailto.putExtra(Intent.EXTRA_TEXT,"Dear Trust support,");
+                startActivity(Intent.createChooser(mailto, "Select email application."));
+                return true;
+            }
+        });
+
         final Preference donate = findPreference("pref_donate");
 
         donate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

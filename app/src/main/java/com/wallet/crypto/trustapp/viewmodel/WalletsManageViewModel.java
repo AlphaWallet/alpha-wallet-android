@@ -120,12 +120,12 @@ public class WalletsManageViewModel extends BaseViewModel {
     }
 
     private void onExportError(Throwable throwable) {
-        Crashlytics.getInstance().core.logException(throwable);
+        Crashlytics.logException(throwable);
         exportWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
     }
 
     private void onCreateWalletError(Throwable throwable) {
-        Crashlytics.getInstance().core.logException(throwable);
+        Crashlytics.logException(throwable);
         createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
 	}
 

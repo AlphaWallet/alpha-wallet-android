@@ -82,7 +82,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
                 eth = Controller.WeiToEth(wei, 5);
                 Log.d(TAG, eth);
             } catch (Exception e) {
-                Log.e(TAG, "Error WeiToEth");
+                Log.e(TAG, "Error weiToEth");
             }
 
             if (!eth.equals("0")) {

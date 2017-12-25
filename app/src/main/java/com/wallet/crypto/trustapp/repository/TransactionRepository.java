@@ -73,7 +73,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Completable createTransaction(Wallet from, String toAddress, String wei, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().infuraUrl));
+		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return Single.fromCallable(() -> {
 			EthGetTransactionCount ethGetTransactionCount = web3j

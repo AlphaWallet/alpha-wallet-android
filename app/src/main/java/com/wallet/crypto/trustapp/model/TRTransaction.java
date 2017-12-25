@@ -25,7 +25,7 @@ import java.util.List;
 	"operations": [{
 		"_id": "5a14702affc4db9cf17c17ee",
 		"transactionId": "0xd3efa659f5968c0b16e038e00add96eeb10dc1e2baaf3d493d3b23df63985ffa",
-		"type": "token_transfer",
+		"viewType": "token_transfer",
 		"from": "0x0122374ddd61ebdbe487f27225c8d55a96688714",
 		"to": "0xaa3cc54d7f10fa3a1737e4997ba27c34f330ce16",
 		"value": "1000000000000000000",
@@ -47,7 +47,7 @@ import java.util.List;
 		"contract": "0xab95e915c123fded5bdfb6325e35ef5515f1ea69",
 		"to": "0xaa3cc54d7f10fa3a1737e4997ba27c34f330ce16",
 		"from": "0x0122374ddd61ebdbe487f27225c8d55a96688714",
-		"type": "token_transfer",
+		"viewType": "token_transfer",
 		"title": "Transfer XNN"
 	}],
 	"id": "0xd3efa659f5968c0b16e038e00add96eeb10dc1e2baaf3d493d3b23df63985ffa"

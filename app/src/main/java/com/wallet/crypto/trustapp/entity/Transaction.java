@@ -3,10 +3,15 @@ package com.wallet.crypto.trustapp.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Arrays;
+
 public class Transaction implements Parcelable {
-    public final String blockNumber;
-    public final String timeStamp;
+    @SerializedName("_id")
     public final String hash;
+    public final String blockNumber;
+    public final long timeStamp;
     public final String nonce;
     public final String blockHash;
     public final String transactionIndex;
@@ -21,10 +26,11 @@ public class Transaction implements Parcelable {
     public final String cumulativeGasUsed;
     public final String gasUsed;
     public final String confirmations;
+    public final TransactionOperation[] operations;
 
 	public Transaction(
 			String blockNumber,
-			String timeStamp,
+			long timeStamp,
 			String hash,
 			String nonce,
 			String blockHash,
@@ -39,7 +45,8 @@ public class Transaction implements Parcelable {
 			String contractAddress,
 			String cumulativeGasUsed,
 			String gasUsed,
-			String confirmations) {
+			String confirmations,
+            TransactionOperation[] operations) {
 		this.blockNumber = blockNumber;
 		this.timeStamp = timeStamp;
 		this.hash = hash;
@@ -57,11 +64,12 @@ public class Transaction implements Parcelable {
 		this.cumulativeGasUsed = cumulativeGasUsed;
 		this.gasUsed = gasUsed;
 		this.confirmations = confirmations;
+		this.operations = operations;
 	}
 
 	protected Transaction(Parcel in) {
 		blockNumber = in.readString();
-		timeStamp = in.readString();
+		timeStamp = in.readLong();
 		hash = in.readString();
 		nonce = in.readString();
 		blockHash = in.readString();
@@ -77,6 +85,12 @@ public class Transaction implements Parcelable {
 		cumulativeGasUsed = in.readString();
 		gasUsed = in.readString();
 		confirmations = in.readString();
+        Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
+        TransactionOperation[] operations = null;
+        if (parcelableArray != null) {
+            operations = Arrays.copyOf(parcelableArray, parcelableArray.length, TransactionOperation[].class);
+        }
+		this.operations = operations;
 	}
 
 	public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
@@ -99,7 +113,7 @@ public class Transaction implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(blockNumber);
-		dest.writeString(timeStamp);
+		dest.writeLong(timeStamp);
 		dest.writeString(hash);
 		dest.writeString(nonce);
 		dest.writeString(blockHash);
@@ -115,5 +129,6 @@ public class Transaction implements Parcelable {
 		dest.writeString(cumulativeGasUsed);
 		dest.writeString(gasUsed);
 		dest.writeString(confirmations);
+		dest.writeParcelableArray(operations, flags);
 	}
 }

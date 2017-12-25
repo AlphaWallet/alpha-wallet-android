@@ -85,7 +85,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Controller {
 	public static final String ETHEREUM = "Ethereum";
-	public static final String POA = "POA Network";
+	public static final String POA = "POA_NETWORK_NAME Network";
 	public static final String KOVAN = "Kovan (Test)";
 	public static final String ROPSTEN = "Ropsten (Test)";
 
@@ -160,8 +160,8 @@ public class Controller {
 
         mNetworks.add(new VMNetwork(ETHEREUM, "ETH", "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://api.trustwalletapp.com/",
                 "https://etherscan.io/", "ethereum", 1, false));
-        mNetworks.add(new VMNetwork(POA, "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99, true));
-        //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
+        mNetworks.add(new VMNetwork(POA, "POA_NETWORK_NAME", "https://core.poa.defaultNetwork", "https://poa.trustwalletapp.com", null, "poa", 99, true));
+        //mNetworks.add(new VMNetwork("POA_NETWORK_NAME Network (Test)", "POA_NETWORK_NAME", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
         mNetworks.add(new VMNetwork(KOVAN, "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42, true));
         mNetworks.add(new VMNetwork(ROPSTEN, "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3, true));
 

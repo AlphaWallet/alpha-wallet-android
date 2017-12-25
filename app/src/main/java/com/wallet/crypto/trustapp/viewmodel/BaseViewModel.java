@@ -10,6 +10,7 @@ import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 
+import io.fabric.sdk.android.Fabric;
 import io.reactivex.disposables.Disposable;
 
 public class BaseViewModel extends ViewModel {
@@ -38,7 +39,7 @@ public class BaseViewModel extends ViewModel {
 	}
 
 	protected void onError(Throwable throwable) {
-        Crashlytics.getInstance().core.logException(throwable);
+        Crashlytics.logException(throwable);
 		if (throwable instanceof ServiceException) {
 			error.setValue(((ServiceException) throwable).error);
 		} else {

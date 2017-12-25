@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
     <item
-        android:id="@+id/action_deposit"
-        android:icon="@drawable/ic_attach_money_white_24dp"
-        android:title="@string/action_buy"
-        android:orderInCategory="80"
-        app:showAsAction="always"/>
-
-    <item
-        android:id="@+id/action_select_account"
-        android:icon="@drawable/ic_swap_horiz_white_24dp"
+        android:id="@+id/action_wallets"
         android:title="@string/action_select_account"
-        android:orderInCategory="90"
-        app:showAsAction="never"/>
-
+        android:orderInCategory="30"
+        app:showAsAction="ifRoom"
+        />
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:orderInCategory="20"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="always"
+        />
 </menu>

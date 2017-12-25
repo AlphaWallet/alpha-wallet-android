@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.App;
 import com.wallet.crypto.trustapp.repository.KSPasswordStore;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
+import com.wallet.crypto.trustapp.util.LogInterceptor;
 
 import javax.inject.Singleton;
 
@@ -14,7 +15,7 @@ import dagger.Provides;
 import okhttp3.OkHttpClient;
 
 @Module
-public class ToolsModule {
+class ToolsModule {
 	@Provides
 	Context provideContext(App application) {
 		return application.getApplicationContext();
@@ -29,7 +30,9 @@ public class ToolsModule {
 	@Singleton
 	@Provides
 	OkHttpClient okHttpClient() {
-		return new OkHttpClient();
+		return new OkHttpClient.Builder()
+                .addInterceptor(new LogInterceptor())
+                .build();
 	}
 
 	@Singleton

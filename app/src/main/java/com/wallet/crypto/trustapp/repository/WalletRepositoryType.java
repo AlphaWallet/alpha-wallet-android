@@ -22,5 +22,5 @@ public interface WalletRepositoryType {
 	Completable setDefaultWallet(Wallet wallet);
 	Single<Wallet> getDefaultWallet();
 
-	Maybe<BigInteger> ballanceInWei(Wallet wallet);
+	Single<BigInteger> ballanceInWei(Wallet wallet);
 }

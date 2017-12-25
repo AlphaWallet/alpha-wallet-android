@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.web3j.crypto.Wallet.create;
 
@@ -90,11 +91,12 @@ public class WalletRepository implements WalletRepositoryType {
 	}
 
 	@Override
-	public Maybe<BigInteger> ballanceInWei(Wallet wallet) {
-		return Maybe.fromCallable(() -> Web3jFactory
-					.build(new HttpService(networkRepository.getDefaultNetwork().infuraUrl))
+	public Single<BigInteger> ballanceInWei(Wallet wallet) {
+		return Single.fromCallable(() -> Web3jFactory
+					.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
 					.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
 					.send()
-					.getBalance());
+					.getBalance())
+                .subscribeOn(Schedulers.io());
 	}
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.controller.Controller;
+import com.wallet.crypto.trustapp.service.CoinmarketcapTickerService;
 import com.wallet.crypto.trustapp.repository.WalletRepository;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
@@ -18,6 +19,7 @@ import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.BlockExplorerClient;
 import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
+import com.wallet.crypto.trustapp.service.TickerService;
 
 import javax.inject.Singleton;
 
@@ -43,9 +45,17 @@ public class RepositoriesModule {
 	}
 
 	@Singleton
+    @Provides
+    TickerService provideTickerService(OkHttpClient httpClient, Gson gson) {
+	    return new CoinmarketcapTickerService(httpClient, gson);
+    }
+
+	@Singleton
 	@Provides
-	EthereumNetworkRepositoryType provideEthereumNetworkRepository(PreferenceRepositoryType preferenceRepository) {
-		return new EthereumNetworkRepository(preferenceRepository);
+	EthereumNetworkRepositoryType provideEthereumNetworkRepository(
+            PreferenceRepositoryType preferenceRepository,
+            TickerService tickerService) {
+		return new EthereumNetworkRepository(preferenceRepository, tickerService);
 	}
 
 	@Singleton

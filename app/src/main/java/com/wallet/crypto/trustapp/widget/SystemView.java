@@ -83,6 +83,9 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 	}
 
 	public void showProgress(boolean shouldShow) {
+	    if (shouldShow && swipeRefreshLayout != null && swipeRefreshLayout.isRefreshing()) {
+	        return;
+        }
 		if (shouldShow) {
 			if (swipeRefreshLayout != null
 					&& recyclerView != null

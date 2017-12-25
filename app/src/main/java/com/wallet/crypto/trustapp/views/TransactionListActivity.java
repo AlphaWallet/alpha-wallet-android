@@ -291,7 +291,7 @@ public class TransactionListActivity extends AppCompatActivity {
             case R.id.action_deposit:
                 mController.depositMoney(this);
                 break;
-            case R.id.action_select_account:
+            case R.id.action_wallets:
                 mController.navigateToAccountList(this);
                 break;
             case R.id.action_settings:

@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 {
     "_id": "5a14702affc4db9cf17c17ee",
     "transactionId": "0xd3efa659f5968c0b16e038e00add96eeb10dc1e2baaf3d493d3b23df63985ffa",
-    "type": "token_transfer",
+    "viewType": "token_transfer",
     "from": "0x0122374ddd61ebdbe487f27225c8d55a96688714",
     "to": "0xaa3cc54d7f10fa3a1737e4997ba27c34f330ce16",
     "value": "1000000000000000000",
@@ -30,7 +30,7 @@ public class TROperation {
     @SerializedName("transactionId")
     private String transactionId;
 
-    @SerializedName("type")
+    @SerializedName("viewType")
     private String type;
 
     @SerializedName("from")

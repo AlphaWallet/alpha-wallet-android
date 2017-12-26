@@ -80,9 +80,14 @@
             android:name=".views.TokenListActivity"
             android:label="@string/title_activity_token_list"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".views.CustomPinActivity" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="74d3fa8b5038a154c0c05555d27112a0d4a80d68" />
+
     </application>
 
 </manifest>

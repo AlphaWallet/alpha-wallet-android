@@ -36,6 +36,18 @@
         </PreferenceCategory>
 
         <PreferenceCategory
+            android:title="Security"
+            android:key="pref_security" >
+
+            <SwitchPreference
+                android:key="pref_pincode"
+                android:title="Pincode"
+                android:icon="@mipmap/settings_lock">
+            </SwitchPreference>
+
+        </PreferenceCategory>
+
+        <PreferenceCategory
             android:title="@string/title_community"
             android:key="pref_community_links" >
 

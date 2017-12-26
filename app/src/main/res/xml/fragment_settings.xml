@@ -41,7 +41,7 @@
 
             <SwitchPreference
                 android:key="pref_pincode"
-                android:title="Pincode"
+                android:title="@string/title_pincode"
                 android:icon="@mipmap/settings_lock">
             </SwitchPreference>
 

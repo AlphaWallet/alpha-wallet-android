@@ -36,7 +36,7 @@
         </PreferenceCategory>
 
         <PreferenceCategory
-            android:title="Security"
+            android:title="@string/title_security"
             android:key="pref_security" >
 
             <SwitchPreference

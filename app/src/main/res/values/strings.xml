@@ -71,6 +71,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_community">Community</string>
+    <string name="title_security">Security</string>
     <string name="title_opensource">Open source development</string>
     <string name="title_source_code">Source code</string>
     <string name="title_report_bug">Report a bug</string>

@@ -78,4 +78,19 @@ dependencies {
     compile('com.crashlytics.sdk.android:answers:1.4.1@aar') {
         transitive = true;
     }
+    // Pincode Lollipin
+    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
+        transitive = true
+    }
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '26.1.0'
+            }
+        }
+    }
 }

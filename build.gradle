@@ -21,6 +21,10 @@ allprojects {
             url 'https://maven.google.com/'
             name 'Google'
         }
+        // needed for pincode Lollipin
+        maven {
+            url "https://github.com/omadahealth/omada-nexus/raw/master/release"
+        }
     }
 }
 

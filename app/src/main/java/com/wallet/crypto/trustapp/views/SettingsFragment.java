@@ -10,6 +10,8 @@ import android.preference.Preference;
 //import android.preference.PreferenceFragment;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.SwitchPreference;
+import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
@@ -88,6 +90,21 @@ public class SettingsFragment extends PreferenceFragment
                 return false;
             }
         });
+
+        final SwitchPreference pinCode = (SwitchPreference) findPreference("pref_pincode");
+        pinCode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                final boolean enable = !((SwitchPreference) preference).isChecked();
+                if (enable) {
+                    // TODO: enable pin code
+                } else {
+                    // TODO: disable pin code
+                }
+                return true;
+            }
+        });
+
 
         final Preference export = findPreference("pref_export");
 

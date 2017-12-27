@@ -43,7 +43,7 @@ import static com.wallet.crypto.trustapp.controller.ServiceErrorException.KEY_ST
 import static com.wallet.crypto.trustapp.controller.ServiceErrorException.USER_NOT_AUTHENTICATED;
 
 @TargetApi(23)
-class KS {
+public class KS {
 	private static final String TAG = "KS";
 
 	private static final String ANDROID_KEY_STORE = "AndroidKeyStore";

@@ -1,8 +1,10 @@
 package com.wallet.crypto.trustapp.ui.widget.holder;
 
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +47,9 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
 
-        typeIcon.setColorFilter(getContext().getColor(R.color.item_icon_tint));
+        typeIcon.setColorFilter(
+                ContextCompat.getColor(getContext(), R.color.item_icon_tint),
+                PorterDuff.Mode.SRC_ATOP);
 
         itemView.setOnClickListener(this);
     }
@@ -90,7 +94,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
         }
         address.setText(isSent ? to : from);
-        value.setTextColor(getContext().getColor(isSent ? R.color.red : R.color.green));
+        value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
 
         if (valueStr.equals("0")) {
             valueStr = "0 " + symbol;

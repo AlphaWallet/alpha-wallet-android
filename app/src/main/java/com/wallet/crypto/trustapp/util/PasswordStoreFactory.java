@@ -1,11 +1,9 @@
 package com.wallet.crypto.trustapp.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
-import com.wallet.crypto.trustapp.views.TransactionListActivity;
 import com.wallet.pwd.trustapp.PasswordManager;
 
 public class PasswordStoreFactory {

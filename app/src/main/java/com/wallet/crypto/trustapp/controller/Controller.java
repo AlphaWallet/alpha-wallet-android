@@ -28,10 +28,8 @@ import com.wallet.crypto.trustapp.model.TRTransaction;
 import com.wallet.crypto.trustapp.model.TRTransactionListResponse;
 import com.wallet.crypto.trustapp.model.VMAccount;
 import com.wallet.crypto.trustapp.model.VMNetwork;
-import com.wallet.crypto.trustapp.util.KS;
-import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
-import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
-import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
+import com.wallet.crypto.trustapp.views.AccountListActivity;
 import com.wallet.crypto.trustapp.views.CreateAccountActivity;
 import com.wallet.crypto.trustapp.views.ImportAccountActivity;
 import com.wallet.crypto.trustapp.views.RequestActivity;
@@ -85,7 +83,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Controller {
 	public static final String ETHEREUM = "Ethereum";
-	public static final String POA = "POA_NETWORK_NAME Network";
+	public static final String POA = "POA Network";
 	public static final String KOVAN = "Kovan (Test)";
 	public static final String ROPSTEN = "Ropsten (Test)";
 
@@ -376,7 +374,7 @@ public class Controller {
         try {
 	        String wei = EthToWei(ethAmount);
 //            String password = PasswordManager.getPassword(from, mAppContext);
-	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        String password = new String(PasswordStoreFactory.get(mAppContext, from.toLowerCase()));
 	        new SendTransactionTask(from, to, wei, gasLimit, gasPrice, password, null, listener).execute();
         } catch (ServiceErrorException ex) {
 	        Log.e(TAG, "Error sending transaction: ", ex);
@@ -401,7 +399,7 @@ public class Controller {
 	        byte[] data = Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
 
 //            String password = PasswordManager.getPassword(from, mAppContext);
-	        String password = new String(KS.get(mAppContext, from.toLowerCase()));
+	        String password = new String(PasswordStoreFactory.get(mAppContext, from.toLowerCase()));
 	        new SendTransactionTask(from, contractAddress, "0", gasLimit, gasPrice, password, data, listener).execute();
         } catch (ServiceErrorException ex) {
         	throw ex;
@@ -417,7 +415,7 @@ public class Controller {
 	    try {
 		    Account account = mEtherStore.createAccount(password);
 		    address = account.getAddress().getHex().toLowerCase();
-		    KS.put(mAppContext, address, password);
+		    PasswordStoreFactory.put(mAppContext, address, password);
 		    result = new VMAccount(address, "0");
 		    return result;
 	    } finally {
@@ -483,7 +481,7 @@ public class Controller {
 
     public void deleteAccount(String address) throws Exception {
 //        String password = PasswordManager.getPassword(address, mAppContext);
-	    String password = new String(KS.get(mAppContext, address.toLowerCase()));
+	    String password = new String(PasswordStoreFactory.get(mAppContext, address.toLowerCase()));
         mEtherStore.deleteAccount(address, password);
         loadAccounts();
         if (address.equals(mPreferences.getCurrentWalletAddress())) {
@@ -502,7 +500,7 @@ public class Controller {
     public String exportAccount(String address, String newPassword) throws ServiceErrorException {
         try {
 	        Account account = mEtherStore.getAccount(address);
-	        String accountPassword = new String(KS.get(mAppContext, address.toLowerCase()));
+	        String accountPassword = new String(PasswordStoreFactory.get(mAppContext, address.toLowerCase()));
 	        return mEtherStore.exportAccount(account, accountPassword, newPassword);
         } catch (ServiceErrorException ex) {
         	throw ex;
@@ -554,7 +552,7 @@ public class Controller {
         return version;
     }
 
-    public void depositMoney(Context context) {
+    public void depositMoney(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.title_deposit);
 
@@ -579,7 +577,7 @@ public class Controller {
         }
 
         //list of items
-        String[] items = depositOptions.toArray(new String[names.size()]);
+        final String[] items = depositOptions.toArray(new String[names.size()]);
         builder.setSingleChoiceItems(items, 0,
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -605,7 +603,7 @@ public class Controller {
                             url = url.replace("{cryptoCurrency}", getCurrentNetwork().getSymbol());
 
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            mAppContext.startActivity(browserIntent);
+                            context.startActivity(browserIntent);
                         }
                     }
                 });
@@ -764,7 +762,7 @@ public class Controller {
             try {
 	            Account account = mEtherStore.importKeyStore(keystoreJson, password);
 	            address = account.getAddress().getHex().toLowerCase();
-	            KS.put(mAppContext, address, password);
+	            PasswordStoreFactory.put(mAppContext, address, password);
 	            loadAccounts();
 	            Log.d("INFO", "Imported account: " + account.getAddress().getHex());
 	            listener.onTaskCompleted(new TaskResult(TaskStatus.SUCCESS, "Imported wallet."));
@@ -925,7 +923,7 @@ public class Controller {
                             mEthTicker = tickers.get(0);
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, e.getLocalizedMessage());
+                        Log.e(TAG, "Err:", e);
                     }
                 }
 

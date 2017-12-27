@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -29,13 +30,11 @@ import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.controller.TaskResult;
-import com.wallet.crypto.trustapp.model.ESTransaction;
-import com.wallet.crypto.trustapp.model.TRContract;
 import com.wallet.crypto.trustapp.model.TROperation;
 import com.wallet.crypto.trustapp.model.TRTransaction;
 import com.wallet.crypto.trustapp.model.VMAccount;
-import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.crypto.trustapp.util.PMMigrateHelper;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 import com.wallet.crypto.trustapp.util.RootUtil;
 
 import java.math.BigDecimal;
@@ -205,7 +204,7 @@ public class TransactionListActivity extends AppCompatActivity {
 			    PMMigrateHelper.migrate(this);
 		    } catch (ServiceErrorException e) {
 			    if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
-				    KS.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
+				    PasswordStoreFactory.showAuthenticationScreen(this, Controller.UNLOCK_SCREEN_REQUEST);
 			    } else {
 				    Toast.makeText(this, "Could not process passwords.", Toast.LENGTH_LONG)
 						    .show();
@@ -231,11 +230,8 @@ public class TransactionListActivity extends AppCompatActivity {
 	}
 
 	private void checkGuard() {
-		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-		if (keyguardManager != null
-				&& !keyguardManager.isDeviceSecure()
-				&& pref.getBoolean("should_show_security_warning", true)) {
+		if (!isDeviceSecure() && pref.getBoolean("should_show_security_warning", true)) {
 			pref.edit().putBoolean("should_show_security_warning", false).apply();
 			new AlertDialog.Builder(this)
 					.setTitle(R.string.lock_title)
@@ -254,6 +250,16 @@ public class TransactionListActivity extends AppCompatActivity {
 					})
 					.show();
 		}
+	}
+
+	protected boolean isDeviceSecure() {
+		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+		if (keyguardManager == null) {
+			return false;
+		}
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+				? keyguardManager.isDeviceSecure()
+				: keyguardManager.isKeyguardSecure();
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

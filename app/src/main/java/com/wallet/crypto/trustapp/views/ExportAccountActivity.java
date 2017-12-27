@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
-import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 
 public class ExportAccountActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -127,7 +127,7 @@ public class ExportAccountActivity extends AppCompatActivity implements View.OnC
 				}
 			} catch (ServiceErrorException e) {
 				if (e.code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
-					KS.showAuthenticationScreen(ExportAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
+					PasswordStoreFactory.showAuthenticationScreen(ExportAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
 				} else {
 					showError("Failed to export account " + e.getMessage());
 				}

@@ -14,7 +14,7 @@ import android.widget.Toast;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
-import com.wallet.crypto.trustapp.util.KS;
+import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 
 /**
  * A login screen that offers login via email/password.
@@ -71,7 +71,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 			Log.d("CREATE_ACC", "Error", e);
 			if (e instanceof ServiceErrorException
 					&& ((ServiceErrorException) e).code == ServiceErrorException.USER_NOT_AUTHENTICATED) {
-				KS.showAuthenticationScreen(CreateAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
+				PasswordStoreFactory.showAuthenticationScreen(CreateAccountActivity.this, Controller.UNLOCK_SCREEN_REQUEST);
 			} else {
 				Toast.makeText(getApplicationContext(), "Create account: " + e.toString(), Toast.LENGTH_LONG).show();
 			}

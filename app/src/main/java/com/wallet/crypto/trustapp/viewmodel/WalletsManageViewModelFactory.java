@@ -10,7 +10,6 @@ import com.wallet.crypto.trustapp.interact.ExportWalletInteract;
 import com.wallet.crypto.trustapp.interact.FetchWalletsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
-import com.wallet.crypto.trustapp.router.ExportWalletRouter;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
 
 import javax.inject.Inject;

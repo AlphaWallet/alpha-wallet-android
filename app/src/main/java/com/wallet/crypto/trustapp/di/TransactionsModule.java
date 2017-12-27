@@ -9,6 +9,7 @@ import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
+import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModelFactory;
 
 import dagger.Module;
@@ -23,14 +24,16 @@ class TransactionsModule {
             FetchTransactionsInteract fetchTransactionsInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
-            SettingsRouter settingsRoute) {
+            SettingsRouter settingsRoute,
+            TransactionDetailRouter transactionDetailRouter) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 fetchTransactionsInteract,
                 getDefaultWalletBalance,
                 manageWalletsRouter,
-                settingsRoute);
+                settingsRoute,
+                transactionDetailRouter);
     }
 
     @Provides
@@ -63,5 +66,10 @@ class TransactionsModule {
     @Provides
     SettingsRouter provideSettingsRouter() {
         return new SettingsRouter();
+    }
+
+    @Provides
+    TransactionDetailRouter transactionDetailRouter() {
+        return new TransactionDetailRouter();
     }
 }

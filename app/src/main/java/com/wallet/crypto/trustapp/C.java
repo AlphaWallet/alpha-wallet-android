@@ -9,7 +9,7 @@ public abstract class C {
     public static final long ETHER_DECIMALS = 18;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
-    public static final String POA_NETWORK_NAME = "POA_NETWORK_NAME Network";
+    public static final String POA_NETWORK_NAME = "POA Network";
     public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
 
@@ -28,5 +28,6 @@ public abstract class C {
 
     public interface Key {
 	    String WALLET = "wallet";
+        String TRANSACTION = "transaction";
     }
 }

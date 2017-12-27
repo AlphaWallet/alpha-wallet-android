@@ -15,4 +15,9 @@ public class TransactionInDiskSource implements TransactionLocalSource {
 	public void putTransactions(Wallet wallet, Transaction[] transactions) {
 
 	}
+
+    @Override
+    public void clear() {
+
+    }
 }

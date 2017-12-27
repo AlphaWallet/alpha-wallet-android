@@ -3,10 +3,10 @@ package com.wallet.crypto.trustapp.ui.widget.holder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.format.DateFormat;
-import android.text.format.DateUtils;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
@@ -25,14 +25,13 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
 
     private static final int SIGNIFICANT_FIGURES = 3;
 
-    private static final String DATE_TEMPLATE = "MM/dd/yy H:mm:ss zzz";
     public static final String DEFAULT_ADDRESS_ADDITIONAL = "default_address";
     public static final String DEFAULT_SYMBOL_ADDITIONAL = "network_symbol";
 
     private final TextView type;
-    private final TextView date;
     private final TextView address;
     private final TextView value;
+    private final ImageView typeIcon;
 
     private Transaction transaction;
     private String defaultAddress;
@@ -41,10 +40,12 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     public TransactionHolder(int resId, ViewGroup parent) {
         super(resId, parent);
 
-        date = findViewById(R.id.date);
+        typeIcon = findViewById(R.id.type_icon);
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
+
+        typeIcon.setColorFilter(getContext().getColor(R.color.item_icon_tint));
 
         itemView.setOnClickListener(this);
     }
@@ -58,33 +59,36 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
 
         String networkSymbol = addition.getString(DEFAULT_SYMBOL_ADDITIONAL);
-        long timestamp = transaction.timeStamp * DateUtils.SECOND_IN_MILLIS;
         // If operations include token transfer, display token transfer instead
         TransactionOperation operation = transaction.operations == null
                 || transaction.operations.length == 0 ? null : transaction.operations[0];
 
         if (operation == null || operation.contract == null) {
             // default to ether transaction
-            fill(timestamp, transaction.from, transaction.to, networkSymbol, transaction.value,
-                    ETHER_DECIMALS, false);
+            fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
+                    ETHER_DECIMALS);
         } else {
-            fill(timestamp, operation.from, operation.to, operation.contract.symbol, operation.value,
-                    operation.contract.decimals, true);
+            fill(transaction.error, operation.from, operation.to, operation.contract.symbol, operation.value,
+                    operation.contract.decimals);
         }
     }
 
     private void fill(
-            long timestamp,
+            String error,
             String from,
             String to,
             String symbol,
             String valueStr,
-            long decimals,
-            boolean isTokenTransfer) {
-        date.setText(DateFormat.format(DATE_TEMPLATE, timestamp));
+            long decimals) {
         boolean isSent = from.toLowerCase().equals(defaultAddress);
-        type.setText(isTokenTransfer ? getString(R.string.transfer, symbol)
-                : isSent ? getString(R.string.sent) : getString(R.string.received));
+        type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
+        if (!TextUtils.isEmpty(error)) {
+            typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
+        } else if (isSent) {
+            typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+        } else {
+            typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+        }
         address.setText(isSent ? to : from);
         value.setTextColor(getContext().getColor(isSent ? R.color.red : R.color.green));
 

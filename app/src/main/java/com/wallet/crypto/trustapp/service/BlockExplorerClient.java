@@ -36,7 +36,7 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 		this.networkRepository = networkRepository;
 		this.networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		buildApiClient(networkInfo.backendUrl);
+		onNetworkChanged(networkInfo);
 	}
 
 	private void buildApiClient(String baseUrl) {
@@ -59,7 +59,7 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 	}
 
 	private void onNetworkChanged(NetworkInfo networkInfo) {
-		buildApiClient(networkInfo.etherscanUrl);
+		buildApiClient(networkInfo.backendUrl);
 	}
 
 	private static @NonNull <T> ApiErrorOperator<T> apiError(Gson gson) {

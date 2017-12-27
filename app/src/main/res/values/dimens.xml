@@ -23,4 +23,8 @@
 	<dimen name="small_text">12sp</dimen>
 	<dimen name="normal_text">16sp</dimen>
 	<dimen name="title_text">26sp</dimen>
+    <dimen name="list_content_margin">72dp</dimen>
+    <dimen name="list_group_head">14sp</dimen>
+    <dimen name="title_height_small">48dp</dimen>
+    <dimen name="title_height_normal">56dp</dimen>
 </resources>

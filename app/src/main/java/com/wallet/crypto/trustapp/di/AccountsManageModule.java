@@ -8,7 +8,6 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.router.ExportWalletRouter;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
 import com.wallet.crypto.trustapp.viewmodel.WalletsManageViewModelFactory;
 

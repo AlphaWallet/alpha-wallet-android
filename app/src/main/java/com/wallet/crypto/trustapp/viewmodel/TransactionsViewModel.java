@@ -13,7 +13,7 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
-import com.wallet.crypto.trustapp.ui.TransactionsActivity;
+import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 
 import java.util.Map;
 
@@ -30,6 +30,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
+    private final TransactionDetailRouter transactionDetailRouter;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -37,13 +38,15 @@ public class TransactionsViewModel extends BaseViewModel {
             FetchTransactionsInteract fetchTransactionsInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
-            SettingsRouter settingsRouter) {
+            SettingsRouter settingsRouter,
+            TransactionDetailRouter transactionDetailRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
+        this.transactionDetailRouter = transactionDetailRouter;
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -71,7 +74,7 @@ public class TransactionsViewModel extends BaseViewModel {
     public void fetchTransactions() {
         progress.postValue(true);
         fetchTransactionsInteract
-                .fetch(/*defaultWallet.getValue()*/new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3"))
+                .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
                 .subscribe(this::onTransactions, this::onError);
     }
 
@@ -105,5 +108,9 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void openSettings(Context context) {
         settingsRouter.open(context);
+    }
+
+    public void showDetails(Context context, Transaction transaction) {
+        transactionDetailRouter.open(context, transaction);
     }
 }

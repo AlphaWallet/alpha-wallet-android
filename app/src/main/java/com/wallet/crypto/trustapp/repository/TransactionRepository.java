@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.repository;
 
+import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Transaction;
@@ -36,9 +37,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 		this.accountKeystoreService = accountKeystoreService;
 		this.blockExplorerClient = blockExplorerClient;
 		this.transactionLocalSource = inMemoryCache;
+
+		this.networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
 	}
 
-	@Override
+    @Override
 	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
 		return transactionLocalSource.fetchTransaction(wallet)
 				.onErrorResumeNext(Single
@@ -73,7 +76,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Completable createTransaction(Wallet from, String toAddress, String wei, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+		final Web3j web3j = Web3jFactory
+                .build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return Single.fromCallable(() -> {
 			EthGetTransactionCount ethGetTransactionCount = web3j
@@ -81,7 +85,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 					.send();
 			return ethGetTransactionCount.getTransactionCount();
 		})
-		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, wei, nonce.longValue(), networkRepository.getDefaultNetwork().chainId))
+		.flatMap(nonce -> accountKeystoreService.signTransaction(
+		        from, password, toAddress, wei, nonce.longValue(),
+                networkRepository.getDefaultNetwork().chainId))
 		.flatMapCompletable(signedMessage -> Completable.fromAction(() -> {
 			EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
@@ -91,4 +97,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 			}
 		}));
 	}
+
+    private void onNetworkChanged(NetworkInfo networkInfo) {
+        transactionLocalSource.clear();
+    }
 }

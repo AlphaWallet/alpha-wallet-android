@@ -15,8 +15,12 @@
 	<color name="bottom_dialog_title">#89000000</color>
 	<color name="bottom_dialog_item">#dd000000</color>
 
+    <color name="list_group_head">#40000000</color>
+
 	<color name="semitransparentWhite">#AAFFFFFF</color>
 
 	<color name="QRCodeBlackColor">#FF000000</color>
 	<color name="QRCodeWhiteColor">#FFFFFFFF</color>
+
+    <color name="item_icon_tint">#89000000</color>
 </resources>

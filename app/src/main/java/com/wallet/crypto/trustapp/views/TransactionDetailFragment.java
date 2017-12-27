@@ -61,7 +61,7 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
             }
 
             Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+//            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
 
             boolean isSent = mItem.getFrom().toLowerCase().equals(address.toLowerCase());
             String wei = mItem.getValue();
@@ -89,9 +89,9 @@ public class TransactionDetailFragment extends Fragment implements View.OnClickL
                 eth = sign + eth;
             }
 
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(eth + " " + mController.getCurrentNetwork().getSymbol());
-            }
+//            if (appBarLayout != null) {
+//                appBarLayout.setTitle(eth + " " + mController.getCurrentNetwork().getSymbol());
+//            }
         }
     }
 

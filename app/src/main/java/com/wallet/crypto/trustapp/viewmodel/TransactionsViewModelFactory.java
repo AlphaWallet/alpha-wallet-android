@@ -10,6 +10,7 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
+import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 
@@ -19,6 +20,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
+    private final TransactionDetailRouter transactionDetailRouter;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -26,13 +28,15 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             FetchTransactionsInteract fetchTransactionsInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
-            SettingsRouter settingsRouter) {
+            SettingsRouter settingsRouter,
+            TransactionDetailRouter transactionDetailRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
+        this.transactionDetailRouter = transactionDetailRouter;
     }
 
     @NonNull
@@ -44,6 +48,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 fetchTransactionsInteract,
                 getDefaultWalletBalance,
                 manageWalletsRouter,
-                settingsRouter);
+                settingsRouter,
+                transactionDetailRouter);
     }
 }

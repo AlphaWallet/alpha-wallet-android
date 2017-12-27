@@ -14,8 +14,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+//        setSupportActionBar(toolbar);
 
         // Show the Up generateButton in the action bar.
         ActionBar actionBar = getSupportActionBar();

@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.di;
 import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
 import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
+import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;
 
 import dagger.Module;
@@ -21,6 +22,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TransactionsModule.class)
 	abstract TransactionsActivity bindTransactionsModule();
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = TransactionDetailModule.class)
+    abstract TransactionDetailActivity bindTransactionDetailModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SettingsModule.class)

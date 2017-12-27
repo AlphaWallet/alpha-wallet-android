@@ -6,7 +6,6 @@
     <string name="title_import">Import</string>
     <string name="title_create">Create</string>
     <string name="title_account">Wallets</string>
-    <string name="title_item_detail">Item Detail</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_create_account">New Wallet</string>
 
@@ -101,7 +100,6 @@
     <string name="prompt_private_key">Private key</string>
     <string name="error_import_private_key">Error importing private key</string>
     <string name="message_importing_private_key">Importing private key. One moment.</string>
-    <string name="action_transaction_detail">More details</string>
     <string name="lock_title">Lock screen</string>
     <string name="lock_body">Secure lock screen hasn\'t set up. It is not safe.</string>
     <string name="lock_settings">Lock settings</string>
@@ -133,6 +131,8 @@
 	<string name="action_backup_wallet">Backup Wallet</string>
 	<string name="action_backup_later">Do it later</string>
 	<string name="set_account_default">Do want to make a new wallet the main one?</string>
+    <!-- Titles -->
+    <string name="title_item_detail">Item Detail</string>
     <!-- Suggestions -->
     <string name="suggestion_field_required">* Field required</string>
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
@@ -162,4 +162,17 @@
     <string name="intro_message_third_page">The fastest Ethereum wallet experience on mobile.</string>
     <!-- Menus -->
     <string name="navigation_settings">Settings</string>
+    <!-- Subtitles -->
+    <string name="subtitle_from">From</string>
+    <string name="subtitle_to">To</string>
+    <string name="subtitle_gas_fee">Gas Fee (Gwei)</string>
+    <string name="subtitle_transaction_num">Transaction #</string>
+    <string name="transaction_time">Transaction Time</string>
+    <string name="subtitle_block_num">Block #</string>
+    <!-- Actions -->
+    <string name="action_share">Share</string>
+    <string name="action_transaction_detail">More details</string>
+    <!-- Subject -->
+    <string name="subject_transaction_detail">Transaction detail</string>
+    <string name="error_fail_load_transaction">Failed to load transaction list</string>
 </resources>

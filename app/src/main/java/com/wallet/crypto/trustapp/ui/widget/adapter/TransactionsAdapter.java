@@ -10,31 +10,35 @@ import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.widget.OnTransactionClickListener;
-import com.wallet.crypto.trustapp.ui.widget.entity.ListItem;
+import com.wallet.crypto.trustapp.ui.widget.entity.DateSortedItem;
+import com.wallet.crypto.trustapp.ui.widget.entity.SortedItem;
+import com.wallet.crypto.trustapp.ui.widget.entity.TimestampSortedItem;
+import com.wallet.crypto.trustapp.ui.widget.entity.TransactionSortedItem;
 import com.wallet.crypto.trustapp.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.trustapp.ui.widget.holder.TransactionDateHolder;
 import com.wallet.crypto.trustapp.ui.widget.holder.TransactionHolder;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
-    private final SortedList<ListItem> items = new SortedList<>(ListItem.class, new SortedList.Callback<ListItem>() {
+    private final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
-        public int compare(ListItem left, ListItem right) {
-            return 0;
+        public int compare(SortedItem left, SortedItem right) {
+            return left.compare(right);
+        }
+
+        @Override
+        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
+            return oldItem.areContentsTheSame(newItem);
+        }
+
+        @Override
+        public boolean areItemsTheSame(SortedItem left, SortedItem right) {
+            return left.areItemsTheSame(right);
         }
 
         @Override
         public void onChanged(int position, int count) {
             notifyItemRangeChanged(position, count);
-        }
-
-        @Override
-        public boolean areContentsTheSame(ListItem oldItem, ListItem newItem) {
-            return false;
-        }
-
-        @Override
-        public boolean areItemsTheSame(ListItem item1, ListItem item2) {
-            return false;
         }
 
         @Override
@@ -66,10 +70,13 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         BinderViewHolder holder = null;
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE: {
-                TransactionHolder h
+                TransactionHolder transactionHolder
                         = new TransactionHolder(R.layout.item_transaction, parent);
-                h.setOnTransactionClickListener(onTransactionClickListener);
-                holder = h;
+                transactionHolder.setOnTransactionClickListener(onTransactionClickListener);
+                holder = transactionHolder;
+            } break;
+            case TransactionDateHolder.VIEW_TYPE: {
+                holder = new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
             }
         }
         return holder;
@@ -105,7 +112,16 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
     public void addTransactions(Transaction[] transactions) {
         items.beginBatchedUpdates();
-        items.addAll(ListItem.create(transactions, TransactionHolder.VIEW_TYPE));
+        for (Transaction transaction : transactions) {
+            TransactionSortedItem sortedItem = new TransactionSortedItem(
+                    TransactionHolder.VIEW_TYPE, transaction, TimestampSortedItem.DESC);
+            items.add(sortedItem);
+            items.add(DateSortedItem.round(transaction.timeStamp));
+        }
         items.endBatchedUpdates();
+    }
+
+    public void clear() {
+        items.clear();
     }
 }

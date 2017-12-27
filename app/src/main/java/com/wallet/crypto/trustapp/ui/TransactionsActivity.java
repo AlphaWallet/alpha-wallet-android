@@ -76,13 +76,14 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
-
+        viewModel.showDetails(view.getContext(), transaction);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        adapter.clear();
         viewModel.prepare();
     }
 
@@ -141,7 +142,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        systemView.showError(errorEnvelope.message, this);
+        systemView.showError(getString(R.string.error_fail_load_transaction), this);
     }
 
     @Override

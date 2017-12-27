@@ -8,6 +8,7 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.pwd.trustapp.PasswordManager;
 
+import java.security.SecureRandom;
 import java.util.UUID;
 
 import io.reactivex.Completable;
@@ -53,6 +54,11 @@ public class TrustPasswordStore implements PasswordStore {
 
 	@Override
 	public Single<String> generatePassword() {
-		return Single.just(UUID.randomUUID().toString());
+		return Single.fromCallable(() -> {
+            byte bytes[] = new byte[256];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(bytes);
+            return String.valueOf(bytes);
+        });
 	}
 }

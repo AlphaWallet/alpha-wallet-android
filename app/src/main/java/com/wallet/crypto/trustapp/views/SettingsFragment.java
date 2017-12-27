@@ -1,6 +1,9 @@
 package com.wallet.crypto.trustapp.views;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -28,6 +31,33 @@ public class SettingsFragment extends PreferenceFragment
 
         mController = Controller.with(getActivity());
 
+        final Preference rate = findPreference("pref_rate");
+
+        rate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                rateThisApp();
+                return false;
+            }
+        });
+
+        final Preference email = findPreference("pref_email");
+
+        email.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                Intent mailto = new Intent(Intent.ACTION_SEND);
+                mailto.setType("message/rfc822") ; // use from live device
+                mailto.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@trustwalletapp.com"});
+                mailto.putExtra(Intent.EXTRA_SUBJECT,"Android support question");
+                mailto.putExtra(Intent.EXTRA_TEXT,"Dear Trust support,");
+                startActivity(Intent.createChooser(mailto, "Select email application."));
+                return true;
+            }
+        });
+
         final Preference donate = findPreference("pref_donate");
 
         donate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -35,6 +65,26 @@ public class SettingsFragment extends PreferenceFragment
             public boolean onPreferenceClick(Preference preference) {
 
                 mController.navigateToSend(getActivity(), "0x9f8284ce2cf0c8ce10685f537b1fff418104a317");
+                return false;
+            }
+        });
+
+        final Preference twitter = findPreference("pref_twitter");
+
+        twitter.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+            	Intent intent;
+                try {
+                    // get the Twitter app if possible
+                    getActivity().getPackageManager().getPackageInfo("com.twitter.android", 0);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("twitter://user?user_id=911011433147654144"));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                } catch (Exception e) {
+                    // no Twitter app, revert to browser
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/trustwalletapp"));
+                }
+                startActivity(intent);
                 return false;
             }
         });
@@ -107,6 +157,22 @@ public class SettingsFragment extends PreferenceFragment
         lp.setValue(currentValue);
         lp.setSummary(currentValue);
         lp.setEntryValues(entryValues);
+    }
+
+    private void rateThisApp() {
+        Uri uri = Uri.parse("market://details?id=" + getActivity().getPackageName());
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        try {
+            startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + getActivity().getPackageName())));
+        }
     }
 }
 

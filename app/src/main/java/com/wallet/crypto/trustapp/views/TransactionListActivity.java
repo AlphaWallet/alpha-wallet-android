@@ -43,7 +43,8 @@ import java.util.List;
 
 public class TransactionListActivity extends AppCompatActivity {
 
-    private static final int SIGNIFICANT_FIGURES = 3;
+    public static final int SIGNIFICANT_FIGURES = 3;
+    private static final String PREF_SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -231,8 +232,8 @@ public class TransactionListActivity extends AppCompatActivity {
 
 	private void checkGuard() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-		if (!isDeviceSecure() && pref.getBoolean("should_show_security_warning", true)) {
-			pref.edit().putBoolean("should_show_security_warning", false).apply();
+		if (!isDeviceSecure() && pref.getBoolean(PREF_SHOULD_SHOW_SECURITY_WARNING, true)) {
+			pref.edit().putBoolean(PREF_SHOULD_SHOW_SECURITY_WARNING, false).apply();
 			new AlertDialog.Builder(this)
 					.setTitle(R.string.lock_title)
 					.setMessage(R.string.lock_body)

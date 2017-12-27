@@ -24,7 +24,7 @@ public class WalletTest {
     }
 
     @Test
-    public void deleteAccountTest() {
+    public void deleteAccountTest() throws Exception {
         Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
         VMAccount account = controller.createAccount("test password");
         assert(account != null);
@@ -39,7 +39,7 @@ public class WalletTest {
     }
 
     @Test
-    public void createAccountTest() {
+    public void createAccountTest() throws Exception {
         Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
         VMAccount account = controller.createAccount("test password");
         assert(account != null);

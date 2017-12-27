@@ -114,7 +114,7 @@
     <string name="no_repeat">No, repeat</string>
     <string name="unable_unblock_device">Unable to unlock the device.</string>
     <string name="gas_limit">Gas Limit</string>
-    <string name="gas_price">Gas Price (Wei)</string>
+    <string name="gas_price">Gas Price (Gwei)</string>
     <string name="skip">Skip</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Any \'rooted\' app can access Trust\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
@@ -131,6 +131,8 @@
 	<string name="action_backup_wallet">Backup Wallet</string>
 	<string name="action_backup_later">Do it later</string>
 	<string name="set_account_default">Do want to make a new wallet the main one?</string>
+    <string name="no_tokens">No tokens found.</string>
+    <string name="title_email">Email us</string>
     <!-- Titles -->
     <string name="title_item_detail">Item Detail</string>
     <!-- Suggestions -->

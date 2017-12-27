@@ -27,7 +27,7 @@ import com.wallet.crypto.trustapp.controller.OnTaskCompleted;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.controller.TaskResult;
 import com.wallet.crypto.trustapp.controller.TaskStatus;
-import com.wallet.crypto.trustapp.controller.Utils;
+import com.wallet.crypto.trustapp.util.QRURLParser;
 import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 import com.wallet.crypto.trustapp.views.barcode.BarcodeCaptureActivity;
 
@@ -294,7 +294,7 @@ public class SendActivity extends AppCompatActivity {
 		        if (data != null) {
 			        Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
 
-			        String extracted_address = Utils.extractAddressFromQrString(barcode.displayValue);
+			        String extracted_address = QRURLParser.getInstance().extractAddressFromQrString(barcode.displayValue);
 			        if (extracted_address == null) {
 				        Toast.makeText(this, "QR code doesn't contain account address", Toast.LENGTH_SHORT).show();
 				        return;

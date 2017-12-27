@@ -25,8 +25,10 @@ import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;

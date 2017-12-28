@@ -17,7 +17,6 @@ public class CustomApplication extends MultiDexApplication {
 
         // enable pin code for the application
         LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-        lockManager.getAppLock().setTimeout(10000);
         lockManager.enableAppLock(this, CustomPinActivity.class);
     }
 

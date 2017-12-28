@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.controller.Controller;
+import com.wallet.crypto.trustapp.repository.TokenRepository;
+import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.service.CoinmarketcapTickerService;
 import com.wallet.crypto.trustapp.repository.WalletRepository;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
@@ -18,8 +20,10 @@ import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.BlockExplorerClient;
 import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
+import com.wallet.crypto.trustapp.service.EthplorerTokenService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 import com.wallet.crypto.trustapp.service.TickerService;
+import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
 
 import javax.inject.Singleton;
 
@@ -91,4 +95,16 @@ public class RepositoriesModule {
 			EthereumNetworkRepositoryType ethereumNetworkRepository) {
 		return new BlockExplorerClient(httpClient, gson, ethereumNetworkRepository);
 	}
+
+	@Singleton
+    @Provides
+    TokenRepositoryType provideTokenRepository(TokenExplorerClientType tokenExplorerClientType) {
+	    return new TokenRepository(tokenExplorerClientType);
+    }
+
+	@Singleton
+    @Provides
+    TokenExplorerClientType provideTokenService(OkHttpClient okHttpClient, Gson gson) {
+	    return new EthplorerTokenService(okHttpClient, gson);
+    }
 }

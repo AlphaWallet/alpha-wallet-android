@@ -28,21 +28,21 @@ public class GetDefaultWalletBalance {
     }
 
     public Single<Map<String, String>> get(Wallet wallet) {
-        return walletRepository.ballanceInWei(wallet)
+        return walletRepository.balanceInWei(wallet)
                 .flatMap(ethBallance -> {
-                    Map<String, String> ballances = new HashMap<>();
-                    ballances.put(ethereumNetworkRepository.getDefaultNetwork().symbol, weiToEth(ethBallance, 5));
-                    return Single.just(ballances);
+                    Map<String, String> balances = new HashMap<>();
+                    balances.put(ethereumNetworkRepository.getDefaultNetwork().symbol, weiToEth(ethBallance, 5));
+                    return Single.just(balances);
                 })
-                .flatMap(ballances -> ethereumNetworkRepository
+                .flatMap(balances -> ethereumNetworkRepository
                         .getTicker()
                         .observeOn(Schedulers.io())
                         .flatMap(ticker -> {
-                            String ethBallance = ballances.get(ethereumNetworkRepository.getDefaultNetwork().symbol);
-                            ballances.put(USD_SYMBOL, BallanceUtils.ethToUsd(ticker.priceUsd, ethBallance));
-                            return Single.just(ballances);
+                            String ethBallance = balances.get(ethereumNetworkRepository.getDefaultNetwork().symbol);
+                            balances.put(USD_SYMBOL, BallanceUtils.ethToUsd(ticker.priceUsd, ethBallance));
+                            return Single.just(balances);
                         })
-                        .onErrorResumeNext(throwable -> Single.just(ballances)))
+                        .onErrorResumeNext(throwable -> Single.just(balances)))
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

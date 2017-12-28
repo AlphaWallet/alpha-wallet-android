@@ -8,6 +8,8 @@ import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.trustapp.router.MyAddressRouter;
+import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModelFactory;
@@ -25,7 +27,9 @@ class TransactionsModule {
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRoute,
-            TransactionDetailRouter transactionDetailRouter) {
+            TransactionDetailRouter transactionDetailRouter,
+            MyAddressRouter myAddressRouter,
+            MyTokensRouter myTokensRouter) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -33,7 +37,9 @@ class TransactionsModule {
                 getDefaultWalletBalance,
                 manageWalletsRouter,
                 settingsRoute,
-                transactionDetailRouter);
+                transactionDetailRouter,
+                myAddressRouter,
+                myTokensRouter);
     }
 
     @Provides
@@ -69,7 +75,17 @@ class TransactionsModule {
     }
 
     @Provides
-    TransactionDetailRouter transactionDetailRouter() {
+    TransactionDetailRouter provideTransactionDetailRouter() {
         return new TransactionDetailRouter();
+    }
+
+    @Provides
+    MyAddressRouter provideMyAddressRouter() {
+        return new MyAddressRouter();
+    }
+
+    @Provides
+    MyTokensRouter provideMyTokensRouter() {
+        return new MyTokensRouter();
     }
 }

@@ -12,6 +12,8 @@ import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.trustapp.router.MyAddressRouter;
+import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 
@@ -31,6 +33,8 @@ public class TransactionsViewModel extends BaseViewModel {
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
     private final TransactionDetailRouter transactionDetailRouter;
+    private final MyAddressRouter myAddressRouter;
+    private final MyTokensRouter myTokensRouter;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -39,7 +43,9 @@ public class TransactionsViewModel extends BaseViewModel {
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
-            TransactionDetailRouter transactionDetailRouter) {
+            TransactionDetailRouter transactionDetailRouter,
+            MyAddressRouter myAddressRouter,
+            MyTokensRouter myTokensRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -47,6 +53,8 @@ public class TransactionsViewModel extends BaseViewModel {
         this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
         this.transactionDetailRouter = transactionDetailRouter;
+        this.myAddressRouter = myAddressRouter;
+        this.myTokensRouter = myTokensRouter;
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -78,7 +86,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::onTransactions, this::onError);
     }
 
-    public void getBallance() {
+    public void getBalance() {
         disposable = getDefaultWalletBalance
                 .get(defaultWallet.getValue())
                 .subscribe(defaultWalletBalance::postValue);
@@ -93,7 +101,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-        getBallance();
+        getBalance();
         fetchTransactions();
     }
 
@@ -102,15 +110,23 @@ public class TransactionsViewModel extends BaseViewModel {
         this.transactions.postValue(transactions);
     }
 
-    public void openWallets(Context context) {
+    public void showWallets(Context context) {
         manageWalletsRouter.open(context);
     }
 
-    public void openSettings(Context context) {
+    public void showSettings(Context context) {
         settingsRouter.open(context);
     }
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
+    }
+
+    public void showMyAddress(Context context) {
+        myAddressRouter.open(context, defaultWallet.getValue());
+    }
+
+    public void showTokens(Context context) {
+        myTokensRouter.open(context, defaultWallet.getValue());
     }
 }

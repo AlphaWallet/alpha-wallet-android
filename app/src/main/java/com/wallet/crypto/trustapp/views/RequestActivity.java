@@ -56,7 +56,7 @@ public class RequestActivity extends AppCompatActivity {
         final Controller controller = Controller.with(this);
 
         TextView addressLabel = findViewById(R.id.addressLabel);
-        addressLabel.setText(getString(R.string.message_this_is_your_address).replace("Ethereum", controller.getCurrentNetwork().getName()));
+        addressLabel.setText(getString(R.string.suggestion_this_is_your_address).replace("Ethereum", controller.getCurrentNetwork().getName()));
 
         imageView = (ImageView)findViewById(R.id.imageView);
         addressTextView = (TextView)findViewById(R.id.addressTextView);

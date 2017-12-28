@@ -11,7 +11,7 @@
         android:id="@+id/addressLabel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/message_this_is_your_address"
+        android:text="@string/suggestion_this_is_your_address"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:gravity="center"

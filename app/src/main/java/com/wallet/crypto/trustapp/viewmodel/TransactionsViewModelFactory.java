@@ -9,6 +9,8 @@ import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.trustapp.router.MyAddressRouter;
+import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 
@@ -21,6 +23,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
     private final TransactionDetailRouter transactionDetailRouter;
+    private final MyAddressRouter myAddressRouter;
+    private final MyTokensRouter myTokensRouter;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -29,7 +33,9 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
-            TransactionDetailRouter transactionDetailRouter) {
+            TransactionDetailRouter transactionDetailRouter,
+            MyAddressRouter myAddressRouter,
+            MyTokensRouter myTokensRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -37,6 +43,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
         this.transactionDetailRouter = transactionDetailRouter;
+        this.myAddressRouter = myAddressRouter;
+        this.myTokensRouter = myTokensRouter;
     }
 
     @NonNull
@@ -49,6 +57,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 getDefaultWalletBalance,
                 manageWalletsRouter,
                 settingsRouter,
-                transactionDetailRouter);
+                transactionDetailRouter,
+                myAddressRouter,
+                myTokensRouter);
     }
 }

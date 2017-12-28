@@ -11,6 +11,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.wallet.crypto.trustapp.R;
@@ -43,7 +45,7 @@ public class ManageWalletsActivity extends BaseActivity implements
 
 	private SystemView systemView;
 	private Dialog dialog;
-	private View addAction;
+//	private View addAction;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,14 +59,11 @@ public class ManageWalletsActivity extends BaseActivity implements
 		adapter = new WalletsManageAdapter(this::onSetWalletDefault, this::onDeleteWallet);
 		SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
 		systemView = findViewById(R.id.system_view);
-		addAction = findViewById(R.id.fab);
 
 		RecyclerView list = findViewById(R.id.list);
 
 		list.setLayoutManager(new LinearLayoutManager(this));
 		list.setAdapter(adapter);
-
-		addAction.setOnClickListener(this);
 
 		systemView.attachRecyclerView(list);
 		systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -98,9 +97,28 @@ public class ManageWalletsActivity extends BaseActivity implements
 			finish();
 			System.exit(0);
 		}
+		// TODO: Process first start
 	}
 
-	@Override
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+	    if (adapter.getItemCount() > 0) {
+            getMenuInflater().inflate(R.menu.menu_add, menu);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+            case R.id.action_add: {
+                onAddWallet();
+            } break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
@@ -129,9 +147,6 @@ public class ManageWalletsActivity extends BaseActivity implements
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
-			case R.id.fab: {
-				onAddWallet();
-			} break;
 			case R.id.try_again: {
 				viewModel.fetchWallets();
 			} break;
@@ -168,7 +183,6 @@ public class ManageWalletsActivity extends BaseActivity implements
 	private void onFetchWallet(Wallet[] wallets) {
 		if (wallets == null || wallets.length == 0) {
 			dissableDisplayHomeAsUp();
-			addAction.setVisibility(View.GONE);
 			AddWalletView addWalletView = new AddWalletView(this, R.layout.layout_empty_add_account);
 			addWalletView.setOnNewWalletClickListener(this);
 			addWalletView.setOnImportWalletClickListener(this);
@@ -176,9 +190,9 @@ public class ManageWalletsActivity extends BaseActivity implements
 			adapter.setWallets(new Wallet[0]);
 		} else {
 			enableDisplayHomeAsUp();
-			addAction.setVisibility(View.VISIBLE);
 			adapter.setWallets(wallets);
 		}
+		invalidateOptionsMenu();
 	}
 
 	private void onCreatedWallet(Wallet wallet) {

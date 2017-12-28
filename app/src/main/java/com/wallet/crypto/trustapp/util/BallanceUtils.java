@@ -14,8 +14,8 @@ public class BallanceUtils {
         return eth_scaled.toString();
     }
 
-    public static String ethToUsd(String priceUsd, String ethBallance) {
-        BigDecimal usd = new BigDecimal(ethBallance).multiply(new BigDecimal(priceUsd));
+    public static String ethToUsd(String priceUsd, String ethBalance) {
+        BigDecimal usd = new BigDecimal(ethBalance).multiply(new BigDecimal(priceUsd));
         usd = usd.setScale(2, RoundingMode.CEILING);
         return usd.toString();
     }

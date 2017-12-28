@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -37,6 +38,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     @Inject
     TransactionsViewModelFactory transactionsViewModelFactory;
     private TransactionsViewModel viewModel;
+
     private SystemView systemView;
     private TransactionsAdapter adapter;
 
@@ -89,7 +91,8 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.transaction_list_menu, menu);
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        getMenuInflater().inflate(R.menu.wallets_menu, menu);
 
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
         if (networkInfo != null && networkInfo.symbol.equals(ETH_SYMBOL)) {
@@ -102,28 +105,46 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_wallets: {
-                viewModel.openWallets(this);
+                viewModel.showWallets(this);
             } break;
             case R.id.action_settings: {
-                viewModel.openSettings(this);
+                viewModel.showSettings(this);
+            } break;
+            case R.id.action_my_address: {
+                viewModel.showMyAddress(this);
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void onBalanceChanged(Map<String, String> ballances) {
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_my_address: {
+                viewModel.showMyAddress(this);
+                return true;
+            }
+            case R.id.action_my_tokens: {
+                viewModel.showTokens(this);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void onBalanceChanged(Map<String, String> balance) {
         ActionBar actionBar = getSupportActionBar();
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
         Wallet wallet = viewModel.defaultWallet().getValue();
         if (actionBar == null || networkInfo == null || wallet == null) {
             return;
         }
-        if (TextUtils.isEmpty(ballances.get(C.USD_SYMBOL))) {
-            actionBar.setTitle(ballances.get(networkInfo.symbol) + " " + networkInfo.symbol);
+        if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
+            actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
             actionBar.setSubtitle(wallet.address);
         } else {
-            actionBar.setTitle("$" + ballances.get(C.USD_SYMBOL));
-            actionBar.setSubtitle(ballances.get(C.USD_SYMBOL) + " " + networkInfo.symbol);
+            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
+            actionBar.setSubtitle(balance.get(C.USD_SYMBOL) + " " + networkInfo.symbol);
         }
     }
 

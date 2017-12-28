@@ -170,7 +170,7 @@ public class WalletRepoTest {
 	public void testGetBalance() {
 		importAccount(STORE_1, PASS_1);
 		TestObserver<BigInteger> subscriber = accountRepository
-				.ballanceInWei(new Wallet(ADDRESS_1))
+				.balanceInWei(new Wallet(ADDRESS_1))
 				.test();
 		subscriber.awaitTerminalEvent();
 		subscriber.assertComplete();

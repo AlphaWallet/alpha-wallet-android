@@ -110,6 +110,14 @@
             android:name=".ui.TransactionDetailActivity"
             android:label="@string/action_transaction_detail"
             />
+        <activity
+            android:name=".ui.MyAddressActivity"
+            android:label="@string/title_my_address"
+            />
+        <activity
+            android:name=".ui.TokensActivity"
+            android:label="@string/title_my_tokens"
+            />
 
         <meta-data
             android:name="io.fabric.ApiKey"

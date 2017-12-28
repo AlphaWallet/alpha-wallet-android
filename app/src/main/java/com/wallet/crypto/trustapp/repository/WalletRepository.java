@@ -91,7 +91,7 @@ public class WalletRepository implements WalletRepositoryType {
 	}
 
 	@Override
-	public Single<BigInteger> ballanceInWei(Wallet wallet) {
+	public Single<BigInteger> balanceInWei(Wallet wallet) {
 		return Single.fromCallable(() -> Web3jFactory
 					.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
 					.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)

@@ -17,7 +17,6 @@ import static com.wallet.crypto.trustapp.C.ETH_SYMBOL;
 import static com.wallet.crypto.trustapp.C.KOVAN_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.POA_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.POA_SYMBOL;
-import static com.wallet.crypto.trustapp.C.POA_TIKER;
 import static com.wallet.crypto.trustapp.C.ROPSTEN_NETWORK_NAME;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {

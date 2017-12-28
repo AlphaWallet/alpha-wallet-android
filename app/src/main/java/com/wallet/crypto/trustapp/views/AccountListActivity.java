@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,6 +18,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.model.VMAccount;
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Activity representing a list of accounts
  */
-public class AccountListActivity extends AppCompatActivity {
+public class AccountListActivity extends PinCompatActivity {
 
     private Controller mController;
     private View mRecyclerView;

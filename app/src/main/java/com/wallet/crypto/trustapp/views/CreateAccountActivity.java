@@ -3,7 +3,6 @@ package com.wallet.crypto.trustapp.views;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
@@ -19,7 +19,7 @@ import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 /**
  * A login screen that offers login via email/password.
  */
-public class CreateAccountActivity extends AppCompatActivity {
+public class CreateAccountActivity extends PinCompatActivity {
 
     private Controller mController;
 

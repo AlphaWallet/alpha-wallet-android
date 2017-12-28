@@ -7,13 +7,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 
-public class ImportAccountActivity extends AppCompatActivity {
+public class ImportAccountActivity extends PinCompatActivity {
 
     private final int KEYSTORE_POSITION = 0;
     private final int PRIVATE_KEY_POSITION = 1;

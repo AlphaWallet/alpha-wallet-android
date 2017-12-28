@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +17,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.R;
@@ -35,7 +35,7 @@ import org.ethereum.geth.Address;
 
 import java.math.BigInteger;
 
-public class SendActivity extends AppCompatActivity {
+public class SendActivity extends PinCompatActivity {
 
     private Controller mController;
 

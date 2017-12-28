@@ -18,5 +18,13 @@ public class CustomPinActivity extends AppLockActivity {
     public void onPinSuccess(int attempts) {
 
     }
+
+    @Override
+    public int getPinLength() {
+        return super.getPinLength();
+    }
+
+
+
 }
 

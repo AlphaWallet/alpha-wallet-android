@@ -4,17 +4,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 
 import static com.wallet.crypto.trustapp.views.ExportAccountActivity.ADDRESS_KEY;
 
-public class WarningBackupActivity extends AppCompatActivity {
+public class WarningBackupActivity extends PinCompatActivity {
 
     Button mBackupButton;
     Button mLaterButton;

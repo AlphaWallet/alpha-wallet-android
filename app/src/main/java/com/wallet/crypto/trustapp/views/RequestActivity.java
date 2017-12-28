@@ -8,7 +8,6 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
 import android.view.MenuItem;
@@ -18,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -27,7 +27,7 @@ import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.model.VMAccount;
 
-public class RequestActivity extends AppCompatActivity {
+public class RequestActivity extends PinCompatActivity {
 
     private static final String TAG = "REQUEST_ACTIVITY";
     private static final double QR_CODE_WIDTH_RATIO = 0.9;

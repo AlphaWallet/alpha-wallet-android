@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -16,12 +15,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.controller.ServiceErrorException;
 import com.wallet.crypto.trustapp.util.PasswordStoreFactory;
 
-public class ExportAccountActivity extends AppCompatActivity implements View.OnClickListener {
+public class ExportAccountActivity extends PinCompatActivity implements View.OnClickListener {
 
 	public static final String ADDRESS_KEY = "account_address";
 	public static final int SHARE_REQUEST_CODE = 1;

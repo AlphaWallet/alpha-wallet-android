@@ -32,11 +32,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -49,7 +49,7 @@ import com.wallet.crypto.trustapp.views.camera.CameraSourcePreview;
 
 import java.io.IOException;
 
-public final class BarcodeCaptureActivity extends AppCompatActivity
+public final class BarcodeCaptureActivity extends PinCompatActivity
         implements BarcodeTracker.BarcodeGraphicTrackerCallback {
 
     private static final String TAG = "Barcode-reader";

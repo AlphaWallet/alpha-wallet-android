@@ -1,11 +1,11 @@
 package com.wallet.crypto.trustapp.views;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends PinCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

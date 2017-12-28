@@ -143,6 +143,7 @@ public class AccountListActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Log.d(TAG, "Selected account " + mItem.getAddress());
                         mController.setCurrentAddress(mItem.getAddress());
+                        setResult(RESULT_OK);
                         notifyDataSetChanged();
                         AccountListActivity.this.finish();
                     }

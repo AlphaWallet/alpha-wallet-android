@@ -17,7 +17,6 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -95,6 +94,7 @@ public class Controller {
     private static Controller mInstance;
 
     public static final int IMPORT_ACCOUNT_REQUEST = 1;
+    public static final int SELECT_ACCOUNT = 2;
     public static final int UNLOCK_SCREEN_REQUEST = 1001;
 //    public static final int SHARE_RESULT = 2;
 
@@ -121,8 +121,9 @@ public class Controller {
     // Views
     private TransactionListActivity mTransactionListActivity;
 
-    // Background task
-    private int mInterval = 10000; // ms
+    // Background tasks
+    private int mQueryPricesInterval = 1000*60*5; // 5 mins in ms
+    private int mQueryTransactionsInterval = 10000; // 10 sec in ms
     private Handler mHandler;
 
     public static Controller with(Context context) {
@@ -158,8 +159,8 @@ public class Controller {
                 "https://etherscan.io/", "ethereum", 1, false));
         mNetworks.add(new VMNetwork(POA, "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", null, "poa", 99, true));
         //mNetworks.add(new VMNetwork("POA Network (Test)", "POA", "https://core.poa.network", "https://poa.trustwalletapp.com", "https://etherscan.io/", "poa", 99));
-        mNetworks.add(new VMNetwork(KOVAN, "ETH(Kovan)", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42, true));
-        mNetworks.add(new VMNetwork(ROPSTEN, "ETH(Ropsten)", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3, true));
+        mNetworks.add(new VMNetwork(KOVAN, "ETH", "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://kovan.trustwalletapp.com/", "https://kovan.etherscan.io", "ethereum", 42, true));
+        mNetworks.add(new VMNetwork(ROPSTEN, "ETH", "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk", "https://ropsten.trustwalletapp.com/", "https://ropsten.etherscan.io", "ethereum", 3, true));
 
         // Load current from app preferences
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mAppContext);
@@ -216,7 +217,7 @@ public class Controller {
             } catch (Exception e) {
                 Log.e(TAG, "Unable to fetch update mTransactionListActivity");
             } finally {
-                mHandler.postDelayed(mStatusChecker, mInterval);
+                mHandler.postDelayed(mStatusChecker, mQueryTransactionsInterval);
             }
 
             fetchEthereumTicker();
@@ -247,13 +248,18 @@ public class Controller {
 
     public void loadViewModels(final OnTaskCompleted listener) {
         // Get transactions
-        new GetTransactionsTask(mAccounts, new OnTaskCompleted() {
+        final List<VMAccount> list = new ArrayList<>();
+        VMAccount current = getCurrentAccount();
+        if (current != null) {
+            list.add(current);
+        }
+        new GetTransactionsTask(list, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(TaskResult result) {
                 Log.d(TAG, "Finished loading transactions");
 
                 // ... and then get balances
-                new GetBalancesTask(mAccounts, listener).execute();
+                new GetBalancesTask(list, listener).execute();
             }
         }).execute();
 
@@ -288,9 +294,9 @@ public class Controller {
         context.startActivity(intent);
     }
 
-    public void navigateToAccountList(Context context) {
-        Intent intent = new Intent(context, AccountListActivity.class);
-        context.startActivity(intent);
+    public void navigateToAccountList(Activity activity) {
+        Intent intent = new Intent(activity, AccountListActivity.class);
+        activity.startActivityForResult(intent, SELECT_ACCOUNT);
     }
 
     public void navigateToCreateAccount(Context context) {
@@ -923,7 +929,8 @@ public class Controller {
                 @Override
                 public void onFailure(Call<List<CMTicker>> call, Throwable t) {
                     Log.e("ERROR", t.toString());
-                    Toast.makeText(mAppContext, "Error contacting ether price service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mAppContext, "Error contacting ether price service.", Toast.LENGTH_SHORT).show();
+                    //Fail silently - users were confused by this message
                 }
             });
         } catch (Exception e) {
@@ -975,7 +982,8 @@ public class Controller {
                     @Override
                     public void onFailure(Call<TRTransactionListResponse> call, Throwable t) {
                         Log.e("ERROR", t.toString());
-                        Toast.makeText(mAppContext, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(mAppContext, "Error contacting RPC service. Check internet connection.", Toast.LENGTH_SHORT).show();
+                        //Fail silently - users were confused by this message
                     }
                 });
             } catch (Exception e) {

@@ -272,6 +272,10 @@ public class TransactionListActivity extends AppCompatActivity {
         	if (resultCode == RESULT_OK) {
 
 	        }
+        } else if (requestCode == Controller.SELECT_ACCOUNT) {
+            if (resultCode == RESULT_OK) {
+                fetchModelsAndReinit();
+            }
         }
     }
 

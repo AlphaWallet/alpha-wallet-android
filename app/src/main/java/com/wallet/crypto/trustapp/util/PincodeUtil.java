@@ -15,10 +15,13 @@ import com.wallet.crypto.trustapp.views.CustomPinActivity;
 
 /**
  * Singleton class handling pincode functionality
+ *
+ * Once set, pincode needs to be entered again after 2 minutes.
  */
 public class PincodeUtil {
 
     private static PincodeUtil instance;
+    private static long timeoutValue = 2 * 60 * 000; // in minutes
 
     /**
      * private constructor (singleton)
@@ -74,6 +77,7 @@ public class PincodeUtil {
     public void enablePincode(final Context context) {
         if (!isPincodeEnabled(context)) {
             final LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+            lockManager.getAppLock().setTimeout(timeoutValue);
             lockManager.enableAppLock(context, CustomPinActivity.class);
 
             final Intent intent = new Intent(context, CustomPinActivity.class);

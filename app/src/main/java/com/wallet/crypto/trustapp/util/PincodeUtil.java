@@ -21,7 +21,7 @@ import com.wallet.crypto.trustapp.views.CustomPinActivity;
 public class PincodeUtil {
 
     private static PincodeUtil instance;
-    private static long timeoutValue = 2 * 60 * 000; // in minutes
+    private static long timeoutValue = 2 * 60 * 1000; // in minutes
 
     /**
      * private constructor (singleton)

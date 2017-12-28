@@ -564,11 +564,11 @@ public class Controller {
         names.add("Coinbase");
         urls.add("https://buy.coinbase.com/widget?code={widgetCode}&amount={amount}&address={address}&crypto_currency={cryptoCurrency}");
 
-        //names.add("Shapeshift (Crypto only)");
-        //urls.add("https://shapeshift.io/shifty.html?destination={address}&output={cryptoCurrency}&amount={amount}&apiKey={publicKey}");
+        names.add("Shapeshift (Crypto only)");
+        urls.add("https://shapeshift.io/shifty.html?destination={address}&output={cryptoCurrency}&amount={amount}&apiKey={publicKey}");
 
-        //names.add("Changelly");
-        //urls.add("https://changelly.com/widget/v1?auth=email&from=BTC&to={cryptoCurrency}&merchant_id={referralID}&address={address}&amount={amount}&ref_id={referralID}&color=00cf70");
+        names.add("Changelly");
+        urls.add("https://changelly.com/widget/v1?auth=email&from=BTC&to={cryptoCurrency}&merchant_id={referralID}&address={address}&amount={amount}&ref_id={referralID}&color=00cf70");
 
         assert(names.size() == urls.size());
 

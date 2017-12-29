@@ -13,7 +13,7 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasFragmentInjector;
 
-public class SettingsActivity extends AppCompatActivity implements HasFragmentInjector {
+public class SettingsActivity extends BaseActivity implements HasFragmentInjector {
 
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentInjector;
@@ -23,10 +23,10 @@ public class SettingsActivity extends AppCompatActivity implements HasFragmentIn
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-
+        toolbar();
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
+                .replace(R.id.fragment_container, new SettingsFragment())
                 .commit();
     }
 

@@ -11,6 +11,7 @@ import com.wallet.crypto.trustapp.interact.FetchWalletsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
+import com.wallet.crypto.trustapp.router.TransactionsRouter;
 
 import javax.inject.Inject;
 
@@ -24,17 +25,19 @@ public class WalletsManageViewModelFactory implements ViewModelProvider.Factory 
     private final ExportWalletInteract exportWalletInteract;
 
 	private final ImportWalletRouter importWalletRouter;
+    private final TransactionsRouter transactionsRouter;
 
 
     @Inject
 	public WalletsManageViewModelFactory(
-			CreateWalletInteract createWalletInteract,
-			SetDefaultWalletInteract setDefaultWalletInteract,
-			DeleteWalletInteract deleteWalletInteract,
-			FetchWalletsInteract fetchWalletsInteract,
-			FindDefaultWalletInteract findDefaultWalletInteract,
+            CreateWalletInteract createWalletInteract,
+            SetDefaultWalletInteract setDefaultWalletInteract,
+            DeleteWalletInteract deleteWalletInteract,
+            FetchWalletsInteract fetchWalletsInteract,
+            FindDefaultWalletInteract findDefaultWalletInteract,
             ExportWalletInteract exportWalletInteract,
-			ImportWalletRouter importWalletRouter) {
+            ImportWalletRouter importWalletRouter,
+            TransactionsRouter transactionsRouter) {
 		this.createWalletInteract = createWalletInteract;
 		this.setDefaultWalletInteract = setDefaultWalletInteract;
 		this.deleteWalletInteract = deleteWalletInteract;
@@ -42,6 +45,7 @@ public class WalletsManageViewModelFactory implements ViewModelProvider.Factory 
 		this.findDefaultWalletInteract = findDefaultWalletInteract;
 		this.exportWalletInteract = exportWalletInteract;
 		this.importWalletRouter = importWalletRouter;
+		this.transactionsRouter = transactionsRouter;
 	}
 
 	@NonNull
@@ -54,6 +58,7 @@ public class WalletsManageViewModelFactory implements ViewModelProvider.Factory 
                 fetchWalletsInteract,
                 findDefaultWalletInteract,
                 exportWalletInteract,
-                importWalletRouter);
+                importWalletRouter,
+                transactionsRouter);
 	}
 }

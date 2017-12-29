@@ -1,6 +1,8 @@
 package com.wallet.crypto.trustapp.service;
 
 import com.google.gson.Gson;
+import com.wallet.crypto.trustapp.entity.ApiErrorException;
+import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.Token;
 
 import io.reactivex.Observable;
@@ -17,41 +19,36 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
+import static com.wallet.crypto.trustapp.C.ErrorCode.UNKNOWN;
+
 public class EthplorerTokenService implements TokenExplorerClientType {
     private static final String ETHPLORER_API_URL = "https://api.ethplorer.io";
 
-    private final OkHttpClient httpClient;
-    private final Gson gson;
     private EthplorerApiClient ethplorerApiClient;
 
     public EthplorerTokenService(
             OkHttpClient httpClient,
             Gson gson) {
-        this.httpClient = httpClient;
-        this.gson = gson;
-        buildApiClient(ETHPLORER_API_URL);
-    }
-
-    private void buildApiClient(String baseUrl) {
         ethplorerApiClient = new Retrofit.Builder()
-                .baseUrl(baseUrl)
+                .baseUrl(ETHPLORER_API_URL)
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
                 .create(EthplorerApiClient.class);
     }
+
     @Override
     public Observable<Token[]> fetch(String walletAddress) {
         return ethplorerApiClient.fetchTokens(walletAddress)
-                .lift(apiError(gson))
-                .map(r -> r.tokens)
+                .lift(apiError())
+                .map(r -> r.tokens == null ? new Token[0] : r.tokens)
                 .subscribeOn(Schedulers.io());
     }
 
     private static @NonNull
-    <T> ApiErrorOperator<T> apiError(Gson gson) {
-        return new ApiErrorOperator<>(gson);
+    ApiErrorOperator apiError() {
+        return new ApiErrorOperator();
     }
 
     public interface EthplorerApiClient {
@@ -61,23 +58,32 @@ public class EthplorerTokenService implements TokenExplorerClientType {
 
     private static class EthplorerResponse {
         Token[] tokens;
+        EthplorerError error;
     }
 
-    private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
+    private static class EthplorerError {
+        int code;
+        String message;
+    }
 
-        private final Gson gson;
-
-        public ApiErrorOperator(Gson gson) {
-            this.gson = gson;
-        }
+    private final static class ApiErrorOperator implements ObservableOperator<EthplorerResponse, Response<EthplorerResponse>> {
 
         @Override
-        public Observer<? super Response<T>> apply(Observer<? super T> observer) throws Exception {
-            return new DisposableObserver<Response<T>>() {
+        public Observer<? super Response<EthplorerResponse>> apply(Observer<? super EthplorerResponse> observer) throws Exception {
+            return new DisposableObserver<Response<EthplorerResponse>>() {
                 @Override
-                public void onNext(Response<T> response) {
-                    observer.onNext(response.body());
-                    observer.onComplete();
+                public void onNext(Response<EthplorerResponse> response) {
+                    EthplorerResponse body = response.body();
+                    if (body != null && body.error == null) {
+                        observer.onNext(body);
+                        observer.onComplete();
+                    } else {
+                        if (body != null) {
+                            observer.onError(new ApiErrorException(new ErrorEnvelope(body.error.code, body.error.message)));
+                        } else {
+                            observer.onError(new ApiErrorException(new ErrorEnvelope(UNKNOWN, "Service not available")));
+                        }
+                    }
                 }
 
                 @Override

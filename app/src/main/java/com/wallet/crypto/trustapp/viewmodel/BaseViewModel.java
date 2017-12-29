@@ -39,7 +39,7 @@ public class BaseViewModel extends ViewModel {
 	}
 
 	protected void onError(Throwable throwable) {
-        Crashlytics.logException(throwable);
+//        Crashlytics.logException(throwable);
 		if (throwable instanceof ServiceException) {
 			error.setValue(((ServiceException) throwable).error);
 		} else {

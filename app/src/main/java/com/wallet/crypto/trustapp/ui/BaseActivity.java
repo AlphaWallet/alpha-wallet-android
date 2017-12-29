@@ -20,6 +20,20 @@ public abstract class BaseActivity extends AppCompatActivity {
 		return toolbar;
 	}
 
+	protected void setTitle(String title) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(title);
+        }
+    }
+
+    protected void setSubtitle(String subtitle) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setSubtitle(subtitle);
+        }
+    }
+
 	protected void enableDisplayHomeAsUp() {
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {

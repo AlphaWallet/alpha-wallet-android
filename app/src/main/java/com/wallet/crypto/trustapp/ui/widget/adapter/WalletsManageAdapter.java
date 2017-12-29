@@ -13,16 +13,19 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
 	private final OnSetWalletDefaultListener onSetWalletDefaultListener;
 	private final OnWalletDeleteListener onWalletDeleteListener;
+    private final OnExportWalletListener onExportWalletListener;
 
-	private Wallet[] wallets = new Wallet[0];
+    private Wallet[] wallets = new Wallet[0];
 
 	private Wallet defaultWallet = null;
 
 	public WalletsManageAdapter(
 			OnSetWalletDefaultListener onSetWalletDefaultListener,
-			OnWalletDeleteListener onWalletDeleteListener) {
+			OnWalletDeleteListener onWalletDeleteListener,
+            OnExportWalletListener onExportWalletListener) {
 		this.onSetWalletDefaultListener = onSetWalletDefaultListener;
 		this.onWalletDeleteListener = onWalletDeleteListener;
+		this.onExportWalletListener = onExportWalletListener;
 	}
 
 	@Override
@@ -30,9 +33,10 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 		BinderViewHolder binderViewHolder = null;
 		switch (viewType) {
 			case WalletManageHolder.VIEW_TYPE: {
-				WalletManageHolder h = new WalletManageHolder(R.layout.item_account_manage, parent);
+				WalletManageHolder h = new WalletManageHolder(R.layout.item_wallet_manage, parent);
 				h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
 				h.setOnWalletDeleteListener(onWalletDeleteListener);
+				h.setOnExportWalletListener(onExportWalletListener);
 				binderViewHolder = h;
 			}
 		}
@@ -78,8 +82,10 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 	}
 
 	public interface OnWalletDeleteListener {
-
-
 		void onDelete(Wallet delete);
 	}
+
+    public interface OnExportWalletListener {
+	    void onExport(Wallet wallet);
+    }
 }

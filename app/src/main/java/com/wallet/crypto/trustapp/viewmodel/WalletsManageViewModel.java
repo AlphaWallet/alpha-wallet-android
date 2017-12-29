@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 
 import com.crashlytics.android.Crashlytics;
 import com.wallet.crypto.trustapp.C;
@@ -15,6 +16,8 @@ import com.wallet.crypto.trustapp.interact.FetchWalletsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
+import com.wallet.crypto.trustapp.router.TransactionsRouter;
+import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
 
 import static com.wallet.crypto.trustapp.C.IMPORT_REQUEST_CODE;
 
@@ -28,6 +31,7 @@ public class WalletsManageViewModel extends BaseViewModel {
     private final ExportWalletInteract exportWalletInteract;
 
 	private final ImportWalletRouter importWalletRouter;
+    private final TransactionsRouter transactionsRouter;
 
 	private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
 	private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -37,13 +41,14 @@ public class WalletsManageViewModel extends BaseViewModel {
 	private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
 
     WalletsManageViewModel(
-			CreateWalletInteract createWalletInteract,
-			SetDefaultWalletInteract setDefaultWalletInteract,
-			DeleteWalletInteract deleteWalletInteract,
-			FetchWalletsInteract fetchWalletsInteract,
-			FindDefaultWalletInteract findDefaultWalletInteract,
+            CreateWalletInteract createWalletInteract,
+            SetDefaultWalletInteract setDefaultWalletInteract,
+            DeleteWalletInteract deleteWalletInteract,
+            FetchWalletsInteract fetchWalletsInteract,
+            FindDefaultWalletInteract findDefaultWalletInteract,
             ExportWalletInteract exportWalletInteract,
-			ImportWalletRouter importWalletRouter) {
+            ImportWalletRouter importWalletRouter,
+            TransactionsRouter transactionsRouter) {
 		this.createWalletInteract = createWalletInteract;
 		this.setDefaultWalletInteract = setDefaultWalletInteract;
 		this.deleteWalletInteract = deleteWalletInteract;
@@ -51,6 +56,7 @@ public class WalletsManageViewModel extends BaseViewModel {
 		this.findDefaultWalletInteract = findDefaultWalletInteract;
 		this.importWalletRouter = importWalletRouter;
 		this.exportWalletInteract = exportWalletInteract;
+		this.transactionsRouter = transactionsRouter;
 
 		fetchWallets();
 	}
@@ -132,4 +138,8 @@ public class WalletsManageViewModel extends BaseViewModel {
 	public void importWallet(Activity activity) {
 		importWalletRouter.openForResult(activity, IMPORT_REQUEST_CODE);
 	}
+
+    public void showTransactions(Context context) {
+        transactionsRouter.open(context, true);
+    }
 }

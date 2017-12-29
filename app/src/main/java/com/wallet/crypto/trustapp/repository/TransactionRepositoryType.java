@@ -5,10 +5,10 @@ import com.wallet.crypto.trustapp.entity.Transaction;
 
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
-import io.reactivex.Single;
+import io.reactivex.Observable;
 
 public interface TransactionRepositoryType {
-	Single<Transaction[]> fetchTransaction(Wallet wallet);
+	Observable<Transaction[]> fetchTransaction(Wallet wallet);
 	Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash);
 	Completable createTransaction(Wallet from, String toAddress, String wei, String password);
 }

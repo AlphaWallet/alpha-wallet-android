@@ -9,6 +9,7 @@ import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
+import com.wallet.crypto.trustapp.router.TransactionsRouter;
 import com.wallet.crypto.trustapp.viewmodel.WalletsManageViewModelFactory;
 
 import dagger.Module;
@@ -25,14 +26,16 @@ class AccountsManageModule {
 			FetchWalletsInteract fetchWalletsInteract,
 			FindDefaultWalletInteract findDefaultWalletInteract,
 			ExportWalletInteract exportWalletInteract,
-			ImportWalletRouter importWalletRouter) {
+			ImportWalletRouter importWalletRouter,
+            TransactionsRouter transactionsRouter) {
 		return new WalletsManageViewModelFactory(createWalletInteract,
                 setDefaultWalletInteract,
                 deleteWalletInteract,
                 fetchWalletsInteract,
                 findDefaultWalletInteract,
                 exportWalletInteract,
-                importWalletRouter);
+                importWalletRouter,
+                transactionsRouter);
 	}
 
 	@Provides
@@ -72,4 +75,9 @@ class AccountsManageModule {
     ImportWalletRouter provideImportAccountRouter() {
 		return new ImportWalletRouter();
 	}
+
+	@Provides
+    TransactionsRouter provideTransactionsRouter() {
+	    return new TransactionsRouter();
+    }
 }

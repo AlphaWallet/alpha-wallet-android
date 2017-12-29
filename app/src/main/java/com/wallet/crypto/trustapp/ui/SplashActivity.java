@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.views;
+package com.wallet.crypto.trustapp.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,19 +21,12 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics.Builder()
                 .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
-
-
         // Start home activity
         if (Controller.with(this).getAccounts().size() == 0) {
-            new ManageWalletsRouter().open(this, false);
+            new ManageWalletsRouter().open(this, true);
         } else {
-            new TransactionsRouter().open(this, false);
+            new TransactionsRouter().open(this, true);
         }
-
-        // close splash activity
-
-        finish();
-
     }
 
 }

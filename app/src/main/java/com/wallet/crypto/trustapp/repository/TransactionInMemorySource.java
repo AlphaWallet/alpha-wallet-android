@@ -19,7 +19,7 @@ public class TransactionInMemorySource implements TransactionLocalSource {
 	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
 		return Single.fromCallable(() -> {
 			CacheUnit unit = cache.get(wallet.address);
-			Transaction[] transactions = null;
+			Transaction[] transactions = new Transaction[0];
 			if (unit != null) {
 				if (System.currentTimeMillis() - unit.create > MAX_TIME_OUT) {
 					cache.remove(wallet.address);

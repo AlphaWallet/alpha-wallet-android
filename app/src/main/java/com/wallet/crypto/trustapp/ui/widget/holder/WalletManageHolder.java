@@ -21,8 +21,10 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 	private final RadioButton defaultAction;
 	private final ImageView deleteAction;
 	private final TextView address;
-	private WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
+    private final ImageView exportAction;
+    private WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
 	private WalletsManageAdapter.OnWalletDeleteListener onWalletDeleteListener;
+	private WalletsManageAdapter.OnExportWalletListener onExportWalletListener;
 	private Wallet wallet;
 
 	public WalletManageHolder(int resId, ViewGroup parent) {
@@ -30,10 +32,12 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 
 		defaultAction = findViewById(R.id.default_action);
 		deleteAction = findViewById(R.id.delete_action);
+		exportAction = findViewById(R.id.export_action);
 		address = findViewById(R.id.address);
 
 		defaultAction.setOnClickListener(this);
 		deleteAction.setOnClickListener(this);
+		exportAction.setOnClickListener(this);
 	}
 
 	@Override
@@ -58,6 +62,10 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 		this.onWalletDeleteListener = onWalletDeleteListener;
 	}
 
+    public void setOnExportWalletListener(WalletsManageAdapter.OnExportWalletListener onExportWalletListener) {
+        this.onExportWalletListener = onExportWalletListener;
+    }
+
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
@@ -71,6 +79,11 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 					onWalletDeleteListener.onDelete(wallet);
 				}
 			}
+            case R.id.export_action: {
+                if (onExportWalletListener != null) {
+                    onExportWalletListener.onExport(wallet);
+                }
+            }
 		}
 	}
 }

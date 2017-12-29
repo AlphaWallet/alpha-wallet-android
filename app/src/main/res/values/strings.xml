@@ -153,6 +153,8 @@
     <string name="title_dialog_error">Error</string>
     <string name="title_dialog_handling">Handling…</string>
     <string name="title_dialog_watch_out">Watch out!</string>
+    <string name="title_dialog_add_account">Add wallet</string>
+    <string name="title_dialog_deposit">How would you like to buy?</string>
     <!-- Dialog messages-->
     <string name="dialog_message">Enter the password to encrypt your wallet</string>
     <string name="dialog_message_unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
@@ -177,11 +179,18 @@
     <!-- Actions -->
     <string name="action_share">Share</string>
     <string name="action_transaction_detail">More details</string>
+    <string name="action_add_wallet">Add wallet</string>
+    <string name="action_coinbase">Coinbase</string>
+    <string name="action_shapeshift">Shapeshift (Crypto only)</string>
+    <string name="action_changelly">Changelly</string>
+    <string name="action_wallets">Wallets</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_load_transaction">Failed to load transaction list</string>
     <string name="error_fail_generate_qr">Could not generate qr code.</string>
     <string name="NA">N/A</string>
     <string name="minus">-</string>
-    <string name="action_add_wallet">Add wallet</string>
+    <string name="error_wallet_not_selected">Wallet is not selected</string>
+    <string name="no_transactions_yet">No transactions yet!</string>
+    <string name="unknown_balance">-- ETH</string>
 </resources>

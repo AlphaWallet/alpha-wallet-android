@@ -56,7 +56,7 @@ public class ManageWalletsActivity extends BaseActivity implements
 		// Init toolbar
 		toolbar();
 
-		adapter = new WalletsManageAdapter(this::onSetWalletDefault, this::onDeleteWallet);
+		adapter = new WalletsManageAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
 		SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
 		systemView = findViewById(R.id.system_view);
 
@@ -81,7 +81,11 @@ public class ManageWalletsActivity extends BaseActivity implements
 		refreshLayout.setOnRefreshListener(viewModel::fetchWallets);
 	}
 
-	@Override
+    private void onExportWallet(Wallet wallet) {
+        showBackupDialog(wallet, false);
+    }
+
+    @Override
 	protected void onPause() {
 		super.onPause();
 
@@ -92,7 +96,7 @@ public class ManageWalletsActivity extends BaseActivity implements
 	public void onBackPressed() {
 		// User can't start work without wallet.
 		if (adapter.getItemCount() > 0) {
-			super.onBackPressed();
+			viewModel.showTransactions(this);
 		} else {
 			finish();
 			System.exit(0);

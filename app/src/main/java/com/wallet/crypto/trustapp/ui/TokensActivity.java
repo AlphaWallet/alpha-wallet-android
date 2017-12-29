@@ -82,6 +82,9 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
 
     private void onTokens(Token[] tokens) {
         adapter.setTokens(tokens);
+        if (tokens == null || tokens.length == 0) {
+            systemView.showEmpty(getString(R.string.no_tokens));
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

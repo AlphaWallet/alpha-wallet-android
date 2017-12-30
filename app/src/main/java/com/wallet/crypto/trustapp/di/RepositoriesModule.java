@@ -43,10 +43,8 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	AccountKeystoreService provideAccountKeyStoreService(Context context) {
-		// TODO: KeyStore lock File. Use prepared keystore by migration in process
-        File file = new File(context.getFilesDir(), "keystore");
+        File file = new File(context.getFilesDir(), "keystore/keystore");
 		return new GethKeystoreAccountService(file);
-//		return new GethKeystoreAccountService(Controller.with(context).getEtherStore());
 	}
 
 	@Singleton

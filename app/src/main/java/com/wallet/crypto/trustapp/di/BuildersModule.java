@@ -4,6 +4,7 @@ import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
 import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
 import com.wallet.crypto.trustapp.ui.MyAddressActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
+import com.wallet.crypto.trustapp.ui.SplashActivity;
 import com.wallet.crypto.trustapp.ui.TokensActivity;
 import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;
@@ -13,6 +14,10 @@ import dagger.android.ContributesAndroidInjector;
 
 @Module
 public abstract class BuildersModule {
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SplashModule.class)
+	abstract SplashActivity bindSplashModule();
+
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AccountsManageModule.class)
 	abstract ManageWalletsActivity bindManageWalletsModule();

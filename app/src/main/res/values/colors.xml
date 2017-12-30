@@ -9,7 +9,7 @@
 	<color name="colorPrimaryDark">#1E76CE</color>
 	<color name="colorAccent">#2e91db</color>
 
-    <color name="title">#89000000</color>
+    <!--<color name="title">#89000000</color>-->
 	<color name="secondary_text">#40000000</color>
 
 	<color name="bottom_dialog_title">#89000000</color>

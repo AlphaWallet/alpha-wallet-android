@@ -6,7 +6,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import com.wallet.crypto.trustapp.controller.ServiceErrorException;
+import com.wallet.crypto.trustapp.entity.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.util.KS;
 import com.wallet.pwd.trustapp.PasswordManager;
@@ -38,10 +38,9 @@ public class TrustPasswordStore implements PasswordStore {
                 String address = key.replace("-pwd", "");
                 try {
                     KS.put(context, address.toLowerCase(), PasswordManager.getPassword(address, context));
-                } catch (ServiceErrorException ex) {
+                } catch (Exception ex) {
                     Toast.makeText(context, "Could not process passwords.", Toast.LENGTH_LONG)
                             .show();
-                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }

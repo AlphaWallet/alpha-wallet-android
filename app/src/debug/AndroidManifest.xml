@@ -28,49 +28,7 @@
         android:theme="@style/AppTheme.NoActionBar"
         >
         <activity
-            android:name=".views.TransactionListActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/title_trust"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".views.TransactionDetailActivity"
-            android:label="@string/title_item_detail"
-            android:parentActivityName=".views.TransactionListActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.wallet.crypto.trustapp.views.TransactionListActivity" />
-        </activity>
-        <activity
-            android:name=".views.CreateAccountActivity"
-            android:label="@string/title_activity_create_account" />
-        <activity
-            android:name=".views.SendActivity"
-            android:label="@string/title_send" />
-        <activity
-            android:name=".views.AccountListActivity"
-            android:label="@string/title_account_list"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".views.ImportAccountActivity"
-            android:label="@string/title_activity_import_account"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".views.ExportAccountActivity"
-            android:label="@string/title_activity_export_account"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".views.IntroActivity"
-            android:label="@string/app_intro"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".views.barcode.BarcodeCaptureActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity
-            android:name=".views.RequestActivity"
-            android:label="@string/title_request" />
-        <activity
-            android:name=".views.SplashActivity"
+            android:name=".ui.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -78,20 +36,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".views.SettingsActivity"
-            android:label="@string/title_activity_settings">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.wallet.crypto.trustapp.views.TransactionListActivity" />
-        </activity>
-        <activity
-            android:name=".views.WarningBackupActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".views.TokenListActivity"
-            android:label="@string/title_activity_token_list"
-            android:theme="@style/AppTheme.NoActionBar" />
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="74d3fa8b5038a154c0c05555d27112a0d4a80d68" />

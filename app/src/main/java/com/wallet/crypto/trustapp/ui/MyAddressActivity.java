@@ -17,7 +17,6 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
@@ -31,6 +30,7 @@ import static com.wallet.crypto.trustapp.C.Key.WALLET;
 public class MyAddressActivity extends BaseActivity implements View.OnClickListener {
 
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
+    public static final String KEY_ADDRESS = "key_address";
 
     @Inject
     protected EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -80,7 +80,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(Controller.KEY_ADDRESS, wallet.address);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, wallet.address);
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }

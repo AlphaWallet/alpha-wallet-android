@@ -3,6 +3,8 @@ package com.wallet.crypto.trustapp.ui;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -11,7 +13,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
@@ -60,7 +61,7 @@ public class SettingsFragment extends PreferenceFragment
             setRpcServerPreferenceData(listPreference);
             return false;
         });
-        String versionString = Controller.with(getActivity()).getVersion();
+        String versionString = getVersion();
         Preference version = findPreference("pref_version");
         version.setSummary(versionString);
         SharedPreferences preferences = PreferenceManager
@@ -174,6 +175,17 @@ public class SettingsFragment extends PreferenceFragment
         lp.setValue(currentValue);
         lp.setSummary(currentValue);
         lp.setEntryValues(entryValues);
+    }
+
+    public String getVersion() {
+        String version = "N/A";
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            version = pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return version;
     }
 }
 

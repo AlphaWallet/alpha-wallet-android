@@ -4,17 +4,20 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.controller.Controller;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.viewmodel.TransactionDetailViewModel;
 import com.wallet.crypto.trustapp.viewmodel.TransactionDetailViewModelFactory;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -49,13 +52,19 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         ((TextView) findViewById(R.id.to)).setText(transaction.to);
         ((TextView) findViewById(R.id.gas_fee)).setText(transaction.gasUsed);
         ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
-        ((TextView) findViewById(R.id.txn_time)).setText(Controller.GetDate(transaction.timeStamp));
+        ((TextView) findViewById(R.id.txn_time)).setText(getDate(transaction.timeStamp));
         ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
         findViewById(R.id.more_detail).setOnClickListener(this);
 
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
                 .get(TransactionDetailViewModel.class);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+    }
+
+    private String getDate(long timeStampInSec) {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(timeStampInSec * 1000);
+        return DateFormat.getLongDateFormat(this).format(cal.getTime());
     }
 
     @Override

@@ -10,13 +10,13 @@ import android.widget.TextView;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
-import com.wallet.crypto.trustapp.views.TransactionListActivity;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
+    private static final int SIGNIFICANT_FIGURES = 3;
     private final TextView name;
     private final TextView symbol;
     private final TextView balance;
@@ -47,7 +47,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             BigDecimal balance = new BigDecimal(token.balance);
             BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
             balance = token.tokenInfo.decimals > 0 ? balance.divide(decimalDivisor) : balance;
-            balance = balance.setScale(TransactionListActivity.SIGNIFICANT_FIGURES, RoundingMode.HALF_UP).stripTrailingZeros();
+            balance = balance.setScale(SIGNIFICANT_FIGURES, RoundingMode.HALF_UP).stripTrailingZeros();
             this.balance.setText(balance.toPlainString());
         } catch (Exception e) {
             fillEmpty();

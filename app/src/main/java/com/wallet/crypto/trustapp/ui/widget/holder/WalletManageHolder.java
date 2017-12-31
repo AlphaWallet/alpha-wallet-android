@@ -78,12 +78,12 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 				if (onWalletDeleteListener != null) {
 					onWalletDeleteListener.onDelete(wallet);
 				}
-			}
+			} break;
             case R.id.export_action: {
                 if (onExportWalletListener != null) {
                     onExportWalletListener.onExport(wallet);
                 }
-            }
+            } break;
 		}
 	}
 }

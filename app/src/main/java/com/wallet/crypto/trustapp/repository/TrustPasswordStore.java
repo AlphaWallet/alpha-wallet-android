@@ -66,7 +66,7 @@ public class TrustPasswordStore implements PasswordStore {
 	public Completable setPassword(Wallet wallet, String password) {
 		return Completable.fromAction(() -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                KS.put(context, password, wallet.address);
+                KS.put(context, wallet.address, password);
             } else {
                 try {
                     PasswordManager.setPassword(wallet.address, password, context);

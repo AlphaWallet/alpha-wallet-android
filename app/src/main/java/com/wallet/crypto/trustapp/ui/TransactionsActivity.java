@@ -102,7 +102,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         setSubtitle("");
         adapter.clear();
         viewModel.prepare();
-//        checkGuard();
         checkRoot();
     }
 

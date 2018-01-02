@@ -48,6 +48,20 @@ public abstract class BaseActivity extends AppCompatActivity {
 		}
 	}
 
+	protected void hideToolbar() {
+        ActionBar actionBar = getSupportActionBar();
+	    if (actionBar != null) {
+	        actionBar.hide();
+        }
+    }
+
+    protected void showToolbar() {
+        ActionBar actionBar = getSupportActionBar();
+	    if (actionBar != null) {
+	        actionBar.show();
+        }
+    }
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {

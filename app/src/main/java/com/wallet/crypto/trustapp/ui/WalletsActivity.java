@@ -23,6 +23,7 @@ import com.wallet.crypto.trustapp.viewmodel.WalletsViewModel;
 import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
 import com.wallet.crypto.trustapp.widget.AddWalletView;
 import com.wallet.crypto.trustapp.widget.BackupView;
+import com.wallet.crypto.trustapp.widget.BackupWarningView;
 import com.wallet.crypto.trustapp.widget.SystemView;
 
 import javax.inject.Inject;
@@ -44,20 +45,22 @@ public class WalletsActivity extends BaseActivity implements
 	private WalletsManageAdapter adapter;
 
 	private SystemView systemView;
-	private Dialog dialog;
+    private BackupWarningView backupWarning;
+    private Dialog dialog;
 
-	@Override
+    @Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		AndroidInjection.inject(this);
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_accounts);
+		setContentView(R.layout.activity_wallets);
 		// Init toolbar
 		toolbar();
 
 		adapter = new WalletsManageAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
 		SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
 		systemView = findViewById(R.id.system_view);
+		backupWarning = findViewById(R.id.backup_warning);
 
 		RecyclerView list = findViewById(R.id.list);
 
@@ -66,6 +69,8 @@ public class WalletsActivity extends BaseActivity implements
 
 		systemView.attachRecyclerView(list);
 		systemView.attachSwipeRefreshLayout(refreshLayout);
+		backupWarning.setOnPositiveClickListener(this::onNowBackup);
+		backupWarning.setOnNegativeClickListener(this::onLaterBackup);
 
 		viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
 				.get(WalletsViewModel.class);
@@ -138,12 +143,28 @@ public class WalletsActivity extends BaseActivity implements
             if (resultCode == RESULT_OK) {
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_exported), Snackbar.LENGTH_SHORT)
                         .show();
+                backupWarning.hide();
+                showToolbar();
+                hideDialog();
+                if (adapter.getItemCount() <= 1) {
+                    onBackPressed();
+                }
             } else {
                 dialog = buildDialog()
                         .setMessage(R.string.do_manage_make_backup)
-                        .setPositiveButton(R.string.yes_continue, null)
+                        .setPositiveButton(R.string.yes_continue, (dialog, which) -> {
+                            hideDialog();
+                            backupWarning.hide();
+                            showToolbar();
+                            if (adapter.getItemCount() <= 1) {
+                                onBackPressed();
+                            }
+                        })
                         .setNegativeButton(R.string.no_repeat,
-                                (dialog, which) -> openShareDialog(viewModel.exportedStore().getValue()))
+                                (dialog, which) -> {
+                                    openShareDialog(viewModel.exportedStore().getValue());
+                                    hideDialog();
+                                })
                         .create();
                 dialog.show();
             }
@@ -194,34 +215,38 @@ public class WalletsActivity extends BaseActivity implements
 			addWalletView.setOnImportWalletClickListener(this);
 			systemView.showEmpty(addWalletView);
 			adapter.setWallets(new Wallet[0]);
-		} else {
+            hideToolbar();
+        } else {
 			enableDisplayHomeAsUp();
 			adapter.setWallets(wallets);
-		}
+//            showToolbar();
+        }
 		invalidateOptionsMenu();
 	}
 
 	private void onCreatedWallet(Wallet wallet) {
-		dialog = buildDialog()
-				.setTitle(R.string.message_no_backup)
-				.setIcon(R.mipmap.backup_warning)
-				.setMessage(R.string.backup_warning_text)
-				.setPositiveButton(R.string.action_backup_wallet,
-                        (dialogInterface, i) -> showBackupDialog(wallet, true))
-				.setNegativeButton(R.string.action_backup_later,
-                        (dialogInterface, i) -> showNoBackupWarning(wallet))
-				.create();
-		dialog.show();
+        hideToolbar();
+        backupWarning.show(wallet);
 	}
+
+	private void onLaterBackup(View view, Wallet wallet) {
+        showNoBackupWarning(wallet);
+    }
+
+    private void onNowBackup(View view, Wallet wallet) {
+        showBackupDialog(wallet, true);
+    }
 
     private void showNoBackupWarning(Wallet wallet) {
         dialog = buildDialog()
                 .setTitle(getString(R.string.title_dialog_watch_out))
                 .setMessage(getString(R.string.dialog_message_unrecoverable_message))
                 .setIcon(R.drawable.ic_warning_black_24dp)
-                .setPositiveButton(android.R.string.yes,
-                        (dialog, whichButton) -> showBackupDialog(wallet, true))
-                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+                    backupWarning.hide();
+                    showToolbar();
+                })
+                .setNegativeButton(android.R.string.no, (dialog, whichButton) -> showBackupDialog(wallet, true))
                 .create();
         dialog.show();
     }
@@ -277,7 +302,7 @@ public class WalletsActivity extends BaseActivity implements
 
 	private void hideDialog() {
 		if (dialog != null && dialog.isShowing()) {
-			dialog.hide();
+			dialog.dismiss();
 			dialog = null;
 		}
 	}

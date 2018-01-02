@@ -149,7 +149,7 @@ public class TransactionsViewModel extends BaseViewModel {
         settingsRouter.open(context);
     }
 
-    public void openSend(Context context) { sendRouter.open(context); }
+    public void showSend(Context context) { sendRouter.open(context); }
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);

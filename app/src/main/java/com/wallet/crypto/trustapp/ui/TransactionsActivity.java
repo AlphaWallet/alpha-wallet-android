@@ -21,7 +21,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -69,13 +68,15 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.action_my_address: {
+                    viewModel.showMyAddress(TransactionsActivity.this);
                 }
                 break;
                 case R.id.action_send: {
-                    viewModel.openSend(TransactionsActivity.this);
+                    viewModel.showSend(TransactionsActivity.this);
                 }
                 break;
                 case R.id.action_my_tokens: {
+                    viewModel.showTokens(TransactionsActivity.this);
                 }
                 break;
             }
@@ -210,7 +211,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
             actionBar.setSubtitle(wallet.address);
         } else {
             actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
-            actionBar.setSubtitle(balance.get(C.USD_SYMBOL) + " " + networkInfo.symbol);
+            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
         }
     }
 

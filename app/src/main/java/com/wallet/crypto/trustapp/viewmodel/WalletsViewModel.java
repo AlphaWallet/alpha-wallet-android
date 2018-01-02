@@ -17,11 +17,10 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
-import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
 
 import static com.wallet.crypto.trustapp.C.IMPORT_REQUEST_CODE;
 
-public class WalletsManageViewModel extends BaseViewModel {
+public class WalletsViewModel extends BaseViewModel {
 
 	private final CreateWalletInteract createWalletInteract;
 	private final SetDefaultWalletInteract setDefaultWalletInteract;
@@ -40,7 +39,7 @@ public class WalletsManageViewModel extends BaseViewModel {
 	private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
 	private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
 
-    WalletsManageViewModel(
+    WalletsViewModel(
             CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             DeleteWalletInteract deleteWalletInteract,

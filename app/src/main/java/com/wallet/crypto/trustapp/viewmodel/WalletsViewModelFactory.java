@@ -15,7 +15,7 @@ import com.wallet.crypto.trustapp.router.TransactionsRouter;
 
 import javax.inject.Inject;
 
-public class WalletsManageViewModelFactory implements ViewModelProvider.Factory {
+public class WalletsViewModelFactory implements ViewModelProvider.Factory {
 
 	private final CreateWalletInteract createWalletInteract;
 	private final SetDefaultWalletInteract setDefaultWalletInteract;
@@ -29,7 +29,7 @@ public class WalletsManageViewModelFactory implements ViewModelProvider.Factory 
 
 
     @Inject
-	public WalletsManageViewModelFactory(
+	public WalletsViewModelFactory(
             CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             DeleteWalletInteract deleteWalletInteract,
@@ -51,7 +51,7 @@ public class WalletsManageViewModelFactory implements ViewModelProvider.Factory 
 	@NonNull
 	@Override
 	public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-		return (T) new WalletsManageViewModel(
+		return (T) new WalletsViewModel(
                 createWalletInteract,
                 setDefaultWalletInteract,
                 deleteWalletInteract,

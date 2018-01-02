@@ -93,11 +93,13 @@ public class SettingsFragment extends PreferenceFragment
 
         email.setOnPreferenceClickListener(preference -> {
 
-            Intent mailto = new Intent(Intent.ACTION_SEND);
+            Intent mailto = new Intent(Intent.ACTION_SENDTO);
             mailto.setType("message/rfc822") ; // use from live device
-            mailto.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@trustwalletapp.com"});
-            mailto.putExtra(Intent.EXTRA_SUBJECT,"Android support question");
-            mailto.putExtra(Intent.EXTRA_TEXT,"Dear Trust support,");
+            mailto.setData(Uri.parse("mailto:support@trustwalletapp.com")
+                    .buildUpon()
+                    .appendQueryParameter("subject", "Android support question")
+                    .appendQueryParameter("body", "Dear Trust support,")
+                    .build());
             startActivity(Intent.createChooser(mailto, "Select email application."));
             return true;
         });

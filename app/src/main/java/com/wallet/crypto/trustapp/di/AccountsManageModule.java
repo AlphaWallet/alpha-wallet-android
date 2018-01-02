@@ -10,7 +10,7 @@ import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.router.ImportWalletRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
-import com.wallet.crypto.trustapp.viewmodel.WalletsManageViewModelFactory;
+import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -19,7 +19,7 @@ import dagger.Provides;
 class AccountsManageModule {
 
 	@Provides
-    WalletsManageViewModelFactory provideAccountsManageViewModelFactory(
+    WalletsViewModelFactory provideAccountsManageViewModelFactory(
 			CreateWalletInteract createWalletInteract,
 			SetDefaultWalletInteract setDefaultWalletInteract,
 			DeleteWalletInteract deleteWalletInteract,
@@ -28,7 +28,7 @@ class AccountsManageModule {
 			ExportWalletInteract exportWalletInteract,
 			ImportWalletRouter importWalletRouter,
             TransactionsRouter transactionsRouter) {
-		return new WalletsManageViewModelFactory(createWalletInteract,
+		return new WalletsViewModelFactory(createWalletInteract,
                 setDefaultWalletInteract,
                 deleteWalletInteract,
                 fetchWalletsInteract,

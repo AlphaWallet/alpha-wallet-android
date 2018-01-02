@@ -19,8 +19,8 @@ import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsManageAdapter;
-import com.wallet.crypto.trustapp.viewmodel.WalletsManageViewModel;
-import com.wallet.crypto.trustapp.viewmodel.WalletsManageViewModelFactory;
+import com.wallet.crypto.trustapp.viewmodel.WalletsViewModel;
+import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
 import com.wallet.crypto.trustapp.widget.AddWalletView;
 import com.wallet.crypto.trustapp.widget.BackupView;
 import com.wallet.crypto.trustapp.widget.SystemView;
@@ -32,20 +32,19 @@ import dagger.android.AndroidInjection;
 import static com.wallet.crypto.trustapp.C.IMPORT_REQUEST_CODE;
 import static com.wallet.crypto.trustapp.C.SHARE_REQUEST_CODE;
 
-public class ManageWalletsActivity extends BaseActivity implements
+public class WalletsActivity extends BaseActivity implements
 		View.OnClickListener,
         AddWalletView.OnNewWalletClickListener,
         AddWalletView.OnImportWalletClickListener {
 
 	@Inject
-    WalletsManageViewModelFactory walletsManageViewModelFactory;
-	WalletsManageViewModel viewModel;
+    WalletsViewModelFactory walletsViewModelFactory;
+	WalletsViewModel viewModel;
 
 	private WalletsManageAdapter adapter;
 
 	private SystemView systemView;
 	private Dialog dialog;
-//	private View addAction;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,8 +67,8 @@ public class ManageWalletsActivity extends BaseActivity implements
 		systemView.attachRecyclerView(list);
 		systemView.attachSwipeRefreshLayout(refreshLayout);
 
-		viewModel = ViewModelProviders.of(this, walletsManageViewModelFactory)
-				.get(WalletsManageViewModel.class);
+		viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
+				.get(WalletsViewModel.class);
 
 		viewModel.error().observe(this, this::onError);
 		viewModel.progress().observe(this, systemView::showProgress);
@@ -101,7 +100,6 @@ public class ManageWalletsActivity extends BaseActivity implements
 			finish();
 			System.exit(0);
 		}
-		// TODO: Process first start
 	}
 
     @Override
@@ -118,6 +116,10 @@ public class ManageWalletsActivity extends BaseActivity implements
             case R.id.action_add: {
                 onAddWallet();
             } break;
+            case android.R.id.home: {
+                onBackPressed();
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }

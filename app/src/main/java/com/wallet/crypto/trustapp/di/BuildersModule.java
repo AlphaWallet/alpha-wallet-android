@@ -1,7 +1,7 @@
 package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
-import com.wallet.crypto.trustapp.ui.ManageWalletsActivity;
+import com.wallet.crypto.trustapp.ui.WalletsActivity;
 import com.wallet.crypto.trustapp.ui.MyAddressActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
 import com.wallet.crypto.trustapp.ui.SplashActivity;
@@ -20,7 +20,7 @@ public abstract class BuildersModule {
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AccountsManageModule.class)
-	abstract ManageWalletsActivity bindManageWalletsModule();
+	abstract WalletsActivity bindManageWalletsModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = ImportModule.class)

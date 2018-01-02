@@ -16,11 +16,11 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.trustapp.util.BallanceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModel;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
-import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 
 import org.ethereum.geth.Address;
 

@@ -22,8 +22,8 @@
         android:id="@+id/img"
         android:contentDescription="@string/empty"
         android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/intro_img_size"
+        android:layout_height="@dimen/intro_img_size"
         android:src="@mipmap/onboarding_lock"
         />
     <TextView

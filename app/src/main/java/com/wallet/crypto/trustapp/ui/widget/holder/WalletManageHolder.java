@@ -35,6 +35,7 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 		exportAction = findViewById(R.id.export_action);
 		address = findViewById(R.id.address);
 
+		address.setOnClickListener(this);
 		defaultAction.setOnClickListener(this);
 		deleteAction.setOnClickListener(this);
 		exportAction.setOnClickListener(this);
@@ -52,6 +53,8 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 		address.setText(wallet.address);
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
+		deleteAction.setVisibility(addition.getBoolean(IS_DEFAULT_ADDITION, false)
+                ? View.GONE : View.VISIBLE);
 	}
 
 	public void setOnSetWalletDefaultListener(WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener) {
@@ -69,6 +72,7 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
+            case R.id.address:
 			case R.id.default_action: {
 				if (onSetWalletDefaultListener != null) {
 					onSetWalletDefaultListener.onSetDefault(wallet);

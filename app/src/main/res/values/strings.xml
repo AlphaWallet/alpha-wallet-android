@@ -210,9 +210,12 @@
     <string name="minus">-</string>
     <string name="error_wallet_not_selected">Wallet is not selected</string>
     <string name="no_transactions_yet">No transactions yet!</string>
-    <string name="unknown_balance">-- ETH</string>
+    <string name="unknown_balance_with_symbol">-- ETH</string>
+    <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy">dummy_value</string>
     <string name="dummy_transaction_value">X ETH</string>
     <string name="title_dialog_sending">Sending...</string>
-    >>>>>>> move-to-mvvm
+    <string name="welcome.erc20.label.title">ERC20 Compatible</string>
+    <string name="welcome.erc20.label.description">Support for ERC20 tokens by default.</string>
+    <string name="i_understand">I understand</string>
 </resources>

@@ -47,6 +47,7 @@ public class WalletsActivity extends BaseActivity implements
 	private SystemView systemView;
     private BackupWarningView backupWarning;
     private Dialog dialog;
+    private boolean isSetDefault;
 
     @Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -204,7 +205,11 @@ public class WalletsActivity extends BaseActivity implements
 	}
 
 	private void onChangeDefaultWallet(Wallet wallet) {
-		adapter.setDefaultWallet(wallet);
+        if (isSetDefault) {
+            viewModel.showTransactions(this);
+        } else {
+            adapter.setDefaultWallet(wallet);
+        }
 	}
 
 	private void onFetchWallet(Wallet[] wallets) {
@@ -219,7 +224,6 @@ public class WalletsActivity extends BaseActivity implements
         } else {
 			enableDisplayHomeAsUp();
 			adapter.setWallets(wallets);
-//            showToolbar();
         }
 		invalidateOptionsMenu();
 	}
@@ -242,11 +246,11 @@ public class WalletsActivity extends BaseActivity implements
                 .setTitle(getString(R.string.title_dialog_watch_out))
                 .setMessage(getString(R.string.dialog_message_unrecoverable_message))
                 .setIcon(R.drawable.ic_warning_black_24dp)
-                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+                .setPositiveButton(R.string.i_understand, (dialog, whichButton) -> {
                     backupWarning.hide();
                     showToolbar();
                 })
-                .setNegativeButton(android.R.string.no, (dialog, whichButton) -> showBackupDialog(wallet, true))
+                .setNegativeButton(android.R.string.cancel, null) //(dialog, whichButton) -> showBackupDialog(wallet, true)
                 .create();
         dialog.show();
     }
@@ -282,6 +286,7 @@ public class WalletsActivity extends BaseActivity implements
 
 	private void onSetWalletDefault(Wallet wallet) {
 		viewModel.setDefaultWallet(wallet);
+		isSetDefault = true;
 	}
 
 	private void onDeleteWallet(Wallet wallet) {

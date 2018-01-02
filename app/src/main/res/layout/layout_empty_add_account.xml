@@ -14,7 +14,7 @@
         <android.support.v4.view.ViewPager
             android:id="@+id/intro"
             android:layout_width="match_parent"
-            android:layout_height="340dp"
+            android:layout_height="@dimen/intro_height"
             />
         <com.rd.PageIndicatorView
             android:id="@+id/pageIndicatorView"
@@ -34,23 +34,25 @@
 	<Button
 		android:id="@+id/new_account_action"
 		android:text="@string/action_create_new_account"
+        android:padding="@dimen/big_padding"
 		android:layout_gravity="center_horizontal"
 		android:layout_marginTop="@dimen/big_margin"
-		android:layout_marginStart="@dimen/normal_margin"
-		android:layout_marginEnd="@dimen/normal_margin"
-		android:layout_width="220dp"
+		android:layout_marginStart="@dimen/big_margin"
+		android:layout_marginEnd="@dimen/big_margin"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		style="@style/Widget.AppCompat.Button.Colored"
 		/>
 	<Button
 		android:id="@+id/import_account_action"
 		android:text="@string/already_have_account"
-		android:gravity="center_horizontal|center_vertical"
-		android:layout_gravity="center_horizontal"
+        android:padding="@dimen/big_padding"
+        android:gravity="center_horizontal|center_vertical"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/normal_margin"
-		android:layout_marginStart="@dimen/normal_margin"
-		android:layout_marginEnd="@dimen/normal_margin"
-		android:layout_width="220dp"
+		android:layout_marginStart="@dimen/big_margin"
+		android:layout_marginEnd="@dimen/big_margin"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		style="@style/Widget.AppCompat.Button"
 		/>

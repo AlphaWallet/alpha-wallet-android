@@ -2,8 +2,6 @@ package com.wallet.crypto.trustapp.repository;
 
 import com.wallet.crypto.trustapp.entity.GasSettings;
 
-import io.reactivex.Single;
-
 public interface PreferenceRepositoryType {
 	String getCurrentWalletAddress();
 	void setCurrentWalletAddress(String address);

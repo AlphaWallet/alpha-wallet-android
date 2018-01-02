@@ -3,19 +3,18 @@ package com.wallet.crypto.trustapp.di;
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.wallet.crypto.trustapp.repository.TokenRepository;
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.service.CoinmarketcapTickerService;
-import com.wallet.crypto.trustapp.repository.WalletRepository;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
+import com.wallet.crypto.trustapp.repository.TokenRepository;
+import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.TransactionInMemorySource;
 import com.wallet.crypto.trustapp.repository.TransactionLocalSource;
 import com.wallet.crypto.trustapp.repository.TransactionRepository;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
+import com.wallet.crypto.trustapp.repository.WalletRepository;
+import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.BlockExplorerClient;
 import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
@@ -23,6 +22,7 @@ import com.wallet.crypto.trustapp.service.EthplorerTokenService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 import com.wallet.crypto.trustapp.service.TickerService;
 import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
+import com.wallet.crypto.trustapp.service.TrustWalletTickerService;
 
 import java.io.File;
 
@@ -50,7 +50,7 @@ public class RepositoriesModule {
 	@Singleton
     @Provides
     TickerService provideTickerService(OkHttpClient httpClient, Gson gson) {
-	    return new CoinmarketcapTickerService(httpClient, gson);
+	    return new TrustWalletTickerService(httpClient, gson);
     }
 
 	@Singleton

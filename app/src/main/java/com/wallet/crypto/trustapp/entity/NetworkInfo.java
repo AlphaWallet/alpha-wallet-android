@@ -6,7 +6,6 @@ public class NetworkInfo {
     public final String rpcServerUrl;
     public final String backendUrl;
     public final String etherscanUrl;
-    public final String ticker;
     public final int chainId;
     public final boolean isMainNetwork;
 
@@ -16,7 +15,6 @@ public class NetworkInfo {
             String rpcServerUrl,
             String backendUrl,
             String etherscanUrl,
-            String ticker,
             int chainId,
             boolean isMainNetwork) {
         this.name = name;
@@ -24,7 +22,6 @@ public class NetworkInfo {
         this.rpcServerUrl = rpcServerUrl;
         this.backendUrl = backendUrl;
         this.etherscanUrl = etherscanUrl;
-        this.ticker = ticker;
         this.chainId = chainId;
         this.isMainNetwork = isMainNetwork;
     }

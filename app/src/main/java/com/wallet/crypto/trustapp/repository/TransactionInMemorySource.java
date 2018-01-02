@@ -2,8 +2,8 @@ package com.wallet.crypto.trustapp.repository;
 
 import android.text.format.DateUtils;
 
-import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.Transaction;
+import com.wallet.crypto.trustapp.entity.Wallet;
 
 import java.util.Map;
 

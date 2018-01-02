@@ -1,8 +1,5 @@
 package com.wallet.crypto.trustapp.repository;
 
-import android.util.Log;
-
-import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Transaction;
@@ -10,7 +7,6 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
 
-import org.reactivestreams.Subscriber;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -21,16 +17,10 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-import io.reactivex.Completable;
-import io.reactivex.FlowableOperator;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Single;
-import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subscribers.DisposableSubscriber;
 
 public class TransactionRepository implements TransactionRepositoryType {
 

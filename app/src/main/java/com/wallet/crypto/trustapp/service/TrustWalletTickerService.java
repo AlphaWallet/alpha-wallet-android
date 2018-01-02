@@ -15,61 +15,59 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 
-public class CoinmarketcapTickerService implements TickerService {
+public class TrustWalletTickerService implements TickerService {
 
-    private static final String COINMARKET_API_URL = "https://api.coinmarketcap.com";
+    private static final String TRUST_API_URL = "https://api.trustwalletapp.com";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
-    private CoinmarketApiClient coinmarketApiClient;
+    private ApiClient apiClient;
 
-    public CoinmarketcapTickerService(
+    public TrustWalletTickerService(
             OkHttpClient httpClient,
             Gson gson) {
         this.httpClient = httpClient;
         this.gson = gson;
-        buildApiClient(COINMARKET_API_URL);
+        buildApiClient(TRUST_API_URL);
     }
 
     private void buildApiClient(String baseUrl) {
-        coinmarketApiClient = new Retrofit.Builder()
+        apiClient = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
-                .create(CoinmarketApiClient.class);
+                .create(ApiClient.class);
     }
 
     @Override
-    public Observable<Ticker> fetchTickerPrice(String ticker) {
-        return coinmarketApiClient
-                .fetchTickerPrice(ticker)
-                .lift(apiError(gson))
-                .map(r -> r[0])
+    public Observable<Ticker> fetchTickerPrice(String symbols) {
+        return apiClient
+                .fetchTickerPrice(symbols)
+                .lift(apiError())
+                .map(r -> r.response[0])
                 .subscribeOn(Schedulers.io());
     }
 
     private static @NonNull
-    <T> ApiErrorOperator<T> apiError(Gson gson) {
-        return new ApiErrorOperator<>(gson);
+    <T> ApiErrorOperator<T> apiError() {
+        return new ApiErrorOperator<>();
     }
 
-    public interface CoinmarketApiClient {
-        @GET("/v1/ticker/{ticker}")
-        Observable<Response<Ticker[]>> fetchTickerPrice(@Path("ticker") String ticker);
+    public interface ApiClient {
+        @GET("prices?currency=USD&")
+        Observable<Response<TrustResponse>> fetchTickerPrice(@Query("symbols") String symbols);
+    }
+
+    private static class TrustResponse {
+        Ticker[] response;
     }
 
     private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
-
-        private final Gson gson;
-
-        public ApiErrorOperator(Gson gson) {
-            this.gson = gson;
-        }
 
         @Override
         public Observer<? super Response<T>> apply(Observer<? super T> observer) throws Exception {

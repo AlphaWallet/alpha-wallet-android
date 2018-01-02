@@ -12,7 +12,6 @@ import java.util.Set;
 import io.reactivex.Single;
 
 import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
-import static com.wallet.crypto.trustapp.C.ETHEREUM_TIKER;
 import static com.wallet.crypto.trustapp.C.ETH_SYMBOL;
 import static com.wallet.crypto.trustapp.C.KOVAN_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.POA_NETWORK_NAME;

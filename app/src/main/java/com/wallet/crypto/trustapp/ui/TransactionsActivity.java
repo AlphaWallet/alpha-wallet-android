@@ -2,17 +2,13 @@ package com.wallet.crypto.trustapp.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.KeyguardManager;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -57,30 +53,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     private TransactionsAdapter adapter;
     private Dialog dialog;
 
-    private BottomNavigationView navigation;
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_my_address: {
-                    viewModel.showMyAddress(TransactionsActivity.this);
-                }
-                break;
-                case R.id.action_send: {
-                    viewModel.showSend(TransactionsActivity.this);
-                }
-                break;
-                case R.id.action_my_tokens: {
-                    viewModel.showTokens(TransactionsActivity.this);
-                }
-                break;
-            }
-            return false;
-        }
-    };
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -93,9 +65,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         setSubtitle("");
         initBottomNavigation();
         dissableDisplayHomeAsUp();
-
-//        navigation = findViewById(R.id.bottom_navigation);
-//        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
@@ -193,6 +162,10 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 viewModel.showTokens(this);
                 return true;
             }
+            case R.id.action_send: {
+                viewModel.showSend(this);
+                return true;
+            }
         }
         return false;
     }
@@ -248,29 +221,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                     })
                     .show();
         }
-    }
-
-//    private void checkGuard() {
-//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-//        if (!isDeviceSecure() && pref.getBoolean(SHOULD_SHOW_SECURITY_WARNING, true)) {
-//            pref.edit().putBoolean(SHOULD_SHOW_SECURITY_WARNING, false).apply();
-//            new AlertDialog.Builder(this)
-//                    .setTitle(R.string.lock_title)
-//                    .setMessage(R.string.lock_body)
-//                    .setPositiveButton(R.string.lock_settings, (dialog, which) -> {
-//                        Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
-//                        startActivity(intent);
-//                    })
-//                    .setNegativeButton(R.string.skip, (dialog, which) -> {
-//                    })
-//                    .show();
-//        }
-//    }
-
-    protected boolean isDeviceSecure() {
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        return keyguardManager != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                ? keyguardManager.isDeviceSecure() : keyguardManager.isKeyguardSecure());
     }
 
     private void openExchangeDialog() {

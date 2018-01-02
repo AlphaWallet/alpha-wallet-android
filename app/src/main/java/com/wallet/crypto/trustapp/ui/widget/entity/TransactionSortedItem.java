@@ -3,7 +3,6 @@ package com.wallet.crypto.trustapp.ui.widget.entity;
 import android.text.format.DateUtils;
 
 import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.ui.widget.holder.TransactionHolder;
 
 import java.util.Calendar;
 import java.util.Date;

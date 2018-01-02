@@ -7,7 +7,6 @@ import com.wallet.crypto.trustapp.util.BallanceUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;

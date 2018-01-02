@@ -1,8 +1,8 @@
 package com.wallet.crypto.trustapp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.ServiceException;
+import com.wallet.crypto.trustapp.entity.Wallet;
 
 import org.ethereum.geth.Accounts;
 import org.ethereum.geth.Address;
@@ -19,10 +19,7 @@ import java.nio.charset.Charset;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
-import io.reactivex.SingleTransformer;
 import io.reactivex.schedulers.Schedulers;
-import rx.exceptions.Exceptions;
 
 import static org.web3j.crypto.Wallet.create;
 

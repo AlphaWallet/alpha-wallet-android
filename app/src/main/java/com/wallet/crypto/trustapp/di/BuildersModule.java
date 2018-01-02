@@ -2,14 +2,14 @@ package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.ui.ConfirmationActivity;
 import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
-import com.wallet.crypto.trustapp.ui.SendActivity;
-import com.wallet.crypto.trustapp.ui.WalletsActivity;
 import com.wallet.crypto.trustapp.ui.MyAddressActivity;
+import com.wallet.crypto.trustapp.ui.SendActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
 import com.wallet.crypto.trustapp.ui.SplashActivity;
 import com.wallet.crypto.trustapp.ui.TokensActivity;
 import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;
+import com.wallet.crypto.trustapp.ui.WalletsActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;

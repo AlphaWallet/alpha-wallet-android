@@ -24,7 +24,7 @@
     </android.support.v4.widget.SwipeRefreshLayout>
     <com.wallet.crypto.trustapp.widget.SystemView
         android:id="@+id/system_view"
-        android:background="@android:color/white"
+        android:background="@color/white"
         android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

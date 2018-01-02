@@ -99,6 +99,7 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void prepare() {
+        progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);

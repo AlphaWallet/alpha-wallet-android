@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.ui.ConfirmationActivity;
 import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
+import com.wallet.crypto.trustapp.ui.SendActivity;
 import com.wallet.crypto.trustapp.ui.WalletsActivity;
 import com.wallet.crypto.trustapp.ui.MyAddressActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;

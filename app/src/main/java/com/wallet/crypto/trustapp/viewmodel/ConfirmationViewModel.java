@@ -2,16 +2,12 @@ package com.wallet.crypto.trustapp.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.util.Log;
 
 import com.wallet.crypto.trustapp.entity.GasSettings;
-import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 import java.math.BigInteger;
 

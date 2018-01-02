@@ -6,12 +6,12 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.WalletRepository;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
+import com.wallet.crypto.trustapp.repository.WalletRepository;
+import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 

@@ -14,10 +14,9 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ExternalBrowserRouter;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
-import com.wallet.crypto.trustapp.router.SendRouter;
-import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.MyAddressRouter;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
+import com.wallet.crypto.trustapp.router.SendRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 

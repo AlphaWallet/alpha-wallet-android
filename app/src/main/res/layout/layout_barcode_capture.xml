@@ -7,10 +7,10 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-    <com.wallet.crypto.trustapp.views.camera.CameraSourcePreview
+    <com.wallet.crypto.trustapp.ui.camera.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-    </com.wallet.crypto.trustapp.views.camera.CameraSourcePreview>
+    </com.wallet.crypto.trustapp.ui.camera.CameraSourcePreview>
 </LinearLayout>

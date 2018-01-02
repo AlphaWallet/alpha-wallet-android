@@ -1,13 +1,10 @@
 package com.wallet.crypto.trustapp.repository;
 
-import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.Transaction;
-
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import com.wallet.crypto.trustapp.entity.Wallet;
 
 import java.math.BigInteger;
 
-import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;

@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.wallet.crypto.trustapp.interact.ImportWalletInteract;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 
 public class ImportWalletViewModelFactory implements ViewModelProvider.Factory {
 

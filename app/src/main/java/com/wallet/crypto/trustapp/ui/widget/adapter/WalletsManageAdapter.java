@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.holder.WalletManageHolder;
 import com.wallet.crypto.trustapp.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.trustapp.ui.widget.holder.WalletManageHolder;
 
 public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 

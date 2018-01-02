@@ -76,6 +76,10 @@
         <activity
             android:name=".ui.CustomPinActivity"
             />
+        <activity
+            android:name=".ui.barcode.BarcodeCaptureActivity"
+            android:label="@string/title_activity_confirmation"
+            />
 
         <meta-data
             android:name="io.fabric.ApiKey"

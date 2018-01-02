@@ -3,7 +3,6 @@ package com.wallet.crypto.trustapp.viewmodel;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.wallet.crypto.trustapp.R;

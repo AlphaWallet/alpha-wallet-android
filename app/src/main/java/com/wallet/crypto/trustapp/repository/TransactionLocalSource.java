@@ -1,7 +1,7 @@
 package com.wallet.crypto.trustapp.repository;
 
-import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.Transaction;
+import com.wallet.crypto.trustapp.entity.Wallet;
 
 import io.reactivex.Single;
 

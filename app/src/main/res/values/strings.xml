@@ -217,5 +217,6 @@
     <string name="welcome.erc20.label.title">ERC20 Compatible</string>
     <string name="welcome.erc20.label.description">Support for ERC20 tokens by default.</string>
     <string name="i_understand">I understand</string>
+    <string name="scan_qr">Get address from QR Code</string>
     >>>>>>> move-to-mvvm
 </resources>

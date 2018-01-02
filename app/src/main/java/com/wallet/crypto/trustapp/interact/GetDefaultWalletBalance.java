@@ -3,7 +3,7 @@ package com.wallet.crypto.trustapp.interact;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.util.BallanceUtils;
+import com.wallet.crypto.trustapp.util.BalanceUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.wallet.crypto.trustapp.C.USD_SYMBOL;
-import static com.wallet.crypto.trustapp.util.BallanceUtils.weiToEth;
+import static com.wallet.crypto.trustapp.util.BalanceUtils.weiToEth;
 
 public class GetDefaultWalletBalance {
 
@@ -39,7 +39,7 @@ public class GetDefaultWalletBalance {
                         .observeOn(Schedulers.io())
                         .flatMap(ticker -> {
                             String ethBallance = balances.get(ethereumNetworkRepository.getDefaultNetwork().symbol);
-                            balances.put(USD_SYMBOL, BallanceUtils.ethToUsd(ticker.price, ethBallance));
+                            balances.put(USD_SYMBOL, BalanceUtils.ethToUsd(ticker.price, ethBallance));
                             return Single.just(balances);
                         })
                         .onErrorResumeNext(throwable -> Single.just(balances)))

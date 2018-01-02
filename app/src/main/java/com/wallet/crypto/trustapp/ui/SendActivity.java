@@ -17,7 +17,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
-import com.wallet.crypto.trustapp.util.BallanceUtils;
+import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModel;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
@@ -153,7 +153,7 @@ public class SendActivity extends BaseActivity {
 
     boolean isValidEthAmount(String eth) {
         try {
-            String wei = BallanceUtils.EthToWei(eth);
+            String wei = BalanceUtils.EthToWei(eth);
             return wei != null;
         } catch (Exception e) {
             return false;

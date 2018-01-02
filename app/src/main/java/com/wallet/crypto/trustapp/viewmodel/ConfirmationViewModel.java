@@ -28,12 +28,10 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.createTransactionInteract = createTransactionInteract;
     }
 
-    public void createTransaction(String from, String to, String amount, String gasPrice, String gasLimit) {
+    public void createTransaction(String from, String to, String amount, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
-        BigInteger gasPriceBI = new BigInteger(gasPrice);
-        BigInteger gasLimitBI = new BigInteger(gasLimit);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPriceBI, gasLimitBI)
+                .create(new Wallet(from), to, amount, gasPrice, gasLimit)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 

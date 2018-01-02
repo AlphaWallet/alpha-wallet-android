@@ -1,138 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
-<include layout="@layout/layout_app_bar"/>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    >
+    <include layout="@layout/layout_app_bar" />
 
-    <TextView
-        android:id="@+id/text_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy_transaction_value"
-        android:textAppearance="?android:textAppearanceLarge"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-         />
-
-    <TextView
-        android:id="@+id/label_from"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/label_from"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_value"
-        android:textAppearance="?textAppearanceListItem"
-         />
-
-    <TextView
-        android:id="@+id/text_from"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy"
-        android:textAppearance="?textAppearanceListItemSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_from"
-        />
-
-    <TextView
-        android:id="@+id/label_to"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/label_to"
-        android:textAppearance="?textAppearanceListItem"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_from"
-        />
-
-    <TextView
-        android:id="@+id/text_to"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy"
-        android:textAppearance="?textAppearanceListItemSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_to"
-        />
-
-    <TextView
-        android:id="@+id/label_gas_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/label_gas_price"
-        android:textAppearance="?textAppearanceListItem"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_to"
-        />
-
-    <TextView
-        android:id="@+id/text_gas_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy"
-        android:textAppearance="?textAppearanceListItemSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_gas_price"
-        />
-
-    <TextView
-        android:id="@+id/label_gas_limit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/label_gas_limit"
-        android:textAppearance="?textAppearanceListItem"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_gas_price"
-        />
-
-    <TextView
-        android:id="@+id/text_gas_limit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy"
-        android:textAppearance="?textAppearanceListItemSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_gas_limit"
-        />
-
-    <TextView
-        android:id="@+id/label_network_fee"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/label_network_fee"
-        android:textAppearance="?textAppearanceListItem"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_gas_limit"
-        />
-
-    <TextView
-        android:id="@+id/text_network_fee"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy"
-        android:textAppearance="?textAppearanceListItemSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/label_network_fee"
-        />
-
-    <Button
-        android:id="@+id/send_button"
-        style="@style/Widget.AppCompat.Button.Colored"
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/action_send"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/text_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dummy_transaction_value"
+            android:textAppearance="?android:textAppearanceLarge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/text_value">
+
+            <TextView
+                android:id="@+id/label_from"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_from" />
+
+            <TextView
+                android:id="@+id/text_from"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:textIsSelectable="true"
+                android:text="@string/dummy"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+            <TextView
+                android:id="@+id/label_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_to" />
+
+            <TextView
+                android:id="@+id/text_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:textIsSelectable="true"
+                android:text="@string/dummy"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+            <TextView
+                android:id="@+id/label_gas_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_gas_price" />
+
+            <TextView
+                android:id="@+id/text_gas_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:textIsSelectable="true"
+                android:text="@string/dummy"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+            <TextView
+                android:id="@+id/label_gas_limit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_gas_limit" />
+
+            <TextView
+                android:id="@+id/text_gas_limit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:textIsSelectable="true"
+                android:text="@string/dummy"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+            <TextView
+                android:id="@+id/label_network_fee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_network_fee" />
+
+            <TextView
+                android:id="@+id/text_network_fee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:textIsSelectable="true"
+                android:text="@string/dummy"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/send_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_send"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
 
-</android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 </LinearLayout>

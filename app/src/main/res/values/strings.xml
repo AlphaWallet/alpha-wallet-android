@@ -213,7 +213,7 @@
     <string name="unknown_balance_with_symbol">-- ETH</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy">dummy_value</string>
-    <string name="dummy_transaction_value">X ETH</string>
+    <string name="dummy_transaction_value">-- ETH</string>
     <string name="title_dialog_sending">Sending...</string>
     <string name="welcome.erc20.label.title">ERC20 Compatible</string>
     <string name="welcome.erc20.label.description">Support for ERC20 tokens by default.</string>

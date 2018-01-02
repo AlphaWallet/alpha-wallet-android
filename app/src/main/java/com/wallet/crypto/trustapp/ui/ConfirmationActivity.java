@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,8 +19,13 @@ import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.GasSettings;
 import com.wallet.crypto.trustapp.entity.Wallet;
+import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
+
+import org.web3j.utils.Convert;
+
+import java.math.BigInteger;
 
 import javax.inject.Inject;
 
@@ -39,6 +45,8 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView gasLimitText;
     private TextView networkFeeText;
     private Button sendButton;
+
+    private String amount;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,10 +68,15 @@ public class ConfirmationActivity extends BaseActivity {
         sendButton.setOnClickListener(view -> onSend());
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
-        String amount = getIntent().getStringExtra(C.EXTRA_AMOUNT);
+        amount = getIntent().getStringExtra(C.EXTRA_AMOUNT);
+        String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
+        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
 
         toAddressText.setText(toAddress);
-        valueText.setText(amount);
+
+        String amountString = "-" + amount + " " + symbol;
+        valueText.setText(amountString);
+        valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
 
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
@@ -119,12 +132,14 @@ public class ConfirmationActivity extends BaseActivity {
     }
 
     private void onSend() {
+        GasSettings gasSettings = viewModel.gasSettings().getValue();
+
         viewModel.createTransaction(
                 fromAddressText.getText().toString(),
                 toAddressText.getText().toString(),
-                valueText.getText().toString(),
-                gasPriceText.getText().toString(),
-                gasLimitText.getText().toString()
+                amount,
+                gasSettings.gasPrice,
+                gasSettings.gasLimit
         );
     }
 
@@ -133,8 +148,8 @@ public class ConfirmationActivity extends BaseActivity {
     }
 
     private void onTransaction(String hash) {
-         hideDialog();
-         dialog = new AlertDialog.Builder(this)
+        hideDialog();
+        dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.transaction_succeeded)
                 .setMessage(hash)
                 .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
@@ -150,9 +165,13 @@ public class ConfirmationActivity extends BaseActivity {
     }
 
     private void onGasSettings(GasSettings gasSettings) {
-        gasPriceText.setText(gasSettings.gasPrice.toString());
+        String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
+        gasPriceText.setText(gasPrice);
         gasLimitText.setText(gasSettings.gasLimit.toString());
-        networkFeeText.setText(gasSettings.gasPrice.multiply(gasSettings.gasLimit).toString());
+
+        String networkFee = BalanceUtils.weiToEth(gasSettings
+                .gasPrice.multiply(gasSettings.gasLimit)).toPlainString() + " " + C.ETH_SYMBOL;
+        networkFeeText.setText(networkFee);
     }
 
     private void onError(ErrorEnvelope error) {

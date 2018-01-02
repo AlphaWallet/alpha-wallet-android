@@ -20,6 +20,8 @@ public abstract class C {
     public static final String ETH_SYMBOL = "ETH";
     public static final String POA_SYMBOL = "POA";
 
+    public static final String GWEI_UNIT = "Gwei";
+
     public static final String EXTRA_ADDRESS = "ADDRESS";
     public static final String EXTRA_CONTRACT_ADDRESS = "CONTRACT_ADDRESS";
     public static final String EXTRA_DECIMALS = "DECIMALS";

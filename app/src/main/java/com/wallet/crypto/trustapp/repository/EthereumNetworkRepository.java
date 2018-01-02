@@ -25,22 +25,18 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
                     "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://api.trustwalletapp.com/",
-                    "https://etherscan.io/",
-                    ETHEREUM_TIKER, 1, true),
+                    "https://etherscan.io/",1, true),
             new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
                     "https://core.poa.network",
-                    "https://poa.trustwalletapp.com",
-                    null, "poa", 99, true),
+                    "https://poa.trustwalletapp.com","poa", 99, false),
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL,
                     "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://kovan.trustwalletapp.com/",
-                    "https://kovan.etherscan.io",
-                    ETHEREUM_TIKER, 42, false),
+                    "https://kovan.etherscan.io", 42, false),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
                     "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://ropsten.trustwalletapp.com/",
-                    "https://ropsten.etherscan.io",
-                    ETHEREUM_TIKER, 3, false),
+                    "https://ropsten.etherscan.io",3, false),
 	};
 
 	private final PreferenceRepositoryType preferences;
@@ -96,6 +92,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
     @Override
     public Single<Ticker> getTicker() {
         return Single.fromObservable(tickerService
-                .fetchTickerPrice(getDefaultNetwork().ticker));
+                .fetchTickerPrice(getDefaultNetwork().symbol));
     }
 }

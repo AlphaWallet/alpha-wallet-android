@@ -139,7 +139,7 @@ public class SendActivity extends BaseActivity {
             return;
         }
 
-        viewModel.openConfirmation(this, to, amount);
+        viewModel.openConfirmation(this, to, amount, contractAddress, decimals, symbol, sendingTokens);
     }
 
     boolean isAddressValid(String address) {

@@ -213,5 +213,6 @@
     <string name="unknown_balance">-- ETH</string>
     <string name="dummy">dummy_value</string>
     <string name="dummy_transaction_value">X ETH</string>
->>>>>>> move-to-mvvm
+    <string name="title_dialog_sending">Sending...</string>
+    >>>>>>> move-to-mvvm
 </resources>

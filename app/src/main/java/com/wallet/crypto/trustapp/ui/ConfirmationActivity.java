@@ -104,7 +104,7 @@ public class ConfirmationActivity extends BaseActivity {
         hideDialog();
         if (shouldShowProgress) {
             dialog = new AlertDialog.Builder(this)
-                    .setTitle(R.string.title_dialog_handling)
+                    .setTitle(R.string.title_dialog_sending)
                     .setView(new ProgressBar(this))
                     .setCancelable(false)
                     .create();

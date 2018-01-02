@@ -3,10 +3,8 @@ package com.wallet.crypto.trustapp.ui;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
@@ -14,8 +12,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,7 +46,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.wallet.crypto.trustapp.C.ETH_SYMBOL;
-import static com.wallet.crypto.trustapp.C.Key.SHOULD_SHOW_SECURITY_WARNING;
 
 public class TransactionsActivity extends BaseNavigationActivity implements View.OnClickListener {
 
@@ -92,13 +89,13 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         setContentView(R.layout.activity_transactions);
 
         toolbar();
-        setTitle(getString(R.string.unknown_balance));
+        setTitle(getString(R.string.unknown_balance_with_symbol));
         setSubtitle("");
         initBottomNavigation();
         dissableDisplayHomeAsUp();
 
-        navigation = findViewById(R.id.bottom_navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+//        navigation = findViewById(R.id.bottom_navigation);
+//        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
@@ -132,10 +129,11 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     protected void onResume() {
         super.onResume();
 
+        setTitle(getString(R.string.unknown_balance_without_symbol));
+        setSubtitle("");
         adapter.clear();
         viewModel.prepare();
-
-        checkGuard();
+//        checkGuard();
         checkRoot();
     }
 
@@ -208,7 +206,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         }
         if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
             actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-            actionBar.setSubtitle(wallet.address);
+            actionBar.setSubtitle("");
         } else {
             actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
             actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
@@ -218,6 +216,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     private void onTransactions(Transaction[] transaction) {
         if (transaction == null || transaction.length == 0) {
             EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
+            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
             systemView.showEmpty(emptyView);
         }
         adapter.addTransactions(transaction);
@@ -251,22 +250,22 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         }
     }
 
-    private void checkGuard() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (!isDeviceSecure() && pref.getBoolean(SHOULD_SHOW_SECURITY_WARNING, true)) {
-            pref.edit().putBoolean(SHOULD_SHOW_SECURITY_WARNING, false).apply();
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.lock_title)
-                    .setMessage(R.string.lock_body)
-                    .setPositiveButton(R.string.lock_settings, (dialog, which) -> {
-                        Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
-                        startActivity(intent);
-                    })
-                    .setNegativeButton(R.string.skip, (dialog, which) -> {
-                    })
-                    .show();
-        }
-    }
+//    private void checkGuard() {
+//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+//        if (!isDeviceSecure() && pref.getBoolean(SHOULD_SHOW_SECURITY_WARNING, true)) {
+//            pref.edit().putBoolean(SHOULD_SHOW_SECURITY_WARNING, false).apply();
+//            new AlertDialog.Builder(this)
+//                    .setTitle(R.string.lock_title)
+//                    .setMessage(R.string.lock_body)
+//                    .setPositiveButton(R.string.lock_settings, (dialog, which) -> {
+//                        Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
+//                        startActivity(intent);
+//                    })
+//                    .setNegativeButton(R.string.skip, (dialog, which) -> {
+//                    })
+//                    .show();
+//        }
+//    }
 
     protected boolean isDeviceSecure() {
         KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);

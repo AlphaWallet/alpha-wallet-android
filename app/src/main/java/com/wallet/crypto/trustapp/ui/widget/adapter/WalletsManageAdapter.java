@@ -77,7 +77,11 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 		notifyDataSetChanged();
 	}
 
-	public interface OnSetWalletDefaultListener {
+    public Wallet getDefaultWallet() {
+        return defaultWallet;
+    }
+
+    public interface OnSetWalletDefaultListener {
 		void onSetDefault(Wallet wallet);
 	}
 

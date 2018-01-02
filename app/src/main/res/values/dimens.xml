@@ -27,4 +27,7 @@
     <dimen name="list_group_head">14sp</dimen>
     <dimen name="title_height_small">48dp</dimen>
     <dimen name="title_height_normal">56dp</dimen>
+
+    <dimen name="intro_height">340dp</dimen>
+    <dimen name="intro_img_size">200dp</dimen>
 </resources>

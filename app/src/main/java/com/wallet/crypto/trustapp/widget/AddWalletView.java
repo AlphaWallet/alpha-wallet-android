@@ -76,16 +76,19 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 	private static class IntroPagerAdapter extends PagerAdapter {
         private int[] titles = new int[] {
                 R.string.intro_title_first_page,
+                R.string.welcome_erc20_label_title,
                 R.string.intro_title_second_page,
                 R.string.intro_title_third_page,
         };
         private int[] messages = new int[] {
                 R.string.intro_message_first_page,
+                R.string.welcome_erc20_label_description,
                 R.string.intro_message_second_page,
                 R.string.intro_message_third_page,
         };
         private int[] images = new int[] {
                 R.mipmap.onboarding_lock,
+                R.drawable.onboarding_erc20,
                 R.mipmap.onboarding_open_source,
                 R.mipmap.onboarding_rocket
         };

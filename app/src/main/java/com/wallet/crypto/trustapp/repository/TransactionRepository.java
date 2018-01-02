@@ -1,5 +1,8 @@
 package com.wallet.crypto.trustapp.repository;
 
+import android.util.Log;
+
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Transaction;
@@ -16,6 +19,8 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
+import java.math.BigInteger;
+
 import io.reactivex.Completable;
 import io.reactivex.FlowableOperator;
 import io.reactivex.Maybe;
@@ -23,6 +28,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Single;
+import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 
@@ -75,9 +81,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Completable createTransaction(Wallet from, String toAddress, String wei, String password) {
-		final Web3j web3j = Web3jFactory
-                .build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+	public Single<String> createTransaction(Wallet from, String toAddress, String wei, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
+		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return Single.fromCallable(() -> {
 			EthGetTransactionCount ethGetTransactionCount = web3j
@@ -85,17 +90,16 @@ public class TransactionRepository implements TransactionRepositoryType {
 					.send();
 			return ethGetTransactionCount.getTransactionCount();
 		})
-		.flatMap(nonce -> accountKeystoreService.signTransaction(
-		        from, password, toAddress, wei, nonce.longValue(),
-                networkRepository.getDefaultNetwork().chainId))
-		.flatMapCompletable(signedMessage -> Completable.fromAction(() -> {
+		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, wei, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
+		.flatMap(signedMessage -> Single.fromCallable( () -> {
 			EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
 					.send();
 			if (raw.hasError()) {
 				throw new ServiceException(raw.getError().getMessage());
 			}
-		})).observeOn(Schedulers.io());
+			return raw.getTransactionHash();
+		})).subscribeOn(Schedulers.io());
 	}
 
     private void onNetworkChanged(NetworkInfo networkInfo) {

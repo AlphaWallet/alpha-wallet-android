@@ -15,11 +15,13 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +61,28 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     private TransactionsAdapter adapter;
     private Dialog dialog;
 
+    private BottomNavigationView navigation;
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_my_address: {
+                }
+                break;
+                case R.id.action_send: {
+                    viewModel.openSend(TransactionsActivity.this);
+                }
+                break;
+                case R.id.action_my_tokens: {
+                }
+                break;
+            }
+            return false;
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -71,6 +95,9 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         setSubtitle("");
         initBottomNavigation();
         dissableDisplayHomeAsUp();
+
+        navigation = findViewById(R.id.bottom_navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);

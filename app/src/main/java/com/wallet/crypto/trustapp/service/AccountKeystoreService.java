@@ -2,6 +2,8 @@ package com.wallet.crypto.trustapp.service;
 
 import com.wallet.crypto.trustapp.entity.Wallet;
 
+import java.math.BigInteger;
+
 import io.reactivex.Completable;
 import io.reactivex.Single;
 
@@ -52,7 +54,10 @@ public interface AccountKeystoreService {
 			String signerPassword,
 			String toAddress,
 			String wei,
+			BigInteger gasPrice,
+			BigInteger gasLimit,
 			long nonce,
+			byte[] data,
 			long chainId);
 
 	/**

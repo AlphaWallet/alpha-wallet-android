@@ -14,6 +14,8 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ExternalBrowserRouter;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.trustapp.router.SendRouter;
+import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.MyAddressRouter;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
@@ -40,6 +42,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
+    private final SendRouter sendRouter;
     private final TransactionDetailRouter transactionDetailRouter;
     private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
@@ -54,6 +57,7 @@ public class TransactionsViewModel extends BaseViewModel {
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
+            SendRouter sendRouter,
             TransactionDetailRouter transactionDetailRouter,
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
@@ -64,6 +68,7 @@ public class TransactionsViewModel extends BaseViewModel {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
+        this.sendRouter = sendRouter;
         this.transactionDetailRouter = transactionDetailRouter;
         this.myAddressRouter = myAddressRouter;
         this.myTokensRouter = myTokensRouter;
@@ -116,7 +121,6 @@ public class TransactionsViewModel extends BaseViewModel {
                         .get(defaultWallet.getValue())
                         .subscribe(defaultWalletBalance::postValue, t -> {}))
                 .subscribe();
-
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -144,6 +148,8 @@ public class TransactionsViewModel extends BaseViewModel {
     public void showSettings(Context context) {
         settingsRouter.open(context);
     }
+
+    public void openSend(Context context) { sendRouter.open(context); }
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);

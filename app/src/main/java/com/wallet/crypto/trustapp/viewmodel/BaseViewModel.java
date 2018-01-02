@@ -10,7 +10,6 @@ import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 
-import io.fabric.sdk.android.Fabric;
 import io.reactivex.disposables.Disposable;
 
 public class BaseViewModel extends ViewModel {
@@ -41,9 +40,9 @@ public class BaseViewModel extends ViewModel {
 	protected void onError(Throwable throwable) {
         Crashlytics.logException(throwable);
 		if (throwable instanceof ServiceException) {
-			error.setValue(((ServiceException) throwable).error);
+			error.postValue(((ServiceException) throwable).error);
 		} else {
-			error.setValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
+			error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
 			// TODO: Add dialog with offer send error log to developers: notify about error.
 			Log.d("SESSION", "Err", throwable);
 		}

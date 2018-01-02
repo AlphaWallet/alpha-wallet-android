@@ -7,9 +7,7 @@ import android.support.annotation.NonNull;
 
 public class CreateAccountViewModelFactory implements ViewModelProvider.Factory {
 
-	public CreateAccountViewModelFactory() {
-
-	}
+	public CreateAccountViewModelFactory() { }
 
 	@NonNull
 	@Override

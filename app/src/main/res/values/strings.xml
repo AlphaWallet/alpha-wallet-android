@@ -137,6 +137,8 @@
     <string name="title_item_detail">Item Detail</string>
     <string name="title_my_address">My Address</string>
     <string name="title_my_tokens">My Tokens</string>
+    <string name="title_activity_send">Send</string>
+    <string name="title_activity_confirmation">Confirm</string>
     <!-- Suggestions -->
     <string name="suggestion_field_required">* Field required</string>
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
@@ -160,6 +162,7 @@
     <string name="dialog_message_unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
     <string name="toast_message_wallet_imported">The wallet was imported</string>
     <string name="toast_message_wallet_exported">A backup was created</string>
+    <string name="toast_qr_code_no_address">QR code doesn\'t contain valid address</string>
     <!-- Intro resources-->
     <string name="intro_title_first_page"><![CDATA[Private & Secure]]></string>
     <string name="intro_title_second_page">Fully Transparent</string>
@@ -169,6 +172,15 @@
     <string name="intro_message_third_page">The fastest Ethereum wallet experience on mobile.</string>
     <!-- Menus -->
     <string name="navigation_settings">Settings</string>
+    <!-- Labels -->
+    <string name="label_from">From</string>
+    <string name="label_to">To</string>
+    <string name="label_gas_limit">Gas Limit</string>
+    <string name="label_gas_price">Gas Price</string>
+    <string name="label_network_fee">Network Fee</string>
+    <string name="button_ok">OK</string>
+    <string name="hint_recipient_address">Recipient address</string>
+    <string name="hint_amount">Amount</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
@@ -184,13 +196,22 @@
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>
     <string name="action_changelly">Changelly</string>
     <string name="action_wallets">Wallets</string>
+    <string name="action_next">Next</string>
+    <string name="action_edit">Edit</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_load_transaction">Failed to load transaction list</string>
     <string name="error_fail_generate_qr">Could not generate qr code.</string>
+    <string name="error_invalid_address">Invalid address</string>
+    <string name="error_invalid_amount">Invalid amount</string>
+    <string name="error_transaction_failed">Transaction error</string>
+    <string name="transaction_succeeded">Transaction successful</string>
     <string name="NA">N/A</string>
     <string name="minus">-</string>
     <string name="error_wallet_not_selected">Wallet is not selected</string>
     <string name="no_transactions_yet">No transactions yet!</string>
     <string name="unknown_balance">-- ETH</string>
+    <string name="dummy">dummy_value</string>
+    <string name="dummy_transaction_value">X ETH</string>
+>>>>>>> move-to-mvvm
 </resources>

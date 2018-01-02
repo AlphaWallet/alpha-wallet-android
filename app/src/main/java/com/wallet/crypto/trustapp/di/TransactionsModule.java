@@ -9,6 +9,7 @@ import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.router.ExternalBrowserRouter;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.trustapp.router.SendRouter;
 import com.wallet.crypto.trustapp.router.MyAddressRouter;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
@@ -27,7 +28,8 @@ class TransactionsModule {
             FetchTransactionsInteract fetchTransactionsInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
-            SettingsRouter settingsRoute,
+            SettingsRouter settingsRouter,
+            SendRouter sendRouter,
             TransactionDetailRouter transactionDetailRouter,
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
@@ -38,7 +40,8 @@ class TransactionsModule {
                 fetchTransactionsInteract,
                 getDefaultWalletBalance,
                 manageWalletsRouter,
-                settingsRoute,
+                settingsRouter,
+                sendRouter,
                 transactionDetailRouter,
                 myAddressRouter,
                 myTokensRouter,
@@ -76,6 +79,9 @@ class TransactionsModule {
     SettingsRouter provideSettingsRouter() {
         return new SettingsRouter();
     }
+
+    @Provides
+    SendRouter provideSendRouter() { return new SendRouter(); }
 
     @Provides
     TransactionDetailRouter provideTransactionDetailRouter() {

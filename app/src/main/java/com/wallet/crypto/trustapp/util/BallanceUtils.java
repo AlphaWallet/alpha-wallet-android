@@ -19,4 +19,9 @@ public class BallanceUtils {
         usd = usd.setScale(2, RoundingMode.CEILING);
         return usd.toString();
     }
+
+    public static String EthToWei(String eth) throws Exception {
+        BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(weiInEth));
+        return wei.toBigInteger().toString();
+    }
 }

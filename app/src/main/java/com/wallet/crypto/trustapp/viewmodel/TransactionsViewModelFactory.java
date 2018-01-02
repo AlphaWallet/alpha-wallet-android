@@ -13,6 +13,7 @@ import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
 import com.wallet.crypto.trustapp.router.MyAddressRouter;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SettingsRouter;
+import com.wallet.crypto.trustapp.router.SendRouter;
 import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
@@ -23,6 +24,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
+    private final SendRouter sendRouter;
     private final TransactionDetailRouter transactionDetailRouter;
     private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
@@ -35,6 +37,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
+            SendRouter sendRouter,
             TransactionDetailRouter transactionDetailRouter,
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
@@ -45,6 +48,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
+        this.sendRouter = sendRouter;
         this.transactionDetailRouter = transactionDetailRouter;
         this.myAddressRouter = myAddressRouter;
         this.myTokensRouter = myTokensRouter;
@@ -61,6 +65,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 getDefaultWalletBalance,
                 manageWalletsRouter,
                 settingsRouter,
+                sendRouter,
                 transactionDetailRouter,
                 myAddressRouter,
                 myTokensRouter,

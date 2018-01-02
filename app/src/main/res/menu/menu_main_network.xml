@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_send"
+        android:icon="@drawable/ic_send_white_24dp"
+        android:title="@string/title_send"
+        />
+    <item
+        android:id="@+id/action_my_address"
+        android:icon="@mipmap/qr_code_icon"
+        android:title="@string/title_request"
+        />
+    <item
+        android:id="@+id/action_my_tokens"
+        android:icon="@drawable/token_icon"
+        android:title="@string/title_tokens"
+        />
+</menu>

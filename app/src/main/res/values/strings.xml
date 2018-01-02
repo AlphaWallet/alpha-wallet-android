@@ -6,11 +6,10 @@
     <string name="title_import">Import</string>
     <string name="title_create">Create</string>
     <string name="title_account">Wallets</string>
-    <string name="title_item_detail">Item Detail</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_create_account">New Wallet</string>
 
-    <!-- Strings related to account creation -->
+    <!-- Strings relatedwalletount creation -->
     <string name="prompt_email">Wallet name</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Create</string>
@@ -36,7 +35,6 @@
     <string name="cancel">cancel</string>
     <string name="confirm_delete_account">Make sure that you have a backup of this wallet.</string>
     <string name="title_activity_import_account">ImportAccountActivity</string>
-    <string name="hint_keystore">Keystore</string>
     <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
     <string name="action_export">Backup private key</string>
@@ -89,9 +87,8 @@
         Your wallet is never saved to cloud storage or standard device backups.
     </string>
     <string name="message_no_backup">No backup, no Ethereum.</string>
-    <string name="unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
-    <string name="title_watchout">Watch out!</string>
     <string name="error_deleting_account">Error deleting wallet</string>
+    <string name="error_deleting_account_with_details">Error deleting wallet %s</string>
     <string name="error_passwords_must_match">Passwords must match.</string>
     <string name="label_confirm_new_password">Confirm new password</string>
     <string name="label_new_password">New password</string>
@@ -105,9 +102,6 @@
     <string name="prompt_private_key">Private key</string>
     <string name="error_import_private_key">Error importing private key</string>
     <string name="message_importing_private_key">Importing private key. One moment.</string>
-    <string name="tab_keystore">Keystore</string>
-    <string name="tab_private_key">Private key</string>
-    <string name="action_transaction_detail">More details</string>
     <string name="lock_title">Lock screen</string>
     <string name="lock_body">Secure lock screen hasn\'t set up. It is not safe.</string>
     <string name="lock_settings">Lock settings</string>
@@ -127,10 +121,98 @@
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Any \'rooted\' app can access Trust\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
     <string name="gas_fee_title">Gas Fee (Gwei)</string>
-    <string name="transfer">Transfer</string>
+    <string name="transfer">Transfer %s</string>
     <string name="action_buy">Buy</string>
     <string name="title_deposit">How would you like to buy?</string>
+    <string name="empty" />
+    <string name="try_again">Try again</string>
+    <string name="already_have_account">Already have a wallet?</string>
+    <string name="title_add_account">Add wallet</string>
+    <string name="action_create_new_account">Create new wallet</string>
+    <string name="unknown_error">An error has occurred.</string>
+    <string name="action_backup_wallet">Backup Wallet</string>
+    <string name="action_backup_later">Do it later</string>
+    <string name="set_account_default">Do want to make a new wallet the main one?</string>
     <string name="no_tokens">No tokens found.</string>
     <string name="title_email">Email us</string>
-
+    <!-- Titles -->
+    <string name="title_item_detail">Item Detail</string>
+    <string name="title_my_address">My Address</string>
+    <string name="title_my_tokens">My Tokens</string>
+    <string name="title_activity_send">Send</string>
+    <string name="title_activity_confirmation">Confirm</string>
+    <!-- Suggestions -->
+    <string name="suggestion_field_required">* Field required</string>
+    <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
+    <string name="suggestion_private_key">Private key has to be 64 characters long</string>
+    <string name="suggestion_empty_password_available">The password can be left blank.</string>
+    <string name="suggestion_this_is_your_address">My %s wallet address</string>
+    <!-- Hints -->
+    <string name="hint_private_key_field">Private key *</string>
+    <string name="hint_keystore">Keystore *</string>
+    <!-- Tabs labels-->
+    <string name="tab_keystore">Keystore</string>
+    <string name="tab_private_key">Private key</string>
+    <!-- Dialog titles -->
+    <string name="title_dialog_error">Error</string>
+    <string name="title_dialog_handling">Handling…</string>
+    <string name="title_dialog_watch_out">Watch out!</string>
+    <string name="title_dialog_add_account">Add wallet</string>
+    <string name="title_dialog_deposit">How would you like to buy?</string>
+    <!-- Dialog messages-->
+    <string name="dialog_message">Enter the password to encrypt your wallet</string>
+    <string name="dialog_message_unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
+    <string name="toast_message_wallet_imported">The wallet was imported</string>
+    <string name="toast_message_wallet_exported">A backup was created</string>
+    <string name="toast_qr_code_no_address">QR code doesn\'t contain valid address</string>
+    <!-- Intro resources-->
+    <string name="intro_title_first_page"><![CDATA[Private & Secure]]></string>
+    <string name="intro_title_second_page">Fully Transparent</string>
+    <string name="intro_title_third_page">Ultra reliable</string>
+    <string name="intro_message_first_page">Private keys never leave your device.</string>
+    <string name="intro_message_second_page">Code is open sourced (GPL-3.0 license) and fully audited.</string>
+    <string name="intro_message_third_page">The fastest Ethereum wallet experience on mobile.</string>
+    <!-- Menus -->
+    <string name="navigation_settings">Settings</string>
+    <!-- Labels -->
+    <string name="label_from">From</string>
+    <string name="label_to">To</string>
+    <string name="label_gas_limit">Gas Limit</string>
+    <string name="label_gas_price">Gas Price</string>
+    <string name="label_network_fee">Network Fee</string>
+    <string name="button_ok">OK</string>
+    <string name="hint_recipient_address">Recipient address</string>
+    <string name="hint_amount">Amount</string>
+    <!-- Subtitles -->
+    <string name="subtitle_from">From</string>
+    <string name="subtitle_to">To</string>
+    <string name="subtitle_gas_fee">Gas Fee (Gwei)</string>
+    <string name="subtitle_transaction_num">Transaction #</string>
+    <string name="subtitle_transaction_time">Transaction Time</string>
+    <string name="subtitle_block_num">Block #</string>
+    <!-- Actions -->
+    <string name="action_share">Share</string>
+    <string name="action_transaction_detail">More details</string>
+    <string name="action_add_wallet">Add wallet</string>
+    <string name="action_coinbase">Coinbase</string>
+    <string name="action_shapeshift">Shapeshift (Crypto only)</string>
+    <string name="action_changelly">Changelly</string>
+    <string name="action_wallets">Wallets</string>
+    <string name="action_next">Next</string>
+    <string name="action_edit">Edit</string>
+    <!-- Subject -->
+    <string name="subject_transaction_detail">Transaction detail</string>
+    <string name="error_fail_load_transaction">Failed to load transaction list</string>
+    <string name="error_fail_generate_qr">Could not generate qr code.</string>
+    <string name="error_invalid_address">Invalid address</string>
+    <string name="error_invalid_amount">Invalid amount</string>
+    <string name="error_transaction_failed">Transaction error</string>
+    <string name="transaction_succeeded">Transaction successful</string>
+    <string name="NA">N/A</string>
+    <string name="minus">-</string>
+    <string name="error_wallet_not_selected">Wallet is not selected</string>
+    <string name="no_transactions_yet">No transactions yet!</string>
+    <string name="unknown_balance">-- ETH</string>
+    <string name="dummy">dummy_value</string>
+    <string name="dummy_transaction_value">X ETH</string>
 </resources>

@@ -1,43 +1,142 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.wallet.crypto.trustapp.views.TransactionDetailActivity"
-    tools:ignore="MergeRootFrame">
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/app_bar_height"
-        android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/toolbar_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:toolbarId="@+id/toolbar">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/detail_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/item_detail_container"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <include layout="@layout/layout_simple_toolbar" />
+    <ScrollView
+        android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        >
+        <LinearLayout
+            android:layout_margin="16dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <TextView
+                android:id="@+id/amount"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/from_title"
+                android:text="@string/subtitle_from"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/from"
+                android:textSize="12sp"
+                android:textIsSelectable="true"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
+                />
+            <TextView
+                android:id="@+id/to_title"
+                android:text="@string/subtitle_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/to"
+                android:textSize="12sp"
+                android:textIsSelectable="true"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
+                />
+            <TextView
+                android:id="@+id/gas_fee_title"
+                android:text="@string/subtitle_gas_fee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/gas_fee"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="0.000044"
+                />
+            <TextView
+                android:id="@+id/txn_hash_title"
+                android:text="@string/subtitle_transaction_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/txn_hash"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF"
+                />
 
-</android.support.design.widget.CoordinatorLayout>
+            <TextView
+                android:id="@+id/txn_time_title"
+                android:text="@string/subtitle_transaction_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:id="@+id/txn_time"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="September 4, 2017 at 2:32:12 PM"
+                />
+
+            <TextView
+                android:id="@+id/block_hash_title"
+                android:text="@string/subtitle_block_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/block_number"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="4238793"
+                />
+            <Button
+                android:id="@+id/more_detail"
+                android:text="@string/action_transaction_detail"
+                android:clickable="true"
+                android:focusable="true"
+                android:autoLink="web"
+                android:linksClickable="true"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

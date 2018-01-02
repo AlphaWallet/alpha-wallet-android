@@ -11,7 +11,7 @@ Welcome to Trust's open source Android app!
 
 ## Getting Started
 
-1. Install latest Android Studio (>=3.0 RC 2).
+1. Install latest Android Studio (>=3.0.0).
 2. Clone this repository.
 3. Register with etherscan.io and populate the API keys in Controller.java
 4. Build and run.

@@ -11,7 +11,7 @@ import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.controller.ServiceErrorException;
+import com.wallet.crypto.trustapp.entity.ServiceErrorException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,10 +25,8 @@ import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -38,14 +36,14 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import static com.wallet.crypto.trustapp.controller.ServiceErrorException.INVALID_KEY;
-import static com.wallet.crypto.trustapp.controller.ServiceErrorException.IV_OR_ALIAS_NO_ON_DISK;
-import static com.wallet.crypto.trustapp.controller.ServiceErrorException.KEY_IS_GONE;
-import static com.wallet.crypto.trustapp.controller.ServiceErrorException.KEY_STORE_ERROR;
-import static com.wallet.crypto.trustapp.controller.ServiceErrorException.USER_NOT_AUTHENTICATED;
+import static com.wallet.crypto.trustapp.entity.ServiceErrorException.INVALID_KEY;
+import static com.wallet.crypto.trustapp.entity.ServiceErrorException.IV_OR_ALIAS_NO_ON_DISK;
+import static com.wallet.crypto.trustapp.entity.ServiceErrorException.KEY_IS_GONE;
+import static com.wallet.crypto.trustapp.entity.ServiceErrorException.KEY_STORE_ERROR;
+import static com.wallet.crypto.trustapp.entity.ServiceErrorException.USER_NOT_AUTHENTICATED;
 
 @TargetApi(23)
-class KS {
+public class KS {
 	private static final String TAG = "KS";
 
 	private static final String ANDROID_KEY_STORE = "AndroidKeyStore";

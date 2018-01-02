@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <item
+        android:id="@+id/action_deposit"
+        android:icon="@drawable/ic_action_deposit"
+        android:title="@string/action_buy"
+        android:orderInCategory="10"
+        app:showAsAction="always"
+        />
+</menu>

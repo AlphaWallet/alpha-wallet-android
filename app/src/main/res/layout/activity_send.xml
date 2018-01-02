@@ -1,75 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
-
-    <include layout="@layout/layout_app_bar" />
-
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <include layout="@layout/layout_simple_toolbar" />
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp">
-
+        >
         <RelativeLayout
             android:id="@+id/send_to_address_layout"
+            android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
+            >
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/to_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 >
-
-            <EditText
-                android:id="@+id/send_to_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:hint="@string/hint_recipient_address"
-                android:imeActionLabel="@string/prompt_to"
-                android:imeOptions="actionUnspecified"
-                android:inputType="text"
-                android:maxLines="1"
-                android:paddingEnd="40dp"
-                android:paddingRight="40dp"
-                />
+                <EditText
+                    android:id="@+id/send_to_address"
+                    android:hint="@string/hint_recipient_address"
+                    android:imeActionLabel="@string/prompt_to"
+                    android:imeOptions="actionUnspecified"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingRight="@dimen/half_large_padding"
+                    android:paddingEnd="@dimen/half_large_padding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
             </android.support.design.widget.TextInputLayout>
-
             <ImageButton
                 android:id="@+id/scan_barcode_button"
+                android:src="@mipmap/qr_code_icon"
+                android:contentDescription="@string/scan_qr"
+                android:background="?android:selectableItemBackground"
+                android:padding="@dimen/big_padding"
+                android:layout_alignParentEnd="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="?android:selectableItemBackground"
-                android:padding="10dp"
-                android:src="@mipmap/qr_code_icon" />
-
+                />
         </RelativeLayout>
-
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/amount_input_layout"
+            android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/send_to_address_layout"
             >
-
             <EditText
                 android:id="@+id/send_amount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:hint="@string/hint_amount"
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeOptions="actionUnspecified"
                 android:inputType="numberDecimal"
-                android:maxLines="1" />
-
+                android:maxLines="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
         </android.support.design.widget.TextInputLayout>
-    </android.support.constraint.ConstraintLayout>
-
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>

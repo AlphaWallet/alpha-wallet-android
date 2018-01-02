@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -44,6 +46,8 @@ public class SendActivity extends BaseActivity {
     private String contractAddress;
     private int decimals;
     private String symbol;
+    private TextInputLayout toInputLayout;
+    private TextInputLayout amountInputLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,7 +61,9 @@ public class SendActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
 
+        toInputLayout = findViewById(R.id.to_input_layout);
         toAddressText = findViewById(R.id.send_to_address);
+        amountInputLayout = findViewById(R.id.amount_input_layout);
         amountText = findViewById(R.id.send_amount);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
@@ -126,12 +132,12 @@ public class SendActivity extends BaseActivity {
         boolean inputValid = true;
         final String to = toAddressText.getText().toString();
         if (!isAddressValid(to)) {
-            toAddressText.setError(getString(R.string.error_invalid_address));
+            toInputLayout.setError(getString(R.string.error_invalid_address));
             inputValid = false;
         }
         final String amount = amountText.getText().toString();
         if (!isValidEthAmount(amount)) {
-            amountText.setError(getString(R.string.error_invalid_amount));
+            amountInputLayout.setError(getString(R.string.error_invalid_amount));
             inputValid = false;
         }
 

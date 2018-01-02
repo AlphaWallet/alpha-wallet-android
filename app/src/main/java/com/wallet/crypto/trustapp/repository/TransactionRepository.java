@@ -47,7 +47,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
         return Observable.create(e -> {
             Transaction[] transactions = transactionLocalSource.fetchTransaction(wallet).blockingGet();
-            e.onNext(transactions == null ? new Transaction[0] : transactions);
+            if (transactions != null && transactions.length > 0) {
+                e.onNext(transactions);
+            }
             transactions = blockExplorerClient.fetchTransactions(wallet.address).blockingFirst();
             transactionLocalSource.clear();
             transactionLocalSource.putTransactions(wallet, transactions);

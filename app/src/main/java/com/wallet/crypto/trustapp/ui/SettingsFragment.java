@@ -107,7 +107,7 @@ public class SettingsFragment extends PreferenceFragment
                 } else {
                     // disable pin code without asking for it
                     LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-                    lockManager.getAppLock().disableAndRemoveConfiguration();
+                    lockManager.getAppLock().disable();
                 }
                 return true;
             }

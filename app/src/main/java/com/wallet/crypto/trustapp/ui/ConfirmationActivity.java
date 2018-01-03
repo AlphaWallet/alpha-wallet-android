@@ -23,10 +23,6 @@ import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
 
-import org.web3j.utils.Convert;
-
-import java.math.BigInteger;
-
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
@@ -99,7 +95,7 @@ public class ConfirmationActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_edit: {
-                viewModel.openAdvanced();
+                viewModel.openGasSettings(ConfirmationActivity.this);
             }
             break;
         }

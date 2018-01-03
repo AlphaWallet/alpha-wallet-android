@@ -2,12 +2,14 @@ package com.wallet.crypto.trustapp.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 
 import com.wallet.crypto.trustapp.entity.GasSettings;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.router.GasSettingsRouter;
 
 import java.math.BigInteger;
 
@@ -20,12 +22,16 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final CreateTransactionInteract createTransactionInteract;
 
+    private final GasSettingsRouter gasSettingsRouter;
+
     public ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
-                                 CreateTransactionInteract createTransactionInteract) {
+                                 CreateTransactionInteract createTransactionInteract,
+                                 GasSettingsRouter gasSettingsRouter) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.createTransactionInteract = createTransactionInteract;
+        this.gasSettingsRouter = gasSettingsRouter;
     }
 
     public void createTransaction(String from, String to, String amount, BigInteger gasPrice, BigInteger gasLimit) {
@@ -65,6 +71,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.gasSettings.setValue(gasSettings);
     }
 
-    public void openAdvanced() {
+    public void openGasSettings(Context context) {
+        gasSettingsRouter.open(context);
     }
 }

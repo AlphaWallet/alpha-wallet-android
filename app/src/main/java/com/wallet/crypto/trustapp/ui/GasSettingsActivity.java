@@ -4,7 +4,6 @@ package com.wallet.crypto.trustapp.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SeekBar;
@@ -16,6 +15,7 @@ import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModel;
 import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModelFactory;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.inject.Inject;
@@ -28,8 +28,6 @@ public class GasSettingsActivity extends BaseActivity {
     GasSettingsViewModelFactory viewModelFactory;
     GasSettingsViewModel viewModel;
 
-    private SeekBar gasPriceSlider;
-    private SeekBar gasLimitSlider;
     private TextView gasPriceText;
     private TextView gasLimitText;
     private TextView networkFeeText;
@@ -43,8 +41,8 @@ public class GasSettingsActivity extends BaseActivity {
         setContentView(R.layout.activity_gas_settings);
         toolbar();
 
-        gasPriceSlider = findViewById(R.id.gas_price_slider);
-        gasLimitSlider = findViewById(R.id.gas_limit_slider);
+        SeekBar gasPriceSlider = findViewById(R.id.gas_price_slider);
+        SeekBar gasLimitSlider = findViewById(R.id.gas_limit_slider);
         gasPriceText = findViewById(R.id.gas_price_text);
         gasLimitText = findViewById(R.id.gas_limit_text);
         networkFeeText = findViewById(R.id.text_network_fee);
@@ -57,9 +55,58 @@ public class GasSettingsActivity extends BaseActivity {
 
         BigInteger gasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
         BigInteger gasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
+        BigInteger gasLimitMin = BigInteger.valueOf(C.GAS_LIMIT_MIN);
+        BigInteger gasLimitMax = BigInteger.valueOf(C.GAS_LIMIT_MAX);
+        BigInteger gasPriceMin = BigInteger.valueOf(C.GAS_PRICE_MIN);
+        BigInteger networkFeeMax = BigInteger.valueOf(C.NETWORK_FEE_MAX);
 
-        Log.d("GAS", gasPrice.toString());
-        Log.d("GAS", gasLimit.toString());
+        final int gasPriceMinGwei = BalanceUtils.weiToGweiBI(gasPriceMin).intValue();
+        gasPriceSlider.setMax(BalanceUtils
+                .weiToGweiBI(networkFeeMax.divide(gasLimitMax))
+                .subtract(BigDecimal.valueOf(gasPriceMinGwei))
+                .intValue());
+        int gasPriceProgress = BalanceUtils
+                .weiToGweiBI(gasPrice)
+                .subtract(BigDecimal.valueOf(gasPriceMinGwei))
+                .intValue();
+        gasPriceSlider.setProgress(gasPriceProgress);
+        gasPriceSlider.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        viewModel.gasPrice().setValue(BalanceUtils.gweiToWei(BigDecimal.valueOf(progress + gasPriceMinGwei)));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+
+        gasLimitSlider.setMax(gasLimitMax.subtract(gasLimitMin).intValue());
+        gasLimitSlider.setProgress(gasLimit.subtract(gasLimitMin).intValue());
+        gasLimitSlider.refreshDrawableState();
+        gasLimitSlider.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        progress = progress / 100;
+                        progress = progress * 100;
+                        viewModel.gasLimit().setValue(BigInteger.valueOf(progress).add(gasLimitMin));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+
 
         viewModel.gasPrice().observe(this, this::onGasPrice);
         viewModel.gasLimit().observe(this, this::onGasLimit);

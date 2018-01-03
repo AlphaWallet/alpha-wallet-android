@@ -31,7 +31,15 @@ public class BalanceUtils {
         return wei.toBigInteger().toString();
     }
 
+    public static BigDecimal weiToGweiBI(BigInteger wei) {
+        return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI);
+    }
+
     public static String weiToGwei(BigInteger wei) {
         return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI).toPlainString();
+    }
+
+    public static BigInteger gweiToWei(BigDecimal gwei) {
+        return Convert.toWei(gwei, Convert.Unit.GWEI).toBigInteger();
     }
 }

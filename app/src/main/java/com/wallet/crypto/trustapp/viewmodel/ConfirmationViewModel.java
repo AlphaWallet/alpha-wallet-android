@@ -72,6 +72,6 @@ public class ConfirmationViewModel extends BaseViewModel {
     }
 
     public void openGasSettings(Context context) {
-        gasSettingsRouter.open(context);
+        gasSettingsRouter.open(context, gasSettings.getValue());
     }
 }

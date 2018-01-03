@@ -3,7 +3,7 @@
     <string name="balance">Balance</string>
     <string name="title_send">Send</string>
     <string name="title_request">My Address</string>
-    <string name="title_import">Import</string>
+    <string name="title_import">Import Wallet</string>
     <string name="title_create">Create</string>
     <string name="title_account">Wallets</string>
     <string name="title_activity_main2">Main2Activity</string>

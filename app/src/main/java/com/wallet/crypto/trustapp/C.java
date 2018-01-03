@@ -29,6 +29,9 @@ public abstract class C {
     public static final String EXTRA_SENDING_TOKENS = "SENDING_TOKENS";
     public static final String EXTRA_TO_ADDRESS = "TO_ADDRESS";
     public static final String EXTRA_AMOUNT = "AMOUNT";
+    public static final String EXTRA_GAS_PRICE = "GAS_PRICE";
+    public static final String EXTRA_GAS_LIMIT = "GAS_LIMIT";
+
     public static final String DEFAULT_GAS_PRICE = "30000000000";
     public static final String DEFAULT_GAS_LIMIT = "90000";
 
@@ -39,14 +42,13 @@ public abstract class C {
 
     public interface ErrorCode {
 
-		int UNKNOWN = 1;
-		int CANT_GET_STORE_PASSWORD = 2;
-	}
+        int UNKNOWN = 1;
+        int CANT_GET_STORE_PASSWORD = 2;
+    }
 
     public interface Key {
-	    String WALLET = "wallet";
+        String WALLET = "wallet";
         String TRANSACTION = "transaction";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
     }
-
 }

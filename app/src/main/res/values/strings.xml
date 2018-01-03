@@ -47,7 +47,7 @@
     <string name="sent">Sent</string>
     <string name="received">Received</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="network_label">RPC server</string>
+    <string name="network_label">Network</string>
     <string name="app_intro">Intro</string>
 
     <string name="title_trust">Trust</string>

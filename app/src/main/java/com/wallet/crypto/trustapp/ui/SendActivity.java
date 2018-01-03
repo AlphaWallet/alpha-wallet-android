@@ -69,7 +69,11 @@ public class SendActivity extends BaseActivity {
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
+        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
+
+        setTitle(getString(R.string.title_send) + " " + symbol);
+        amountInputLayout.setHint(getString(R.string.hint_amount) + " " + symbol);
 
         // Populate to address if it has been passed forward
         String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);

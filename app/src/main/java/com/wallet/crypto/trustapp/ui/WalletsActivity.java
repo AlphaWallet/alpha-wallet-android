@@ -135,6 +135,7 @@ public class WalletsActivity extends BaseActivity implements
 		super.onActivityResult(requestCode, resultCode, data);
 
 		if (requestCode == IMPORT_REQUEST_CODE) {
+			showToolbar();
 		    if (resultCode == RESULT_OK) {
                 viewModel.fetchWallets();
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)

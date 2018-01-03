@@ -9,6 +9,7 @@ public abstract class C {
     public static final long ETHER_DECIMALS = 18;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
+    public static final String CLASSIC_NETWORK_NAME = "Classic";
     public static final String POA_NETWORK_NAME = "POA Network";
     public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
@@ -19,6 +20,7 @@ public abstract class C {
     public static final String USD_SYMBOL = "$";
     public static final String ETH_SYMBOL = "ETH";
     public static final String POA_SYMBOL = "POA";
+    public static final String ETC_SYMBOL = "ETC";
 
     public static final String GWEI_UNIT = "Gwei";
 

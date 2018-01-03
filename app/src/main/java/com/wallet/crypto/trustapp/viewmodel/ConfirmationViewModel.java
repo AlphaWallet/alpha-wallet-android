@@ -1,8 +1,10 @@
 package com.wallet.crypto.trustapp.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 
 import com.wallet.crypto.trustapp.entity.GasSettings;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -45,7 +47,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         return defaultWallet;
     }
 
-    public LiveData<GasSettings> gasSettings() {
+    public MutableLiveData<GasSettings> gasSettings() {
         return gasSettings;
     }
 
@@ -64,14 +66,16 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-        onGasSettings(fetchGasSettingsInteract.fetch());
+        if (gasSettings.getValue() == null) {
+            onGasSettings(fetchGasSettingsInteract.fetch());
+        }
     }
 
     private void onGasSettings(GasSettings gasSettings) {
         this.gasSettings.setValue(gasSettings);
     }
 
-    public void openGasSettings(Context context) {
+    public void openGasSettings(Activity context) {
         gasSettingsRouter.open(context, gasSettings.getValue());
     }
 }

@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +23,9 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
+import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModel;
+
+import java.math.BigInteger;
 
 import javax.inject.Inject;
 
@@ -180,5 +184,17 @@ public class ConfirmationActivity extends BaseActivity {
                 })
                 .create();
         dialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                BigInteger gasPrice = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_PRICE));
+                BigInteger gasLimit = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_LIMIT));
+                GasSettings settings = new GasSettings(gasPrice, gasLimit);
+                viewModel.gasSettings().postValue(settings);
+            }
+        }
     }
 }

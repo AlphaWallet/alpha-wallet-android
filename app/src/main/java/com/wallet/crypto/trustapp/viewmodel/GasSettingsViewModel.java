@@ -7,6 +7,7 @@ import java.math.BigInteger;
 
 public class GasSettingsViewModel extends BaseViewModel {
 
+    public static final int SET_GAS_SETTINGS = 1;
     private MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
     private MutableLiveData<BigInteger> gasLimit = new MutableLiveData<>();
 
@@ -15,10 +16,15 @@ public class GasSettingsViewModel extends BaseViewModel {
         gasLimit.setValue(new BigInteger("0"));
     }
 
-    public MutableLiveData<BigInteger> gasPrice() { return gasPrice; }
-    public MutableLiveData<BigInteger> gasLimit() { return gasLimit; }
-    public BigInteger networkFee() { return gasPrice.getValue().multiply(gasLimit.getValue()); }
+    public MutableLiveData<BigInteger> gasPrice() {
+        return gasPrice;
+    }
 
-    public void saveSettings() {
+    public MutableLiveData<BigInteger> gasLimit() {
+        return gasLimit;
+    }
+
+    public BigInteger networkFee() {
+        return gasPrice.getValue().multiply(gasLimit.getValue());
     }
 }

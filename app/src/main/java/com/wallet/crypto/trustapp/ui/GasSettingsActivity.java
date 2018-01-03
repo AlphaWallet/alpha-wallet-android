@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.ui;
 
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Menu;
@@ -144,7 +145,11 @@ public class GasSettingsActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save: {
-                viewModel.saveSettings();
+                Intent intent = new Intent();
+                intent.putExtra(C.EXTRA_GAS_PRICE, viewModel.gasPrice().getValue().toString());
+                intent.putExtra(C.EXTRA_GAS_LIMIT, viewModel.gasLimit().getValue().toString());
+                setResult(RESULT_OK, intent);
+                finish();
             }
             break;
         }

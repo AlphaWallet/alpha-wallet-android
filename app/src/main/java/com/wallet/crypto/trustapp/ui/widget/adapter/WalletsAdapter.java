@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.widget.holder.BinderViewHolder;
-import com.wallet.crypto.trustapp.ui.widget.holder.WalletManageHolder;
+import com.wallet.crypto.trustapp.ui.widget.holder.WalletHolder;
 
-public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
 	private final OnSetWalletDefaultListener onSetWalletDefaultListener;
 	private final OnWalletDeleteListener onWalletDeleteListener;
@@ -19,7 +19,7 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
 	private Wallet defaultWallet = null;
 
-	public WalletsManageAdapter(
+	public WalletsAdapter(
 			OnSetWalletDefaultListener onSetWalletDefaultListener,
 			OnWalletDeleteListener onWalletDeleteListener,
             OnExportWalletListener onExportWalletListener) {
@@ -32,8 +32,8 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 	public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		BinderViewHolder binderViewHolder = null;
 		switch (viewType) {
-			case WalletManageHolder.VIEW_TYPE: {
-				WalletManageHolder h = new WalletManageHolder(R.layout.item_wallet_manage, parent);
+			case WalletHolder.VIEW_TYPE: {
+				WalletHolder h = new WalletHolder(R.layout.item_wallet_manage, parent);
 				h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
 				h.setOnWalletDeleteListener(onWalletDeleteListener);
 				h.setOnExportWalletListener(onExportWalletListener);
@@ -46,12 +46,13 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 	@Override
 	public void onBindViewHolder(BinderViewHolder holder, int position) {
 		switch (getItemViewType(position)) {
-			case WalletManageHolder.VIEW_TYPE:{
+			case WalletHolder.VIEW_TYPE:{
 				Wallet wallet = wallets[position];
 				Bundle bundle = new Bundle();
 				bundle.putBoolean(
-						WalletManageHolder.IS_DEFAULT_ADDITION,
+						WalletHolder.IS_DEFAULT_ADDITION,
 						defaultWallet != null && defaultWallet.sameAddress(wallet.address));
+				bundle.putBoolean(WalletHolder.IS_LAST_ITEM, getItemCount() == 1);
 				holder.bind(wallet, bundle);
 			} break;
 		}
@@ -64,7 +65,7 @@ public class WalletsManageAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
 	@Override
 	public int getItemViewType(int position) {
-		return WalletManageHolder.VIEW_TYPE;
+		return WalletHolder.VIEW_TYPE;
 	}
 
 	public void setDefaultWallet(Wallet wallet) {

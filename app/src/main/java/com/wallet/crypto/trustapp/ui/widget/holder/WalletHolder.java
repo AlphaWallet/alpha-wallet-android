@@ -11,23 +11,24 @@ import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsManageAdapter;
+import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsAdapter;
 
-public class WalletManageHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
+public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 
 	public static final int VIEW_TYPE = 1001;
 	public final static String IS_DEFAULT_ADDITION = "is_default";
+    public static final String IS_LAST_ITEM = "is_last";
 
-	private final RadioButton defaultAction;
+    private final RadioButton defaultAction;
 	private final ImageView deleteAction;
 	private final TextView address;
     private final ImageView exportAction;
-    private WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
-	private WalletsManageAdapter.OnWalletDeleteListener onWalletDeleteListener;
-	private WalletsManageAdapter.OnExportWalletListener onExportWalletListener;
+    private WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
+	private WalletsAdapter.OnWalletDeleteListener onWalletDeleteListener;
+	private WalletsAdapter.OnExportWalletListener onExportWalletListener;
 	private Wallet wallet;
 
-	public WalletManageHolder(int resId, ViewGroup parent) {
+	public WalletHolder(int resId, ViewGroup parent) {
 		super(resId, parent);
 
 		defaultAction = findViewById(R.id.default_action);
@@ -53,19 +54,20 @@ public class WalletManageHolder extends BinderViewHolder<Wallet> implements View
 		address.setText(wallet.address);
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
-		deleteAction.setVisibility(addition.getBoolean(IS_DEFAULT_ADDITION, false)
-                ? View.GONE : View.VISIBLE);
+		deleteAction.setVisibility(
+		        addition.getBoolean(IS_DEFAULT_ADDITION, false) && !addition.getBoolean(IS_LAST_ITEM, false)
+                    ? View.GONE : View.VISIBLE);
 	}
 
-	public void setOnSetWalletDefaultListener(WalletsManageAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener) {
+	public void setOnSetWalletDefaultListener(WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener) {
 		this.onSetWalletDefaultListener = onSetWalletDefaultListener;
 	}
 
-	public void setOnWalletDeleteListener(WalletsManageAdapter.OnWalletDeleteListener onWalletDeleteListener) {
+	public void setOnWalletDeleteListener(WalletsAdapter.OnWalletDeleteListener onWalletDeleteListener) {
 		this.onWalletDeleteListener = onWalletDeleteListener;
 	}
 
-    public void setOnExportWalletListener(WalletsManageAdapter.OnExportWalletListener onExportWalletListener) {
+    public void setOnExportWalletListener(WalletsAdapter.OnExportWalletListener onExportWalletListener) {
         this.onExportWalletListener = onExportWalletListener;
     }
 

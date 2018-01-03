@@ -11,7 +11,9 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.SwitchPreference;
 
+import com.github.omadahealth.lollipin.lib.managers.AppLock;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
@@ -89,6 +91,26 @@ public class SettingsFragment extends PreferenceFragment
             }
             startActivity(intent);
             return false;
+        });
+
+        final SwitchPreference pinCode = (SwitchPreference) findPreference("pref_pincode");
+        pinCode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                final boolean enable = !((SwitchPreference) preference).isChecked();
+                if (enable) {
+                    // enable pin code
+                    final Intent intent = new Intent(getActivity(), CustomPinActivity.class);
+                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
+                    startActivity(intent);
+                } else {
+                    // disable pin code
+                    final Intent intent = new Intent(getActivity(), CustomPinActivity.class);
+                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
+                    startActivity(intent);
+                }
+                return true;
+            }
         });
 
         final Preference donate = findPreference("pref_donate");

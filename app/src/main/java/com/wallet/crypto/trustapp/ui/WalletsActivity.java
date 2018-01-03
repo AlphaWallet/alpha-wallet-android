@@ -18,7 +18,7 @@ import android.view.View;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsManageAdapter;
+import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsAdapter;
 import com.wallet.crypto.trustapp.viewmodel.WalletsViewModel;
 import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
 import com.wallet.crypto.trustapp.widget.AddWalletView;
@@ -42,7 +42,7 @@ public class WalletsActivity extends BaseActivity implements
     WalletsViewModelFactory walletsViewModelFactory;
 	WalletsViewModel viewModel;
 
-	private WalletsManageAdapter adapter;
+	private WalletsAdapter adapter;
 
 	private SystemView systemView;
     private BackupWarningView backupWarning;
@@ -58,7 +58,7 @@ public class WalletsActivity extends BaseActivity implements
 		// Init toolbar
 		toolbar();
 
-		adapter = new WalletsManageAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
+		adapter = new WalletsAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
 		SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
 		systemView = findViewById(R.id.system_view);
 		backupWarning = findViewById(R.id.backup_warning);

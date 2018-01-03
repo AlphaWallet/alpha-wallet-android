@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 
 import com.github.omadahealth.lollipin.lib.managers.AppLock;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
@@ -104,10 +105,9 @@ public class SettingsFragment extends PreferenceFragment
                     intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
                     startActivity(intent);
                 } else {
-                    // disable pin code
-                    final Intent intent = new Intent(getActivity(), CustomPinActivity.class);
-                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.DISABLE_PINLOCK);
-                    startActivity(intent);
+                    // disable pin code without asking for it
+                    LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+                    lockManager.getAppLock().disableAndRemoveConfiguration();
                 }
                 return true;
             }

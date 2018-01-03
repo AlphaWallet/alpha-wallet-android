@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -16,11 +18,11 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.util.BallanceUtils;
+import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModel;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
-import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 
 import org.ethereum.geth.Address;
 
@@ -44,6 +46,8 @@ public class SendActivity extends BaseActivity {
     private String contractAddress;
     private int decimals;
     private String symbol;
+    private TextInputLayout toInputLayout;
+    private TextInputLayout amountInputLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,13 +61,19 @@ public class SendActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
 
+        toInputLayout = findViewById(R.id.to_input_layout);
         toAddressText = findViewById(R.id.send_to_address);
+        amountInputLayout = findViewById(R.id.amount_input_layout);
         amountText = findViewById(R.id.send_amount);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
+        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
+
+        setTitle(getString(R.string.title_send) + " " + symbol);
+        amountInputLayout.setHint(getString(R.string.hint_amount) + " " + symbol);
 
         // Populate to address if it has been passed forward
         String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
@@ -126,12 +136,12 @@ public class SendActivity extends BaseActivity {
         boolean inputValid = true;
         final String to = toAddressText.getText().toString();
         if (!isAddressValid(to)) {
-            toAddressText.setError(getString(R.string.error_invalid_address));
+            toInputLayout.setError(getString(R.string.error_invalid_address));
             inputValid = false;
         }
         final String amount = amountText.getText().toString();
         if (!isValidEthAmount(amount)) {
-            amountText.setError(getString(R.string.error_invalid_amount));
+            amountInputLayout.setError(getString(R.string.error_invalid_amount));
             inputValid = false;
         }
 
@@ -139,7 +149,7 @@ public class SendActivity extends BaseActivity {
             return;
         }
 
-        viewModel.openConfirmation(this, to, amount);
+        viewModel.openConfirmation(this, to, amount, contractAddress, decimals, symbol, sendingTokens);
     }
 
     boolean isAddressValid(String address) {
@@ -153,7 +163,7 @@ public class SendActivity extends BaseActivity {
 
     boolean isValidEthAmount(String eth) {
         try {
-            String wei = BallanceUtils.EthToWei(eth);
+            String wei = BalanceUtils.EthToWei(eth);
             return wei != null;
         } catch (Exception e) {
             return false;

@@ -3,7 +3,7 @@
     <string name="balance">Balance</string>
     <string name="title_send">Send</string>
     <string name="title_request">My Address</string>
-    <string name="title_import">Import</string>
+    <string name="title_import">Import Wallet</string>
     <string name="title_create">Create</string>
     <string name="title_account">Wallets</string>
     <string name="title_activity_main2">Main2Activity</string>
@@ -47,7 +47,7 @@
     <string name="sent">Sent</string>
     <string name="received">Received</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="network_label">RPC server</string>
+    <string name="network_label">Network</string>
     <string name="app_intro">Intro</string>
 
     <string name="title_trust">Trust</string>
@@ -115,8 +115,6 @@
     <string name="yes_continue">Yes, continue</string>
     <string name="no_repeat">No, repeat</string>
     <string name="unable_unblock_device">Unable to unlock the device.</string>
-    <string name="gas_limit">Gas Limit</string>
-    <string name="gas_price">Gas Price (Gwei)</string>
     <string name="skip">Skip</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Any \'rooted\' app can access Trust\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
@@ -215,8 +213,15 @@
     <string name="unknown_balance_with_symbol">-- ETH</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy">dummy_value</string>
-    <string name="dummy_transaction_value">X ETH</string>
+    <string name="dummy_transaction_value">-- ETH</string>
+    <string name="title_dialog_sending">Sending...</string>
     <string name="welcome.erc20.label.title">ERC20 Compatible</string>
     <string name="welcome.erc20.label.description">Support for ERC20 tokens by default.</string>
     <string name="i_understand">I understand</string>
+    <string name="scan_qr">Get address from QR Code</string>
+    <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your tranasction will be processed by the %@ network.</string>
+    <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your %@. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
+    <string name="title_send_settings">Advanced</string>
+    <string name="title_activity_barcode">Barcode Scan</string>
+    <string name="action_save">Save</string>
 </resources>

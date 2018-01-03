@@ -29,49 +29,45 @@
 
         <activity
             android:name=".ui.WalletsActivity"
-            android:label="@string/title_account_list"
-            />
+            android:label="@string/title_account_list" />
 
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
-            android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
-            />
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
             android:name=".ui.TransactionsActivity"
-            android:label="@string/title_import"
-            />
+            android:label="@string/title_import" />
 
         <activity
             android:name=".ui.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            />
-
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".ui.TransactionDetailActivity"
-            android:label="@string/action_transaction_detail"
-            />
-
+            android:label="@string/action_transaction_detail" />
         <activity
             android:name=".ui.MyAddressActivity"
-            android:label="@string/title_my_address"
-            />
-
+            android:label="@string/title_my_address" />
         <activity
             android:name=".ui.TokensActivity"
-            android:label="@string/title_my_tokens"
-            />
+            android:label="@string/title_my_tokens" />
 
         <activity
             android:name=".ui.SendActivity"
-            android:label="@string/title_activity_send"
-            />
+            android:label="@string/title_activity_send" />
 
         <activity
             android:name=".ui.ConfirmationActivity"
-            android:label="@string/title_activity_confirmation"
-            />
+            android:label="@string/title_activity_confirmation" />
+
+        <activity
+            android:name=".ui.barcode.BarcodeCaptureActivity"
+            android:label="@string/title_activity_barcode" />
+
+        <activity
+            android:name=".ui.GasSettingsActivity"
+            android:label="@string/title_send_settings" />
 
         <activity
             android:name=".ui.CustomPinActivity"

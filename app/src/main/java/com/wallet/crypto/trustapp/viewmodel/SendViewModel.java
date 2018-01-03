@@ -16,7 +16,7 @@ public class SendViewModel extends BaseViewModel {
         this.confirmationRouter = confirmationRouter;
     }
 
-    public void openConfirmation(Context context, String to, String amount) {
-        confirmationRouter.open(context, to, amount);
+    public void openConfirmation(Context context, String to, String amount, String contractAddress, int decimals, String symbol, boolean sendingTokens) {
+        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens);
     }
 }

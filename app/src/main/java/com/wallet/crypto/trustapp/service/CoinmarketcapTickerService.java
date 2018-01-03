@@ -2,7 +2,6 @@ package com.wallet.crypto.trustapp.service;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.entity.Ticker;
-import com.wallet.crypto.trustapp.service.TickerService;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;

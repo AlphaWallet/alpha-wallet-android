@@ -74,7 +74,7 @@ public final class BarcodeCaptureActivity extends PinCompatActivity
         super.onCreate(icicle);
         setContentView(R.layout.layout_barcode_capture);
 
-        mPreview = (CameraSourcePreview) findViewById(R.id.preview);
+        mPreview = findViewById(R.id.preview);
 
         boolean autoFocus = true;
         boolean useFlash = false;

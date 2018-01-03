@@ -9,8 +9,6 @@ import com.wallet.crypto.trustapp.entity.GasSettings;
 
 import java.math.BigInteger;
 
-import io.reactivex.Single;
-
 public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
 	private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";

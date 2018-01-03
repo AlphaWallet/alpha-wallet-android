@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.App;
-import com.wallet.crypto.trustapp.repository.TrustPasswordStore;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
+import com.wallet.crypto.trustapp.repository.TrustPasswordStore;
 import com.wallet.crypto.trustapp.util.LogInterceptor;
 
 import javax.inject.Singleton;

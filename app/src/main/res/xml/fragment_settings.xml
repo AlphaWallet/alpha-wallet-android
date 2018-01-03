@@ -7,8 +7,7 @@
         <Preference
             android:key="pref_wallet"
             android:icon="@mipmap/settings_backup"
-            android:title="@string/action_wallets"
-            android:summary="Keep it secure and never share it with anyone."/>
+            android:title="@string/action_wallets" />
 
         <ListPreference
             android:key="pref_rpcServer"

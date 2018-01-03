@@ -12,7 +12,6 @@ import android.widget.EditText;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.ui.widget.OnImportPrivateKeyListener;
-import com.wallet.crypto.trustapp.widget.HelperTextInputLayout;
 
 public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener {
 

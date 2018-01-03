@@ -8,6 +8,7 @@ import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
+import com.wallet.crypto.trustapp.router.GasSettingsRouter;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
 
 import dagger.Module;
@@ -19,9 +20,10 @@ public class ConfirmationModule {
     public ConfirmationViewModelFactory provideConfirmationViewModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchGasSettingsInteract fetchGasSettingsInteract,
-            CreateTransactionInteract createTransactionInteract
+            CreateTransactionInteract createTransactionInteract,
+            GasSettingsRouter gasSettingsRouter
     ) {
-        return new ConfirmationViewModelFactory(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract);
+        return new ConfirmationViewModelFactory(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter);
     }
 
     @Provides
@@ -37,5 +39,10 @@ public class ConfirmationModule {
     @Provides
     CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
         return new CreateTransactionInteract(transactionRepository, passwordStore);
+    }
+
+    @Provides
+    GasSettingsRouter provideGasSettingsRouter() {
+        return new GasSettingsRouter();
     }
 }

@@ -1,13 +1,9 @@
 package com.wallet.crypto.trustapp.interact;
 
 
-import android.util.Log;
-
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
-
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 import java.math.BigInteger;
 

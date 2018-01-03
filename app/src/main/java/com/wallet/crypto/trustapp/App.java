@@ -6,7 +6,6 @@ import android.support.multidex.MultiDexApplication;
 import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.wallet.crypto.trustapp.di.DaggerAppComponent;
 import com.wallet.crypto.trustapp.ui.CustomPinActivity;
-import com.wallet.crypto.trustapp.ui.SplashActivity;
 
 import javax.inject.Inject;
 
@@ -32,6 +31,7 @@ public class App extends MultiDexApplication implements HasActivityInjector {
 		// enable pin code for the application
 		LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
 		lockManager.enableAppLock(this, CustomPinActivity.class);
+		lockManager.getAppLock().setShouldShowForgot(false);
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
+import io.realm.Realm;
 
 public class App extends MultiDexApplication implements HasActivityInjector {
 
@@ -19,8 +20,8 @@ public class App extends MultiDexApplication implements HasActivityInjector {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
-		DaggerAppComponent
+        Realm.init(this);
+        DaggerAppComponent
 				.builder()
 				.application(this)
 				.build()

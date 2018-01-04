@@ -48,6 +48,7 @@ public class ConfirmationActivity extends BaseActivity {
 
     private BigInteger amount;
     private int decimals;
+    private String contractAddress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class ConfirmationActivity extends BaseActivity {
         sendButton.setOnClickListener(view -> onSend());
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
@@ -136,13 +138,22 @@ public class ConfirmationActivity extends BaseActivity {
     private void onSend() {
         GasSettings gasSettings = viewModel.gasSettings().getValue();
 
-        viewModel.createTransaction(
-                fromAddressText.getText().toString(),
-                toAddressText.getText().toString(),
-                amount,
-                gasSettings.gasPrice,
-                gasSettings.gasLimit
-        );
+        if (contractAddress == null) {
+            viewModel.createTransaction(
+                    fromAddressText.getText().toString(),
+                    toAddressText.getText().toString(),
+                    amount,
+                    gasSettings.gasPrice,
+                    gasSettings.gasLimit);
+        } else {
+            viewModel.createTokenTransfer(
+                    fromAddressText.getText().toString(),
+                    toAddressText.getText().toString(),
+                    contractAddress,
+                    amount,
+                    gasSettings.gasPrice,
+                    gasSettings.gasLimit);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet) {

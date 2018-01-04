@@ -11,8 +11,10 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.router.GasSettingsRouter;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class ConfirmationViewModel extends BaseViewModel {
@@ -39,7 +41,15 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPrice, gasLimit)
+                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
+
+    public void createTokenTransfer(String from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
+        progress.postValue(true);
+        final byte[] data = TokenRepository.createTokenTransferData(to, amount);
+        disposable = createTransactionInteract
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 

@@ -179,6 +179,9 @@
     <string name="button_ok">OK</string>
     <string name="hint_recipient_address">Recipient address</string>
     <string name="hint_amount">Amount</string>
+    <string name="hint_contract_address">Contract address</string>
+    <string name="hint_contract_symbol">Symbol</string>
+    <string name="hint_contract_decimals">Decimals</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
@@ -196,6 +199,7 @@
     <string name="action_wallets">Wallets</string>
     <string name="action_next">Next</string>
     <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_load_transaction">Failed to load transaction list</string>
@@ -203,6 +207,7 @@
     <string name="error_invalid_address">Invalid address</string>
     <string name="error_invalid_amount">Invalid amount</string>
     <string name="error_transaction_failed">Transaction error</string>
+    <string name="error_must_numeric">must be a numeric value.</string>
     <string name="transaction_succeeded">Transaction successful</string>
     <string name="NA">N/A</string>
     <string name="minus">-</string>
@@ -221,5 +226,6 @@
     <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
     <string name="title_send_settings">Advanced</string>
     <string name="title_activity_barcode">Barcode Scan</string>
-    <string name="action_save">Save</string>
+    <string name="error_add_token">Could not add token.</string>
+    <string name="title_add_token">Add token</string>
 </resources>

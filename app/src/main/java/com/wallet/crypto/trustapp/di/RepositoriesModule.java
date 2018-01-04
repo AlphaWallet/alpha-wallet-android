@@ -6,7 +6,9 @@ import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
+import com.wallet.crypto.trustapp.repository.RealmTokenSource;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
+import com.wallet.crypto.trustapp.repository.TokenLocalSource;
 import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.TransactionInMemorySource;
@@ -63,11 +65,13 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-    WalletRepositoryType provideAccountRepository(
+    WalletRepositoryType provideWalletRepository(
+            OkHttpClient okHttpClient,
 			PreferenceRepositoryType preferenceRepositoryType,
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository) {
-		return new WalletRepository(preferenceRepositoryType, accountKeystoreService, networkRepository);
+		return new WalletRepository(
+		        okHttpClient, preferenceRepositoryType, accountKeystoreService, networkRepository);
 	}
 
 	@Singleton
@@ -97,13 +101,27 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-    TokenRepositoryType provideTokenRepository(TokenExplorerClientType tokenExplorerClientType) {
-	    return new TokenRepository(tokenExplorerClientType);
+    TokenRepositoryType provideTokenRepository(
+            OkHttpClient okHttpClient,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            TokenExplorerClientType tokenExplorerClientType,
+            TokenLocalSource tokenLocalSource) {
+	    return new TokenRepository(
+	            okHttpClient,
+	            ethereumNetworkRepository,
+	            tokenExplorerClientType,
+                tokenLocalSource);
     }
 
 	@Singleton
     @Provides
     TokenExplorerClientType provideTokenService(OkHttpClient okHttpClient, Gson gson) {
 	    return new EthplorerTokenService(okHttpClient, gson);
+    }
+
+    @Singleton
+    @Provides
+    TokenLocalSource provideRealmTokenSource() {
+	    return new RealmTokenSource();
     }
 }

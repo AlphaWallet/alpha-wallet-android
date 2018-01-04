@@ -3,7 +3,7 @@ package com.wallet.crypto.trustapp.service;
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.entity.ApiErrorException;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenInfo;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
@@ -39,10 +39,21 @@ public class EthplorerTokenService implements TokenExplorerClientType {
     }
 
     @Override
-    public Observable<Token[]> fetch(String walletAddress) {
+    public Observable<TokenInfo[]> fetch(String walletAddress) {
         return ethplorerApiClient.fetchTokens(walletAddress)
                 .lift(apiError())
-                .map(r -> r.tokens == null ? new Token[0] : r.tokens)
+                .map(r -> {
+                    if (r.tokens == null) {
+                        return new TokenInfo[0];
+                    } else {
+                        int len = r.tokens.length;
+                        TokenInfo[] result = new TokenInfo[len];
+                        for (int i = 0; i < len; i++) {
+                            result[i] = r.tokens[i].tokenInfo;
+                        }
+                        return result;
+                    }
+                })
                 .subscribeOn(Schedulers.io());
     }
 
@@ -54,6 +65,10 @@ public class EthplorerTokenService implements TokenExplorerClientType {
     public interface EthplorerApiClient {
         @GET("/getAddressInfo/{address}?apiKey=freekey")
         Observable<Response<EthplorerResponse>> fetchTokens(@Path("address") String address);
+    }
+
+    private static class Token {
+        TokenInfo tokenInfo;
     }
 
     private static class EthplorerResponse {

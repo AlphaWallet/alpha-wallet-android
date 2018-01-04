@@ -1,11 +1,14 @@
 package com.wallet.crypto.trustapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.wallet.crypto.trustapp.R;
@@ -62,15 +65,25 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add: {
+                viewModel.showAddToken(this);
+            } break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void onTokenClick(View view, Token token) {
-//        Context context = v.getContext();
-//        Intent intent = new Intent(context, SendActivity.class);
-//        intent.putExtra(SendActivity.EXTRA_SENDING_TOKENS, true);
-//        intent.putExtra(SendActivity.EXTRA_CONTRACT_ADDRESS, info.getAddress());
-//        intent.putExtra(SendActivity.EXTRA_SYMBOL, info.getSymbol());
-//        intent.putExtra(SendActivity.EXTRA_DECIMALS, info.getDecimals());
-//
-//        context.startActivity(intent);
+        Context context = view.getContext();
+        viewModel.showSendToken(context, token.tokenInfo.address, token.tokenInfo.symbol, token.tokenInfo.decimals);
     }
 
     @Override

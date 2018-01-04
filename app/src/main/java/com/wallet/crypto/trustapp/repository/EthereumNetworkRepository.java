@@ -30,7 +30,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
             new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
                     "https://mewapi.epool.io/",
                     "https://classic.trustwalletapp.com",
-                    "https://gastracker.io",66, true),
+                    "https://gastracker.io",61, true),
             new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
                     "https://core.poa.network",
                     "https://poa.trustwalletapp.com","poa", 99, false),

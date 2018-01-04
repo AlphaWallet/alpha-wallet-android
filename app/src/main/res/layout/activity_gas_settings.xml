@@ -48,6 +48,7 @@
                 android:layout_marginTop="@dimen/big_margin" />
 
             <TextView
+                android:id="@+id/gas_price_info_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/info_gas_price"
@@ -85,6 +86,7 @@
                 android:layout_marginTop="@dimen/big_margin" />
 
             <TextView
+                android:id="@+id/gas_limit_info_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/info_gas_limit"

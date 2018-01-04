@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModel;
 import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModelFactory;
@@ -32,6 +33,8 @@ public class GasSettingsActivity extends BaseActivity {
     private TextView gasPriceText;
     private TextView gasLimitText;
     private TextView networkFeeText;
+    private TextView gasPriceInfoText;
+    private TextView gasLimitInfoText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,6 +50,8 @@ public class GasSettingsActivity extends BaseActivity {
         gasPriceText = findViewById(R.id.gas_price_text);
         gasLimitText = findViewById(R.id.gas_limit_text);
         networkFeeText = findViewById(R.id.text_network_fee);
+        gasPriceInfoText = findViewById(R.id.gas_price_info_text);
+        gasLimitInfoText = findViewById(R.id.gas_limit_info_text);
 
         gasPriceSlider.setPadding(0, 0, 0, 0);
         gasLimitSlider.setPadding(0, 0, 0, 0);
@@ -111,9 +116,23 @@ public class GasSettingsActivity extends BaseActivity {
 
         viewModel.gasPrice().observe(this, this::onGasPrice);
         viewModel.gasLimit().observe(this, this::onGasLimit);
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
 
         viewModel.gasPrice().setValue(gasPrice);
         viewModel.gasLimit().setValue(gasLimit);
+    }
+
+    @Override
+    public void onResume() {
+
+        super.onResume();
+
+        viewModel.prepare();
+    }
+
+    private void onDefaultNetwork(NetworkInfo network) {
+        gasPriceInfoText.setText(getString(R.string.info_gas_price).replace(C.ETHEREUM_NETWORK_NAME, network.name));
+        gasLimitInfoText.setText(getString(R.string.info_gas_limit).replace(C.ETHEREUM_NETWORK_NAME, network.symbol));
     }
 
     private void onGasPrice(BigInteger price) {

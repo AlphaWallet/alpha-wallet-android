@@ -155,12 +155,13 @@ public class ConfirmationActivity extends BaseActivity {
                 .setTitle(R.string.transaction_succeeded)
                 .setMessage(hash)
                 .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    // Do nothing
+                    finish();
                 })
                 .setNeutralButton(R.string.copy, (dialog1, id) -> {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("transaction hash", hash);
                     clipboard.setPrimaryClip(clip);
+                    finish();
                 })
                 .create();
         dialog.show();

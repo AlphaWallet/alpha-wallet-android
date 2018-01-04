@@ -32,14 +32,13 @@ public abstract class C {
     public static final String EXTRA_GAS_PRICE = "GAS_PRICE";
     public static final String EXTRA_GAS_LIMIT = "GAS_LIMIT";
 
-    public static final String DEFAULT_GAS_PRICE = "30000000000";
-    public static final String DEFAULT_GAS_LIMIT = "90000";
-
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
     public static final String CHANGELLY_REF_ID = "968d4f0f0bf9";
     public static final String DONATION_ADDRESS = "0x9f8284ce2cf0c8ce10685f537b1fff418104a317";
 
+    public static final String DEFAULT_GAS_PRICE = "21000000000";
+    public static final String DEFAULT_GAS_LIMIT = "90000";
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_MAX = 300000L;
     public static final long GAS_PRICE_MIN = 1000000000L;

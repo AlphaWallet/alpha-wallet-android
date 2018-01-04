@@ -150,6 +150,9 @@ public class SendActivity extends BaseActivity {
             return;
         }
 
+        toInputLayout.setErrorEnabled(false);
+        amountInputLayout.setErrorEnabled(false);
+
         BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amount, decimals);
         viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens);
     }

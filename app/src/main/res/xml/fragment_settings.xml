@@ -7,7 +7,8 @@
         <Preference
             android:key="pref_wallet"
             android:icon="@mipmap/settings_backup"
-            android:title="@string/action_wallets" />
+            android:title="@string/action_wallets"
+            />
 
         <ListPreference
             android:key="pref_rpcServer"

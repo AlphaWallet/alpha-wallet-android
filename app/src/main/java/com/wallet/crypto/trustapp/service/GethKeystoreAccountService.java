@@ -89,10 +89,10 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
     }
 
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, String toAddress, String wei, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
+    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
             BigInt value = new BigInt(0);
-            value.setString(wei, 10);
+            value.setString(amount.toString(), 10);
 
             BigInt gasPriceBI = new BigInt(0);
             gasPriceBI.setString(gasPrice.toString(), 10);

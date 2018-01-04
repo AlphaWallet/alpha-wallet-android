@@ -6,8 +6,6 @@ public abstract class C {
     public static final int EXPORT_REQUEST_CODE = 1002;
     public static final int SHARE_REQUEST_CODE = 1003;
 
-    public static final long ETHER_DECIMALS = 18;
-
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Classic";
     public static final String POA_NETWORK_NAME = "POA Network";
@@ -46,6 +44,7 @@ public abstract class C {
     public static final long GAS_LIMIT_MAX = 300000L;
     public static final long GAS_PRICE_MIN = 1000000000L;
     public static final long NETWORK_FEE_MAX = 20000000000000000L;
+    public static final int ETHER_DECIMALS = 18;
 
     public interface ErrorCode {
 

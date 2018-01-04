@@ -7,6 +7,8 @@ import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.router.ConfirmationRouter;
 
+import java.math.BigInteger;
+
 public class SendViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
@@ -16,7 +18,7 @@ public class SendViewModel extends BaseViewModel {
         this.confirmationRouter = confirmationRouter;
     }
 
-    public void openConfirmation(Context context, String to, String amount, String contractAddress, int decimals, String symbol, boolean sendingTokens) {
+    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens) {
         confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens);
     }
 }

@@ -46,7 +46,8 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView networkFeeText;
     private Button sendButton;
 
-    private String amount;
+    private BigInteger amount;
+    private int decimals;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,13 +69,14 @@ public class ConfirmationActivity extends BaseActivity {
         sendButton.setOnClickListener(view -> onSend());
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
-        amount = getIntent().getStringExtra(C.EXTRA_AMOUNT);
+        amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
 
         toAddressText.setText(toAddress);
 
-        String amountString = "-" + amount + " " + symbol;
+        String amountString = "-" + BalanceUtils.subunitToBase(amount, decimals) + " " + symbol;
         valueText.setText(amountString);
         valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
 

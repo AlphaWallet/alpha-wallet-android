@@ -36,7 +36,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.gasSettingsRouter = gasSettingsRouter;
     }
 
-    public void createTransaction(String from, String to, String amount, BigInteger gasPrice, BigInteger gasLimit) {
+    public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
         disposable = createTransactionInteract
                 .create(new Wallet(from), to, amount, gasPrice, gasLimit)

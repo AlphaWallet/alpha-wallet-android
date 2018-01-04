@@ -53,7 +53,7 @@ public interface AccountKeystoreService {
 			Wallet signer,
 			String signerPassword,
 			String toAddress,
-			String wei,
+			BigInteger amount,
 			BigInteger gasPrice,
 			BigInteger gasLimit,
 			long nonce,

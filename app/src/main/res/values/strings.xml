@@ -137,6 +137,7 @@
     <string name="title_my_tokens">My Tokens</string>
     <string name="title_activity_send">Send</string>
     <string name="title_activity_confirmation">Confirm</string>
+    <string name="title_transaction_details">Transaction details</string>
     <!-- Suggestions -->
     <string name="suggestion_field_required">* Field required</string>
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
@@ -191,7 +192,7 @@
     <string name="subtitle_block_num">Block #</string>
     <!-- Actions -->
     <string name="action_share">Share</string>
-    <string name="action_transaction_detail">Transaction details</string>
+    <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>

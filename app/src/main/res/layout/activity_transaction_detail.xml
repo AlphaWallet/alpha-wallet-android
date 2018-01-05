@@ -126,7 +126,7 @@
                 />
             <Button
                 android:id="@+id/more_detail"
-                android:text="@string/action_transaction_detail"
+                android:text="@string/action_more_details"
                 android:clickable="true"
                 android:focusable="true"
                 android:autoLink="web"

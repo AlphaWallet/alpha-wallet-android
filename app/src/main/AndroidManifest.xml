@@ -44,7 +44,7 @@
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".ui.TransactionDetailActivity"
-            android:label="@string/action_transaction_detail" />
+            android:label="@string/title_transaction_details" />
         <activity
             android:name=".ui.MyAddressActivity"
             android:label="@string/title_my_address" />

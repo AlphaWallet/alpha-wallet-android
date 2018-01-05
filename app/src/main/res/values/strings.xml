@@ -137,7 +137,8 @@
     <string name="title_my_tokens">My Tokens</string>
     <string name="title_activity_send">Send</string>
     <string name="title_activity_confirmation">Confirm</string>
-    <string name="title_transaction_details">Transaction details</string>
+    <string name="title_transaction_details">Transaction Details</string>
+    <string name="title_add_token">Add Custom Token</string>
     <!-- Suggestions -->
     <string name="suggestion_field_required">* Field required</string>
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
@@ -228,5 +229,4 @@
     <string name="title_send_settings">Advanced</string>
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
-    <string name="title_add_token">Add token</string>
 </resources>

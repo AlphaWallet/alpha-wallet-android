@@ -15,6 +15,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
 	private static final String GAS_PRICE_KEY  ="gas_price";
     private static final String GAS_LIMIT_KEY  ="gas_limit";
+	private static final String GAS_LIMIT_FOR_TOKENS_KEY = "gas_limit_for_tokens";
 
 	private final SharedPreferences pref;
 
@@ -43,9 +44,12 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	}
 
 	@Override
-    public GasSettings getGasSettings() {
+    public GasSettings getGasSettings(boolean forTokenTransfer) {
 	    BigInteger gasPrice = new BigInteger(pref.getString(GAS_PRICE_KEY, C.DEFAULT_GAS_PRICE));
-	    BigInteger gasLimit = new BigInteger(pref.getString(GAS_LIMIT_KEY, C.DEFAULT_GAS_LIMIT));
+		BigInteger gasLimit = new BigInteger(pref.getString(GAS_LIMIT_KEY, C.DEFAULT_GAS_LIMIT));
+	    if (forTokenTransfer) {
+			gasLimit = new BigInteger(pref.getString(GAS_LIMIT_FOR_TOKENS_KEY, C.DEFAULT_GAS_LIMIT_FOR_TOKENS));
+		}
 
 	    return new GasSettings(gasPrice, gasLimit);
     }

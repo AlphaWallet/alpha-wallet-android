@@ -28,6 +28,8 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private final GasSettingsRouter gasSettingsRouter;
 
+    boolean confirmationForTokenTransfer = false;
+
     public ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
                                  CreateTransactionInteract createTransactionInteract,
@@ -63,7 +65,8 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public LiveData<String> sendTransaction() { return newTransaction; }
 
-    public void prepare() {
+    public void prepare(boolean confirmationForTokenTransfer) {
+        this.confirmationForTokenTransfer = confirmationForTokenTransfer;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -77,7 +80,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         if (gasSettings.getValue() == null) {
-            onGasSettings(fetchGasSettingsInteract.fetch());
+            onGasSettings(fetchGasSettingsInteract.fetch(confirmationForTokenTransfer));
         }
     }
 

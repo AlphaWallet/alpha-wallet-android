@@ -41,6 +41,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.ETH_SYMBOL;
 
 public class TransactionsActivity extends BaseNavigationActivity implements View.OnClickListener {
@@ -119,7 +120,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         getMenuInflater().inflate(R.menu.menu_settings, menu);
 
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-        if (networkInfo != null && networkInfo.symbol.equals(ETH_SYMBOL)) {
+        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
             getMenuInflater().inflate(R.menu.menu_deposit, menu);
         }
         return super.onCreateOptionsMenu(menu);

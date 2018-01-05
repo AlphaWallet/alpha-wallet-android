@@ -11,8 +11,8 @@ public class FetchGasSettingsInteract {
         this.repository = repository;
     }
 
-    public GasSettings fetch() {
-        return repository.getGasSettings();
+    public GasSettings fetch(boolean forTokenTransfer) {
+        return repository.getGasSettings(forTokenTransfer);
     }
 
 }

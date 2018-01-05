@@ -39,6 +39,7 @@ public abstract class C {
 
     public static final String DEFAULT_GAS_PRICE = "21000000000";
     public static final String DEFAULT_GAS_LIMIT = "90000";
+    public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_MAX = 300000L;
     public static final long GAS_PRICE_MIN = 1000000000L;

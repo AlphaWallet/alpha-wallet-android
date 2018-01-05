@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.repository;
 
+import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
@@ -14,16 +15,16 @@ import io.realm.Sort;
 public class RealmTokenSource implements TokenLocalSource {
 
     @Override
-    public Completable put(Wallet wallet, TokenInfo tokenInfo) {
-        return Completable.fromAction(() -> putInNeed(wallet, tokenInfo));
+    public Completable put(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
+        return Completable.fromAction(() -> putInNeed(networkInfo, wallet, tokenInfo));
     }
 
     @Override
-    public Single<TokenInfo[]> fetch(Wallet wallet) {
+    public Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
             Realm realm = null;
             try {
-                realm = getRealmInstance(wallet);
+                realm = getRealmInstance(networkInfo, wallet);
                 RealmResults<RealmTokenInfo> realmItems = realm.where(RealmTokenInfo.class)
                         .sort("addedTime", Sort.ASCENDING)
                         .findAll();
@@ -48,18 +49,18 @@ public class RealmTokenSource implements TokenLocalSource {
         });
     }
 
-    private Realm getRealmInstance(Wallet wallet) {
+    private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
         RealmConfiguration config = new RealmConfiguration.Builder()
-                .name(wallet.address + ".realm")
+                .name(wallet.address + "-" + networkInfo.name + ".realm")
                 .schemaVersion(1)
                 .build();
         return Realm.getInstance(config);
     }
 
-    private void putInNeed(Wallet wallet, TokenInfo tokenInfo) {
+    private void putInNeed(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
         Realm realm = null;
         try {
-            realm = getRealmInstance(wallet);
+            realm = getRealmInstance(networkInfo, wallet);
             RealmTokenInfo realmTokenInfo = realm.where(RealmTokenInfo.class)
                     .equalTo("address", tokenInfo.address)
                     .findFirst();

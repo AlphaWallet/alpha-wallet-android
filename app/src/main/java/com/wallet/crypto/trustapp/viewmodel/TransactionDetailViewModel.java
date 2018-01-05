@@ -10,7 +10,9 @@ import android.text.TextUtils;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.router.ExternalBrowserRouter;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -21,17 +23,23 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private final ExternalBrowserRouter externalBrowserRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
     TransactionDetailViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
+            FindDefaultWalletInteract findDefaultWalletInteract,
             ExternalBrowserRouter externalBrowserRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
 
-        disposable = findDefaultNetworkInteract
+        findDefaultNetworkInteract
                 .find()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(defaultNetwork::postValue);
+        disposable = findDefaultWalletInteract
+                .find()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(defaultWallet::postValue);
     }
 
 
@@ -69,5 +77,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     .build();
         }
         return null;
+    }
+
+    public LiveData<Wallet> defaultWallet() {
+        return defaultWallet;
     }
 }

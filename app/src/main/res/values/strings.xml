@@ -229,4 +229,5 @@
     <string name="title_send_settings">Advanced</string>
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
+    <string name="facebook">Facebook</string>
 </resources>

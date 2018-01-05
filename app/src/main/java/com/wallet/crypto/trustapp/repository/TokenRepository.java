@@ -31,7 +31,6 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -39,6 +38,7 @@ public class TokenRepository implements TokenRepositoryType {
     private final TokenExplorerClientType tokenNetworkService;
     private final TokenLocalSource tokenLocalSource;
     private final OkHttpClient httpClient;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private Web3j web3j;
 
     public TokenRepository(
@@ -47,9 +47,10 @@ public class TokenRepository implements TokenRepositoryType {
             TokenExplorerClientType tokenNetworkService,
             TokenLocalSource tokenLocalSource) {
         this.httpClient = okHttpClient;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenNetworkService = tokenNetworkService;
         this.tokenLocalSource = tokenLocalSource;
-        ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
+        this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
@@ -60,8 +61,9 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token[]> fetch(String walletAddress) {
         return Observable.create(e -> {
+            NetworkInfo defaultNetwork = ethereumNetworkRepository.getDefaultNetwork();
             Wallet wallet = new Wallet(walletAddress);
-            Token[] tokens = tokenLocalSource.fetch(wallet)
+            Token[] tokens = tokenLocalSource.fetch(defaultNetwork, wallet)
                     .map(items -> {
                         int len = items.length;
                         Token[] result = new Token[len];
@@ -73,8 +75,8 @@ public class TokenRepository implements TokenRepositoryType {
                     .blockingGet();
             e.onNext(tokens);
 
-            updateTokenInfoCache(wallet);
-            tokens = tokenLocalSource.fetch(wallet)
+            updateTokenInfoCache(defaultNetwork, wallet);
+            tokens = tokenLocalSource.fetch(defaultNetwork, wallet)
                         .map(items -> {
                             int len = items.length;
                             Token[] result = new Token[len];
@@ -96,17 +98,24 @@ public class TokenRepository implements TokenRepositoryType {
 
     @Override
     public Completable addToken(Wallet wallet, String address, String symbol, int decimals) {
-        return tokenLocalSource
-                .put(wallet, new TokenInfo(address, "", symbol, decimals));
+        return tokenLocalSource.put(
+                ethereumNetworkRepository.getDefaultNetwork(),
+                wallet,
+                new TokenInfo(address, "", symbol, decimals));
     }
 
-    private void updateTokenInfoCache(Wallet wallet) {
+    private void updateTokenInfoCache(NetworkInfo defaultNetwork, Wallet wallet) {
+        if (!defaultNetwork.isMainNetwork) {
+            return;
+        }
         tokenNetworkService
                 .fetch(wallet.address)
                 .flatMapCompletable(items -> Completable.fromAction(() -> {
                     for (TokenInfo tokenInfo : items) {
                         try {
-                            tokenLocalSource.put(wallet, tokenInfo).blockingAwait();
+                            tokenLocalSource.put(
+                                    ethereumNetworkRepository.getDefaultNetwork(), wallet, tokenInfo)
+                                    .blockingAwait();
                         } catch (Throwable t) {
                             Log.d("TOKEN_REM", "Err", t);
                         }

@@ -53,6 +53,12 @@
                     android:data="https://t.me/joinchat/AAMtrQ_wtd918mm_mU0BRQ" />
             </Preference>
 
+            <Preference
+                android:key="pref_facebook"
+                android:title="@string/facebook"
+                android:icon="@drawable/settings_facebook">
+
+            </Preference>
         </PreferenceCategory>
 
         <PreferenceCategory

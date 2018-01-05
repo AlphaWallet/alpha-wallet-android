@@ -77,8 +77,16 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
             case R.id.action_add: {
                 viewModel.showAddToken(this);
             } break;
+            case android.R.id.home: {
+                viewModel.showTransactions(this, true);
+            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        viewModel.showTransactions(this, true);
     }
 
     private void onTokenClick(View view, Token token) {

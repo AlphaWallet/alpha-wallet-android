@@ -93,6 +93,13 @@ public class SettingsFragment extends PreferenceFragment
             return false;
         });
 
+        final Preference facebook = findPreference("pref_facebook");
+        facebook.setOnPreferenceClickListener(preference -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/trustwalletapp"));
+            startActivity(intent);
+            return false;
+        });
+
         final Preference donate = findPreference("pref_donate");
         donate.setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(getActivity(), SendActivity.class);

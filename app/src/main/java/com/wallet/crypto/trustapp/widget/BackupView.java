@@ -26,4 +26,14 @@ public class BackupView extends FrameLayout {
     public String getPassword() {
         return password.getText().toString();
     }
+
+    public void showKeyBoard() {
+        password.requestFocus();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        showKeyBoard();
+    }
 }

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.Snackbar;
@@ -19,6 +20,7 @@ import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsAdapter;
+import com.wallet.crypto.trustapp.util.KeyboardUtils;
 import com.wallet.crypto.trustapp.viewmodel.WalletsViewModel;
 import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
 import com.wallet.crypto.trustapp.widget.AddWalletView;
@@ -48,6 +50,7 @@ public class WalletsActivity extends BaseActivity implements
     private BackupWarningView backupWarning;
     private Dialog dialog;
     private boolean isSetDefault;
+    private final Handler handler = new Handler();
 
     @Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -264,14 +267,23 @@ public class WalletsActivity extends BaseActivity implements
         dialog = buildDialog()
                 .setView(view)
                 .setPositiveButton(R.string.ok,
-                        (dialogInterface, i) -> viewModel.exportWallet(wallet, view.getPassword()))
+                        (dialogInterface, i) -> {
+                            viewModel.exportWallet(wallet, view.getPassword());
+                            KeyboardUtils.hideKeyboard(view.findViewById(R.id.password));
+                        })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
                     if (isNew) {
                         onCreatedWallet(wallet);
                     }
+                    KeyboardUtils.hideKeyboard(view.findViewById(R.id.password));
                 })
+                .setOnDismissListener(dialog -> KeyboardUtils.hideKeyboard(view.findViewById(R.id.password)))
                 .create();
         dialog.show();
+        handler.postDelayed(() -> {
+            KeyboardUtils.showKeyboard(view.findViewById(R.id.password));
+        }, 500);
+
     }
 
     private void openShareDialog(String jsonData) {

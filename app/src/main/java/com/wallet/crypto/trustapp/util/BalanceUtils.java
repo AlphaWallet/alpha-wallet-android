@@ -52,7 +52,7 @@ public class BalanceUtils {
      * @return amount in subunits
      */
     public static BigInteger baseToSubunit(String baseAmountStr, int decimals) {
-        assert(decimals > 0);
+        assert(decimals >= 0);
         BigDecimal baseAmount = new BigDecimal(baseAmountStr);
         BigDecimal subunitAmount = baseAmount.multiply(BigDecimal.valueOf(10).pow(decimals));
         try {
@@ -69,7 +69,7 @@ public class BalanceUtils {
      * @return amount in base units
      */
     public static BigDecimal subunitToBase(BigInteger subunitAmount, int decimals) {
-        assert(decimals > 0);
+        assert(decimals >= 0);
         return new BigDecimal(subunitAmount).divide(BigDecimal.valueOf(10).pow(decimals));
     }
 }

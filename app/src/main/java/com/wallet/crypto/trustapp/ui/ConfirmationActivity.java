@@ -78,7 +78,7 @@ public class ConfirmationActivity extends BaseActivity {
 
         toAddressText.setText(toAddress);
 
-        String amountString = "-" + BalanceUtils.subunitToBase(amount, decimals) + " " + symbol;
+        String amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
         valueText.setText(amountString);
         valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
 

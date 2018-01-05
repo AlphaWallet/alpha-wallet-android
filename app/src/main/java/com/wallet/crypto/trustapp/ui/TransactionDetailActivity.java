@@ -13,9 +13,11 @@ import android.widget.TextView;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
+import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.viewmodel.TransactionDetailViewModel;
 import com.wallet.crypto.trustapp.viewmodel.TransactionDetailViewModelFactory;
 
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -48,9 +50,11 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
         toolbar();
 
+        BigInteger gasFee = new BigInteger(transaction.gasUsed).multiply(new BigInteger(transaction.gasPrice));
+
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
         ((TextView) findViewById(R.id.to)).setText(transaction.to);
-        ((TextView) findViewById(R.id.gas_fee)).setText(transaction.gasUsed);
+        ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
         ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(getDate(transaction.timeStamp));
         ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);

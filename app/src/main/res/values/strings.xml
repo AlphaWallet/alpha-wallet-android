@@ -185,13 +185,13 @@
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
-    <string name="subtitle_gas_fee">Gas Fee (Gwei)</string>
+    <string name="subtitle_gas_fee">Gas Fee</string>
     <string name="subtitle_transaction_num">Transaction #</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
     <string name="subtitle_block_num">Block #</string>
     <!-- Actions -->
     <string name="action_share">Share</string>
-    <string name="action_transaction_detail">More details</string>
+    <string name="action_transaction_detail">Transaction details</string>
     <string name="action_add_wallet">Add wallet</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>

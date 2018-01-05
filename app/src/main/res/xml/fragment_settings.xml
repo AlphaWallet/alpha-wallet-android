@@ -56,7 +56,7 @@
             <Preference
                 android:key="pref_facebook"
                 android:title="@string/facebook"
-                android:icon="@drawable/settings_facebook">
+                android:icon="@drawable/ic_facebook">
 
             </Preference>
         </PreferenceCategory>

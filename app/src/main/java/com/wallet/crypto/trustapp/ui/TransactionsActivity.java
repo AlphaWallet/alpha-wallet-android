@@ -201,8 +201,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         adapter.setDefaultNetwork(networkInfo);
-        setBottomMenu(networkInfo.isMainNetwork
-                ? R.menu.menu_main_network : R.menu.menu_secondary_network);
+        setBottomMenu(R.menu.menu_main_network);
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

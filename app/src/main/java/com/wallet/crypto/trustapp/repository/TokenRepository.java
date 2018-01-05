@@ -31,6 +31,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 public class TokenRepository implements TokenRepositoryType {

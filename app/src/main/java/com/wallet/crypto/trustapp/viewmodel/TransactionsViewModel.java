@@ -27,8 +27,8 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 public class TransactionsViewModel extends BaseViewModel {
-    private static final long GET_BALANCE_INTERVAL = 3;
-    private static final long FETCH_TRANSACTIONS_INTERVAL = 5;
+    private static final long GET_BALANCE_INTERVAL = 8;
+    private static final long FETCH_TRANSACTIONS_INTERVAL = 10;
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
@@ -107,7 +107,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void fetchTransactions() {
         progress.postValue(true);
-        transactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.MINUTES)
+        transactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
             .doOnNext(l ->
                 disposable = fetchTransactionsInteract
                         .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
@@ -116,7 +116,7 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void getBalance() {
-        balanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.MINUTES)
+        balanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> getDefaultWalletBalance
                         .get(defaultWallet.getValue())
                         .subscribe(defaultWalletBalance::postValue, t -> {}))

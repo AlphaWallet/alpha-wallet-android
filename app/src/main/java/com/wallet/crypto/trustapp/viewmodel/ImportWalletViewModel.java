@@ -3,6 +3,9 @@ package com.wallet.crypto.trustapp.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import com.wallet.crypto.trustapp.C;
+import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
+import com.wallet.crypto.trustapp.entity.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.ImportWalletInteract;
 import com.wallet.crypto.trustapp.ui.widget.OnImportKeystoreListener;
@@ -40,5 +43,15 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
     private void onWallet(Wallet wallet) {
         progress.postValue(false);
         this.wallet.postValue(wallet);
+    }
+
+    public void onError(Throwable throwable) {
+        if (throwable.getCause() instanceof ServiceErrorException) {
+            if (((ServiceErrorException) throwable.getCause()).code == C.ErrorCode.ALREADY_ADDED){
+                error.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
+            }
+        } else {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+        }
     }
 }

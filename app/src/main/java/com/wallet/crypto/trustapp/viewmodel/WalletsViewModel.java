@@ -76,6 +76,10 @@ public class WalletsViewModel extends BaseViewModel {
         return exportedStore;
     }
 
+    public LiveData<ErrorEnvelope> exportError() {
+        return exportWalletError;
+    }
+
 	public void setDefaultWallet(Wallet wallet) {
 		disposable = setDefaultWalletInteract
 				.set(wallet)

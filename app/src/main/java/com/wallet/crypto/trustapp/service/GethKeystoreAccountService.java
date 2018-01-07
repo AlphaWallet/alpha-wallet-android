@@ -1,15 +1,19 @@
 package com.wallet.crypto.trustapp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wallet.crypto.trustapp.C;
+import com.wallet.crypto.trustapp.entity.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Wallet;
 
+import org.ethereum.geth.Account;
 import org.ethereum.geth.Accounts;
 import org.ethereum.geth.Address;
 import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
+import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletFile;
 
@@ -54,11 +58,15 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
     @Override
     public Single<Wallet> importKeystore(String store, String password, String newPassword) {
         return Single.fromCallable(() -> {
-            org.ethereum.geth.Account account = keyStore
+            JSONObject jsonObject = new JSONObject(store);
+            String address = "0x" + jsonObject.getString("address");
+            if (hasAccount(address)) {
+                throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added");
+            }
+            Account account = keyStore
                     .importKey(store.getBytes(Charset.forName("UTF-8")), password, newPassword);
             return new Wallet(account.getAddress().getHex().toLowerCase());
-        })
-                .subscribeOn(Schedulers.io());
+        }).subscribeOn(Schedulers.io());
     }
 
     @Override

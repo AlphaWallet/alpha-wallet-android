@@ -230,4 +230,6 @@
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
     <string name="facebook">Facebook</string>
+    <string name="error_already_added">Already added</string>
+    <string name="error_export_error">Failed to export the purse</string>
 </resources>

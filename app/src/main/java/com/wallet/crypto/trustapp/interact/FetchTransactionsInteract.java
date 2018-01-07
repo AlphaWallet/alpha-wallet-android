@@ -6,6 +6,7 @@ import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class FetchTransactionsInteract {
 
@@ -18,6 +19,7 @@ public class FetchTransactionsInteract {
     public Observable<Transaction[]> fetch(Wallet wallet) {
         return transactionRepository
                 .fetchTransaction(wallet)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

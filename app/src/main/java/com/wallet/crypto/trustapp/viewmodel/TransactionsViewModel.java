@@ -27,8 +27,8 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 public class TransactionsViewModel extends BaseViewModel {
-    private static final long GET_BALANCE_INTERVAL = 8;
-    private static final long FETCH_TRANSACTIONS_INTERVAL = 10;
+    private static final long GET_BALANCE_INTERVAL = 10;
+    private static final long FETCH_TRANSACTIONS_INTERVAL = 12;
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();

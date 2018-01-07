@@ -8,6 +8,8 @@ import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.repository.TrustPasswordStore;
 import com.wallet.crypto.trustapp.util.LogInterceptor;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -32,6 +34,9 @@ class ToolsModule {
 	OkHttpClient okHttpClient() {
 		return new OkHttpClient.Builder()
                 .addInterceptor(new LogInterceptor())
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
                 .build();
 	}
 

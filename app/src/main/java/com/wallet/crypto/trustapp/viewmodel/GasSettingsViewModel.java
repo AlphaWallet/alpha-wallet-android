@@ -21,8 +21,8 @@ public class GasSettingsViewModel extends BaseViewModel {
 
     public GasSettingsViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        gasPrice.setValue(new BigInteger("0"));
-        gasLimit.setValue(new BigInteger("0"));
+        gasPrice.setValue(BigInteger.ZERO);
+        gasLimit.setValue(BigInteger.ZERO);
     }
 
     public void prepare() {

@@ -10,7 +10,6 @@ import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
@@ -46,17 +45,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 
     @Override
 	public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
-        return Observable.create(e -> {
-            Transaction[] transactions = transactionLocalSource.fetchTransaction(wallet).blockingGet();
-            if (transactions != null && transactions.length > 0) {
-                e.onNext(transactions);
-            }
-            transactions = blockExplorerClient.fetchTransactions(wallet.address).blockingFirst();
-            transactionLocalSource.clear();
-            transactionLocalSource.putTransactions(wallet, transactions);
-            e.onNext(transactions);
-            e.onComplete();
-        });
+	    return Single.merge(
+	            transactionLocalSource.fetchTransaction(wallet), fetchAndCacheFromNetwork(wallet))
+                .toObservable();
     }
 
 	@Override
@@ -94,6 +85,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 			return raw.getTransactionHash();
 		})).subscribeOn(Schedulers.io());
 	}
+
+	private Single<Transaction[]> fetchAndCacheFromNetwork(Wallet wallet) {
+        return Single.fromObservable(
+                blockExplorerClient.fetchTransactions(wallet.address)
+                        .doOnNext(transactions -> transactionLocalSource.putTransactions(wallet, transactions)));
+    }
 
     private void onNetworkChanged(NetworkInfo networkInfo) {
         transactionLocalSource.clear();

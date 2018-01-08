@@ -43,6 +43,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
+import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TransactionsActivity extends BaseNavigationActivity implements View.OnClickListener {
 
@@ -196,11 +197,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onTransactions(Transaction[] transaction) {
-        if (transaction == null || transaction.length == 0) {
-            EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
-            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
-            systemView.showEmpty(emptyView);
-        }
         adapter.addTransactions(transaction);
         invalidateOptionsMenu();
     }
@@ -215,7 +211,13 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        systemView.showError(getString(R.string.error_fail_load_transaction), this);
+        if (errorEnvelope.code == EMPTY_COLLECTION) {
+            EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
+            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
+            systemView.showEmpty(emptyView);
+        } else {
+            systemView.showError(getString(R.string.error_fail_load_transaction), this);
+        }
     }
 
     private void checkRoot() {

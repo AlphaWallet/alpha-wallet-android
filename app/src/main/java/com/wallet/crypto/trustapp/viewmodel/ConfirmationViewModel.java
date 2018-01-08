@@ -3,8 +3,6 @@ package com.wallet.crypto.trustapp.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
-import android.content.Intent;
 
 import com.wallet.crypto.trustapp.entity.GasSettings;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -14,15 +12,9 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.router.GasSettingsRouter;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 
 public class ConfirmationViewModel extends BaseViewModel {
-    private static final long FETCH_GAS_PRICE_INTERVAL = 7;
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
@@ -33,9 +25,9 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private final GasSettingsRouter gasSettingsRouter;
 
-    boolean confirmationForTokenTransfer = false;
+    private boolean confirmationForTokenTransfer = false;
 
-    public ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
+    ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
                                  CreateTransactionInteract createTransactionInteract,
                                  GasSettingsRouter gasSettingsRouter) {

@@ -51,6 +51,7 @@ public abstract class C {
         int UNKNOWN = 1;
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
+        int EMPTY_COLLECTION = 4;
     }
 
     public interface Key {

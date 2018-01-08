@@ -34,6 +34,7 @@ public class TransactionInMemorySource implements TransactionLocalSource {
 
 	@Override
 	public void putTransactions(Wallet wallet, Transaction[] transactions) {
+	    clear();
 		cache.put(wallet.address, new CacheUnit(wallet.address, System.currentTimeMillis(), transactions));
 	}
 

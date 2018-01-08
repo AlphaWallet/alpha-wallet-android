@@ -5,6 +5,8 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.net.Uri;
 
+import com.wallet.crypto.trustapp.C;
+import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10;
@@ -109,9 +112,9 @@ public class TransactionsViewModel extends BaseViewModel {
         progress.postValue(true);
         transactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
             .doOnNext(l ->
-                    fetchTransactionsInteract
+                    transactionDisposable = fetchTransactionsInteract
                         .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
-                        .subscribe(this::onTransactions, this::onError))
+                        .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted))
             .subscribe();
     }
 
@@ -137,8 +140,15 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     private void onTransactions(Transaction[] transactions) {
+        this.transactions.setValue(transactions);
+    }
+
+    private void onTransactionsFetchCompleted() {
         progress.postValue(false);
-        this.transactions.postValue(transactions);
+        Transaction[] transactions = this.transactions.getValue();
+        if (transactions == null || transactions.length == 0) {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
+        }
     }
 
     public void showWallets(Context context) {

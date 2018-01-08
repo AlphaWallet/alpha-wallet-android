@@ -9,7 +9,4 @@ public interface PreferenceRepositoryType {
 	String getDefaultNetwork();
 	void setDefaultNetwork(String netName);
 
-	GasSettings getGasSettings(boolean forTokenTransfer);
-	void setGasSettings(GasSettings gasPrice);
-
 }

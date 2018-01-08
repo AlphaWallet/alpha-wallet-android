@@ -16,8 +16,13 @@ import com.wallet.crypto.trustapp.router.GasSettingsRouter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 public class ConfirmationViewModel extends BaseViewModel {
+    private static final long FETCH_GAS_PRICE_INTERVAL = 7;
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
@@ -63,7 +68,9 @@ public class ConfirmationViewModel extends BaseViewModel {
         return gasSettings;
     }
 
-    public LiveData<String> sendTransaction() { return newTransaction; }
+    public LiveData<String> sendTransaction() {
+        return newTransaction;
+    }
 
     public void prepare(boolean confirmationForTokenTransfer) {
         this.confirmationForTokenTransfer = confirmationForTokenTransfer;
@@ -80,12 +87,14 @@ public class ConfirmationViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         if (gasSettings.getValue() == null) {
-            onGasSettings(fetchGasSettingsInteract.fetch(confirmationForTokenTransfer));
+            disposable = fetchGasSettingsInteract
+                    .fetch(confirmationForTokenTransfer)
+                    .subscribe(this::onGasSettings, this::onError);
         }
     }
 
     private void onGasSettings(GasSettings gasSettings) {
-        this.gasSettings.setValue(gasSettings);
+        this.gasSettings.postValue(gasSettings);
     }
 
     public void openGasSettings(Activity context) {

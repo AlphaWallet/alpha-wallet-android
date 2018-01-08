@@ -4,8 +4,9 @@ package com.wallet.crypto.trustapp.di;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
+import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.router.GasSettingsRouter;
@@ -32,8 +33,8 @@ public class ConfirmationModule {
     }
 
     @Provides
-    FetchGasSettingsInteract provideFetchGasSettingsInteract(PreferenceRepositoryType preferenceRepositoryType) {
-        return new FetchGasSettingsInteract(preferenceRepositoryType);
+    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
+        return new FetchGasSettingsInteract(gasSettingsRepository);
     }
 
     @Provides

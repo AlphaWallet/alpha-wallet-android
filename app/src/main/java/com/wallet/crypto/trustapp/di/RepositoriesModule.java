@@ -5,6 +5,8 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
+import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 import com.wallet.crypto.trustapp.repository.RealmTokenSource;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
@@ -124,4 +126,10 @@ public class RepositoriesModule {
     TokenLocalSource provideRealmTokenSource() {
 	    return new RealmTokenSource();
     }
+
+    @Singleton
+	@Provides
+	GasSettingsRepositoryType provideGasSettingsRepository(EthereumNetworkRepositoryType ethereumNetworkRepository) {
+		return new GasSettingsRepository(ethereumNetworkRepository);
+	}
 }

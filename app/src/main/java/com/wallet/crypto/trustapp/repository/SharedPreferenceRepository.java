@@ -42,21 +42,4 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	public void setDefaultNetwork(String netName) {
 		pref.edit().putString(DEFAULT_NETWORK_NAME_KEY, netName).apply();
 	}
-
-	@Override
-    public GasSettings getGasSettings(boolean forTokenTransfer) {
-	    BigInteger gasPrice = new BigInteger(pref.getString(GAS_PRICE_KEY, C.DEFAULT_GAS_PRICE));
-		BigInteger gasLimit = new BigInteger(pref.getString(GAS_LIMIT_KEY, C.DEFAULT_GAS_LIMIT));
-	    if (forTokenTransfer) {
-			gasLimit = new BigInteger(pref.getString(GAS_LIMIT_FOR_TOKENS_KEY, C.DEFAULT_GAS_LIMIT_FOR_TOKENS));
-		}
-
-	    return new GasSettings(gasPrice, gasLimit);
-    }
-
-    @Override
-    public void setGasSettings(GasSettings gasSettings) {
-	    pref.edit().putString(GAS_PRICE_KEY, gasSettings.gasPrice.toString()).apply();
-        pref.edit().putString(GAS_PRICE_KEY, gasSettings.gasLimit.toString()).apply();
-    }
 }

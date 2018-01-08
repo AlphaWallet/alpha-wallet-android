@@ -217,7 +217,7 @@
     <string name="no_transactions_yet">No transactions yet!</string>
     <string name="unknown_balance_with_symbol">-- ETH</string>
     <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy">dummy_value</string>
+    <string name="dummy">-</string>
     <string name="dummy_transaction_value">-- ETH</string>
     <string name="title_dialog_sending">Sending...</string>
     <string name="welcome.erc20.label.title">ERC20 Compatible</string>

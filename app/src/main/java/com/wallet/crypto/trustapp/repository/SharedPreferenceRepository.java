@@ -4,11 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.entity.GasSettings;
-
-import java.math.BigInteger;
-
 public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
 	private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";

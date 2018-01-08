@@ -4,7 +4,6 @@ package com.wallet.crypto.trustapp.di;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;

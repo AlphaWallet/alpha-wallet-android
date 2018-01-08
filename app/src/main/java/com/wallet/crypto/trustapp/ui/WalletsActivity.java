@@ -15,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -33,7 +32,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.ErrorCode.ALREADY_ADDED;
 import static com.wallet.crypto.trustapp.C.IMPORT_REQUEST_CODE;
 import static com.wallet.crypto.trustapp.C.SHARE_REQUEST_CODE;
 

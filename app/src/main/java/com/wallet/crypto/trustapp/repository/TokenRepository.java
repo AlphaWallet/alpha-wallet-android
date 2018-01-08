@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.repository;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -60,40 +62,33 @@ public class TokenRepository implements TokenRepositoryType {
 
     @Override
     public Observable<Token[]> fetch(String walletAddress) {
-        return Observable.create(e -> {
-            NetworkInfo defaultNetwork = ethereumNetworkRepository.getDefaultNetwork();
-            Wallet wallet = new Wallet(walletAddress);
-            Token[] tokens = tokenLocalSource.fetch(defaultNetwork, wallet)
-                    .map(items -> {
-                        int len = items.length;
-                        Token[] result = new Token[len];
-                        for (int i = 0; i < len; i++) {
-                            result[i] = new Token(items[i], null);
-                        }
-                        return result;
-                    })
-                    .blockingGet();
-            e.onNext(tokens);
+        NetworkInfo defaultNetwork = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return Single.merge(
+                fetchTokensFromLocal(defaultNetwork, wallet),
+                updateTokenInfoCache(defaultNetwork, wallet))
+                .toObservable();
+    }
 
-            updateTokenInfoCache(defaultNetwork, wallet);
-            tokens = tokenLocalSource.fetch(defaultNetwork, wallet)
-                        .map(items -> {
-                            int len = items.length;
-                            Token[] result = new Token[len];
-                            for (int i = 0; i < len; i++) {
-                                BigDecimal balance = null;
-                                try {
-                                    balance = getBalance(wallet, items[i]);
-                                } catch (Exception e1) {
-                                    Log.d("TOKEN", "Err", e1);
+    private Single<Token[]> fetchTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
+        return tokenLocalSource.fetch(defaultNetwork, wallet)
+                .map(items -> getBalances(wallet, items));
+    }
+
+    private Token[] getBalances(Wallet wallet, TokenInfo[] items) {
+        int len = items.length;
+        Token[] result = new Token[len];
+        for (int i = 0; i < len; i++) {
+            BigDecimal balance = null;
+            try {
+                balance = getBalance(wallet, items[i]);
+            } catch (Exception e1) {
+                Log.d("TOKEN", "Err", e1);
                                     /* Quietly */
-                                }
-                                result[i] = new Token(items[i], balance);
-                            }
-                            return result;
-                        }).blockingGet();
-            e.onNext(tokens);
-        });
+            }
+            result[i] = new Token(items[i], balance);
+        }
+        return result;
     }
 
     @Override
@@ -104,24 +99,10 @@ public class TokenRepository implements TokenRepositoryType {
                 new TokenInfo(address, "", symbol, decimals));
     }
 
-    private void updateTokenInfoCache(NetworkInfo defaultNetwork, Wallet wallet) {
-        if (!defaultNetwork.isMainNetwork) {
-            return;
-        }
-        tokenNetworkService
-                .fetch(wallet.address)
-                .flatMapCompletable(items -> Completable.fromAction(() -> {
-                    for (TokenInfo tokenInfo : items) {
-                        try {
-                            tokenLocalSource.put(
-                                    ethereumNetworkRepository.getDefaultNetwork(), wallet, tokenInfo)
-                                    .blockingAwait();
-                        } catch (Throwable t) {
-                            Log.d("TOKEN_REM", "Err", t);
-                        }
-                    }
-                }))
-                .blockingAwait();
+    private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo defaultNetwork, @NonNull Wallet wallet) {
+        return Single.fromObservable(tokenNetworkService.fetch(wallet.address))
+                .flatMap(tokenInfos -> tokenLocalSource.put(defaultNetwork, wallet, tokenInfos))
+                .map(items -> getBalances(wallet, items));
     }
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {
@@ -157,7 +138,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     public static byte[] createTokenTransferData(String to, BigInteger tokenAmount) {
-        List<Type> params = Arrays.<Type>asList(new Address(to), new Uint256(tokenAmount));
+        List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenAmount));
 
         List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {
         });

@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;

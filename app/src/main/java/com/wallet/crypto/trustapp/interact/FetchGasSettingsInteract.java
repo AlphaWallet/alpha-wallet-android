@@ -3,9 +3,7 @@ package com.wallet.crypto.trustapp.interact;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.GasSettings;
-import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
-import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
 
 import java.math.BigInteger;
 

@@ -9,5 +9,6 @@ import io.reactivex.Single;
 
 public interface TokenLocalSource {
     Completable put(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo);
+    Single<TokenInfo[]> put(NetworkInfo networkInfo, Wallet wallet, TokenInfo[] tokenInfos);
     Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet);
 }

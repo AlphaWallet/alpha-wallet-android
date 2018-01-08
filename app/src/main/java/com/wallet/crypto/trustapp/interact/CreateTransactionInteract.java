@@ -3,7 +3,6 @@ package com.wallet.crypto.trustapp.interact;
 
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 
 import java.math.BigInteger;

@@ -20,6 +20,17 @@ public class RealmTokenSource implements TokenLocalSource {
     }
 
     @Override
+    public Single<TokenInfo[]> put(NetworkInfo networkInfo, Wallet wallet, TokenInfo[] tokenInfos) {
+        return Single.fromCallable(() -> {
+            for (TokenInfo tokenInfo : tokenInfos) {
+                putInNeed(networkInfo, wallet, tokenInfo);
+            }
+            return tokenInfos;
+        })
+        .flatMap(tokenInfos1 -> fetch(networkInfo, wallet));
+    }
+
+    @Override
     public Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
             Realm realm = null;

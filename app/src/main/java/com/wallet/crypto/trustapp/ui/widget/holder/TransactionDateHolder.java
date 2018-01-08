@@ -15,7 +15,7 @@ import java.util.TimeZone;
 
 public class TransactionDateHolder extends BinderViewHolder<Date> {
 
-§    private static final String DATE_TEMPLATE = "MM/dd/yy";
+    private static final String DATE_TEMPLATE = "MMM, dd yyyy";
 
     public static final int VIEW_TYPE = 1004;
     private final TextView title;

@@ -7,46 +7,53 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
     <include layout="@layout/layout_simple_toolbar" />
-    <LinearLayout
-        android:orientation="vertical"
+    <FrameLayout
+        android:background="@color/white"
         android:layout_marginTop="?actionBarSize"
-        android:padding="@dimen/big_padding"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-        <TextView
-            android:id="@+id/address_suggestion"
-            android:gravity="center"
-            android:layout_gravity="center_horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            tools:text="@string/suggestion_this_is_your_address"
-            />
-        <ImageView
-            android:id="@+id/qr_image"
-            app:srcCompat="@drawable/ic_autorenew_black_24dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/big_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-        <TextView
-            android:id="@+id/address"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/big_margin"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
-        <Button
-            android:id="@+id/copy_action"
-            android:text="@string/copy"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/big_margin"
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="@dimen/big_padding"
+            android:layout_gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            />
-    </LinearLayout>
+            >
+            <TextView
+                android:id="@+id/address_suggestion"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                tools:text="@string/suggestion_this_is_your_address"
+                />
+            <ImageView
+                android:id="@+id/qr_image"
+                app:srcCompat="@drawable/ic_autorenew_black_24dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/address"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                />
+            <Button
+                android:id="@+id/copy_action"
+                android:text="@string/copy"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

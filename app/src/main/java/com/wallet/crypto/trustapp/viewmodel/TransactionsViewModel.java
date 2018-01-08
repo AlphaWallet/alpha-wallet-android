@@ -109,7 +109,7 @@ public class TransactionsViewModel extends BaseViewModel {
         progress.postValue(true);
         transactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
             .doOnNext(l ->
-                disposable = fetchTransactionsInteract
+                    fetchTransactionsInteract
                         .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
                         .subscribe(this::onTransactions, this::onError))
             .subscribe();

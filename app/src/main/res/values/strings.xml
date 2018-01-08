@@ -144,7 +144,7 @@
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
     <string name="suggestion_private_key">Private key has to be 64 characters long</string>
     <string name="suggestion_empty_password_available">The password can be left blank.</string>
-    <string name="suggestion_this_is_your_address">My %s wallet address</string>
+    <string name="suggestion_this_is_your_address">My public %s wallet address</string>
     <!-- Hints -->
     <string name="hint_private_key_field">Private key *</string>
     <string name="hint_keystore">Keystore *</string>

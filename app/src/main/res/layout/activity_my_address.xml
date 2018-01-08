@@ -26,7 +26,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                tools:text="@string/suggestion_this_is_your_address"
+                tools:text="@string/message_this_is_your_address"
                 />
             <ImageView
                 android:id="@+id/qr_image"

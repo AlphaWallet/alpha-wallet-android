@@ -15,7 +15,7 @@ import java.util.TimeZone;
 
 public class TransactionDateHolder extends BinderViewHolder<Date> {
 
-//    private static final String DATE_TEMPLATE = "MM/dd/yy H:mm:ss zzz";
+§    private static final String DATE_TEMPLATE = "MM/dd/yy";
 
     public static final int VIEW_TYPE = 1004;
     private final TextView title;
@@ -31,12 +31,13 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
         if (data == null) {
             title.setText(null);
         } else {
-            java.text.DateFormat dateFormat = DateFormat.getMediumDateFormat(getContext());
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
             calendar.setTime(data);
-            title.setText(dateFormat.format(calendar.getTime()));
+//            java.text.DateFormat dateFormat = DateFormat.getMediumDateFormat(getContext());
+//            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+//            title.setText(dateFormat.format(calendar.getTime()));
+            title.setText(DateFormat.format(DATE_TEMPLATE, calendar));
         }
     }
 }

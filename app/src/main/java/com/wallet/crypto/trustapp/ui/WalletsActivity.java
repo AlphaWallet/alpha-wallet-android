@@ -299,13 +299,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
 	private void onError(ErrorEnvelope errorEnvelope) {
-        if (errorEnvelope.code == ALREADY_ADDED) {
-            systemView.showError(getString(R.string.error_already_added), this);
-        } else {
-            Toast.makeText(this, getString(R.string.error_export_error), Toast.LENGTH_LONG)
-                    .show();
-        }
-
+        systemView.showError(errorEnvelope.message, this);
 	}
 
 	private void onSetWalletDefault(Wallet wallet) {

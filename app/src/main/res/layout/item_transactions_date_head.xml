@@ -4,10 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp"
+    android:paddingTop="@dimen/half_small_margin"
+    android:paddingBottom="@dimen/half_small_margin"
     >
-    <!--android:layout_height="@dimen/title_height_small"-->
     <TextView
         android:id="@+id/title"
         android:textColor="@color/list_group_head"

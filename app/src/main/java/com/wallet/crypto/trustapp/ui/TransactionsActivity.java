@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -42,7 +43,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
-import static com.wallet.crypto.trustapp.C.ETH_SYMBOL;
 
 public class TransactionsActivity extends BaseNavigationActivity implements View.OnClickListener {
 
@@ -74,6 +74,15 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         RecyclerView list = findViewById(R.id.list);
 
         list.setLayoutManager(new LinearLayoutManager(this));
+        list.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                int position = list.getChildAdapterPosition(view);
+                if (position == 0) {
+                    outRect.top = (int) getResources().getDimension(R.dimen.big_margin);
+                }
+            }
+        });
         list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);

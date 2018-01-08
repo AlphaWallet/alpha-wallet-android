@@ -109,7 +109,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        systemView.showError(getString(R.string.error_fail_load_transaction), this);
+        systemView.showError(getString(R.string.error_fail_load_tokens), this);
     }
 
     @Override

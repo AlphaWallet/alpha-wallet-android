@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         >
         <LinearLayout
-            android:layout_margin="16dp"
+            android:layout_margin="@dimen/big_margin"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
                 android:linksClickable="true"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 />

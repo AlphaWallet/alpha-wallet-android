@@ -20,7 +20,8 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
 
     private EditText keystore;
     private EditText password;
-    private OnImportKeystoreListener onImportKeystoreListener;
+    @NonNull
+    private OnImportKeystoreListener onImportKeystoreListener = dummyOnImportKeystoreListener;
 
     public static ImportKeystoreFragment create() {
         return new ImportKeystoreFragment();
@@ -54,7 +55,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         }
     }
 
-    public void setOnImportKeystoreListener(OnImportKeystoreListener onImportKeystoreListener) {
+    public void setOnImportKeystoreListener(@Nullable OnImportKeystoreListener onImportKeystoreListener) {
         this.onImportKeystoreListener = onImportKeystoreListener == null
             ? dummyOnImportKeystoreListener
             : onImportKeystoreListener;

@@ -117,11 +117,10 @@ public class TransactionsViewModel extends BaseViewModel {
     public void fetchTransactions() {
         progress.postValue(true);
         fetchTransactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
-            .doOnNext(l ->
-                    fetchTransactionDisposable = fetchTransactionsInteract
+            .doOnNext(l -> fetchTransactionsInteract
                         .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
                         .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted))
-            .subscribe();
+            .subscribe(l -> {}, t -> {});
     }
 
     public void getBalance() {
@@ -129,7 +128,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 .doOnNext(l -> getDefaultWalletBalance
                         .get(defaultWallet.getValue())
                         .subscribe(defaultWalletBalance::postValue, t -> {}))
-                .subscribe();
+                .subscribe(l -> {}, t -> {});
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

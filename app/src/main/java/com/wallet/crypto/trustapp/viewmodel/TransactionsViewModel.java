@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -48,8 +49,10 @@ public class TransactionsViewModel extends BaseViewModel {
     private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
-    private Disposable balanceDisposable;
-    private Disposable transactionDisposable;
+    @Nullable
+    private Disposable getBalanceDisposable;
+    @Nullable
+    private Disposable fetchTransactionDisposable;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -80,8 +83,12 @@ public class TransactionsViewModel extends BaseViewModel {
     protected void onCleared() {
         super.onCleared();
 
-        transactionDisposable.dispose();
-        balanceDisposable.dispose();
+        if (fetchTransactionDisposable != null) {
+            fetchTransactionDisposable.dispose();
+        }
+        if (getBalanceDisposable != null) {
+            getBalanceDisposable.dispose();
+        }
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -109,16 +116,16 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void fetchTransactions() {
         progress.postValue(true);
-        transactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
+        fetchTransactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
             .doOnNext(l ->
-                    transactionDisposable = fetchTransactionsInteract
+                    fetchTransactionDisposable = fetchTransactionsInteract
                         .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
                         .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted))
             .subscribe();
     }
 
     public void getBalance() {
-        balanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
+        getBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> getDefaultWalletBalance
                         .get(defaultWallet.getValue())
                         .subscribe(defaultWalletBalance::postValue, t -> {}))

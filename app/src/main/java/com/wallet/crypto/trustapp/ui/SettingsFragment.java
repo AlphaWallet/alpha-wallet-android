@@ -55,7 +55,7 @@ public class SettingsFragment extends PreferenceFragment
                 .find()
                 .subscribe(wallet -> {
                     PreferenceManager
-                            .getDefaultSharedPreferences(getActivity())
+                            .getDefaultSharedPreferences(view.getContext())
                             .edit()
                             .putString("pref_wallet", wallet.address)
                             .apply();

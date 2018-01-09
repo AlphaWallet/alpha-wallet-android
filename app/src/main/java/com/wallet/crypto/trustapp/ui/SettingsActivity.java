@@ -36,6 +36,7 @@ public class SettingsActivity extends BaseActivity implements HasFragmentInjecto
         switch (item.getItemId()) {
             case android.R.id.home: {
                 new TransactionsRouter().open(this, true);
+                finish();
                 return true;
             }
         }
@@ -45,6 +46,7 @@ public class SettingsActivity extends BaseActivity implements HasFragmentInjecto
     @Override
     public void onBackPressed() {
         new TransactionsRouter().open(this, true);
+        finish();
     }
 
     @Override

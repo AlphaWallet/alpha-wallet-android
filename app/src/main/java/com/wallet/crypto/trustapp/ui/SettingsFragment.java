@@ -11,6 +11,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.view.View;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
@@ -36,7 +38,10 @@ public class SettingsFragment extends PreferenceFragment
     public void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+    }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.fragment_settings);
         final Preference wallets = findPreference("pref_wallet");

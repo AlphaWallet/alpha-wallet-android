@@ -158,7 +158,7 @@ public class TransactionsViewModel extends BaseViewModel {
         settingsRouter.open(context);
     }
 
-    public void showSend(Context context) { sendRouter.open(context); }
+    public void showSend(Context context) { sendRouter.open(context, defaultNetwork.getValue().symbol); }
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);

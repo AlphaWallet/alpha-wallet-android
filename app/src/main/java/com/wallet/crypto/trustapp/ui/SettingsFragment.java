@@ -55,7 +55,7 @@ public class SettingsFragment extends PreferenceFragment
                             .putString("pref_wallet", wallet.address)
                             .apply();
                     wallets.setSummary(wallet.address);
-                });
+                }, t -> {});
 
         final ListPreference listPreference = (ListPreference) findPreference("pref_rpcServer");
         // THIS IS REQUIRED IF YOU DON'T HAVE 'entries' and 'entryValues' in your XML

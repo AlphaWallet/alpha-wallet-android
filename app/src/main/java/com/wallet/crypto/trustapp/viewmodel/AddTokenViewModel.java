@@ -43,7 +43,7 @@ public class AddTokenViewModel extends BaseViewModel {
     public void showTokens(Context context) {
         findDefaultWalletInteract
                 .find()
-                .subscribe(w -> myTokensRouter.open(context, w));
+                .subscribe(w -> myTokensRouter.open(context, w), this::onError);
 
     }
 }

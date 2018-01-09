@@ -34,9 +34,9 @@ class ToolsModule {
 	OkHttpClient okHttpClient() {
 		return new OkHttpClient.Builder()
                 .addInterceptor(new LogInterceptor())
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
 	}
 

@@ -35,11 +35,11 @@ public class TransactionDetailViewModel extends BaseViewModel {
         findDefaultNetworkInteract
                 .find()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(defaultNetwork::postValue);
+                .subscribe(defaultNetwork::postValue, t -> {});
         disposable = findDefaultWalletInteract
                 .find()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(defaultWallet::postValue);
+                .subscribe(defaultWallet::postValue,  t -> {});
     }
 
 

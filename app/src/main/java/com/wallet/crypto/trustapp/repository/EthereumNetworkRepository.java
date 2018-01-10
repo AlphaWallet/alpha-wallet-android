@@ -19,6 +19,7 @@ import static com.wallet.crypto.trustapp.C.KOVAN_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.POA_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.POA_SYMBOL;
 import static com.wallet.crypto.trustapp.C.ROPSTEN_NETWORK_NAME;
+import static com.wallet.crypto.trustapp.C.SOKOL_NETWORK_NAME;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
@@ -26,22 +27,26 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
                     "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://api.trustwalletapp.com/",
-                    "https://etherscan.io/",1, true),
+                    "https://etherscan.io/tx/",1, true),
             new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
                     "https://mewapi.epool.io/",
                     "https://classic.trustwalletapp.com",
-                    "https://gastracker.io",61, true),
+                    "https://gastracker.io/tx/",61, true),
             new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
-                    "https://core.poa.network",
+                    "https://core.poa.network/tx/",
                     "https://poa.trustwalletapp.com","poa", 99, false),
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL,
                     "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://kovan.trustwalletapp.com/",
-                    "https://kovan.etherscan.io", 42, false),
+                    "https://kovan.etherscan.io/tx/", 42, false),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
                     "https://ropsten.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://ropsten.trustwalletapp.com/",
-                    "https://ropsten.etherscan.io",3, false),
+                    "https://ropsten.etherscan.io/tx/",3, false),
+            new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
+                    "https://sokol.poa.network",
+                    "https://trust-sokol.herokuapp.com/",
+                    "http://testnet.oracles.org:4000/txid/search/",77, false),
 	};
 
 	private final PreferenceRepositoryType preferences;

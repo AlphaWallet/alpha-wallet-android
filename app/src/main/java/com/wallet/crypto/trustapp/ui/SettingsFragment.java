@@ -11,9 +11,15 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+<<<<<<< HEAD
 import android.support.annotation.Nullable;
 import android.view.View;
+=======
+import android.preference.SwitchPreference;
+>>>>>>> pincode
 
+import com.github.omadahealth.lollipin.lib.managers.AppLock;
+import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
@@ -103,6 +109,25 @@ public class SettingsFragment extends PreferenceFragment
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/trustwalletapp"));
             startActivity(intent);
             return false;
+	});
+
+        final SwitchPreference pinCode = (SwitchPreference) findPreference("pref_pincode");
+        pinCode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                final boolean enable = !((SwitchPreference) preference).isChecked();
+                if (enable) {
+                    // enable pin code
+                    final Intent intent = new Intent(getActivity(), CustomPinActivity.class);
+                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
+                    startActivity(intent);
+                } else {
+                    // disable pin code without asking for it
+                    LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+                    lockManager.getAppLock().disable();
+                }
+                return true;
+            }
         });
 
         final Preference donate = findPreference("pref_donate");

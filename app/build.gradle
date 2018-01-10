@@ -124,4 +124,9 @@ dependencies {
     // PW
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(":tn")
+
+    // Pincode Lollipin
+    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
+        transitive = true
+    }
 }

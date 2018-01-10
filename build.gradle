@@ -20,6 +20,10 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        // needed for pincode Lollipin
+        maven {
+            url "https://github.com/omadahealth/omada-nexus/raw/master/release"
+        }
     }
 }
 

@@ -2,10 +2,10 @@ package com.wallet.crypto.trustapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.BuildConfig;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends PinCompatActivity {
 
     @Inject
     SplashViewModelFactory splashViewModelFactory;
@@ -45,5 +45,4 @@ public class SplashActivity extends AppCompatActivity {
             new TransactionsRouter().open(this, true);
         }
     }
-
 }

@@ -69,6 +69,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_community">Community</string>
+    <string name="title_security">Security</string>
+    <string name="title_pincode">Pincode</string>
     <string name="title_opensource">Open source development</string>
     <string name="title_source_code">Source code</string>
     <string name="title_report_bug">Report a bug</string>
@@ -86,7 +88,7 @@
     </string>
     <string name="message_no_backup">No backup, no Ethereum.</string>
     <string name="error_deleting_account">Error deleting wallet</string>
-	<string name="error_deleting_account_with_details">Error deleting wallet %s</string>
+    <string name="error_deleting_account_with_details">Error deleting wallet %s</string>
     <string name="error_passwords_must_match">Passwords must match.</string>
     <string name="label_confirm_new_password">Confirm new password</string>
     <string name="label_new_password">New password</string>
@@ -120,15 +122,15 @@
     <string name="transfer">Transfer %s</string>
     <string name="action_buy">Buy</string>
     <string name="title_deposit">How would you like to buy?</string>
-	<string name="empty"/>
-	<string name="try_again">Try again</string>
-	<string name="already_have_account">Already have a wallet?</string>
-	<string name="title_add_account">Add wallet</string>
-	<string name="action_create_new_account">Create new wallet</string>
-	<string name="unknown_error">An error has occurred.</string>
-	<string name="action_backup_wallet">Backup Wallet</string>
-	<string name="action_backup_later">Do it later</string>
-	<string name="set_account_default">Do want to make a new wallet the main one?</string>
+    <string name="empty" />
+    <string name="try_again">Try again</string>
+    <string name="already_have_account">Already have a wallet?</string>
+    <string name="title_add_account">Add wallet</string>
+    <string name="action_create_new_account">Create new wallet</string>
+    <string name="unknown_error">An error has occurred.</string>
+    <string name="action_backup_wallet">Backup Wallet</string>
+    <string name="action_backup_later">Do it later</string>
+    <string name="set_account_default">Do want to make a new wallet the main one?</string>
     <string name="no_tokens">No tokens found.</string>
     <string name="title_email">Email us</string>
     <!-- Titles -->

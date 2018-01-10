@@ -47,34 +47,31 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     public void showMoreDetails(Context context, Transaction transaction) {
-        NetworkInfo networkInfo = defaultNetwork.getValue();
-        if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanUrl)) {
-            Uri uri = Uri.parse(networkInfo.etherscanUrl)
-                    .buildUpon()
-                    .appendEncodedPath("tx")
-                    .appendEncodedPath(transaction.hash)
-                    .build();
+        Uri uri = buildEtherscanUri(transaction);
+        if (uri != null) {
             externalBrowserRouter.open(context, uri);
         }
     }
 
     public void shareTransactionDetail(Context context, Transaction transaction) {
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.subject_transaction_detail));
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, buildEtherscanUri(transaction));
-        context.startActivity(Intent.createChooser(sharingIntent, "Share via"));
+        Uri shareUri = buildEtherscanUri(transaction);
+        if (shareUri != null) {
+            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.subject_transaction_detail));
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, shareUri.toString());
+            context.startActivity(Intent.createChooser(sharingIntent, "Share via"));
+        }
     }
 
     @Nullable
-    private String buildEtherscanUri(Transaction transaction) {
+    private Uri buildEtherscanUri(Transaction transaction) {
         NetworkInfo networkInfo = defaultNetwork.getValue();
         if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanUrl)) {
             return Uri.parse(networkInfo.etherscanUrl)
                     .buildUpon()
                     .appendEncodedPath(transaction.hash)
-                    .build()
-                    .toString();
+                    .build();
         }
         return null;
     }

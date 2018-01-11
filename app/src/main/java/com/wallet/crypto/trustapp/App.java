@@ -3,9 +3,7 @@ package com.wallet.crypto.trustapp;
 import android.app.Activity;
 import android.support.multidex.MultiDexApplication;
 
-import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.wallet.crypto.trustapp.di.DaggerAppComponent;
-import com.wallet.crypto.trustapp.ui.CustomPinActivity;
 
 import javax.inject.Inject;
 

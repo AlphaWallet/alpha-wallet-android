@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 
 

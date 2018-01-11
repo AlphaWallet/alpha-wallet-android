@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
-import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.BuildConfig;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.router.ManageWalletsRouter;

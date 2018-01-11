@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 
-public class SplashActivity extends PinCompatActivity {
+public class SplashActivity extends BaseActivity {
 
     @Inject
     SplashViewModelFactory splashViewModelFactory;

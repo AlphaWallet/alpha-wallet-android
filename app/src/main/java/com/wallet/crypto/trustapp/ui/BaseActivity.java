@@ -1,6 +1,7 @@
 package com.wallet.crypto.trustapp.ui;
 
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
@@ -8,7 +9,7 @@ import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.wallet.crypto.trustapp.R;
 
 
-public abstract class BaseActivity extends PinCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
 	protected Toolbar toolbar() {
 		Toolbar toolbar = findViewById(R.id.toolbar);

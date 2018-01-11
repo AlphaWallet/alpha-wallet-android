@@ -23,8 +23,8 @@ android {
         applicationId "com.wallet.crypto.trustapp"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 46
-        versionName "1.4.11"
+        versionCode 47
+        versionName "1.4.12"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -126,7 +126,7 @@ dependencies {
     compile project(":tn")
 
     // Pincode Lollipin
-    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
-        transitive = true
-    }
+//    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
+//        transitive = true
+//    }
 }

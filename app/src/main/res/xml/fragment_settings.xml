@@ -35,17 +35,17 @@
 
         </PreferenceCategory>
 
-        <PreferenceCategory
-            android:title="@string/title_security"
-            android:key="pref_security" >
+        <!--<PreferenceCategory-->
+            <!--android:title="@string/title_security"-->
+            <!--android:key="pref_security" >-->
 
-            <SwitchPreference
-                android:key="pref_pincode"
-                android:title="@string/title_pincode"
-                android:icon="@mipmap/settings_lock">
-            </SwitchPreference>
+            <!--<SwitchPreference-->
+                <!--android:key="pref_pincode"-->
+                <!--android:title="@string/title_pincode"-->
+                <!--android:icon="@mipmap/settings_lock">-->
+            <!--</SwitchPreference>-->
 
-        </PreferenceCategory>
+        <!--</PreferenceCategory>-->
 
         <PreferenceCategory
             android:title="@string/title_community"

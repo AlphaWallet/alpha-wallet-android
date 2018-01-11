@@ -11,12 +11,9 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-<<<<<<< HEAD
 import android.support.annotation.Nullable;
 import android.view.View;
-=======
 import android.preference.SwitchPreference;
->>>>>>> pincode
 
 import com.github.omadahealth.lollipin.lib.managers.AppLock;
 import com.github.omadahealth.lollipin.lib.managers.LockManager;

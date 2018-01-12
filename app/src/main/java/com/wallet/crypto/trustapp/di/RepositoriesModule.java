@@ -20,8 +20,8 @@ import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepository;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
-import com.wallet.crypto.trustapp.service.BlockExplorerClient;
-import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
+import com.wallet.crypto.trustapp.service.TransactionsNetworkClient;
+import com.wallet.crypto.trustapp.service.TransactionsNetworkClientType;
 import com.wallet.crypto.trustapp.service.EthplorerTokenService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 import com.wallet.crypto.trustapp.service.TickerService;
@@ -81,7 +81,7 @@ public class RepositoriesModule {
 	TransactionRepositoryType provideTransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
-			BlockExplorerClientType blockExplorerClient) {
+			TransactionsNetworkClientType blockExplorerClient) {
 		TransactionLocalSource inMemoryCache = new TransactionInMemorySource();
 		TransactionLocalSource inDiskCache = null;
 		return new TransactionRepository(
@@ -94,11 +94,11 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	BlockExplorerClientType provideBlockExplorerClient(
+    TransactionsNetworkClientType provideBlockExplorerClient(
 			OkHttpClient httpClient,
 			Gson gson,
 			EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new BlockExplorerClient(httpClient, gson, ethereumNetworkRepository);
+		return new TransactionsNetworkClient(httpClient, gson, ethereumNetworkRepository);
 	}
 
 	@Singleton

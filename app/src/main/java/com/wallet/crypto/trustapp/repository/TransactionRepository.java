@@ -5,7 +5,7 @@ import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
-import com.wallet.crypto.trustapp.service.BlockExplorerClientType;
+import com.wallet.crypto.trustapp.service.TransactionsNetworkClientType;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
@@ -26,27 +26,29 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	private final EthereumNetworkRepositoryType networkRepository;
 	private final AccountKeystoreService accountKeystoreService;
-	private final TransactionLocalSource transactionLocalSource;
-	private final BlockExplorerClientType blockExplorerClient;
+    private final TransactionLocalSource inMemoryCache;
+    private final TransactionLocalSource inDiskCache;
+    private final TransactionsNetworkClientType blockExplorerClient;
 
-	public TransactionRepository(
+    public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionLocalSource inMemoryCache,
 			TransactionLocalSource inDiskCache,
-			BlockExplorerClientType blockExplorerClient) {
+			TransactionsNetworkClientType blockExplorerClient) {
 		this.networkRepository = networkRepository;
 		this.accountKeystoreService = accountKeystoreService;
 		this.blockExplorerClient = blockExplorerClient;
-		this.transactionLocalSource = inMemoryCache;
-
-		this.networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
+		this.inMemoryCache = inMemoryCache;
+		this.inDiskCache = inDiskCache;
 	}
 
     @Override
 	public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
+        NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 	    return Single.merge(
-	            transactionLocalSource.fetchTransaction(wallet), fetchAndCacheFromNetwork(wallet))
+	            fetchFromCache(networkInfo, wallet),
+	            fetchAndCacheFromNetwork(networkInfo, wallet))
                 .toObservable();
     }
 
@@ -86,13 +88,24 @@ public class TransactionRepository implements TransactionRepositoryType {
 		})).subscribeOn(Schedulers.io());
 	}
 
-	private Single<Transaction[]> fetchAndCacheFromNetwork(Wallet wallet) {
-        return Single.fromObservable(
-                blockExplorerClient.fetchTransactions(wallet.address)
-                        .doOnNext(transactions -> transactionLocalSource.putTransactions(wallet, transactions)));
+	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
+	    return inMemoryCache
+                .fetchTransaction(networkInfo, wallet)
+                .onErrorResumeNext(inDiskCache
+                        .fetchTransaction(networkInfo, wallet)
+                        .doOnSuccess(transactions ->
+                                inMemoryCache.putTransactions(networkInfo, wallet, transactions)));
+
     }
 
-    private void onNetworkChanged(NetworkInfo networkInfo) {
-        transactionLocalSource.clear();
+	private Single<Transaction[]> fetchAndCacheFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
+        return inDiskCache
+                .findLast(networkInfo, wallet)
+                .flatMap(lastTransaction -> Single.fromObservable(blockExplorerClient
+                        .fetchLastTransactions(wallet, lastTransaction)
+                        .doOnNext(transactions -> {
+                            inMemoryCache.putTransactions(networkInfo, wallet, transactions);
+                            inDiskCache.putTransactions(networkInfo, wallet, transactions);
+                        })));
     }
 }

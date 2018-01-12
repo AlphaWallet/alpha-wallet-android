@@ -10,6 +10,7 @@ public class RealmTokenInfo extends RealmObject {
     private String symbol;
     private int decimals;
     private long addedTime;
+    private boolean isDisable;
 
     public int getDecimals() {
         return decimals;
@@ -49,5 +50,13 @@ public class RealmTokenInfo extends RealmObject {
 
     public void setAddedTime(long addedTime) {
         this.addedTime = addedTime;
+    }
+
+    public boolean isDisable() {
+        return isDisable;
+    }
+
+    public void setDisable(boolean disable) {
+        isDisable = disable;
     }
 }

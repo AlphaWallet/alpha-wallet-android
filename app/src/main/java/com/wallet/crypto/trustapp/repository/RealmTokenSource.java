@@ -1,5 +1,7 @@
 package com.wallet.crypto.trustapp.repository;
 
+import android.support.annotation.NonNull;
+
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -7,9 +9,13 @@ import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmMigration;
+import io.realm.RealmObjectSchema;
 import io.realm.RealmResults;
+import io.realm.RealmSchema;
 import io.realm.Sort;
 
 public class RealmTokenSource implements TokenLocalSource {
@@ -38,6 +44,7 @@ public class RealmTokenSource implements TokenLocalSource {
                 realm = getRealmInstance(networkInfo, wallet);
                 RealmResults<RealmTokenInfo> realmItems = realm.where(RealmTokenInfo.class)
                         .sort("addedTime", Sort.ASCENDING)
+                        .equalTo("isDisable", false)
                         .findAll();
                 int len = realmItems.size();
                 TokenInfo[] result = new TokenInfo[len];
@@ -58,14 +65,6 @@ public class RealmTokenSource implements TokenLocalSource {
                 }
             }
         });
-    }
-
-    private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .name(wallet.address + "-" + networkInfo.name + ".realm")
-                .schemaVersion(1)
-                .build();
-        return Realm.getInstance(config);
     }
 
     private void putInNeed(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
@@ -91,4 +90,27 @@ public class RealmTokenSource implements TokenLocalSource {
         }
     }
 
+    private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .name(wallet.address + "-" + networkInfo.name + ".realm")
+                .schemaVersion(2)
+                .migration(new TokenInfoMigration())
+                .build();
+        return Realm.getInstance(config);
+    }
+
+    private static class TokenInfoMigration implements RealmMigration {
+
+        @Override
+        public void migrate(@NonNull DynamicRealm realm, long oldVersion, long newVersion) {
+            RealmSchema schema = realm.getSchema();
+            if (oldVersion == 1) {
+                RealmObjectSchema tokenInfoSchema = schema.get("RealmTokenInfo");
+                if (tokenInfoSchema != null) {
+                    tokenInfoSchema.addField("isDisable", boolean.class);
+                }
+//                oldVersion++;
+            }
+        }
+    }
 }

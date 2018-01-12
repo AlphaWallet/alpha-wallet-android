@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.repository;
 
 import android.text.format.DateUtils;
 
+import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 
@@ -9,20 +10,19 @@ import java.util.Map;
 
 import io.reactivex.Single;
 
-// TODO: Add pagination.
 public class TransactionInMemorySource implements TransactionLocalSource {
 
 	private static final long MAX_TIME_OUT = DateUtils.MINUTE_IN_MILLIS;
 	private final Map<String, CacheUnit> cache = new java.util.concurrent.ConcurrentHashMap<>();
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
+	public Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet) {
 		return Single.fromCallable(() -> {
-			CacheUnit unit = cache.get(wallet.address);
+			CacheUnit unit = cache.get(createKey(networkInfo, wallet));
 			Transaction[] transactions = new Transaction[0];
 			if (unit != null) {
 				if (System.currentTimeMillis() - unit.create > MAX_TIME_OUT) {
-					cache.remove(wallet.address);
+					cache.remove(createKey(networkInfo, wallet));
 				} else {
 					transactions = unit.transactions;
 				}
@@ -32,15 +32,29 @@ public class TransactionInMemorySource implements TransactionLocalSource {
 		});
 	}
 
-	@Override
-	public void putTransactions(Wallet wallet, Transaction[] transactions) {
+    private String createKey(NetworkInfo networkInfo, Wallet wallet) {
+        return networkInfo.name + wallet.address;
+    }
+
+    @Override
+	public void putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
 	    clear();
-		cache.put(wallet.address, new CacheUnit(wallet.address, System.currentTimeMillis(), transactions));
+		cache.put(createKey(networkInfo, wallet), new CacheUnit(wallet.address, System.currentTimeMillis(), transactions));
 	}
 
     @Override
     public void clear() {
         cache.clear();
+    }
+
+    @Override
+    public Single<Transaction> findLast(NetworkInfo networkInfo, Wallet wallet) {
+	    return Single.fromCallable(() -> {
+            CacheUnit cacheUnit = cache.get(createKey(networkInfo, wallet));
+            return cacheUnit != null && cacheUnit.transactions != null && cacheUnit.transactions.length > 0
+                    ? cacheUnit.transactions[0]
+                    : null;
+        });
     }
 
     private static class CacheUnit {

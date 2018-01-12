@@ -1,14 +1,15 @@
 package com.wallet.crypto.trustapp.repository;
 
+import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 
 import io.reactivex.Single;
 
 public interface TransactionLocalSource {
-	Single<Transaction[]> fetchTransaction(Wallet wallet);
+	Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet);
 
-	void putTransactions(Wallet wallet, Transaction[] transactions);
+	void putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions);
 
-    void clear();
+    Single<Transaction> findLast(NetworkInfo networkInfo, Wallet wallet);
 }

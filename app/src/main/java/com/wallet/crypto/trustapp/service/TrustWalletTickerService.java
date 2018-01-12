@@ -74,18 +74,25 @@ public class TrustWalletTickerService implements TickerService {
             return new DisposableObserver<Response<T>>() {
                 @Override
                 public void onNext(Response<T> response) {
+                    if (isDisposed()) {
+                        return;
+                    }
                     observer.onNext(response.body());
                     observer.onComplete();
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    observer.onError(e);
+                    if (!isDisposed()) {
+                        observer.onError(e);
+                    }
                 }
 
                 @Override
                 public void onComplete() {
-                    observer.onComplete();
+                    if (!isDisposed()) {
+                        observer.onComplete();
+                    }
                 }
             };
         }

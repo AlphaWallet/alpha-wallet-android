@@ -23,9 +23,8 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 
 	private final OkHttpClient httpClient;
 	private final Gson gson;
-	private final EthereumNetworkRepositoryType networkRepository;
 
-	private EtherScanApiClient etherScanApiClient;
+    private EtherScanApiClient etherScanApiClient;
 
 	public BlockExplorerClient(
 			OkHttpClient httpClient,
@@ -33,8 +32,7 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 			EthereumNetworkRepositoryType networkRepository) {
 		this.httpClient = httpClient;
 		this.gson = gson;
-		this.networkRepository = networkRepository;
-		this.networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
+		networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 		onNetworkChanged(networkInfo);
 	}
@@ -53,7 +51,7 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 	public Observable<Transaction[]> fetchTransactions(String address) {
 		return etherScanApiClient
 				.fetchTransactions(address)
-				.lift(apiError(gson))
+				.lift(apiError())
 				.map(r -> r.docs)
 				.subscribeOn(Schedulers.io());
 	}
@@ -62,8 +60,8 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 		buildApiClient(networkInfo.backendUrl);
 	}
 
-	private static @NonNull <T> ApiErrorOperator<T> apiError(Gson gson) {
-		return new ApiErrorOperator<>(gson);
+	private static @NonNull <T> ApiErrorOperator<T> apiError() {
+		return new ApiErrorOperator<>();
 	}
 
 	private interface EtherScanApiClient {
@@ -78,29 +76,30 @@ public class BlockExplorerClient implements BlockExplorerClientType {
 
 	private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
 
-		private final Gson gson;
-
-		public ApiErrorOperator(Gson gson) {
-			this.gson = gson;
-		}
-
 		@Override
 		public Observer<? super retrofit2.Response<T>> apply(Observer<? super T> observer) throws Exception {
             return new DisposableObserver<Response<T>>() {
                 @Override
                 public void onNext(Response<T> response) {
+                    if (isDisposed()) {
+                        return;
+                    }
                     observer.onNext(response.body());
                     observer.onComplete();
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    observer.onError(e);
+                    if (!isDisposed()) {
+                        observer.onError(e);
+                    }
                 }
 
                 @Override
                 public void onComplete() {
-                    observer.onComplete();
+                    if (!isDisposed()) {
+                        observer.onComplete();
+                    }
                 }
             };
 		}

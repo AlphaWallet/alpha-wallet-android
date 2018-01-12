@@ -88,6 +88,9 @@ public class EthplorerTokenService implements TokenExplorerClientType {
             return new DisposableObserver<Response<EthplorerResponse>>() {
                 @Override
                 public void onNext(Response<EthplorerResponse> response) {
+                    if (isDisposed()) {
+                        return;
+                    }
                     EthplorerResponse body = response.body();
                     if (body != null && body.error == null) {
                         observer.onNext(body);
@@ -103,12 +106,16 @@ public class EthplorerTokenService implements TokenExplorerClientType {
 
                 @Override
                 public void onError(Throwable e) {
-                    observer.onError(e);
+                    if (!isDisposed()) {
+                        observer.onError(e);
+                    }
                 }
 
                 @Override
                 public void onComplete() {
-                    observer.onComplete();
+                    if (!isDisposed()) {
+                        observer.onComplete();
+                    }
                 }
             };
         }

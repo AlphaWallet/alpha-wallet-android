@@ -62,7 +62,7 @@ public class GetKeystoreWalletRepoTest {
 	@Test
 	public void testImportStore() {
 		TestObserver<Wallet> subscriber = accountKeystoreService
-				.importKeystore(STORE_1, PASS_1)
+				.importKeystore(STORE_1, PASS_1, PASS_1)
 				.toObservable()
 				.test();
 		subscriber.awaitTerminalEvent();
@@ -144,7 +144,7 @@ public class GetKeystoreWalletRepoTest {
 
 	private void importAccountStore(String store, String password) {
 		TestObserver<Wallet> subscriber = accountKeystoreService
-				.importKeystore(store, password)
+				.importKeystore(store, password, password)
 				.toObservable()
 				.test();
 		subscriber.awaitTerminalEvent();

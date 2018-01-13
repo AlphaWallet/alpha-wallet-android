@@ -13,6 +13,7 @@ import org.ethereum.geth.BigInt;
 import org.ethereum.geth.Geth;
 import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletFile;
@@ -50,23 +51,37 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 
     @Override
     public Single<Wallet> createAccount(String password) {
-        return Single.fromCallable(() -> new Wallet(
-                keyStore.newAccount(password).getAddress().getHex().toLowerCase()))
-                .subscribeOn(Schedulers.io());
+        return Single.fromCallable(() -> new Wallet(keyStore.newAccount(password).getAddress().getHex().toLowerCase()))
+        .subscribeOn(Schedulers.io());
     }
 
     @Override
     public Single<Wallet> importKeystore(String store, String password, String newPassword) {
         return Single.fromCallable(() -> {
-            JSONObject jsonObject = new JSONObject(store);
-            String address = "0x" + jsonObject.getString("address");
+            String address = extractAddressFromStore(store);
             if (hasAccount(address)) {
                 throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added");
             }
-            Account account = keyStore
-                    .importKey(store.getBytes(Charset.forName("UTF-8")), password, newPassword);
+            Account account;
+            try {
+                account = keyStore
+                        .importKey(store.getBytes(Charset.forName("UTF-8")), password, newPassword);
+            } catch (Exception ex) {
+                // We need to make sure that we do not have a broken account
+                deleteAccount(address, newPassword).subscribe(() -> {}, t -> {});
+                throw ex;
+            }
             return new Wallet(account.getAddress().getHex().toLowerCase());
         }).subscribeOn(Schedulers.io());
+    }
+
+    private String extractAddressFromStore(String store) throws Exception {
+        try {
+            JSONObject jsonObject = new JSONObject(store);
+            return "0x" + jsonObject.getString("address");
+        } catch (JSONException ex) {
+            throw new Exception("Invalid keystore");
+        }
     }
 
     @Override
@@ -124,7 +139,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
 
             return signed.encodeRLP();
         })
-                .subscribeOn(Schedulers.io());
+        .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -145,7 +160,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
             }
             return result;
         })
-                .subscribeOn(Schedulers.io());
+        .subscribeOn(Schedulers.io());
     }
 
     private org.ethereum.geth.Account findAccount(String address) throws ServiceException {

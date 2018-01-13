@@ -12,6 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -83,11 +84,25 @@ public class WalletsActivity extends BaseActivity implements
 		viewModel.progress().observe(this, systemView::showProgress);
 		viewModel.wallets().observe(this, this::onFetchWallet);
 		viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
-		viewModel.createdWallet().observe(this, this::onCreatedWallet);
-		viewModel.exportedStore().observe(this, this::openShareDialog);
+        viewModel.createdWallet().observe(this, this::onCreatedWallet);
+        viewModel.createWalletError().observe(this, this::onCreateWalletError);
+        viewModel.exportedStore().observe(this, this::openShareDialog);
+        viewModel.exportWalletError().observe(this, this::onExportWalletError);
+        viewModel.deleteWalletError().observe(this, this::onDeleteWalletError);
 
 		refreshLayout.setOnRefreshListener(viewModel::fetchWallets);
 	}
+
+    private void onCreateWalletError(ErrorEnvelope errorEnvelope) {
+        dialog = buildDialog()
+                .setTitle(R.string.title_dialog_error)
+                .setMessage(TextUtils.isEmpty(errorEnvelope.message)
+                        ? getString(R.string.error_create_wallet)
+                        : errorEnvelope.message)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {})
+                .create();
+        dialog.show();
+    }
 
     private void onExportWallet(Wallet wallet) {
         showBackupDialog(wallet, false);
@@ -280,9 +295,7 @@ public class WalletsActivity extends BaseActivity implements
                 .setOnDismissListener(dialog -> KeyboardUtils.hideKeyboard(view.findViewById(R.id.password)))
                 .create();
         dialog.show();
-        handler.postDelayed(() -> {
-            KeyboardUtils.showKeyboard(view.findViewById(R.id.password));
-        }, 500);
+        handler.postDelayed(() -> KeyboardUtils.showKeyboard(view.findViewById(R.id.password)), 500);
 
     }
 
@@ -294,6 +307,28 @@ public class WalletsActivity extends BaseActivity implements
         startActivityForResult(
                 Intent.createChooser(sharingIntent, "Share via"),
                 SHARE_REQUEST_CODE);
+    }
+
+    private void onExportWalletError(ErrorEnvelope errorEnvelope) {
+        dialog = buildDialog()
+                .setTitle(R.string.title_dialog_error)
+                .setMessage(TextUtils.isEmpty(errorEnvelope.message)
+                        ? getString(R.string.error_export)
+                        : errorEnvelope.message)
+                .setPositiveButton(R.string.ok, (dialogInterface, with) -> {})
+                .create();
+        dialog.show();
+    }
+
+    private void onDeleteWalletError(ErrorEnvelope errorEnvelope) {
+        dialog = buildDialog()
+                .setTitle(R.string.title_dialog_error)
+                .setMessage(TextUtils.isEmpty(errorEnvelope.message)
+                        ? getString(R.string.error_deleting_account)
+                        : errorEnvelope.message)
+                .setPositiveButton(R.string.ok, (dialogInterface, with) -> {})
+                .create();
+        dialog.show();
     }
 
 	private void onError(ErrorEnvelope errorEnvelope) {

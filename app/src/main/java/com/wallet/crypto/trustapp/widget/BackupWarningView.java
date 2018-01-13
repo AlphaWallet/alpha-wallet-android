@@ -39,7 +39,9 @@ public class BackupWarningView extends FrameLayout implements View.OnClickListen
         setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
         LayoutInflater.from(getContext()).inflate(layoutId, this, true);
         findViewById(R.id.backup_action).setOnClickListener(this);
-        findViewById(R.id.later_action).setOnClickListener(this);
+        /* Disabled due to https://github.com/TrustWallet/trust-wallet-android/issues/107
+         * findViewById(R.id.later_action).setOnClickListener(this);
+         */
     }
 
     @Override

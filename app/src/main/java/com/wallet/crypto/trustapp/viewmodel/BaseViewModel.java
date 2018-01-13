@@ -4,9 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.ServiceException;

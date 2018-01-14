@@ -47,7 +47,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
                     "https://sokol.poa.network",
                     "https://trust-sokol.herokuapp.com/",
-                    "http://testnet.oracles.org:4000/txid/search/",77, false),
+                    "https://sokol-explorer.poa.network/account/",77, false),
 	};
 
 	private final PreferenceRepositoryType preferences;

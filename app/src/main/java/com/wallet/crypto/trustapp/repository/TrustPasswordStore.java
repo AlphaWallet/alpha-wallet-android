@@ -6,6 +6,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.wallet.crypto.trustapp.entity.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.util.KS;
@@ -51,12 +52,22 @@ public class TrustPasswordStore implements PasswordStore {
 	public Single<String> getPassword(Wallet wallet) {
 		return Single.fromCallable(() -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                return new String(KS.get(context, wallet.address));
+                try {
+                    return new String(KS.get(context, wallet.address));
+                } catch (Exception ex) {
+                    Crashlytics.logException(ex);
+                    throw new ServiceErrorException(
+                            ServiceErrorException.KEY_STORE_ERROR,
+                            "Failed to get the password from the store.");
+                }
             } else {
                 try {
                     return PasswordManager.getPassword(wallet.address, context);
-                } catch (Exception e) {
-                    throw new ServiceErrorException(ServiceErrorException.KEY_STORE_ERROR);
+                } catch (Exception ex) {
+                    Crashlytics.logException(ex);
+                    throw new ServiceErrorException(
+                            ServiceErrorException.KEY_STORE_ERROR,
+                            "Failed to get the password from the password manager.");
                 }
             }
         });
@@ -71,7 +82,8 @@ public class TrustPasswordStore implements PasswordStore {
                 try {
                     PasswordManager.setPassword(wallet.address, password, context);
                 } catch (Exception e) {
-                    throw new ServiceErrorException(ServiceErrorException.KEY_STORE_ERROR);
+                    throw new ServiceErrorException(
+                            ServiceErrorException.KEY_STORE_ERROR);
                 }
             }
         });

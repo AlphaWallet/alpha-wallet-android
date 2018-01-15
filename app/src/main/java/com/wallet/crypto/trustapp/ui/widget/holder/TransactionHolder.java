@@ -110,7 +110,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         // Perform decimal conversion
         BigDecimal value = new BigDecimal(valueStr);
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = SIGNIFICANT_FIGURES - value.precision() + value.scale();
+        int scale = 4; //SIGNIFICANT_FIGURES - value.precision() + value.scale();
         return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 

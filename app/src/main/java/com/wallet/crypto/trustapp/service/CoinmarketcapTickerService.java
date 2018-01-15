@@ -55,7 +55,7 @@ public class CoinmarketcapTickerService implements TickerService {
 
     private static @NonNull
     <T> ApiErrorOperator<T> apiError(Gson gson) {
-        return new ApiErrorOperator<>(gson);
+        return new ApiErrorOperator<>();
     }
 
     public interface CoinmarketApiClient {
@@ -65,29 +65,30 @@ public class CoinmarketcapTickerService implements TickerService {
 
     private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
 
-        private final Gson gson;
-
-        public ApiErrorOperator(Gson gson) {
-            this.gson = gson;
-        }
-
         @Override
         public Observer<? super Response<T>> apply(Observer<? super T> observer) throws Exception {
             return new DisposableObserver<Response<T>>() {
                 @Override
                 public void onNext(Response<T> response) {
+                    if (isDisposed()) {
+                        return;
+                    }
                     observer.onNext(response.body());
                     observer.onComplete();
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    observer.onError(e);
+                    if (!isDisposed()) {
+                        observer.onError(e);
+                    }
                 }
 
                 @Override
                 public void onComplete() {
-                    observer.onComplete();
+                    if (!isDisposed()) {
+                        observer.onComplete();
+                    }
                 }
             };
         }

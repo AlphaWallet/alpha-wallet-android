@@ -51,7 +51,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
                 error.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
             }
         } else {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+            error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
         }
     }
 }

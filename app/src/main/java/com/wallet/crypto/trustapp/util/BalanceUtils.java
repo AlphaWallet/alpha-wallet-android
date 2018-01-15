@@ -13,11 +13,10 @@ public class BalanceUtils {
         return Convert.fromWei(new BigDecimal(wei), Convert.Unit.ETHER);
     }
 
-    public static String weiToEth(BigInteger wei, int sigFig) throws Exception {
+    public static BigDecimal weiToEth(BigInteger wei, int sigFig) throws Exception {
         BigDecimal eth = weiToEth(wei);
         int scale = sigFig - eth.precision() + eth.scale();
-        BigDecimal eth_scaled = eth.setScale(scale, RoundingMode.HALF_UP);
-        return eth_scaled.toString();
+        return eth.setScale(scale, RoundingMode.HALF_UP);
     }
 
     public static String ethToUsd(String priceUsd, String ethBalance) {

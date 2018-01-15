@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.wallet.crypto.trustapp.C;
@@ -38,6 +39,7 @@ public class WalletsViewModel extends BaseViewModel {
 	private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
 	private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
 	private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
+	private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
 
     WalletsViewModel(
             CreateWalletInteract createWalletInteract,
@@ -72,12 +74,20 @@ public class WalletsViewModel extends BaseViewModel {
         return createdWallet;
     }
 
+    public LiveData<ErrorEnvelope> createWalletError() {
+        return createWalletError;
+    }
+
     public LiveData<String> exportedStore() {
         return exportedStore;
     }
 
-    public LiveData<ErrorEnvelope> exportError() {
+    public LiveData<ErrorEnvelope> exportWalletError() {
         return exportWalletError;
+    }
+
+    public LiveData<ErrorEnvelope> deleteWalletError() {
+        return deleteWalletError;
     }
 
 	public void setDefaultWallet(Wallet wallet) {
@@ -89,7 +99,7 @@ public class WalletsViewModel extends BaseViewModel {
 	public void deleteWallet(Wallet wallet) {
 		disposable = deleteWalletInteract
 				.delete(wallet)
-				.subscribe(this::onFetchWallets, this::onError);
+				.subscribe(this::onFetchWallets, this::onDeleteWalletError);
 	}
 
 	private void onFetchWallets(Wallet[] items) {
@@ -125,17 +135,30 @@ public class WalletsViewModel extends BaseViewModel {
     public void exportWallet(Wallet wallet, String storePassword) {
         exportWalletInteract
                 .export(wallet, storePassword)
-                .subscribe(exportedStore::postValue, this::onExportError);
+                .subscribe(exportedStore::postValue, this::onExportWalletError);
     }
 
-    private void onExportError(Throwable throwable) {
+    private void onExportWalletError(Throwable throwable) {
         Crashlytics.logException(throwable);
-        exportWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+        exportWalletError.postValue(
+                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
+                                ? throwable.getMessage() : throwable.getLocalizedMessage()));
+    }
+
+    private void onDeleteWalletError(Throwable throwable) {
+        Crashlytics.logException(throwable);
+        deleteWalletError.postValue(
+                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
+                                ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
     private void onCreateWalletError(Throwable throwable) {
         Crashlytics.logException(throwable);
-        createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+        if (throwable.getCause() == null || TextUtils.isEmpty(throwable.getCause().getMessage())) {
+            createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
+        } else {
+            createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getCause().getMessage()));
+        }
 	}
 
 	public void importWallet(Activity activity) {

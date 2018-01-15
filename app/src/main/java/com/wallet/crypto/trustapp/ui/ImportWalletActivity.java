@@ -6,11 +6,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.widget.ProgressBar;
 
 import com.wallet.crypto.trustapp.C;
@@ -97,13 +97,15 @@ public class ImportWalletActivity extends BaseActivity {
 
     private void onError(ErrorEnvelope errorEnvelope) {
         hideDialog();
-        @StringRes int messageResourceId = R.string.error_import;
+        String message = TextUtils.isEmpty(errorEnvelope.message)
+                ? getString(R.string.error_import)
+                : errorEnvelope.message;
         if (errorEnvelope.code == ALREADY_ADDED) {
-            messageResourceId = R.string.error_already_added;
+            message = getString(R.string.error_already_added);
         }
         dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.title_dialog_error)
-                .setMessage(messageResourceId)
+                .setMessage(message)
                 .setPositiveButton(R.string.ok, null)
                 .create();
         dialog.show();

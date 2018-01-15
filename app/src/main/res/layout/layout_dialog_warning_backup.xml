@@ -44,14 +44,15 @@
             android:layout_marginTop="@dimen/half_large_margin"
             android:layout_marginBottom="@dimen/normal_margin"
             />
-        <Button
+        <!-- Disabled due to https://github.com/TrustWallet/trust-wallet-android/issues/107 -->
+        <!--<Button
             android:id="@+id/later_action"
             android:text="@string/action_backup_later"
             android:layout_marginTop="@dimen/half_large_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/Widget.AppCompat.Button"
-            />
+            />-->
         <Button
             android:id="@+id/backup_action"
             android:text="@string/action_backup_wallet"

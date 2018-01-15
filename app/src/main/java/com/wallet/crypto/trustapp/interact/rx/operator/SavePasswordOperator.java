@@ -5,7 +5,6 @@ import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import io.reactivex.observers.DisposableCompletableObserver;
 
@@ -23,22 +22,27 @@ public class SavePasswordOperator implements SingleTransformer<Wallet, Wallet> {
     }
 
     @Override
-    public SingleSource<Wallet> apply(Single<Wallet> upstream) {
-        Wallet wallet = upstream.blockingGet();
-        return passwordStore
+    public Single<Wallet> apply(Single<Wallet> upstream) {
+        return upstream.flatMap(wallet ->
+                passwordStore
                 .setPassword(wallet, password)
-                .onErrorResumeNext(err -> walletRepository.deleteWallet(wallet.address, password)
+                .onErrorResumeNext(err -> walletRepository
+                        .deleteWallet(wallet.address, password)
                         .lift(observer -> new DisposableCompletableObserver() {
                             @Override
                             public void onComplete() {
-                                observer.onError(err);
+                                if (isDisposed()) {
+                                    observer.onError(err);
+                                }
                             }
 
                             @Override
                             public void onError(Throwable e) {
-                                observer.onError(e);
+                                if (isDisposed()) {
+                                    observer.onError(e);
+                                }
                             }
                         }))
-                .toSingle(() -> wallet);
+                .toSingle(() -> wallet));
     }
 }

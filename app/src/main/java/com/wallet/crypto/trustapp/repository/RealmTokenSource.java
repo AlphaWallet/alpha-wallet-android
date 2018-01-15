@@ -33,7 +33,7 @@ public class RealmTokenSource implements TokenLocalSource {
             }
             return tokenInfos;
         })
-        .flatMap(tokenInfos1 -> fetch(networkInfo, wallet));
+        .flatMap(items -> fetch(networkInfo, wallet));
     }
 
     @Override

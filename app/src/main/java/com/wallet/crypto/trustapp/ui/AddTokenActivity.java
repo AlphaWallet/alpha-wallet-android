@@ -91,7 +91,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onSave() {
         boolean isValid = true;
-        String address = this.address.getText().toString();
+        String address = this.address.getText().toString().toLowerCase();
         String symbol = this.symbol.getText().toString().toLowerCase();
         String rawDecimals = this.decimals.getText().toString();
         int decimals = 0;

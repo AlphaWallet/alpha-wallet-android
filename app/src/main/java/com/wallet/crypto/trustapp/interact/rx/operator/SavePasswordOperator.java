@@ -6,7 +6,8 @@ import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
-import io.reactivex.observers.DisposableCompletableObserver;
+
+import static com.wallet.crypto.trustapp.interact.rx.operator.Operators.completableErrorProxy;
 
 public class SavePasswordOperator implements SingleTransformer<Wallet, Wallet> {
 
@@ -14,7 +15,7 @@ public class SavePasswordOperator implements SingleTransformer<Wallet, Wallet> {
     private final String password;
     private final WalletRepositoryType walletRepository;
 
-    public SavePasswordOperator(
+    SavePasswordOperator(
             PasswordStore passwordStore, WalletRepositoryType walletRepository, String password) {
         this.passwordStore = passwordStore;
         this.password = password;
@@ -28,21 +29,7 @@ public class SavePasswordOperator implements SingleTransformer<Wallet, Wallet> {
                 .setPassword(wallet, password)
                 .onErrorResumeNext(err -> walletRepository
                         .deleteWallet(wallet.address, password)
-                        .lift(observer -> new DisposableCompletableObserver() {
-                            @Override
-                            public void onComplete() {
-                                if (isDisposed()) {
-                                    observer.onError(err);
-                                }
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                if (isDisposed()) {
-                                    observer.onError(e);
-                                }
-                            }
-                        }))
+                        .lift(completableErrorProxy(err)))
                 .toSingle(() -> wallet));
     }
 }

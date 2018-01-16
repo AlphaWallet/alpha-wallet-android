@@ -154,11 +154,8 @@ public class WalletsViewModel extends BaseViewModel {
 
     private void onCreateWalletError(Throwable throwable) {
         Crashlytics.logException(throwable);
-        if (throwable.getCause() == null || TextUtils.isEmpty(throwable.getCause().getMessage())) {
-            createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null));
-        } else {
-            createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getCause().getMessage()));
-        }
+        progress.postValue(false);
+        createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
 	}
 
 	public void importWallet(Activity activity) {

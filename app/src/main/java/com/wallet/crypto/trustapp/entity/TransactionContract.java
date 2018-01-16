@@ -10,6 +10,9 @@ public class TransactionContract implements Parcelable {
     public long decimals;
     public String symbol;
 
+    public TransactionContract() {
+    }
+
     protected TransactionContract(Parcel in) {
         address = in.readString();
         name = in.readString();

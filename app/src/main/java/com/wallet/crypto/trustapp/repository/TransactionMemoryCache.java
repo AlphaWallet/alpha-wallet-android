@@ -10,7 +10,7 @@ import java.util.Map;
 
 import io.reactivex.Single;
 
-public class TransactionInMemorySource implements TransactionLocalSource {
+public class TransactionMemoryCache implements TransactionLocalSource {
 
 	private static final long MAX_TIME_OUT = DateUtils.MINUTE_IN_MILLIS;
 	private final Map<String, CacheUnit> cache = new java.util.concurrent.ConcurrentHashMap<>();

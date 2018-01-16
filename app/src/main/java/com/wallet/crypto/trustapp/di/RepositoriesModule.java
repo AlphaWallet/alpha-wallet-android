@@ -13,7 +13,8 @@ import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
 import com.wallet.crypto.trustapp.repository.TokenLocalSource;
 import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.repository.TransactionInMemorySource;
+import com.wallet.crypto.trustapp.repository.TransactionsRealmCache;
+import com.wallet.crypto.trustapp.repository.TransactionMemoryCache;
 import com.wallet.crypto.trustapp.repository.TransactionLocalSource;
 import com.wallet.crypto.trustapp.repository.TransactionRepository;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
@@ -82,8 +83,8 @@ public class RepositoriesModule {
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionsNetworkClientType blockExplorerClient) {
-		TransactionLocalSource inMemoryCache = new TransactionInMemorySource();
-		TransactionLocalSource inDiskCache = null;
+		TransactionLocalSource inMemoryCache = new TransactionMemoryCache();
+		TransactionLocalSource inDiskCache = new TransactionsRealmCache();
 		return new TransactionRepository(
 				networkRepository,
 				accountKeystoreService,

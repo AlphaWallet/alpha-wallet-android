@@ -10,7 +10,6 @@ import org.web3j.protocol.http.HttpService;
 import java.math.BigInteger;
 
 import io.reactivex.Completable;
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
@@ -39,12 +38,12 @@ public class WalletRepository implements WalletRepositoryType {
 	}
 
 	@Override
-	public Maybe<Wallet> findWallet(String address) {
+	public Single<Wallet> findWallet(String address) {
 		return fetchWallets()
-				.flatMapMaybe(accounts -> {
+				.flatMap(accounts -> {
 					for (Wallet wallet : accounts) {
 						if (wallet.sameAddress(address)) {
-							return Maybe.just(wallet);
+							return Single.just(wallet);
 						}
 					}
 					return null;
@@ -85,8 +84,7 @@ public class WalletRepository implements WalletRepositoryType {
 	@Override
 	public Single<Wallet> getDefaultWallet() {
 		return Single.fromCallable(preferenceRepositoryType::getCurrentWalletAddress)
-				.flatMapMaybe(this::findWallet)
-				.toSingle();
+				.flatMap(this::findWallet);
 	}
 
 	@Override

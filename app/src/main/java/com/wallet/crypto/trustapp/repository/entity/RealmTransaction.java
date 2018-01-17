@@ -2,8 +2,10 @@ package com.wallet.crypto.trustapp.repository.entity;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 public class RealmTransaction extends RealmObject {
+    @PrimaryKey
     private String hash;
     private String blockNumber;
     private long timeStamp;

@@ -87,6 +87,9 @@ public class TokensViewModel extends BaseViewModel {
     }
 
     private void onTokens(Token[] tokens) {
+        if (tokens != null && tokens.length > 0) {
+            progress.postValue(false);
+        }
         this.tokens.setValue(tokens);
     }
 
@@ -99,7 +102,7 @@ public class TokensViewModel extends BaseViewModel {
 
     }
 
-    public void showTransactions(Context context, boolean isClearStack) {
-        transactionsRouter.open(context, isClearStack);
+    public void showTransactions(Context context) {
+        transactionsRouter.open(context, true);
     }
 }

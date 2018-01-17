@@ -19,16 +19,17 @@ import io.realm.RealmResults;
 public class TransactionsRealmCache implements TransactionLocalSource {
 	@Override
 	public Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet) {
-        Realm instance = null;
-        try {
-            instance = getRealmInstance(networkInfo, wallet);
-            final Realm realm = instance;
-            return Single.fromCallable(() -> convert(realm.where(RealmTransaction.class).findAll()));
-        } finally {
-            if (instance != null) {
-                instance.close();
+        return Single.fromCallable(() -> {
+            Realm instance = null;
+            try {
+                instance = getRealmInstance(networkInfo, wallet);
+                return convert(instance.where(RealmTransaction.class).findAll());
+            } finally {
+                if (instance != null) {
+                    instance.close();
+                }
             }
-        }
+        });
 	}
 
     @Override
@@ -39,7 +40,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 instance = getRealmInstance(networkInfo, wallet);
                 instance.beginTransaction();
                 for (Transaction transaction : transactions) {
-                    RealmTransaction item = instance.createObject(RealmTransaction.class, "hash");
+                    RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
                     fill(instance, item, transaction);
                 }
                 instance.commitTransaction();
@@ -74,7 +75,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     private void fill(Realm realm, RealmTransaction item, Transaction transaction) {
-        item.setHash(transaction.hash);
         item.setError(transaction.error);
         item.setBlockNumber(transaction.blockNumber);
         item.setTimeStamp(transaction.timeStamp);

@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -22,7 +23,7 @@ public class BaseViewModel extends ViewModel {
 		cancel();
 	}
 
-	protected void cancel() {
+	private void cancel() {
 		if (disposable != null && !disposable.isDisposed()) {
 			disposable.dispose();
 		}
@@ -37,7 +38,8 @@ public class BaseViewModel extends ViewModel {
 	}
 
 	protected void onError(Throwable throwable) {
-		if (throwable instanceof ServiceException) {
+        Log.d("TAG", "Err", throwable);
+        if (throwable instanceof ServiceException) {
 			error.postValue(((ServiceException) throwable).error);
 		} else {
 		    if (throwable.getCause() == null || TextUtils.isEmpty(throwable.getCause().getMessage())) {

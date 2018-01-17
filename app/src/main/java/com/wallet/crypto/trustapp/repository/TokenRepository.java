@@ -6,6 +6,8 @@ import android.util.Log;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
+import com.wallet.crypto.trustapp.entity.Transaction;
+import com.wallet.crypto.trustapp.entity.TransactionOperation;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
 
@@ -20,12 +22,12 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,17 +43,20 @@ public class TokenRepository implements TokenRepositoryType {
     private final TokenLocalSource tokenLocalSource;
     private final OkHttpClient httpClient;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final TransactionLocalSource transactionsLocalCache;
     private Web3j web3j;
 
     public TokenRepository(
             OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenExplorerClientType tokenNetworkService,
-            TokenLocalSource tokenLocalSource) {
+            TokenLocalSource tokenLocalSource,
+            TransactionLocalSource transactionsLocalCache) {
         this.httpClient = okHttpClient;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenNetworkService = tokenNetworkService;
         this.tokenLocalSource = tokenLocalSource;
+        this.transactionsLocalCache = transactionsLocalCache;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
@@ -66,8 +71,30 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
                 fetchTokensFromLocal(defaultNetwork, wallet),
-                updateTokenInfoCache(defaultNetwork, wallet))
+                updateTokenInfoCache(defaultNetwork, wallet),
+                extractFromTransactions(defaultNetwork, wallet))
                 .toObservable();
+    }
+
+    private Single<Token[]> extractFromTransactions(NetworkInfo network, Wallet wallet) {
+        return transactionsLocalCache.fetchTransaction(network, wallet)
+                .flatMap(transactions -> {
+                    List<TokenInfo> result = new ArrayList<>();
+                    for (Transaction transaction : transactions) {
+                        if (transaction.operations == null || transaction.operations.length == 0) {
+                            continue;
+                        }
+                        TransactionOperation operation = transaction.operations[0];
+                        result.add(new TokenInfo(
+                                operation.contract.address,
+                                operation.contract.name,
+                                operation.contract.symbol,
+                                (int) operation.contract.decimals));
+                    }
+                    return Single.just(result.toArray(new TokenInfo[result.size()]));
+                })
+                .flatMap(tokenInfos -> tokenLocalSource.put(network, wallet, tokenInfos))
+                .map(items -> getBalances(wallet, items));
     }
 
     private Single<Token[]> fetchTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
@@ -99,9 +126,12 @@ public class TokenRepository implements TokenRepositoryType {
                 new TokenInfo(address, "", symbol, decimals));
     }
 
-    private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo defaultNetwork, @NonNull Wallet wallet) {
+    private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo network, @NonNull Wallet wallet) {
+        if (!network.isMainNetwork) {
+            return Single.just(new Token[0]);
+        }
         return Single.fromObservable(tokenNetworkService.fetch(wallet.address))
-                .flatMap(tokenInfos -> tokenLocalSource.put(defaultNetwork, wallet, tokenInfos))
+                .flatMap(tokenInfos -> tokenLocalSource.put(network, wallet, tokenInfos))
                 .map(items -> getBalances(wallet, items));
     }
 
@@ -130,7 +160,8 @@ public class TokenRepository implements TokenRepositoryType {
         String encodedFunction = FunctionEncoder.encode(function);
 
         org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
-                Transaction.createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
+                org.web3j.protocol.core.methods.request.Transaction
+                    .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
                 DefaultBlockParameterName.LATEST)
                 .sendAsync().get();
 
@@ -140,7 +171,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static byte[] createTokenTransferData(String to, BigInteger tokenAmount) {
         List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenAmount));
 
-        List<TypeReference<?>> returnTypes = Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {
+        List<TypeReference<?>> returnTypes = Collections.singletonList(new TypeReference<Bool>() {
         });
 
         Function function = new Function("transfer", params, returnTypes);

@@ -145,6 +145,9 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     private void onTransactions(Transaction[] transactions) {
+        if (transactions != null && transactions.length > 0) {
+            progress.postValue(false);
+        }
         this.transactions.setValue(transactions);
     }
 

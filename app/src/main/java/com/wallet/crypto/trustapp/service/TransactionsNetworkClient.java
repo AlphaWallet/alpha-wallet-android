@@ -67,6 +67,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
     @Override
     public Observable<Transaction[]> fetchLastTransactions(Wallet wallet, Transaction lastTransaction) {
 	    return Observable.fromCallable(() -> {
+            @NonNull String lastTransactionHash = lastTransaction == null
+                    ? "" :lastTransaction.hash;
             List<Transaction> result = new ArrayList<>();
             int pages = 0;
             int page = 0;
@@ -80,7 +82,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                     if (body != null) {
                         pages = body.pages;
                         for (Transaction transaction : body.docs) {
-                            if (transaction.hash.equals(lastTransaction.hash)) {
+                            if (lastTransactionHash.equals(transaction.hash)) {
                                 hasMore = false;
                                 break;
                             }

@@ -26,20 +26,17 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	private final EthereumNetworkRepositoryType networkRepository;
 	private final AccountKeystoreService accountKeystoreService;
-    private final TransactionLocalSource inMemoryCache;
     private final TransactionLocalSource inDiskCache;
     private final TransactionsNetworkClientType blockExplorerClient;
 
     public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
-			TransactionLocalSource inMemoryCache,
 			TransactionLocalSource inDiskCache,
 			TransactionsNetworkClientType blockExplorerClient) {
 		this.networkRepository = networkRepository;
 		this.accountKeystoreService = accountKeystoreService;
 		this.blockExplorerClient = blockExplorerClient;
-		this.inMemoryCache = inMemoryCache;
 		this.inDiskCache = inDiskCache;
 	}
 
@@ -89,12 +86,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
-	    return inMemoryCache
-                .fetchTransaction(networkInfo, wallet)
-                .onErrorResumeNext(inDiskCache
-                        .fetchTransaction(networkInfo, wallet)
-                        .doOnSuccess(transactions ->
-                                inMemoryCache.putTransactions(networkInfo, wallet, transactions)));
+	    return inDiskCache.fetchTransaction(networkInfo, wallet);
 
     }
 
@@ -102,10 +94,12 @@ public class TransactionRepository implements TransactionRepositoryType {
         return inDiskCache
                 .findLast(networkInfo, wallet)
                 .flatMap(lastTransaction -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(wallet, lastTransaction)
-                        .doOnNext(transactions -> {
-                            inMemoryCache.putTransactions(networkInfo, wallet, transactions);
-                            inDiskCache.putTransactions(networkInfo, wallet, transactions);
-                        })));
+                        .fetchLastTransactions(wallet, lastTransaction)))
+                .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
+                        .fetchLastTransactions(wallet, null)))
+                .flatMap(transactions -> {
+                    inDiskCache.putTransactions(networkInfo, wallet, transactions);
+                    return inDiskCache.fetchTransaction(networkInfo, wallet);
+                });
     }
 }

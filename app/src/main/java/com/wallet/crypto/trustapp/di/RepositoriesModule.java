@@ -13,20 +13,19 @@ import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
 import com.wallet.crypto.trustapp.repository.TokenLocalSource;
 import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.repository.TransactionsRealmCache;
-import com.wallet.crypto.trustapp.repository.TransactionMemoryCache;
 import com.wallet.crypto.trustapp.repository.TransactionLocalSource;
 import com.wallet.crypto.trustapp.repository.TransactionRepository;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
+import com.wallet.crypto.trustapp.repository.TransactionsRealmCache;
 import com.wallet.crypto.trustapp.repository.WalletRepository;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
-import com.wallet.crypto.trustapp.service.TransactionsNetworkClient;
-import com.wallet.crypto.trustapp.service.TransactionsNetworkClientType;
 import com.wallet.crypto.trustapp.service.EthplorerTokenService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
 import com.wallet.crypto.trustapp.service.TickerService;
 import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
+import com.wallet.crypto.trustapp.service.TransactionsNetworkClient;
+import com.wallet.crypto.trustapp.service.TransactionsNetworkClientType;
 import com.wallet.crypto.trustapp.service.TrustWalletTickerService;
 
 import java.io.File;
@@ -82,16 +81,20 @@ public class RepositoriesModule {
 	TransactionRepositoryType provideTransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
-			TransactionsNetworkClientType blockExplorerClient) {
-		TransactionLocalSource inMemoryCache = new TransactionMemoryCache();
-		TransactionLocalSource inDiskCache = new TransactionsRealmCache();
+			TransactionsNetworkClientType blockExplorerClient,
+            TransactionLocalSource inDiskCache) {
 		return new TransactionRepository(
 				networkRepository,
 				accountKeystoreService,
-				inMemoryCache,
 				inDiskCache,
 				blockExplorerClient);
 	}
+
+	@Singleton
+    @Provides
+    TransactionLocalSource provideTransactionInDiskCache() {
+        return new TransactionsRealmCache();
+    }
 
 	@Singleton
 	@Provides
@@ -108,12 +111,14 @@ public class RepositoriesModule {
             OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenExplorerClientType tokenExplorerClientType,
-            TokenLocalSource tokenLocalSource) {
+            TokenLocalSource tokenLocalSource,
+            TransactionLocalSource inDiskCache) {
 	    return new TokenRepository(
 	            okHttpClient,
 	            ethereumNetworkRepository,
 	            tokenExplorerClientType,
-                tokenLocalSource);
+                tokenLocalSource,
+                inDiskCache);
     }
 
 	@Singleton

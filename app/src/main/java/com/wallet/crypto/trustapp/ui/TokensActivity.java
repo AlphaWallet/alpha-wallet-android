@@ -79,7 +79,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
                 viewModel.showAddToken(this);
             } break;
             case android.R.id.home: {
-                viewModel.showTransactions(this, true);
+                viewModel.showTransactions(this);
             }
         }
         return super.onOptionsItemSelected(item);
@@ -87,7 +87,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
 
     @Override
     public void onBackPressed() {
-        viewModel.showTransactions(this, true);
+        viewModel.showTransactions(this);
     }
 
     private void onTokenClick(View view, Token token) {

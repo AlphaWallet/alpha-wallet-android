@@ -99,7 +99,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<Token[]> fetchTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
         return tokenLocalSource.fetch(defaultNetwork, wallet)
-                .map(items -> getBalances(wallet, items));
+                .map(this::mapToTokens);
     }
 
     private Token[] getBalances(Wallet wallet, TokenInfo[] items) {
@@ -132,7 +132,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         return Single.fromObservable(tokenNetworkService.fetch(wallet.address))
                 .flatMap(tokenInfos -> tokenLocalSource.put(network, wallet, tokenInfos))
-                .map(items -> getBalances(wallet, items));
+                .map(this::mapToTokens);
     }
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {
@@ -177,5 +177,14 @@ public class TokenRepository implements TokenRepositoryType {
         Function function = new Function("transfer", params, returnTypes);
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    private Token[] mapToTokens(TokenInfo[] items) {
+        int len = items.length;
+        Token[] tokens = new Token[len];
+        for (int i = 0; i < len; i++) {
+            tokens[i] = new Token(items[i], null);
+        }
+        return tokens;
     }
 }

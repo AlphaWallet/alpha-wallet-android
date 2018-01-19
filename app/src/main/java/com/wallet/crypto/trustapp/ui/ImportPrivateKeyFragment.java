@@ -18,7 +18,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
 
     private EditText privateKey;
-    private OnImportPrivateKeyListener onImportPrivateKeyListener;
+    private OnImportPrivateKeyListener onImportPrivateKeyListener = dummyOnImportPrivateKeyListener;
 
     public static ImportPrivateKeyFragment create() {
         return new ImportPrivateKeyFragment();

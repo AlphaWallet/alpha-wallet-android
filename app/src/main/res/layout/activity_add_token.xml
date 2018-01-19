@@ -14,20 +14,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/address_input_layout"
+        <RelativeLayout
+            android:id="@+id/contract_address_layout"
             android:layout_marginTop="@dimen/big_margin"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             >
-            <EditText
-                android:id="@+id/address"
-                android:hint="@string/hint_contract_address"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/address_input_layout"
+                android:focusable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                >
+                <EditText
+                    android:id="@+id/address"
+                    android:hint="@string/hint_contract_address"
+                    android:paddingRight="@dimen/half_large_padding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+            </android.support.design.widget.TextInputLayout>
+            <ImageButton
+                android:id="@+id/scan_contract_address_qr"
+                android:src="@mipmap/qr_code_icon"
+                android:contentDescription="@string/scan_qr"
+                android:background="?android:selectableItemBackground"
+                android:padding="@dimen/big_padding"
+                android:layout_alignParentEnd="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 />
-        </android.support.design.widget.TextInputLayout>
+        </RelativeLayout>
         <android.support.design.widget.TextInputLayout
             android:id="@+id/symbol_input_layout"
             android:layout_marginTop="@dimen/normal_margin"

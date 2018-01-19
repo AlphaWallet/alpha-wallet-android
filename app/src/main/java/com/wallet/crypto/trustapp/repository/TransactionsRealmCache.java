@@ -9,6 +9,9 @@ import com.wallet.crypto.trustapp.repository.entity.RealmTransaction;
 import com.wallet.crypto.trustapp.repository.entity.RealmTransactionContract;
 import com.wallet.crypto.trustapp.repository.entity.RealmTransactionOperation;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -17,6 +20,9 @@ import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
+
+    private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
+
 	@Override
 	public Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
@@ -156,10 +162,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .name(wallet.address + "-" + networkInfo.name + "-trx.realm")
-                .schemaVersion(1)
-                .build();
+        String name = wallet.address + "_" + networkInfo.name + "_trx.realm";
+        RealmConfiguration config = realmConfigurations.get(name);
+        if (config == null) {
+            config = new RealmConfiguration.Builder()
+                    .name(name)
+                    .schemaVersion(1)
+                    .build();
+            realmConfigurations.put(name, config);
+        }
         return Realm.getInstance(config);
     }
 }

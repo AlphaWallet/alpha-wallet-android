@@ -7,6 +7,9 @@ import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.realm.DynamicRealm;
@@ -18,7 +21,9 @@ import io.realm.RealmResults;
 import io.realm.RealmSchema;
 import io.realm.Sort;
 
-public class RealmTokenSource implements TokenLocalSource {
+public class TokensRealmSource implements TokenLocalSource {
+
+    private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     @Override
     public Completable put(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
@@ -91,11 +96,16 @@ public class RealmTokenSource implements TokenLocalSource {
     }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .name(wallet.address + "-" + networkInfo.name + ".realm")
-                .schemaVersion(2)
-                .migration(new TokenInfoMigration())
-                .build();
+        String name = wallet.address + "_" + networkInfo.name + ".realm";
+        RealmConfiguration config = realmConfigurations.get(name);
+        if (config == null) {
+            config = new RealmConfiguration.Builder()
+                    .name(name)
+                    .schemaVersion(2)
+                    .migration(new TokenInfoMigration())
+                    .build();
+            realmConfigurations.put(name, config);
+        }
         return Realm.getInstance(config);
     }
 

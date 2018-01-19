@@ -88,7 +88,7 @@ public class TokensViewModel extends BaseViewModel {
 
     private void onTokens(Token[] tokens) {
         if (tokens != null && tokens.length > 0) {
-            progress.postValue(false);
+            progress.postValue(true);
         }
         this.tokens.setValue(tokens);
     }

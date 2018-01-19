@@ -8,7 +8,7 @@ import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
-import com.wallet.crypto.trustapp.repository.RealmTokenSource;
+import com.wallet.crypto.trustapp.repository.TokensRealmSource;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
 import com.wallet.crypto.trustapp.repository.TokenLocalSource;
 import com.wallet.crypto.trustapp.repository.TokenRepository;
@@ -130,7 +130,7 @@ public class RepositoriesModule {
     @Singleton
     @Provides
     TokenLocalSource provideRealmTokenSource() {
-	    return new RealmTokenSource();
+	    return new TokensRealmSource();
     }
 
     @Singleton

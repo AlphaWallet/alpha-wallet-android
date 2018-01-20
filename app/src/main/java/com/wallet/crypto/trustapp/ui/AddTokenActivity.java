@@ -6,13 +6,18 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Address;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
+import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModel;
 import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModelFactory;
 import com.wallet.crypto.trustapp.widget.SystemView;
@@ -20,6 +25,8 @@ import com.wallet.crypto.trustapp.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+
+import static com.wallet.crypto.trustapp.C.Key.WALLET;
 
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
 
@@ -33,8 +40,10 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private TextView symbol;
     private TextInputLayout decimalsLayout;
     private TextView decimals;
+    private TextView name;
     private SystemView systemView;
     private Dialog dialog;
+    private String lastCheck;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,6 +63,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         decimals = findViewById(R.id.decimals);
         systemView = findViewById(R.id.system_view);
         systemView.hide();
+        name = findViewById(R.id.textViewName);
+        name.setEnabled(false);
 
         findViewById(R.id.save).setOnClickListener(this);
 
@@ -62,12 +73,51 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
+        viewModel.update().observe(this, this::onChecked);
+        lastCheck = "";
+
+        address.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //wait until we have an ethereum address
+                String check = address.getText().toString().toLowerCase();
+                //process the address first
+                if (check.length() > 39 && check.length() < 43) {
+                    if (!check.equals(lastCheck) && Address.isAddress(check)) {
+                        //let's check the address here - see if we have an eth token
+                        lastCheck = check; // don't get caught in a loop
+                        onCheck(check);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     private void onSaved(boolean result) {
         if (result) {
             viewModel.showTokens(this);
             finish();
+        }
+    }
+
+    private void onChecked(boolean result) {
+        if (result) {
+            TokenInfo token = viewModel.tokenInfo().getValue();
+            address.setText(token.address);
+            symbol.setText(token.symbol);
+            decimals.setText(String.valueOf(token.decimals));
+            name.setText(token.name);
         }
     }
 
@@ -89,9 +139,13 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    private void onCheck(String address) {
+        viewModel.setupTokens(address);
+    }
+
     private void onSave() {
         boolean isValid = true;
-        String address = this.address.getText().toString().toLowerCase();
+        String address = this.address.getText().toString();
         String symbol = this.symbol.getText().toString().toLowerCase();
         String rawDecimals = this.decimals.getText().toString();
         int decimals = 0;

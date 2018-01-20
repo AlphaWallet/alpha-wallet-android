@@ -1,7 +1,10 @@
 package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.interact.AddTokenInteract;
+import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.interact.SetupTokensInteract;
+import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
@@ -17,9 +20,17 @@ public class AddTokenModule {
     AddTokenViewModelFactory addTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            MyTokensRouter myTokensRouter) {
+            MyTokensRouter myTokensRouter,
+            SetupTokensInteract setupTokensInteract,
+            FindDefaultNetworkInteract findDefaultNetworkInteract) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, findDefaultWalletInteract, myTokensRouter);
+                addTokenInteract, findDefaultWalletInteract, myTokensRouter, setupTokensInteract, findDefaultNetworkInteract);
+    }
+
+    @Provides
+    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
+            EthereumNetworkRepositoryType networkRepository) {
+        return new FindDefaultNetworkInteract(networkRepository);
     }
 
     @Provides
@@ -37,5 +48,10 @@ public class AddTokenModule {
     @Provides
     MyTokensRouter provideMyTokensRouter() {
         return new MyTokensRouter();
+    }
+
+    @Provides
+    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
+        return new SetupTokensInteract(tokenRepository);
     }
 }

@@ -18,7 +18,9 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -102,6 +104,30 @@ public class TokenRepository implements TokenRepositoryType {
                 .map(this::mapToTokens);
     }
 
+    @Override
+    public Observable<TokenInfo> update(String contractAddr) {
+        return setupTokensFromLocal(contractAddr).toObservable();
+    }
+
+    private Single<TokenInfo> setupTokensFromLocal(String address)
+    {
+        return Single.fromCallable(() -> {
+            try
+            {
+                TokenInfo result = new TokenInfo(
+                        address,
+                        getName(address),
+                        getSymbol(address),
+                        getDecimals(address));
+
+                return result;
+            }
+            finally {
+
+            }
+        });
+    }
+
     private Token[] getBalances(Wallet wallet, TokenInfo[] items) {
         int len = items.length;
         Token[] result = new Token[len];
@@ -148,11 +174,71 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
+    private String getName(String address) throws Exception {
+        org.web3j.abi.datatypes.Function function = nameOf();
+        Wallet temp = new Wallet(null);
+        String responseValue = callSmartContractFunction(function, address, temp);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return (String)response.get(0).getValue();
+        } else {
+            return null;
+        }
+    }
+
+    private String getSymbol(String address) throws Exception {
+        org.web3j.abi.datatypes.Function function = symbolOf();
+        Wallet temp = new Wallet(null);
+        String responseValue = callSmartContractFunction(function, address, temp);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return (String)response.get(0).getValue();
+        } else {
+            return null;
+        }
+    }
+
+    private int getDecimals(String address) throws Exception {
+        org.web3j.abi.datatypes.Function function = decimalsOf();
+        Wallet temp = new Wallet(null);
+        String responseValue = callSmartContractFunction(function, address, temp);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return ((Uint8) response.get(0)).getValue().intValue();
+        } else {
+            return 18; //default
+        }
+    }
+
     private static org.web3j.abi.datatypes.Function balanceOf(String owner) {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function nameOf() {
+        return new Function("name",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function symbolOf() {
+        return new Function("symbol",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function decimalsOf() {
+        return new Function("decimals",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
     private String callSmartContractFunction(

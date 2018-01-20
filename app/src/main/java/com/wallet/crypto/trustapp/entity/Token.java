@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
     public final BigDecimal balance;
+    public TokenTicker ticker;
 
     public Token(TokenInfo tokenInfo, BigDecimal balance) {
         this.tokenInfo = tokenInfo;

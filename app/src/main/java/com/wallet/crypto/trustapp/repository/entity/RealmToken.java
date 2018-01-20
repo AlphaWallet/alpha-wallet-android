@@ -3,14 +3,16 @@ package com.wallet.crypto.trustapp.repository.entity;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class RealmTokenInfo extends RealmObject {
+public class RealmToken extends RealmObject {
     @PrimaryKey
     private String address;
     private String name;
     private String symbol;
     private int decimals;
     private long addedTime;
-    private boolean isDisable;
+    private long updatedTime;
+    private String balance;
+    private boolean isEnabled;
 
     public int getDecimals() {
         return decimals;
@@ -52,11 +54,27 @@ public class RealmTokenInfo extends RealmObject {
         this.addedTime = addedTime;
     }
 
-    public boolean isDisable() {
-        return isDisable;
+    public long getUpdatedTime() {
+        return updatedTime;
     }
 
-    public void setDisable(boolean disable) {
-        isDisable = disable;
+    public void setUpdatedTime(long updatedTime) {
+        this.updatedTime = updatedTime;
+    }
+
+    public String getBalance() {
+        return balance;
+    }
+
+    public void setBalance(String balance) {
+        this.balance = balance;
+    }
+
+    public boolean getEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 }

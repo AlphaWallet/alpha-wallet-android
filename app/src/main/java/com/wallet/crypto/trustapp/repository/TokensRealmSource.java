@@ -1,66 +1,65 @@
 package com.wallet.crypto.trustapp.repository;
 
-import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
+import com.wallet.crypto.trustapp.repository.entity.RealmToken;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmMigration;
-import io.realm.RealmObjectSchema;
 import io.realm.RealmResults;
-import io.realm.RealmSchema;
 import io.realm.Sort;
 
 public class TokensRealmSource implements TokenLocalSource {
 
+    private static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     @Override
-    public Completable put(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
-        return Completable.fromAction(() -> putInNeed(networkInfo, wallet, tokenInfo));
-    }
-
-    @Override
-    public Single<TokenInfo[]> put(NetworkInfo networkInfo, Wallet wallet, TokenInfo[] tokenInfos) {
-        return Single.fromCallable(() -> {
-            for (TokenInfo tokenInfo : tokenInfos) {
-                putInNeed(networkInfo, wallet, tokenInfo);
+    public Completable saveTokens(NetworkInfo networkInfo, Wallet wallet, Token[] items) {
+        return Completable.fromAction(() -> {
+            Date now = new Date();
+            for (Token token : items) {
+                saveToken(networkInfo, wallet, token, now);
             }
-            return tokenInfos;
-        })
-        .flatMap(items -> fetch(networkInfo, wallet));
+        });
     }
 
     @Override
-    public Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet) {
+    public Single<Token[]> fetchTokens(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
+            long now = System.currentTimeMillis();
             Realm realm = null;
             try {
                 realm = getRealmInstance(networkInfo, wallet);
-                RealmResults<RealmTokenInfo> realmItems = realm.where(RealmTokenInfo.class)
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                         .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isDisable", false)
+                        .equalTo("isEnabled", true)
                         .findAll();
                 int len = realmItems.size();
-                TokenInfo[] result = new TokenInfo[len];
+                Token[] result = new Token[len];
                 for (int i = 0; i < len; i++) {
-                    RealmTokenInfo realmItem = realmItems.get(i);
+                    RealmToken realmItem = realmItems.get(i);
                     if (realmItem != null) {
-                        result[i] = new TokenInfo(
+                        TokenInfo info = new TokenInfo(
                                 realmItem.getAddress(),
                                 realmItem.getName(),
                                 realmItem.getSymbol(),
                                 realmItem.getDecimals());
+                        BigDecimal balance = TextUtils.isEmpty(realmItem.getBalance()) || realmItem.getUpdatedTime() + ACTUAL_BALANCE_INTERVAL < now
+                                ? null : new BigDecimal(realmItem.getBalance());
+                        result[i] = new Token(info, balance);
                     }
                 }
                 return result;
@@ -72,21 +71,28 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void putInNeed(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
+    private void saveToken(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime) {
         Realm realm = null;
         try {
             realm = getRealmInstance(networkInfo, wallet);
-            RealmTokenInfo realmTokenInfo = realm.where(RealmTokenInfo.class)
-                    .equalTo("address", tokenInfo.address)
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", token.tokenInfo.address)
                     .findFirst();
-            if (realmTokenInfo == null) {
-                realm.executeTransaction(r -> {
-                    RealmTokenInfo obj = r.createObject(RealmTokenInfo.class, tokenInfo.address);
-                    obj.setName(tokenInfo.name);
-                    obj.setSymbol(tokenInfo.symbol);
-                    obj.setDecimals(tokenInfo.decimals);
-                    obj.setAddedTime(System.currentTimeMillis());
-                });
+            realm.beginTransaction();
+            if (realmToken == null) {
+                realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
+                realmToken.setName(token.tokenInfo.name);
+                realmToken.setSymbol(token.tokenInfo.symbol);
+                realmToken.setDecimals(token.tokenInfo.decimals);
+                realmToken.setAddedTime(currentTime.getTime());
+                realmToken.setEnabled(true);
+            }
+            realmToken.setBalance(token.balance.toString());
+            realmToken.setUpdatedTime(currentTime.getTime());
+            realm.commitTransaction();
+        } catch (Exception ex) {
+            if (realm != null) {
+                realm.cancelTransaction();
             }
         } finally {
             if (realm != null) {
@@ -96,31 +102,15 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        String name = wallet.address + "_" + networkInfo.name + ".realm";
+        String name = wallet.address + "_" + networkInfo.name + "_tkns.realm";
         RealmConfiguration config = realmConfigurations.get(name);
         if (config == null) {
             config = new RealmConfiguration.Builder()
                     .name(name)
-                    .schemaVersion(2)
-                    .migration(new TokenInfoMigration())
+                    .schemaVersion(1)
                     .build();
             realmConfigurations.put(name, config);
         }
         return Realm.getInstance(config);
-    }
-
-    private static class TokenInfoMigration implements RealmMigration {
-
-        @Override
-        public void migrate(@NonNull DynamicRealm realm, long oldVersion, long newVersion) {
-            RealmSchema schema = realm.getSchema();
-            if (oldVersion == 1) {
-                RealmObjectSchema tokenInfoSchema = schema.get("RealmTokenInfo");
-                if (tokenInfoSchema != null) {
-                    tokenInfoSchema.addField("isDisable", boolean.class);
-                }
-//                oldVersion++;
-            }
-        }
     }
 }

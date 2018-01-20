@@ -137,11 +137,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             operation.to = rawOperation.getTo();
             operation.value = rawOperation.getValue();
             operation.contract = new TransactionContract();
-            operation.contract.address= rawOperation.getContract().getAddress();
-            operation.contract.name= rawOperation.getContract().getName();
-            operation.contract.totalSupply= rawOperation.getContract().getTotalSupply();
-            operation.contract.decimals= rawOperation.getContract().getDecimals();
-            operation.contract.symbol= rawOperation.getContract().getSymbol();
+            operation.contract.address = rawOperation.getContract().getAddress();
+            operation.contract.name = rawOperation.getContract().getName();
+            operation.contract.totalSupply = rawOperation.getContract().getTotalSupply();
+            operation.contract.decimals = rawOperation.getContract().getDecimals();
+            operation.contract.symbol = rawOperation.getContract().getSymbol();
             operations[i] = operation;
         }
 	    return new Transaction(

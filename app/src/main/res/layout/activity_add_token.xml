@@ -55,6 +55,7 @@
             <EditText
                 android:id="@+id/symbol"
                 android:hint="@string/hint_contract_symbol"
+                android:inputType="textNoSuggestions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
@@ -81,11 +82,61 @@
             >
             <EditText
                 android:id="@+id/textViewName"
-                android:hint="Name"
+                android:hint="@string/hint_contract_name"
+                android:inputType="textNoSuggestions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
         </android.support.design.widget.TextInputLayout>
+        <LinearLayout
+            android:id="@+id/layoutTicket"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/venue_input_layout"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <EditText
+                android:id="@+id/textViewVenue"
+                android:hint="@string/hint_contract_venue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                />
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/date_input_layout"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <EditText
+                android:id="@+id/textViewDate"
+                android:hint="@string/hint_contract_date"
+                android:inputType="textNoSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/price_input_layout"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <EditText
+                android:id="@+id/textViewPrice"
+                android:hint="@string/hint_contract_price"
+                android:inputType="textNoSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+        </android.support.design.widget.TextInputLayout>
+        </LinearLayout>
         <Button
             android:id="@+id/save"
             android:text="@string/action_save"

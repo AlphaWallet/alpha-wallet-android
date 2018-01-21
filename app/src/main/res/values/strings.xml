@@ -186,6 +186,10 @@
     <string name="hint_contract_address">Contract address</string>
     <string name="hint_contract_symbol">Symbol</string>
     <string name="hint_contract_decimals">Decimals</string>
+    <string name="hint_contract_name">Name</string>
+    <string name="hint_contract_venue">Venue</string>
+    <string name="hint_contract_date">Date</string>
+    <string name="hint_contract_price">Price</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>

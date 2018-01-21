@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
@@ -18,6 +19,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -116,9 +118,18 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 TokenInfo result = new TokenInfo(
                         address,
-                        getName(address),
-                        getSymbol(address),
+                        getContractData(address, stringParam("name")),
+                        getContractData(address, stringParam("symbol")),
                         getDecimals(address));
+
+                String venue = getContractData(address, stringParam("venue"));
+                if (venue != null && venue.length() > 0)
+                {
+                    String date = getContractData(address, stringParam("date"));
+                    BigDecimal price = new BigDecimal((BigInteger)getContractData(address, intParam("getTicketStartPrice")));
+                    TicketInfo ticket = new TicketInfo(result, venue, date, price);
+                    result = ticket;
+                }
 
                 return result;
             }
@@ -174,6 +185,26 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
+    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception {
+        Wallet temp = new Wallet(null);
+        String responseValue = callSmartContractFunction(function, address, temp);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return (T)response.get(0).getValue();
+//            if (response.get(0).getValue() instanceof String) {
+//                return (T)response.get(0).getValue();
+//            }
+//            else {
+//                int retVal = ((Uint8) response.get(0)).getValue().intValue();
+//                return (T)retVal;
+//            }
+        } else {
+            return null;
+        }
+    }
+
     private String getName(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = nameOf();
         Wallet temp = new Wallet(null);
@@ -189,6 +220,20 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private String getSymbol(String address) throws Exception {
+        org.web3j.abi.datatypes.Function function = symbolOf();
+        Wallet temp = new Wallet(null);
+        String responseValue = callSmartContractFunction(function, address, temp);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return (String)response.get(0).getValue();
+        } else {
+            return null;
+        }
+    }
+
+    private String getVenue(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = symbolOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
@@ -227,6 +272,18 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function("name",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function stringParam(String param) {
+        return new Function(param,
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function intParam(String param) {
+        return new Function(param,
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function symbolOf() {

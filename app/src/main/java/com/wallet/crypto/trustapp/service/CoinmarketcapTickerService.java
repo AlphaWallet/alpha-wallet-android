@@ -2,10 +2,13 @@ package com.wallet.crypto.trustapp.service;
 
 import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.entity.Ticker;
+import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenTicker;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
 import io.reactivex.Observer;
+import io.reactivex.Single;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -51,6 +54,11 @@ public class CoinmarketcapTickerService implements TickerService {
                 .lift(apiError(gson))
                 .map(r -> r[0])
                 .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<TokenTicker[]> fetchTockenTickers(Token[] tokens, String currency) {
+        return Single.just(new TokenTicker[0]);
     }
 
     private static @NonNull

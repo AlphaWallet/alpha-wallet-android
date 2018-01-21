@@ -112,13 +112,15 @@ public class RepositoriesModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenExplorerClientType tokenExplorerClientType,
             TokenLocalSource tokenLocalSource,
-            TransactionLocalSource inDiskCache) {
+            TransactionLocalSource inDiskCache,
+            TickerService tickerService) {
 	    return new TokenRepository(
 	            okHttpClient,
 	            ethereumNetworkRepository,
 	            tokenExplorerClientType,
                 tokenLocalSource,
-                inDiskCache);
+                inDiskCache,
+                tickerService);
     }
 
 	@Singleton

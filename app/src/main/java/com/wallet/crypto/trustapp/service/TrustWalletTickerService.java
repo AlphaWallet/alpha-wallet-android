@@ -90,7 +90,7 @@ public class TrustWalletTickerService implements TickerService {
         @GET("prices?currency=USD&")
         Observable<Response<TrustResponse<Ticker>>> fetchTickerPrice(@Query("symbols") String symbols);
 
-        @POST("tokenPrices&")
+        @POST("tokenPrices")
         Single<Response<TrustResponse<TokenTicker>>> fetchTokenPrices(@Body TokenTickerRequestBody body);
     }
 

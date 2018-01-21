@@ -6,10 +6,13 @@ import android.text.format.DateUtils;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
+import com.wallet.crypto.trustapp.entity.TokenTicker;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.entity.RealmToken;
+import com.wallet.crypto.trustapp.repository.entity.RealmTokenTicker;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +27,7 @@ import io.realm.Sort;
 public class TokensRealmSource implements TokenLocalSource {
 
     private static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 500; //* DateUtils.MINUTE_IN_MILLIS;
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     @Override
@@ -68,6 +72,65 @@ public class TokensRealmSource implements TokenLocalSource {
                     realm.close();
                 }
             }
+        });
+    }
+
+    @Override
+    public void saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers) {
+        Realm realm = null;
+        try {
+            realm = getRealmInstance(network, wallet);
+            realm.beginTransaction();
+            realm.where(RealmTokenTicker.class).findAll().deleteAllFromRealm();
+            long now = System.currentTimeMillis();
+            for (TokenTicker tokenTicker : tokenTickers) {
+                RealmTokenTicker realmObj = realm.createObject(RealmTokenTicker.class);
+                realmObj.setContract(tokenTicker.contract);
+                realmObj.setPercentChange24h(tokenTicker.percentChange24h);
+                realmObj.setPrice(tokenTicker.price);
+                realmObj.setCreatedTime(now);
+            }
+            realm.commitTransaction();
+        } catch (Exception ex) {
+            if (realm != null) {
+                realm.cancelTransaction();
+            }
+        } finally {
+            if (realm != null) {
+                realm.close();
+            }
+        }
+    }
+
+    @Override
+    public Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {
+        return Single.fromCallable(() -> {
+            ArrayList<TokenTicker> tokenTickers = new ArrayList<>();
+            Realm realm = null;
+            try {
+                realm = getRealmInstance(network, wallet);
+                realm.beginTransaction();
+                long minCreatedTime = System.currentTimeMillis() - ACTUAL_TOKEN_TICKER_INTERVAL;
+                RealmResults<RealmTokenTicker> rawItems = realm.where(RealmTokenTicker.class)
+                        .greaterThan("createdTime", minCreatedTime)
+                        .findAll();
+                int len = rawItems.size();
+                for (int i = 0; i < len; i++) {
+                    RealmTokenTicker rawItem = rawItems.get(i);
+                    if (rawItem != null) {
+                        tokenTickers.add(new TokenTicker(
+                                rawItem.getContract(),
+                                rawItem.getPrice(),
+                                rawItem.getPercentChange24h()));
+                    }
+                }
+                realm.commitTransaction();
+            } finally {
+                if (realm != null) {
+                    realm.close();
+                }
+            }
+            return tokenTickers.size() == 0 ? null : tokenTickers.toArray(new TokenTicker[tokenTickers.size()]);
         });
     }
 

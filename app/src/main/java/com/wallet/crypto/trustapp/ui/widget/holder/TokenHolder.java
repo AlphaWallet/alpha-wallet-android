@@ -1,8 +1,13 @@
 package com.wallet.crypto.trustapp.ui.widget.holder;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -12,11 +17,13 @@ import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
     private final TextView symbol;
-    private final TextView balance;
+    private final TextView balanceEth;
+    private final TextView balanceCurrency;
 
     private Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -25,7 +32,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         super(resId, parent);
 
         symbol = findViewById(R.id.symbol);
-        balance = findViewById(R.id.balance);
+        balanceEth = findViewById(R.id.balance_eth);
+        balanceCurrency = findViewById(R.id.balance_currency);
         itemView.setOnClickListener(this);
     }
 
@@ -45,15 +53,39 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
                     ? "0"
                     : ethBalance.toPlainString();
-            this.balance.setText(value);
+            this.balanceEth.setText(value);
+            if (data.ticker == null) {
+                this.balanceCurrency.setVisibility(View.GONE);
+            } else {
+                String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
+                        ? "0"
+                        : ethBalance.multiply(new BigDecimal(data.ticker.price))
+                            .setScale(5, RoundingMode.HALF_UP)
+                            .stripTrailingZeros()
+                            .toPlainString();
+                this.balanceCurrency.setVisibility(View.VISIBLE);
+                String formattedPercents = "";
+                int color = Color.RED;
+                try {
+                    double percentage = Double.valueOf(data.ticker.percentChange24h);
+                    color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
+                    formattedPercents = "(" + (percentage < 0 ? "-" : "+") + data.ticker.percentChange24h + ")";
+                } catch (Exception ex) { /* Quietly */ }
+                String lbl = getString(R.string.token_balance, "$", converted, formattedPercents);
+                Spannable spannable = new SpannableString(lbl);
+                spannable.setSpan(new ForegroundColorSpan(color),
+                        converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                this.balanceCurrency.setText(spannable);
+            }
         } catch (Exception e) {
             fillEmpty();
         }
     }
 
     private void fillEmpty() {
-        balance.setText(R.string.NA);
-        balance.setText(R.string.minus);
+        balanceEth.setText(R.string.NA);
+        balanceCurrency.setVisibility(View.GONE);
+//        balance.setText(R.string.minus);
     }
 
     @Override

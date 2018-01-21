@@ -39,6 +39,7 @@ import java.util.Map;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import okhttp3.OkHttpClient;
 
@@ -104,10 +105,16 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<TokenTicker[]> getTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {
         return localSource.fetchTickers(network, wallet, tokens)
-                .onErrorResumeNext(tickerService
-                        .fetchTockenTickers(tokens, "USD")
-                        .onErrorResumeNext(throwable -> Single.just(new TokenTicker[0])))
-                        .doOnSuccess(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers));
+                .onErrorResumeNext(new io.reactivex.functions.Function<Throwable, SingleSource<? extends TokenTicker[]>>() {
+                    @Override
+                    public SingleSource<? extends TokenTicker[]> apply(Throwable throwable) throws Exception {
+                        return tickerService
+                                .fetchTockenTickers(tokens, "USD")
+                                .onErrorResumeNext(thr -> Single.just(new TokenTicker[0]));
+
+                    }
+                })
+                .doOnSuccess(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers));
     }
 
     @Override

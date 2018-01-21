@@ -11,9 +11,9 @@ import java.math.BigInteger;
 public class TicketInfo extends TokenInfo {
     public final String venue;
     public final String date;
-    public final BigDecimal price;
+    public final double price;
 
-    public TicketInfo(TokenInfo ti, String venue, String date, BigDecimal price)
+    public TicketInfo(TokenInfo ti, String venue, String date, double price)
     {
         super(ti.address, ti.name, ti.symbol, ti.decimals);
         this.venue = venue;

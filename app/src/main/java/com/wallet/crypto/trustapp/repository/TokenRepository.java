@@ -126,7 +126,8 @@ public class TokenRepository implements TokenRepositoryType {
                 if (venue != null && venue.length() > 0)
                 {
                     String date = getContractData(address, stringParam("date"));
-                    BigDecimal price = new BigDecimal((BigInteger)getContractData(address, intParam("getTicketStartPrice")));
+                    BigDecimal priceBD = new BigDecimal((BigInteger)getContractData(address, intParam("getTicketStartPrice")));
+                    double price = priceBD.doubleValue();
                     TicketInfo ticket = new TicketInfo(result, venue, date, price);
                     result = ticket;
                 }
@@ -156,11 +157,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable addToken(Wallet wallet, String address, String symbol, int decimals) {
+    public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
         return tokenLocalSource.put(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
-                new TokenInfo(address, "", symbol, decimals));
+                tokenInfo);
     }
 
     private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo network, @NonNull Wallet wallet) {

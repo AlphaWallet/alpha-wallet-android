@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.interact;
 
+import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 
@@ -16,11 +17,11 @@ public class AddTokenInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Completable add(String address, String symbol, int decimals) {
+    public Completable add(TokenInfo tokenInfo) {
         return walletRepository
                 .getDefaultWallet()
                 .flatMapCompletable(wallet -> tokenRepository
-                        .addToken(wallet, address, symbol, decimals)
+                        .addToken(wallet, tokenInfo)
                         .observeOn(AndroidSchedulers.mainThread()));
     }
 }

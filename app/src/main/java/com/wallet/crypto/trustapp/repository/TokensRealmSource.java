@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.repository;
 import android.support.annotation.NonNull;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
@@ -61,6 +62,11 @@ public class TokensRealmSource implements TokenLocalSource {
                                 realmItem.getName(),
                                 realmItem.getSymbol(),
                                 realmItem.getDecimals());
+
+                        if (realmItem.getVenue() != null)
+                        {
+                            result[i] = new TicketInfo(result[i], realmItem.getVenue(), realmItem.getDate(), realmItem.getPrice());
+                        }
                     }
                 }
                 return result;
@@ -82,6 +88,14 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmTokenInfo == null) {
                 realm.executeTransaction(r -> {
                     RealmTokenInfo obj = r.createObject(RealmTokenInfo.class, tokenInfo.address);
+
+                    if (tokenInfo instanceof TicketInfo)
+                    {
+                        obj.setVenue(((TicketInfo) tokenInfo).venue);
+                        obj.setDate(((TicketInfo) tokenInfo).date);
+                        obj.setPrice(((TicketInfo) tokenInfo).price);
+                    }
+
                     obj.setName(tokenInfo.name);
                     obj.setSymbol(tokenInfo.symbol);
                     obj.setDecimals(tokenInfo.decimals);

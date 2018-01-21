@@ -184,7 +184,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                 ticketLayout.setVisibility(View.VISIBLE);
                 venue.setText(((TicketInfo) token).venue);
                 date.setText(((TicketInfo) token).date);
-                BigDecimal ethPrice = Convert.fromWei(((TicketInfo)token).price, Convert.Unit.ETHER);
+                BigDecimal ethDBPrice = new BigDecimal(((TicketInfo)token).price);
+                BigDecimal ethPrice = Convert.fromWei(ethDBPrice, Convert.Unit.ETHER);
                 price.setText(String.valueOf(ethPrice));
             }
             else
@@ -221,6 +222,12 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         String address = this.address.getText().toString();
         String symbol = this.symbol.getText().toString().toLowerCase();
         String rawDecimals = this.decimals.getText().toString();
+        String name = this.name.getText().toString();
+        String venue = this.venue.getText().toString();
+        String date = this.date.getText().toString();
+        String rawPrice = this.price.getText().toString();
+
+        double priceDb = 0;
         int decimals = 0;
 
         if (TextUtils.isEmpty(address)) {
@@ -245,13 +252,19 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
+        try {
+            priceDb = Double.valueOf(rawPrice);
+        } catch (NumberFormatException ex) {
+            price.setError(getString(R.string.error_must_numeric));
+        }
+
         if (!Address.isAddress(address)) {
             addressLayout.setError(getString(R.string.error_invalid_address));
             isValid = false;
         }
 
         if (isValid) {
-            viewModel.save(address, symbol, decimals);
+            viewModel.save(address, symbol, decimals, name, venue, date, priceDb);
         }
     }
 }

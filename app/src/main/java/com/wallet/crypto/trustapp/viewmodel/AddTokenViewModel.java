@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -48,10 +49,23 @@ public class AddTokenViewModel extends BaseViewModel {
         return wallet;
     }
 
-    public void save(String address, String symbol, int decimals) {
+    public void save(String address, String symbol, int decimals, String name, String venue, String date, double db) {
+        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, venue, date, db);
         addTokenInteract
-                .add(address, symbol, decimals)
+                .add(tokenInfo)
                 .subscribe(this::onSaved, this::onError);
+    }
+
+    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, String venue, String date, double db)
+    {
+        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals);
+
+        if (venue != null && venue.length() > 0)
+        {
+            tokenInfo = new TicketInfo(tokenInfo, venue, date, db);
+        }
+
+        return tokenInfo;
     }
 
     private void onSaved() {

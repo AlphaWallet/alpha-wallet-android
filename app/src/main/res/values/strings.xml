@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Trust</string>
+    <string name="app_name">Alpha Wallet</string>
     <string name="balance">Balance</string>
     <string name="title_send">Send</string>
     <string name="title_request">My Address</string>
@@ -233,6 +233,7 @@
     <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your transaction will be processed by the Ethereum network.</string>
     <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
     <string name="title_send_settings">Advanced</string>
+    <string name="title_use_token">Use Token</string>
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
     <string name="facebook">Facebook</string>

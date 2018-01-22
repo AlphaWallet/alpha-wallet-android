@@ -2,8 +2,10 @@ package com.wallet.crypto.trustapp.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-public class TokenInfo implements Parcelable {
+public class TokenInfo implements Parcelable, TokenInterface {
     public final String address;
     public final String name;
     public final String symbol;
@@ -46,5 +48,11 @@ public class TokenInfo implements Parcelable {
         dest.writeString(name);
         dest.writeString(symbol);
         dest.writeInt(decimals);
+    }
+
+    @Override
+    public void setupContent(ImageView icon, TextView symbol)
+    {
+        symbol.setText(this.symbol);
     }
 }

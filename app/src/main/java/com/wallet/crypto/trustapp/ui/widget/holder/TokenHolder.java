@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
@@ -17,6 +18,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     private final TextView symbol;
     private final TextView balance;
+    private final ImageView icon;
 
     private Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -26,6 +28,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         symbol = findViewById(R.id.symbol);
         balance = findViewById(R.id.balance);
+        icon = findViewById(R.id.logo);
         itemView.setOnClickListener(this);
     }
 
@@ -37,7 +40,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             return;
         }
         try {
-            symbol.setText(token.tokenInfo.symbol);
+            //customise the token display according to token contents
+            data.tokenInfo.setupContent(icon, symbol);
 
             BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
             BigDecimal ethBalance = token.tokenInfo.decimals > 0

@@ -1,12 +1,9 @@
 package com.wallet.crypto.trustapp.ui.widget.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
@@ -33,13 +30,6 @@ public class TokensAdapter extends RecyclerView.Adapter<TokenHolder> {
 
     @Override
     public void onBindViewHolder(TokenHolder holder, int position) {
-        Token t = items.get(position);
-        if (t.tokenInfo instanceof TicketInfo)
-        {
-            View v = holder.itemView;
-            ImageView iv = v.findViewById(R.id.logo);
-            if (iv != null) iv.setImageResource(R.mipmap.ic_alpha);
-        }
         holder.bind(items.get(position));
     }
 

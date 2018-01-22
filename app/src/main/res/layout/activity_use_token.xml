@@ -97,24 +97,24 @@
             android:orientation="horizontal"
             android:visibility="gone">
             <Button
-                android:id="@+id/use"
-                android:text="@string/action_save"
+                android:id="@+id/button_use"
+                android:text="@string/action_use"
                 android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
                 />
             <Button
-                android:id="@+id/send"
-                android:text="@string/action_save"
+                android:id="@+id/button_sell"
+                android:text="@string/action_sell"
                 android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
                 />
             <Button
-                android:id="@+id/third_action"
-                android:text="@string/action_save"
+                android:id="@+id/button_transfer"
+                android:text="@string/action_transfer"
                 android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

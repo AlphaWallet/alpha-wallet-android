@@ -106,6 +106,11 @@ public class TokensViewModel extends BaseViewModel {
 
     }
 
+    public void showUseToken(Context context, String name, String venue, String date, double price, double balance) {
+        useTokenRouter.open(context, name, venue, date, price, balance);
+
+    }
+
     public void showTransactions(Context context) {
         transactionsRouter.open(context, true);
     }

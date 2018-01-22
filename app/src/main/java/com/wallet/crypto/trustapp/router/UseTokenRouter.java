@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.router;
 import android.content.Context;
 import android.content.Intent;
 
+import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.ui.AddTokenActivity;
 import com.wallet.crypto.trustapp.ui.UseTokenActivity;
 
@@ -12,8 +13,13 @@ import com.wallet.crypto.trustapp.ui.UseTokenActivity;
 
 public class UseTokenRouter {
 
-    public void open(Context context) {
+    public void open(Context context, String name, String venue, String date, double price, double balance) {
         Intent intent = new Intent(context, UseTokenActivity.class);
+        intent.putExtra(C.EXTRA_CONTRACT_NAME, name);
+        intent.putExtra(C.EXTRA_TICKET_DATE, date);
+        intent.putExtra(C.EXTRA_TICKET_PRICE, price);
+        intent.putExtra(C.EXTRA_TICKET_VENUE, venue);
+        intent.putExtra(C.EXTRA_TOKEN_BALANCE, balance);
         context.startActivity(intent);
     }
 }

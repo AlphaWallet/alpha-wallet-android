@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
 import com.wallet.crypto.trustapp.ui.AddTokenActivity;
+import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
 
 public class TokenInfo implements Parcelable, TokenInterface {
     public final String address;
@@ -74,5 +76,10 @@ public class TokenInfo implements Parcelable, TokenInterface {
         obj.setSymbol(symbol);
         obj.setDecimals(decimals);
         obj.setAddedTime(System.currentTimeMillis());
+    }
+
+    public void clickReact(TokensViewModel viewModel, Context context, int balance)
+    {
+        viewModel.showSendToken(context, address, symbol, decimals);
     }
 }

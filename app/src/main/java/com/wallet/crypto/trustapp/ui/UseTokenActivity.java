@@ -39,12 +39,24 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         systemView.hide();
 
 
-        findViewById(R.id.save).setOnClickListener(this);
+        findViewById(R.id.button_use).setOnClickListener(this);
+        findViewById(R.id.button_sell).setOnClickListener(this);
+        findViewById(R.id.button_transfer).setOnClickListener(this);
     }
 
     @Override
-    public void onClick(View view)
+    public void onClick(View v)
     {
+        switch (v.getId()) {
+            case R.id.button_use: {
 
+            } break;
+            case R.id.button_sell: {
+
+            } break;
+            case R.id.button_transfer: {
+
+            } break;
+        }
     }
 }

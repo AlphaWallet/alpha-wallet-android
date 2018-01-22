@@ -67,6 +67,11 @@
             />
 
         <activity
+            android:name=".ui.UseTokenActivity"
+            android:label="@string/title_use_token"
+            />
+
+        <activity
             android:name=".ui.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_barcode" />
 

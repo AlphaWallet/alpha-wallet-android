@@ -92,7 +92,8 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
 
     private void onTokenClick(View view, Token token) {
         Context context = view.getContext();
-        viewModel.showSendToken(context, token.tokenInfo.address, token.tokenInfo.symbol, token.tokenInfo.decimals);
+        token.tokenInfo.clickReact(viewModel, context, token.balance.intValue());
+        //viewModel.showSendToken(context, token.tokenInfo.address, token.tokenInfo.symbol, token.tokenInfo.decimals);
     }
 
     @Override

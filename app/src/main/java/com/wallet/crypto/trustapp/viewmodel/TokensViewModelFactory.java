@@ -9,6 +9,7 @@ import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
+import com.wallet.crypto.trustapp.router.UseTokenRouter;
 
 public class TokensViewModelFactory implements ViewModelProvider.Factory {
 
@@ -16,17 +17,20 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
+    private final UseTokenRouter useTokenRouter;
     private final TransactionsRouter transactionsRouter;
 
     public TokensViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
+                                  UseTokenRouter useTokenRouter,
                                   TransactionsRouter transactionsRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
+        this.useTokenRouter = useTokenRouter;
         this.transactionsRouter = transactionsRouter;
     }
 
@@ -38,6 +42,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
+                useTokenRouter,
                 transactionsRouter);
     }
 }

@@ -11,6 +11,7 @@ import com.wallet.crypto.trustapp.ui.SplashActivity;
 import com.wallet.crypto.trustapp.ui.TokensActivity;
 import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;
+import com.wallet.crypto.trustapp.ui.UseTokenActivity;
 import com.wallet.crypto.trustapp.ui.WalletsActivity;
 
 import dagger.Module;
@@ -63,4 +64,8 @@ public abstract class BuildersModule {
 	@ActivityScope
     @ContributesAndroidInjector(modules = AddTokenModule.class)
 	abstract AddTokenActivity bindAddTokenActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = UseTokenModule.class)
+	abstract UseTokenActivity bindUseTokenActivity();
 }

@@ -13,6 +13,7 @@ import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
+import com.wallet.crypto.trustapp.router.UseTokenRouter;
 
 import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -25,6 +26,7 @@ public class TokensViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
+    private final UseTokenRouter useTokenRouter;
     private final TransactionsRouter transactionsRouter;
 
     TokensViewModel(
@@ -32,11 +34,13 @@ public class TokensViewModel extends BaseViewModel {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
+            UseTokenRouter useTokenRouter,
             TransactionsRouter transactionsRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
+        this.useTokenRouter = useTokenRouter;
         this.transactionsRouter = transactionsRouter;
     }
 

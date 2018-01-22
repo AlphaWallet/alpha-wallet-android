@@ -7,6 +7,7 @@ import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
+import com.wallet.crypto.trustapp.router.UseTokenRouter;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModelFactory;
 
 import dagger.Module;
@@ -21,12 +22,14 @@ class TokensModule {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
+            UseTokenRouter useTokenRouter,
             TransactionsRouter transactionsRouter) {
         return new TokensViewModelFactory(
                 findDefaultNetworkInteract,
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
+                useTokenRouter,
                 transactionsRouter);
     }
 
@@ -49,6 +52,11 @@ class TokensModule {
     @Provides
     SendTokenRouter provideSendTokenRouter() {
         return new SendTokenRouter();
+    }
+
+    @Provides
+    UseTokenRouter provideUseTokenRouter() {
+        return new UseTokenRouter();
     }
 
     @Provides

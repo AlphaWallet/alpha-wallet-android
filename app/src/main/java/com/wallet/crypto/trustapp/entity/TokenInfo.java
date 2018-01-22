@@ -2,8 +2,12 @@ package com.wallet.crypto.trustapp.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
+import com.wallet.crypto.trustapp.ui.AddTokenActivity;
 
 public class TokenInfo implements Parcelable, TokenInterface {
     public final String address;
@@ -51,8 +55,24 @@ public class TokenInfo implements Parcelable, TokenInterface {
     }
 
     @Override
-    public void setupContent(ImageView icon, TextView symbol)
-    {
+    public void setupContent(ImageView icon, TextView symbol) {
         symbol.setText(this.symbol);
+    }
+
+    @Override
+    public void addTokenSetupPage(AddTokenActivity layout) {
+        layout.address.setText(address);
+        layout.symbol.setText(symbol);
+        layout.decimals.setText(String.valueOf(decimals));
+        layout.name.setText(name);
+        layout.ticketLayout.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void storeRealmData(RealmTokenInfo obj) {
+        obj.setName(name);
+        obj.setSymbol(symbol);
+        obj.setDecimals(decimals);
+        obj.setAddedTime(System.currentTimeMillis());
     }
 }

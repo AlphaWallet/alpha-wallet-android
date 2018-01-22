@@ -56,6 +56,7 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(this::onSaved, this::onError);
     }
 
+    //Here we decide what type of token we are dealing with
     private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, String venue, String date, double db)
     {
         TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals);

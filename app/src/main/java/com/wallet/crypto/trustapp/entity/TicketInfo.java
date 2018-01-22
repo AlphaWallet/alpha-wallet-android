@@ -1,10 +1,13 @@
 package com.wallet.crypto.trustapp.entity;
 
 
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
+import com.wallet.crypto.trustapp.ui.AddTokenActivity;
 
 /**
  * Created by James on 20/01/2018.
@@ -27,8 +30,25 @@ public class TicketInfo extends TokenInfo implements TokenInterface
     @Override
     public void setupContent(ImageView icon, TextView symbol)
     {
-        //For tickets use the venue title and switch to the ticket logo
         symbol.setText(this.name);
         icon.setImageResource(R.mipmap.ic_alpha);
+    }
+
+    @Override
+    public void addTokenSetupPage(AddTokenActivity layout) {
+        super.addTokenSetupPage(layout);
+        layout.ticketLayout.setVisibility(View.VISIBLE);
+        layout.venue.setText(venue);
+        layout.date.setText(date);
+        layout.price.setText(String.valueOf(price));
+    }
+
+    @Override
+    public void storeRealmData(RealmTokenInfo obj) {
+        super.storeRealmData(obj);
+
+        obj.setVenue(venue);
+        obj.setDate(date);
+        obj.setPrice(price);
     }
 }

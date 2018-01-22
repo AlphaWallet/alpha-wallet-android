@@ -53,18 +53,18 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
     private TextInputLayout addressLayout;
-    private TextView address;
+    public TextView address;
     private TextInputLayout symbolLayout;
-    private TextView symbol;
+    public TextView symbol;
     private TextInputLayout decimalsLayout;
-    private TextView decimals;
-    private TextView name;
-    private LinearLayout ticketLayout;
+    public TextView decimals;
+    public TextView name;
+    public LinearLayout ticketLayout;
 
     //Ticket Info
-    private TextView venue;
-    private TextView date;
-    private TextView price;
+    public TextView venue;
+    public TextView date;
+    public TextView price;
 
     private SystemView systemView;
     private Dialog dialog;
@@ -174,24 +174,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private void onChecked(boolean result) {
         if (result) {
             TokenInfo token = viewModel.tokenInfo().getValue();
-            address.setText(token.address);
-            symbol.setText(token.symbol);
-            decimals.setText(String.valueOf(token.decimals));
-            name.setText(token.name);
-
-            if (token instanceof TicketInfo)
-            {
-                ticketLayout.setVisibility(View.VISIBLE);
-                venue.setText(((TicketInfo) token).venue);
-                date.setText(((TicketInfo) token).date);
-                BigDecimal ethDBPrice = new BigDecimal(((TicketInfo)token).price);
-                BigDecimal ethPrice = Convert.fromWei(ethDBPrice, Convert.Unit.ETHER);
-                price.setText(String.valueOf(ethPrice));
-            }
-            else
-            {
-                ticketLayout.setVisibility(View.GONE);
-            }
+            token.addTokenSetupPage(this);
         }
     }
 

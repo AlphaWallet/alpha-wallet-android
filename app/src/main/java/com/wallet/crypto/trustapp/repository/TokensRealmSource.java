@@ -88,18 +88,7 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmTokenInfo == null) {
                 realm.executeTransaction(r -> {
                     RealmTokenInfo obj = r.createObject(RealmTokenInfo.class, tokenInfo.address);
-
-                    if (tokenInfo instanceof TicketInfo)
-                    {
-                        obj.setVenue(((TicketInfo) tokenInfo).venue);
-                        obj.setDate(((TicketInfo) tokenInfo).date);
-                        obj.setPrice(((TicketInfo) tokenInfo).price);
-                    }
-
-                    obj.setName(tokenInfo.name);
-                    obj.setSymbol(tokenInfo.symbol);
-                    obj.setDecimals(tokenInfo.decimals);
-                    obj.setAddedTime(System.currentTimeMillis());
+                    tokenInfo.storeRealmData(obj);
                 });
             }
         } finally {

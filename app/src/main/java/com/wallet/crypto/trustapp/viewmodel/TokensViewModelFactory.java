@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.ChangeTokenCollectionRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;

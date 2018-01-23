@@ -1,7 +1,6 @@
 package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.ui.AddTokenActivity;
-import com.wallet.crypto.trustapp.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.trustapp.ui.ConfirmationActivity;
 import com.wallet.crypto.trustapp.ui.GasSettingsActivity;
 import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
@@ -9,6 +8,7 @@ import com.wallet.crypto.trustapp.ui.MyAddressActivity;
 import com.wallet.crypto.trustapp.ui.SendActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
 import com.wallet.crypto.trustapp.ui.SplashActivity;
+import com.wallet.crypto.trustapp.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.trustapp.ui.TokensActivity;
 import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;

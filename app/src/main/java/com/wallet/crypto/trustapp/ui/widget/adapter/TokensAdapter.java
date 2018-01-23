@@ -15,8 +15,6 @@ import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.trustapp.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 

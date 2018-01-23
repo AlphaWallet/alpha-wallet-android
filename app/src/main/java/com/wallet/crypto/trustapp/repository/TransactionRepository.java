@@ -79,7 +79,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
 					.send();
 			if (raw.hasError()) {
-				throw new ServiceException(raw.getError().getMessage());
+			    throw new Exception(raw.getError().getMessage());
 			}
 			return raw.getTransactionHash();
 		})).subscribeOn(Schedulers.io());

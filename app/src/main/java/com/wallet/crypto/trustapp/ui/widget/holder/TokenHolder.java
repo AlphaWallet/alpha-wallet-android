@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import java.math.RoundingMode;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
+    public static final int VIEW_TYPE = 1005;
     private final TextView symbol;
     private final TextView balanceEth;
     private final TextView balanceCurrency;
@@ -45,22 +47,26 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             return;
         }
         try {
-            symbol.setText(token.tokenInfo.symbol);
+            if (TextUtils.isEmpty(token.tokenInfo.name)) {
+                symbol.setText(token.tokenInfo.symbol);
+            } else {
+                symbol.setText(token.tokenInfo.name + " (" + token.tokenInfo.symbol + ")");
+            }
 
             BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
             BigDecimal ethBalance = token.tokenInfo.decimals > 0
                     ? token.balance.divide(decimalDivisor) : token.balance;
             String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
                     ? "0"
-                    : ethBalance.toPlainString();
+                    : ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
             this.balanceEth.setText(value);
             if (data.ticker == null) {
                 this.balanceCurrency.setVisibility(View.GONE);
             } else {
                 String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                        ? "0"
+                        ? "\u2014"
                         : ethBalance.multiply(new BigDecimal(data.ticker.price))
-                            .setScale(5, RoundingMode.HALF_UP)
+                            .setScale(2, RoundingMode.HALF_UP)
                             .stripTrailingZeros()
                             .toPlainString();
                 this.balanceCurrency.setVisibility(View.VISIBLE);
@@ -69,9 +75,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                 try {
                     double percentage = Double.valueOf(data.ticker.percentChange24h);
                     color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-                    formattedPercents = "(" + (percentage < 0 ? "-" : "+") + data.ticker.percentChange24h + ")";
+                    formattedPercents = "(" + (percentage < 0 ? "-" : "+") + data.ticker.percentChange24h + "%)";
                 } catch (Exception ex) { /* Quietly */ }
-                String lbl = getString(R.string.token_balance, "$", converted, formattedPercents);
+                String lbl = getString(R.string.token_balance,
+                        ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
+                        converted, formattedPercents);
                 Spannable spannable = new SpannableString(lbl);
                 spannable.setSpan(new ForegroundColorSpan(color),
                         converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

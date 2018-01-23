@@ -41,12 +41,5 @@
             android:layout_height="wrap_content"
             style="@style/Widget.AppCompat.Button.Colored"
             />
-        <TextView
-            android:text="@string/suggestion_field_required"
-            android:layout_marginTop="@dimen/big_margin"
-            android:layout_marginStart="@dimen/small_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
     </LinearLayout>
 </ScrollView>

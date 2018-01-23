@@ -19,6 +19,8 @@ import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModelFactory;
 import com.wallet.crypto.trustapp.widget.SystemView;
 
+import java.math.BigDecimal;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
@@ -61,9 +63,14 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
+        viewModel.total().observe(this, this::onTotal);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
+    }
+
+    private void onTotal(BigDecimal totalInCurrency) {
+        adapter.setTotal(totalInCurrency);
     }
 
     @Override

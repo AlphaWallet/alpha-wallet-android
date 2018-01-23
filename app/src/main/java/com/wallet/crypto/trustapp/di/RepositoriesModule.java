@@ -110,6 +110,7 @@ public class RepositoriesModule {
     TokenRepositoryType provideTokenRepository(
             OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
+            WalletRepositoryType walletRepository,
             TokenExplorerClientType tokenExplorerClientType,
             TokenLocalSource tokenLocalSource,
             TransactionLocalSource inDiskCache,
@@ -117,6 +118,7 @@ public class RepositoriesModule {
 	    return new TokenRepository(
 	            okHttpClient,
 	            ethereumNetworkRepository,
+	            walletRepository,
 	            tokenExplorerClientType,
                 tokenLocalSource,
                 inDiskCache,

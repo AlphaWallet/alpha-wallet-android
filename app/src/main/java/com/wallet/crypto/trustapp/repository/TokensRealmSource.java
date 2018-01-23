@@ -27,7 +27,7 @@ import io.realm.Sort;
 public class TokensRealmSource implements TokenLocalSource {
 
     private static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 500; //* DateUtils.MINUTE_IN_MILLIS;
+    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     @Override

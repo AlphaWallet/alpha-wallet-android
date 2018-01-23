@@ -39,7 +39,6 @@ import java.util.Map;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import okhttp3.OkHttpClient;
 
@@ -48,6 +47,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 public class TokenRepository implements TokenRepositoryType {
 
     private final TokenExplorerClientType tokenNetworkService;
+    private final WalletRepositoryType walletRepository;
     private final TokenLocalSource localSource;
     private final OkHttpClient httpClient;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -58,12 +58,14 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenRepository(
             OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
+            WalletRepositoryType walletRepository,
             TokenExplorerClientType tokenNetworkService,
             TokenLocalSource localSource,
             TransactionLocalSource transactionsLocalCache,
             TickerService tickerService) {
         this.httpClient = okHttpClient;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.walletRepository = walletRepository;
         this.tokenNetworkService = tokenNetworkService;
         this.localSource = localSource;
         this.transactionsLocalCache = transactionsLocalCache;
@@ -77,13 +79,20 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token[]> fetch(String walletAddress) {
+    public Observable<Token[]> fetchActive(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
-                fetchCachedTokens(network, wallet).compose(attachTicker(network, wallet)),
-                updateTokens(network, wallet).compose(attachTicker(network, wallet)))
+                fetchCachedTokens(network, wallet).compose(attachEthereum(network, wallet)),
+                updateTokens(network, wallet).compose(attachTicker(network, wallet)).compose(attachEthereum(network, wallet)))
             .toObservable();
+    }
+
+    @Override
+    public Observable<Token[]> fetchAll(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchCachedTokens(network, wallet).toObservable();
     }
 
     private SingleTransformer<Token[], Token[]> attachTicker(NetworkInfo network, Wallet wallet) {
@@ -105,15 +114,9 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<TokenTicker[]> getTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {
         return localSource.fetchTickers(network, wallet, tokens)
-                .onErrorResumeNext(new io.reactivex.functions.Function<Throwable, SingleSource<? extends TokenTicker[]>>() {
-                    @Override
-                    public SingleSource<? extends TokenTicker[]> apply(Throwable throwable) throws Exception {
-                        return tickerService
-                                .fetchTockenTickers(tokens, "USD")
-                                .onErrorResumeNext(thr -> Single.just(new TokenTicker[0]));
-
-                    }
-                })
+                .onErrorResumeNext(throwable -> tickerService
+                        .fetchTockenTickers(tokens, "USD")
+                        .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])))
                 .doOnSuccess(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers));
     }
 
@@ -185,6 +188,17 @@ public class TokenRepository implements TokenRepositoryType {
         ;
     }
 
+    private SingleTransformer<Token[], Token[]> attachEthereum(NetworkInfo network, Wallet wallet) {
+        return upstream -> Single.zip(
+                upstream, getEth(network, wallet),
+                (tokens, ethToken) -> {
+                    List<Token> result = new ArrayList<>();
+                    result.add(ethToken);
+                    result.addAll(Arrays.asList(tokens));
+                    return result.toArray(new Token[result.size()]);
+                });
+    }
+
     private void swap(Map<String, Token> out, Token[] tokens) {
         for (Token right : tokens) {
             Token left = out.get(right.tokenInfo.address);
@@ -197,6 +211,17 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<Token[]> fetchCachedTokens(NetworkInfo network, Wallet wallet) {
         return localSource.fetchTokens(network, wallet);
+    }
+
+    private Single<Token> getEth(NetworkInfo network, Wallet wallet) {
+        return Single.zip(walletRepository
+                        .balanceInWei(wallet), ethereumNetworkRepository.getTicker(),
+                (balance, ticker) -> {
+                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18);
+                    Token token = new Token(info, new BigDecimal(balance));
+                    token.ticker = new TokenTicker("", ticker.price, ticker.percentChange24h);
+                    return token;
+                });
     }
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {

@@ -17,7 +17,7 @@ public class FetchTokensInteract {
     }
 
     public Observable<Token[]> fetch(Wallet wallet) {
-        return tokenRepository.fetch(wallet.address)
+        return tokenRepository.fetchActive(wallet.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

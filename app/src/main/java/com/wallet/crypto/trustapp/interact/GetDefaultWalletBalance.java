@@ -5,6 +5,7 @@ import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +34,9 @@ public class GetDefaultWalletBalance {
                     Map<String, String> balances = new HashMap<>();
                     balances.put(
                             ethereumNetworkRepository.getDefaultNetwork().symbol,
-                            weiToEth(ethBallance, 4).stripTrailingZeros().toPlainString());
+                            weiToEth(ethBallance, 4)
+                                    .setScale(4, BigDecimal.ROUND_HALF_UP)
+                                .stripTrailingZeros().toPlainString());
                     return Single.just(balances);
                 })
                 .flatMap(balances -> ethereumNetworkRepository

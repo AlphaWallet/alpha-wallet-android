@@ -14,12 +14,15 @@ import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
 
+import java.math.BigDecimal;
+
 import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TokensViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
+    private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -68,6 +71,10 @@ public class TokensViewModel extends BaseViewModel {
         return tokens;
     }
 
+    public LiveData<BigDecimal> total() {
+        return total;
+    }
+
     public void fetchTokens() {
         progress.postValue(true);
         if (defaultNetwork.getValue() == null) {
@@ -90,6 +97,23 @@ public class TokensViewModel extends BaseViewModel {
         this.tokens.setValue(tokens);
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
+
+            if (tokens.length > 0 && tokens[1].ticker == null) {
+                return; // Show than have ticker for tokens.
+            }
+            BigDecimal total = new BigDecimal("0");
+            for (Token token : tokens) {
+                if (token.balance != null && token.ticker != null && token.balance.compareTo(BigDecimal.ZERO) != 0) {
+                    BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
+                    BigDecimal ethBalance = token.tokenInfo.decimals > 0
+                            ? token.balance.divide(decimalDivisor) : token.balance;
+                    total = total.add(ethBalance.multiply(new BigDecimal(token.ticker.price)));
+                }
+            }
+            total = total.setScale(2, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
+            if (total.compareTo(BigDecimal.ZERO) != 0) {
+                this.total.postValue(total);
+            }
         }
     }
 

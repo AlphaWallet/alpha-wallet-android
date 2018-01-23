@@ -10,7 +10,9 @@ import io.reactivex.Single;
 
 public interface TokenLocalSource {
     Completable saveTokens(NetworkInfo networkInfo, Wallet wallet, Token[] items);
-    Single<Token[]> fetchTokens(NetworkInfo networkInfo, Wallet wallet);
+
+    Single<Token[]> fetchEnabledTokens(NetworkInfo networkInfo, Wallet wallet);
+    Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet);
 
     void saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers);
     Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens);

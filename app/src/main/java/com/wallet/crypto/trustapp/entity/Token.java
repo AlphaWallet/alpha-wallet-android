@@ -15,6 +15,12 @@ public class Token implements Parcelable {
         this.balance = balance;
     }
 
+    public Token(TokenInfo tokenInfo, BigDecimal balance, TokenTicker tokenTicker) {
+        this.tokenInfo = tokenInfo;
+        this.balance = balance;
+        this.ticker = tokenTicker;
+    }
+
     private Token(Parcel in) {
         tokenInfo = in.readParcelable(TokenInfo.class.getClassLoader());
         balance = new BigDecimal(in.readString());

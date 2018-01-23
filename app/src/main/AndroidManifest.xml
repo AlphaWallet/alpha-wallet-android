@@ -75,8 +75,8 @@
             android:label="@string/title_send_settings" />
 
         <activity
-            android:name=".ui.CustomPinActivity"
-            />
+            android:name=".ui.TokenChangeCollectionActivity"
+            android:label="@string/title_tokens" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

@@ -83,7 +83,7 @@ public class TokenRepository implements TokenRepositoryType {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
-                fetchCachedTokens(network, wallet).compose(attachEthereum(network, wallet)),
+                fetchCachedEnabledTokens(network, wallet).compose(attachEthereum(network, wallet)),
                 updateTokens(network, wallet).compose(attachTicker(network, wallet)).compose(attachEthereum(network, wallet)))
             .toObservable();
     }
@@ -92,7 +92,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchAll(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-        return fetchCachedTokens(network, wallet).toObservable();
+        return localSource.fetchAllTokens(network, wallet).toObservable();
     }
 
     private SingleTransformer<Token[], Token[]> attachTicker(NetworkInfo network, Wallet wallet) {
@@ -125,7 +125,20 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.saveTokens(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
-                new Token[] {new Token(new TokenInfo(address, "", symbol, decimals), null)});
+                new Token[] {new Token(new TokenInfo(address, "", symbol, decimals, true), null)});
+    }
+
+    @Override
+    public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        TokenInfo tokenInfo = new TokenInfo(
+                token.tokenInfo.address,
+                token.tokenInfo.name,
+                token.tokenInfo.symbol,
+                token.tokenInfo.decimals,
+                isEnabled);
+        token = new Token(tokenInfo, token.balance, token.ticker);
+        return localSource.saveTokens(network, wallet, new Token[] {token});
     }
 
     private Single<Token[]> fetchFromNetworkSource(@NonNull NetworkInfo network, @NonNull Wallet wallet) {
@@ -155,7 +168,8 @@ public class TokenRepository implements TokenRepositoryType {
                                 operation.contract.address,
                                 operation.contract.name,
                                 operation.contract.symbol,
-                                operation.contract.decimals), null));
+                                operation.contract.decimals,
+                                true), null));
                     }
                     return Single.just(result.toArray(new Token[result.size()]));
                 });
@@ -165,7 +179,7 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.zip(
                 fetchFromNetworkSource(network, wallet),
                 extractFromTransactions(network, wallet),
-                fetchCachedTokens(network, wallet),
+                fetchCachedEnabledTokens(network, wallet),
                 (tokens, tokens2, tokens3) -> {
                     final Map<String, Token> result = new HashMap<>();
                     swap(result, tokens);
@@ -184,7 +198,7 @@ public class TokenRepository implements TokenRepositoryType {
         })
         .toList()
         .flatMapCompletable(list -> localSource.saveTokens(network, wallet, list.toArray(new Token[list.size()])))
-        .andThen(fetchCachedTokens(network, wallet))
+        .andThen(fetchCachedEnabledTokens(network, wallet))
         ;
     }
 
@@ -209,15 +223,15 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private Single<Token[]> fetchCachedTokens(NetworkInfo network, Wallet wallet) {
-        return localSource.fetchTokens(network, wallet);
+    private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {
+        return localSource.fetchEnabledTokens(network, wallet);
     }
 
     private Single<Token> getEth(NetworkInfo network, Wallet wallet) {
         return Single.zip(walletRepository
                         .balanceInWei(wallet), ethereumNetworkRepository.getTicker(),
                 (balance, ticker) -> {
-                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18);
+                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
                     Token token = new Token(info, new BigDecimal(balance));
                     token.ticker = new TokenTicker("", ticker.price, ticker.percentChange24h);
                     return token;

@@ -21,6 +21,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -41,9 +42,8 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token[]> fetchTokens(NetworkInfo networkInfo, Wallet wallet) {
+    public Single<Token[]> fetchEnabledTokens(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
-            long now = System.currentTimeMillis();
             Realm realm = null;
             try {
                 realm = getRealmInstance(networkInfo, wallet);
@@ -51,22 +51,26 @@ public class TokensRealmSource implements TokenLocalSource {
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
                         .findAll();
-                int len = realmItems.size();
-                Token[] result = new Token[len];
-                for (int i = 0; i < len; i++) {
-                    RealmToken realmItem = realmItems.get(i);
-                    if (realmItem != null) {
-                        TokenInfo info = new TokenInfo(
-                                realmItem.getAddress(),
-                                realmItem.getName(),
-                                realmItem.getSymbol(),
-                                realmItem.getDecimals());
-                        BigDecimal balance = TextUtils.isEmpty(realmItem.getBalance()) || realmItem.getUpdatedTime() + ACTUAL_BALANCE_INTERVAL < now
-                                ? null : new BigDecimal(realmItem.getBalance());
-                        result[i] = new Token(info, balance);
-                    }
+                return convert(realmItems, System.currentTimeMillis());
+            } finally {
+                if (realm != null) {
+                    realm.close();
                 }
-                return result;
+            }
+        });
+    }
+
+    @Override
+    public Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet) {
+        return Single.fromCallable(() -> {
+            Realm realm = null;
+            try {
+                realm = getRealmInstance(networkInfo, wallet);
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .sort("addedTime", Sort.ASCENDING)
+                        .findAll();
+
+                return convert(realmItems, System.currentTimeMillis());
             } finally {
                 if (realm != null) {
                     realm.close();
@@ -149,6 +153,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setDecimals(token.tokenInfo.decimals);
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
+            } else {
+                realmToken.setEnabled(token.tokenInfo.isEnabled);
             }
             realmToken.setBalance(token.balance.toString());
             realmToken.setUpdatedTime(currentTime.getTime());
@@ -162,6 +168,26 @@ public class TokensRealmSource implements TokenLocalSource {
                 realm.close();
             }
         }
+    }
+
+    private Token[] convert(RealmResults<RealmToken> realmItems, long now) {
+        int len = realmItems.size();
+        Token[] result = new Token[len];
+        for (int i = 0; i < len; i++) {
+            RealmToken realmItem = realmItems.get(i);
+            if (realmItem != null) {
+                TokenInfo info = new TokenInfo(
+                        realmItem.getAddress(),
+                        realmItem.getName(),
+                        realmItem.getSymbol(),
+                        realmItem.getDecimals(),
+                        realmItem.getEnabled());
+                BigDecimal balance = TextUtils.isEmpty(realmItem.getBalance()) || realmItem.getUpdatedTime() + ACTUAL_BALANCE_INTERVAL < now
+                        ? null : new BigDecimal(realmItem.getBalance());
+                result[i] = new Token(info, balance);
+            }
+        }
+        return result;
     }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {

@@ -21,14 +21,13 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
 public class TokensRealmSource implements TokenLocalSource {
 
     private static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 500;//5 * DateUtils.MINUTE_IN_MILLIS;
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     @Override
@@ -89,6 +88,7 @@ public class TokensRealmSource implements TokenLocalSource {
             long now = System.currentTimeMillis();
             for (TokenTicker tokenTicker : tokenTickers) {
                 RealmTokenTicker realmObj = realm.createObject(RealmTokenTicker.class);
+                realmObj.setId(tokenTicker.id);
                 realmObj.setContract(tokenTicker.contract);
                 realmObj.setPercentChange24h(tokenTicker.percentChange24h);
                 realmObj.setPrice(tokenTicker.price);
@@ -119,10 +119,12 @@ public class TokensRealmSource implements TokenLocalSource {
                         .greaterThan("createdTime", minCreatedTime)
                         .findAll();
                 int len = rawItems.size();
+
                 for (int i = 0; i < len; i++) {
                     RealmTokenTicker rawItem = rawItems.get(i);
                     if (rawItem != null) {
                         tokenTickers.add(new TokenTicker(
+                                rawItem.getId(),
                                 rawItem.getContract(),
                                 rawItem.getPrice(),
                                 rawItem.getPercentChange24h()));
@@ -134,8 +136,34 @@ public class TokensRealmSource implements TokenLocalSource {
                     realm.close();
                 }
             }
-            return tokenTickers.size() == 0 ? null : tokenTickers.toArray(new TokenTicker[tokenTickers.size()]);
+            return tokenTickers.size() == 0 || tokenTickers.size() != tokens.length
+                    ? null
+                    : tokenTickers.toArray(new TokenTicker[tokenTickers.size()]);
         });
+    }
+
+    @Override
+    public void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled) {
+        Realm realm = null;
+        try {
+            realm = getRealmInstance(network, wallet);
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", token.tokenInfo.address)
+                    .findFirst();
+            realm.beginTransaction();
+            if (realmToken != null) {
+                realmToken.setEnabled(isEnabled);
+            }
+            realm.commitTransaction();
+        } catch (Exception ex) {
+            if (realm != null) {
+                realm.cancelTransaction();
+            }
+        } finally {
+            if (realm != null) {
+                realm.close();
+            }
+        }
     }
 
     private void saveToken(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime) {
@@ -153,10 +181,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setDecimals(token.tokenInfo.decimals);
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
-            } else {
-                realmToken.setEnabled(token.tokenInfo.isEnabled);
             }
-            realmToken.setBalance(token.balance.toString());
+            realmToken.setBalance(token.balance == null ? null : token.balance.toString());
             realmToken.setUpdatedTime(currentTime.getTime());
             realm.commitTransaction();
         } catch (Exception ex) {

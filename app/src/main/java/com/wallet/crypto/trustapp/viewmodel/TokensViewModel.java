@@ -41,11 +41,6 @@ public class TokensViewModel extends BaseViewModel {
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
     }
 
-    public void prepare() {
-        progress.postValue(true);
-        fetchTokens();
-    }
-
     public MutableLiveData<Wallet> wallet() {
         return wallet;
     }
@@ -78,7 +73,7 @@ public class TokensViewModel extends BaseViewModel {
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
 
-            if (tokens.length > 0 && tokens[1].ticker == null) {
+            if (tokens.length > 1 && tokens[1].ticker == null) {
                 return; // Show than have ticker for tokens.
             }
             BigDecimal total = new BigDecimal("0");

@@ -90,6 +90,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
                 viewModel.showEditTokens(this);
             } break;
             case android.R.id.home: {
+                adapter.clear();
                 viewModel.showTransactions(this);
             }
         }
@@ -110,7 +111,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
     protected void onResume() {
         super.onResume();
 
-        viewModel.prepare();
+        viewModel.fetchTokens();
     }
 
     private void onTokens(Token[] tokens) {

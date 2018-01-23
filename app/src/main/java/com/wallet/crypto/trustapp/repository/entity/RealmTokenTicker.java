@@ -7,6 +7,15 @@ public class RealmTokenTicker extends RealmObject {
     private String price;
     private String percentChange24h;
     private long createdTime;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getContract() {
         return contract;

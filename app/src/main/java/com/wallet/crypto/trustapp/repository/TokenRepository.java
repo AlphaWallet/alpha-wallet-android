@@ -83,7 +83,7 @@ public class TokenRepository implements TokenRepositoryType {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
-                fetchCachedEnabledTokens(network, wallet).compose(attachEthereum(network, wallet)),
+                fetchCachedEnabledTokens(network, wallet).compose(attachTicker(network, wallet)).compose(attachEthereum(network, wallet)),
                 updateTokens(network, wallet).compose(attachTicker(network, wallet)).compose(attachEthereum(network, wallet)))
             .toObservable();
     }
@@ -131,14 +131,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        TokenInfo tokenInfo = new TokenInfo(
-                token.tokenInfo.address,
-                token.tokenInfo.name,
-                token.tokenInfo.symbol,
-                token.tokenInfo.decimals,
-                isEnabled);
-        token = new Token(tokenInfo, token.balance, token.ticker);
-        return localSource.saveTokens(network, wallet, new Token[] {token});
+        return Completable.fromAction(() -> localSource.setEnable(network, wallet, token, isEnabled));
     }
 
     private Single<Token[]> fetchFromNetworkSource(@NonNull NetworkInfo network, @NonNull Wallet wallet) {
@@ -187,19 +180,20 @@ public class TokenRepository implements TokenRepositoryType {
                     swap(result, tokens3);
                     return result.values().toArray(new Token[result.size()]);
                 })
-        .flatMapObservable(Observable::fromArray)
-        .map(token -> {
-            if (token.balance == null) {
-                try {
-                    return new Token(token.tokenInfo, getBalance(wallet, token.tokenInfo));
-                } catch (Throwable th) { /* Quietly */ }
-            }
-            return token;
-        })
-        .toList()
-        .flatMapCompletable(list -> localSource.saveTokens(network, wallet, list.toArray(new Token[list.size()])))
-        .andThen(fetchCachedEnabledTokens(network, wallet))
-        ;
+                .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens))
+                .andThen(fetchCachedEnabledTokens(network, wallet))
+                .flatMapObservable(Observable::fromArray)
+                .map(token -> {
+                    if (token.balance == null) {
+                        try {
+                            return new Token(token.tokenInfo, getBalance(wallet, token.tokenInfo));
+                        } catch (Throwable th) { /* Quietly */ }
+                    }
+                    return token;
+                })
+                .toList()
+                .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens.toArray(new Token[tokens.size()])))
+                .andThen(fetchCachedEnabledTokens(network, wallet));
     }
 
     private SingleTransformer<Token[], Token[]> attachEthereum(NetworkInfo network, Wallet wallet) {
@@ -233,7 +227,7 @@ public class TokenRepository implements TokenRepositoryType {
                 (balance, ticker) -> {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
                     Token token = new Token(info, new BigDecimal(balance));
-                    token.ticker = new TokenTicker("", ticker.price, ticker.percentChange24h);
+                    token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h);
                     return token;
                 });
     }

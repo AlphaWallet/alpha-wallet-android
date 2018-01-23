@@ -6,11 +6,7 @@ import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenTicker;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableOperator;
-import io.reactivex.Observer;
 import io.reactivex.Single;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
@@ -53,8 +49,17 @@ public class TrustWalletTickerService implements TickerService {
     public Observable<Ticker> fetchTickerPrice(String symbols) {
         return apiClient
                 .fetchTickerPrice(symbols)
-                .lift(apiError())
-                .map(r -> r.response[0])
+                .map(r -> {
+                    if (r.isSuccessful()) {
+                        TrustResponse<Ticker> body = r.body();
+                        if (body == null || body.response.length < 0) {
+                            throw new Exception("server error");
+                        }
+                        return body.response[0];
+                    } else {
+                        throw new Exception("server error");
+                    }
+                })
                 .subscribeOn(Schedulers.io());
     }
 
@@ -79,11 +84,6 @@ public class TrustWalletTickerService implements TickerService {
             TrustResponse<TokenTicker> body = r.body();
             return body == null ? null : body.response;
         });
-    }
-
-    private static @NonNull
-    <T> ApiErrorOperator<T> apiError() {
-        return new ApiErrorOperator<>();
     }
 
     public interface ApiClient {
@@ -111,36 +111,5 @@ public class TrustWalletTickerService implements TickerService {
 
     private static class TrustResponse<T> {
         T[] response;
-    }
-
-    private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
-
-        @Override
-        public Observer<? super Response<T>> apply(Observer<? super T> observer) throws Exception {
-            return new DisposableObserver<Response<T>>() {
-                @Override
-                public void onNext(Response<T> response) {
-                    if (isDisposed()) {
-                        return;
-                    }
-                    observer.onNext(response.body());
-                    observer.onComplete();
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    if (!isDisposed()) {
-                        observer.onError(e);
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    if (!isDisposed()) {
-                        observer.onComplete();
-                    }
-                }
-            };
-        }
     }
 }

@@ -15,6 +15,8 @@ import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.trustapp.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
@@ -42,7 +44,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
          @Override
          public void onInserted(int position, int count) {
-             notifyItemMoved(position, count);
+             notifyItemRangeInserted(position, count);
          }
 
          @Override
@@ -55,7 +57,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
              notifyItemMoved(fromPosition, toPosition);
          }
      });
-//    private final List<Token> items = new ArrayList<>();
 
     public TokensAdapter(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
@@ -95,13 +96,18 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setTokens(Token[] tokens) {
         items.beginBatchedUpdates();
-        for (Token token : tokens) {
-            items.add(new TokenSortedItem(token));
+        items.clear();
+        for (int i = 0; i < tokens.length; i++) {
+            items.add(new TokenSortedItem(tokens[i], 10 + i));
         }
         items.endBatchedUpdates();
     }
 
     public void setTotal(BigDecimal totalInCurrency) {
         items.add(new TotalBalanceSortedItem(totalInCurrency));
+    }
+
+    public void clear() {
+        items.clear();
     }
 }

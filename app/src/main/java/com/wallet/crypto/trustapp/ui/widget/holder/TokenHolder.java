@@ -11,8 +11,10 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
@@ -26,6 +28,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView symbol;
     private final TextView balanceEth;
     private final TextView balanceCurrency;
+    private final ImageView icon;
 
     private Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -33,6 +36,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public TokenHolder(int resId, ViewGroup parent) {
         super(resId, parent);
 
+        icon = findViewById(R.id.icon);
         symbol = findViewById(R.id.symbol);
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
@@ -84,6 +88,18 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                 spannable.setSpan(new ForegroundColorSpan(color),
                         converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 this.balanceCurrency.setText(spannable);
+
+                if (!TextUtils.isEmpty(token.ticker.id)) {
+                    Picasso.with(getContext())
+                            .load("https://files.coinmarketcap.com/static/img/coins/128x128/" + data.ticker.id + ".png")
+                            .fit()
+                            .centerInside()
+                            .placeholder(R.mipmap.token_logo)
+                            .error(R.mipmap.token_logo)
+                            .into(icon);
+                } else {
+                    icon.setImageResource(R.mipmap.token_logo);
+                }
             }
         } catch (Exception e) {
             fillEmpty();

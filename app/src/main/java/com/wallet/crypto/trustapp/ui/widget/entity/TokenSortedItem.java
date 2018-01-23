@@ -5,8 +5,8 @@ import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
 
 public class TokenSortedItem extends SortedItem<Token> {
 
-    public TokenSortedItem(Token value) {
-        super(TokenHolder.VIEW_TYPE, value, 2);
+    public TokenSortedItem(Token value, int weight) {
+        super(TokenHolder.VIEW_TYPE, value, weight);
     }
 
     @Override

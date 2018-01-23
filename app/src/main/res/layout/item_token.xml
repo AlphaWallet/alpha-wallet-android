@@ -11,7 +11,7 @@
     android:layout_height="wrap_content"
     >
     <ImageView
-        android:id="@+id/logo"
+        android:id="@+id/icon"
         android:src="@mipmap/token_logo"
         android:contentDescription="@string/empty"
         android:layout_centerVertical="true"
@@ -26,7 +26,7 @@
         android:textAppearance="?attr/textAppearanceListItem"
         android:layout_marginStart="@dimen/big_margin"
         android:layout_marginEnd="@dimen/normal_margin"
-        android:layout_toEndOf="@+id/logo"
+        android:layout_toEndOf="@+id/icon"
         android:layout_toStartOf="@+id/balance_container"
         android:layout_centerVertical="true"
         android:layout_width="wrap_content"

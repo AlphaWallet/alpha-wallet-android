@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.repository;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
+import com.wallet.crypto.trustapp.BuildConfig;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
@@ -217,12 +218,13 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        String name = wallet.address + "_" + networkInfo.name + "_tkns.realm";
+        String name = wallet.address + "-" + networkInfo.name + "-tokens.realm";
         RealmConfiguration config = realmConfigurations.get(name);
         if (config == null) {
             config = new RealmConfiguration.Builder()
                     .name(name)
-                    .schemaVersion(1)
+                    .schemaVersion(BuildConfig.DB_VERSION)
+                    .deleteRealmIfMigrationNeeded()
                     .build();
             realmConfigurations.put(name, config);
         }

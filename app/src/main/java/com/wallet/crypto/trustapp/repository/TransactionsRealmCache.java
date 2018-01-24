@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.repository;
 
+import com.wallet.crypto.trustapp.BuildConfig;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.TransactionContract;
@@ -162,12 +163,13 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        String name = wallet.address + "_" + networkInfo.name + "_trx.realm";
+        String name = wallet.address + "-" + networkInfo.name + "-transactions.realm";
         RealmConfiguration config = realmConfigurations.get(name);
         if (config == null) {
             config = new RealmConfiguration.Builder()
                     .name(name)
-                    .schemaVersion(1)
+                    .schemaVersion(BuildConfig.DB_VERSION)
+                    .deleteRealmIfMigrationNeeded()
                     .build();
             realmConfigurations.put(name, config);
         }

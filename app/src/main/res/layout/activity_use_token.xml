@@ -13,28 +13,15 @@
         android:layout_marginBottom="@dimen/big_padding"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/address_input_layout"
-            android:focusable="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/address"
-                android:hint="@string/hint_contract_address"
-                android:paddingRight="@dimen/half_large_padding"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
+
         <android.support.design.widget.TextInputLayout
             android:id="@+id/name_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
+            android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
             <EditText
-                android:id="@+id/name"
+                android:id="@+id/textViewName"
                 android:hint="@string/hint_contract_name"
                 android:inputType="textNoSuggestions"
                 android:layout_width="match_parent"
@@ -45,8 +32,7 @@
             android:id="@+id/layoutTicket"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/venue_input_layout"
                 android:layout_marginTop="@dimen/normal_margin"
@@ -89,18 +75,33 @@
                     android:layout_height="wrap_content"
                     />
             </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/balance_input_layout"
+                android:layout_marginTop="@dimen/normal_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <EditText
+                    android:id="@+id/textViewBalance"
+                    android:hint="@string/hint_token_balance"
+                    android:inputType="textNoSuggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+            </android.support.design.widget.TextInputLayout>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:layout_gravity="center"
+            android:orientation="horizontal">
             <Button
                 android:id="@+id/button_use"
                 android:text="@string/action_use"
                 android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
                 />
@@ -108,7 +109,8 @@
                 android:id="@+id/button_sell"
                 android:text="@string/action_sell"
                 android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
                 />
@@ -116,7 +118,8 @@
                 android:id="@+id/button_transfer"
                 android:text="@string/action_transfer"
                 android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
                 />

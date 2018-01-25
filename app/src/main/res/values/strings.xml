@@ -40,6 +40,7 @@
     <string name="action_export">Backup private key</string>
     <string name="message_save_this">Keep this someplace safe</string>
     <string name="copy">Copy to clipboard</string>
+    <string name="advanced">Advanced Options</string>
     <string name="close">Close</string>
     <string name="keystore_keyword">KEYSTORE</string>
     <string name="prompt_confirm_password">Confirm password</string>
@@ -81,6 +82,7 @@
     <string name="message_delete_account">Permanently deleting wallet. Make sure that it has been exported and stored elsewhere.</string>
     <string name="error_import">Error importing keystore</string>
     <string name="message_this_is_your_address">My public Ethereum wallet address</string>
+    <string name="message_attending_venue">Entry Code for Venue Ticket</string>
     <string name="min_pwd_length">Password must be at least %d chars long</string>
     <string name="backup_warning_text">
         Since only you control your money, you\'ll need to save your backup keystore in case this app is deleted. \n\n
@@ -147,6 +149,7 @@
     <string name="suggestion_private_key">Private key has to be 64 characters long</string>
     <string name="suggestion_empty_password_available">The password can be left blank.</string>
     <string name="suggestion_this_is_your_address">My public %s wallet address</string>
+    <string name="entrance_token_address">Entrance token address %s</string>
     <!-- Hints -->
     <string name="hint_private_key_field">Private key *</string>
     <string name="hint_keystore">Keystore *</string>
@@ -191,8 +194,9 @@
     <string name="hint_contract_date">Date</string>
     <string name="hint_contract_price">Price</string>
     <string name="action_use">Use</string>
-    <string name="action_sell">Marketplace</string>
+    <string name="action_sell">Sell</string>
     <string name="action_transfer">Transfer</string>
+    <string name="hint_token_balance">Balance</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>

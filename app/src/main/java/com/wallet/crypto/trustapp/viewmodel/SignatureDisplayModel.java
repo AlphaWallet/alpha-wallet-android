@@ -7,33 +7,26 @@ import android.support.annotation.Nullable;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.interact.AddTokenInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.SetupTokensInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
-import com.wallet.crypto.trustapp.interact.UseTokenInteract;
-import com.wallet.crypto.trustapp.router.MyTokensRouter;
-import com.wallet.crypto.trustapp.router.SendTokenRouter;
-import com.wallet.crypto.trustapp.router.SignatureDisplayRouter;
+
 
 import java.util.concurrent.TimeUnit;
 
+import dagger.Provides;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Created by James on 22/01/2018.
+ * Created by James on 25/01/2018.
  */
 
-public class UseTokenViewModel extends BaseViewModel {
+public class SignatureDisplayModel extends BaseViewModel {
     private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final UseTokenInteract useTokenInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MyTokensRouter myTokensRouter;
     private final SignatureGenerateInteract signatureGenerateInteract;
-    private final SignatureDisplayRouter signatureDisplayRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -42,19 +35,13 @@ public class UseTokenViewModel extends BaseViewModel {
     @Nullable
     private Disposable cycleSignatureDisposable;
 
-    UseTokenViewModel(
-            UseTokenInteract useTokenInteract,
+    SignatureDisplayModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
-            MyTokensRouter myTokensRouter,
-            SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
-        this.useTokenInteract = useTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.myTokensRouter = myTokensRouter;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.signatureDisplayRouter = signatureDisplayRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
+        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -64,9 +51,14 @@ public class UseTokenViewModel extends BaseViewModel {
         return signature;
     }
 
-    public void showRotatingSignature(Context context) {
-        signatureDisplayRouter.open(context, defaultWallet.getValue());
 
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+
+        if (cycleSignatureDisposable != null) {
+            cycleSignatureDisposable.dispose();
+        }
     }
 
     public void prepare() {
@@ -88,7 +80,6 @@ public class UseTokenViewModel extends BaseViewModel {
     }
 
     public void startCycleSignature() {
-        progress.postValue(true);
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
                         .getMessage(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
@@ -97,18 +88,18 @@ public class UseTokenViewModel extends BaseViewModel {
     }
 
     private void onMessageGenerated() {
-        progress.postValue(false);
+
     }
 
     private void onSignedMessage(String message) {
-        progress.postValue(false);
+
         //write to screen
-        signature.setValue(message);
+        signature.postValue(message);
     }
 
     private void onDefaultWallet(Wallet wallet) {
         //TODO: switch on 'use' button
-        progress.postValue(false);
+
         defaultWallet.setValue(wallet);
     }
 }

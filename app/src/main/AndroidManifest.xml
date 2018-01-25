@@ -72,6 +72,11 @@
             />
 
         <activity
+            android:name=".ui.SignatureDisplayActivity"
+            android:label="@string/title_use_token"
+            />
+
+        <activity
             android:name=".ui.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_barcode" />
 

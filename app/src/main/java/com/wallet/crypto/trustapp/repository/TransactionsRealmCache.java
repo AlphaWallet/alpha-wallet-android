@@ -30,7 +30,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             Realm instance = null;
             try {
                 instance = getRealmInstance(networkInfo, wallet);
-                return convert(instance.where(RealmTransaction.class).findAll());
+                Transaction[] result = convert(instance.where(RealmTransaction.class).findAll());
+                return result;
             } finally {
                 if (instance != null) {
                     instance.close();
@@ -40,8 +41,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	}
 
     @Override
-	public void putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
-        Completable.fromAction(() -> {
+	public Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
+        return Completable.fromAction(() -> {
             Realm instance = null;
             try {
                 instance = getRealmInstance(networkInfo, wallet);
@@ -61,8 +62,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 }
             }
         })
-        .subscribeOn(Schedulers.io())
-        .subscribe(() -> {}, t -> {});
+        .subscribeOn(Schedulers.io());
 	}
 
     @Override

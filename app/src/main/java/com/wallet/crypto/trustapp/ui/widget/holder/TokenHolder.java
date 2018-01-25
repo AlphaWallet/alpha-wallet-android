@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenTicker;
 import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ import java.math.RoundingMode;
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1005;
+
     private final TextView symbol;
     private final TextView balanceEth;
     private final TextView balanceCurrency;
@@ -46,16 +48,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        if (data == null) {
-            fillEmpty();
-            return;
-        }
         try {
-            if (TextUtils.isEmpty(token.tokenInfo.name)) {
-                symbol.setText(token.tokenInfo.symbol);
-            } else {
-                symbol.setText(token.tokenInfo.name + " (" + token.tokenInfo.symbol + ")");
-            }
+            // We handled NPE. Exception handling is expensive, but not impotent here
+            symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
+                        ? token.tokenInfo.symbol
+                        : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol));
 
             BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
             BigDecimal ethBalance = token.tokenInfo.decimals > 0
@@ -64,46 +61,54 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                     ? "0"
                     : ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
             this.balanceEth.setText(value);
-            if (data.ticker == null) {
+            TokenTicker ticker = token.ticker;
+            if (ticker == null) {
                 this.balanceCurrency.setVisibility(View.GONE);
             } else {
-                String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                        ? "\u2014"
-                        : ethBalance.multiply(new BigDecimal(data.ticker.price))
-                            .setScale(2, RoundingMode.HALF_UP)
-                            .stripTrailingZeros()
-                            .toPlainString();
-                this.balanceCurrency.setVisibility(View.VISIBLE);
-                String formattedPercents = "";
-                int color = Color.RED;
-                try {
-                    double percentage = Double.valueOf(data.ticker.percentChange24h);
-                    color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-                    formattedPercents = "(" + (percentage < 0 ? "-" : "+") + data.ticker.percentChange24h + "%)";
-                } catch (Exception ex) { /* Quietly */ }
-                String lbl = getString(R.string.token_balance,
-                        ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
-                        converted, formattedPercents);
-                Spannable spannable = new SpannableString(lbl);
-                spannable.setSpan(new ForegroundColorSpan(color),
-                        converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                this.balanceCurrency.setText(spannable);
-
-                if (!TextUtils.isEmpty(token.ticker.id)) {
-                    Picasso.with(getContext())
-                            .load("https://files.coinmarketcap.com/static/img/coins/128x128/" + data.ticker.id + ".png")
-                            .fit()
-                            .centerInside()
-                            .placeholder(R.mipmap.token_logo)
-                            .error(R.mipmap.token_logo)
-                            .into(icon);
-                } else {
-                    icon.setImageResource(R.mipmap.token_logo);
-                }
+                fillCurrency(ethBalance, ticker);
+                fillIcon(ticker.image, R.mipmap.token_logo);
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
             fillEmpty();
         }
+    }
+
+    private void fillIcon(String imageUrl, int defaultResId) {
+        if (TextUtils.isEmpty(imageUrl)) {
+            icon.setImageResource(defaultResId);
+        } else {
+            Picasso.with(getContext())
+                    .load(imageUrl)
+                    .fit()
+                    .centerInside()
+                    .placeholder(defaultResId)
+                    .error(defaultResId)
+                    .into(icon);
+        }
+    }
+
+    private void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
+        String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
+                ? "\u2014"
+                : ethBalance.multiply(new BigDecimal(ticker.price))
+                .setScale(2, RoundingMode.HALF_UP)
+                .stripTrailingZeros()
+                .toPlainString();
+        this.balanceCurrency.setVisibility(View.VISIBLE);
+        String formattedPercents = "";
+        int color = Color.RED;
+        try {
+            double percentage = Double.valueOf(ticker.percentChange24h);
+            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
+            formattedPercents = "(" + (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%)";
+        } catch (Exception ex) { /* Quietly */ }
+        String lbl = getString(R.string.token_balance,
+                ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
+                converted, formattedPercents);
+        Spannable spannable = new SpannableString(lbl);
+        spannable.setSpan(new ForegroundColorSpan(color),
+                converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        this.balanceCurrency.setText(spannable);
     }
 
     private void fillEmpty() {

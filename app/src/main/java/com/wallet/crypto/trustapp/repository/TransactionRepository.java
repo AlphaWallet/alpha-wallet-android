@@ -96,9 +96,7 @@ public class TransactionRepository implements TransactionRepositoryType {
                         .fetchLastTransactions(wallet, lastTransaction)))
                 .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
                         .fetchLastTransactions(wallet, null)))
-                .flatMap(transactions -> {
-                    inDiskCache.putTransactions(networkInfo, wallet, transactions);
-                    return inDiskCache.fetchTransaction(networkInfo, wallet);
-                });
+                .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
+                .andThen(inDiskCache.fetchTransaction(networkInfo, wallet));
     }
 }

@@ -68,7 +68,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
     public Observable<Transaction[]> fetchLastTransactions(Wallet wallet, Transaction lastTransaction) {
 	    return Observable.fromCallable(() -> {
             @NonNull String lastTransactionHash = lastTransaction == null
-                    ? "" :lastTransaction.hash;
+                    ? "" : lastTransaction.hash;
             List<Transaction> result = new ArrayList<>();
             int pages = 0;
             int page = 0;

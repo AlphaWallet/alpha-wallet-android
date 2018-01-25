@@ -29,6 +29,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 500;//5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final String COINMARKETCAP_IMAGE_URL = "https://files.coinmarketcap.com/static/img/coins/128x128/%s.png";
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     @Override
@@ -93,6 +94,9 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmObj.setContract(tokenTicker.contract);
                 realmObj.setPercentChange24h(tokenTicker.percentChange24h);
                 realmObj.setPrice(tokenTicker.price);
+                realmObj.setImage(TextUtils.isEmpty(tokenTicker.image)
+                        ? String.format(COINMARKETCAP_IMAGE_URL, tokenTicker.id)
+                        : tokenTicker.image);
                 realmObj.setCreatedTime(now);
             }
             realm.commitTransaction();
@@ -128,7 +132,8 @@ public class TokensRealmSource implements TokenLocalSource {
                                 rawItem.getId(),
                                 rawItem.getContract(),
                                 rawItem.getPrice(),
-                                rawItem.getPercentChange24h()));
+                                rawItem.getPercentChange24h(),
+                                rawItem.getImage()));
                     }
                 }
                 realm.commitTransaction();

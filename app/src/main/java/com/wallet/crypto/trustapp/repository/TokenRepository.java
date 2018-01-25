@@ -198,7 +198,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private SingleTransformer<Token[], Token[]> attachEthereum(NetworkInfo network, Wallet wallet) {
         return upstream -> Single.zip(
-                upstream, getEth(network, wallet),
+                upstream, attachEth(network, wallet),
                 (tokens, ethToken) -> {
                     List<Token> result = new ArrayList<>();
                     result.add(ethToken);
@@ -221,13 +221,14 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.fetchEnabledTokens(network, wallet);
     }
 
-    private Single<Token> getEth(NetworkInfo network, Wallet wallet) {
-        return Single.zip(walletRepository
-                        .balanceInWei(wallet), ethereumNetworkRepository.getTicker(),
+    private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
+        return Single.zip(
+                walletRepository.balanceInWei(wallet),
+                ethereumNetworkRepository.getTicker(),
                 (balance, ticker) -> {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
                     Token token = new Token(info, new BigDecimal(balance));
-                    token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h);
+                    token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h, null);
                     return token;
                 });
     }

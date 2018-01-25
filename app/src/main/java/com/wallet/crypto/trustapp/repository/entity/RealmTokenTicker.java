@@ -8,6 +8,7 @@ public class RealmTokenTicker extends RealmObject {
     private String percentChange24h;
     private long createdTime;
     private String id;
+    private String image;
 
     public String getId() {
         return id;
@@ -47,5 +48,13 @@ public class RealmTokenTicker extends RealmObject {
 
     public void setCreatedTime(long createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

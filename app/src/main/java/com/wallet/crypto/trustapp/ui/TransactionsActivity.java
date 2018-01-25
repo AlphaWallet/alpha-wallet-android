@@ -98,7 +98,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
 
-        refreshLayout.setOnRefreshListener(viewModel::fetchTransactions);
+        refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions());
     }
 
     private void onTransactionClick(View view, Transaction transaction) {

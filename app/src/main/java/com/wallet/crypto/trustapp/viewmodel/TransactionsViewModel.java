@@ -4,7 +4,9 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -53,6 +55,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private Disposable getBalanceDisposable;
     @Nullable
     private Disposable fetchTransactionDisposable;
+    private Handler handler = new Handler();
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -89,6 +92,7 @@ public class TransactionsViewModel extends BaseViewModel {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
+        handler.removeCallbacks(startFetchTransactionsTask);
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -115,12 +119,12 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void fetchTransactions() {
+        handler.removeCallbacks(startFetchTransactionsTask);
         progress.postValue(true);
-        fetchTransactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
-            .doOnNext(l -> fetchTransactionsInteract
-                        .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
-                        .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted))
-            .subscribe(l -> {}, t -> {});
+        /*For special address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
+        Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
+        fetchTransactionDisposable = fetch
+                .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted);
     }
 
     public void getBalance() {
@@ -157,6 +161,9 @@ public class TransactionsViewModel extends BaseViewModel {
         if (transactions == null || transactions.length == 0) {
             error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
         }
+        handler.postDelayed(
+                startFetchTransactionsTask,
+                FETCH_TRANSACTIONS_INTERVAL * DateUtils.SECOND_IN_MILLIS);
     }
 
     public void showWallets(Context context) {
@@ -184,4 +191,11 @@ public class TransactionsViewModel extends BaseViewModel {
     public void openDeposit(Context context, Uri uri) {
         externalBrowserRouter.open(context, uri);
     }
+
+    private final Runnable startFetchTransactionsTask = new Runnable() {
+        @Override
+        public void run() {
+            fetchTransactions();
+        }
+    };
 }

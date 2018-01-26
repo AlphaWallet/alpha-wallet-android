@@ -1,6 +1,5 @@
 package com.wallet.crypto.trustapp.repository;
 
-import com.wallet.crypto.trustapp.BuildConfig;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.TransactionContract;
@@ -9,29 +8,29 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.entity.RealmTransaction;
 import com.wallet.crypto.trustapp.repository.entity.RealmTransactionContract;
 import com.wallet.crypto.trustapp.repository.entity.RealmTransactionOperation;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.wallet.crypto.trustapp.service.RealmManager;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
 
-    private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
+    private final RealmManager realmManager;
+
+    public TransactionsRealmCache(RealmManager realmManager) {
+        this.realmManager = realmManager;
+    }
 
 	@Override
 	public Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
             Realm instance = null;
             try {
-                instance = getRealmInstance(networkInfo, wallet);
-                Transaction[] result = convert(instance.where(RealmTransaction.class).findAll());
-                return result;
+                instance = realmManager.getRealmInstance(networkInfo, wallet);
+                return convert(instance.where(RealmTransaction.class).findAll());
             } finally {
                 if (instance != null) {
                     instance.close();
@@ -45,7 +44,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Completable.fromAction(() -> {
             Realm instance = null;
             try {
-                instance = getRealmInstance(networkInfo, wallet);
+                instance = realmManager.getRealmInstance(networkInfo, wallet);
                 instance.beginTransaction();
                 for (Transaction transaction : transactions) {
                     RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
@@ -70,7 +69,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Single.fromCallable(() -> {
             Realm realm = null;
             try {
-                realm = getRealmInstance(networkInfo, wallet);
+                realm = realmManager.getRealmInstance(networkInfo, wallet);
                 return convert(realm.where(RealmTransaction.class).findFirst());
             } finally {
                 if (realm != null) {
@@ -160,19 +159,5 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getGasUsed(),
                 operations
                 );
-    }
-
-    private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-        String name = wallet.address + "-" + networkInfo.name + "-transactions.realm";
-        RealmConfiguration config = realmConfigurations.get(name);
-        if (config == null) {
-            config = new RealmConfiguration.Builder()
-                    .name(name)
-                    .schemaVersion(BuildConfig.DB_VERSION)
-                    .deleteRealmIfMigrationNeeded()
-                    .build();
-            realmConfigurations.put(name, config);
-        }
-        return Realm.getInstance(config);
     }
 }

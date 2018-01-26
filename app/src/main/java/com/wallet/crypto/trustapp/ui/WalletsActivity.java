@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -223,6 +224,8 @@ public class WalletsActivity extends BaseActivity implements
 		dialog.setContentView(addWalletView);
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) addWalletView.getParent());
+		dialog.setOnShowListener(dialog -> behavior.setPeekHeight(addWalletView.getHeight()));
 		dialog.show();
 	}
 

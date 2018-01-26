@@ -22,6 +22,7 @@ import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.EthplorerTokenService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
+import com.wallet.crypto.trustapp.service.RealmManager;
 import com.wallet.crypto.trustapp.service.TickerService;
 import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
 import com.wallet.crypto.trustapp.service.TransactionsNetworkClient;
@@ -92,8 +93,8 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-    TransactionLocalSource provideTransactionInDiskCache() {
-        return new TransactionsRealmCache();
+    TransactionLocalSource provideTransactionInDiskCache(RealmManager realmManager) {
+        return new TransactionsRealmCache(realmManager);
     }
 
 	@Singleton
@@ -133,8 +134,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource() {
-	    return new TokensRealmSource();
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager) {
+	    return new TokensRealmSource(realmManager);
     }
 
     @Singleton

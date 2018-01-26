@@ -1,6 +1,7 @@
 package com.wallet.crypto.trustapp.repository;
 
 import android.support.annotation.NonNull;
+import android.text.format.DateUtils;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Token;
@@ -32,12 +33,13 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import okhttp3.OkHttpClient;
@@ -46,6 +48,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 public class TokenRepository implements TokenRepositoryType {
 
+    private static final long BALANCE_UPDATE_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
     private final TokenExplorerClientType tokenNetworkService;
     private final WalletRepositoryType walletRepository;
     private final TokenLocalSource localSource;
@@ -83,10 +86,13 @@ public class TokenRepository implements TokenRepositoryType {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
-                fetchCachedEnabledTokens(network, wallet).compose(attachTicker(network, wallet)).compose(attachEthereum(network, wallet)),
-                updateTokens(network, wallet).compose(attachTicker(network, wallet)).compose(attachEthereum(network, wallet)))
+                fetchCachedEnabledTokens(network, wallet), // Immediately show the cache.
+                updateTokens(network, wallet) // Looking for new tokens
+                        .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
             .toObservable();
     }
+
+
 
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
@@ -117,7 +123,10 @@ public class TokenRepository implements TokenRepositoryType {
                 .onErrorResumeNext(throwable -> tickerService
                         .fetchTockenTickers(tokens, "USD")
                         .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])))
-                .doOnSuccess(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers));
+                .flatMapCompletable(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers))
+                .andThen(localSource
+                        .fetchTickers(network, wallet, tokens)
+                        .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])));
     }
 
     @Override
@@ -125,7 +134,13 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.saveTokens(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
-                new Token[] {new Token(new TokenInfo(address, "", symbol, decimals, true), null)});
+                new Token[] { new Token(
+                        new TokenInfo(address,
+                                "",
+                                symbol,
+                                decimals,
+                                true),
+                        null, 0)});
     }
 
     @Override
@@ -162,38 +177,50 @@ public class TokenRepository implements TokenRepositoryType {
                                 operation.contract.name,
                                 operation.contract.symbol,
                                 operation.contract.decimals,
-                                true), null));
+                                true), null, 0));
                     }
                     return Single.just(result.toArray(new Token[result.size()]));
                 });
     }
 
-    private Single<Token[]> updateTokens(NetworkInfo network, Wallet wallet) {
+    private Completable updateTokens(NetworkInfo network, Wallet wallet) {
         return Single.zip(
                 fetchFromNetworkSource(network, wallet),
                 extractFromTransactions(network, wallet),
-                fetchCachedEnabledTokens(network, wallet),
-                (tokens, tokens2, tokens3) -> {
-                    final Map<String, Token> result = new HashMap<>();
-                    swap(result, tokens);
-                    swap(result, tokens2);
-                    swap(result, tokens3);
-                    return result.values().toArray(new Token[result.size()]);
-                })
-                .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens))
-                .andThen(fetchCachedEnabledTokens(network, wallet))
-                .flatMapObservable(Observable::fromArray)
-                .map(token -> {
-                    if (token.balance == null) {
-                        try {
-                            return new Token(token.tokenInfo, getBalance(wallet, token.tokenInfo));
-                        } catch (Throwable th) { /* Quietly */ }
+                localSource.fetchAllTokens(network, wallet),
+                (fromNetTokens, fromTrxTokens, cachedTokens) -> {
+                    final Set<String> oldTokensIndex = new HashSet<>();
+                    final List<Token> zip = new ArrayList<>();
+                    zip.addAll(Arrays.asList(fromNetTokens));
+                    zip.addAll(Arrays.asList(fromTrxTokens));
+                    final List<Token> newTokens = new ArrayList<>();
+                    for (Token cachedToken : cachedTokens) {
+                        oldTokensIndex.add(cachedToken.tokenInfo.address);
                     }
-                    return token;
+                    for (int i = zip.size() - 1; i > -1; i--) {
+                        if (!oldTokensIndex.contains(zip.get(i).tokenInfo.address)) {
+                            newTokens.add(zip.get(i));
+                        }
+                    }
+                    return newTokens.toArray(new Token[newTokens.size()]);
                 })
-                .toList()
-                .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens.toArray(new Token[tokens.size()])))
-                .andThen(fetchCachedEnabledTokens(network, wallet));
+                .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens));
+    }
+
+    private ObservableTransformer<Token, Token> updateBalance(NetworkInfo network, Wallet wallet) {
+        return upstream -> upstream.map(token -> {
+            long now = System.currentTimeMillis();
+            long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
+            if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
+                try {
+                    token = new Token(
+                            token.tokenInfo,
+                            getBalance(wallet, token.tokenInfo), now);
+                    localSource.updateTokenBalance(network, wallet, token);
+                } catch (Throwable th) { /* Quietly */ }
+            }
+            return token;
+        });
     }
 
     private SingleTransformer<Token[], Token[]> attachEthereum(NetworkInfo network, Wallet wallet) {
@@ -207,18 +234,15 @@ public class TokenRepository implements TokenRepositoryType {
                 });
     }
 
-    private void swap(Map<String, Token> out, Token[] tokens) {
-        for (Token right : tokens) {
-            Token left = out.get(right.tokenInfo.address);
-
-            if (left == null || (left.balance == null && right.balance != null)) {
-                out.put(right.tokenInfo.address, right);
-            }
-        }
-    }
-
     private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {
-        return localSource.fetchEnabledTokens(network, wallet);
+        return localSource
+                .fetchEnabledTokens(network, wallet)
+                .flatMapObservable(Observable::fromArray)
+                .compose(updateBalance(network, wallet))
+                .toList()
+                .map(list -> list.toArray(new Token[list.size()]))
+                .compose(attachTicker(network, wallet))
+                .compose(attachEthereum(network, wallet));
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
@@ -227,7 +251,7 @@ public class TokenRepository implements TokenRepositoryType {
                 ethereumNetworkRepository.getTicker(),
                 (balance, ticker) -> {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    Token token = new Token(info, new BigDecimal(balance));
+                    Token token = new Token(info, new BigDecimal(balance), System.currentTimeMillis());
                     token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h, null);
                     return token;
                 });
@@ -274,7 +298,7 @@ public class TokenRepository implements TokenRepositoryType {
         int len = items.length;
         Token[] tokens = new Token[len];
         for (int i = 0; i < len; i++) {
-            tokens[i] = new Token(items[i], null);
+            tokens[i] = new Token(items[i], null, 0);
         }
         return tokens;
     }

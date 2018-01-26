@@ -64,6 +64,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             TokenTicker ticker = token.ticker;
             if (ticker == null) {
                 this.balanceCurrency.setVisibility(View.GONE);
+                fillIcon(null, R.mipmap.token_logo);
             } else {
                 fillCurrency(ethBalance, ticker);
                 fillIcon(ticker.image, R.mipmap.token_logo);

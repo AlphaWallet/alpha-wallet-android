@@ -1,14 +1,17 @@
 package com.wallet.crypto.trustapp.repository.entity;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 public class RealmTokenTicker extends RealmObject {
+    @PrimaryKey
     private String contract;
     private String price;
     private String percentChange24h;
     private long createdTime;
     private String id;
     private String image;
+    private long updatedTime;
 
     public String getId() {
         return id;
@@ -56,5 +59,13 @@ public class RealmTokenTicker extends RealmObject {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public long getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(long updatedTime) {
+        this.updatedTime = updatedTime;
     }
 }

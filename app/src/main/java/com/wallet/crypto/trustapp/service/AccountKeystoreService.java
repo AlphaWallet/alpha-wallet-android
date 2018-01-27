@@ -60,6 +60,12 @@ public interface AccountKeystoreService {
 			byte[] data,
 			long chainId);
 
+	Single<byte[]> signTransaction(
+			Wallet signer,
+			String signerPassword,
+			String message,
+			long chainId);
+
 	/**
 	 * Check if there is an address in the keystore
 	 * @param address {@link Wallet} address

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
+import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
@@ -27,10 +28,11 @@ public class SignatureDisplayModel extends BaseViewModel {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
+    private final CreateTransactionInteract createTransactionInteract;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<String> signature = new MutableLiveData<>();
+    private final MutableLiveData<byte[]> signature = new MutableLiveData<>();
 
     @Nullable
     private Disposable cycleSignatureDisposable;
@@ -38,19 +40,20 @@ public class SignatureDisplayModel extends BaseViewModel {
     SignatureDisplayModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
+            CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.createTransactionInteract = createTransactionInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
-    public LiveData<String> signature() {
+    public LiveData<byte[]> signature() {
         return signature;
     }
-
 
     @Override
     protected void onCleared() {
@@ -62,7 +65,6 @@ public class SignatureDisplayModel extends BaseViewModel {
     }
 
     public void prepare() {
-        progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
@@ -75,31 +77,27 @@ public class SignatureDisplayModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onWalletFetchComplete() {
-
-    }
-
-    public void startCycleSignature() {
+    private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
-                        .subscribe(this::onSignedMessage, this::onError))
+                        .getMessage(defaultWallet.getValue())
+                        .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
     }
 
-    private void onMessageGenerated() {
-
+    private void onSignMessage(String message) {
+        //now run this guy through the signed message system
+        disposable = createTransactionInteract
+                .sign(defaultWallet.getValue(), message)
+                .subscribe(this::onSignedMessage, this::onError);
     }
 
-    private void onSignedMessage(String message) {
-
-        //write to screen
-        signature.postValue(message);
+    private void onSignedMessage(byte[] signatureStr) {
+        signature.postValue(signatureStr);
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        //TODO: switch on 'use' button
-
         defaultWallet.setValue(wallet);
+        startCycleSignature();
     }
 }

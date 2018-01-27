@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import android.util.Base64;
 
 import static com.wallet.crypto.trustapp.C.Key.WALLET;
 
@@ -99,7 +100,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.startCycleSignature();
+        viewModel.prepare();
     }
 
     @Override
@@ -112,8 +113,10 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
-    private void onSignatureChanged(String newSig) {
-        final Bitmap qrCode = createQRImage(newSig);
+    private void onSignatureChanged(byte[] newSig) {
+        byte[] sigBytes = Base64.encode(newSig, Base64.DEFAULT);
+        String sig = new String(sigBytes);
+        final Bitmap qrCode = createQRImage(sig);
         ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
     }
 }

@@ -19,6 +19,13 @@ public class CreateTransactionInteract {
         this.passwordStore = passwordStore;
     }
 
+    public Single<byte[]> sign(Wallet wallet, String message) {
+        return passwordStore.getPassword(wallet)
+                .flatMap(password ->
+                        transactionRepository.getSignature(wallet, message, password)
+                                .observeOn(AndroidSchedulers.mainThread()));
+    }
+
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data) {
         return passwordStore.getPassword(from)
                 .flatMap(password ->

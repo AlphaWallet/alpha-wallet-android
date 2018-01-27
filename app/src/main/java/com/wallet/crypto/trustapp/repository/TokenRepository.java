@@ -6,6 +6,7 @@ import android.util.Log;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenFactory;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.TransactionOperation;
@@ -17,18 +18,22 @@ import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -141,17 +146,37 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private Token[] getBalances(Wallet wallet, TokenInfo[] items) {
+        TokenFactory tFactory = new TokenFactory();
         int len = items.length;
+        int invalidResults = 0;
         Token[] result = new Token[len];
         for (int i = 0; i < len; i++) {
             BigDecimal balance = null;
+            List<Uint16> balances = null;
             try {
+                balances = getBalanceArray(wallet, items[i]);
                 balance = getBalance(wallet, items[i]);
             } catch (Exception e1) {
                 Log.d("TOKEN", "Err", e1);
                                     /* Quietly */
             }
-            result[i] = new Token(items[i], balance);
+            result[i] = tFactory.CreateToken(items[i], balance, balances);
+            if (result[i] == null) invalidResults++;
+        }
+        //prune null entries
+        if (invalidResults > 0)
+        {
+            Token[] prunedResult = new Token[len - invalidResults];
+            int pruneIndex = 0;
+            for (int i = 0; i < len; i++)
+            {
+                if (result[i] != null)
+                {
+                    prunedResult[pruneIndex] = result[i];
+                    pruneIndex++;
+                }
+            }
+            result = prunedResult;
         }
         return result;
     }
@@ -184,6 +209,17 @@ public class TokenRepository implements TokenRepositoryType {
         } else {
             return null;
         }
+    }
+
+    private List<Uint16> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        List<Uint16> indicies = null;
+        if (tokenInfo instanceof TicketInfo)
+        {
+            org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
+            indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+        }
+
+        return indicies;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception {
@@ -269,6 +305,13 @@ public class TokenRepository implements TokenRepositoryType {
                 Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 
+    private static org.web3j.abi.datatypes.Function balanceOfArray(String owner) {
+        return new org.web3j.abi.datatypes.Function(
+                "balanceOf",
+                Collections.singletonList(new Address(owner)),
+                Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {}));
+    }
+
     private static org.web3j.abi.datatypes.Function nameOf() {
         return new Function("name",
                 Arrays.<Type>asList(),
@@ -299,13 +342,32 @@ public class TokenRepository implements TokenRepositoryType {
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
+    private List callSmartContractFunctionArray(
+            org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet) throws Exception
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+        org.web3j.protocol.core.methods.response.EthCall ethCall = web3j.ethCall(
+                org.web3j.protocol.core.methods.request.Transaction
+                        .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
+                DefaultBlockParameterName.LATEST)
+                .sendAsync().get();
+
+        String value = ethCall.getValue();
+        List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
+        if (values.isEmpty()) return null;
+
+        Type T = values.get(0);
+        Object o = T.getValue();
+        return (List) o;
+    }
+
     private String callSmartContractFunction(
             org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
 
         org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
                 org.web3j.protocol.core.methods.request.Transaction
-                    .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
+                        .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
                 DefaultBlockParameterName.LATEST)
                 .sendAsync().get();
 

@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.wallet.crypto.trustapp.R;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class TotalBalanceHolder extends BinderViewHolder<BigDecimal> {
 
@@ -25,6 +26,6 @@ public class TotalBalanceHolder extends BinderViewHolder<BigDecimal> {
     public void bind(@Nullable BigDecimal data, @NonNull Bundle addition) {
         title.setText(data == null
             ? ""
-            : "$" + data.setScale(2, BigDecimal.ROUND_HALF_UP).stripTrailingZeros().toPlainString());
+            : "$" + data.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());
     }
 }

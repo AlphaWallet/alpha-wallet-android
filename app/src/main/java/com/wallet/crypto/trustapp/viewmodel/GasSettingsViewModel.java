@@ -7,6 +7,7 @@ import android.arch.lifecycle.MutableLiveData;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class GasSettingsViewModel extends BaseViewModel {
@@ -47,8 +48,8 @@ public class GasSettingsViewModel extends BaseViewModel {
         defaultNetwork.setValue(networkInfo);
     }
 
-    public BigInteger networkFee() {
-        return gasPrice.getValue().multiply(gasLimit.getValue());
+    public BigDecimal networkFee() {
+        return new BigDecimal(gasPrice.getValue().multiply(gasLimit.getValue()));
     }
 
 }

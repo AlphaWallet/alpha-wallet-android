@@ -98,7 +98,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
 
-        refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions());
+        refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -153,7 +153,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.try_again: {
-                viewModel.fetchTransactions();
+                viewModel.fetchTransactions(true);
             } break;
             case R.id.action_buy: {
                 openExchangeDialog();
@@ -211,13 +211,13 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        if (errorEnvelope.code == EMPTY_COLLECTION) {
+        if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
             EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
             emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
             systemView.showEmpty(emptyView);
-        } else {
+        }/* else {
             systemView.showError(getString(R.string.error_fail_load_transaction), this);
-        }
+        }*/
     }
 
     private void checkRoot() {
@@ -249,6 +249,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onDepositClick(View view, Uri uri) {
-        viewModel.openDeposit(this, uri);
+        viewModel.openDeposit(view.getContext(), uri);
     }
 }

@@ -246,15 +246,16 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
-        return Single.zip(
-                walletRepository.balanceInWei(wallet),
-                ethereumNetworkRepository.getTicker(),
-                (balance, ticker) -> {
+        return walletRepository.balanceInWei(wallet)
+                .map(balance -> {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    Token token = new Token(info, new BigDecimal(balance), System.currentTimeMillis());
-                    token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h, null);
-                    return token;
-                });
+                    return new Token(info, balance, System.currentTimeMillis());
+                })
+                .flatMap(token -> ethereumNetworkRepository.getTicker()
+                        .map(ticker -> {
+                            token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h, null);
+                            return token;
+                        }).onErrorResumeNext(throwable -> Single.just(token)));
     }
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {

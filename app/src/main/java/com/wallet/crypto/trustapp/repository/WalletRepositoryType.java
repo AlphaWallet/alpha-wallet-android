@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.repository;
 
 import com.wallet.crypto.trustapp.entity.Wallet;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import io.reactivex.Completable;
@@ -21,5 +22,5 @@ public interface WalletRepositoryType {
 	Completable setDefaultWallet(Wallet wallet);
 	Single<Wallet> getDefaultWallet();
 
-	Single<BigInteger> balanceInWei(Wallet wallet);
+	Single<BigDecimal> balanceInWei(Wallet wallet);
 }

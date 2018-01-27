@@ -55,7 +55,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
         toolbar();
 
-        BigInteger gasFee = new BigInteger(transaction.gasUsed).multiply(new BigInteger(transaction.gasPrice));
+        BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
         amount = findViewById(R.id.amount);
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
         ((TextView) findViewById(R.id.to)).setText(transaction.to);

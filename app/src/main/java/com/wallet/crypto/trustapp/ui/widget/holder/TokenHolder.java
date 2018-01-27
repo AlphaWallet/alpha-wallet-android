@@ -16,11 +16,12 @@ import java.math.BigDecimal;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
-    private final TextView symbol;
-    private final TextView balance;
-    private final ImageView icon;
+    public final TextView symbol;
+    public final TextView balance;
+    public final ImageView icon;
+    public final TextView arrayBalance;
 
-    private Token token;
+    public Token token;
     private OnTokenClickListener onTokenClickListener;
 
     public TokenHolder(int resId, ViewGroup parent) {
@@ -29,6 +30,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         symbol = findViewById(R.id.symbol);
         balance = findViewById(R.id.balance);
         icon = findViewById(R.id.logo);
+        arrayBalance = findViewById(R.id.balanceArray);
         itemView.setOnClickListener(this);
     }
 
@@ -41,15 +43,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         try {
             //customise the token display according to token contents
-            data.tokenInfo.setupContent(icon, symbol);
-
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
-            BigDecimal ethBalance = token.tokenInfo.decimals > 0
-                    ? token.balance.divide(decimalDivisor) : token.balance;
-            String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                    ? "0"
-                    : ethBalance.toPlainString();
-            this.balance.setText(value);
+            data.tokenInfo.setupContent(this);
         } catch (Exception e) {
             fillEmpty();
         }

@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
 import com.wallet.crypto.trustapp.ui.AddTokenActivity;
+import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
+
+import java.math.BigDecimal;
 
 public class TokenInfo implements Parcelable, TokenInterface {
     public final String address;
@@ -57,8 +60,17 @@ public class TokenInfo implements Parcelable, TokenInterface {
     }
 
     @Override
-    public void setupContent(ImageView icon, TextView symbol) {
-        symbol.setText(this.symbol);
+    public void setupContent(TokenHolder holder) {
+        holder.symbol.setText(this.symbol);
+        BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, decimals));
+        BigDecimal ethBalance = decimals > 0
+                ? holder.token.balance.divide(decimalDivisor) : holder.token.balance;
+        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
+                ? "0"
+                : ethBalance.toPlainString();
+        holder.balance.setText(value);
+        holder.balance.setVisibility(View.VISIBLE);
+        holder.arrayBalance.setVisibility(View.GONE);
     }
 
     @Override

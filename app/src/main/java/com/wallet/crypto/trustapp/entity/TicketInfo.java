@@ -9,7 +9,10 @@ import android.widget.TextView;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.repository.entity.RealmTokenInfo;
 import com.wallet.crypto.trustapp.ui.AddTokenActivity;
+import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
+
+import org.web3j.abi.datatypes.generated.Uint16;
 
 /**
  * Created by James on 20/01/2018.
@@ -30,10 +33,30 @@ public class TicketInfo extends TokenInfo implements TokenInterface
     }
 
     @Override
-    public void setupContent(ImageView icon, TextView symbol)
+    public void setupContent(TokenHolder tokenHolder)
     {
-        symbol.setText(this.name);
-        icon.setImageResource(R.mipmap.ic_alpha);
+        tokenHolder.symbol.setText(this.name);
+        tokenHolder.icon.setImageResource(R.mipmap.ic_alpha);
+        tokenHolder.balance.setVisibility(View.GONE);
+        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
+
+        //form balance array for ID's
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Uint16 id : ((Ticket)tokenHolder.token).balanceArray)
+        {
+            if (!first)
+            {
+                sb.append(", ");
+            }
+            first = false;
+
+            Integer value = id.getValue().intValue();
+            sb.append(value.toString());
+        }
+
+        tokenHolder.arrayBalance.setText(sb.toString());
     }
 
     @Override

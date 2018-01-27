@@ -3,7 +3,6 @@ package com.wallet.crypto.trustapp.repository;
 import com.wallet.crypto.trustapp.entity.Wallet;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;

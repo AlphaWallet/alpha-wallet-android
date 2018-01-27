@@ -25,7 +25,7 @@ public class TotalBalanceHolder extends BinderViewHolder<BigDecimal> {
     @Override
     public void bind(@Nullable BigDecimal data, @NonNull Bundle addition) {
         title.setText(data == null
-            ? ""
+            ? "--"
             : "$" + data.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());
     }
 }

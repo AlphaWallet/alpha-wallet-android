@@ -26,6 +26,7 @@ import java.math.RoundingMode;
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1005;
+    private static final String EMPTY_BALANCE = "\u2014\u2014";
 
     private final TextView symbol;
     private final TextView balanceEth;
@@ -57,13 +58,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
             BigDecimal ethBalance = token.tokenInfo.decimals > 0
                     ? token.balance.divide(decimalDivisor) : token.balance;
-            String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                    ? "0"
-                    : ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+            ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
+            String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
             this.balanceEth.setText(value);
             TokenTicker ticker = token.ticker;
             if (ticker == null) {
-                this.balanceCurrency.setVisibility(View.GONE);
+                this.balanceCurrency.setText(EMPTY_BALANCE);
                 fillIcon(null, R.mipmap.token_logo);
             } else {
                 fillCurrency(ethBalance, ticker);
@@ -90,12 +90,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     private void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                ? "\u2014"
+                ? EMPTY_BALANCE
                 : ethBalance.multiply(new BigDecimal(ticker.price))
                 .setScale(2, RoundingMode.HALF_UP)
                 .stripTrailingZeros()
                 .toPlainString();
-        this.balanceCurrency.setVisibility(View.VISIBLE);
         String formattedPercents = "";
         int color = Color.RED;
         try {
@@ -114,8 +113,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     private void fillEmpty() {
         balanceEth.setText(R.string.NA);
-        balanceCurrency.setVisibility(View.GONE);
-//        balance.setText(R.string.minus);
+        balanceCurrency.setText(EMPTY_BALANCE);
     }
 
     @Override

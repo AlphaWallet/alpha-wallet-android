@@ -18,7 +18,9 @@ public class TotalBalanceSortedItem extends SortedItem<BigDecimal> {
     @Override
     public boolean areContentsTheSame(SortedItem newItem) {
         return newItem.viewType == viewType
-                && ((TotalBalanceSortedItem) newItem).value.compareTo(value) == 0;
+                || (((TotalBalanceSortedItem) newItem).value == null && value == null)
+                || (((TotalBalanceSortedItem) newItem).value != null && value != null
+                    && ((TotalBalanceSortedItem) newItem).value.compareTo(value) == 0);
     }
 
     @Override

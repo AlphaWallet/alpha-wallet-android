@@ -55,6 +55,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
              notifyItemMoved(fromPosition, toPosition);
          }
      });
+    private TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
     public TokensAdapter(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
@@ -95,6 +96,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void setTokens(Token[] tokens) {
         items.beginBatchedUpdates();
         items.clear();
+        items.add(total);
         for (int i = 0; i < tokens.length; i++) {
             items.add(new TokenSortedItem(tokens[i], 10 + i));
         }
@@ -102,7 +104,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void setTotal(BigDecimal totalInCurrency) {
-        items.add(new TotalBalanceSortedItem(totalInCurrency));
+        total = new TotalBalanceSortedItem(totalInCurrency);
+        items.add(total);
     }
 
     public void clear() {

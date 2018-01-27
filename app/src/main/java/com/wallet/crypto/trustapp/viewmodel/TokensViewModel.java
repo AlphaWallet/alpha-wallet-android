@@ -72,14 +72,23 @@ public class TokensViewModel extends BaseViewModel {
         this.tokens.setValue(tokens);
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
+            showTotalBalance(tokens);
+        }
+    }
 
-            if (tokens.length > 1 && tokens[1].ticker == null) {
-                return; // Show than have ticker for tokens.
+    private void showTotalBalance(Token[] tokens) {
+        boolean allTokensHasTicker = true;
+        for (Token token : tokens) {
+            if (token.ticker == null) {
+                allTokensHasTicker = false;
+                break;
             }
-            BigDecimal total = new BigDecimal("0");
+        }
+        BigDecimal total = null;
+        if (allTokensHasTicker) {
+            total = new BigDecimal("0");
             for (Token token : tokens) {
-                if (token.balance != null
-                        && token.ticker != null
+                if (token.balance != null && token.ticker != null
                         && token.balance.compareTo(BigDecimal.ZERO) != 0) {
                     BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
                     BigDecimal ethBalance = token.tokenInfo.decimals > 0
@@ -89,10 +98,11 @@ public class TokensViewModel extends BaseViewModel {
                 }
             }
             total = total.setScale(2, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
-            if (total.compareTo(BigDecimal.ZERO) != 0) {
-                this.total.postValue(total);
+            if (total.compareTo(BigDecimal.ZERO) == 0) {
+                total = null;
             }
         }
+        this.total.postValue(total);
     }
 
     public void showAddToken(Context context) {

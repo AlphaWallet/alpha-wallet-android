@@ -8,7 +8,6 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;

@@ -20,7 +20,6 @@ import com.wallet.crypto.trustapp.viewmodel.TransactionDetailViewModel;
 import com.wallet.crypto.trustapp.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Locale;

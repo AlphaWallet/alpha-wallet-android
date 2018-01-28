@@ -1,44 +1,42 @@
 package com.wallet.crypto.trustapp.di;
 
-import android.content.Context;
-
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.interact.AddTokenInteract;
+import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
+import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.SetupTokensInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
+import com.wallet.crypto.trustapp.interact.TicketTransferInteract;
 import com.wallet.crypto.trustapp.interact.UseTokenInteract;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
+import com.wallet.crypto.trustapp.router.ConfirmationRouter;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
-import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.SignatureDisplayRouter;
 import com.wallet.crypto.trustapp.router.TicketTransferRouter;
-import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModelFactory;
+import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
+import com.wallet.crypto.trustapp.viewmodel.TicketTransferViewModelFactory;
 import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by James on 22/01/2018.
+ * Created by James on 28/01/2018.
  */
 
 @Module
-public class UseTokenModule {
+public class TicketTransferModule
+{
     @Provides
-    UseTokenViewModelFactory useTokenViewModelFactory(
-            UseTokenInteract useTokenInteract,
+    TicketTransferViewModelFactory ticketTransferViewModelFactory(
+            TicketTransferInteract ticketTransferInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            SignatureGenerateInteract signatureGenerateInteract,
-            MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
-            SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
-        return new UseTokenViewModelFactory(
-                useTokenInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract);
+        return new TicketTransferViewModelFactory(
+                ticketTransferInteract, findDefaultWalletInteract, ticketTransferRouter, findDefaultNetworkInteract);
     }
 
     @Provides
@@ -48,10 +46,10 @@ public class UseTokenModule {
     }
 
     @Provides
-    UseTokenInteract provideUseTokenInteract(
+    TicketTransferInteract provideTicketTransferInteract(
             TokenRepositoryType tokenRepository,
             WalletRepositoryType walletRepository) {
-        return new UseTokenInteract(walletRepository, tokenRepository);
+        return new TicketTransferInteract(walletRepository, tokenRepository);
     }
 
     @Provides
@@ -60,22 +58,7 @@ public class UseTokenModule {
     }
 
     @Provides
-    MyTokensRouter provideMyTokensRouter() {
-        return new MyTokensRouter();
-    }
-
-    @Provides
-    TicketTransferRouter tiketTransferRouter() {
+    TicketTransferRouter provideTicketTransferRouter() {
         return new TicketTransferRouter();
-    }
-
-    @Provides
-    SignatureDisplayRouter provideSignatureDisplayRouter() {
-        return new SignatureDisplayRouter();
-    }
-
-    @Provides
-    SignatureGenerateInteract provideSignatureGenerateInteract(WalletRepositoryType walletRepository) {
-        return new SignatureGenerateInteract(walletRepository);
     }
 }

@@ -34,6 +34,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView price;
     public TextView balance;
 
+    private String address;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -48,6 +50,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         String tDate = getIntent().getStringExtra(C.EXTRA_TICKET_DATE);
         double tPrice = getIntent().getDoubleExtra(C.EXTRA_TICKET_PRICE, 0);
         double dbBalance = getIntent().getDoubleExtra(C.EXTRA_TOKEN_BALANCE ,0);
+        address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
 
         int tBalance = (int)dbBalance;
 
@@ -91,7 +94,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
             } break;
             case R.id.button_transfer: {
-
+                viewModel.showTransferToken(this, address);
             } break;
         }
     }

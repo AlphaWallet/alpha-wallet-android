@@ -9,6 +9,7 @@ import com.wallet.crypto.trustapp.ui.SendActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
 import com.wallet.crypto.trustapp.ui.SignatureDisplayActivity;
 import com.wallet.crypto.trustapp.ui.SplashActivity;
+import com.wallet.crypto.trustapp.ui.TicketTransferActivity;
 import com.wallet.crypto.trustapp.ui.TokensActivity;
 import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;
@@ -73,4 +74,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SignatureModule.class)
 	abstract SignatureDisplayActivity bindSignatureDisplayActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TicketTransferModule.class)
+	abstract TicketTransferActivity bindTicketTransferActivity();
 }

@@ -16,6 +16,7 @@ import com.wallet.crypto.trustapp.interact.UseTokenInteract;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.SignatureDisplayRouter;
+import com.wallet.crypto.trustapp.router.TicketTransferRouter;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,7 @@ public class UseTokenViewModel extends BaseViewModel {
     private final UseTokenInteract useTokenInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MyTokensRouter myTokensRouter;
+    private final TicketTransferRouter ticketTransferRouter;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final SignatureDisplayRouter signatureDisplayRouter;
 
@@ -47,6 +49,7 @@ public class UseTokenViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
+            TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.useTokenInteract = useTokenInteract;
@@ -55,6 +58,7 @@ public class UseTokenViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.signatureDisplayRouter = signatureDisplayRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
+        this.ticketTransferRouter = ticketTransferRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -104,6 +108,10 @@ public class UseTokenViewModel extends BaseViewModel {
         progress.postValue(false);
         //write to screen
         signature.setValue(message);
+    }
+
+    public void showTransferToken(Context context, String address) {
+        ticketTransferRouter.open(context, address);
     }
 
     private void onDefaultWallet(Wallet wallet) {

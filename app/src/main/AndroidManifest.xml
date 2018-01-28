@@ -85,6 +85,10 @@
             android:label="@string/title_send_settings" />
 
         <activity
+            android:name=".ui.TicketTransferActivity"
+            android:label="@string/ticket_transfer_title" />
+
+        <activity
             android:name=".ui.CustomPinActivity"
             />
 

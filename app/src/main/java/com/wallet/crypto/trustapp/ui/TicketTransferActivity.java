@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,7 +72,7 @@ public class TicketTransferActivity extends BaseActivity
         systemView = findViewById(R.id.system_view);
         systemView.hide();
 
-        setTitle(getString(R.string.title_send));
+        setTitle(getString(R.string.ticket_transfer_title));
 
         name = findViewById(R.id.textViewName);
         ids = findViewById(R.id.textViewIDs);
@@ -81,6 +82,12 @@ public class TicketTransferActivity extends BaseActivity
 
         viewModel = ViewModelProviders.of(this, ticketTransferViewModelFactory)
                 .get(TicketTransferViewModel.class);
+
+        ImageButton scanBarcodeButton = findViewById(R.id.scan_barcode_button);
+        scanBarcodeButton.setOnClickListener(view -> {
+            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+        });
     }
 
     @Override

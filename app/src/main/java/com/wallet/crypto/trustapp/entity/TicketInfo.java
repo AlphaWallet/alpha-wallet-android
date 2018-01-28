@@ -40,11 +40,17 @@ public class TicketInfo extends TokenInfo implements TokenInterface
         tokenHolder.balance.setVisibility(View.GONE);
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
 
-        //form balance array for ID's
+        String ids = populateIDs(tokenHolder.token);
+        tokenHolder.arrayBalance.setText(ids);
+    }
+
+    @Override
+    public String populateIDs(Token token)
+    {
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (Uint16 id : ((Ticket)tokenHolder.token).balanceArray)
+        for (Uint16 id : ((Ticket)token).balanceArray)
         {
             if (!first)
             {
@@ -54,9 +60,10 @@ public class TicketInfo extends TokenInfo implements TokenInterface
 
             Integer value = id.getValue().intValue();
             sb.append(value.toString());
+            displayIDs = sb.toString();
         }
 
-        tokenHolder.arrayBalance.setText(sb.toString());
+        return displayIDs;
     }
 
     @Override
@@ -79,6 +86,6 @@ public class TicketInfo extends TokenInfo implements TokenInterface
 
     public void clickReact(TokensViewModel viewModel, Context context, int balance)
     {
-        viewModel.showUseToken(context, name, venue, date, price, balance);
+        viewModel.showUseToken(context, name, venue, date, address, price, balance);
     }
 }

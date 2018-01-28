@@ -15,4 +15,5 @@ public interface TokenInterface {
     void setupContent(TokenHolder tokenHolder);
     void addTokenSetupPage(AddTokenActivity layout);
     void storeRealmData(RealmTokenInfo obj);
+    String populateIDs(Token token);
 }

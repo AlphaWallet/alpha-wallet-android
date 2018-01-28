@@ -19,6 +19,8 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.entity.Ticket;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
@@ -29,8 +31,10 @@ import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModelFactory;
 import com.wallet.crypto.trustapp.widget.SystemView;
 
 import org.ethereum.geth.Address;
+import org.web3j.abi.datatypes.generated.Uint16;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -57,6 +61,7 @@ public class TicketTransferActivity extends BaseActivity
     private EditText toAddressText;
     private EditText idsText;
     private TextInputLayout toInputLayout;
+    private TextInputLayout amountInputLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,6 +84,10 @@ public class TicketTransferActivity extends BaseActivity
         toInputLayout = findViewById(R.id.to_input_layout);
         toAddressText = findViewById(R.id.send_to_address);
         idsText = findViewById(R.id.send_ids);
+        amountInputLayout = findViewById(R.id.amount_input_layout);
+
+        name.setText(address);
+        ids.setText("...");
 
         viewModel = ViewModelProviders.of(this, ticketTransferViewModelFactory)
                 .get(TicketTransferViewModel.class);
@@ -88,6 +97,14 @@ public class TicketTransferActivity extends BaseActivity
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+
+        viewModel.ticket().observe(this, this::onTicket);
+    }
+
+    private void onTicket(Ticket ticket) {
+        name.setText(ticket.tokenInfo.name);
+        String idStr = ticket.tokenInfo.populateIDs(ticket);
+        ids.setText(idStr);
     }
 
     @Override
@@ -136,7 +153,7 @@ public class TicketTransferActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(address);
     }
 
     private void onNext() {
@@ -148,19 +165,20 @@ public class TicketTransferActivity extends BaseActivity
             inputValid = false;
         }
         final String amount = idsText.getText().toString();
-        /*if (!isValidAmount(amount)) {
+        List<Uint16> idSendList = viewModel.ticket().getValue().parseIDList(amount);
+
+        if (idSendList == null || idSendList.isEmpty())
+        {
             amountInputLayout.setError(getString(R.string.error_invalid_amount));
             inputValid = false;
-        }*/
+        }
 
         if (!inputValid) {
             return;
         }
 
         toInputLayout.setErrorEnabled(false);
-
-        //BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amount, decimals);
-        //viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens);
+        viewModel.openConfirmation(this, to, amount);
     }
 
     boolean isAddressValid(String address) {

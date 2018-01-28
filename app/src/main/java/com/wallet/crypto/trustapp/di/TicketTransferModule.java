@@ -33,10 +33,12 @@ public class TicketTransferModule
     TicketTransferViewModelFactory ticketTransferViewModelFactory(
             TicketTransferInteract ticketTransferInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
+            FetchTokensInteract fetchTokensInteract,
             TicketTransferRouter ticketTransferRouter,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            ConfirmationRouter confirmationRouter) {
         return new TicketTransferViewModelFactory(
-                ticketTransferInteract, findDefaultWalletInteract, ticketTransferRouter, findDefaultNetworkInteract);
+                ticketTransferInteract, findDefaultWalletInteract, fetchTokensInteract, ticketTransferRouter, findDefaultNetworkInteract, confirmationRouter);
     }
 
     @Provides
@@ -53,8 +55,18 @@ public class TicketTransferModule
     }
 
     @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
+    }
+
+    @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
+    }
+
+    @Provides
+    ConfirmationRouter provideConfirmationRouter() {
+        return new ConfirmationRouter();
     }
 
     @Provides

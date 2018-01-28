@@ -78,6 +78,7 @@
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeOptions="actionUnspecified"
                 android:inputType="numberDecimal"
+                android:digits="0123456789,"
                 android:maxLines="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

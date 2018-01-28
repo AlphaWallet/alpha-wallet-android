@@ -49,6 +49,8 @@ public class ConfirmationActivity extends BaseActivity {
     private BigInteger amount;
     private int decimals;
     private String contractAddress;
+    private String amountStr;
+    private boolean confirmationForTicketTransfer = false; //TODO: Refactor this!
     private boolean confirmationForTokenTransfer = false;
 
     @Override
@@ -72,16 +74,26 @@ public class ConfirmationActivity extends BaseActivity {
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        confirmationForTicketTransfer = getIntent().getBooleanExtra(C.EXTRA_TICKET_VENUE, false);
+        amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
 
         confirmationForTokenTransfer = contractAddress != null;
+        if (!confirmationForTicketTransfer) {
+            amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        }
 
         toAddressText.setText(toAddress);
+        String amountString;
 
-        String amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+        if (!confirmationForTicketTransfer) {
+            amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+        } else {
+            amountString = amountStr;
+        }
+
         valueText.setText(amountString);
         valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
 

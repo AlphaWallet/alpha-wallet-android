@@ -3,7 +3,10 @@ package com.wallet.crypto.trustapp.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.web3j.abi.datatypes.generated.Uint16;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
@@ -40,5 +43,10 @@ public class Token implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(tokenInfo, flags);
         dest.writeString(balance.toString());
+    }
+
+    public List<Uint16> parseIDList(String userList)
+    {
+        return null;
     }
 }

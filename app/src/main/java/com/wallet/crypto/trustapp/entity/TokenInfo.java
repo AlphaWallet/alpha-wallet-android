@@ -90,6 +90,12 @@ public class TokenInfo implements Parcelable, TokenInterface {
         obj.setAddedTime(System.currentTimeMillis());
     }
 
+    @Override
+    public String populateIDs(Token token)
+    {
+        return "";
+    }
+
     public void clickReact(TokensViewModel viewModel, Context context, int balance)
     {
         viewModel.showSendToken(context, address, symbol, decimals);

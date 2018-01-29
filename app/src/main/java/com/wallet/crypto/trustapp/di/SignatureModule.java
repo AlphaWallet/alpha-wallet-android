@@ -1,11 +1,13 @@
 package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
+import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
+import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.viewmodel.SignatureDisplayModelFactory;
@@ -24,9 +26,10 @@ public class SignatureModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            FetchTokensInteract fetchTokensInteract) {
         return new SignatureDisplayModelFactory(
-                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract);
+                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract);
     }
 
     @Provides
@@ -38,6 +41,11 @@ public class SignatureModule {
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 
     @Provides

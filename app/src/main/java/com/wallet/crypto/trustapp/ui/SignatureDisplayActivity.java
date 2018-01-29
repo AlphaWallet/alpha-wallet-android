@@ -8,7 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +55,12 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     //private UseTokenViewModel viewModel;
     private SystemView systemView;
 
+
+    public TextView name;
+    public TextView ids;
+    private EditText idsText;
+    private TextInputLayout amountInputLayout;
+
     private Wallet wallet;
     private Ticket ticket;
 
@@ -68,17 +76,24 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
 
         toolbar();
 
-        ticket = (Ticket)getIntent().getParcelableExtra(TICKET);
+        ticket = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
-        ((TextView) findViewById(R.id.address_suggestion)).setText(ticket.ticketInfo.name);
-        ((TextView) findViewById(R.id.address)).setText(wallet.address);
         findViewById(R.id.advanced_options).setOnClickListener(this);
         final Bitmap qrCode = createQRImage(wallet.address);
         ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
 
+        name = findViewById(R.id.textViewName);
+        ids = findViewById(R.id.textViewIDs);
+        idsText = findViewById(R.id.send_ids);
+        amountInputLayout = findViewById(R.id.amount_input_layout);
+
+        name.setText(ticket.ticketInfo.name);
+        ids.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
+
         viewModel = ViewModelProviders.of(this, signatureDisplayModelFactory)
                 .get(SignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
+        viewModel.ticket().observe(this, this::onTicket);
     }
 
     private Bitmap createQRImage(String address) {
@@ -104,7 +119,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(ticket.ticketInfo.address);
     }
 
     @Override
@@ -122,5 +137,11 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         String sig = new String(sigBytes);
         final Bitmap qrCode = createQRImage(sig);
         ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+    }
+
+    private void onTicket(Ticket ticket) {
+        name.setText(ticket.tokenInfo.name);
+        String idStr = ticket.tokenInfo.populateIDs(ticket.balanceArray, false);
+        ids.setText(idStr);
     }
 }

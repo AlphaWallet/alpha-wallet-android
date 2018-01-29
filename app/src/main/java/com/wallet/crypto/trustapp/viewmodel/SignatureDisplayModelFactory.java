@@ -9,6 +9,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
+import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
@@ -26,21 +27,24 @@ public class SignatureDisplayModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final FetchTokensInteract fetchTokensInteract;
 
     public SignatureDisplayModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            FetchTokensInteract fetchTokensInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.createTransactionInteract = createTransactionInteract;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract);
+        return (T) new SignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract);
     }
 }

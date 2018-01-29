@@ -14,6 +14,8 @@ import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
 
 import org.web3j.abi.datatypes.generated.Uint16;
 
+import java.util.List;
+
 /**
  * Created by James on 20/01/2018.
  */
@@ -40,18 +42,19 @@ public class TicketInfo extends TokenInfo implements TokenInterface
         tokenHolder.balance.setVisibility(View.GONE);
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
 
-        String ids = populateIDs(tokenHolder.token);
+        String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
         tokenHolder.arrayBalance.setText(ids);
     }
 
     @Override
-    public String populateIDs(Token token)
+    public String populateIDs(List<Uint16> idArray, boolean keepZeros)
     {
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (Uint16 id : ((Ticket)token).balanceArray)
+        for (Uint16 id : idArray)
         {
+            if (!keepZeros && id.getValue().intValue() == 0) continue;
             if (!first)
             {
                 sb.append(", ");

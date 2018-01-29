@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenFactory;
@@ -39,6 +40,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -219,6 +221,19 @@ public class TokenRepository implements TokenRepositoryType {
             indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
         }
 
+        //remove all zero values
+        //indicies.removeIf(val -> val.getValue().intValue() == 0);  - Java 8 only :(
+
+        /*for(Iterator valItr = indicies.iterator();
+            valItr.hasNext();)
+        {
+            Uint16 val = (Uint16)valItr.next();
+            if(val.getValue().intValue() == 0)
+            {
+                valItr.remove();
+            }
+        }*/
+
         return indicies;
     }
 
@@ -376,6 +391,21 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static byte[] createTokenTransferData(String to, BigInteger tokenAmount) {
         List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenAmount));
+
+        List<TypeReference<?>> returnTypes = Collections.singletonList(new TypeReference<Bool>() {
+        });
+
+        Function function = new Function("transfer", params, returnTypes);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    public static byte[] createTicketTransferData(String to, String ids) {
+        //params are: Address, List<Uint16> of ticket indicies
+        //convert to ticket. Re-factor this so there's no code repetition
+        Ticket t = new Ticket(null, null);
+        List ticketIndicies = t.parseIDList(ids); //just convert straight into a list here because we already converted into indicies
+        List<Type> params = Arrays.asList(new Address(to), new DynamicArray<Uint16>(ticketIndicies));
 
         List<TypeReference<?>> returnTypes = Collections.singletonList(new TypeReference<Bool>() {
         });

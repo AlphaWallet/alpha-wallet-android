@@ -53,10 +53,44 @@ public class Ticket extends Token implements Parcelable
                 //remove whitespace
                 String trim = id.trim();
                 Uint16 thisId = new Uint16(Integer.parseInt(trim));
+                idList.add(thisId);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = null;
+        }
+
+        return idList;
+    }
+
+    public List<Uint16> parseIndexList(String userList)
+    {
+        //read given indicies and convert into internal format, error checking to ensure
+        List<Uint16> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = userList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                Uint16 thisId = new Uint16(Integer.parseInt(trim));
 
                 if (thisId.getValue().intValue() > 0)
                 {
-                    idList.add(thisId);
+                    //TODO: store all ticket values as Integer.
+                    //find index in balance array
+                    for (int index = 0; index < balanceArray.size(); index++)
+                    {
+                        if (balanceArray.get(index).getValue().intValue() == thisId.getValue().intValue())
+                        {
+                            Uint16 value = new Uint16(index);
+                            idList.add(value);
+                        }
+                    }
                 }
             }
         }

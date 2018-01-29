@@ -44,9 +44,4 @@ public class Token implements Parcelable {
         dest.writeParcelable(tokenInfo, flags);
         dest.writeString(balance.toString());
     }
-
-    public List<Uint16> parseIDList(String userList)
-    {
-        return null;
-    }
 }

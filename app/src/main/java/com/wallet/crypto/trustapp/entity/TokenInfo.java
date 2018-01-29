@@ -12,7 +12,10 @@ import com.wallet.crypto.trustapp.ui.AddTokenActivity;
 import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
 
+import org.web3j.abi.datatypes.generated.Uint16;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 public class TokenInfo implements Parcelable, TokenInterface {
     public final String address;
@@ -91,7 +94,7 @@ public class TokenInfo implements Parcelable, TokenInterface {
     }
 
     @Override
-    public String populateIDs(Token token)
+    public String populateIDs(List<Uint16> d, boolean keepZeros)
     {
         return "";
     }

@@ -153,7 +153,15 @@ public class ConfirmationActivity extends BaseActivity {
     private void onSend() {
         GasSettings gasSettings = viewModel.gasSettings().getValue();
 
-        if (!confirmationForTokenTransfer) {
+        if (confirmationForTicketTransfer) {
+            viewModel.createTicketTransfer(
+                    fromAddressText.getText().toString(),
+                    toAddressText.getText().toString(),
+                    contractAddress,
+                    amountStr,
+                    gasSettings.gasPrice,
+                    gasSettings.gasLimit);
+        } else if (!confirmationForTokenTransfer) {
             viewModel.createTransaction(
                     fromAddressText.getText().toString(),
                     toAddressText.getText().toString(),

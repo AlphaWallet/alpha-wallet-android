@@ -6,6 +6,8 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.Ticket;
+import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.AddTokenInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
@@ -68,8 +70,8 @@ public class UseTokenViewModel extends BaseViewModel {
         return signature;
     }
 
-    public void showRotatingSignature(Context context) {
-        signatureDisplayRouter.open(context, defaultWallet.getValue());
+    public void showRotatingSignature(Context context, Ticket token) {
+        signatureDisplayRouter.open(context, defaultWallet.getValue(), token);
 
     }
 
@@ -87,31 +89,8 @@ public class UseTokenViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onWalletFetchComplete() {
-
-    }
-
-    public void startCycleSignature() {
-        progress.postValue(true);
-        cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
-                        .subscribe(this::onSignedMessage, this::onError))
-                .subscribe(l -> {}, t -> {});
-    }
-
-    private void onMessageGenerated() {
-        progress.postValue(false);
-    }
-
-    private void onSignedMessage(String message) {
-        progress.postValue(false);
-        //write to screen
-        signature.setValue(message);
-    }
-
-    public void showTransferToken(Context context, String address) {
-        ticketTransferRouter.open(context, address);
+    public void showTransferToken(Context context, Ticket ticket) {
+        ticketTransferRouter.open(context, ticket);
     }
 
     private void onDefaultWallet(Wallet wallet) {

@@ -15,29 +15,44 @@ import java.util.List;
 
 public class Ticket extends Token implements Parcelable
 {
-    public final List<Uint16> balanceArray;
+    public final TicketInfo ticketInfo;
+    public final List<Integer> balanceArray;
 
-    public Ticket(TokenInfo tokenInfo, List<Uint16> balances) {
+    public Ticket(TicketInfo tokenInfo, List<Integer> balances) {
         super(tokenInfo, BigDecimal.ZERO);
         this.balanceArray = balances;
+        this.ticketInfo = tokenInfo;
     }
 
     private Ticket(Parcel in) {
-        super(in);
+        super(in, true);
+        //now read in ticket
+        ticketInfo = in.readParcelable(TicketInfo.class.getClassLoader());
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-        balanceArray = new ArrayList<Uint16>();
+        balanceArray = new ArrayList<Integer>();
         for (Object o : readObjArray)
         {
-            Uint16 val = (Uint16)o;
+            Integer val = (Integer)o;
             balanceArray.add(val);
         }
     }
 
+    public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
+        @Override
+        public Ticket createFromParcel(Parcel in) {
+            return new Ticket(in);
+        }
+
+        @Override
+        public Ticket[] newArray(int size) {
+            return new Ticket[size];
+        }
+    };
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(tokenInfo, flags);
+        dest.writeParcelable(ticketInfo, flags);
         dest.writeArray(balanceArray.toArray());
-        dest.writeString(balance.toString());
     }
 
     public List<Uint16> parseIDList(String userList)
@@ -64,10 +79,10 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
-    public List<Uint16> parseIndexList(String userList)
+    public List<Integer> parseIndexList(String userList)
     {
         //read given indicies and convert into internal format, error checking to ensure
-        List<Uint16> idList = new ArrayList<>();
+        List<Integer> idList = new ArrayList<>();
 
         try
         {
@@ -77,19 +92,25 @@ public class Ticket extends Token implements Parcelable
             {
                 //remove whitespace
                 String trim = id.trim();
-                Uint16 thisId = new Uint16(Integer.parseInt(trim));
+                Integer thisId = Integer.parseInt(trim);
 
-                if (thisId.getValue().intValue() > 0)
+                if (thisId > 0)
                 {
-                    //TODO: store all ticket values as Integer.
+                    //TODO: store all values as a map
                     //find index in balance array
+                    boolean added = false;
                     for (int index = 0; index < balanceArray.size(); index++)
                     {
-                        if (balanceArray.get(index).getValue().intValue() == thisId.getValue().intValue())
+                        if (balanceArray.get(index) == thisId)
                         {
-                            Uint16 value = new Uint16(index);
-                            idList.add(value);
+                            idList.add(index);
+                            added = true;
+                            break;
                         }
+                    }
+                    if (!added) {
+                        idList = null;
+                        break;
                     }
                 }
             }

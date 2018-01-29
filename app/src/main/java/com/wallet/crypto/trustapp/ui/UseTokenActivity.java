@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.entity.Ticket;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModelFactory;
@@ -16,6 +18,8 @@ import com.wallet.crypto.trustapp.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+
+import static com.wallet.crypto.trustapp.C.Key.TICKET;
 
 /**
  * Created by James on 22/01/2018.
@@ -35,6 +39,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView balance;
 
     private String address;
+    private Ticket ticket;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,14 +50,9 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         setContentView(R.layout.activity_use_token);
         toolbar();
 
-        String tName = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
-        String tVenue = getIntent().getStringExtra(C.EXTRA_TICKET_VENUE);
-        String tDate = getIntent().getStringExtra(C.EXTRA_TICKET_DATE);
-        double tPrice = getIntent().getDoubleExtra(C.EXTRA_TICKET_PRICE, 0);
-        double dbBalance = getIntent().getDoubleExtra(C.EXTRA_TOKEN_BALANCE ,0);
-        address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        ticket = getIntent().getParcelableExtra(TICKET);
 
-        int tBalance = (int)dbBalance;
+        TicketInfo info = ticket.ticketInfo;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -63,11 +63,12 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         price = findViewById(R.id.textViewPrice);
         balance = findViewById(R.id.textViewBalance);
 
-        name.setText(tName);
-        venue.setText(tVenue);
-        date.setText(tDate);
-        price.setText(String.valueOf(tPrice));
-        balance.setText(String.valueOf(tBalance));
+        name.setText(info.name);
+        venue.setText(info.venue);
+        date.setText(info.date);
+        price.setText(String.valueOf(info.price));
+        balance.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
+        address = info.address;
 
         viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)
                 .get(UseTokenViewModel.class);
@@ -88,13 +89,13 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     {
         switch (v.getId()) {
             case R.id.button_use: {
-                viewModel.showRotatingSignature(this);
+                viewModel.showRotatingSignature(this, ticket);
             } break;
             case R.id.button_sell: {
 
             } break;
             case R.id.button_transfer: {
-                viewModel.showTransferToken(this, address);
+                viewModel.showTransferToken(this, ticket);
             } break;
         }
     }

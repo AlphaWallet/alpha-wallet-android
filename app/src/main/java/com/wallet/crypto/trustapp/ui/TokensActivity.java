@@ -92,7 +92,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
 
     private void onTokenClick(View view, Token token) {
         Context context = view.getContext();
-        token.tokenInfo.clickReact(viewModel, context, token.balance.intValue());
+        token.tokenInfo.clickReact(viewModel, context, token.balance.intValue(), token);
     }
 
     @Override

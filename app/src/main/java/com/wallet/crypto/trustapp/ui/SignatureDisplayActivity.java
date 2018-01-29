@@ -19,6 +19,7 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.viewmodel.SignatureDisplayModel;
@@ -35,6 +36,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import android.util.Base64;
 
+import static com.wallet.crypto.trustapp.C.Key.TICKET;
 import static com.wallet.crypto.trustapp.C.Key.WALLET;
 
 /**
@@ -52,6 +54,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     private SystemView systemView;
 
     private Wallet wallet;
+    private Ticket ticket;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,8 +68,9 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
 
         toolbar();
 
+        ticket = (Ticket)getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
-        ((TextView) findViewById(R.id.address_suggestion)).setText("Entry Ticket");
+        ((TextView) findViewById(R.id.address_suggestion)).setText(ticket.ticketInfo.name);
         ((TextView) findViewById(R.id.address)).setText(wallet.address);
         findViewById(R.id.advanced_options).setOnClickListener(this);
         final Bitmap qrCode = createQRImage(wallet.address);

@@ -64,6 +64,7 @@ public abstract class C {
     public interface Key {
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
+        String TICKET = "ticket";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
     }
 }

@@ -40,6 +40,8 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.wallet.crypto.trustapp.C.Key.TICKET;
+
 /**
  * Created by James on 28/01/2018.
  */
@@ -57,6 +59,7 @@ public class TicketTransferActivity extends BaseActivity
     public TextView ids;
 
     private String address;
+    private Ticket ticket;
 
     private EditText toAddressText;
     private EditText idsText;
@@ -72,7 +75,8 @@ public class TicketTransferActivity extends BaseActivity
         setContentView(R.layout.activity_transfer_token);
         toolbar();
 
-        address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        ticket = getIntent().getParcelableExtra(TICKET);
+        address = ticket.ticketInfo.address;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -165,7 +169,7 @@ public class TicketTransferActivity extends BaseActivity
             inputValid = false;
         }
         final String amount = idsText.getText().toString();
-        List<Uint16> idSendList = viewModel.ticket().getValue().parseIndexList(amount);
+        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(amount);
 
         if (idSendList == null || idSendList.isEmpty())
         {
@@ -178,12 +182,8 @@ public class TicketTransferActivity extends BaseActivity
         }
 
         String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
-        List<Uint16> idStringList = viewModel.ticket().getValue().parseIDList(amount);
-        //now regenerate into a string
-        String ticketIDs = viewModel.ticket().getValue().tokenInfo.populateIDs(idStringList, false);
-
         toInputLayout.setErrorEnabled(false);
-        viewModel.openConfirmation(this, to, indexList, ticketIDs);
+        viewModel.openConfirmation(this, to, indexList, amount);
     }
 
     boolean isAddressValid(String address) {

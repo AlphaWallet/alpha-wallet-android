@@ -105,8 +105,8 @@ public class TokensViewModel extends BaseViewModel {
         sendTokenRouter.open(context, address, symbol, decimals);
     }
 
-    public void showUseToken(Context context, String name, String venue, String date, String address, double price, double balance) {
-        useTokenRouter.open(context, name, venue, date, address, price, balance);
+    public void showUseToken(Context context, String name, String venue, String date, String address, double price, double balance, Token token) {
+        useTokenRouter.open(context, name, venue, date, address, price, balance, token);
 
     }
 

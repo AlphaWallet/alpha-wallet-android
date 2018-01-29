@@ -30,7 +30,7 @@ public class TokenInfo implements Parcelable, TokenInterface {
         this.decimals = decimals;
     }
 
-    private TokenInfo(Parcel in) {
+    public TokenInfo(Parcel in) {
         address = in.readString();
         name = in.readString();
         symbol = in.readString();
@@ -94,12 +94,12 @@ public class TokenInfo implements Parcelable, TokenInterface {
     }
 
     @Override
-    public String populateIDs(List<Uint16> d, boolean keepZeros)
+    public String populateIDs(List<Integer> d, boolean keepZeros)
     {
         return "";
     }
 
-    public void clickReact(TokensViewModel viewModel, Context context, int balance)
+    public void clickReact(TokensViewModel viewModel, Context context, int balance, Token token)
     {
         viewModel.showSendToken(context, address, symbol, decimals);
     }

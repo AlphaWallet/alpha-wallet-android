@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.entity;
 
 
 import android.content.Context;
+import android.os.Parcel;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,6 +35,37 @@ public class TicketInfo extends TokenInfo implements TokenInterface
         this.price = price;
     }
 
+    private TicketInfo(Parcel in)
+    {
+        super(in);
+        this.venue = in.readString();
+        this.date = in.readString();
+        this.price = in.readDouble();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(address);
+        dest.writeString(name);
+        dest.writeString(symbol);
+        dest.writeInt(decimals);
+        dest.writeString(venue);
+        dest.writeString(date);
+        dest.writeDouble(price);
+    }
+
+    public static final Creator<TicketInfo> CREATOR = new Creator<TicketInfo>() {
+        @Override
+        public TicketInfo createFromParcel(Parcel in) {
+            return new TicketInfo(in);
+        }
+
+        @Override
+        public TicketInfo[] newArray(int size) {
+            return new TicketInfo[size];
+        }
+    };
+
     @Override
     public void setupContent(TokenHolder tokenHolder)
     {
@@ -47,22 +79,21 @@ public class TicketInfo extends TokenInfo implements TokenInterface
     }
 
     @Override
-    public String populateIDs(List<Uint16> idArray, boolean keepZeros)
+    public String populateIDs(List<Integer> idArray, boolean keepZeros)
     {
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (Uint16 id : idArray)
+        for (Integer id : idArray)
         {
-            if (!keepZeros && id.getValue().intValue() == 0) continue;
+            if (!keepZeros && id == 0) continue;
             if (!first)
             {
                 sb.append(", ");
             }
             first = false;
 
-            Integer value = id.getValue().intValue();
-            sb.append(value.toString());
+            sb.append(id.toString());
             displayIDs = sb.toString();
         }
 
@@ -87,8 +118,8 @@ public class TicketInfo extends TokenInfo implements TokenInterface
         obj.setPrice(price);
     }
 
-    public void clickReact(TokensViewModel viewModel, Context context, int balance)
+    public void clickReact(TokensViewModel viewModel, Context context, int balance, Token token)
     {
-        viewModel.showUseToken(context, name, venue, date, address, price, balance);
+        viewModel.showUseToken(context, name, venue, date, address, price, balance, token);
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class TokenFactory
 {
-    public Token CreateToken(TokenInfo tokenInfo, BigDecimal balance, List<Uint16> balances)
+    public Token CreateToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances)
     {
         Token thisToken;
         if (tokenInfo instanceof TicketInfo)
@@ -22,7 +22,7 @@ public class TokenFactory
             }
             else
             {
-                thisToken = new Ticket(tokenInfo, balances);
+                thisToken = new Ticket((TicketInfo)tokenInfo, balances);
             }
         }
         else

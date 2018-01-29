@@ -154,7 +154,7 @@ public class TokenRepository implements TokenRepositoryType {
         Token[] result = new Token[len];
         for (int i = 0; i < len; i++) {
             BigDecimal balance = null;
-            List<Uint16> balances = null;
+            List<Integer> balances = null;
             try {
                 balances = getBalanceArray(wallet, items[i]);
                 balance = getBalance(wallet, items[i]);
@@ -213,28 +213,18 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private List<Uint16> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
-        List<Uint16> indicies = null;
+    private List<Integer> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        List<Integer> result = new ArrayList<>();
         if (tokenInfo instanceof TicketInfo)
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-        }
-
-        //remove all zero values
-        //indicies.removeIf(val -> val.getValue().intValue() == 0);  - Java 8 only :(
-
-        /*for(Iterator valItr = indicies.iterator();
-            valItr.hasNext();)
-        {
-            Uint16 val = (Uint16)valItr.next();
-            if(val.getValue().intValue() == 0)
+            List<Uint16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            for (Uint16 val : indicies)
             {
-                valItr.remove();
+                result.add(val.getValue().intValue());
             }
-        }*/
-
-        return indicies;
+        }
+        return result;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception {

@@ -79,6 +79,7 @@ public class ConfirmationActivity extends BaseActivity {
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
+        String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
 
         confirmationForTokenTransfer = contractAddress != null;
         if (!confirmationForTicketTransfer) {
@@ -91,7 +92,7 @@ public class ConfirmationActivity extends BaseActivity {
         if (!confirmationForTicketTransfer) {
             amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
         } else {
-            amountString = amountStr;
+            amountString = tokenList;
         }
 
         valueText.setText(amountString);

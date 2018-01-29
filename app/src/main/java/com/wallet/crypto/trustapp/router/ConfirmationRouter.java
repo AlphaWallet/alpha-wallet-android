@@ -22,7 +22,7 @@ public class ConfirmationRouter {
         context.startActivity(intent);
     }
 
-    public void open(Context context, String to, String ids, String contractAddress, int decimals, String symbol) {
+    public void open(Context context, String to, String ids, String contractAddress, int decimals, String symbol, String ticketIDs) {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_TO_ADDRESS, to);
         intent.putExtra(C.EXTRA_AMOUNT, ids);
@@ -31,6 +31,7 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_TICKET_VENUE, true);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
+        intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIDs);
         context.startActivity(intent);
     }
 }

@@ -173,14 +173,17 @@ public class TicketTransferActivity extends BaseActivity
             inputValid = false;
         }
 
-        String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
-
         if (!inputValid) {
             return;
         }
 
+        String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
+        List<Uint16> idStringList = viewModel.ticket().getValue().parseIDList(amount);
+        //now regenerate into a string
+        String ticketIDs = viewModel.ticket().getValue().tokenInfo.populateIDs(idStringList, false);
+
         toInputLayout.setErrorEnabled(false);
-        viewModel.openConfirmation(this, to, indexList);
+        viewModel.openConfirmation(this, to, indexList, ticketIDs);
     }
 
     boolean isAddressValid(String address) {

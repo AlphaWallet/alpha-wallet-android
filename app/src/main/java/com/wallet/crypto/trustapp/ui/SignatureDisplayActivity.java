@@ -9,18 +9,23 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.entity.Address;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.SignaturePair;
 import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
@@ -29,6 +34,7 @@ import com.wallet.crypto.trustapp.viewmodel.SignatureDisplayModelFactory;
 import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.trustapp.widget.SystemView;
 
+import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -52,9 +58,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     @Inject
     protected SignatureDisplayModelFactory signatureDisplayModelFactory;
     private SignatureDisplayModel viewModel;
-    //private UseTokenViewModel viewModel;
     private SystemView systemView;
-
 
     public TextView name;
     public TextView ids;
@@ -71,9 +75,6 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_rotating_signature);
-        //systemView = findViewById(R.id.system_view);
-        //systemView.hide();
-
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
@@ -94,6 +95,26 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
                 .get(SignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
+
+        idsText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                final String balanceArray = idsText.getText().toString();
+                //convert to an index array
+                viewModel.newBalanceArray(balanceArray);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     private Bitmap createQRImage(String address) {
@@ -132,11 +153,21 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
-    private void onSignatureChanged(byte[] newSig) {
-        byte[] sigBytes = Base64.encode(newSig, Base64.DEFAULT);
-        String sig = new String(sigBytes);
-        final Bitmap qrCode = createQRImage(sig);
-        ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+    private void onSignatureChanged(SignaturePair sigPair) {
+        try
+        {
+            ByteArrayOutputStream qrMessage = new ByteArrayOutputStream();
+            qrMessage.write(sigPair.selection);
+            qrMessage.write(sigPair.signature);
+            byte[] sigBytes = Base64.encode(qrMessage.toByteArray(), Base64.DEFAULT);
+            String sig = new String(sigBytes);
+            final Bitmap qrCode = createQRImage(sig);
+            ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+        }
+        catch (Exception e)
+        {
+
+        }
     }
 
     private void onTicket(Ticket ticket) {

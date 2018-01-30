@@ -5,7 +5,9 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import com.wallet.crypto.trustapp.entity.MessagePair;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.SignaturePair;
 import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -16,6 +18,8 @@ import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
 
 
+import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import dagger.Provides;
@@ -38,7 +42,7 @@ public class SignatureDisplayModel extends BaseViewModel {
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<byte[]> signature = new MutableLiveData<>();
+    private final MutableLiveData<SignaturePair> signature = new MutableLiveData<>();
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
@@ -50,6 +54,7 @@ public class SignatureDisplayModel extends BaseViewModel {
     private Disposable cycleSignatureDisposable;
 
     private String address;
+    private BigInteger bitFieldLookup;
 
     SignatureDisplayModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -67,7 +72,7 @@ public class SignatureDisplayModel extends BaseViewModel {
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
-    public LiveData<byte[]> signature() {
+    public LiveData<SignaturePair> signature() {
         return signature;
     }
     public LiveData<Ticket> ticket() {
@@ -114,20 +119,35 @@ public class SignatureDisplayModel extends BaseViewModel {
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(defaultWallet.getValue())
+                        .getMessage(bitFieldLookup)
                         .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
     }
 
-    private void onSignMessage(String message) {
+    private void onSignMessage(MessagePair pair) {
         //now run this guy through the signed message system
         disposable = createTransactionInteract
-                .sign(defaultWallet.getValue(), message)
+                .sign(defaultWallet.getValue(), pair)
                 .subscribe(this::onSignedMessage, this::onError);
     }
 
-    private void onSignedMessage(byte[] signatureStr) {
-        signature.postValue(signatureStr);
+    private void onSignedMessage(SignaturePair sigPair) {
+        signature.postValue(sigPair);
+    }
+
+    public void newBalanceArray(String balanceArray) {
+        //convert to array of indicies
+        List<Integer> indexList = ticket.getValue().parseIndexList(balanceArray);
+        //convert this to a bitfield
+        if (indexList != null && indexList.size() > 0) {
+            bitFieldLookup = BigInteger.ZERO;
+            for (Integer i : indexList) {
+                BigInteger adder = BigInteger.valueOf(2).pow(i);
+                bitFieldLookup = bitFieldLookup.add(adder);
+            }
+
+            String hexVal = Integer.toHexString(bitFieldLookup.intValue());
+        }
     }
 
     private void onDefaultWallet(Wallet wallet) {

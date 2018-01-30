@@ -1,5 +1,6 @@
 package com.wallet.crypto.trustapp.interact;
 
+import com.wallet.crypto.trustapp.entity.MessagePair;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
@@ -9,6 +10,7 @@ import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import io.reactivex.Observable;
@@ -28,20 +30,16 @@ public class SignatureGenerateInteract {
         this.walletRepository = walletRepository;
     }
 
-    public Single<String> getMessage(Wallet wallet) {
+    //TODO: Sign message here not in the additional field
+    public Single<MessagePair> getMessage(BigInteger bitField) {
         return Single.fromCallable(() -> {
+            //convert biginteger to hex
+            String hexField = bitField.toString(16);
             long currentTime = System.currentTimeMillis();
             long minsT = currentTime / (60 * 1000);
             int minsTime = (int) minsT;
-            String plainMessage = new String(String.valueOf(minsTime));
-            //now sign this message with the wallet address
-
-            return plainMessage;
+            String plainMessage = hexField + "," + String.valueOf(minsTime);
+            return new MessagePair(hexField, plainMessage);
         });
-
-//        return walletRepository
-//                .fetchTransaction(wallet)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread());
     }
 }

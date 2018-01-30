@@ -88,35 +88,25 @@ public class Ticket extends Token implements Parcelable
         {
             String[] ids = userList.split(",");
 
-            for (String id : ids)
-            {
+            for (String id : ids) {
                 //remove whitespace
                 String trim = id.trim();
                 Integer thisId = Integer.parseInt(trim);
 
-                if (thisId > 0)
-                {
-                    //TODO: store all values as a map
-                    //find index in balance array
-                    boolean added = false;
-                    for (int index = 0; index < balanceArray.size(); index++)
-                    {
-                        if (balanceArray.get(index) == thisId)
-                        {
+                if (thisId > 0) {
+                    int index = balanceArray.indexOf(thisId);
+                    if (index > -1) {
+                        if (!idList.contains(index)) {  //just make sure they didn't already add this one
                             idList.add(index);
-                            added = true;
-                            break;
                         }
-                    }
-                    if (!added) {
+                    } else {
                         idList = null;
                         break;
                     }
                 }
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             idList = null;
         }
 

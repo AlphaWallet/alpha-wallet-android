@@ -36,7 +36,7 @@ public class SignatureGenerateInteract {
             //convert biginteger to hex
             String hexField = bitField.toString(16);
             long currentTime = System.currentTimeMillis();
-            long minsT = currentTime / (60 * 1000);
+            long minsT = currentTime / (30 * 1000);
             int minsTime = (int) minsT;
             String plainMessage = hexField + "," + String.valueOf(minsTime);
             return new MessagePair(hexField, plainMessage);

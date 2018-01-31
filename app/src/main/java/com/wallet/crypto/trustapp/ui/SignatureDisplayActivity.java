@@ -35,6 +35,7 @@ import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.trustapp.widget.SystemView;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -95,6 +96,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
                 .get(SignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
+        viewModel.time().observe(this, this::onTime);
 
         idsText.addTextChangedListener(new TextWatcher()
         {
@@ -156,12 +158,12 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     private void onSignatureChanged(SignaturePair sigPair) {
         try
         {
-            ByteArrayOutputStream qrMessage = new ByteArrayOutputStream();
-            qrMessage.write(sigPair.selection);
-            qrMessage.write(sigPair.signature);
-            byte[] sigBytes = Base64.encode(qrMessage.toByteArray(), Base64.DEFAULT);
-            String sig = new String(sigBytes);
-            final Bitmap qrCode = createQRImage(sig);
+            StringBuilder sb = new StringBuilder();
+            sb.append(sigPair.selectionStr);
+            sb.append(sigPair.signatureStr);
+            name.setText(sigPair.message);
+
+            final Bitmap qrCode = createQRImage(sb.toString());
             ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
         }
         catch (Exception e)
@@ -174,5 +176,10 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         name.setText(ticket.tokenInfo.name);
         String idStr = ticket.tokenInfo.populateIDs(ticket.balanceArray, false);
         ids.setText(idStr);
+    }
+
+    private void onTime(String t)
+    {
+        name.setText(t);
     }
 }

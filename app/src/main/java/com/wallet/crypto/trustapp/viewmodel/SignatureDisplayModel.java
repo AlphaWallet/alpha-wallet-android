@@ -31,7 +31,7 @@ import io.reactivex.disposables.Disposable;
  */
 
 public class SignatureDisplayModel extends BaseViewModel {
-    private static final long CYCLE_SIGNATURE_INTERVAL = 30;
+    private static final long CYCLE_SIGNATURE_INTERVAL = 5;
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -46,6 +46,8 @@ public class SignatureDisplayModel extends BaseViewModel {
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
+
+    private final MutableLiveData<String> time = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -77,6 +79,9 @@ public class SignatureDisplayModel extends BaseViewModel {
     }
     public LiveData<Ticket> ticket() {
         return ticket;
+    }
+    public LiveData<String> time() {
+        return time;
     }
 
     @Override
@@ -126,6 +131,7 @@ public class SignatureDisplayModel extends BaseViewModel {
 
     private void onSignMessage(MessagePair pair) {
         //now run this guy through the signed message system
+        time.postValue(pair.message);
         disposable = createTransactionInteract
                 .sign(defaultWallet.getValue(), pair)
                 .subscribe(this::onSignedMessage, this::onError);
@@ -137,16 +143,25 @@ public class SignatureDisplayModel extends BaseViewModel {
 
     public void newBalanceArray(String balanceArray) {
         //convert to array of indicies
-        List<Integer> indexList = ticket.getValue().parseIndexList(balanceArray);
-        //convert this to a bitfield
-        if (indexList != null && indexList.size() > 0) {
-            bitFieldLookup = BigInteger.ZERO;
-            for (Integer i : indexList) {
-                BigInteger adder = BigInteger.valueOf(2).pow(i);
-                bitFieldLookup = bitFieldLookup.add(adder);
-            }
+        try
+        {
+            List<Integer> indexList = ticket.getValue().parseIndexList(balanceArray);
+            //convert this to a bitfield
+            if (indexList != null && indexList.size() > 0)
+            {
+                bitFieldLookup = BigInteger.ZERO;
+                for (Integer i : indexList)
+                {
+                    BigInteger adder = BigInteger.valueOf(2).pow(i);
+                    bitFieldLookup = bitFieldLookup.add(adder);
+                }
 
-            String hexVal = Integer.toHexString(bitFieldLookup.intValue());
+                String hexVal = Integer.toHexString(bitFieldLookup.intValue());
+            }
+        }
+        catch (Exception e)
+        {
+
         }
     }
 

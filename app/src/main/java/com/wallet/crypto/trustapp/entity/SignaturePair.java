@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.math.BigInteger;
 
 /**
  * Created by James on 30/01/2018.
@@ -16,6 +17,9 @@ public class SignaturePair {
     public final byte[] signature;
     public final String message;
 
+    public String signatureStr;
+    public String selectionStr;
+
     //go from selection and signature to produce the sig and selection for QR
     public SignaturePair(String selection, byte[] signature)
     {
@@ -24,16 +28,25 @@ public class SignaturePair {
         byte[] select = null;
         try
         {
-            ByteArrayOutputStream sBuilder = new ByteArrayOutputStream();
-            DataOutputStream ds = new DataOutputStream(sBuilder);
             int trailingZeros = getTrailingZeros(selection);
             String truncatedValue = selection.substring(0, selection.length() - trailingZeros);
-            int newLength = truncatedValue.length(); //only need to know the length of the truncated selection value
-            ds.writeByte(newLength);
-            ds.writeByte(trailingZeros);
-            ds.write(truncatedValue.getBytes());
-            ds.flush();
-            select = sBuilder.toByteArray();
+
+            //to create string
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format("%1$02d", truncatedValue.length()));
+            sb.append(String.format("%1$02d", trailingZeros));
+            sb.append(String.valueOf(truncatedValue));
+            selectionStr = sb.toString();
+
+            BigInteger bi = new BigInteger(signature);
+            signatureStr  = bi.toString(10);
+
+            //check if the produced number was negative
+            if (signatureStr.charAt(0) == '-')
+            {
+                BigInteger twosComplement = twosComplement(bi);
+                signatureStr  = twosComplement.toString(10);
+            }
         }
         catch (Exception e)
         {
@@ -47,36 +60,62 @@ public class SignaturePair {
         }
     }
 
+    public static BigInteger twosComplement(BigInteger original)
+    {
+        // for negative BigInteger, top byte is negative
+        byte[] contents = original.toByteArray();
+
+        // prepend byte of opposite sign
+        byte[] result = new byte[contents.length + 1];
+        System.arraycopy(contents, 0, result, 1, contents.length);
+        result[0] = (contents[0] < 0) ? 0 : (byte)-1;
+
+        // this will be two's complement
+        return new BigInteger(result);
+    }
+
     //got from a received byte[] message to produce selection and signature inputs
     public SignaturePair(String qrMessage, String timeMessage)
     {
-        //convert selection into optimised selection
-        //qrMessage is base64 message, first convert back to bytes
-        byte[] byteMessage = Base64.decode(qrMessage, Base64.DEFAULT);
+        //convert selection from optimised string
+        //first char is length
+        String lengthStr = qrMessage.substring(0,2);
+        int selectionLength = Integer.parseInt(lengthStr);
+        String trailingZerosStr = qrMessage.substring(2,4);
+        int trailingZeros = Integer.parseInt(trailingZerosStr);
+
         byte[] selectionCandidate = null;
         byte[] signatureCandidate = null;
         String messageCandidate = null;
         try
         {
-            ByteArrayInputStream sBuilder = new ByteArrayInputStream(byteMessage);
-            DataInputStream ds = new DataInputStream(sBuilder);
-            int selectionLength = ds.readByte();
-            int trailingZeros = ds.readByte();
-            byte[] selectionBytes = new byte[selectionLength + trailingZeros];
-            ds.read(selectionBytes, 0, selectionLength);
+            //get selection int
+            String selectionStr = qrMessage.substring(4, 4 + selectionLength);
+            int selectionInt = Integer.parseInt(selectionStr);
+            StringBuilder selectionHex = new StringBuilder();
+            selectionHex.append(Integer.toHexString(selectionInt));
+
             //populate trailing zeros
             for (int i = 0; i < trailingZeros; i++)
             {
-                selectionBytes[i + selectionLength] = '0';
+                selectionHex.append("0");
             }
-            selectionCandidate = selectionBytes;
+            selectionCandidate = selectionHex.toString().getBytes();
 
-            int remaining = ds.available();
+            //final number is the sig
+            String sigStr = qrMessage.substring(4 + selectionLength);
+            //convert to BigInteger
+            BigInteger sigBi = new BigInteger(sigStr, 10);
+            //Now convert sig back to Byte
+            signatureCandidate = sigBi.toByteArray();
 
-            signatureCandidate = new byte[remaining];
-
-            //now read signature
-            ds.readFully(signatureCandidate);
+            if (signatureCandidate.length > 65)
+            {
+                byte[] sigCopy = new byte[65];
+                //prune the first digit
+                System.arraycopy(signatureCandidate, 1, sigCopy, 0, 65); //Arrays.copyOf(signatureCandidate[1], 65);
+                signatureCandidate = sigCopy;
+            }
 
             //now create the message
             StringBuilder sb = new StringBuilder();

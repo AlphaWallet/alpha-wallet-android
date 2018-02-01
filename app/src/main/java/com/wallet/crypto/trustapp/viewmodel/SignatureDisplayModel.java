@@ -31,8 +31,9 @@ import io.reactivex.disposables.Disposable;
  */
 
 public class SignatureDisplayModel extends BaseViewModel {
-    private static final long CYCLE_SIGNATURE_INTERVAL = 5;
+    private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private static final long CHECK_BALANCE_INTERVAL = 10;
+    private static final long CHECK_SELECTION_INTERVAL = 1;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -47,7 +48,7 @@ public class SignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
 
-    private final MutableLiveData<String> time = new MutableLiveData<>();
+    private final MutableLiveData<String> selection = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -55,8 +56,14 @@ public class SignatureDisplayModel extends BaseViewModel {
     @Nullable
     private Disposable cycleSignatureDisposable;
 
+    @Nullable
+    private Disposable checkSelectionDisposable;
+
     private String address;
     private BigInteger bitFieldLookup;
+    private String lastSelection;
+    private String newSelection;
+    private int unchangedCount = 10;
 
     SignatureDisplayModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -80,8 +87,8 @@ public class SignatureDisplayModel extends BaseViewModel {
     public LiveData<Ticket> ticket() {
         return ticket;
     }
-    public LiveData<String> time() {
-        return time;
+    public LiveData<String> selection() {
+        return selection;
     }
 
     @Override
@@ -93,6 +100,9 @@ public class SignatureDisplayModel extends BaseViewModel {
         }
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
+        }
+        if (checkSelectionDisposable != null) {
+            checkSelectionDisposable.dispose();
         }
     }
 
@@ -131,7 +141,6 @@ public class SignatureDisplayModel extends BaseViewModel {
 
     private void onSignMessage(MessagePair pair) {
         //now run this guy through the signed message system
-        time.postValue(pair.message);
         disposable = createTransactionInteract
                 .sign(defaultWallet.getValue(), pair)
                 .subscribe(this::onSignedMessage, this::onError);
@@ -141,11 +150,40 @@ public class SignatureDisplayModel extends BaseViewModel {
         signature.postValue(sigPair);
     }
 
-    public void newBalanceArray(String balanceArray) {
+    private void startSelectionCheck() {
+        checkSelectionDisposable = Observable.interval(0, CHECK_SELECTION_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> checkSelectionChanged())
+                .subscribe(l -> {}, t -> {});
+    }
+
+    private void checkSelectionChanged()
+    {
+        unchangedCount++;
+
+        if (unchangedCount == 2)
+        {
+            //do the new selection
+            changeSelection();
+
+            //push to QR
+            signatureGenerateInteract
+                    .getMessage(bitFieldLookup)
+                    .subscribe(this::onSignMessage, this::onError);
+        }
+
+        if (newSelection != null && !newSelection.equals(lastSelection))
+        {
+            lastSelection = newSelection;
+            unchangedCount = 0;
+        }
+    }
+
+    private void changeSelection()
+    {
         //convert to array of indicies
         try
         {
-            List<Integer> indexList = ticket.getValue().parseIndexList(balanceArray);
+            List<Integer> indexList = ticket.getValue().parseIndexList(newSelection);
             //convert this to a bitfield
             if (indexList != null && indexList.size() > 0)
             {
@@ -156,7 +194,16 @@ public class SignatureDisplayModel extends BaseViewModel {
                     bitFieldLookup = bitFieldLookup.add(adder);
                 }
 
-                String hexVal = Integer.toHexString(bitFieldLookup.intValue());
+                //now convert back to parsed string, with checked indicies
+                String neatSelection = ticket.getValue().parseList(indexList);
+                selection.postValue(neatSelection);
+
+                //String hexVal = Integer.toHexString(bitFieldLookup.intValue());
+            }
+            else
+            {
+                selection.postValue("");
+                bitFieldLookup = BigInteger.ZERO;
             }
         }
         catch (Exception e)
@@ -165,10 +212,15 @@ public class SignatureDisplayModel extends BaseViewModel {
         }
     }
 
+    public void newBalanceArray(String balanceArray) {
+        newSelection = balanceArray;
+    }
+
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         startCycleSignature();
         fetchTransactions();
+        startSelectionCheck();
     }
 
     private void onTokens(Token[] tokens) {

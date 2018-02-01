@@ -37,14 +37,43 @@
                 android:text="Ticket IDs"
                 android:textColor="@color/black"/>
 
+            <RelativeLayout
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <!--
+                <ImageView
+                    android:id="@+id/image_qr_blank"
+                    android:layout_centerInParent="true"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/basicqrcode2"
+                    android:alpha="0.4"
+                    /> -->
+
+                <TextView
+                    android:id="@+id/textAddIDs"
+                    android:textSize="20sp"
+                    android:layout_centerInParent="true"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_ids_to_redeem"
+                    />
+
             <ImageView
                 android:id="@+id/qr_image"
                 app:srcCompat="@drawable/ic_autorenew_black_24dp"
-                android:layout_gravity="center_horizontal"
+                android:layout_centerInParent="true"
                 android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 />
+            </RelativeLayout>
             <TextView
                 android:id="@+id/address"
                 android:textSize="12sp"
@@ -54,12 +83,22 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 />
+            <TextView
+                android:id="@+id/textViewSelection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text=""
+                android:textColor="@color/black"/>
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/amount_input_layout"
                 android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 >
+
                 <EditText
                     android:id="@+id/send_ids"
                     android:hint="@string/hint_ids"

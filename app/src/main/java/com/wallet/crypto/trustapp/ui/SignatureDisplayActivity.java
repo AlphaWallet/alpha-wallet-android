@@ -12,6 +12,7 @@ import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,6 +66,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     public TextView ids;
     private EditText idsText;
     private TextInputLayout amountInputLayout;
+    private TextView selection;
 
     private Wallet wallet;
     private Ticket ticket;
@@ -81,12 +83,13 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         ticket = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
         findViewById(R.id.advanced_options).setOnClickListener(this);
-        final Bitmap qrCode = createQRImage(wallet.address);
-        ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+
+        inviteUserToAddIDs();
 
         name = findViewById(R.id.textViewName);
         ids = findViewById(R.id.textViewIDs);
         idsText = findViewById(R.id.send_ids);
+        selection = findViewById(R.id.textViewSelection);
         amountInputLayout = findViewById(R.id.amount_input_layout);
 
         name.setText(ticket.ticketInfo.name);
@@ -96,7 +99,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
                 .get(SignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
-        viewModel.time().observe(this, this::onTime);
+        viewModel.selection().observe(this, this::onSelected);
 
         idsText.addTextChangedListener(new TextWatcher()
         {
@@ -155,16 +158,25 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
+    private void inviteUserToAddIDs()
+    {
+        final Bitmap qrCode = createQRImage(wallet.address);
+        ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+        findViewById(R.id.qr_image).setAlpha(0.1f);
+
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setVisibility(View.VISIBLE);
+    }
+
     private void onSignatureChanged(SignaturePair sigPair) {
         try
         {
-            StringBuilder sb = new StringBuilder();
-            sb.append(sigPair.selectionStr);
-            sb.append(sigPair.signatureStr);
-            name.setText(sigPair.message);
-
-            final Bitmap qrCode = createQRImage(sb.toString());
+            if (sigPair.selectionStr == null) return;
+            String qrMessage = sigPair.selectionStr + sigPair.signatureStr;
+            final Bitmap qrCode = createQRImage(qrMessage);
             ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+            findViewById(R.id.qr_image).setAlpha(1.0f);
+            findViewById(R.id.textAddIDs).setVisibility(View.GONE);
         }
         catch (Exception e)
         {
@@ -176,10 +188,41 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         name.setText(ticket.tokenInfo.name);
         String idStr = ticket.tokenInfo.populateIDs(ticket.balanceArray, false);
         ids.setText(idStr);
+
+        //check current list of IDs is still valid
+        String currentList = selection.getText().toString();
+        if (currentList.length() > 0) {
+            String correctList = ticket.checkBalance(currentList);
+
+            if (!correctList.equals(currentList))
+            {
+                // ticket was burned, used or transferred
+                selection.setText(correctList);
+                idsText.setText(correctList);
+                viewModel.newBalanceArray(correctList);
+                if (correctList.length() == 0) {
+                    inviteUserToAddIDs();
+                }
+            }
+        }
     }
 
-    private void onTime(String t)
+    private void onSelected(String selectionStr)
     {
-        name.setText(t);
+        selection.setText(selectionStr);
+        try
+        {
+            //dismiss soft keyboard
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(idsText.getWindowToken(), 0);
+            if (selectionStr == null || selectionStr.length() == 0)
+            {
+                inviteUserToAddIDs();
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
     }
 }

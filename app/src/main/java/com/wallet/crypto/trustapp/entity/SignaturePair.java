@@ -113,7 +113,7 @@ public class SignaturePair {
             {
                 byte[] sigCopy = new byte[65];
                 //prune the first digit
-                System.arraycopy(signatureCandidate, 1, sigCopy, 0, 65); //Arrays.copyOf(signatureCandidate[1], 65);
+                System.arraycopy(signatureCandidate, 1, sigCopy, 0, 65);
                 signatureCandidate = sigCopy;
             }
 

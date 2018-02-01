@@ -55,6 +55,42 @@ public class Ticket extends Token implements Parcelable
         dest.writeArray(balanceArray.toArray());
     }
 
+    public String parseList(List<Integer> checkedIndexList) {
+        StringBuilder sb = new StringBuilder();
+
+        boolean first = true;
+        for (Integer i : checkedIndexList) {
+            //reverse lookup the selected IDs
+            if (i < balanceArray.size())
+            {
+                if (!first) sb.append(", ");
+                int thisTicketId = balanceArray.get(i);
+                sb.append(String.valueOf(thisTicketId));
+                first = false;
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public String checkBalance(String selection)
+    {
+        StringBuilder sb = new StringBuilder();
+        //convert selection to index list
+        List<Uint16> selectionIndex = parseIDList(selection);
+        //add correct entries
+        boolean first = true;
+        for (Uint16 id : selectionIndex) {
+            if (balanceArray.contains(id.getValue().intValue())) {
+                if (!first) sb.append(", ");
+                sb.append(String.valueOf(id.getValue().toString(10)));
+                first = false;
+            }
+        }
+
+        return sb.toString();
+    }
+
     public List<Uint16> parseIDList(String userList)
     {
         List<Uint16> idList = new ArrayList<>();

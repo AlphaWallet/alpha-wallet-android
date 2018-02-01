@@ -77,30 +77,20 @@ public class TokensViewModel extends BaseViewModel {
     }
 
     private void showTotalBalance(Token[] tokens) {
-        boolean allTokensHasTicker = true;
+        BigDecimal total = new BigDecimal("0");
         for (Token token : tokens) {
-            if (token.ticker == null) {
-                allTokensHasTicker = false;
-                break;
+            if (token.balance != null && token.ticker != null
+                    && token.balance.compareTo(BigDecimal.ZERO) != 0) {
+                BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
+                BigDecimal ethBalance = token.tokenInfo.decimals > 0
+                        ? token.balance.divide(decimalDivisor)
+                        : token.balance;
+                total = total.add(ethBalance.multiply(new BigDecimal(token.ticker.price)));
             }
         }
-        BigDecimal total = null;
-        if (allTokensHasTicker) {
-            total = new BigDecimal("0");
-            for (Token token : tokens) {
-                if (token.balance != null && token.ticker != null
-                        && token.balance.compareTo(BigDecimal.ZERO) != 0) {
-                    BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
-                    BigDecimal ethBalance = token.tokenInfo.decimals > 0
-                            ? token.balance.divide(decimalDivisor, BigDecimal.ROUND_HALF_UP)
-                            : token.balance;
-                    total = total.add(ethBalance.multiply(new BigDecimal(token.ticker.price)));
-                }
-            }
-            total = total.setScale(2, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
-            if (total.compareTo(BigDecimal.ZERO) == 0) {
-                total = null;
-            }
+        total = total.setScale(2, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
+        if (total.compareTo(BigDecimal.ZERO) == 0) {
+            total = null;
         }
         this.total.postValue(total);
     }

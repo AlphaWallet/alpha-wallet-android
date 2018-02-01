@@ -11,12 +11,7 @@ public class TokenSortedItem extends SortedItem<Token> {
 
     @Override
     public int compare(SortedItem other) {
-        if (other.viewType == TokenHolder.VIEW_TYPE) {
-            TokenSortedItem rightItem = (TokenSortedItem) other;
-            return value.tokenInfo.symbol.compareToIgnoreCase(rightItem.value.tokenInfo.symbol);
-        } else {
-            return weight - other.weight;
-        }
+        return weight - other.weight;
     }
 
     @Override

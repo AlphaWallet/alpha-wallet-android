@@ -149,7 +149,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     realm.close();
                 }
             }
-            return tokenTickers.size() == 0 || tokenTickers.size() != tokens.length
+            return tokenTickers.size() == 0
                     ? null
                     : tokenTickers.toArray(new TokenTicker[tokenTickers.size()]);
         });

@@ -137,7 +137,7 @@ public class TokenRepository implements TokenRepositoryType {
                 new Token[] { new Token(
                         new TokenInfo(address,
                                 "",
-                                symbol,
+                                symbol.toLowerCase(),
                                 decimals,
                                 true),
                         null, 0)});

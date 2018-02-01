@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.SubscribeWrapper;
 import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
@@ -47,6 +48,8 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
+import rx.Subscription;
+import rx.functions.Action1;
 
 public class TokenRepository implements TokenRepositoryType {
 
@@ -116,6 +119,18 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<TokenInfo> update(String contractAddr) {
         return setupTokensFromLocal(contractAddr).toObservable();
+    }
+
+    @Override
+    public void memPoolListener(final SubscribeWrapper subscriber)
+    {
+        new Thread()
+        {
+            public void run()
+            {
+                subscriber.transactionSubscriber = web3j.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
+            }
+        }.start();
     }
 
     private Single<TokenInfo> setupTokensFromLocal(String address)

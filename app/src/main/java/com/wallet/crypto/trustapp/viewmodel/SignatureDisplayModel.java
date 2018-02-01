@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import com.wallet.crypto.trustapp.entity.MessagePair;
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.SignaturePair;
+import com.wallet.crypto.trustapp.entity.SubscribeWrapper;
 import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -15,8 +16,11 @@ import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.interact.MemPoolInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
 
+
+import org.web3j.protocol.core.methods.response.Transaction;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -25,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import dagger.Provides;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import rx.Subscription;
+import rx.functions.Action1;
 
 /**
  * Created by James on 25/01/2018.
@@ -40,6 +46,7 @@ public class SignatureDisplayModel extends BaseViewModel {
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final MemPoolInteract memoryPoolInteract;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -49,6 +56,10 @@ public class SignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
 
     private final MutableLiveData<String> selection = new MutableLiveData<>();
+
+    private SubscribeWrapper wrapper;
+
+    private Subscription poolListener;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -70,12 +81,14 @@ public class SignatureDisplayModel extends BaseViewModel {
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTokensInteract fetchTokensInteract,
+            MemPoolInteract memoryPoolInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.memoryPoolInteract = memoryPoolInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -103,6 +116,10 @@ public class SignatureDisplayModel extends BaseViewModel {
         }
         if (checkSelectionDisposable != null) {
             checkSelectionDisposable.dispose();
+        }
+
+        if (wrapper != null && wrapper.transactionSubscriber != null) {
+            wrapper.transactionSubscriber.unsubscribe();
         }
     }
 
@@ -137,6 +154,11 @@ public class SignatureDisplayModel extends BaseViewModel {
                         .getMessage(bitFieldLookup)
                         .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
+    }
+
+    private void startMemoryPoolListener() {
+        wrapper = new SubscribeWrapper(scanReturn);
+        memoryPoolInteract.poolListener(wrapper);
     }
 
     private void onSignMessage(MessagePair pair) {
@@ -221,6 +243,7 @@ public class SignatureDisplayModel extends BaseViewModel {
         startCycleSignature();
         fetchTransactions();
         startSelectionCheck();
+        startMemoryPoolListener();
     }
 
     private void onTokens(Token[] tokens) {
@@ -238,4 +261,32 @@ public class SignatureDisplayModel extends BaseViewModel {
             }
         }
     }
+
+    //Handle each new transaction on memory pool
+    private Action1<Transaction> scanReturn = (tx) ->
+    {
+        try
+        {
+            String input = tx.getInput();
+            String from = tx.getFrom();
+            String to = tx.getTo();
+            String userAddr = defaultWallet().getValue().address;
+
+            if ((from != null
+                    && (to != null)
+                    && (input != null && input.contains("dead"))))
+            {
+                userAddr = input.substring(34, 34 + 40);
+                System.out.println("TX: input " + input);
+                System.out.println("TX: user " + userAddr);
+                System.out.println("TX: from " + from);
+                System.out.println("TX: to" + to);
+
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+    };
 }

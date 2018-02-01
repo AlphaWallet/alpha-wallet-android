@@ -4,6 +4,7 @@ import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.interact.MemPoolInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
@@ -27,9 +28,10 @@ public class SignatureModule {
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTokensInteract fetchTokensInteract,
+            MemPoolInteract memPoolInteract) {
         return new SignatureDisplayModelFactory(
-                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract);
+                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract);
     }
 
     @Provides
@@ -56,5 +58,10 @@ public class SignatureModule {
     @Provides
     CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
         return new CreateTransactionInteract(transactionRepository, passwordStore);
+    }
+
+    @Provides
+    MemPoolInteract provideMemPoolInteract(TokenRepositoryType tokenRepository) {
+        return new MemPoolInteract(tokenRepository);
     }
 }

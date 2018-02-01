@@ -1,5 +1,8 @@
 package com.wallet.crypto.trustapp.repository;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -46,6 +49,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import rx.Subscription;
@@ -126,9 +130,42 @@ public class TokenRepository implements TokenRepositoryType {
     {
         new Thread()
         {
+            final Object waitForUnsubscribe = new Object();
             public void run()
             {
-                subscriber.transactionSubscriber = web3j.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
+                subscriber.wrapperInteraction = new Handler(Looper.getMainLooper())
+                {
+                    @Override
+                    public void handleMessage(Message msg)
+                    {
+                        super.handleMessage(msg);
+                        //only handle shutdown message
+                        synchronized (waitForUnsubscribe)
+                        {
+                            waitForUnsubscribe.notifyAll();
+                        }
+                    }
+                };
+
+                final Subscription transactionSubscription = web3j.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
+
+                try
+                {
+                    synchronized (waitForUnsubscribe)
+                    {
+                        waitForUnsubscribe.wait();
+                    }
+                }
+                catch (InterruptedException e)
+                {
+
+                }
+                finally
+                {
+                    //Now terminate the observable and the thread
+                    transactionSubscription.unsubscribe();
+                    subscriber.wrapperInteraction = null;
+                }
             }
         }.start();
     }

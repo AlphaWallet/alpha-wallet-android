@@ -1,5 +1,7 @@
 package com.wallet.crypto.trustapp.entity;
 
+import android.os.Handler;
+
 import rx.Subscription;
 import rx.functions.Action1;
 import org.web3j.protocol.core.methods.response.Transaction;
@@ -11,7 +13,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
 public class SubscribeWrapper
 {
     public Action1<Transaction> scanReturn;
-    public Subscription transactionSubscriber;
+    public Handler wrapperInteraction;
 
     public SubscribeWrapper(Action1<Transaction> s)
     {

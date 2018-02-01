@@ -118,8 +118,9 @@ public class SignatureDisplayModel extends BaseViewModel {
             checkSelectionDisposable.dispose();
         }
 
-        if (wrapper != null && wrapper.transactionSubscriber != null) {
-            wrapper.transactionSubscriber.unsubscribe();
+        if (wrapper != null && wrapper.wrapperInteraction != null) {
+            wrapper.wrapperInteraction.sendEmptyMessage(1);
+            wrapper = null;
         }
     }
 

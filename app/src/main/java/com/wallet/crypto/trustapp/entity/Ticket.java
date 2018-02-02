@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import org.web3j.abi.datatypes.generated.Uint16;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +19,13 @@ public class Ticket extends Token implements Parcelable
     public final TicketInfo ticketInfo;
     public final List<Integer> balanceArray;
 
+    private List<Integer> burnArray; //mutable
+
     public Ticket(TicketInfo tokenInfo, List<Integer> balances) {
         super(tokenInfo, BigDecimal.ZERO);
         this.balanceArray = balances;
         this.ticketInfo = tokenInfo;
+        burnArray = new ArrayList<>();
     }
 
     private Ticket(Parcel in) {
@@ -29,11 +33,23 @@ public class Ticket extends Token implements Parcelable
         //now read in ticket
         ticketInfo = in.readParcelable(TicketInfo.class.getClassLoader());
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
+        Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
         balanceArray = new ArrayList<Integer>();
+        burnArray = new ArrayList<Integer>();
         for (Object o : readObjArray)
         {
             Integer val = (Integer)o;
             balanceArray.add(val);
+        }
+
+        //check to see if burn notice is needed
+        for (Object o : readBurnArray)
+        {
+            Integer val = (Integer)o;
+            if (balanceArray.contains(val))
+            {
+                burnArray.add(val);
+            }
         }
     }
 
@@ -53,6 +69,7 @@ public class Ticket extends Token implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(ticketInfo, flags);
         dest.writeArray(balanceArray.toArray());
+        dest.writeArray(burnArray.toArray());
     }
 
     public String parseList(List<Integer> checkedIndexList) {
@@ -81,7 +98,7 @@ public class Ticket extends Token implements Parcelable
         //add correct entries
         boolean first = true;
         for (Uint16 id : selectionIndex) {
-            if (balanceArray.contains(id.getValue().intValue())) {
+            if (balanceArray.contains(id.getValue().intValue()) && !burnArray.contains(id.getValue().intValue())) {
                 if (!first) sb.append(", ");
                 sb.append(String.valueOf(id.getValue().toString(10)));
                 first = false;
@@ -147,5 +164,34 @@ public class Ticket extends Token implements Parcelable
         }
 
         return idList;
+    }
+
+    //Burn handling
+    public void addToBurnList(List<BigInteger> burnIndicies)
+    {
+        for (BigInteger b : burnIndicies) {
+            Integer index = b.intValue();
+
+            //lookup index
+            if (balanceArray.size() > index)
+            {
+                Integer value = balanceArray.get(index);
+                if (value > 0) {
+                    burnArray.add(value);
+                }
+            }
+        }
+    }
+
+    public List<Integer> getValidIndicies() {
+        List<Integer> validIndicies = new ArrayList<>();
+        for (Integer ticketIndex : balanceArray)
+        {
+            if (!burnArray.contains(ticketIndex)) {
+                validIndicies.add(ticketIndex);
+            }
+        }
+
+        return validIndicies;
     }
 }

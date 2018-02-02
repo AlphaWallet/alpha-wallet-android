@@ -186,7 +186,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
 
     private void onTicket(Ticket ticket) {
         name.setText(ticket.tokenInfo.name);
-        String idStr = ticket.tokenInfo.populateIDs(ticket.balanceArray, false);
+        String idStr = ticket.tokenInfo.populateIDs(ticket.getValidIndicies(), false);
         ids.setText(idStr);
 
         //check current list of IDs is still valid

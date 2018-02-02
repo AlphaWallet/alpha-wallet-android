@@ -11,6 +11,7 @@ import com.wallet.crypto.trustapp.entity.SignaturePair;
 import com.wallet.crypto.trustapp.entity.SubscribeWrapper;
 import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TransactionInput;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
@@ -20,9 +21,24 @@ import com.wallet.crypto.trustapp.interact.MemPoolInteract;
 import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
 
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
+import org.web3j.abi.datatypes.generated.Uint16;
+import org.web3j.crypto.Hash;
 import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.tuples.Tuple;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -220,8 +236,6 @@ public class SignatureDisplayModel extends BaseViewModel {
                 //now convert back to parsed string, with checked indicies
                 String neatSelection = ticket.getValue().parseList(indexList);
                 selection.postValue(neatSelection);
-
-                //String hexVal = Integer.toHexString(bitFieldLookup.intValue());
             }
             else
             {
@@ -263,31 +277,53 @@ public class SignatureDisplayModel extends BaseViewModel {
         }
     }
 
+    private void markUsedIndicies(List<BigInteger> burnList) {
+        Ticket t = ticket().getValue();
+        t.addToBurnList(burnList);
+        ticket.postValue(t);
+    }
+
     //Handle each new transaction on memory pool
     private Action1<Transaction> scanReturn = (tx) ->
     {
         try
         {
             String input = tx.getInput();
-            String from = tx.getFrom();
-            String to = tx.getTo();
-            String userAddr = defaultWallet().getValue().address;
+            String from = Numeric.cleanHexPrefix(tx.getFrom());
+            String to = Numeric.cleanHexPrefix(tx.getTo());
+            String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
 
-            if ((from != null
-                    && (to != null)
-                    && (input != null && input.contains("dead"))))
+            String methodSignature = "transferFrom(address,address,uint16[])";
+            String methodId = buildMethodId(methodSignature);
+
+            if (       (from != null)
+                    && (to != null && ticket().getValue().ticketInfo.address.contains(to))
+                    && (input != null)
+                    && (input.contains(methodId))
+                    && (input.contains("dead") && input.contains(userAddr))  )
             {
-                userAddr = input.substring(34, 34 + 40);
-                System.out.println("TX: input " + input);
-                System.out.println("TX: user " + userAddr);
-                System.out.println("TX: from " + from);
-                System.out.println("TX: to" + to);
+                System.out.println("Burn Transaction!");
 
+                //TODO: Add the burn transaction to a temporary list of burns that override the received transactions
+                TransactionInput t = new TransactionInput(input);
+
+                if (t.functionName.equals("transferFrom"))
+                {
+                    //pass the list of args back into token listing
+                    List<BigInteger> transferIndicies = t.paramValues;
+                    markUsedIndicies(transferIndicies);
+                }
             }
         }
         catch (Exception e)
         {
-
+            e.printStackTrace();
         }
     };
+
+    private String buildMethodId(String methodSignature) {
+        byte[] input = methodSignature.getBytes();
+        byte[] hash = Hash.sha3(input);
+        return Numeric.toHexString(hash).substring(0, 10);
+    }
 }

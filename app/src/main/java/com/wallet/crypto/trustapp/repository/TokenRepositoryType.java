@@ -1,9 +1,14 @@
 package com.wallet.crypto.trustapp.repository;
 
 import com.wallet.crypto.trustapp.entity.SubscribeWrapper;
+import com.wallet.crypto.trustapp.entity.Ticket;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
+
+import java.math.BigInteger;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;

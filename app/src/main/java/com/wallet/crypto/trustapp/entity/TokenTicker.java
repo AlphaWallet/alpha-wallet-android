@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TokenTicker implements Parcelable {
     public final String id;
     public final String contract;
@@ -12,6 +15,8 @@ public class TokenTicker implements Parcelable {
     @SerializedName("percent_change_24h")
     public final String percentChange24h;
     public final String image;
+    public final String venue;
+    public final String date;
 
     public TokenTicker(String id, String contract, String price, String percentChange24h, String image) {
         this.id = id;
@@ -19,6 +24,18 @@ public class TokenTicker implements Parcelable {
         this.price = price;
         this.percentChange24h = percentChange24h;
         this.image = image;
+        this.venue = null;
+        this.date = null;
+    }
+
+    public TokenTicker(String id, String contract, String price, String percentChange24h, String image, String venue, String date) {
+        this.id = id;
+        this.contract = contract;
+        this.price = price;
+        this.percentChange24h = percentChange24h;
+        this.image = image;
+        this.venue = venue;
+        this.date = date;
     }
 
     private TokenTicker(Parcel in) {
@@ -27,6 +44,22 @@ public class TokenTicker implements Parcelable {
         price = in.readString();
         percentChange24h = in.readString();
         image = in.readString();
+        byte type = in.readByte();
+        switch (type)
+        {
+            case 0:
+                venue = null;
+                date = null;
+                break;
+            case 1:
+                venue = in.readString();
+                date = in.readString();
+                break;
+            default:
+                venue = null;
+                date = null;
+                break;
+        }
     }
 
     public static final Creator<TokenTicker> CREATOR = new Creator<TokenTicker>() {
@@ -53,5 +86,16 @@ public class TokenTicker implements Parcelable {
         dest.writeString(price);
         dest.writeString(percentChange24h);
         dest.writeString(image);
+
+        if (venue != null)
+        {
+            dest.writeByte((byte)1);
+            dest.writeString(venue);
+            dest.writeString(price);
+        }
+        else
+        {
+            dest.writeByte((byte)0);
+        }
     }
 }

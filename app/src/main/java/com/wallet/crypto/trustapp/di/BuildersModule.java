@@ -7,11 +7,14 @@ import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
 import com.wallet.crypto.trustapp.ui.MyAddressActivity;
 import com.wallet.crypto.trustapp.ui.SendActivity;
 import com.wallet.crypto.trustapp.ui.SettingsActivity;
+import com.wallet.crypto.trustapp.ui.SignatureDisplayActivity;
 import com.wallet.crypto.trustapp.ui.SplashActivity;
+import com.wallet.crypto.trustapp.ui.TicketTransferActivity;
 import com.wallet.crypto.trustapp.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.trustapp.ui.TokensActivity;
 import com.wallet.crypto.trustapp.ui.TransactionDetailActivity;
 import com.wallet.crypto.trustapp.ui.TransactionsActivity;
+import com.wallet.crypto.trustapp.ui.UseTokenActivity;
 import com.wallet.crypto.trustapp.ui.WalletsActivity;
 
 import dagger.Module;
@@ -35,9 +38,9 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = TransactionsModule.class)
 	abstract TransactionsActivity bindTransactionsModule();
 
-    @ActivityScope
-    @ContributesAndroidInjector(modules = TransactionDetailModule.class)
-    abstract TransactionDetailActivity bindTransactionDetailModule();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TransactionDetailModule.class)
+	abstract TransactionDetailActivity bindTransactionDetailModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SettingsModule.class)
@@ -50,11 +53,11 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = ConfirmationModule.class)
 	abstract ConfirmationActivity bindConfirmationModule();
-    @ContributesAndroidInjector
+	@ContributesAndroidInjector
 	abstract MyAddressActivity bindMyAddressModule();
 
 	@ActivityScope
-    @ContributesAndroidInjector(modules = TokensModule.class)
+	@ContributesAndroidInjector(modules = TokensModule.class)
 	abstract TokensActivity bindTokensModule();
 
 	@ActivityScope
@@ -62,10 +65,22 @@ public abstract class BuildersModule {
 	abstract GasSettingsActivity bindGasSettingsModule();
 
 	@ActivityScope
-    @ContributesAndroidInjector(modules = AddTokenModule.class)
+	@ContributesAndroidInjector(modules = AddTokenModule.class)
 	abstract AddTokenActivity bindAddTokenActivity();
 
 	@ActivityScope
-    @ContributesAndroidInjector(modules = ChangeTokenModule.class)
+	@ContributesAndroidInjector(modules = ChangeTokenModule.class)
 	abstract TokenChangeCollectionActivity bindChangeTokenCollectionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SignatureModule.class)
+	abstract SignatureDisplayActivity bindSignatureDisplayActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = UseTokenModule.class)
+	abstract UseTokenActivity bindUseTokenActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TicketTransferModule.class)
+	abstract TicketTransferActivity bindTicketTransferActivity();
 }

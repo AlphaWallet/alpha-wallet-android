@@ -12,6 +12,7 @@ import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.ChangeTokenCollectionRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
+import com.wallet.crypto.trustapp.router.UseTokenRouter;
 
 import java.math.BigDecimal;
 
@@ -25,6 +26,7 @@ public class TokensViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
+    private final UseTokenRouter useTokenRouter;
     private final TransactionsRouter transactionsRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
@@ -33,10 +35,12 @@ public class TokensViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
             TransactionsRouter transactionsRouter,
-            ChangeTokenCollectionRouter changeTokenCollectionRouter) {
+            ChangeTokenCollectionRouter changeTokenCollectionRouter,
+            UseTokenRouter useTokenRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
+        this.useTokenRouter = useTokenRouter;
         this.transactionsRouter = transactionsRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
     }
@@ -101,6 +105,10 @@ public class TokensViewModel extends BaseViewModel {
 
     public void showSendToken(Context context, String address, String symbol, int decimals) {
         sendTokenRouter.open(context, address, symbol, decimals);
+    }
+
+    public void showUseToken(Context context, String name, String venue, String date, String address, double price, double balance, Token token) {
+        useTokenRouter.open(context, name, venue, date, address, price, balance, token);
 
     }
 

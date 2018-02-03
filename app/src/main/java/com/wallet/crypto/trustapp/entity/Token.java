@@ -3,7 +3,10 @@ package com.wallet.crypto.trustapp.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.web3j.abi.datatypes.generated.Uint16;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
@@ -18,7 +21,13 @@ public class Token implements Parcelable {
         this.updateBlancaTime = updateBlancaTime;
     }
 
-    private Token(Parcel in) {
+    protected Token(Parcel in, boolean secondary) {
+        updateBlancaTime = in.readLong();
+        tokenInfo = null;
+        balance = BigDecimal.ZERO;
+    }
+
+    protected Token(Parcel in) {
         tokenInfo = in.readParcelable(TokenInfo.class.getClassLoader());
         balance = new BigDecimal(in.readString());
         updateBlancaTime = in.readLong();

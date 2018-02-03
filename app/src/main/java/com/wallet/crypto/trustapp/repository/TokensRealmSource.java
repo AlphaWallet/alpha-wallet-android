@@ -4,7 +4,9 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.Ticket;
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
 import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.TokenTicker;
 import com.wallet.crypto.trustapp.entity.Wallet;
@@ -135,12 +137,23 @@ public class TokensRealmSource implements TokenLocalSource {
                 for (int i = 0; i < len; i++) {
                     RealmTokenTicker rawItem = rawItems.get(i);
                     if (rawItem != null) {
-                        tokenTickers.add(new TokenTicker(
-                                rawItem.getId(),
-                                rawItem.getContract(),
-                                rawItem.getPrice(),
-                                rawItem.getPercentChange24h(),
-                                rawItem.getImage()));
+                        if (rawItem.getVenue() == null) {
+                            tokenTickers.add(new TokenTicker(
+                                    rawItem.getId(),
+                                    rawItem.getContract(),
+                                    rawItem.getPrice(),
+                                    rawItem.getPercentChange24h(),
+                                    rawItem.getImage()));
+                        } else {
+                            tokenTickers.add(new TokenTicker(
+                                    rawItem.getId(),
+                                    rawItem.getContract(),
+                                    rawItem.getPrice(),
+                                    rawItem.getPercentChange24h(),
+                                    rawItem.getImage(),
+                                    rawItem.getVenue(),
+                                    rawItem.getDate()));
+                        }
                     }
                 }
                 realm.commitTransaction();
@@ -163,6 +176,7 @@ public class TokensRealmSource implements TokenLocalSource {
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
+
             realm.beginTransaction();
             if (realmToken != null) {
                 realmToken.setEnabled(isEnabled);
@@ -179,7 +193,6 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-
     @Override
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token) {
         Realm realm = null;
@@ -190,7 +203,14 @@ public class TokensRealmSource implements TokenLocalSource {
                     .findFirst();
             realm.beginTransaction();
             if (realmToken != null) {
-                realmToken.setBalance(token.balance.toString());
+                if (token instanceof Ticket) { //TODO: Use proper inherticance on Token type, godammit!
+                    Ticket t = (Ticket)token;
+                    realmToken.setBalance(t.ticketInfo.populateIDs(t.balanceArray, false));
+                }
+                else
+                {
+                    realmToken.setBalance(token.balance.toString());
+                }
             }
             realm.commitTransaction();
         } catch (Exception ex) {

@@ -32,6 +32,12 @@ public abstract class C {
     public static final String EXTRA_AMOUNT = "AMOUNT";
     public static final String EXTRA_GAS_PRICE = "GAS_PRICE";
     public static final String EXTRA_GAS_LIMIT = "GAS_LIMIT";
+    public static final String EXTRA_CONTRACT_NAME = "NAME";
+    public static final String EXTRA_TICKET_VENUE = "TVENUE";
+    public static final String EXTRA_TICKET_DATE = "TDATE";
+    public static final String EXTRA_TICKET_PRICE = "TPRICE";
+    public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
+    public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
 
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
@@ -58,6 +64,7 @@ public abstract class C {
     public interface Key {
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
+        String TICKET = "ticket";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
     }
 }

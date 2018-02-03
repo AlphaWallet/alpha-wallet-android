@@ -52,6 +52,14 @@ public class ConfirmationViewModel extends BaseViewModel {
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
+    public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit) {
+        progress.postValue(true);
+        final byte[] data = TokenRepository.createTicketTransferData(to, ids);
+        disposable = createTransactionInteract
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
+
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }

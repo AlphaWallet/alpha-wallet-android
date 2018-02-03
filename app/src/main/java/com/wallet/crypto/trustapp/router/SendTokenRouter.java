@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.wallet.crypto.trustapp.C;
+import com.wallet.crypto.trustapp.entity.Ticket;
+import com.wallet.crypto.trustapp.entity.TicketInfo;
+import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.ui.SendActivity;
 
 public class SendTokenRouter {

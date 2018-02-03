@@ -84,9 +84,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 		})).subscribeOn(Schedulers.io());
 	}
 
+	@Override
+	public Single<byte[]> getSignature(Wallet wallet, String message, String password)
+	{
+		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
+	}
+
 	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
 	    return inDiskCache.fetchTransaction(networkInfo, wallet);
-
     }
 
 	private Single<Transaction[]> fetchAndCacheFromNetwork(NetworkInfo networkInfo, Wallet wallet) {

@@ -16,6 +16,7 @@ import org.ethereum.geth.Transaction;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.WalletFile;
 
 import java.io.File;
@@ -27,6 +28,7 @@ import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
 import static org.web3j.crypto.Wallet.create;
+import static org.web3j.crypto.Wallet.decrypt;
 
 public class GethKeystoreAccountService implements AccountKeystoreService {
     private static final int PRIVATE_KEY_RADIX = 16;
@@ -140,6 +142,20 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
             return signed.encodeRLP();
         })
         .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, String message, long chainId)
+    {
+        return Single.fromCallable(() -> {
+            byte[] messageHash = Hash.sha3(message.getBytes());
+            BigInt chain = new BigInt(chainId); // Chain identifier of the main net
+            org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+            keyStore.unlock(gethAccount, signerPassword);
+            byte[] signed = keyStore.signHash(gethAccount.getAddress(), messageHash);
+            keyStore.lock(gethAccount.getAddress());
+            return signed;
+        }).subscribeOn(Schedulers.io());
     }
 
     @Override

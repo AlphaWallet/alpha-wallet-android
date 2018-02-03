@@ -13,6 +13,10 @@ public class RealmTokenTicker extends RealmObject {
     private String image;
     private long updatedTime;
 
+    //So far Realm doesn't support extending RealmTokenInfo as a base class :(
+    private String venue = null;
+    private String date = null;
+
     public String getId() {
         return id;
     }
@@ -63,6 +67,23 @@ public class RealmTokenTicker extends RealmObject {
 
     public long getUpdatedTime() {
         return updatedTime;
+    }
+
+    public String getVenue() { return venue; }
+
+    public void setVenue(String venue)
+    {
+        this.venue = venue;
+    }
+
+    public String getDate()
+    {
+        return date;
+    }
+
+    public void setDate(String date)
+    {
+        this.date = date;
     }
 
     public void setUpdatedTime(long updatedTime) {

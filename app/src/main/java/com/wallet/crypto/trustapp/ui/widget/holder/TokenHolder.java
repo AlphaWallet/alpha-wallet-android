@@ -28,12 +28,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public static final int VIEW_TYPE = 1005;
     private static final String EMPTY_BALANCE = "\u2014\u2014";
 
-    private final TextView symbol;
-    private final TextView balanceEth;
-    private final TextView balanceCurrency;
-    private final ImageView icon;
+    public final TextView symbol;
+    public final TextView balanceEth;
+    public final TextView balanceCurrency;
+    public final ImageView icon;
+    public final TextView arrayBalance;
 
-    private Token token;
+    public Token token;
     private OnTokenClickListener onTokenClickListener;
 
     public TokenHolder(int resId, ViewGroup parent) {
@@ -43,6 +44,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         symbol = findViewById(R.id.symbol);
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
+        arrayBalance = findViewById(R.id.balanceArray);
         itemView.setOnClickListener(this);
     }
 

@@ -1,25 +1,20 @@
 package com.wallet.crypto.trustapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.widget.adapter.TokensAdapter;
-import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
-import com.wallet.crypto.trustapp.viewmodel.TokensViewModelFactory;
+import com.wallet.crypto.trustapp.ui.widget.adapter.ChangeTokenCollectionAdapter;
+import com.wallet.crypto.trustapp.viewmodel.TokenChangeCollectionViewModel;
+import com.wallet.crypto.trustapp.viewmodel.TokenChangeCollectionViewModelFactory;
 import com.wallet.crypto.trustapp.widget.SystemView;
-
-import java.math.BigDecimal;
 
 import javax.inject.Inject;
 
@@ -28,16 +23,19 @@ import dagger.android.AndroidInjection;
 import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 import static com.wallet.crypto.trustapp.C.Key.WALLET;
 
-public class TokensActivity extends BaseActivity implements View.OnClickListener {
-    @Inject
-    TokensViewModelFactory transactionsViewModelFactory;
-    private TokensViewModel viewModel;
+public class TokenChangeCollectionActivity extends BaseActivity implements View.OnClickListener {
 
+    @Inject
+    protected TokenChangeCollectionViewModelFactory viewModelFactory;
+    private TokenChangeCollectionViewModel viewModel;
+
+    private ChangeTokenCollectionAdapter adapter;
     private SystemView systemView;
-    private TokensAdapter adapter;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+
         AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
@@ -46,11 +44,10 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
 
         toolbar();
 
-        adapter = new TokensAdapter(this::onTokenClick);
-        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
-        systemView = findViewById(R.id.system_view);
-
+        adapter = new ChangeTokenCollectionAdapter(this::onTokenClick);
         RecyclerView list = findViewById(R.id.list);
+        systemView = findViewById(R.id.system_view);
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
@@ -58,60 +55,26 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
-        viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
-                .get(TokensViewModel.class);
+        viewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(TokenChangeCollectionViewModel.class);
+
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
-        viewModel.total().observe(this, this::onTotal);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }
 
-    private void onTotal(BigDecimal totalInCurrency) {
-        adapter.setTotal(totalInCurrency);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
-        getMenuInflater().inflate(R.menu.menu_edit, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_add: {
-                viewModel.showAddToken(this);
-            } break;
-            case R.id.action_edit: {
-                viewModel.showEditTokens(this);
-            } break;
-            case android.R.id.home: {
-                adapter.clear();
-                viewModel.showTransactions(this);
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        viewModel.showTransactions(this);
-    }
-
     private void onTokenClick(View view, Token token) {
-        Context context = view.getContext();
-        viewModel.showSendToken(context, token.tokenInfo.address, token.tokenInfo.symbol, token.tokenInfo.decimals);
+        viewModel.setEnabled(token);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        viewModel.fetchTokens();
+        viewModel.prepare();
     }
 
     private void onTokens(Token[] tokens) {

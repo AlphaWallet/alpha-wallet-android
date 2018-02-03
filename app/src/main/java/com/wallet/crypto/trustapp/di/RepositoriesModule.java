@@ -8,11 +8,11 @@ import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
 import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
-import com.wallet.crypto.trustapp.repository.TokensRealmSource;
 import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
 import com.wallet.crypto.trustapp.repository.TokenLocalSource;
 import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
+import com.wallet.crypto.trustapp.repository.TokensRealmSource;
 import com.wallet.crypto.trustapp.repository.TransactionLocalSource;
 import com.wallet.crypto.trustapp.repository.TransactionRepository;
 import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
@@ -22,6 +22,7 @@ import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
 import com.wallet.crypto.trustapp.service.EthplorerTokenService;
 import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
+import com.wallet.crypto.trustapp.service.RealmManager;
 import com.wallet.crypto.trustapp.service.TickerService;
 import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
 import com.wallet.crypto.trustapp.service.TransactionsNetworkClient;
@@ -92,8 +93,8 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-    TransactionLocalSource provideTransactionInDiskCache() {
-        return new TransactionsRealmCache();
+    TransactionLocalSource provideTransactionInDiskCache(RealmManager realmManager) {
+        return new TransactionsRealmCache(realmManager);
     }
 
 	@Singleton
@@ -110,15 +111,19 @@ public class RepositoriesModule {
     TokenRepositoryType provideTokenRepository(
             OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
+            WalletRepositoryType walletRepository,
             TokenExplorerClientType tokenExplorerClientType,
             TokenLocalSource tokenLocalSource,
-            TransactionLocalSource inDiskCache) {
+            TransactionLocalSource inDiskCache,
+            TickerService tickerService) {
 	    return new TokenRepository(
 	            okHttpClient,
 	            ethereumNetworkRepository,
+	            walletRepository,
 	            tokenExplorerClientType,
                 tokenLocalSource,
-                inDiskCache);
+                inDiskCache,
+                tickerService);
     }
 
 	@Singleton
@@ -129,8 +134,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource() {
-	    return new TokensRealmSource();
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager) {
+	    return new TokensRealmSource(realmManager);
     }
 
     @Singleton

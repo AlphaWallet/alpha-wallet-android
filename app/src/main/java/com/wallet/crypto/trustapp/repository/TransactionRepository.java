@@ -1,7 +1,6 @@
 package com.wallet.crypto.trustapp.repository;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.service.AccountKeystoreService;
@@ -79,7 +78,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
 					.send();
 			if (raw.hasError()) {
-				throw new ServiceException(raw.getError().getMessage());
+			    throw new Exception(raw.getError().getMessage());
 			}
 			return raw.getTransactionHash();
 		})).subscribeOn(Schedulers.io());
@@ -97,9 +96,7 @@ public class TransactionRepository implements TransactionRepositoryType {
                         .fetchLastTransactions(wallet, lastTransaction)))
                 .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
                         .fetchLastTransactions(wallet, null)))
-                .flatMap(transactions -> {
-                    inDiskCache.putTransactions(networkInfo, wallet, transactions);
-                    return inDiskCache.fetchTransaction(networkInfo, wallet);
-                });
+                .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
+                .andThen(inDiskCache.fetchTransaction(networkInfo, wallet));
     }
 }

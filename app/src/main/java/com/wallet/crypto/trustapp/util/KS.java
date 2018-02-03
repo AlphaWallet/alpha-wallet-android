@@ -100,7 +100,7 @@ public class KS {
 				keyStore.deleteEntry(alias);
 				throw new ServiceErrorException(
 						ServiceErrorException.FAIL_TO_SAVE_IV_FILE,
-						"Failed to save the iv file for: " + alias);
+						"Failed to saveTokens the iv file for: " + alias);
 			}
 			CipherOutputStream cipherOutputStream = null;
 			try {
@@ -111,7 +111,7 @@ public class KS {
 			} catch (Exception ex) {
 				throw new ServiceErrorException(
 						ServiceErrorException.KEY_STORE_ERROR,
-						"Failed to save the file for: " + alias);
+						"Failed to saveTokens the file for: " + alias);
 			} finally {
 				if (cipherOutputStream != null) {
 					cipherOutputStream.close();

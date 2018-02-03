@@ -7,17 +7,17 @@ public class TransactionContract implements Parcelable {
     public String address;
     public String name;
     public String totalSupply;
-    public long decimals;
+    public int decimals;
     public String symbol;
 
     public TransactionContract() {
     }
 
-    protected TransactionContract(Parcel in) {
+    private TransactionContract(Parcel in) {
         address = in.readString();
         name = in.readString();
         totalSupply = in.readString();
-        decimals = in.readLong();
+        decimals = in.readInt();
         symbol = in.readString();
     }
 
@@ -43,7 +43,7 @@ public class TransactionContract implements Parcelable {
         parcel.writeString(address);
         parcel.writeString(name);
         parcel.writeString(totalSupply);
-        parcel.writeLong(decimals);
+        parcel.writeInt(decimals);
         parcel.writeString(symbol);
     }
 }

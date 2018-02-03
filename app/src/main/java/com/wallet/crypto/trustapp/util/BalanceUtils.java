@@ -9,19 +9,13 @@ import java.math.RoundingMode;
 public class BalanceUtils {
     private static String weiInEth  = "1000000000000000000";
 
-    public static BigDecimal weiToEth(BigInteger wei) {
-        return Convert.fromWei(new BigDecimal(wei), Convert.Unit.ETHER);
-    }
-
-    public static BigDecimal weiToEth(BigInteger wei, int sigFig) throws Exception {
-        BigDecimal eth = weiToEth(wei);
-        int scale = sigFig - eth.precision() + eth.scale();
-        return eth.setScale(scale, RoundingMode.HALF_UP);
+    public static BigDecimal weiToEth(BigDecimal wei) {
+        return Convert.fromWei(wei, Convert.Unit.ETHER);
     }
 
     public static String ethToUsd(String priceUsd, String ethBalance) {
         BigDecimal usd = new BigDecimal(ethBalance).multiply(new BigDecimal(priceUsd));
-        usd = usd.setScale(2, RoundingMode.CEILING);
+        usd = usd.setScale(2, RoundingMode.HALF_UP);
         return usd.toString();
     }
 

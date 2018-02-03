@@ -8,6 +8,7 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 
 import java.util.Map;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public class TransactionMemoryCache implements TransactionLocalSource {
@@ -37,9 +38,9 @@ public class TransactionMemoryCache implements TransactionLocalSource {
     }
 
     @Override
-	public void putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
-		cache.put(createKey(networkInfo, wallet),
-                new CacheUnit(wallet.address, System.currentTimeMillis(), transactions));
+	public Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
+		return Completable.fromAction(() -> cache.put(createKey(networkInfo, wallet),
+                new CacheUnit(wallet.address, System.currentTimeMillis(), transactions)));
 	}
 
     @Override

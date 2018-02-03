@@ -25,6 +25,7 @@ import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
 import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModel;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.inject.Inject;
@@ -186,8 +187,8 @@ public class ConfirmationActivity extends BaseActivity {
         gasPriceText.setText(gasPrice);
         gasLimitText.setText(gasSettings.gasLimit.toString());
 
-        String networkFee = BalanceUtils.weiToEth(gasSettings
-                .gasPrice.multiply(gasSettings.gasLimit)).toPlainString() + " " + C.ETH_SYMBOL;
+        String networkFee = BalanceUtils.weiToEth(new BigDecimal(gasSettings
+                .gasPrice.multiply(gasSettings.gasLimit))).toPlainString() + " " + C.ETH_SYMBOL;
         networkFeeText.setText(networkFee);
     }
 

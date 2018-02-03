@@ -8,7 +8,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
- * Delete and fetch wallets
+ * Delete and fetchTokens wallets
  */
 public class DeleteWalletInteract {
 	private final WalletRepositoryType walletRepository;

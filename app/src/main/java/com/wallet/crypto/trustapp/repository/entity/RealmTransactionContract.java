@@ -6,7 +6,7 @@ public class RealmTransactionContract extends RealmObject {
     private String address;
     private String name;
     private String totalSupply;
-    private long decimals;
+    private int decimals;
     private String symbol;
 
     public String getAddress() {
@@ -33,11 +33,11 @@ public class RealmTransactionContract extends RealmObject {
         this.totalSupply = totalSupply;
     }
 
-    public long getDecimals() {
+    public int getDecimals() {
         return decimals;
     }
 
-    public void setDecimals(long decimals) {
+    public void setDecimals(int decimals) {
         this.decimals = decimals;
     }
 

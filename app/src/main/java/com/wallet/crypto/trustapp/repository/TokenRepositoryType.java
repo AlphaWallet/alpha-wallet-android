@@ -8,7 +8,11 @@ import io.reactivex.Observable;
 
 public interface TokenRepositoryType {
 
-    Observable<Token[]> fetch(String walletAddress);
+    Observable<Token[]> fetchActive(String walletAddress);
+
+    Observable<Token[]> fetchAll(String walletAddress);
 
     Completable addToken(Wallet wallet, String address, String symbol, int decimals);
+
+    Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
 }

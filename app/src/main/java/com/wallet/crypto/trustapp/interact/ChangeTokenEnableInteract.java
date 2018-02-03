@@ -4,20 +4,19 @@ import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 
-import io.reactivex.Observable;
+import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class FetchTokensInteract {
-
+public class ChangeTokenEnableInteract {
     private final TokenRepositoryType tokenRepository;
 
-    public FetchTokensInteract(TokenRepositoryType tokenRepository) {
+    public ChangeTokenEnableInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<Token[]> fetch(Wallet wallet) {
-        return tokenRepository.fetchActive(wallet.address)
+    public Completable setEnable(Wallet wallet, Token token) {
+        return tokenRepository.setEnable(wallet, token, !token.tokenInfo.isEnabled)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

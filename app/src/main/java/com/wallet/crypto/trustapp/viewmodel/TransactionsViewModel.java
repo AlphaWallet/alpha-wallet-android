@@ -4,7 +4,9 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -24,14 +26,13 @@ import com.wallet.crypto.trustapp.router.SettingsRouter;
 import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 public class TransactionsViewModel extends BaseViewModel {
-    private static final long GET_BALANCE_INTERVAL = 10;
-    private static final long FETCH_TRANSACTIONS_INTERVAL = 12;
+    private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
+    private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
@@ -53,6 +54,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private Disposable getBalanceDisposable;
     @Nullable
     private Disposable fetchTransactionDisposable;
+    private Handler handler = new Handler();
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -83,12 +85,8 @@ public class TransactionsViewModel extends BaseViewModel {
     protected void onCleared() {
         super.onCleared();
 
-        if (fetchTransactionDisposable != null) {
-            fetchTransactionDisposable.dispose();
-        }
-        if (getBalanceDisposable != null) {
-            getBalanceDisposable.dispose();
-        }
+        handler.removeCallbacks(startFetchTransactionsTask);
+        handler.removeCallbacks(startGetBalanceTask);
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -114,21 +112,23 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
-    public void fetchTransactions() {
-        progress.postValue(true);
-        fetchTransactionDisposable = Observable.interval(0, FETCH_TRANSACTIONS_INTERVAL, TimeUnit.SECONDS)
-            .doOnNext(l -> fetchTransactionsInteract
-                        .fetch(defaultWallet.getValue()/*new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/)
-                        .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted))
-            .subscribe(l -> {}, t -> {});
+    public void fetchTransactions(boolean shouldShowProgress) {
+        handler.removeCallbacks(startFetchTransactionsTask);
+        progress.postValue(shouldShowProgress);
+        /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
+        Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
+        fetchTransactionDisposable = fetch
+                .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted);
     }
 
     public void getBalance() {
-        getBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> getDefaultWalletBalance
-                        .get(defaultWallet.getValue())
-                        .subscribe(defaultWalletBalance::postValue, t -> {}))
-                .subscribe(l -> {}, t -> {});
+        getBalanceDisposable = getDefaultWalletBalance
+                .get(defaultWallet.getValue())
+                .subscribe(values -> {
+                    defaultWalletBalance.postValue(values);
+                    handler.removeCallbacks(startGetBalanceTask);
+                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
+                }, t -> {});
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -141,14 +141,15 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         getBalance();
-        fetchTransactions();
+        fetchTransactions(true);
     }
 
     private void onTransactions(Transaction[] transactions) {
-        if (transactions != null && transactions.length > 0) {
+        this.transactions.setValue(transactions);
+        Boolean last = progress.getValue();
+        if (transactions != null && transactions.length > 0 && last != null && last) {
             progress.postValue(true);
         }
-        this.transactions.setValue(transactions);
     }
 
     private void onTransactionsFetchCompleted() {
@@ -157,6 +158,9 @@ public class TransactionsViewModel extends BaseViewModel {
         if (transactions == null || transactions.length == 0) {
             error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
         }
+        handler.postDelayed(
+                startFetchTransactionsTask,
+                FETCH_TRANSACTIONS_INTERVAL * DateUtils.SECOND_IN_MILLIS);
     }
 
     public void showWallets(Context context) {
@@ -184,4 +188,8 @@ public class TransactionsViewModel extends BaseViewModel {
     public void openDeposit(Context context, Uri uri) {
         externalBrowserRouter.open(context, uri);
     }
+
+    private final Runnable startFetchTransactionsTask = () -> this.fetchTransactions(false);
+
+    private final Runnable startGetBalanceTask = this::getBalance;
 }

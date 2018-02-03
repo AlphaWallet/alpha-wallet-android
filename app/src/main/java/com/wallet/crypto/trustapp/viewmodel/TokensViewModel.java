@@ -5,59 +5,40 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
+import com.wallet.crypto.trustapp.router.ChangeTokenCollectionRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
+
+import java.math.BigDecimal;
 
 import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TokensViewModel extends BaseViewModel {
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
+    private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final TransactionsRouter transactionsRouter;
+    private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
     TokensViewModel(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            TransactionsRouter transactionsRouter) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+            TransactionsRouter transactionsRouter,
+            ChangeTokenCollectionRouter changeTokenCollectionRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.transactionsRouter = transactionsRouter;
-    }
-
-    public void prepare() {
-        progress.postValue(true);
-        findDefaultNetwork();
-    }
-
-    private void findDefaultNetwork() {
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        fetchTokens();
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
+        this.changeTokenCollectionRouter = changeTokenCollectionRouter;
     }
 
     public MutableLiveData<Wallet> wallet() {
@@ -68,12 +49,13 @@ public class TokensViewModel extends BaseViewModel {
         return tokens;
     }
 
+    public LiveData<BigDecimal> total() {
+        return total;
+    }
+
     public void fetchTokens() {
         progress.postValue(true);
-        if (defaultNetwork.getValue() == null) {
-            findDefaultNetwork();
-        }
-        disposable = fetchTokensInteract
+        fetchTokensInteract
                 .fetch(wallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
@@ -87,10 +69,30 @@ public class TokensViewModel extends BaseViewModel {
     }
 
     private void onTokens(Token[] tokens) {
+        this.tokens.setValue(tokens);
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
+            showTotalBalance(tokens);
         }
-        this.tokens.setValue(tokens);
+    }
+
+    private void showTotalBalance(Token[] tokens) {
+        BigDecimal total = new BigDecimal("0");
+        for (Token token : tokens) {
+            if (token.balance != null && token.ticker != null
+                    && token.balance.compareTo(BigDecimal.ZERO) != 0) {
+                BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
+                BigDecimal ethBalance = token.tokenInfo.decimals > 0
+                        ? token.balance.divide(decimalDivisor)
+                        : token.balance;
+                total = total.add(ethBalance.multiply(new BigDecimal(token.ticker.price)));
+            }
+        }
+        total = total.setScale(2, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
+        if (total.compareTo(BigDecimal.ZERO) == 0) {
+            total = null;
+        }
+        this.total.postValue(total);
     }
 
     public void showAddToken(Context context) {
@@ -104,5 +106,9 @@ public class TokensViewModel extends BaseViewModel {
 
     public void showTransactions(Context context) {
         transactionsRouter.open(context, true);
+    }
+
+    public void showEditTokens(Context context) {
+        changeTokenCollectionRouter.open(context, wallet.getValue());
     }
 }

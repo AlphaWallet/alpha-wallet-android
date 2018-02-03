@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.wallet.crypto.trustapp.App;
 import com.wallet.crypto.trustapp.repository.PasswordStore;
 import com.wallet.crypto.trustapp.repository.TrustPasswordStore;
+import com.wallet.crypto.trustapp.service.RealmManager;
 import com.wallet.crypto.trustapp.util.LogInterceptor;
 
 import java.util.concurrent.TimeUnit;
@@ -45,4 +46,10 @@ class ToolsModule {
 	PasswordStore passwordStore(Context context) {
 		return new TrustPasswordStore(context);
 	}
+
+	@Singleton
+    @Provides
+    RealmManager provideRealmManager() {
+	    return new RealmManager();
+    }
 }

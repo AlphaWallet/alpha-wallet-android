@@ -7,7 +7,7 @@ import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -88,12 +88,12 @@ public class WalletRepository implements WalletRepositoryType {
 	}
 
 	@Override
-	public Single<BigInteger> balanceInWei(Wallet wallet) {
-		return Single.fromCallable(() -> Web3jFactory
+	public Single<BigDecimal> balanceInWei(Wallet wallet) {
+		return Single.fromCallable(() -> new BigDecimal(Web3jFactory
 					.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false))
 					.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
 					.send()
-					.getBalance())
+					.getBalance()))
                 .subscribeOn(Schedulers.io());
 	}
 }

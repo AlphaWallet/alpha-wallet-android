@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -6,20 +6,18 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Ticket;
-import com.wallet.crypto.trustapp.entity.TicketInfo;
-import com.wallet.crypto.trustapp.router.SendTokenRouter;
-import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModel;
-import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModelFactory;
-import com.wallet.crypto.trustapp.widget.SystemView;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.TicketInfo;
+import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 
 /**
  * Created by James on 22/01/2018.

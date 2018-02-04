@@ -13,7 +13,7 @@ public abstract class C {
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
 
-    public static final String ETHEREUM_TIKER = "ethereum";
+    public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TIKER = "poa";
 
     public static final String USD_SYMBOL = "$";

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -8,20 +8,20 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.widget.adapter.ChangeTokenCollectionAdapter;
-import com.wallet.crypto.trustapp.viewmodel.TokenChangeCollectionViewModel;
-import com.wallet.crypto.trustapp.viewmodel.TokenChangeCollectionViewModelFactory;
-import com.wallet.crypto.trustapp.widget.SystemView;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.ChangeTokenCollectionAdapter;
+import com.wallet.crypto.alphawallet.viewmodel.TokenChangeCollectionViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.TokenChangeCollectionViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
-import static com.wallet.crypto.trustapp.C.Key.WALLET;
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
+import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 
 public class TokenChangeCollectionActivity extends BaseActivity implements View.OnClickListener {
 

@@ -1,13 +1,13 @@
-package com.wallet.crypto.trustapp.ui.widget.adapter;
+package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.holder.BinderViewHolder;
-import com.wallet.crypto.trustapp.ui.widget.holder.WalletHolder;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.WalletHolder;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 

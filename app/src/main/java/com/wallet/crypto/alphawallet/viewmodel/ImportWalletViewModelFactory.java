@@ -18,4 +18,5 @@ public class ImportWalletViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new ImportWalletViewModel(importWalletInteract);
-    
+    }
+}

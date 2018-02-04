@@ -1,7 +1,7 @@
-package com.wallet.crypto.trustapp.interact;
+package com.wallet.crypto.alphawallet.interact;
 
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 
 /**
  * Created by James on 28/01/2018.

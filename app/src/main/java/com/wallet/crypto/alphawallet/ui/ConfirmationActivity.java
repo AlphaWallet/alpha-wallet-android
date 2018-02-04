@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
@@ -15,15 +15,15 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.GasSettings;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.util.BalanceUtils;
-import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModel;
-import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
-import com.wallet.crypto.trustapp.viewmodel.GasSettingsViewModel;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.GasSettings;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -1,12 +1,12 @@
-package com.wallet.crypto.trustapp.router;
+package com.wallet.crypto.alphawallet.router;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.TokenChangeCollectionActivity;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 
-import static com.wallet.crypto.trustapp.C.Key.WALLET;
+import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 
 public class ChangeTokenCollectionRouter {
 

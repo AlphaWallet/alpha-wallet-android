@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -9,7 +9,6 @@ import android.support.design.widget.TextInputLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -17,30 +16,24 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Ticket;
-import com.wallet.crypto.trustapp.entity.TicketInfo;
-import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
-import com.wallet.crypto.trustapp.util.BalanceUtils;
-import com.wallet.crypto.trustapp.util.QRURLParser;
-import com.wallet.crypto.trustapp.viewmodel.TicketTransferViewModel;
-import com.wallet.crypto.trustapp.viewmodel.TicketTransferViewModelFactory;
-import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModel;
-import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModelFactory;
-import com.wallet.crypto.trustapp.widget.SystemView;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.util.QRURLParser;
+import com.wallet.crypto.alphawallet.viewmodel.TicketTransferViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.TicketTransferViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import org.ethereum.geth.Address;
-import org.web3j.abi.datatypes.generated.Uint16;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 
 /**
  * Created by James on 28/01/2018.

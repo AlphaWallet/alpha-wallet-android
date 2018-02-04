@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wallet.crypto.trustapp.ui.camera;
+package com.wallet.crypto.alphawallet.ui.camera;
 
 import android.Manifest;
 import android.annotation.SuppressLint;

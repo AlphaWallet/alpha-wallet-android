@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.util;
+package com.wallet.crypto.alphawallet.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -10,8 +10,8 @@ import android.security.keystore.KeyProperties;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ServiceErrorException;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,11 +36,11 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import static com.wallet.crypto.trustapp.entity.ServiceErrorException.INVALID_KEY;
-import static com.wallet.crypto.trustapp.entity.ServiceErrorException.IV_OR_ALIAS_NO_ON_DISK;
-import static com.wallet.crypto.trustapp.entity.ServiceErrorException.KEY_IS_GONE;
-import static com.wallet.crypto.trustapp.entity.ServiceErrorException.KEY_STORE_ERROR;
-import static com.wallet.crypto.trustapp.entity.ServiceErrorException.USER_NOT_AUTHENTICATED;
+import static com.wallet.crypto.alphawallet.entity.ServiceErrorException.INVALID_KEY;
+import static com.wallet.crypto.alphawallet.entity.ServiceErrorException.IV_OR_ALIAS_NO_ON_DISK;
+import static com.wallet.crypto.alphawallet.entity.ServiceErrorException.KEY_IS_GONE;
+import static com.wallet.crypto.alphawallet.entity.ServiceErrorException.KEY_STORE_ERROR;
+import static com.wallet.crypto.alphawallet.entity.ServiceErrorException.USER_NOT_AUTHENTICATED;
 
 @TargetApi(23)
 public class KS {

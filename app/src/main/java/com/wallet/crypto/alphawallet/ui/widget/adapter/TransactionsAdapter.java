@@ -1,22 +1,22 @@
-package com.wallet.crypto.trustapp.ui.widget.adapter;
+package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
 import android.os.Bundle;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.OnTransactionClickListener;
-import com.wallet.crypto.trustapp.ui.widget.entity.DateSortedItem;
-import com.wallet.crypto.trustapp.ui.widget.entity.SortedItem;
-import com.wallet.crypto.trustapp.ui.widget.entity.TimestampSortedItem;
-import com.wallet.crypto.trustapp.ui.widget.entity.TransactionSortedItem;
-import com.wallet.crypto.trustapp.ui.widget.holder.BinderViewHolder;
-import com.wallet.crypto.trustapp.ui.widget.holder.TransactionDateHolder;
-import com.wallet.crypto.trustapp.ui.widget.holder.TransactionHolder;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.OnTransactionClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.entity.DateSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TimestampSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TransactionSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TransactionDateHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TransactionHolder;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 

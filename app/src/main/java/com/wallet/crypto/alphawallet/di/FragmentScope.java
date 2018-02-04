@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
 import java.lang.annotation.Retention;
 

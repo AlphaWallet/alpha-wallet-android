@@ -1,12 +1,12 @@
-package com.wallet.crypto.trustapp.ui.widget.adapter;
+package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
-import com.wallet.crypto.trustapp.ui.widget.holder.ChangeTokenHolder;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.holder.ChangeTokenHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import android.text.TextUtils;
 

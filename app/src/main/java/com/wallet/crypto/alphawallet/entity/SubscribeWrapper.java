@@ -1,8 +1,7 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import android.os.Handler;
 
-import rx.Subscription;
 import rx.functions.Action1;
 import org.web3j.protocol.core.methods.response.Transaction;
 

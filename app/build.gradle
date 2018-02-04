@@ -20,7 +20,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion '26.0.2'
     defaultConfig {
-        applicationId "com.wallet.crypto.trustapp"
+        applicationId "com.wallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
         versionCode 60

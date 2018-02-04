@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -15,13 +15,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
-import com.wallet.crypto.trustapp.util.BalanceUtils;
-import com.wallet.crypto.trustapp.util.QRURLParser;
-import com.wallet.crypto.trustapp.viewmodel.SendViewModel;
-import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.util.QRURLParser;
+import com.wallet.crypto.alphawallet.viewmodel.SendViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.SendViewModelFactory;
 
 import org.ethereum.geth.Address;
 

@@ -1,10 +1,10 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
-import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
-import com.wallet.crypto.trustapp.router.ConfirmationRouter;
+import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
+import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 
 import io.reactivex.annotations.NonNull;
 

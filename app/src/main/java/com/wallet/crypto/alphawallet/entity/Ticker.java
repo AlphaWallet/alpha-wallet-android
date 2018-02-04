@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,4 +9,5 @@ public class Ticker {
     public String price;
     @SerializedName("percent_change_24h")
     public String percentChange24h;
+    public String price_usd;
 }

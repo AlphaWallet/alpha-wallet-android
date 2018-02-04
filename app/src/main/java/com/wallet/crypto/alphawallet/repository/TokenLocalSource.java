@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp.repository;
+package com.wallet.crypto.alphawallet.repository;
 
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.TokenTicker;
-import com.wallet.crypto.trustapp.entity.Wallet;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenTicker;
+import com.wallet.crypto.alphawallet.entity.Wallet;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;

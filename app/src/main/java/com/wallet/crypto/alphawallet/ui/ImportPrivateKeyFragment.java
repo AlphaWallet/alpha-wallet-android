@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,8 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.ui.widget.OnImportPrivateKeyListener;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
 
 public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener {
 

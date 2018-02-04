@@ -1,12 +1,12 @@
-package com.wallet.crypto.trustapp.widget;
+package com.wallet.crypto.alphawallet.widget;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 
 public class EmptyTransactionsView extends FrameLayout {
 

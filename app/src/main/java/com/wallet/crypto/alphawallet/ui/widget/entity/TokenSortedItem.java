@@ -1,7 +1,7 @@
-package com.wallet.crypto.trustapp.ui.widget.entity;
+package com.wallet.crypto.alphawallet.ui.widget.entity;
 
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 
 public class TokenSortedItem extends SortedItem<Token> {
 

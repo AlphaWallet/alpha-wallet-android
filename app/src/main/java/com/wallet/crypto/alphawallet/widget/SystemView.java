@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.widget;
+package com.wallet.crypto.alphawallet.widget;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -17,7 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.alphawallet.R;
 
 public class SystemView extends FrameLayout implements View.OnClickListener {
 	private ProgressBar progress;

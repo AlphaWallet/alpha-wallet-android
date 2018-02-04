@@ -1,33 +1,34 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.wallet.crypto.trustapp.repository.EthereumNetworkRepository;
-import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.trustapp.repository.GasSettingsRepository;
-import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
-import com.wallet.crypto.trustapp.repository.PreferenceRepositoryType;
-import com.wallet.crypto.trustapp.repository.SharedPreferenceRepository;
-import com.wallet.crypto.trustapp.repository.TokenLocalSource;
-import com.wallet.crypto.trustapp.repository.TokenRepository;
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.repository.TokensRealmSource;
-import com.wallet.crypto.trustapp.repository.TransactionLocalSource;
-import com.wallet.crypto.trustapp.repository.TransactionRepository;
-import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
-import com.wallet.crypto.trustapp.repository.TransactionsRealmCache;
-import com.wallet.crypto.trustapp.repository.WalletRepository;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.service.AccountKeystoreService;
-import com.wallet.crypto.trustapp.service.EthplorerTokenService;
-import com.wallet.crypto.trustapp.service.GethKeystoreAccountService;
-import com.wallet.crypto.trustapp.service.RealmManager;
-import com.wallet.crypto.trustapp.service.TickerService;
-import com.wallet.crypto.trustapp.service.TokenExplorerClientType;
-import com.wallet.crypto.trustapp.service.TransactionsNetworkClient;
-import com.wallet.crypto.trustapp.service.TransactionsNetworkClientType;
-import com.wallet.crypto.trustapp.service.TrustWalletTickerService;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepository;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.GasSettingsRepository;
+import com.wallet.crypto.alphawallet.repository.GasSettingsRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PreferenceRepositoryType;
+import com.wallet.crypto.alphawallet.repository.SharedPreferenceRepository;
+import com.wallet.crypto.alphawallet.repository.TokenLocalSource;
+import com.wallet.crypto.alphawallet.repository.TokenRepository;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TokensRealmSource;
+import com.wallet.crypto.alphawallet.repository.TransactionLocalSource;
+import com.wallet.crypto.alphawallet.repository.TransactionRepository;
+import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TransactionsRealmCache;
+import com.wallet.crypto.alphawallet.repository.WalletRepository;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
+import com.wallet.crypto.alphawallet.service.CoinmarketcapTickerService;
+import com.wallet.crypto.alphawallet.service.EthplorerTokenService;
+import com.wallet.crypto.alphawallet.service.GethKeystoreAccountService;
+import com.wallet.crypto.alphawallet.service.RealmManager;
+import com.wallet.crypto.alphawallet.service.TickerService;
+import com.wallet.crypto.alphawallet.service.TokenExplorerClientType;
+import com.wallet.crypto.alphawallet.service.TransactionsNetworkClient;
+import com.wallet.crypto.alphawallet.service.TransactionsNetworkClientType;
+import com.wallet.crypto.alphawallet.service.TrustWalletTickerService;
 
 import java.io.File;
 
@@ -55,7 +56,8 @@ public class RepositoriesModule {
 	@Singleton
     @Provides
     TickerService provideTickerService(OkHttpClient httpClient, Gson gson) {
-	    return new TrustWalletTickerService(httpClient, gson);
+	    //return new TrustWalletTickerService(httpClient, gson);
+		return new CoinmarketcapTickerService(httpClient, gson);
     }
 
 	@Singleton

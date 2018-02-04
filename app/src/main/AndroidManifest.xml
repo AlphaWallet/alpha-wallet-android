@@ -12,7 +12,7 @@
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:testOnly="false"
         android:theme="@style/AppTheme.NoActionBar"
@@ -67,6 +67,16 @@
             />
 
         <activity
+            android:name=".ui.UseTokenActivity"
+            android:label="@string/title_use_token"
+            />
+
+        <activity
+            android:name=".ui.SignatureDisplayActivity"
+            android:label="@string/title_use_token"
+            />
+
+        <activity
             android:name=".ui.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_barcode" />
 
@@ -77,6 +87,14 @@
         <activity
             android:name=".ui.TokenChangeCollectionActivity"
             android:label="@string/title_tokens" />
+
+        <activity
+            android:name=".ui.TicketTransferActivity"
+            android:label="@string/ticket_transfer_title" />
+
+        <activity
+            android:name=".ui.CustomPinActivity"
+            />
 
         <meta-data
             android:name="io.fabric.ApiKey"

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -14,12 +14,12 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 
 import javax.inject.Inject;
 

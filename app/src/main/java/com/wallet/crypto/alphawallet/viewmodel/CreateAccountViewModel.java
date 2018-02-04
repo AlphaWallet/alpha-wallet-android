@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 public class CreateAccountViewModel extends BaseViewModel {
 

@@ -63,4 +63,6 @@ public class TokenChangeCollectionViewModel extends BaseViewModel {
     public void setEnabled(Token token) {
         changeTokenEnableInteract
                 .setEnable(wallet.getValue(), token)
-                .subscribe(() -> {}, this::
+                .subscribe(() -> {}, this::onError);
+    }
+}

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.util;
+package com.wallet.crypto.alphawallet.util;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;

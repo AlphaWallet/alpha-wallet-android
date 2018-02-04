@@ -1,8 +1,8 @@
-package com.wallet.crypto.trustapp.interact.rx.operator;
+package com.wallet.crypto.alphawallet.interact.rx.operator;
 
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 
 import io.reactivex.CompletableOperator;
 import io.reactivex.SingleTransformer;

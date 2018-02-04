@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
@@ -18,36 +18,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Address;
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.SignaturePair;
-import com.wallet.crypto.trustapp.entity.Ticket;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.trustapp.viewmodel.SignatureDisplayModel;
-import com.wallet.crypto.trustapp.viewmodel.SignatureDisplayModelFactory;
-import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModel;
-import com.wallet.crypto.trustapp.widget.SystemView;
-
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.util.concurrent.TimeUnit;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.SignaturePair;
+import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModel;
+import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import android.util.Base64;
 
-import static com.wallet.crypto.trustapp.C.Key.TICKET;
-import static com.wallet.crypto.trustapp.C.Key.WALLET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 
 /**
  * Created by James on 24/01/2018.

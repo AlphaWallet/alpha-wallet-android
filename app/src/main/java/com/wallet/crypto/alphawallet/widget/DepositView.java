@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.widget;
+package com.wallet.crypto.alphawallet.widget;
 
 import android.content.Context;
 import android.net.Uri;
@@ -8,14 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.OnDepositClickListener;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.OnDepositClickListener;
 
-import static com.wallet.crypto.trustapp.C.CHANGELLY_REF_ID;
-import static com.wallet.crypto.trustapp.C.COINBASE_WIDGET_CODE;
-import static com.wallet.crypto.trustapp.C.ETH_SYMBOL;
-import static com.wallet.crypto.trustapp.C.SHAPESHIFT_KEY;
+import static com.wallet.crypto.alphawallet.C.CHANGELLY_REF_ID;
+import static com.wallet.crypto.alphawallet.C.COINBASE_WIDGET_CODE;
+import static com.wallet.crypto.alphawallet.C.ETH_SYMBOL;
+import static com.wallet.crypto.alphawallet.C.SHAPESHIFT_KEY;
 
 public class DepositView extends FrameLayout implements View.OnClickListener {
 

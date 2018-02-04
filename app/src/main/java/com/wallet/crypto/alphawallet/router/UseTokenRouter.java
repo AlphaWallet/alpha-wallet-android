@@ -1,15 +1,12 @@
-package com.wallet.crypto.trustapp.router;
+package com.wallet.crypto.alphawallet.router;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.entity.Ticket;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.AddTokenActivity;
-import com.wallet.crypto.trustapp.ui.UseTokenActivity;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.UseTokenActivity;
 
-import static com.wallet.crypto.trustapp.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 
 /**
  * Created by James on 22/01/2018.

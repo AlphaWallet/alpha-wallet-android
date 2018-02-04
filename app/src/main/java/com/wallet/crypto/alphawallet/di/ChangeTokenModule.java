@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.trustapp.interact.ChangeTokenEnableInteract;
-import com.wallet.crypto.trustapp.interact.FetchAllTokenInfoInteract;
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.viewmodel.TokenChangeCollectionViewModelFactory;
+import com.wallet.crypto.alphawallet.interact.ChangeTokenEnableInteract;
+import com.wallet.crypto.alphawallet.interact.FetchAllTokenInfoInteract;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.viewmodel.TokenChangeCollectionViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

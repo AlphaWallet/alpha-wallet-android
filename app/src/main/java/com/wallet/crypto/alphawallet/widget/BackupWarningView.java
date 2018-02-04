@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.widget;
+package com.wallet.crypto.alphawallet.widget;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -10,9 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.OnBackupClickListener;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.OnBackupClickListener;
 
 
 public class BackupWarningView extends FrameLayout implements View.OnClickListener {

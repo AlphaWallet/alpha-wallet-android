@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,20 +21,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.adapter.TransactionsAdapter;
-import com.wallet.crypto.trustapp.util.RootUtil;
-import com.wallet.crypto.trustapp.viewmodel.BaseNavigationActivity;
-import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModel;
-import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModelFactory;
-import com.wallet.crypto.trustapp.widget.DepositView;
-import com.wallet.crypto.trustapp.widget.EmptyTransactionsView;
-import com.wallet.crypto.trustapp.widget.SystemView;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TransactionsAdapter;
+import com.wallet.crypto.alphawallet.util.RootUtil;
+import com.wallet.crypto.alphawallet.viewmodel.BaseNavigationActivity;
+import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.DepositView;
+import com.wallet.crypto.alphawallet.widget.EmptyTransactionsView;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.util.Map;
 
@@ -42,8 +42,8 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
-import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
+import static com.wallet.crypto.alphawallet.C.ETHEREUM_NETWORK_NAME;
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TransactionsActivity extends BaseNavigationActivity implements View.OnClickListener {
 

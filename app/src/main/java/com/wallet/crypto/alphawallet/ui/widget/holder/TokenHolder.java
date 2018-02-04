@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget.holder;
+package com.wallet.crypto.alphawallet.ui.widget.holder;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -15,10 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.TokenTicker;
-import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenTicker;
+import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +26,7 @@ import java.math.RoundingMode;
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1005;
-    private static final String EMPTY_BALANCE = "\u2014\u2014";
+    public static final String EMPTY_BALANCE = "\u2014\u2014";
 
     public final TextView symbol;
     public final TextView balanceEth;
@@ -57,26 +57,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                         ? token.tokenInfo.symbol
                         : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol));
 
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
-            BigDecimal ethBalance = token.tokenInfo.decimals > 0
-                    ? token.balance.divide(decimalDivisor) : token.balance;
-            ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
-            String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
-            this.balanceEth.setText(value);
-            TokenTicker ticker = token.ticker;
-            if (ticker == null) {
-                this.balanceCurrency.setText(EMPTY_BALANCE);
-                fillIcon(null, R.mipmap.token_logo);
-            } else {
-                fillCurrency(ethBalance, ticker);
-                fillIcon(ticker.image, R.mipmap.token_logo);
-            }
+            token.tokenInfo.setupContent(this);
         } catch (Exception ex) {
             fillEmpty();
         }
     }
 
-    private void fillIcon(String imageUrl, int defaultResId) {
+    public void fillIcon(String imageUrl, int defaultResId) {
         if (TextUtils.isEmpty(imageUrl)) {
             icon.setImageResource(defaultResId);
         } else {
@@ -90,7 +77,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
     }
 
-    private void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
+    public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
                 ? EMPTY_BALANCE
                 : ethBalance.multiply(new BigDecimal(ticker.price))

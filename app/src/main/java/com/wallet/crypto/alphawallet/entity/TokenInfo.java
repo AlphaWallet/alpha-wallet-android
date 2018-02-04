@@ -1,20 +1,20 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.ui.AddTokenActivity;
-import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
-import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
-
-import org.web3j.abi.datatypes.generated.Uint16;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
+import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+
+import static com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
 public class TokenInfo implements Parcelable, TokenInterface {
     public final String address;
@@ -67,14 +67,21 @@ public class TokenInfo implements Parcelable, TokenInterface {
 
     @Override
     public void setupContent(TokenHolder holder) {
-        holder.symbol.setText(this.symbol);
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, decimals));
         BigDecimal ethBalance = decimals > 0
                 ? holder.token.balance.divide(decimalDivisor) : holder.token.balance;
-        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                ? "0"
-                : ethBalance.toPlainString();
+        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
+        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         holder.balanceEth.setText(value);
+        TokenTicker ticker = holder.token.ticker;
+        if (ticker == null) {
+            holder.balanceCurrency.setText(EMPTY_BALANCE);
+            holder.fillIcon(null, R.mipmap.token_logo);
+        } else {
+            holder.fillCurrency(ethBalance, ticker);
+            holder.fillIcon(ticker.image, R.mipmap.token_logo);
+        }
+
         holder.balanceEth.setVisibility(View.VISIBLE);
         holder.arrayBalance.setVisibility(View.GONE);
     }

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

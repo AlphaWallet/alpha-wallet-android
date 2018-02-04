@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget.holder;
+package com.wallet.crypto.alphawallet.ui.widget.holder;
 
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -11,15 +11,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.entity.TransactionOperation;
-import com.wallet.crypto.trustapp.ui.widget.OnTransactionClickListener;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionOperation;
+import com.wallet.crypto.alphawallet.ui.widget.OnTransactionClickListener;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static com.wallet.crypto.trustapp.C.ETHER_DECIMALS;
+import static com.wallet.crypto.alphawallet.C.ETHER_DECIMALS;
 
 public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
 

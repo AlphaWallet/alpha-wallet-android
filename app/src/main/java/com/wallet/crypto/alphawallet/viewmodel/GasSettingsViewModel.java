@@ -1,11 +1,11 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

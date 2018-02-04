@@ -1,16 +1,16 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
-import com.wallet.crypto.trustapp.BuildConfig;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
-import com.wallet.crypto.trustapp.router.TransactionsRouter;
-import com.wallet.crypto.trustapp.viewmodel.SplashViewModel;
-import com.wallet.crypto.trustapp.viewmodel.SplashViewModelFactory;
+import com.wallet.crypto.alphawallet.BuildConfig;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
+import com.wallet.crypto.alphawallet.router.TransactionsRouter;
+import com.wallet.crypto.alphawallet.viewmodel.SplashViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.SplashViewModelFactory;
 
 import javax.inject.Inject;
 

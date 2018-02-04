@@ -44,4 +44,5 @@ public class PasswordStoreFactory {
 		SecureRandom random = new SecureRandom();
 		random.nextBytes(bytes);
 		return String.valueOf(bytes);
-	
+	}
+}

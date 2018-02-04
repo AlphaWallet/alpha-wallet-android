@@ -1,12 +1,12 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
-import com.wallet.crypto.trustapp.router.ConfirmationRouter;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
+import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 
 import java.math.BigInteger;
 

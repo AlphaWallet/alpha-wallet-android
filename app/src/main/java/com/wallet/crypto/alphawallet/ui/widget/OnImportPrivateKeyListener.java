@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget;
+package com.wallet.crypto.alphawallet.ui.widget;
 
 public interface OnImportPrivateKeyListener {
 

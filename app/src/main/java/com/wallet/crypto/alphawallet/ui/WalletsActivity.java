@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
@@ -18,24 +18,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsAdapter;
-import com.wallet.crypto.trustapp.util.KeyboardUtils;
-import com.wallet.crypto.trustapp.viewmodel.WalletsViewModel;
-import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
-import com.wallet.crypto.trustapp.widget.AddWalletView;
-import com.wallet.crypto.trustapp.widget.BackupView;
-import com.wallet.crypto.trustapp.widget.BackupWarningView;
-import com.wallet.crypto.trustapp.widget.SystemView;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.WalletsAdapter;
+import com.wallet.crypto.alphawallet.util.KeyboardUtils;
+import com.wallet.crypto.alphawallet.viewmodel.WalletsViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.WalletsViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.AddWalletView;
+import com.wallet.crypto.alphawallet.widget.BackupView;
+import com.wallet.crypto.alphawallet.widget.BackupWarningView;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.IMPORT_REQUEST_CODE;
-import static com.wallet.crypto.trustapp.C.SHARE_REQUEST_CODE;
+import static com.wallet.crypto.alphawallet.C.IMPORT_REQUEST_CODE;
+import static com.wallet.crypto.alphawallet.C.SHARE_REQUEST_CODE;
 
 public class WalletsActivity extends BaseActivity implements
 		View.OnClickListener,

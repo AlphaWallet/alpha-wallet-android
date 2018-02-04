@@ -1,8 +1,8 @@
-package com.wallet.crypto.trustapp.ui.widget.entity;
+package com.wallet.crypto.alphawallet.ui.widget.entity;
 
 import android.text.format.DateUtils;
 
-import com.wallet.crypto.trustapp.ui.widget.holder.TransactionDateHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TransactionDateHolder;
 
 import java.util.Calendar;
 import java.util.Date;

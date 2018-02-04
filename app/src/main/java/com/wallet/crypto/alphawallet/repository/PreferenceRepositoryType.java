@@ -7,3 +7,4 @@ public interface PreferenceRepositoryType {
 	String getDefaultNetwork();
 	void setDefaultNetwork(String netName);
 
+}

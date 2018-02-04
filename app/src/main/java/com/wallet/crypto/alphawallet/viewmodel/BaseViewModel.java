@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -6,9 +6,9 @@ import android.arch.lifecycle.ViewModel;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.ServiceException;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.ServiceException;
 
 import io.reactivex.disposables.Disposable;
 

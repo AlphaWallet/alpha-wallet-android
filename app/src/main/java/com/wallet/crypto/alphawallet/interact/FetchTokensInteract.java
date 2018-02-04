@@ -1,13 +1,8 @@
-package com.wallet.crypto.trustapp.interact;
+package com.wallet.crypto.alphawallet.interact;
 
-import com.wallet.crypto.trustapp.entity.Ticket;
-import com.wallet.crypto.trustapp.entity.TicketInfo;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-
-import java.math.BigInteger;
-import java.util.List;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;

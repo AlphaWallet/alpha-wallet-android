@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 /**
  * Created by James on 30/01/2018.

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget.entity;
+package com.wallet.crypto.alphawallet.ui.widget.entity;
 
 import java.util.Date;
 

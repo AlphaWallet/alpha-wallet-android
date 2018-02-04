@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.repository.entity;
+package com.wallet.crypto.alphawallet.repository.entity;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;

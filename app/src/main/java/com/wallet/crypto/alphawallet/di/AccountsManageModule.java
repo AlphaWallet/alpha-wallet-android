@@ -1,16 +1,16 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.trustapp.interact.CreateWalletInteract;
-import com.wallet.crypto.trustapp.interact.DeleteWalletInteract;
-import com.wallet.crypto.trustapp.interact.ExportWalletInteract;
-import com.wallet.crypto.trustapp.interact.FetchWalletsInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.SetDefaultWalletInteract;
-import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.router.ImportWalletRouter;
-import com.wallet.crypto.trustapp.router.TransactionsRouter;
-import com.wallet.crypto.trustapp.viewmodel.WalletsViewModelFactory;
+import com.wallet.crypto.alphawallet.interact.CreateWalletInteract;
+import com.wallet.crypto.alphawallet.interact.DeleteWalletInteract;
+import com.wallet.crypto.alphawallet.interact.ExportWalletInteract;
+import com.wallet.crypto.alphawallet.interact.FetchWalletsInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.interact.SetDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.ImportWalletRouter;
+import com.wallet.crypto.alphawallet.router.TransactionsRouter;
+import com.wallet.crypto.alphawallet.viewmodel.WalletsViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

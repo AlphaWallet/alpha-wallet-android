@@ -1,18 +1,18 @@
-package com.wallet.crypto.trustapp.repository;
+package com.wallet.crypto.alphawallet.repository;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.Ticket;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.TicketInfo;
-import com.wallet.crypto.trustapp.entity.TokenInfo;
-import com.wallet.crypto.trustapp.entity.TokenTicker;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.entity.RealmToken;
-import com.wallet.crypto.trustapp.repository.entity.RealmTokenTicker;
-import com.wallet.crypto.trustapp.service.RealmManager;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenFactory;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
+import com.wallet.crypto.alphawallet.entity.TokenTicker;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
+import com.wallet.crypto.alphawallet.repository.entity.RealmTokenTicker;
+import com.wallet.crypto.alphawallet.service.RealmManager;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import io.realm.Sort;
 
 public class TokensRealmSource implements TokenLocalSource {
 
-    private static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
+    public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final String COINMARKETCAP_IMAGE_URL = "https://files.coinmarketcap.com/static/img/coins/128x128/%s.png";
 
@@ -137,23 +137,14 @@ public class TokensRealmSource implements TokenLocalSource {
                 for (int i = 0; i < len; i++) {
                     RealmTokenTicker rawItem = rawItems.get(i);
                     if (rawItem != null) {
-                        if (rawItem.getVenue() == null) {
-                            tokenTickers.add(new TokenTicker(
-                                    rawItem.getId(),
-                                    rawItem.getContract(),
-                                    rawItem.getPrice(),
-                                    rawItem.getPercentChange24h(),
-                                    rawItem.getImage()));
-                        } else {
-                            tokenTickers.add(new TokenTicker(
-                                    rawItem.getId(),
-                                    rawItem.getContract(),
-                                    rawItem.getPrice(),
-                                    rawItem.getPercentChange24h(),
-                                    rawItem.getImage(),
-                                    rawItem.getVenue(),
-                                    rawItem.getDate()));
-                        }
+                        tokenTickers.add(new TokenTicker(
+                                rawItem.getId(),
+                                rawItem.getContract(),
+                                rawItem.getPrice(),
+                                rawItem.getPercentChange24h(),
+                                rawItem.getImage(),
+                                rawItem.getVenue(),
+                                rawItem.getDate()));
                     }
                 }
                 realm.commitTransaction();
@@ -205,7 +196,7 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmToken != null) {
                 if (token instanceof Ticket) { //TODO: Use proper inherticance on Token type, godammit!
                     Ticket t = (Ticket)token;
-                    realmToken.setBalance(t.ticketInfo.populateIDs(t.balanceArray, false));
+                    realmToken.setBalance(t.ticketInfo.populateIDs(t.balanceArray, true));
                 }
                 else
                 {
@@ -239,8 +230,12 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setDecimals(token.tokenInfo.decimals);
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
+                if (token instanceof Ticket) {
+                    realmToken.setVenue(((Ticket) token).ticketInfo.venue);
+                    realmToken.setDate(((Ticket) token).ticketInfo.date);
+                }
             }
-            realmToken.setBalance(token.balance == null ? null : token.balance.toString());
+            realmToken.setBalance(token.getStringBalance());
             realm.commitTransaction();
         } catch (Exception ex) {
             if (realm != null) {
@@ -255,19 +250,13 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private Token[] convert(RealmResults<RealmToken> realmItems, long now) {
         int len = realmItems.size();
+        TokenFactory tf = new TokenFactory();
         Token[] result = new Token[len];
         for (int i = 0; i < len; i++) {
             RealmToken realmItem = realmItems.get(i);
             if (realmItem != null) {
-                TokenInfo info = new TokenInfo(
-                        realmItem.getAddress(),
-                        realmItem.getName(),
-                        realmItem.getSymbol(),
-                        realmItem.getDecimals(),
-                        realmItem.getEnabled());
-                BigDecimal balance = TextUtils.isEmpty(realmItem.getBalance()) || realmItem.getUpdatedTime() + ACTUAL_BALANCE_INTERVAL < now
-                        ? null : new BigDecimal(realmItem.getBalance());
-                result[i] = new Token(info, balance, realmItem.getUpdatedTime());
+                TokenInfo info = tf.CreateTokenInfo(realmItem);
+                result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
             }
         }
         return result;

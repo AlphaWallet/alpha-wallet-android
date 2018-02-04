@@ -1,8 +1,8 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 
 import dagger.Module;
 import dagger.Provides;

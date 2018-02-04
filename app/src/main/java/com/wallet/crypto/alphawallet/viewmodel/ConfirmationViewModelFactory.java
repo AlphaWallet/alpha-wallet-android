@@ -1,13 +1,13 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
-import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.router.GasSettingsRouter;
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
+import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.router.GasSettingsRouter;
 
 public class ConfirmationViewModelFactory implements ViewModelProvider.Factory {
 

@@ -1,12 +1,7 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.wallet.crypto.trustapp.ui.AddTokenActivity;
-import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
-
-import org.web3j.abi.datatypes.generated.Uint16;
+import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 
 import java.util.List;
 

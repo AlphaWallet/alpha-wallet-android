@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp.router;
+package com.wallet.crypto.alphawallet.router;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.wallet.crypto.trustapp.ui.WalletsActivity;
+import com.wallet.crypto.alphawallet.ui.WalletsActivity;
 
 public class ManageWalletsRouter {
 

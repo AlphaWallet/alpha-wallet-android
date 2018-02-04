@@ -1,15 +1,15 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
 
-import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
-import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
-import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.router.GasSettingsRouter;
-import com.wallet.crypto.trustapp.viewmodel.ConfirmationViewModelFactory;
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
+import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.repository.GasSettingsRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.GasSettingsRouter;
+import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

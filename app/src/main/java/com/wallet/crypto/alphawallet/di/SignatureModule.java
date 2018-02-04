@@ -1,17 +1,17 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
-import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.MemPoolInteract;
-import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
-import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.viewmodel.SignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.interact.MemPoolInteract;
+import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

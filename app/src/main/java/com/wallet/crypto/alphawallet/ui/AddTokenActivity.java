@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,27 +21,20 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Address;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Address;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 
-import com.wallet.crypto.trustapp.entity.TicketInfo;
-import com.wallet.crypto.trustapp.entity.TokenInfo;
-import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
-import com.wallet.crypto.trustapp.util.QRURLParser;
-import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModel;
-import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModelFactory;
-import com.wallet.crypto.trustapp.widget.SystemView;
-
-import org.web3j.utils.Convert;
-
-import java.math.BigDecimal;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
+import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.alphawallet.util.QRURLParser;
+import com.wallet.crypto.alphawallet.viewmodel.AddTokenViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.AddTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-
-import static com.wallet.crypto.trustapp.C.Key.WALLET;
 
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
 

@@ -134,7 +134,7 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<TokenTicker[]> getTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {
         return localSource.fetchTickers(network, wallet, tokens)
                 .onErrorResumeNext(throwable -> tickerService
-                        .fetchTockenTickers(tokens, "USD")
+                        .fetchTokenTickers(tokens, "USD")
                         .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])))
                 .flatMapCompletable(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers))
                 .andThen(localSource
@@ -154,7 +154,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
         Token newToken;
         if (tokenInfo instanceof TicketInfo) {
-            newToken = new Ticket((TicketInfo)tokenInfo, null, 0);
+            newToken = new Ticket((TicketInfo)tokenInfo, (List<Integer>)null, 0);
         } else {
             newToken = new Token(
                     new TokenInfo(tokenInfo.address,
@@ -423,7 +423,7 @@ public class TokenRepository implements TokenRepositoryType {
                 })
                 .flatMap(token -> ethereumNetworkRepository.getTicker()
                         .map(ticker -> {
-                            token.ticker = new TokenTicker("", "", ticker.price, ticker.percentChange24h, null);
+                            token.ticker = new TokenTicker("", "", ticker.price_usd, ticker.percentChange24h, null);
                             return token;
                         }).onErrorResumeNext(throwable -> Single.just(token)));
     }
@@ -616,7 +616,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static byte[] createTicketTransferData(String to, String ids) {
         //params are: Address, List<Uint16> of ticket indicies
         //convert to ticket. Re-factor this so there's no code repetition
-        Ticket t = new Ticket(null, null, 0);
+        Ticket t = new Ticket(null, "0", 0);
         List ticketIndicies = t.parseIDList(ids); //just convert straight into a list here because we already converted into indicies
         List<Type> params = Arrays.asList(new Address(to), new DynamicArray<Uint16>(ticketIndicies));
 
@@ -651,8 +651,7 @@ public class TokenRepository implements TokenRepositoryType {
                         true);
 
                 String venue = getContractData(address, stringParam("venue"));
-                if (venue != null && venue.length() > 0)
-                {
+                if (venue != null && venue.length() > 0) {
                     String date = getContractData(address, stringParam("date"));
                     BigDecimal priceBD = new BigDecimal((BigInteger)getContractData(address, intParam("getTicketStartPrice")));
                     double price = priceBD.doubleValue();

@@ -1,12 +1,9 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.web3j.abi.datatypes.generated.Uint16;
-
 import java.math.BigDecimal;
-import java.util.List;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
@@ -31,6 +28,11 @@ public class Token implements Parcelable {
         tokenInfo = in.readParcelable(TokenInfo.class.getClassLoader());
         balance = new BigDecimal(in.readString());
         updateBlancaTime = in.readLong();
+    }
+
+    public String getStringBalance() {
+        if (balance != null) return balance.toString();
+        else return "0";
     }
 
     public static final Creator<Token> CREATOR = new Creator<Token>() {

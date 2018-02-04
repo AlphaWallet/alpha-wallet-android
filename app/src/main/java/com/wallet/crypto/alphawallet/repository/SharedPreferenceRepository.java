@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.repository;
+package com.wallet.crypto.alphawallet.repository;
 
 import android.content.Context;
 import android.content.SharedPreferences;

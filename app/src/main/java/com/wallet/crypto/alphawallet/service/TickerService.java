@@ -11,4 +11,5 @@ public interface TickerService {
 
     Observable<Ticker> fetchTickerPrice(String ticker);
 
-    Single<TokenTicker[]> fetchTockenTickers(Token[] tokens, String cur
+    Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency);
+}

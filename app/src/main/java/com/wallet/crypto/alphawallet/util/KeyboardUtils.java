@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.util;
+package com.wallet.crypto.alphawallet.util;
 
 import android.content.Context;
 import android.view.View;

@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,13 +13,13 @@ import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.widget.ProgressBar;
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.adapter.TabPagerAdapter;
-import com.wallet.crypto.trustapp.viewmodel.ImportWalletViewModel;
-import com.wallet.crypto.trustapp.viewmodel.ImportWalletViewModelFactory;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TabPagerAdapter;
+import com.wallet.crypto.alphawallet.viewmodel.ImportWalletViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.ImportWalletViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.ErrorCode.ALREADY_ADDED;
+import static com.wallet.crypto.alphawallet.C.ErrorCode.ALREADY_ADDED;
 
 public class ImportWalletActivity extends BaseActivity {
 

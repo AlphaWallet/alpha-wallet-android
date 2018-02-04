@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 public class ServiceException extends Exception {
 	public final ErrorEnvelope error;

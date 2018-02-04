@@ -1,11 +1,11 @@
-package com.wallet.crypto.trustapp.util;
+package com.wallet.crypto.alphawallet.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
 
-import com.wallet.crypto.trustapp.entity.ServiceErrorException;
+import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
 import com.wallet.pwd.trustapp.PasswordManager;
 
 import java.util.Map;

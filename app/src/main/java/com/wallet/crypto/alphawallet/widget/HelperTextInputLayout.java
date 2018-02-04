@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.widget;
+package com.wallet.crypto.alphawallet.widget;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -15,7 +15,7 @@ import android.view.animation.Interpolator;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.alphawallet.R;
 
 /**
  * TextInputLayout temporary workaround for helper text showing

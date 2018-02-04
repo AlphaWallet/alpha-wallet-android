@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <com.wallet.crypto.trustapp.widget.HelperTextInputLayout
+        <com.wallet.crypto.alphawallet.widget.HelperTextInputLayout
             android:id="@+id/private_key_input_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
-        </com.wallet.crypto.trustapp.widget.HelperTextInputLayout>
+        </com.wallet.crypto.alphawallet.widget.HelperTextInputLayout>
         <Button
             android:id="@+id/import_action"
             android:text="@string/action_import"

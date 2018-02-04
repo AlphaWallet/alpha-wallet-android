@@ -1,11 +1,11 @@
-package com.wallet.crypto.trustapp;
+package com.wallet.crypto.alphawallet;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.wallet.crypto.trustapp.controller.Controller;
-import com.wallet.crypto.trustapp.model.VMAccount;
+import com.wallet.crypto.alphawallet.controller.Controller;
+import com.wallet.crypto.alphawallet.model.VMAccount;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

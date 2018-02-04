@@ -1,7 +1,7 @@
-package com.wallet.crypto.trustapp.interact;
+package com.wallet.crypto.alphawallet.interact;
 
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;

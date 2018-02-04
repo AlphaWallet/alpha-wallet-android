@@ -16,7 +16,7 @@
  * This file and all BarcodeXXX and CameraXXX files in this project edited by
  * Daniell Algar (included due to copyright reason)
  */
-package com.wallet.crypto.trustapp.ui.barcode;
+package com.wallet.crypto.alphawallet.ui.barcode;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -43,9 +43,9 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.ui.camera.CameraSource;
-import com.wallet.crypto.trustapp.ui.camera.CameraSourcePreview;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.ui.camera.CameraSource;
+import com.wallet.crypto.alphawallet.ui.camera.CameraSourcePreview;
 
 import java.io.IOException;
 

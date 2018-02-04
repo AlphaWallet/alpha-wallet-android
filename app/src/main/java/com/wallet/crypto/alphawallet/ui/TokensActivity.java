@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -11,13 +11,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.widget.adapter.TokensAdapter;
-import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
-import com.wallet.crypto.trustapp.viewmodel.TokensViewModelFactory;
-import com.wallet.crypto.trustapp.widget.SystemView;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
+import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.math.BigDecimal;
 
@@ -25,8 +25,8 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
-import static com.wallet.crypto.trustapp.C.Key.WALLET;
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
+import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 
 public class TokensActivity extends BaseActivity implements View.OnClickListener {
     @Inject

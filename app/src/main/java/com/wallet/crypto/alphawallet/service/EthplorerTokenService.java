@@ -1,7 +1,7 @@
-package com.wallet.crypto.trustapp.service;
+package com.wallet.crypto.alphawallet.service;
 
 import com.google.gson.Gson;
-import com.wallet.crypto.trustapp.entity.TokenInfo;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;

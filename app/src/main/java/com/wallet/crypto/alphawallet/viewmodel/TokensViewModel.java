@@ -1,22 +1,22 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
-import com.wallet.crypto.trustapp.router.AddTokenRouter;
-import com.wallet.crypto.trustapp.router.ChangeTokenCollectionRouter;
-import com.wallet.crypto.trustapp.router.SendTokenRouter;
-import com.wallet.crypto.trustapp.router.TransactionsRouter;
-import com.wallet.crypto.trustapp.router.UseTokenRouter;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
+import com.wallet.crypto.alphawallet.router.AddTokenRouter;
+import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
+import com.wallet.crypto.alphawallet.router.SendTokenRouter;
+import com.wallet.crypto.alphawallet.router.TransactionsRouter;
+import com.wallet.crypto.alphawallet.router.UseTokenRouter;
 
 import java.math.BigDecimal;
 
-import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TokensViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();

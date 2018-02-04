@@ -1,13 +1,13 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.wallet.crypto.trustapp.App;
-import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.TrustPasswordStore;
-import com.wallet.crypto.trustapp.service.RealmManager;
-import com.wallet.crypto.trustapp.util.LogInterceptor;
+import com.wallet.crypto.alphawallet.App;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.TrustPasswordStore;
+import com.wallet.crypto.alphawallet.service.RealmManager;
+import com.wallet.crypto.alphawallet.util.LogInterceptor;
 
 import java.util.concurrent.TimeUnit;
 

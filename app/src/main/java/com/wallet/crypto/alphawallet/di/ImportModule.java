@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.trustapp.interact.ImportWalletInteract;
-import com.wallet.crypto.trustapp.repository.PasswordStore;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.viewmodel.ImportWalletViewModelFactory;
+import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.viewmodel.ImportWalletViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

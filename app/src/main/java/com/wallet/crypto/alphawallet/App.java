@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp;
+package com.wallet.crypto.alphawallet;
 
 import android.app.Activity;
 import android.support.multidex.MultiDexApplication;
 
-import com.wallet.crypto.trustapp.di.DaggerAppComponent;
+import com.wallet.crypto.alphawallet.di.DaggerAppComponent;
 
 import javax.inject.Inject;
 

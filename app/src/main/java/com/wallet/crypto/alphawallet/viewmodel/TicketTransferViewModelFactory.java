@@ -1,19 +1,15 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
-import com.wallet.crypto.trustapp.interact.TicketTransferInteract;
-import com.wallet.crypto.trustapp.interact.UseTokenInteract;
-import com.wallet.crypto.trustapp.router.ConfirmationRouter;
-import com.wallet.crypto.trustapp.router.MyTokensRouter;
-import com.wallet.crypto.trustapp.router.SignatureDisplayRouter;
-import com.wallet.crypto.trustapp.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.interact.TicketTransferInteract;
+import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
+import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 
 /**
  * Created by James on 28/01/2018.

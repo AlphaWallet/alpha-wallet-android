@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget.holder;
+package com.wallet.crypto.alphawallet.ui.widget.holder;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,7 +7,7 @@ import android.text.format.DateFormat;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.alphawallet.R;
 
 import java.util.Calendar;
 import java.util.Date;

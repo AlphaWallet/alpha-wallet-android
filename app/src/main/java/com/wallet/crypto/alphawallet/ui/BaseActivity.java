@@ -1,11 +1,11 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.alphawallet.R;
 
 
 public abstract class BaseActivity extends AppCompatActivity {

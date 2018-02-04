@@ -1,8 +1,8 @@
-package com.wallet.crypto.trustapp.interact;
+package com.wallet.crypto.alphawallet.interact;
 
-import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.repository.TransactionRepositoryType;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;

@@ -1,8 +1,8 @@
-package com.wallet.crypto.trustapp.repository;
+package com.wallet.crypto.alphawallet.repository;
 
 
-import com.wallet.crypto.trustapp.C;
-import com.wallet.crypto.trustapp.entity.GasSettings;
+import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.entity.GasSettings;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;

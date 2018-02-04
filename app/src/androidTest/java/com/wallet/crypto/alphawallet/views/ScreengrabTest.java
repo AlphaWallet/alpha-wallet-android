@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.views;
+package com.wallet.crypto.alphawallet.views;
 
 
 import android.support.test.espresso.ViewInteraction;
@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.alphawallet.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

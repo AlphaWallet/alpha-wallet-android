@@ -1,18 +1,14 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 
 import android.content.Context;
 import android.os.Parcel;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.ui.AddTokenActivity;
-import com.wallet.crypto.trustapp.ui.widget.holder.TokenHolder;
-import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
-
-import org.web3j.abi.datatypes.generated.Uint16;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
+import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 
 import java.util.List;
 
@@ -69,9 +65,10 @@ public class TicketInfo extends TokenInfo implements TokenInterface
     @Override
     public void setupContent(TokenHolder tokenHolder)
     {
-        tokenHolder.symbol.setText(this.name);
-        tokenHolder.icon.setImageResource(R.mipmap.ic_alpha);
+        //tokenHolder.symbol.setText(this.name);
+        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
         tokenHolder.balanceEth.setVisibility(View.GONE);
+        tokenHolder.balanceCurrency.setVisibility(View.GONE);
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
 
         String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);

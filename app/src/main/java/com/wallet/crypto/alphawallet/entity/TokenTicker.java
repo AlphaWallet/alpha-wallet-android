@@ -1,12 +1,9 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TokenTicker implements Parcelable {
     public final String id;
@@ -91,7 +88,7 @@ public class TokenTicker implements Parcelable {
         {
             dest.writeByte((byte)1);
             dest.writeString(venue);
-            dest.writeString(price);
+            dest.writeString(date);
         }
         else
         {

@@ -1,6 +1,6 @@
 # remove the leading '#' to uncomment lines
 
-app_package_name 'com.wallet.crypto.trustapp'
+app_package_name 'com.wallet.crypto.alphawallet'
 # use_tests_in_packages ['your.screenshot.tests.package']
 
 app_apk_path 'app/build/outputs/apk/debug/app-debug.apk'
@@ -10,7 +10,7 @@ locales ['en-US']
 
 # clear all previously generated screenshots in your local output directory before creating new ones
 clear_previous_screenshots true
-use_tests_in_classes ['com.wallet.crypto.trustapp.views.ScreengrabTest']
+use_tests_in_classes ['com.wallet.crypto.alphawallet.views.ScreengrabTest']
 
 # For more information about all available options run
 #   fastlane screengrab --help

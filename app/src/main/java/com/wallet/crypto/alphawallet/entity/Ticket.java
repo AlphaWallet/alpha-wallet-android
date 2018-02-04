@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.entity;
+package com.wallet.crypto.alphawallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +28,13 @@ public class Ticket extends Token implements Parcelable
         burnArray = new ArrayList<>();
     }
 
+    public Ticket(TicketInfo tokenInfo, String balances, long blancaTime) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime);
+        this.balanceArray = parseIDListInteger(balances);
+        this.ticketInfo = tokenInfo;
+        burnArray = new ArrayList<>();
+    }
+
     private Ticket(Parcel in) {
         super(in, true);
         //now read in ticket
@@ -51,6 +58,11 @@ public class Ticket extends Token implements Parcelable
                 burnArray.add(val);
             }
         }
+    }
+
+    @Override
+    public String getStringBalance() {
+        return parseList(balanceArray);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -77,15 +89,22 @@ public class Ticket extends Token implements Parcelable
         StringBuilder sb = new StringBuilder();
 
         boolean first = true;
-        for (Integer i : checkedIndexList) {
-            //reverse lookup the selected IDs
-            if (i < balanceArray.size())
+        if (checkedIndexList != null)
+        {
+            for (Integer i : checkedIndexList)
             {
-                if (!first) sb.append(", ");
-                int thisTicketId = balanceArray.get(i);
-                sb.append(String.valueOf(thisTicketId));
-                first = false;
+                //reverse lookup the selected IDs
+                if (i < balanceArray.size())
+                {
+                    if (!first) sb.append(", ");
+                    int thisTicketId = balanceArray.get(i);
+                    sb.append(String.valueOf(thisTicketId));
+                    first = false;
+                }
             }
+        }
+        else {
+            sb.append("none");
         }
 
         return sb.toString();
@@ -123,6 +142,29 @@ public class Ticket extends Token implements Parcelable
                 String trim = id.trim();
                 Uint16 thisId = new Uint16(Integer.parseInt(trim));
                 idList.add(thisId);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = null;
+        }
+
+        return idList;
+    }
+
+    public List<Integer> parseIDListInteger(String userList)
+    {
+        List<Integer> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = userList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                idList.add(Integer.parseInt(trim));
             }
         }
         catch (Exception e)

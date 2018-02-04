@@ -1,10 +1,10 @@
-package com.wallet.crypto.trustapp.repository;
+package com.wallet.crypto.alphawallet.repository;
 
-import com.wallet.crypto.trustapp.entity.NetworkInfo;
-import com.wallet.crypto.trustapp.entity.Transaction;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.service.AccountKeystoreService;
-import com.wallet.crypto.trustapp.service.TransactionsNetworkClientType;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
+import com.wallet.crypto.alphawallet.service.TransactionsNetworkClientType;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
@@ -85,8 +85,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<byte[]> getSignature(Wallet wallet, String message, String password)
-	{
+	public Single<byte[]> getSignature(Wallet wallet, String message, String password) {
 		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
 	}
 

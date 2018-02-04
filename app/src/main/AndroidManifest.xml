@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.wallet.crypto.trustapp">
+    package="com.wallet.crypto.alphawallet">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name=".App"
+        android:name="com.wallet.crypto.alphawallet.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:name, android:theme, android:allowBackup">
         <activity
-            android:name=".ui.SplashActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,68 +28,68 @@
         </activity>
 
         <activity
-            android:name=".ui.WalletsActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.WalletsActivity"
             android:label="@string/title_account_list" />
 
         <activity
-            android:name=".ui.ImportWalletActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.ImportWalletActivity"
             android:label="@string/title_import"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name=".ui.TransactionsActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.TransactionsActivity"
             android:label="@string/title_import" />
 
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity
-            android:name=".ui.TransactionDetailActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.TransactionDetailActivity"
             android:label="@string/title_transaction_details" />
         <activity
-            android:name=".ui.MyAddressActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.MyAddressActivity"
             android:label="@string/title_my_address" />
         <activity
-            android:name=".ui.TokensActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.TokensActivity"
             android:label="@string/title_my_tokens" />
 
         <activity
-            android:name=".ui.SendActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.SendActivity"
             android:label="@string/title_activity_send" />
 
         <activity
-            android:name=".ui.ConfirmationActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.ConfirmationActivity"
             android:label="@string/title_activity_confirmation" />
 
         <activity
-            android:name=".ui.AddTokenActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.AddTokenActivity"
             android:label="@string/title_add_token"
             />
 
         <activity
-            android:name=".ui.UseTokenActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.UseTokenActivity"
             android:label="@string/title_use_token"
             />
 
         <activity
-            android:name=".ui.SignatureDisplayActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.SignatureDisplayActivity"
             android:label="@string/title_use_token"
             />
 
         <activity
-            android:name=".ui.barcode.BarcodeCaptureActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_barcode" />
 
         <activity
-            android:name=".ui.GasSettingsActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
 
         <activity
-            android:name=".ui.TokenChangeCollectionActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity"
             android:label="@string/title_tokens" />
 
         <activity
-            android:name=".ui.TicketTransferActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.TicketTransferActivity"
             android:label="@string/ticket_transfer_title" />
 
         <activity

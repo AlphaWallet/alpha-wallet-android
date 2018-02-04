@@ -1,11 +1,11 @@
-package com.wallet.crypto.trustapp.ui;
+package com.wallet.crypto.alphawallet.ui;
 
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.router.TransactionsRouter;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 
 import javax.inject.Inject;
 

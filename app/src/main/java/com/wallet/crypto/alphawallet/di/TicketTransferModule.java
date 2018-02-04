@@ -1,23 +1,15 @@
-package com.wallet.crypto.trustapp.di;
+package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
-import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.SignatureGenerateInteract;
-import com.wallet.crypto.trustapp.interact.TicketTransferInteract;
-import com.wallet.crypto.trustapp.interact.UseTokenInteract;
-import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
-import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
-import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
-import com.wallet.crypto.trustapp.router.ConfirmationRouter;
-import com.wallet.crypto.trustapp.router.MyTokensRouter;
-import com.wallet.crypto.trustapp.router.SignatureDisplayRouter;
-import com.wallet.crypto.trustapp.router.TicketTransferRouter;
-import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
-import com.wallet.crypto.trustapp.viewmodel.TicketTransferViewModelFactory;
-import com.wallet.crypto.trustapp.viewmodel.UseTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.interact.TicketTransferInteract;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
+import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.viewmodel.TicketTransferViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

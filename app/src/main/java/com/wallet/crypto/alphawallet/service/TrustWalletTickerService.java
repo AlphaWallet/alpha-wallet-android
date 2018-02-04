@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp.service;
+package com.wallet.crypto.alphawallet.service;
 
 import com.google.gson.Gson;
-import com.wallet.crypto.trustapp.entity.Ticker;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.TokenTicker;
+import com.wallet.crypto.alphawallet.entity.Ticker;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenTicker;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -22,6 +22,7 @@ import retrofit2.http.Query;
 public class TrustWalletTickerService implements TickerService {
 
     private static final String TRUST_API_URL = "https://api.trustwalletapp.com";
+    private static final String COINMARKET_API = "https://api.coinmarketcap.com";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -32,7 +33,7 @@ public class TrustWalletTickerService implements TickerService {
             Gson gson) {
         this.httpClient = httpClient;
         this.gson = gson;
-        buildApiClient(TRUST_API_URL);
+        buildApiClient(COINMARKET_API);
     }
 
     private void buildApiClient(String baseUrl) {
@@ -64,7 +65,7 @@ public class TrustWalletTickerService implements TickerService {
     }
 
     @Override
-    public Single<TokenTicker[]> fetchTockenTickers(Token[] tokens, String currency) {
+    public Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency) {
         return Single.fromCallable(() -> {
             if (tokens == null || tokens.length == 0) {
                 return null;
@@ -86,9 +87,11 @@ public class TrustWalletTickerService implements TickerService {
         });
     }
 
+    //{"status":true,"response":[{"percent_change_24h":"0","image":"https://files.coinmarketcap.com/static/img/coins/128x128/undefined.png"}]}
     public interface ApiClient {
-        @GET("prices?currency=USD&")
-        Observable<Response<TrustResponse<Ticker>>> fetchTickerPrice(@Query("symbols") String symbols);
+        @GET("/v1/ticker/ethereum/")
+        //@GET("prices?currency=USD&")
+        Observable<Response<TrustResponse<Ticker>>> fetchTickerPrice(@Query("convert") String symbols);
 
         @POST("tokenPrices")
         Single<Response<TrustResponse<TokenTicker>>> fetchTokenPrices(@Body TokenTickerRequestBody body);

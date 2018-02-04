@@ -125,7 +125,7 @@
                 />
         </LinearLayout>
     </LinearLayout>
-    <com.wallet.crypto.trustapp.widget.SystemView
+    <com.wallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
         android:layout_marginTop="?actionBarSize"

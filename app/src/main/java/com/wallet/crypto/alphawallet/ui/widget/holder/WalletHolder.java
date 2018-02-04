@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget.holder;
+package com.wallet.crypto.alphawallet.ui.widget.holder;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,9 +9,9 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Wallet;
-import com.wallet.crypto.trustapp.ui.widget.adapter.WalletsAdapter;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.WalletsAdapter;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 

@@ -1,9 +1,9 @@
-package com.wallet.crypto.trustapp.service;
+package com.wallet.crypto.alphawallet.service;
 
 import com.google.gson.Gson;
-import com.wallet.crypto.trustapp.entity.Ticker;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.entity.TokenTicker;
+import com.wallet.crypto.alphawallet.entity.Ticker;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenTicker;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
@@ -57,7 +57,7 @@ public class CoinmarketcapTickerService implements TickerService {
     }
 
     @Override
-    public Single<TokenTicker[]> fetchTockenTickers(Token[] tokens, String currency) {
+    public Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency) {
         return Single.just(new TokenTicker[0]);
     }
 

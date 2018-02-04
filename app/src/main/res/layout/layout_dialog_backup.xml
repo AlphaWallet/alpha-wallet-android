@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
-    <com.wallet.crypto.trustapp.widget.HelperTextInputLayout
+    <com.wallet.crypto.alphawallet.widget.HelperTextInputLayout
         app:hintEnabled="false"
         app:errorEnabled="true"
         app:passwordToggleEnabled="true"
@@ -30,5 +30,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
-    </com.wallet.crypto.trustapp.widget.HelperTextInputLayout>
+    </com.wallet.crypto.alphawallet.widget.HelperTextInputLayout>
 </LinearLayout>

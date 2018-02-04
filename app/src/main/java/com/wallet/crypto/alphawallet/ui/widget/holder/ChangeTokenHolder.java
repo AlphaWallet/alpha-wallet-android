@@ -1,4 +1,4 @@
-package com.wallet.crypto.trustapp.ui.widget.holder;
+package com.wallet.crypto.alphawallet.ui.widget.holder;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.wallet.crypto.trustapp.R;
-import com.wallet.crypto.trustapp.entity.Token;
-import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 
 public class ChangeTokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 

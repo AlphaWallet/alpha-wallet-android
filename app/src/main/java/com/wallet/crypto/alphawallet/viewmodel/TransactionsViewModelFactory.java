@@ -1,20 +1,20 @@
-package com.wallet.crypto.trustapp.viewmodel;
+package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.wallet.crypto.trustapp.interact.FetchTransactionsInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
-import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
-import com.wallet.crypto.trustapp.router.ExternalBrowserRouter;
-import com.wallet.crypto.trustapp.router.ManageWalletsRouter;
-import com.wallet.crypto.trustapp.router.MyAddressRouter;
-import com.wallet.crypto.trustapp.router.MyTokensRouter;
-import com.wallet.crypto.trustapp.router.SendRouter;
-import com.wallet.crypto.trustapp.router.SettingsRouter;
-import com.wallet.crypto.trustapp.router.TransactionDetailRouter;
+import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
+import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
+import com.wallet.crypto.alphawallet.router.MyAddressRouter;
+import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.SendRouter;
+import com.wallet.crypto.alphawallet.router.SettingsRouter;
+import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 

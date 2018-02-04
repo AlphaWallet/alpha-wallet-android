@@ -459,10 +459,13 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return (T)response.get(0).getValue();
+        try
+        {
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1)
+            {
+                return (T) response.get(0).getValue();
 //            if (response.get(0).getValue() instanceof String) {
 //                return (T)response.get(0).getValue();
 //            }
@@ -470,7 +473,14 @@ public class TokenRepository implements TokenRepositoryType {
 //                int retVal = ((Uint8) response.get(0)).getValue().intValue();
 //                return (T)retVal;
 //            }
-        } else {
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch(Exception e)
+        {
             return null;
         }
     }

@@ -4,6 +4,7 @@ import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
+import com.wallet.crypto.alphawallet.ui.MarketOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
 import com.wallet.crypto.alphawallet.ui.SendActivity;
 import com.wallet.crypto.alphawallet.ui.SettingsActivity;
@@ -83,4 +84,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TicketTransferModule.class)
 	abstract TicketTransferActivity bindTicketTransferActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = MarketOrderModule.class)
+	abstract MarketOrderActivity bindMarketOrderActivity();
 }

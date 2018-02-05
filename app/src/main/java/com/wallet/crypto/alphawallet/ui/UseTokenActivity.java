@@ -93,7 +93,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
                 viewModel.showRotatingSignature(this, ticket);
             } break;
             case R.id.button_sell: {
-
+                viewModel.showMarketOrder(this, ticket);
             } break;
             case R.id.button_transfer: {
                 viewModel.showTransferToken(this, ticket);

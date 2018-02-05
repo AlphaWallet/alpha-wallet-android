@@ -197,6 +197,7 @@
     <string name="action_sell">Sell</string>
     <string name="action_transfer">Transfer</string>
     <string name="hint_token_balance">Balance</string>
+    <string name="address">address</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>

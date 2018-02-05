@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.ui.SplashActivity;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -53,7 +54,7 @@ public class ScreengrabTest {
         appCompatButton.perform(click());
 
         ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.import_account_button), withText("Import"),
+                allOf(withId(R.id.import_account_action), withText("Import"),
                         childAtPosition(
                                 childAtPosition(
                                         withId(android.R.id.content),
@@ -76,7 +77,7 @@ public class ScreengrabTest {
         appCompatImageButton.perform(click());
 
         ViewInteraction appCompatButton3 = onView(
-                allOf(withId(R.id.create_account_button), withText("Create"),
+                allOf(withId(R.id.import_account_action), withText("Create"),
                         childAtPosition(
                                 childAtPosition(
                                         withId(android.R.id.content),
@@ -86,7 +87,7 @@ public class ScreengrabTest {
         appCompatButton3.perform(click());
 
         ViewInteraction appCompatButton4 = onView(
-                allOf(withId(R.id.later_button), withText("Do it later"),
+                allOf(withId(R.id.later_action), withText("Do it later"),
                         childAtPosition(
                                 childAtPosition(
                                         withId(android.R.id.content),
@@ -116,10 +117,10 @@ public class ScreengrabTest {
         Screengrab.screenshot("3");
 
         ViewInteraction bottomNavigationItemView = onView(
-                allOf(withId(R.id.navigation_send),
+                allOf(withId(R.id.bottom_navigation),
                         childAtPosition(
                                 childAtPosition(
-                                        withId(R.id.navigation),
+                                        withId(R.id.bottom_navigation),
                                         0),
                                 0),
                         isDisplayed()));
@@ -148,10 +149,10 @@ public class ScreengrabTest {
         }
 
         ViewInteraction bottomNavigationItemView2 = onView(
-                allOf(withId(R.id.navigation_tokens),
+                allOf(withId(R.id.bottom_navigation),
                         childAtPosition(
                                 childAtPosition(
-                                        withId(R.id.navigation),
+                                        withId(R.id.bottom_navigation),
                                         0),
                                 2),
                         isDisplayed()));

@@ -30,6 +30,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -142,47 +143,15 @@ public class TokenRepository implements TokenRepositoryType {
                         .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])));
     }
 
-//    @Override
-//    public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
-//        return tokenLocalSource.put(
-//                ethereumNetworkRepository.getDefaultNetwork(),
-//                wallet,
-//                tokenInfo);
-//    }
-
     @Override
     public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
-        Token newToken;
-        if (tokenInfo instanceof TicketInfo) {
-            newToken = new Ticket((TicketInfo)tokenInfo, (List<Integer>)null, 0);
-        } else {
-            newToken = new Token(
-                    new TokenInfo(tokenInfo.address,
-                            tokenInfo.name,
-                            tokenInfo.symbol,
-                            tokenInfo.decimals,
-                            true),
-                    null, 0);
-        }
+        TokenFactory tf = new TokenFactory();
+        Token newToken = tf.createToken(tokenInfo);
         return localSource.saveTokens(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
                 new Token[] { newToken });
     }
-
-//    @Override
-//    public Completable addToken(Wallet wallet, String address, String symbol, int decimals) {
-//        return localSource.saveTokens(
-//                ethereumNetworkRepository.getDefaultNetwork(),
-//                wallet,
-//                new Token[] { new Token(
-//                        new TokenInfo(address,
-//                                "",
-//                                symbol.toLowerCase(),
-//                                decimals,
-//                                true),
-//                        null, 0)});
-//    }
 
     @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
@@ -264,11 +233,7 @@ public class TokenRepository implements TokenRepositoryType {
                 try {
                     balance = getBalance(wallet, token.tokenInfo);
                     balanceArray = getBalanceArray(wallet, token.tokenInfo);
-                    token = tFactory.CreateToken(token.tokenInfo, balance, balanceArray, now);
-
-//                    token = new Token(
-//                            token.tokenInfo,
-//                            getBalance(wallet, token.tokenInfo), now);
+                    token = tFactory.createToken(token.tokenInfo, balance, balanceArray, now);
                     localSource.updateTokenBalance(network, wallet, token);
                 } catch (Throwable th) { /* Quietly */ }
             }
@@ -339,71 +304,6 @@ public class TokenRepository implements TokenRepositoryType {
         }.start();
     }
 
-//    private Single<TokenInfo> setupTokensFromLocal(String address)
-//    {
-//        return Single.fromCallable(() -> {
-//            try
-//            {
-//                TokenInfo result = new TokenInfo(
-//                        address,
-//                        getContractData(address, stringParam("name")),
-//                        getContractData(address, stringParam("symbol")),
-//                        getDecimals(address));
-//
-//                String venue = getContractData(address, stringParam("venue"));
-//                if (venue != null && venue.length() > 0)
-//                {
-//                    String date = getContractData(address, stringParam("date"));
-//                    BigDecimal priceBD = new BigDecimal((BigInteger)getContractData(address, intParam("getTicketStartPrice")));
-//                    double price = priceBD.doubleValue();
-//                    TicketInfo ticket = new TicketInfo(result, venue, date, price);
-//                    result = ticket;
-//                }
-//
-//                return result;
-//            }
-//            finally {
-//
-//            }
-//        });
-//    }
-
-//    private Token[] getBalances(Wallet wallet, TokenInfo[] items) {
-//        TokenFactory tFactory = new TokenFactory();
-//        int len = items.length;
-//        int invalidResults = 0;
-//        Token[] result = new Token[len];
-//        for (int i = 0; i < len; i++) {
-//            BigDecimal balance = null;
-//            List<Integer> balances = null;
-//            try {
-//                balances = getBalanceArray(wallet, items[i]);
-//                balance = getBalance(wallet, items[i]);
-//            } catch (Exception e1) {
-//                Log.d("TOKEN", "Err", e1);
-//                                    /* Quietly */
-//            }
-//            result[i] = tFactory.CreateToken(items[i], balance, balances);
-//            if (result[i] == null) invalidResults++;
-//        }
-//        //prune null entries
-//        if (invalidResults > 0)
-//        {
-//            Token[] prunedResult = new Token[len - invalidResults];
-//            int pruneIndex = 0;
-//            for (int i = 0; i < len; i++)
-//            {
-//                if (result[i] != null)
-//                {
-//                    prunedResult[pruneIndex] = result[i];
-//                    pruneIndex++;
-//                }
-//            }
-//            result = prunedResult;
-//        }
-//        return result;
-//    }
-
     private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {
         return localSource
                 .fetchEnabledTokens(network, wallet)
@@ -440,10 +340,9 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-
     private List<Integer> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         List<Integer> result = new ArrayList<>();
-        if (tokenInfo instanceof TicketInfo)
+        if (tokenInfo instanceof TicketInfo) //safety check
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Uint16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
@@ -459,10 +358,13 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return (T)response.get(0).getValue();
+        try
+        {
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1)
+            {
+                return (T) response.get(0).getValue();
 //            if (response.get(0).getValue() instanceof String) {
 //                return (T)response.get(0).getValue();
 //            }
@@ -470,7 +372,14 @@ public class TokenRepository implements TokenRepositoryType {
 //                int retVal = ((Uint8) response.get(0)).getValue().intValue();
 //                return (T)retVal;
 //            }
-        } else {
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch(Exception e)
+        {
             return null;
         }
     }
@@ -643,9 +552,14 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 long now = System.currentTimeMillis();
+                String name = getContractData(address, stringParam("name"));
+                if (name == null)
+                {
+                    name = getName(address);
+                }
                 TokenInfo result = new TokenInfo(
                         address,
-                        getContractData(address, stringParam("name")),
+                        name,
                         getContractData(address, stringParam("symbol")),
                         getDecimals(address),
                         true);

@@ -14,6 +14,8 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 
+import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -28,6 +30,7 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 public class MarketOrderViewModel extends BaseViewModel
 {
     private static final long CHECK_BALANCE_INTERVAL = 10;
+    private static final long CHECK_SELECTION_INTERVAL = 1;
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -39,10 +42,17 @@ public class MarketOrderViewModel extends BaseViewModel
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
+    private final MutableLiveData<String> selection = new MutableLiveData<>();
+
     @Nullable
     private Disposable getBalanceDisposable;
+    @Nullable
+    private Disposable checkSelectionDisposable;
 
     private String address;
+    private int unchangedCount = 10;
+    private String lastSelection;
+    private String newSelection;
 
     public MarketOrderViewModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -76,12 +86,21 @@ public class MarketOrderViewModel extends BaseViewModel
     public LiveData<Ticket> ticket() {
         return ticket;
     }
+    public LiveData<String> selection() {
+        return selection;
+    }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    private void startSelectionCheck() {
+        checkSelectionDisposable = Observable.interval(0, CHECK_SELECTION_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> checkSelectionChanged())
+                .subscribe(l -> {}, t -> {});
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -97,6 +116,9 @@ public class MarketOrderViewModel extends BaseViewModel
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
+        if (checkSelectionDisposable != null) {
+            checkSelectionDisposable.dispose();
+        }
     }
 
     private void onFetchTokensCompletable() {
@@ -106,6 +128,7 @@ public class MarketOrderViewModel extends BaseViewModel
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
         }
         fetchTransactions();
+        startSelectionCheck();
     }
 
     private void onTokens(Token[] tokens) {
@@ -122,5 +145,50 @@ public class MarketOrderViewModel extends BaseViewModel
                 break;
             }
         }
+    }
+
+    private void checkSelectionChanged()
+    {
+        unchangedCount++;
+
+        if (unchangedCount == 2)
+        {
+            //do the new selection
+            changeSelection();
+        }
+
+        if (newSelection != null && !newSelection.equals(lastSelection))
+        {
+            lastSelection = newSelection;
+            unchangedCount = 0;
+        }
+    }
+
+    private void changeSelection()
+    {
+        //convert to array of indicies
+        try {
+            List<Integer> indexList = ticket.getValue().parseIndexList(newSelection);
+            //convert this to a bitfield
+            if (indexList != null && indexList.size() > 0) {
+                String neatSelection = ticket.getValue().parseList(indexList);
+                selection.postValue(neatSelection);
+            } else {
+                selection.postValue("");
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void newBalanceArray(String balanceArray) {
+        newSelection = balanceArray;
+    }
+
+    public void generateNewSelection(String selection)
+    {
+        newSelection = selection;
+        //do the new selection
+        changeSelection();
     }
 }

@@ -138,13 +138,10 @@ public class TicketTransferViewModel extends BaseViewModel
     }
 
     public void openConfirmation(Context context, String to, String ids, String ticketIDs) {
-        try
-        {
+        try {
             TicketInfo ticket = (TicketInfo) (this.ticket().getValue().tokenInfo);
             confirmationRouter.open(context, to, ids, ticket.address, ticket.decimals, ticket.symbol, ticketIDs);
-        }
-        catch (Exception e)
-        {
+        }catch (Exception e) {
 
         }
     }

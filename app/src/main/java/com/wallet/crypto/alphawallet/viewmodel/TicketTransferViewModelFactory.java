@@ -15,8 +15,7 @@ import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
  * Created by James on 28/01/2018.
  */
 
-public class TicketTransferViewModelFactory implements ViewModelProvider.Factory
-        {
+public class TicketTransferViewModelFactory implements ViewModelProvider.Factory {
     private final TicketTransferInteract ticketTransferInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final TicketTransferRouter ticketTransferRouter;

@@ -1,14 +1,20 @@
 package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -48,6 +54,7 @@ public class MarketOrderActivity extends BaseActivity
 
     public TextView name;
     public TextView ids;
+    public TextView selected;
 
     private String address;
     private Ticket ticket;
@@ -76,6 +83,7 @@ public class MarketOrderActivity extends BaseActivity
         name = findViewById(R.id.textViewName);
         ids = findViewById(R.id.textViewIDs);
         idsText = findViewById(R.id.send_ids);
+        selected = findViewById(R.id.textViewSelection);
         amountInputLayout = findViewById(R.id.amount_input_layout);
 
         name.setText(address);
@@ -85,6 +93,47 @@ public class MarketOrderActivity extends BaseActivity
                 .get(MarketOrderViewModel.class);
 
         viewModel.ticket().observe(this, this::onTicket);
+        viewModel.selection().observe(this, this::onSelected);
+
+        idsText.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
+
+        idsText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                final String balanceArray = idsText.getText().toString();
+                //convert to an index array
+                viewModel.newBalanceArray(balanceArray);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        idsText.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent)
+            {
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN)
+                {
+                    if (keyEvent.getKeyCode() == keyEvent.KEYCODE_ENTER)
+                    {
+                        final String balanceArray = idsText.getText().toString();
+                        viewModel.generateNewSelection(balanceArray);
+                    }
+                }
+
+                return true;
+            }
+        });
     }
 
     private void onTicket(Ticket ticket) {
@@ -95,7 +144,6 @@ public class MarketOrderActivity extends BaseActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.send_menu, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -120,12 +168,10 @@ public class MarketOrderActivity extends BaseActivity
         // Validate input fields
         boolean inputValid = true;
 
-
         final String amount = idsText.getText().toString();
         List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(amount);
 
-        if (idSendList == null || idSendList.isEmpty())
-        {
+        if (idSendList == null || idSendList.isEmpty()) {
             amountInputLayout.setError(getString(R.string.error_invalid_amount));
             inputValid = false;
         }
@@ -146,5 +192,10 @@ public class MarketOrderActivity extends BaseActivity
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private void onSelected(String selectionStr)
+    {
+        selected.setText(selectionStr);
     }
 }

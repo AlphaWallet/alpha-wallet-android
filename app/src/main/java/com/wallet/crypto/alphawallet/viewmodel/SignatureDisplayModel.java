@@ -205,12 +205,10 @@ public class SignatureDisplayModel extends BaseViewModel {
     private void changeSelection()
     {
         //convert to array of indicies
-        try
-        {
+        try {
             List<Integer> indexList = ticket.getValue().parseIndexList(newSelection);
             //convert this to a bitfield
-            if (indexList != null && indexList.size() > 0)
-            {
+            if (indexList != null && indexList.size() > 0) {
                 bitFieldLookup = BigInteger.ZERO;
                 for (Integer i : indexList)
                 {
@@ -221,21 +219,28 @@ public class SignatureDisplayModel extends BaseViewModel {
                 //now convert back to parsed string, with checked indicies
                 String neatSelection = ticket.getValue().parseList(indexList);
                 selection.postValue(neatSelection);
-            }
-            else
-            {
+            } else {
                 selection.postValue("");
                 bitFieldLookup = BigInteger.ZERO;
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
     }
 
     public void newBalanceArray(String balanceArray) {
         newSelection = balanceArray;
+    }
+
+    public void generateNewSelection(String selection) {
+        newSelection = selection;
+        //do the new selection
+        changeSelection();
+
+        //push to QR
+        signatureGenerateInteract
+                .getMessage(bitFieldLookup)
+                .subscribe(this::onSignMessage, this::onError);
     }
 
     private void onDefaultWallet(Wallet wallet) {

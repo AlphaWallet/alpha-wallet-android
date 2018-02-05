@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -14,20 +15,48 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/name_input_layout"
+        <RelativeLayout
+            android:id="@+id/contract_address_layout"
             android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             >
-            <EditText
-                android:id="@+id/textViewName"
-                android:hint="@string/hint_contract_name"
-                android:inputType="textNoSuggestions"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/name_input_layout"
+                android:focusable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                >
+                <EditText
+                    android:id="@+id/textViewName"
+                    android:hint="@string/hint_contract_name"
+                    android:paddingRight="@dimen/half_large_padding"
+                    android:inputType="textNoSuggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+            </android.support.design.widget.TextInputLayout>
+            <TextView
+                android:id="@+id/textAddrHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12dp"
+                android:layout_marginStart="4dp"
+                android:layout_alignStart="@id/copy_address"
+                android:layout_alignTop="@id/copy_address"
+                android:text="@string/address"/>
+            <ImageButton
+                android:id="@+id/copy_address"
+                app:srcCompat="?android:attr/actionModeCopyDrawable"
+                android:contentDescription="@string/copy_addr_to_clipboard"
+                android:background="?android:selectableItemBackground"
+                android:padding="@dimen/big_padding"
+                android:layout_alignParentEnd="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 />
-        </android.support.design.widget.TextInputLayout>
+        </RelativeLayout>
         <LinearLayout
             android:id="@+id/layoutTicket"
             android:layout_width="match_parent"

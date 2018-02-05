@@ -65,4 +65,8 @@ public class Token implements Parcelable {
     {
         realmToken.setBalance(balance.toString());
     }
+
+    public String getAddress() {
+        return tokenInfo.address;
+    }
 }

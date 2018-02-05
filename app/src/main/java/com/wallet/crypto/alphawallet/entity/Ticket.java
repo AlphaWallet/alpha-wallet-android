@@ -245,4 +245,9 @@ public class Ticket extends Token implements Parcelable
     {
         realmToken.setBalance(ticketInfo.populateIDs(balanceArray, true));
     }
+
+    @Override
+    public String getAddress() {
+        return ticketInfo.address;
+    }
 }

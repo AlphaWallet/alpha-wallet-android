@@ -1,10 +1,14 @@
 package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
@@ -36,7 +40,6 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView price;
     public TextView balance;
 
-    private String address;
     private Ticket ticket;
 
     @Override
@@ -66,7 +69,6 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         date.setText(info.date);
         price.setText(String.valueOf(info.price));
         balance.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
-        address = info.address;
 
         viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)
                 .get(UseTokenViewModel.class);
@@ -74,6 +76,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
+        findViewById(R.id.copy_address).setOnClickListener(this);
     }
 
     @Override
@@ -95,6 +98,12 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
             case R.id.button_transfer: {
                 viewModel.showTransferToken(this, ticket);
             } break;
+            case R.id.copy_address : {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.copy_addr_to_clipboard), ticket.getAddress());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

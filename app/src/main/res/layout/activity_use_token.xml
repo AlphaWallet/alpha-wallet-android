@@ -49,7 +49,7 @@
             <ImageButton
                 android:id="@+id/copy_address"
                 app:srcCompat="?android:attr/actionModeCopyDrawable"
-                android:contentDescription="@string/scan_qr"
+                android:contentDescription="@string/copy_addr_to_clipboard"
                 android:background="?android:selectableItemBackground"
                 android:padding="@dimen/big_padding"
                 android:layout_alignParentEnd="true"
@@ -154,7 +154,6 @@
                 />
         </LinearLayout>
     </LinearLayout>
-    <!--
     <com.wallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
@@ -162,5 +161,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-        -->
 </FrameLayout>

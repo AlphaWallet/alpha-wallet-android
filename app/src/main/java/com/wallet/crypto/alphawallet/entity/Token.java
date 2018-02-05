@@ -3,6 +3,8 @@ package com.wallet.crypto.alphawallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
+
 import java.math.BigDecimal;
 
 public class Token implements Parcelable {
@@ -57,5 +59,10 @@ public class Token implements Parcelable {
         dest.writeParcelable(tokenInfo, flags);
         dest.writeString(balance.toString());
         dest.writeLong(updateBlancaTime);
+    }
+
+    public void setRealmBalance(RealmToken realmToken)
+    {
+        realmToken.setBalance(balance.toString());
     }
 }

@@ -194,14 +194,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     .findFirst();
             realm.beginTransaction();
             if (realmToken != null) {
-                if (token instanceof Ticket) { //TODO: Use proper inherticance on Token type, godammit!
-                    Ticket t = (Ticket)token;
-                    realmToken.setBalance(t.ticketInfo.populateIDs(t.balanceArray, true));
-                }
-                else
-                {
-                    realmToken.setBalance(token.balance.toString());
-                }
+                token.setRealmBalance(realmToken);
             }
             realm.commitTransaction();
         } catch (Exception ex) {
@@ -255,7 +248,7 @@ public class TokensRealmSource implements TokenLocalSource {
         for (int i = 0; i < len; i++) {
             RealmToken realmItem = realmItems.get(i);
             if (realmItem != null) {
-                TokenInfo info = tf.CreateTokenInfo(realmItem);
+                TokenInfo info = tf.createTokenInfo(realmItem);
                 result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
             }
         }

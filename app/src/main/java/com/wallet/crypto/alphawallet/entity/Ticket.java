@@ -3,6 +3,8 @@ package com.wallet.crypto.alphawallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
+
 import org.web3j.abi.datatypes.generated.Uint16;
 
 import java.math.BigDecimal;
@@ -236,5 +238,11 @@ public class Ticket extends Token implements Parcelable
         }
 
         return validIndicies;
+    }
+
+    @Override
+    public void setRealmBalance(RealmToken realmToken)
+    {
+        realmToken.setBalance(ticketInfo.populateIDs(balanceArray, true));
     }
 }

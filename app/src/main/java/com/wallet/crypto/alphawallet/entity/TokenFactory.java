@@ -15,7 +15,7 @@ import static com.wallet.crypto.alphawallet.repository.TokensRealmSource.ACTUAL_
 
 public class TokenFactory
 {
-    public Token CreateToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, long updateBlancaTime)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, long updateBlancaTime)
     {
         Token thisToken;
         if (tokenInfo instanceof TicketInfo)
@@ -56,14 +56,34 @@ public class TokenFactory
         return thisToken;
     }
 
-    public TokenInfo CreateTokenInfo(RealmToken realmItem)
+    public Token createToken(TokenInfo tokenInfo)
+    {
+        Token thisToken;
+        if (tokenInfo instanceof TicketInfo)
+        {
+            thisToken = new Ticket((TicketInfo)tokenInfo, (List<Integer>)null, 0);
+        }
+        else
+        {
+            thisToken = new Token(
+                    new TokenInfo(tokenInfo.address,
+                            tokenInfo.name,
+                            tokenInfo.symbol,
+                            tokenInfo.decimals,
+                            true),
+                    null, 0);
+        }
+
+        return thisToken;
+    }
+
+    public TokenInfo createTokenInfo(RealmToken realmItem)
     {
         TokenInfo ti;
         TokenInfo token = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
                 realmItem.getDecimals(), true);
         if (realmItem.getVenue() != null && realmItem.getVenue().length() > 0)
         {
-            //public TicketInfo(TokenInfo ti, String venue, String date, double price)
             ti = new TicketInfo(token, realmItem.getVenue(), realmItem.getDate(), realmItem.getPrice());
         }
         else

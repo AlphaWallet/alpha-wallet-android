@@ -75,6 +75,6 @@ public class Token implements Parcelable {
         return tokenInfo.address;
     }
     public String getFullName() {
-        return tokenInfo.name + "(" + tokenInfo.symbol + ")";
+        return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
     }
 }

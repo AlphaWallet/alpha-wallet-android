@@ -85,7 +85,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<byte[]> getSignature(Wallet wallet, String message, String password) {
+	public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password) {
 		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
 	}
 

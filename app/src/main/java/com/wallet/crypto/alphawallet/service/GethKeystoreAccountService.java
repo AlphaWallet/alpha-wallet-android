@@ -144,10 +144,10 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
     }
 
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, String message, long chainId)
+    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, byte[] message, long chainId)
     {
         return Single.fromCallable(() -> {
-            byte[] messageHash = Hash.sha3(message.getBytes());
+            byte[] messageHash = Hash.sha3(message);
             BigInt chain = new BigInt(chainId); // Chain identifier of the main net
             org.ethereum.geth.Account gethAccount = findAccount(signer.address);
             keyStore.unlock(gethAccount, signerPassword);

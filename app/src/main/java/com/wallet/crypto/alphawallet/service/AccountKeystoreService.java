@@ -63,7 +63,7 @@ public interface AccountKeystoreService {
 	Single<byte[]> signTransaction(
 			Wallet signer,
 			String signerPassword,
-			String message,
+			byte[] message,
 			long chainId);
 
 	/**

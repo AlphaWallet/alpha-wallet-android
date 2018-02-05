@@ -13,5 +13,5 @@ public interface TransactionRepositoryType {
 	Observable<Transaction[]> fetchTransaction(Wallet wallet);
 	Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash);
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password);
-	Single<byte[]> getSignature(Wallet wallet, String message, String password);
+	Single<byte[]> getSignature(Wallet wallet, byte[] message, String password);
 }

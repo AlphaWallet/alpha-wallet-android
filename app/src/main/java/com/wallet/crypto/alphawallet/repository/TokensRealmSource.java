@@ -228,7 +228,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setDate(((Ticket) token).ticketInfo.date);
                 }
             }
-            realmToken.setBalance(token.getStringBalance());
+            realmToken.setBalance(token.getFullBalance());
             realm.commitTransaction();
         } catch (Exception ex) {
             if (realm != null) {

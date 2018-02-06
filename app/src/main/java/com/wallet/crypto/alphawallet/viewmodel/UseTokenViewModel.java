@@ -12,6 +12,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import com.wallet.crypto.alphawallet.interact.UseTokenInteract;
+import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
@@ -31,6 +32,7 @@ public class UseTokenViewModel extends BaseViewModel {
     private final TicketTransferRouter ticketTransferRouter;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final SignatureDisplayRouter signatureDisplayRouter;
+    private final MarketOrderRouter marketOrderRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -46,7 +48,8 @@ public class UseTokenViewModel extends BaseViewModel {
             MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            MarketOrderRouter marketOrderRouter) {
         this.useTokenInteract = useTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -54,6 +57,7 @@ public class UseTokenViewModel extends BaseViewModel {
         this.signatureDisplayRouter = signatureDisplayRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.ticketTransferRouter = ticketTransferRouter;
+        this.marketOrderRouter = marketOrderRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -90,5 +94,9 @@ public class UseTokenViewModel extends BaseViewModel {
         //TODO: switch on 'use' button
         progress.postValue(false);
         defaultWallet.setValue(wallet);
+    }
+
+    public void showMarketOrder(Context context, Ticket ticket) {
+        marketOrderRouter.open(context, ticket);
     }
 }

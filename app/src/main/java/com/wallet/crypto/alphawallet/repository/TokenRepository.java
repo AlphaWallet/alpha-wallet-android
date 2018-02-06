@@ -106,8 +106,6 @@ public class TokenRepository implements TokenRepositoryType {
             .toObservable();
     }
 
-
-
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();

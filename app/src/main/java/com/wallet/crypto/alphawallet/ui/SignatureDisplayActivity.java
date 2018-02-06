@@ -11,7 +11,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -53,6 +55,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     public TextView name;
     public TextView ids;
     private EditText idsText;
+    private TextView selected;
     private TextInputLayout amountInputLayout;
     private TextView selection;
 
@@ -106,6 +109,24 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
             @Override
             public void afterTextChanged(Editable editable) {
 
+            }
+        });
+
+        idsText.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent)
+            {
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN)
+                {
+                    if (keyEvent.getKeyCode() == keyEvent.KEYCODE_ENTER)
+                    {
+                        final String balanceArray = idsText.getText().toString();
+                        viewModel.generateNewSelection(balanceArray);
+                    }
+                }
+
+                return true;
             }
         });
     }

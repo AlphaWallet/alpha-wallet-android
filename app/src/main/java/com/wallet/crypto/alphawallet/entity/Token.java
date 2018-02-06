@@ -37,6 +37,11 @@ public class Token implements Parcelable {
         else return "0";
     }
 
+    public String getFullBalance() {
+        if (balance != null) return balance.toString();
+        else return "0";
+    }
+
     public static final Creator<Token> CREATOR = new Creator<Token>() {
         @Override
         public Token createFromParcel(Parcel in) {
@@ -68,5 +73,8 @@ public class Token implements Parcelable {
 
     public String getAddress() {
         return tokenInfo.address;
+    }
+    public String getFullName() {
+        return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
     }
 }

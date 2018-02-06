@@ -13,16 +13,23 @@ public class TradeInstance
     final BigInteger price;
     final short[] tickets;
     final String contractAddress;
-    final byte[] signature;
     final byte[] tradeData;
+    byte[] signature;
 
-    public TradeInstance(BigInteger price, BigInteger expiry, short[] tickets, Token ticket, byte[] tradeData, byte[] sig)
-    {
+    public TradeInstance(BigInteger price, BigInteger expiry, short[] tickets, Token ticket, byte[] tradeData) {
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;
         this.contractAddress = ticket.getAddress();
         this.tradeData = tradeData;
+    }
+
+    public TradeInstance addSignature(byte[] sig) {
         this.signature = sig;
+        return this;
+    }
+
+    public byte[] getTradeData() {
+        return tradeData;
     }
 }

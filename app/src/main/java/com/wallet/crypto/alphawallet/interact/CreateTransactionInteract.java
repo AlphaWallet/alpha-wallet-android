@@ -34,40 +34,60 @@ public class CreateTransactionInteract {
     }
 
     //sign a trade transaction
-    public Single<byte[]> sign(Wallet wallet, byte[] message) {
+    public Single<TradeInstance> sign(Wallet wallet, TradeInstance input) {
         return passwordStore.getPassword(wallet)
-                .flatMap(password ->
-                        transactionRepository.getSignature(wallet, message, password)
+                .flatMap(password -> transactionRepository.getSignature(wallet, input.getTradeData(), password)
+                .map(sig -> input.addSignature(sig))
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
     public Single<TradeInstance> getTradeMessageAndSignature(Wallet wallet, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
-        byte[] tradeData = encodeMessageForTrade(price, expiryTimestamp, tickets, ticket);
-        return passwordStore.getPassword(wallet)
-                .flatMap(password -> transactionRepository.getSignature(wallet, tradeData, password))
-                .map(sig -> new TradeInstance(price, expiryTimestamp, tickets, ticket, tradeData, sig));
+        return encodeMessageForTrade(price, expiryTimestamp, tickets, ticket)
+                .flatMap(tradeInstance -> sign(wallet, tradeInstance));
     }
 
-    private byte[] encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
-        byte[] priceInWei = price.toByteArray();
-        byte[] expiry = expiryTimestamp.toByteArray();
-        ByteBuffer message = ByteBuffer.allocate(96 + tickets.length * 2);
-        byte[] leadingZeros = new byte[32 - priceInWei.length];
-        message.put(leadingZeros);
-        message.put(priceInWei);
-        byte[] leadingZerosExpiry = new byte[32 - expiry.length];
-        message.put(leadingZerosExpiry);
-        message.put(expiry);
-        //TODO maybe need to cast to bigint
-        //BigInteger addr = new BigInteger(CONTRACT_ADDR.substring(2), 16);
-        byte[] contract = hexStringToBytes("000000000000000000000000" + ticket.getAddress().substring(2));
-        System.out.println("length of contract: " + contract.length);
-        message.put(contract);
-        ShortBuffer shortBuffer = message.slice().asShortBuffer();
-        shortBuffer.put(tickets);
-
-        return message.array();
+    private Single<TradeInstance> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
+        return Single.fromCallable(() -> {
+            byte[] priceInWei = price.toByteArray();
+            byte[] expiry = expiryTimestamp.toByteArray();
+            ByteBuffer message = ByteBuffer.allocate(96 + tickets.length * 2);
+            byte[] leadingZeros = new byte[32 - priceInWei.length];
+            message.put(leadingZeros);
+            message.put(priceInWei);
+            byte[] leadingZerosExpiry = new byte[32 - expiry.length];
+            message.put(leadingZerosExpiry);
+            message.put(expiry);
+            //TODO maybe need to cast to bigint
+            //BigInteger addr = new BigInteger(CONTRACT_ADDR.substring(2), 16);
+            byte[] contract = hexStringToBytes("000000000000000000000000" + ticket.getAddress().substring(2));
+            System.out.println("length of contract: " + contract.length);
+            message.put(contract);
+            ShortBuffer shortBuffer = message.slice().asShortBuffer();
+            shortBuffer.put(tickets);
+            return new TradeInstance(price, expiryTimestamp, tickets, ticket, message.array());
+        });
     }
+
+//    private byte[] encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
+//        byte[] priceInWei = price.toByteArray();
+//        byte[] expiry = expiryTimestamp.toByteArray();
+//        ByteBuffer message = ByteBuffer.allocate(96 + tickets.length * 2);
+//        byte[] leadingZeros = new byte[32 - priceInWei.length];
+//        message.put(leadingZeros);
+//        message.put(priceInWei);
+//        byte[] leadingZerosExpiry = new byte[32 - expiry.length];
+//        message.put(leadingZerosExpiry);
+//        message.put(expiry);
+//        //TODO maybe need to cast to bigint
+//        //BigInteger addr = new BigInteger(CONTRACT_ADDR.substring(2), 16);
+//        byte[] contract = hexStringToBytes("000000000000000000000000" + ticket.getAddress().substring(2));
+//        System.out.println("length of contract: " + contract.length);
+//        message.put(contract);
+//        ShortBuffer shortBuffer = message.slice().asShortBuffer();
+//        shortBuffer.put(tickets);
+//
+//        return message.array();
+//    }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data) {
         return passwordStore.getPassword(from)

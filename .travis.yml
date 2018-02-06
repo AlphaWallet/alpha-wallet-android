@@ -25,6 +25,9 @@ licenses:
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
 
+before_install:
+  - bash .travis-android-license-bugfix.sh
+
 install:
   - true
 

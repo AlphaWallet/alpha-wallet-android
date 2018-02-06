@@ -32,4 +32,9 @@ public class TradeInstance
     public byte[] getTradeData() {
         return tradeData;
     }
+
+    public String getStringSig() {
+        String sigStr = new String(signature);
+        return sigStr;
+    }
 }

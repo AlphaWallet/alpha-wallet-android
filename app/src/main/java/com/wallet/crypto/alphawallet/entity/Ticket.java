@@ -69,7 +69,8 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getFullBalance() {
-        return ticketInfo.populateIDs(balanceArray, true);
+        if (balanceArray == null) return "no tokens";
+        else return ticketInfo.populateIDs(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {

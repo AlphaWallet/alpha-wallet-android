@@ -68,27 +68,6 @@ public class CreateTransactionInteract {
         });
     }
 
-//    private byte[] encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
-//        byte[] priceInWei = price.toByteArray();
-//        byte[] expiry = expiryTimestamp.toByteArray();
-//        ByteBuffer message = ByteBuffer.allocate(96 + tickets.length * 2);
-//        byte[] leadingZeros = new byte[32 - priceInWei.length];
-//        message.put(leadingZeros);
-//        message.put(priceInWei);
-//        byte[] leadingZerosExpiry = new byte[32 - expiry.length];
-//        message.put(leadingZerosExpiry);
-//        message.put(expiry);
-//        //TODO maybe need to cast to bigint
-//        //BigInteger addr = new BigInteger(CONTRACT_ADDR.substring(2), 16);
-//        byte[] contract = hexStringToBytes("000000000000000000000000" + ticket.getAddress().substring(2));
-//        System.out.println("length of contract: " + contract.length);
-//        message.put(contract);
-//        ShortBuffer shortBuffer = message.slice().asShortBuffer();
-//        shortBuffer.put(tickets);
-//
-//        return message.array();
-//    }
-
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data) {
         return passwordStore.getPassword(from)
                 .flatMap(password ->

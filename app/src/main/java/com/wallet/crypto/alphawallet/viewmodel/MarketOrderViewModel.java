@@ -9,7 +9,9 @@ import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TicketInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -34,6 +36,7 @@ public class MarketOrderViewModel extends BaseViewModel
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
+    private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
@@ -57,10 +60,12 @@ public class MarketOrderViewModel extends BaseViewModel
     public MarketOrderViewModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            CreateTransactionInteract createTransactionInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.createTransactionInteract = createTransactionInteract;
     }
 
     public void prepare(String address) {
@@ -185,10 +190,30 @@ public class MarketOrderViewModel extends BaseViewModel
         newSelection = balanceArray;
     }
 
-    public void generateNewSelection(String selection)
-    {
+    public void generateNewSelection(String selection) {
         newSelection = selection;
         //do the new selection
         changeSelection();
+    }
+
+    public void generateMarketOrders(List<Integer> idSendList)
+    {
+        short[] ticketIDs = new short[idSendList.size()];
+        int index = 0;
+        for (Integer i : idSendList) {
+            ticketIDs[index++] = i.shortValue();
+        }
+
+        BigInteger price = BigInteger.TEN;
+        BigInteger expiryTime = BigInteger.TEN;
+
+        disposable = createTransactionInteract
+                .getTradeMessageAndSignature(defaultWallet.getValue(), price, expiryTime, ticketIDs, ticket().getValue())
+                .subscribe(this::onCreateOrder, this::onError);
+    }
+
+    public void onCreateOrder(TradeInstance t)
+    {
+        System.out.println("Order Sig: " + t.getStringSig());
     }
 }

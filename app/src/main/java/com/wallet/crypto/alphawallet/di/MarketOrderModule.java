@@ -1,11 +1,14 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.TicketTransferInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
@@ -26,9 +29,10 @@ public class MarketOrderModule
     MarketOrderViewModelFactory marketOrderViewModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            CreateTransactionInteract createTransactionInteract) {
         return new MarketOrderViewModelFactory(
-                findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract);
+                findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract);
     }
 
     @Provides
@@ -45,5 +49,10 @@ public class MarketOrderModule
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
+    }
+
+    @Provides
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
+        return new CreateTransactionInteract(transactionRepository, passwordStore);
     }
 }

@@ -205,15 +205,17 @@ public class MarketOrderViewModel extends BaseViewModel
         }
 
         BigInteger price = BigInteger.TEN;
-        BigInteger expiryTime = BigInteger.TEN;
 
-        disposable = createTransactionInteract
-                .getTradeMessageAndSignature(defaultWallet.getValue(), price, expiryTime, ticketIDs, ticket().getValue())
-                .subscribe(this::onCreateOrder, this::onError);
+        //Use base queue otherwise the queue g
+        createTransactionInteract.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue(), this::onCompleteMarketTask, this::onError, this::onAllTransactions);
+
+        System.out.println("go");
     }
 
-    public void onCreateOrder(TradeInstance t)
+    public void onOrdersCreated(TradeInstance[] trades)
     {
-        System.out.println("Order Sig: " + t.getStringSig());
+        for (TradeInstance t : trades) {
+            System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
+        }
     }
 }

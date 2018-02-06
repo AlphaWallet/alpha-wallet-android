@@ -9,6 +9,7 @@ import android.util.Log;
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.ServiceException;
+import com.wallet.crypto.alphawallet.entity.TradeInstance;
 
 import io.reactivex.disposables.Disposable;
 
@@ -48,5 +49,16 @@ public class BaseViewModel extends ViewModel {
                 error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getCause().getMessage(), throwable));
             }
 		}
+	}
+
+	public void onCompleteMarketTask(TradeInstance[] trades) {
+		for (TradeInstance t : trades) {
+			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
+		}
+	}
+
+	public void onAllTransactions() {
+		//progress.postValue(false);
+		System.out.println("go2");
 	}
 }

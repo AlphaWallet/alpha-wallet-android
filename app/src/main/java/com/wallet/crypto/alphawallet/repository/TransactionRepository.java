@@ -1,6 +1,9 @@
 package com.wallet.crypto.alphawallet.repository;
 
+import android.support.annotation.Nullable;
+
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
@@ -19,6 +22,8 @@ import java.math.BigInteger;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class TransactionRepository implements TransactionRepositoryType {
@@ -28,7 +33,11 @@ public class TransactionRepository implements TransactionRepositoryType {
     private final TransactionLocalSource inDiskCache;
     private final TransactionsNetworkClientType blockExplorerClient;
 
-    public TransactionRepository(
+	@Nullable
+	private Disposable processMarketQueue;
+
+
+	public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionLocalSource inDiskCache,
@@ -103,4 +112,22 @@ public class TransactionRepository implements TransactionRepositoryType {
                 .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
                 .andThen(inDiskCache.fetchTransaction(networkInfo, wallet));
     }
+
+
+	@Override
+	public Consumer<? super TradeInstance[]> onOrdersCreated(TradeInstance[] trades)
+	{
+		for (TradeInstance t : trades) {
+			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
+		}
+
+		return null;
+	}
+
+	@Override
+	public void ProcessMarketOrders(Disposable orderQueue)
+	{
+		processMarketQueue = orderQueue;
+		//need to listen to things on this queue
+	}
 }

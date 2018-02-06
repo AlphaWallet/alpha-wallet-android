@@ -60,7 +60,6 @@ public class MarketOrderActivity extends BaseActivity
     private Ticket ticket;
 
     private EditText idsText;
-    private TextInputLayout toInputLayout;
     private TextInputLayout amountInputLayout;
 
     @Override
@@ -181,7 +180,7 @@ public class MarketOrderActivity extends BaseActivity
         }
 
         String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
-        toInputLayout.setErrorEnabled(false);
+        amountInputLayout.setErrorEnabled(false);
 
         //let's try to generate a market order
         viewModel.generateMarketOrders(idSendList);

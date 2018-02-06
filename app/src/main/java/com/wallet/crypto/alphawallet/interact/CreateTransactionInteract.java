@@ -12,15 +12,23 @@ import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 public class CreateTransactionInteract {
     private final TransactionRepositoryType transactionRepository;
     private final PasswordStore passwordStore;
+
+    private final long MARKET_INTERVAL = 10*60; // 10 minutes
 
     public CreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
         this.transactionRepository = transactionRepository;
@@ -34,16 +42,30 @@ public class CreateTransactionInteract {
     }
 
     //sign a trade transaction
-    public Single<TradeInstance> sign(Wallet wallet, TradeInstance input) {
+    public Single<TradeInstance> sign(Wallet wallet, TradeInstance t) {
         return passwordStore.getPassword(wallet)
-                .flatMap(password -> transactionRepository.getSignature(wallet, input.getTradeData(), password)
-                .map(sig -> input.addSignature(sig))
-                                .observeOn(AndroidSchedulers.mainThread()));
+                .flatMap(password -> transactionRepository.getSignature(wallet, t.getTradeData(), password))
+                .map(sig -> new TradeInstance(t, sig));
+    }
+
+    public Single<TradeInstance[]> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
+        return Single.fromCallable(() -> {
+            TradeInstance[] trades = new TradeInstance[2016];
+            //initial expiry 10 minutes from now
+            long expiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
+            for (int i = 0; i < 2016; i++) {
+                BigInteger expiryTimestamp = BigInteger.valueOf(expiry + (i*MARKET_INTERVAL));
+                trades[i] = (getTradeMessageAndSignature(wallet, price, expiryTimestamp, tickets, ticket)
+                        .blockingGet());
+            }
+
+            return trades;
+        });
     }
 
     public Single<TradeInstance> getTradeMessageAndSignature(Wallet wallet, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
         return encodeMessageForTrade(price, expiryTimestamp, tickets, ticket)
-                .flatMap(tradeInstance -> sign(wallet, tradeInstance));
+                .flatMap(newTrade -> sign(wallet, newTrade));
     }
 
     private Single<TradeInstance> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
@@ -64,8 +86,16 @@ public class CreateTransactionInteract {
             message.put(contract);
             ShortBuffer shortBuffer = message.slice().asShortBuffer();
             shortBuffer.put(tickets);
+            //return message.array();
             return new TradeInstance(price, expiryTimestamp, tickets, ticket, message.array());
         });
+    }
+
+    public Observable<TradeInstance[]> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
+        return getTradeMessages(wallet, price, tickets, ticket).toObservable()
+                //.subscribe(data -> )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data) {
@@ -85,5 +115,11 @@ public class CreateTransactionInteract {
                     + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
+    }
+
+    public void createMarketOrders(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket,
+                                   Consumer<? super TradeInstance[]> onComplete, Consumer<? super Throwable> onError, Action onAllTransactions) {
+        transactionRepository.ProcessMarketOrders(getTradeInstances(wallet, price, tickets, ticket)
+                .subscribe(onComplete, onError, onAllTransactions));
     }
 }

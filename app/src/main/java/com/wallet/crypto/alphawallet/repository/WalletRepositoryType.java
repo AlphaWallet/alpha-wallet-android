@@ -1,11 +1,13 @@
 package com.wallet.crypto.alphawallet.repository;
 
+import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 
 import java.math.BigDecimal;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
 
 public interface WalletRepositoryType {
 	Single<Wallet[]> fetchWallets();

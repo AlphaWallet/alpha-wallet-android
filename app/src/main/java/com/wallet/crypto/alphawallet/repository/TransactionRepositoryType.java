@@ -17,6 +17,4 @@ public interface TransactionRepositoryType {
 	Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash);
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password);
 	Single<byte[]> getSignature(Wallet wallet, byte[] message, String password);
-	Disposable getMarketQueue();
-	void setMarketQueue(Disposable disposable);
 }

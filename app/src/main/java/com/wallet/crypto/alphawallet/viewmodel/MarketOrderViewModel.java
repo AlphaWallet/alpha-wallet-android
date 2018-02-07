@@ -15,6 +15,7 @@ import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -43,6 +44,7 @@ public class MarketOrderViewModel extends BaseViewModel
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final MarketQueueService marketQueueService;
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
@@ -66,23 +68,23 @@ public class MarketOrderViewModel extends BaseViewModel
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            CreateTransactionInteract createTransactionInteract) {
+            CreateTransactionInteract createTransactionInteract,
+            MarketQueueService marketQueueService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.createTransactionInteract = createTransactionInteract;
+        this.marketQueueService = marketQueueService;
     }
 
     public void prepare(String address) {
         this.address = address;
-        //progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
     public void fetchTransactions() {
-        //progress.postValue(true);
         getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
                         .fetch(defaultWallet.getValue())
@@ -207,9 +209,11 @@ public class MarketOrderViewModel extends BaseViewModel
 
         BigInteger price = BigInteger.TEN;
 
-        createTransactionInteract.setMarketQueue(
-        createTransactionInteract
-                .getTradeInstances(defaultWallet.getValue(), price, ticketIDs, ticket().getValue())
-                .subscribe(this::onCompleteMarketTask, this::onError, this::onAllTransactions));
+        marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue());
+
+//        createTransactionInteract.setMarketQueue(
+//        createTransactionInteract
+//                .getTradeInstances(defaultWallet.getValue(), price, ticketIDs, ticket().getValue())
+//                .subscribe(this::onCompleteMarketTask, this::onError, this::onAllTransactions));
     }
 }

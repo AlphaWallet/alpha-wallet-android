@@ -7,7 +7,6 @@ import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
-import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.service.TransactionsNetworkClientType;
 
 import org.web3j.protocol.Web3j;
@@ -33,19 +32,16 @@ public class TransactionRepository implements TransactionRepositoryType {
 	private final AccountKeystoreService accountKeystoreService;
     private final TransactionLocalSource inDiskCache;
     private final TransactionsNetworkClientType blockExplorerClient;
-    private final MarketQueueService marketQueueService;
 
 	public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionLocalSource inDiskCache,
-			TransactionsNetworkClientType blockExplorerClient,
-			MarketQueueService marketQueueService) {
+			TransactionsNetworkClientType blockExplorerClient) {
 		this.networkRepository = networkRepository;
 		this.accountKeystoreService = accountKeystoreService;
 		this.blockExplorerClient = blockExplorerClient;
 		this.inDiskCache = inDiskCache;
-		this.marketQueueService = marketQueueService;
 	}
 
     @Override
@@ -96,16 +92,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password) {
 		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
-	}
-
-	@Override
-	public Disposable getMarketQueue() {
-		return marketQueueService.getMarketQueue();
-	}
-
-	@Override
-	public void setMarketQueue(Disposable disposable) {
-		marketQueueService.setMarketQueue(disposable);
 	}
 
 	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {

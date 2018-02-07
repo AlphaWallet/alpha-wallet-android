@@ -7,6 +7,7 @@ import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepository;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.GasSettingsRepository;
 import com.wallet.crypto.alphawallet.repository.GasSettingsRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import com.wallet.crypto.alphawallet.repository.SharedPreferenceRepository;
 import com.wallet.crypto.alphawallet.repository.TokenLocalSource;
@@ -86,14 +87,12 @@ public class RepositoriesModule {
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionsNetworkClientType blockExplorerClient,
-            TransactionLocalSource inDiskCache,
-			MarketQueueService marketQueueService) {
+            TransactionLocalSource inDiskCache) {
 		return new TransactionRepository(
 				networkRepository,
 				accountKeystoreService,
 				inDiskCache,
-				blockExplorerClient,
-				marketQueueService);
+				blockExplorerClient);
 	}
 
 	@Singleton
@@ -151,7 +150,9 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	MarketQueueService provideMarketQueueService(Context ctx) {
-		return new MarketQueueService(ctx);
+	MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
+												 TransactionRepositoryType transactionRepository,
+												 PasswordStore passwordStore) {
+		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
 	}
 }

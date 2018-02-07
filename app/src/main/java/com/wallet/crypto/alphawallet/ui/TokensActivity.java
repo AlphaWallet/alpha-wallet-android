@@ -17,6 +17,7 @@ import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
     private TokensViewModel viewModel;
 
     private SystemView systemView;
+    private ProgressView progressView;
     private TokensAdapter adapter;
 
     @Override
@@ -49,6 +51,8 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         adapter = new TokensAdapter(this::onTokenClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
+        progressView = findViewById(R.id.progress_view);
+        progressView.hide();
 
         RecyclerView list = findViewById(R.id.list);
 
@@ -65,6 +69,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
+        viewModel.queueProgress().observe(this, progressView::updateProgress);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }

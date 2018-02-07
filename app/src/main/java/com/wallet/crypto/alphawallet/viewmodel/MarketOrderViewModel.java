@@ -20,8 +20,13 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.internal.operators.flowable.FlowableBlockingSubscribe;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -70,14 +75,14 @@ public class MarketOrderViewModel extends BaseViewModel
 
     public void prepare(String address) {
         this.address = address;
-        progress.postValue(true);
+        //progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
     public void fetchTransactions() {
-        progress.postValue(true);
+        //progress.postValue(true);
         getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
                         .fetch(defaultWallet.getValue())
@@ -127,7 +132,7 @@ public class MarketOrderViewModel extends BaseViewModel
     }
 
     private void onFetchTokensCompletable() {
-        progress.postValue(false);
+        //progress.postValue(false);
         Token[] tokens = tokens().getValue();
         if (tokens == null || tokens.length == 0) {
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
@@ -138,7 +143,7 @@ public class MarketOrderViewModel extends BaseViewModel
 
     private void onTokens(Token[] tokens) {
         if (tokens != null && tokens.length > 0) {
-            progress.postValue(true);
+            //progress.postValue(true);
         }
         this.tokens.setValue(tokens);
 
@@ -202,15 +207,9 @@ public class MarketOrderViewModel extends BaseViewModel
 
         BigInteger price = BigInteger.TEN;
 
-        //Use base queue otherwise the queue g
-        createTransactionInteract.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue(), this::onCompleteMarketTask, this::onError, this::onAllTransactions);
-
-        System.out.println("go");
-    }
-
-    public void onOrdersCreated(TradeInstance[] trades) {
-        for (TradeInstance t : trades) {
-            System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
-        }
+        createTransactionInteract.setMarketQueue(
+        createTransactionInteract
+                .getTradeInstances(defaultWallet.getValue(), price, ticketIDs, ticket().getValue())
+                .subscribe(this::onCompleteMarketTask, this::onError, this::onAllTransactions));
     }
 }

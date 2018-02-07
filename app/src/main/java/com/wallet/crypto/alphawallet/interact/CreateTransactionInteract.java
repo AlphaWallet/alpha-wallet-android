@@ -8,6 +8,8 @@ import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -19,6 +21,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -51,15 +54,24 @@ public class CreateTransactionInteract {
     {
         return Single.fromCallable(() ->
         {
-            TradeInstance[] trades = new TradeInstance[2016];
+            final int TRADE_AMOUNT = 100;
+            TradeInstance[] trades = new TradeInstance[TRADE_AMOUNT];
 
             //initial expiry 10 minutes from now
             long expiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
-            for (int i = 0; i < 2016; i++)
+            //TODO: replace this with a computation observable something like this:
+//            Flowable.range(0, TRADE_AMOUNT)
+//                    .observeOn(Schedulers.computation())
+//                    .map(v -> getTradeMessageAndSignature...)
+//                    .blockingSubscribe(this::addTradeSequence, this::onError, this::onAllTransactions);
+
+            for (int i = 0; i < TRADE_AMOUNT; i++)
             {
                 BigInteger expiryTimestamp = BigInteger.valueOf(expiry + (i * MARKET_INTERVAL));
                 trades[i] = (getTradeMessageAndSignature(wallet, password, price, expiryTimestamp, tickets, ticket)
                         .blockingGet());
+                float upd = ((float)i/TRADE_AMOUNT)*100.0f;
+                BaseViewModel.onQueueUpdate((int)upd);
             }
             return trades;
         });
@@ -99,9 +111,12 @@ public class CreateTransactionInteract {
 
     public Observable<TradeInstance[]> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
         return getTradeMessages(wallet, price, tickets, ticket).toObservable()
-                //.subscribe(data -> )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public void setMarketQueue(Disposable disposable) {
+        transactionRepository.setMarketQueue(disposable);
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data) {
@@ -110,6 +125,8 @@ public class CreateTransactionInteract {
                         transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password)
                 .observeOn(AndroidSchedulers.mainThread()));
     }
+
+    public Disposable getMarketQueue() { return transactionRepository.getMarketQueue(); }
 
     private byte[] hexStringToBytes(String s)
     {
@@ -121,11 +138,5 @@ public class CreateTransactionInteract {
                     + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
-    }
-
-    public void createMarketOrders(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket,
-                                   Consumer<? super TradeInstance[]> onComplete, Consumer<? super Throwable> onError, Action onAllTransactions) {
-        transactionRepository.ProcessMarketOrders(getTradeInstances(wallet, price, tickets, ticket)
-                .subscribe(onComplete, onError, onAllTransactions));
     }
 }

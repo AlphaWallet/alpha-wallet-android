@@ -15,6 +15,7 @@ import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TicketInfo;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     protected UseTokenViewModelFactory useTokenViewModelFactory;
     private UseTokenViewModel viewModel;
     private SystemView systemView;
+    private ProgressView progressView;
 
     public TextView name;
     public TextView venue;
@@ -43,7 +45,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     private Ticket ticket;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
@@ -58,6 +61,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
+        progressView = findViewById(R.id.progress_view);
+        progressView.hide();
 
         name = findViewById(R.id.textViewName);
         venue = findViewById(R.id.textViewVenue);
@@ -74,6 +79,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)
                 .get(UseTokenViewModel.class);
 
+        viewModel.queueProgress().observe(this, progressView::updateProgress);
+
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
@@ -81,7 +88,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         viewModel.prepare();
     }
@@ -89,17 +97,25 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onClick(View v)
     {
-        switch (v.getId()) {
-            case R.id.button_use: {
+        switch (v.getId())
+        {
+            case R.id.button_use:
+            {
                 viewModel.showRotatingSignature(this, ticket);
-            } break;
-            case R.id.button_sell: {
+            }
+            break;
+            case R.id.button_sell:
+            {
                 viewModel.showMarketOrder(this, ticket);
-            } break;
-            case R.id.button_transfer: {
+            }
+            break;
+            case R.id.button_transfer:
+            {
                 viewModel.showTransferToken(this, ticket);
-            } break;
-            case R.id.copy_address : {
+            }
+            break;
+            case R.id.copy_address:
+            {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(getResources().getString(R.string.copy_addr_to_clipboard), ticket.getAddress());
                 clipboard.setPrimaryClip(clip);

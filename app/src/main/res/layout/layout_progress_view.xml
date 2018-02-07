@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     android:alpha="0.4"
     >
+
+    <TextView
+        android:id="@+id/textViewProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/progress"
+        android:layout_alignStart="@id/progress"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="15dp"
+        android:textColor="@color/black"/>
+
     <ProgressBar
         android:id="@+id/progress"
         android:layout_alignParentRight="true"
@@ -15,4 +26,5 @@
         android:layout_marginRight="5dp"
         android:layout_marginBottom="5dp"
         />
+
 </RelativeLayout>

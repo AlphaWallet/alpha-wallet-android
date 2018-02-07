@@ -7,6 +7,7 @@ import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.service.TransactionsNetworkClientType;
 
 import org.web3j.protocol.Web3j;
@@ -32,20 +33,19 @@ public class TransactionRepository implements TransactionRepositoryType {
 	private final AccountKeystoreService accountKeystoreService;
     private final TransactionLocalSource inDiskCache;
     private final TransactionsNetworkClientType blockExplorerClient;
-
-	@Nullable
-	private Disposable processMarketQueue;
-
+    private final MarketQueueService marketQueueService;
 
 	public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionLocalSource inDiskCache,
-			TransactionsNetworkClientType blockExplorerClient) {
+			TransactionsNetworkClientType blockExplorerClient,
+			MarketQueueService marketQueueService) {
 		this.networkRepository = networkRepository;
 		this.accountKeystoreService = accountKeystoreService;
 		this.blockExplorerClient = blockExplorerClient;
 		this.inDiskCache = inDiskCache;
+		this.marketQueueService = marketQueueService;
 	}
 
     @Override
@@ -98,6 +98,16 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
 	}
 
+	@Override
+	public Disposable getMarketQueue() {
+		return marketQueueService.getMarketQueue();
+	}
+
+	@Override
+	public void setMarketQueue(Disposable disposable) {
+		marketQueueService.setMarketQueue(disposable);
+	}
+
 	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
 	    return inDiskCache.fetchTransaction(networkInfo, wallet);
     }
@@ -112,22 +122,4 @@ public class TransactionRepository implements TransactionRepositoryType {
                 .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
                 .andThen(inDiskCache.fetchTransaction(networkInfo, wallet));
     }
-
-
-	@Override
-	public Consumer<? super TradeInstance[]> onOrdersCreated(TradeInstance[] trades)
-	{
-		for (TradeInstance t : trades) {
-			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
-		}
-
-		return null;
-	}
-
-	@Override
-	public void ProcessMarketOrders(Disposable orderQueue)
-	{
-		processMarketQueue = orderQueue;
-		//need to listen to things on this queue
-	}
 }

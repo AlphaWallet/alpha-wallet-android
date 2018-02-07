@@ -35,6 +35,7 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.util.QRURLParser;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
@@ -74,15 +75,10 @@ public class MarketOrderActivity extends BaseActivity
     private EditText idsText;
     private TextInputLayout amountInputLayout;
 
-    private ProgressBar marketProgressBar;
-    private FrameLayout viewLayout;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
-        marketProgressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_market_queue);
@@ -95,7 +91,7 @@ public class MarketOrderActivity extends BaseActivity
         systemView.hide();
 
         progressView = findViewById(R.id.progress_view);
-        progressView.showProgress(true);
+        progressView.hide();
 
         setTitle(getString(R.string.market_queue_title));
 
@@ -113,6 +109,8 @@ public class MarketOrderActivity extends BaseActivity
 
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
+        viewModel.progress().observe(this, systemView::showProgress);
+        viewModel.queueProgress().observe(this, progressView::updateProgress);
 
         idsText.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
 
@@ -153,10 +151,6 @@ public class MarketOrderActivity extends BaseActivity
                 return true;
             }
         });
-    }
-
-    public static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener){
-        v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
     }
 
     private void onTicket(Ticket ticket) {
@@ -208,6 +202,11 @@ public class MarketOrderActivity extends BaseActivity
 
         //let's try to generate a market order
         viewModel.generateMarketOrders(idSendList);
+
+        //kill keyboard
+        KeyboardUtils.hideKeyboard(idsText);
+        //InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        //imm.hideSoftInputFromWindow(idsText.getWindowToken(), 0);
 
         //viewModel.openConfirmation(this, to, indexList, amount);
     }

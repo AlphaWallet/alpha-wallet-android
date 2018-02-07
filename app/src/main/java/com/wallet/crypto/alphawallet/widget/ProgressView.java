@@ -5,27 +5,21 @@ package com.wallet.crypto.alphawallet.widget;
  */
 
 import android.content.Context;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 
-public class ProgressView extends RelativeLayout  {
+public class ProgressView extends RelativeLayout {
     private ProgressBar progress;
+    private TextView counter;
 
     public ProgressView(@NonNull Context context) {
         super(context);
@@ -46,6 +40,21 @@ public class ProgressView extends RelativeLayout  {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.layout_progress_view, this, false);
         addView(view);
         progress = view.findViewById(R.id.progress);
+        counter = view.findViewById(R.id.textViewProgress);
+    }
+
+    public void updateProgress(Integer prog) {
+        if (prog < 99) {
+            counter.setText(String.valueOf(prog) + "%");
+            progress.setVisibility(VISIBLE);
+            counter.setVisibility(VISIBLE);
+            setVisibility(VISIBLE);
+        }
+        else
+        {
+            hide();
+            Toast.makeText(this.getContext(), "Order Complete", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void hide() {
@@ -55,18 +64,8 @@ public class ProgressView extends RelativeLayout  {
 
     private void hideAllComponents() {
         progress.setVisibility(GONE);
+        counter.setVisibility(GONE);
         setVisibility(VISIBLE);
-    }
-
-    public void showProgress(boolean shouldShow) {
-        if (shouldShow) {
-            progress.setVisibility(VISIBLE);
-            setVisibility(VISIBLE);
-        }
-        else
-        {
-            hideAllComponents();
-        }
     }
 
     public void showEmpty(View view) {

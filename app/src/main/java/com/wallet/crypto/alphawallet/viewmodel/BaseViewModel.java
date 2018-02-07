@@ -17,7 +17,9 @@ public class BaseViewModel extends ViewModel {
 
 	protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
 	protected final MutableLiveData<Boolean> progress = new MutableLiveData<>();
+	//protected final MutableLiveData<Boolean> queueProgress = new MutableLiveData<>();
 	protected Disposable disposable;
+	protected static final MutableLiveData<Integer> queueCompletion = new MutableLiveData<>();
 
 	@Override
 	protected void onCleared() {
@@ -38,6 +40,10 @@ public class BaseViewModel extends ViewModel {
 		return progress;
 	}
 
+	public LiveData<Integer> queueProgress() {
+		return queueCompletion;
+	}
+
 	protected void onError(Throwable throwable) {
         Log.d("TAG", "Err", throwable);
         if (throwable instanceof ServiceException) {
@@ -51,6 +57,10 @@ public class BaseViewModel extends ViewModel {
 		}
 	}
 
+	public static void onQueueUpdate(int complete) {
+		queueCompletion.postValue(complete);
+	}
+
 	public void onCompleteMarketTask(TradeInstance[] trades) {
 		for (TradeInstance t : trades) {
 			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
@@ -58,7 +68,6 @@ public class BaseViewModel extends ViewModel {
 	}
 
 	public void onAllTransactions() {
-		//progress.postValue(false);
 		System.out.println("go2");
 	}
 }

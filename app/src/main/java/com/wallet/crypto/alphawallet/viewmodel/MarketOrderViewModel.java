@@ -156,21 +156,18 @@ public class MarketOrderViewModel extends BaseViewModel
     {
         unchangedCount++;
 
-        if (unchangedCount == 2)
-        {
+        if (unchangedCount == 2) {
             //do the new selection
             changeSelection();
         }
 
-        if (newSelection != null && !newSelection.equals(lastSelection))
-        {
+        if (newSelection != null && !newSelection.equals(lastSelection)) {
             lastSelection = newSelection;
             unchangedCount = 0;
         }
     }
 
-    private void changeSelection()
-    {
+    private void changeSelection() {
         //convert to array of indicies
         try {
             List<Integer> indexList = ticket.getValue().parseIndexList(newSelection);
@@ -196,8 +193,7 @@ public class MarketOrderViewModel extends BaseViewModel
         changeSelection();
     }
 
-    public void generateMarketOrders(List<Integer> idSendList)
-    {
+    public void generateMarketOrders(List<Integer> idSendList) {
         short[] ticketIDs = new short[idSendList.size()];
         int index = 0;
         for (Integer i : idSendList) {
@@ -212,8 +208,7 @@ public class MarketOrderViewModel extends BaseViewModel
         System.out.println("go");
     }
 
-    public void onOrdersCreated(TradeInstance[] trades)
-    {
+    public void onOrdersCreated(TradeInstance[] trades) {
         for (TradeInstance t : trades) {
             System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
         }

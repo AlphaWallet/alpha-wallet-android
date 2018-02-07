@@ -434,7 +434,7 @@ public class TokenRepository implements TokenRepositoryType {
         if (response.size() == 1) {
             return ((Uint8) response.get(0)).getValue().intValue();
         } else {
-            return 18; //default
+            return 18;
         }
     }
 

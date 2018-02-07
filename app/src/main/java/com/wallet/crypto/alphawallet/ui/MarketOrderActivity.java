@@ -1,11 +1,15 @@
 package com.wallet.crypto.alphawallet.ui;
 
+import android.app.ActionBar;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,12 +17,17 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -29,6 +38,7 @@ import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.QRURLParser;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import org.ethereum.geth.Address;
@@ -39,6 +49,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 
 /**
@@ -51,6 +62,7 @@ public class MarketOrderActivity extends BaseActivity
     protected MarketOrderViewModelFactory ticketTransferViewModelFactory;
     protected MarketOrderViewModel viewModel;
     private SystemView systemView;
+    private ProgressView progressView;
 
     public TextView name;
     public TextView ids;
@@ -62,9 +74,14 @@ public class MarketOrderActivity extends BaseActivity
     private EditText idsText;
     private TextInputLayout amountInputLayout;
 
+    private ProgressBar marketProgressBar;
+    private FrameLayout viewLayout;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
+        marketProgressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
 
         super.onCreate(savedInstanceState);
 
@@ -76,6 +93,9 @@ public class MarketOrderActivity extends BaseActivity
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
+
+        progressView = findViewById(R.id.progress_view);
+        progressView.showProgress(true);
 
         setTitle(getString(R.string.market_queue_title));
 
@@ -133,6 +153,10 @@ public class MarketOrderActivity extends BaseActivity
                 return true;
             }
         });
+    }
+
+    public static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener){
+        v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
     }
 
     private void onTicket(Ticket ticket) {

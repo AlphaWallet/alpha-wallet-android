@@ -53,6 +53,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
         ticket = getIntent().getParcelableExtra(TICKET);
 
+        setTitle(getString(R.string.title_use_token));
         TicketInfo info = ticket.ticketInfo;
 
         systemView = findViewById(R.id.system_view);

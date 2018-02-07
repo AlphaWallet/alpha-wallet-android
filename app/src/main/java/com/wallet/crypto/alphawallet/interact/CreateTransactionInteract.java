@@ -42,30 +42,37 @@ public class CreateTransactionInteract {
     }
 
     //sign a trade transaction
-    public Single<TradeInstance> sign(Wallet wallet, TradeInstance t) {
-        return passwordStore.getPassword(wallet)
-                .flatMap(password -> transactionRepository.getSignature(wallet, t.getTradeData(), password))
+    public Single<TradeInstance> sign(Wallet wallet, String password, TradeInstance t) {
+        return transactionRepository.getSignature(wallet, t.getTradeData(), password)
                 .map(sig -> new TradeInstance(t, sig));
     }
 
-    public Single<TradeInstance[]> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
-        return Single.fromCallable(() -> {
+    public Single<TradeInstance[]> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, Ticket ticket)
+    {
+        return Single.fromCallable(() ->
+        {
             TradeInstance[] trades = new TradeInstance[2016];
+
             //initial expiry 10 minutes from now
             long expiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
-            for (int i = 0; i < 2016; i++) {
-                BigInteger expiryTimestamp = BigInteger.valueOf(expiry + (i*MARKET_INTERVAL));
-                trades[i] = (getTradeMessageAndSignature(wallet, price, expiryTimestamp, tickets, ticket)
+            for (int i = 0; i < 2016; i++)
+            {
+                BigInteger expiryTimestamp = BigInteger.valueOf(expiry + (i * MARKET_INTERVAL));
+                trades[i] = (getTradeMessageAndSignature(wallet, password, price, expiryTimestamp, tickets, ticket)
                         .blockingGet());
             }
-
             return trades;
         });
     }
 
-    public Single<TradeInstance> getTradeMessageAndSignature(Wallet wallet, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
+    private Single<TradeInstance[]> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
+        return passwordStore.getPassword(wallet)
+                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, ticket));
+    }
+
+    private Single<TradeInstance> getTradeMessageAndSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
         return encodeMessageForTrade(price, expiryTimestamp, tickets, ticket)
-                .flatMap(newTrade -> sign(wallet, newTrade));
+                .flatMap(newTrade -> sign(wallet, password, newTrade));
     }
 
     private Single<TradeInstance> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
@@ -82,7 +89,6 @@ public class CreateTransactionInteract {
             //TODO maybe need to cast to bigint
             //BigInteger addr = new BigInteger(CONTRACT_ADDR.substring(2), 16);
             byte[] contract = hexStringToBytes("000000000000000000000000" + ticket.getAddress().substring(2));
-            System.out.println("length of contract: " + contract.length);
             message.put(contract);
             ShortBuffer shortBuffer = message.slice().asShortBuffer();
             shortBuffer.put(tickets);

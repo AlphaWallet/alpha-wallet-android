@@ -210,10 +210,5 @@ public class MarketOrderViewModel extends BaseViewModel
         BigInteger price = BigInteger.TEN;
 
         marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue());
-
-//        createTransactionInteract.setMarketQueue(
-//        createTransactionInteract
-//                .getTradeInstances(defaultWallet.getValue(), price, ticketIDs, ticket().getValue())
-//                .subscribe(this::onCompleteMarketTask, this::onError, this::onAllTransactions));
     }
 }

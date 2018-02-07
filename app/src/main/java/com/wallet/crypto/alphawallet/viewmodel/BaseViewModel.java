@@ -67,8 +67,4 @@ public class BaseViewModel extends ViewModel {
 			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
 		}
 	}
-
-	public void onAllTransactions() {
-		System.out.println("go2");
-	}
 }

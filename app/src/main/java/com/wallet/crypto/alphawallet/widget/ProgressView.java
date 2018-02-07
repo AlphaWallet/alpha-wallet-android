@@ -53,7 +53,6 @@ public class ProgressView extends RelativeLayout {
         else
         {
             hide();
-            Toast.makeText(this.getContext(), "Order Complete", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -2,6 +2,8 @@ package com.wallet.crypto.alphawallet.service;
 
 import android.content.Context;
 
+import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Wallet;
@@ -19,6 +21,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
+
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 /**
  * Created by James on 7/02/2018.
@@ -151,8 +155,18 @@ public class MarketQueueService
         return data;
     }
 
-    public void createMarketOrders(Wallet value, BigInteger price, short[] ticketIDs, Ticket value1)
+    public void createMarketOrders(Wallet wallet, BigInteger price, short[] ticketIDs, Ticket ticket)
     {
-        
+        marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, ticket)
+                .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
+    }
+
+    private void onError(Throwable error) {
+        //something went wrong
+    }
+
+    public void onAllTransactions()
+    {
+        System.out.println("go2");
     }
 }

@@ -63,7 +63,7 @@ public class MarketQueueService
 {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
     private static final int TRADE_AMOUNT = 10;
-    private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc?start=630832800312;count="; //abc?start=12&count=11&count=3
+    private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/"; //abc?start=12&count=11&count=3
 
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
@@ -87,12 +87,12 @@ public class MarketQueueService
 
     private void buildConnector()
     {
-//        marketQueueConnector = new Retrofit.Builder()
-//                .baseUrl(MARKET_QUEUE_URL)
-//                .client(httpClient)
-//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//                .build()
-//                .create(ApiMarketQueue.class);
+        marketQueueConnector = new Retrofit.Builder()
+                .baseUrl(MARKET_QUEUE_URL)
+                .client(httpClient)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build()
+                .create(ApiMarketQueue.class);
     }
 
     public void setMarketQueue(Disposable disposable)
@@ -108,108 +108,94 @@ public class MarketQueueService
     //TODO: handle completion of transaction formation
     public void processMarketTrades(TradeInstance[] trades)
     {
-        //can we now send the first one to the market queue server?
-        sendMarketOrders(trades);
+        sendMarketOrders(trades)
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(this::handleResponse);
 
-        for (TradeInstance t : trades)
-        {
+        for (TradeInstance t : trades) {
             System.out.println("SIG: " + t.getStringSig());
         }
     }
 
-    public void sendMarketOrders(TradeInstance[] trades)
+    private void handleResponse(okhttp3.Response response)
     {
-//        return Single.fromCallable(() -> {
-        if (trades == null || trades.length == 0)
-        {
-            return;// null;
-        }
+        System.out.println("handle response");
+    }
 
+    public Single<okhttp3.Response> sendMarketOrders(TradeInstance[] trades)
+    {
+        return Single.fromCallable(() -> {
+            if (trades == null || trades.length == 0)
+            {
+                return null;
+            }
+
+            okhttp3.Response response = null;
+
+            try
+            {
+                TradeInstance t = trades[0];
+
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                DataOutputStream ds = new DataOutputStream(buffer);
+                ds.write(Numeric.toBytesPadded(t.contractAddress, 32));
+                ds.write(Numeric.toBytesPadded(t.price, 32));
+                ds.write(Numeric.toBytesPadded(t.expiry, 32));
+
+                for (short ticketIndex : t.tickets)
+                {
+                    ds.writeShort(ticketIndex);
+                }
+
+                //now add the signatures
+                for (TradeInstance thisTrade : trades)
+                {
+                    ds.write(thisTrade.getSignatureBytes());
+                }
+
+                ds.flush();
+
+                String url = MARKET_QUEUE_URL + String.valueOf(trades.length);
+
+                response = writeToQueue(url, buffer.toByteArray(), true);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return response;
+        });
+    }
+
+    private okhttp3.Response writeToQueue(final String queryURL, final byte[] data, final boolean post)
+    {
+        okhttp3.Response response = null;
         try
         {
-            TradeInstance t = trades[0];
+            final MediaType DATA
+                    = MediaType.parse("application/vnd.awallet-signed-orders-v0");
 
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            DataOutputStream ds = new DataOutputStream(buffer);
-            ds.write(Numeric.toBytesPadded(t.contractAddress, 32));
-            ds.write(Numeric.toBytesPadded(t.price, 32));
-            ds.write(Numeric.toBytesPadded(t.expiry, 32));
+            OkHttpClient client = new OkHttpClient();
 
-            for (short ticketIndex : t.tickets)
-            {
-                ds.writeShort(ticketIndex);
-            }
+            RequestBody body = RequestBody.create(DATA, data);
 
-            //now add the signatures
-            for (TradeInstance thisTrade : trades)
-            {
-                ds.write(thisTrade.getSignatureBytes());
-            }
+            Request request = new Request.Builder()
+                    .url("https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc?start=630832800312;count=3")
+                    .put(body)
+                    .addHeader("Content-Type", "application/vnd.awallet-signed-orders-v0")
+                    .build();
 
-            ds.flush();
+            response = client.newCall(request).execute();
 
-            String url = MARKET_QUEUE_URL + String.valueOf(trades.length);
-
-            writeToQueue(url, buffer.toByteArray(), true);
-
-
-//            ds.writeBytes(
-//
-//            int len = tokens.length;
-//            TokenTickerRequestBody requestBody = new TokenTickerRequestBody();
-//            requestBody.currency = currency;
-//            requestBody.tokens = new TokenDescriptionRequestBody[len];
-//            for (int i = 0; i < len; i++) {
-//                requestBody.tokens[i] = new TokenDescriptionRequestBody(
-//                        tokens[i].tokenInfo.address, tokens[i].tokenInfo.symbol);
-//            }
-//            return requestBody;
-//        })
-//                .flatMap(body -> apiClient.fetchTokenPrices(body))
-//                .map(r -> {
-//                    TrustResponse<TokenTicker> body = r.body();
-//                    return body == null ? null : body.response;
-//                });
-
+            System.out.println("HI: " + response.message());
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
-    }
 
-    private void writeToQueue(final String queryURL, final byte[] data, final boolean post)
-    {
-        Thread newQuery = new Thread()
-        {
-            public void run()
-            {
-                try
-                {
-                    final MediaType DATA
-                            = MediaType.parse("application/vnd.awallet-signed-orders-v0");
-
-                    OkHttpClient client = new OkHttpClient();
-
-                    RequestBody body = RequestBody.create(DATA , data);
-
-                    Request request = new Request.Builder()
-                            .url("https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc?start=630832800312;count=3")
-                            .put(body)
-                            .addHeader("Content-Type", "application/vnd.awallet-signed-orders-v0")
-                            .build();
-
-                    okhttp3.Response response = client.newCall(request).execute();
-
-                    System.out.println("HI: " + response.message());
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        };
-        newQuery.start();
+        return response;
     }
 
     public interface ApiMarketQueue
@@ -227,7 +213,6 @@ public class MarketQueueService
     public Single<TradeInstance[]> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, Ticket ticket) {
         return Single.fromCallable(() ->
         {
-
             TradeInstance[] trades = new TradeInstance[TRADE_AMOUNT];
 
             //initial expiry 10 minutes from now

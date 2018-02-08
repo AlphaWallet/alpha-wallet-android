@@ -63,8 +63,8 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 public class MarketQueueService
 {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
-    private static final int TRADE_AMOUNT = 50;
-    private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc"; //abc?start=12&count=11&count=3
+    private static final int TRADE_AMOUNT = 500;
+    private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc";
 
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
@@ -72,6 +72,7 @@ public class MarketQueueService
 
     private Disposable marketQueueProcessing;
     private Context context;
+    private TradeInstance tradeBuilder;
 
     private ApiMarketQueue marketQueueConnector;
 
@@ -97,26 +98,16 @@ public class MarketQueueService
 //                .create(ApiMarketQueue.class);
     }
 
-    public void setMarketQueue(Disposable disposable)
-    {
-        marketQueueProcessing = disposable;
-    }
-
-    public Disposable getMarketQueue()
-    {
-        return marketQueueProcessing;
-    }
-
     //TODO: handle completion of transaction formation
-    public void processMarketTrades(TradeInstance[] trades)
+    public void processMarketTrades(TradeInstance trades)
     {
         marketQueueProcessing = sendMarketOrders(trades)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleResponse);
 
-        for (TradeInstance t : trades) {
-            System.out.println("SIG: " + t.getStringSig());
+        for (byte[] t : trades.getSignatures()) {
+            System.out.println("SIG: " + bytesToHex(t));
         }
     }
 
@@ -153,10 +144,10 @@ public class MarketQueueService
         return buffer.toByteArray();
     }
 
-    public Single<okhttp3.Response> sendMarketOrders(TradeInstance[] trades)
+    public Single<okhttp3.Response> sendMarketOrders(TradeInstance trades)
     {
         return Single.fromCallable(() -> {
-            if (trades == null || trades.length == 0)
+            if (trades == null || trades.getSignatures().size() == 0)
             {
                 return null;
             }
@@ -165,30 +156,19 @@ public class MarketQueueService
 
             try
             {
-                TradeInstance t = trades[0];
-
-                byte[] trade = getTradeBytes(t.price, t.expiry, t.tickets, t.contractAddress);
+                byte[] trade = getTradeBytes(trades.price, trades.expiry, trades.tickets, trades.contractAddress);
 
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 DataOutputStream ds = new DataOutputStream(buffer);
                 ds.write(trade);
-
-                //now add the signatures
-                for (TradeInstance thisTrade : trades)
-                {
-                    ds.write(thisTrade.getSignatureBytes());
-                }
-
+                trades.addSignatures(ds);
                 ds.flush();
 
                 Map<String, String> paramData = new HashMap<>();
                 paramData.put("start", "345345");
-                paramData.put("count", String.valueOf(trades.length));
-
-                String args = formEncodedData(paramData); // = "abc?start=630832800312;count=";
-
-                String url = MARKET_QUEUE_URL + args + String.valueOf(trades.length);
-
+                paramData.put("count", String.valueOf(trades.sigCount()));
+                String args = formEncodedData(paramData);
+                String url = MARKET_QUEUE_URL + args;
                 response = writeToQueue(url, buffer.toByteArray(), true);
             }
             catch (Exception e)
@@ -238,18 +218,18 @@ public class MarketQueueService
     }
 
     //sign a trade transaction
-    public Single<TradeInstance> sign(Wallet wallet, String password, TradeInstance t) {
-        return transactionRepository.getSignature(wallet, t.getTradeData(), password)
-                .map(sig -> new TradeInstance(t, sig));
+    public Single<byte[]> sign(Wallet wallet, String password, TradeInstance t, byte[] data) {
+        return transactionRepository.getSignature(wallet, data, password);
     }
 
-    public Single<TradeInstance[]> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, Ticket ticket) {
+    public Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, Ticket ticket) {
         return Single.fromCallable(() ->
         {
-            TradeInstance[] trades = new TradeInstance[TRADE_AMOUNT];
+            long initialExpiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
+            TradeInstance trade = new TradeInstance(price, BigInteger.valueOf(initialExpiry), tickets, ticket.getAddress());
 
             //initial expiry 10 minutes from now
-            long expiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
+
             //TODO: replace this with a computation observable something like this:
 //            Flowable.range(0, TRADE_AMOUNT)
 //                    .observeOn(Schedulers.computation())
@@ -258,34 +238,34 @@ public class MarketQueueService
 
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
-                BigInteger expiryTimestamp = BigInteger.valueOf(expiry + (i * MARKET_INTERVAL));
-                trades[i] = (getTradeMessageAndSignature(wallet, password, price, expiryTimestamp, tickets, ticket)
-                        .blockingGet());
+                BigInteger expiryTimestamp = BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
+                trade.addSignature(getTradeSignature(wallet, password, price, expiryTimestamp, tickets, ticket).blockingGet());
+                        //.subscribe(trade::addSignature);
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 BaseViewModel.onQueueUpdate((int)upd);
             }
-            return trades;
+            return trade;
         });
     }
 
-    private Single<TradeInstance[]> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, ticket));
     }
 
-    private Single<TradeInstance> getTradeMessageAndSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
+    private Single<byte[]> getTradeSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
         return encodeMessageForTrade(price, expiryTimestamp, tickets, ticket)
-                .flatMap(newTrade -> sign(wallet, password, newTrade));
+                .flatMap(tradeBytes -> transactionRepository.getSignature(wallet, tradeBytes, password));
     }
 
-    private Single<TradeInstance> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
+    private Single<byte[]> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
         return Single.fromCallable(() -> {
             byte[] trade = getTradeBytes(price, expiryTimestamp, tickets, ticket.getIntAddress());
-            return new TradeInstance(price, expiryTimestamp, tickets, ticket, trade);
+            return trade;
         });
     }
 
-    public Observable<TradeInstance[]> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, Ticket ticket) {
         return getTradeMessages(wallet, price, tickets, ticket).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -296,18 +276,6 @@ public class MarketQueueService
                 .flatMap(password ->
                         transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password)
                                 .observeOn(AndroidSchedulers.mainThread()));
-    }
-
-    private byte[] hexStringToBytes(String s)
-    {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2)
-        {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
     }
 
     public void createMarketOrders(Wallet wallet, BigInteger price, short[] ticketIDs, Ticket ticket)
@@ -322,7 +290,7 @@ public class MarketQueueService
 
     public void onAllTransactions()
     {
-        System.out.println("go2");
+
     }
 
     private String formEncodedData(Map<String, String> data)
@@ -350,5 +318,16 @@ public class MarketQueueService
         }
 
         return sb.toString();
+    }
+
+    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 }

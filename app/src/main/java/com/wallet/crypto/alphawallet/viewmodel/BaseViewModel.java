@@ -68,11 +68,4 @@ public class BaseViewModel extends ViewModel {
 	public static void onPushToast(String message) {
 		pushToastMutable.postValue(message);
 	}
-
-	public void onCompleteMarketTask(TradeInstance[] trades) {
-
-		for (TradeInstance t : trades) {
-			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
-		}
-	}
 }

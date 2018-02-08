@@ -4,8 +4,18 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:alpha="0.4"
     >
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/white_transparent"
+        />
 
     <TextView
         android:id="@+id/textViewProgress"
@@ -13,18 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/progress"
         android:layout_alignStart="@id/progress"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="12dp"
         android:textColor="@color/black"/>
-
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="5dp"
-        />
 
 </RelativeLayout>

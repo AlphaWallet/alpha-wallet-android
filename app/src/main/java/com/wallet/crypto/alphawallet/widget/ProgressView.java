@@ -5,6 +5,7 @@ package com.wallet.crypto.alphawallet.widget;
  */
 
 import android.content.Context;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -43,6 +44,12 @@ public class ProgressView extends RelativeLayout {
         progress = view.findViewById(R.id.progress);
         counter = view.findViewById(R.id.textViewProgress);
         context = view.getContext();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            counter.setZ(1.0f);
+            progress.setZ(0.0f);
+        }
     }
 
     public void updateProgress(Integer prog) {

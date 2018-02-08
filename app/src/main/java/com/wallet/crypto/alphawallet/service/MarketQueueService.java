@@ -189,17 +189,14 @@ public class MarketQueueService
             final MediaType DATA
                     = MediaType.parse("application/vnd.awallet-signed-orders-v0");
 
-            OkHttpClient client = new OkHttpClient();
-
             RequestBody body = RequestBody.create(DATA, data);
-
             Request request = new Request.Builder()
                     .url(writeURL)
                     .put(body)
                     .addHeader("Content-Type", "application/vnd.awallet-signed-orders-v0")
                     .build();
 
-            response = client.newCall(request).execute();
+            response = httpClient.newCall(request).execute();
 
             System.out.println("HI: " + response.message());
         }

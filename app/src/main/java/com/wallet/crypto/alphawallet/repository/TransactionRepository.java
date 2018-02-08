@@ -94,6 +94,23 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
 	}
 
+	@Override
+	public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password) {
+		return accountKeystoreService.signTransactionFast(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
+	}
+
+	@Override
+	public void unlockAccount(Wallet signer, String signerPassword) throws Exception
+	{
+		accountKeystoreService.unlockAccount(signer, signerPassword);
+	}
+
+	@Override
+	public void lockAccount(Wallet signer, String signerPassword) throws Exception
+	{
+		accountKeystoreService.lockAccount(signer, signerPassword);
+	}
+
 	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
 	    return inDiskCache.fetchTransaction(networkInfo, wallet);
     }

@@ -63,7 +63,7 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 public class MarketQueueService
 {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
-    private static final int TRADE_AMOUNT = 500;
+    private static final int TRADE_AMOUNT = 2016;
     private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc";
 
     private final OkHttpClient httpClient;
@@ -233,14 +233,15 @@ public class MarketQueueService
 //                    .map(v -> getTradeMessageAndSignature...)
 //                    .blockingSubscribe(this::addTradeSequence, this::onError, this::onAllTransactions);
 
+            transactionRepository.unlockAccount(wallet, password);
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
                 BigInteger expiryTimestamp = BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
                 trade.addSignature(getTradeSignature(wallet, password, price, expiryTimestamp, tickets, ticket).blockingGet());
-                        //.subscribe(trade::addSignature);
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 BaseViewModel.onQueueUpdate((int)upd);
             }
+            transactionRepository.lockAccount(wallet, password);
             return trade;
         });
     }
@@ -252,7 +253,7 @@ public class MarketQueueService
 
     private Single<byte[]> getTradeSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
         return encodeMessageForTrade(price, expiryTimestamp, tickets, ticket)
-                .flatMap(tradeBytes -> transactionRepository.getSignature(wallet, tradeBytes, password));
+                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password));
     }
 
     private Single<byte[]> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {

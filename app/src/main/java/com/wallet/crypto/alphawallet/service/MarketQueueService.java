@@ -86,6 +86,7 @@ public class MarketQueueService
         buildConnector();
     }
 
+    //TODO: hook up retrofit2 instead of doing
     private void buildConnector()
     {
 //        marketQueueConnector = new Retrofit.Builder()
@@ -109,7 +110,7 @@ public class MarketQueueService
     //TODO: handle completion of transaction formation
     public void processMarketTrades(TradeInstance[] trades)
     {
-        sendMarketOrders(trades)
+        marketQueueProcessing = sendMarketOrders(trades)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleResponse);
@@ -132,6 +133,8 @@ public class MarketQueueService
         {
             BaseViewModel.onPushToast("ERROR: Trade not processed");
         }
+
+        marketQueueProcessing.dispose();
     }
 
     private byte[] getTradeBytes(BigInteger price, BigInteger expiryTimestamp, short[] tickets, BigInteger contractAddr) throws Exception

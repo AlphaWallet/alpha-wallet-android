@@ -1,6 +1,7 @@
 package com.wallet.crypto.alphawallet.service;
 
 import android.content.Context;
+import android.os.Looper;
 
 import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.wallet.crypto.alphawallet.R;
@@ -110,6 +111,7 @@ public class MarketQueueService
     {
         sendMarketOrders(trades)
                 .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleResponse);
 
         for (TradeInstance t : trades) {
@@ -120,6 +122,10 @@ public class MarketQueueService
     private void handleResponse(okhttp3.Response response)
     {
         System.out.println("handle response");
+        //we can push to UI from here
+        BaseViewModel.onQueueUpdate(100);
+        //send message
+        BaseViewModel.onPushToast("Queue written");
     }
 
     public Single<okhttp3.Response> sendMarketOrders(TradeInstance[] trades)
@@ -155,7 +161,9 @@ public class MarketQueueService
 
                 ds.flush();
 
-                String url = MARKET_QUEUE_URL + String.valueOf(trades.length);
+                String weirdPythonArg = "abc?start=630832800312;count=";
+
+                String url = MARKET_QUEUE_URL + weirdPythonArg + String.valueOf(trades.length);
 
                 response = writeToQueue(url, buffer.toByteArray(), true);
             }
@@ -168,7 +176,8 @@ public class MarketQueueService
         });
     }
 
-    private okhttp3.Response writeToQueue(final String queryURL, final byte[] data, final boolean post)
+    //TODO: Refactor this using
+    private okhttp3.Response writeToQueue(final String writeURL, final byte[] data, final boolean post)
     {
         okhttp3.Response response = null;
         try
@@ -181,7 +190,7 @@ public class MarketQueueService
             RequestBody body = RequestBody.create(DATA, data);
 
             Request request = new Request.Builder()
-                    .url("https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc?start=630832800312;count=3")
+                    .url(writeURL)
                     .put(body)
                     .addHeader("Content-Type", "application/vnd.awallet-signed-orders-v0")
                     .build();

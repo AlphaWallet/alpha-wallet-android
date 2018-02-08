@@ -111,6 +111,7 @@ public class MarketOrderActivity extends BaseActivity
         viewModel.selection().observe(this, this::onSelected);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
+        viewModel.pushToast().observe(this, this::displayToast);
 
         idsText.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
 
@@ -179,6 +180,10 @@ public class MarketOrderActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         viewModel.prepare(address);
+    }
+
+    private void displayToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT );
     }
 
     private void onNext() {

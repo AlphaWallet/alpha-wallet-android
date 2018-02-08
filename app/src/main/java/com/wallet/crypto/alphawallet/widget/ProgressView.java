@@ -20,6 +20,7 @@ import com.wallet.crypto.alphawallet.R;
 public class ProgressView extends RelativeLayout {
     private ProgressBar progress;
     private TextView counter;
+    private Context context;
 
     public ProgressView(@NonNull Context context) {
         super(context);
@@ -41,19 +42,24 @@ public class ProgressView extends RelativeLayout {
         addView(view);
         progress = view.findViewById(R.id.progress);
         counter = view.findViewById(R.id.textViewProgress);
+        context = view.getContext();
     }
 
     public void updateProgress(Integer prog) {
-        if (prog < 99) {
+        if (prog < 100) {
             counter.setText(String.valueOf(prog) + "%");
             progress.setVisibility(VISIBLE);
             counter.setVisibility(VISIBLE);
             setVisibility(VISIBLE);
-        }
-        else
-        {
+        } else {
             hide();
         }
+    }
+
+    public void displayToast(String msg)
+    {
+        hide();
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT);
     }
 
     public void hide() {

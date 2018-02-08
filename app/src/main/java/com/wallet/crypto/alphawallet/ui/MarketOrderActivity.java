@@ -183,7 +183,7 @@ public class MarketOrderActivity extends BaseActivity
     }
 
     private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT );
+        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 
     private void onNext() {

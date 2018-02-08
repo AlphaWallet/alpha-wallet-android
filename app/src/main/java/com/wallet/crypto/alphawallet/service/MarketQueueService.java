@@ -64,7 +64,7 @@ public class MarketQueueService
 {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
     private static final int TRADE_AMOUNT = 10;
-    private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/"; //abc?start=12&count=11&count=3
+    private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc"; //abc?start=12&count=11&count=3
 
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
@@ -88,12 +88,12 @@ public class MarketQueueService
 
     private void buildConnector()
     {
-        marketQueueConnector = new Retrofit.Builder()
-                .baseUrl(MARKET_QUEUE_URL)
-                .client(httpClient)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build()
-                .create(ApiMarketQueue.class);
+//        marketQueueConnector = new Retrofit.Builder()
+//                .baseUrl(MARKET_QUEUE_URL)
+//                .client(httpClient)
+//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//                .build()
+//                .create(ApiMarketQueue.class);
     }
 
     public void setMarketQueue(Disposable disposable)
@@ -128,6 +128,22 @@ public class MarketQueueService
         BaseViewModel.onPushToast("Queue written");
     }
 
+    private byte[] getTradeBytes(BigInteger price, BigInteger expiryTimestamp, short[] tickets, BigInteger contractAddr) throws Exception
+    {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        DataOutputStream ds = new DataOutputStream(buffer);
+        ds.write(Numeric.toBytesPadded(contractAddr, 32));
+        ds.write(Numeric.toBytesPadded(price, 32));
+        ds.write(Numeric.toBytesPadded(expiryTimestamp, 32));
+        for (short ticketIndex : tickets)
+        {
+            ds.writeShort(ticketIndex);
+        }
+        ds.flush();
+
+        return buffer.toByteArray();
+    }
+
     public Single<okhttp3.Response> sendMarketOrders(TradeInstance[] trades)
     {
         return Single.fromCallable(() -> {
@@ -142,16 +158,11 @@ public class MarketQueueService
             {
                 TradeInstance t = trades[0];
 
+                byte[] trade = getTradeBytes(t.price, t.expiry, t.tickets, t.contractAddress);
+
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 DataOutputStream ds = new DataOutputStream(buffer);
-                ds.write(Numeric.toBytesPadded(t.contractAddress, 32));
-                ds.write(Numeric.toBytesPadded(t.price, 32));
-                ds.write(Numeric.toBytesPadded(t.expiry, 32));
-
-                for (short ticketIndex : t.tickets)
-                {
-                    ds.writeShort(ticketIndex);
-                }
+                ds.write(trade);
 
                 //now add the signatures
                 for (TradeInstance thisTrade : trades)
@@ -161,9 +172,13 @@ public class MarketQueueService
 
                 ds.flush();
 
-                String weirdPythonArg = "abc?start=630832800312;count=";
+                Map<String, String> paramData = new HashMap<>();
+                paramData.put("start", "345345");
+                paramData.put("count", String.valueOf(trades.length));
 
-                String url = MARKET_QUEUE_URL + weirdPythonArg + String.valueOf(trades.length);
+                String args = formEncodedData(paramData); // = "abc?start=630832800312;count=";
+
+                String url = MARKET_QUEUE_URL + args + String.valueOf(trades.length);
 
                 response = writeToQueue(url, buffer.toByteArray(), true);
             }
@@ -256,23 +271,8 @@ public class MarketQueueService
 
     private Single<TradeInstance> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, Ticket ticket) {
         return Single.fromCallable(() -> {
-            byte[] priceInWei = price.toByteArray();
-            byte[] expiry = expiryTimestamp.toByteArray();
-            ByteBuffer message = ByteBuffer.allocate(96 + tickets.length * 2);
-            byte[] leadingZeros = new byte[32 - priceInWei.length];
-            message.put(leadingZeros);
-            message.put(priceInWei);
-            byte[] leadingZerosExpiry = new byte[32 - expiry.length];
-            message.put(leadingZerosExpiry);
-            message.put(expiry);
-            //TODO maybe need to cast to bigint
-            //BigInteger addr = new BigInteger(CONTRACT_ADDR.substring(2), 16);
-            byte[] contract = hexStringToBytes("000000000000000000000000" + ticket.getAddress().substring(2));
-            message.put(contract);
-            ShortBuffer shortBuffer = message.slice().asShortBuffer();
-            shortBuffer.put(tickets);
-            //return message.array();
-            return new TradeInstance(price, expiryTimestamp, tickets, ticket, message.array());
+            byte[] trade = getTradeBytes(price, expiryTimestamp, tickets, ticket.getIntAddress());
+            return new TradeInstance(price, expiryTimestamp, tickets, ticket, trade);
         });
     }
 
@@ -314,5 +314,31 @@ public class MarketQueueService
     public void onAllTransactions()
     {
         System.out.println("go2");
+    }
+
+    private String formEncodedData(Map<String, String> data)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (String key : data.keySet())
+        {
+            String value = null;
+            try
+            {
+                value = URLEncoder.encode(data.get(key), "UTF-8");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+
+            if (sb.length() > 0)
+            {
+                sb.append("&");
+            }
+
+            sb.append(key + "=" + value);
+        }
+
+        return sb.toString();
     }
 }

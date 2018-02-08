@@ -5,7 +5,10 @@ import android.os.Parcelable;
 
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
 
+import org.web3j.utils.Numeric;
+
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
@@ -77,4 +80,6 @@ public class Token implements Parcelable {
     public String getFullName() {
         return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
     }
+
+    public BigInteger getIntAddress() { return Numeric.toBigInt(tokenInfo.address); }
 }

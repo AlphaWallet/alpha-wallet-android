@@ -1,5 +1,7 @@
 package com.wallet.crypto.alphawallet.entity;
 
+import org.web3j.utils.Numeric;
+
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,7 +17,7 @@ public class TradeInstance
     public final BigInteger expiry;
     public final BigInteger price;
     public final short[] tickets;
-    public final String contractAddress;
+    public final BigInteger contractAddress;
     public final byte[] tradeData;
     byte[] signature;
 
@@ -23,7 +25,7 @@ public class TradeInstance
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;
-        this.contractAddress = ticket.getAddress();
+        this.contractAddress = Numeric.toBigInt(ticket.getAddress());//Numeric.cleanHexPrefix(ticket.getAddress());
         this.tradeData = tradeData;
     }
 
@@ -57,5 +59,10 @@ public class TradeInstance
         //sdf.setTimeZone(TimeZone.getTimeZone("GMT-4"));
         String formattedDate = sdf.format(date);
         return formattedDate;
+    }
+
+    public byte[] getSignatureBytes()
+    {
+        return signature;
     }
 }

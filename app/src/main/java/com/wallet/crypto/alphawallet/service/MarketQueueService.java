@@ -63,7 +63,7 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 public class MarketQueueService
 {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
-    private static final int TRADE_AMOUNT = 10;
+    private static final int TRADE_AMOUNT = 50;
     private static final String MARKET_QUEUE_URL = "https://i6pk618b7f.execute-api.ap-southeast-1.amazonaws.com/test/abc"; //abc?start=12&count=11&count=3
 
     private final OkHttpClient httpClient;
@@ -119,13 +119,19 @@ public class MarketQueueService
         }
     }
 
+    //This is running on the main UI thread, so it's safe to push messages etc here
     private void handleResponse(okhttp3.Response response)
     {
         System.out.println("handle response");
-        //we can push to UI from here
         BaseViewModel.onQueueUpdate(100);
-        //send message
-        BaseViewModel.onPushToast("Queue written");
+        if (response.code() == HttpURLConnection.HTTP_OK)
+        {
+            BaseViewModel.onPushToast("Queue written");
+        }
+        else
+        {
+            BaseViewModel.onPushToast("ERROR: Trade not processed");
+        }
     }
 
     private byte[] getTradeBytes(BigInteger price, BigInteger expiryTimestamp, short[] tickets, BigInteger contractAddr) throws Exception
@@ -319,6 +325,7 @@ public class MarketQueueService
     private String formEncodedData(Map<String, String> data)
     {
         StringBuilder sb = new StringBuilder();
+        sb.append("?");
         for (String key : data.keySet())
         {
             String value = null;
@@ -333,7 +340,7 @@ public class MarketQueueService
 
             if (sb.length() > 0)
             {
-                sb.append("&");
+                sb.append(";");
             }
 
             sb.append(key + "=" + value);

@@ -193,7 +193,7 @@
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>
     <string name="hint_contract_price">Price</string>
-    <string name="action_use">Use</string>
+    <string name="action_use">Redeem</string>
     <string name="action_sell">Sell</string>
     <string name="action_transfer">Transfer</string>
     <string name="hint_token_balance">Balance</string>

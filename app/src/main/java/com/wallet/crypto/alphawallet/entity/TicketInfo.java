@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 

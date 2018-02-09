@@ -100,7 +100,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         this.balanceCurrency.setText(spannable);
     }
 
-    private void fillEmpty() {
+    protected void fillEmpty() {
         balanceEth.setText(R.string.NA);
         balanceCurrency.setText(EMPTY_BALANCE);
     }

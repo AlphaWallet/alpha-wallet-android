@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,12 +38,13 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     private ProgressView progressView;
 
     public TextView name;
-    public TextView venue;
-    public TextView date;
-    public TextView price;
-    public TextView balance;
+//    public TextView venue;
+//    public TextView date;
+//    public TextView price;
+//    public TextView balance;
 
     private Ticket ticket;
+    private ListView ticketDisplay;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -65,13 +67,16 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         progressView.hide();
 
         name = findViewById(R.id.textViewName);
-        venue = findViewById(R.id.textViewVenue);
-        date = findViewById(R.id.textViewDate);
-        price = findViewById(R.id.textViewPrice);
-        balance = findViewById(R.id.textViewBalance);
+        ticketDisplay = findViewById(R.id.listTickets);
+//        venue = findViewById(R.id.textViewVenue);
+//        date = findViewById(R.id.textViewDate);
+//        price = findViewById(R.id.textViewPrice);
+//        balance = findViewById(R.id.textViewBalance);
 
-        name.setText(info.name);
-        balance.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
+        String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
+
+        name.setText(useName);
+        //balance.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
 
         viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)
                 .get(UseTokenViewModel.class);
@@ -83,6 +88,13 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
         findViewById(R.id.copy_address).setOnClickListener(this);
+
+        addTicketsToList();
+    }
+
+    private void addTicketsToList()
+    {
+
     }
 
     @Override

@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
     <include layout="@layout/layout_simple_toolbar" />
-    <LinearLayout
+    <RelativeLayout
         android:orientation="vertical"
         android:layout_marginLeft="@dimen/big_padding"
         android:layout_marginTop="?actionBarSize"
@@ -21,6 +21,7 @@
             android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:orientation="horizontal"
             >
             <android.support.design.widget.TextInputLayout
@@ -29,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 >
-                <EditText
+                <TextView
                     android:id="@+id/textViewName"
                     android:hint="@string/hint_contract_name"
                     android:paddingRight="@dimen/half_large_padding"
@@ -58,73 +59,21 @@
                 android:layout_height="wrap_content"
                 />
         </RelativeLayout>
-        <LinearLayout
-            android:id="@+id/layoutTicket"
+
+        <ListView
+            android:id="@+id/listTickets"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/venue_input_layout"
-                android:layout_marginTop="@dimen/normal_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-                <EditText
-                    android:id="@+id/textViewVenue"
-                    android:hint="@string/hint_contract_venue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textNoSuggestions"
-                    />
-            </android.support.design.widget.TextInputLayout>
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/date_input_layout"
-                android:layout_marginTop="@dimen/normal_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-                <EditText
-                    android:id="@+id/textViewDate"
-                    android:hint="@string/hint_contract_date"
-                    android:inputType="textNoSuggestions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-            </android.support.design.widget.TextInputLayout>
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/price_input_layout"
-                android:layout_marginTop="@dimen/normal_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-                <EditText
-                    android:id="@+id/textViewPrice"
-                    android:hint="@string/hint_contract_price"
-                    android:inputType="textNoSuggestions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-            </android.support.design.widget.TextInputLayout>
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/balance_input_layout"
-                android:layout_marginTop="@dimen/normal_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-                <EditText
-                    android:id="@+id/textViewBalance"
-                    android:hint="@string/hint_token_balance"
-                    android:inputType="textNoSuggestions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-            </android.support.design.widget.TextInputLayout>
-        </LinearLayout>
+            android:layout_below="@id/contract_address_layout"
+            android:layout_above="@id/layoutButtons">
+        </ListView>
+
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_alignParentBottom="true"
             android:orientation="horizontal">
             <Button
                 android:id="@+id/button_use"
@@ -154,13 +103,14 @@
                 style="@style/Widget.AppCompat.Button.Colored"
                 />
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
     <com.wallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
         android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:visibility="gone"
         />
     <com.wallet.crypto.alphawallet.widget.ProgressView
         android:id="@+id/progress_view"

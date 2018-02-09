@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
-     private final OnTokenClickListener onTokenClickListener;
+     protected final OnTokenClickListener onTokenClickListener;
      private final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
          @Override
          public int compare(SortedItem o1, SortedItem o2) {

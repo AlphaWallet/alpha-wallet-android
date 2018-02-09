@@ -80,6 +80,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
                 .get(UseTokenViewModel.class);
 
         viewModel.queueProgress().observe(this, progressView::updateProgress);
+        viewModel.pushToast().observe(this, this::displayToast);
 
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
@@ -122,5 +123,9 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
                 Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void displayToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 }

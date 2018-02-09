@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
@@ -70,6 +71,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.total().observe(this, this::onTotal);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
         viewModel.queueProgress().observe(this, progressView::updateProgress);
+        viewModel.pushToast().observe(this, this::displayToast);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }
@@ -138,5 +140,9 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
                 viewModel.fetchTokens();
             } break;
         }
+    }
+
+    private void displayToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 }

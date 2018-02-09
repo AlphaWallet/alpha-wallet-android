@@ -93,6 +93,7 @@ public class TokenInfo implements Parcelable, TokenInterface {
         layout.decimals.setText(String.valueOf(decimals));
         layout.name.setText(name);
         layout.ticketLayout.setVisibility(View.GONE);
+        layout.isStormbird = false;
     }
 
     @Override

@@ -464,6 +464,12 @@ public class TokenRepository implements TokenRepositoryType {
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
+    private static org.web3j.abi.datatypes.Function boolParam(String param) {
+        return new Function(param,
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+    }
+
     private static org.web3j.abi.datatypes.Function intParam(String param) {
         return new Function(param,
                 Arrays.<Type>asList(),
@@ -562,12 +568,10 @@ public class TokenRepository implements TokenRepositoryType {
                         getDecimals(address),
                         true);
 
-                String venue = getContractData(address, stringParam("venue"));
-                if (venue != null && venue.length() > 0) {
-                    String date = getContractData(address, stringParam("date"));
-                    BigDecimal priceBD = new BigDecimal((BigInteger)getContractData(address, intParam("getTicketStartPrice")));
-                    double price = priceBD.doubleValue();
-                    TicketInfo ticket = new TicketInfo(result, venue, date, price);
+                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
+
+                if (isStormbird) {
+                    TicketInfo ticket = new TicketInfo(result);
                     result = ticket;
                 }
 

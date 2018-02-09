@@ -82,9 +82,9 @@ public class TokenFactory
         TokenInfo ti;
         TokenInfo token = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
                 realmItem.getDecimals(), true);
-        if (realmItem.getVenue() != null && realmItem.getVenue().length() > 0)
+        if (realmItem.isStormbird())
         {
-            ti = new TicketInfo(token, realmItem.getVenue(), realmItem.getDate(), realmItem.getPrice());
+            ti = new TicketInfo(token);
         }
         else
         {

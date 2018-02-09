@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:paddingBottom="@dimen/small_margin_padding"
+    android:paddingEnd="@dimen/small_margin_padding"
+    android:paddingStart="@dimen/small_margin_padding"
+    android:background="@drawable/rounded"
+    android:paddingTop="@dimen/small_margin_padding"
+    >
+
+    <TextView
+        android:id="@+id/amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="2dp"
+        android:text="x2"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textColor="@color/green"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_alignBaseline="@+id/amount"
+        android:layout_alignBottom="@+id/amount"
+        android:layout_toEndOf="@+id/amount"
+        android:text="FIFA 2018 Final"
+        android:textAllCaps="true"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/venue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_alignBaseline="@+id/name"
+        android:layout_alignBottom="@+id/name"
+        android:layout_toEndOf="@+id/name"
+        android:text="Hammersmith"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+
+    <LinearLayout
+        android:id="@+id/bottom_part"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/amount"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/datelayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/calendar"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/empty"
+                android:src="@drawable/cal_trans"
+                />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30 Mar 2018"
+                android:textColor="@color/black"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ticketlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.3"
+            android:orientation="horizontal">
+            <ImageView
+                android:id="@+id/ticketicon"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/empty"
+                android:src="@drawable/ticket_trans"
+                />
+
+            <TextView
+                android:id="@+id/tickettext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="51-52"
+                android:textColor="@color/black"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/catlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.3"
+            android:orientation="horizontal">
+            <ImageView
+                android:id="@+id/caticon"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/empty"
+                android:src="@drawable/cat_trans"
+                />
+
+            <TextView
+                android:id="@+id/cattext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cat 1"
+                android:textColor="@color/black"
+                android:textSize="14sp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/empty"
+        android:src="@mipmap/token_logo"
+        />
+        -->
+
+    <TextView
+        android:id="@+id/symbol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/normal_margin"
+        android:layout_marginStart="@dimen/big_margin"
+        android:layout_toEndOf="@+id/icon"
+        android:layout_toStartOf="@+id/balance_container"
+        android:textAllCaps="true"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:text="TRST"
+        />
+
+    <LinearLayout
+        android:id="@+id/balance_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="13dp"
+        android:gravity="end"
+        android:orientation="vertical"
+
+        >
+
+        <TextView
+            android:id="@+id/balance_eth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="8888888"
+            android:visibility="gone"
+            />
+
+        <TextView
+            android:id="@+id/balance_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="$8888888"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/balanceArray"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="13dp"
+        android:maxWidth="80dp"
+        android:textSize="10sp"
+        android:visibility="gone"
+        tools:text=""
+        />
+</RelativeLayout>

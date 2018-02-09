@@ -16,26 +16,32 @@ import java.util.List;
  * Created by James on 20/01/2018.
  */
 
+/**
+ * Notes on what we need to represent in a ticket
+ *
+ * 1. Ticket info. Current contract is an int16, we can use this to start with.
+ * 2. Venue stored in info, also gives date
+ * 3. Date code in info together with venue
+ * 4. Seat code band in info - gives price lookup
+ *
+ * //test spec for int16:
+ * //16 venues/dates, first 4 bits
+ * //left with 12 bits, can store 4096 seat/price zones
+ */
+
+
+
+
 public class TicketInfo extends TokenInfo implements TokenInterface
 {
-    public final String venue;
-    public final String date;
-    public final double price;
-
-    public TicketInfo(TokenInfo ti, String venue, String date, double price)
+    public TicketInfo(TokenInfo ti)
     {
         super(ti.address, ti.name, ti.symbol, ti.decimals, ti.isEnabled);
-        this.venue = venue;
-        this.date = date;
-        this.price = price;
     }
 
     private TicketInfo(Parcel in)
     {
         super(in);
-        this.venue = in.readString();
-        this.date = in.readString();
-        this.price = in.readDouble();
     }
 
     @Override
@@ -45,9 +51,6 @@ public class TicketInfo extends TokenInfo implements TokenInterface
         dest.writeString(symbol);
         dest.writeInt(decimals);
         dest.writeInt(isEnabled ? 1 : 0);
-        dest.writeString(venue);
-        dest.writeString(date);
-        dest.writeDouble(price);
     }
 
     public static final Creator<TicketInfo> CREATOR = new Creator<TicketInfo>() {
@@ -71,8 +74,8 @@ public class TicketInfo extends TokenInfo implements TokenInterface
         tokenHolder.balanceCurrency.setVisibility(View.GONE);
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
 
-        String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
-        tokenHolder.arrayBalance.setText(ids);
+        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
+        tokenHolder.arrayBalance.setText(String.valueOf(((Ticket)(tokenHolder.token)).balanceArray.size()) + " Tickets");
     }
 
     @Override
@@ -100,23 +103,17 @@ public class TicketInfo extends TokenInfo implements TokenInterface
     @Override
     public void addTokenSetupPage(AddTokenActivity layout) {
         super.addTokenSetupPage(layout);
-        layout.ticketLayout.setVisibility(View.VISIBLE);
-        layout.venue.setText(venue);
-        layout.date.setText(date);
-        layout.price.setText(String.valueOf(price));
+        layout.ticketLayout.setVisibility(View.GONE);
+//        layout.venue.setText(TicketDecode.getVenue(tokenId));
+//        layout.date.setText(TicketDecode.getDate(tokenId));
+//        layout.price.setText(TicketDecode.getPriceString(tokenId));
+        layout.isStormbird = true;
+//        layout.tokenId = tokenId;
     }
 
-//    @Override
-//    public void storeRealmData(RealmTokenInfo obj) {
-//        super.storeRealmData(obj);
-//
-//        obj.setVenue(venue);
-//        obj.setDate(date);
-//        obj.setPrice(price);
-//    }
-
+    @Override
     public void clickReact(TokensViewModel viewModel, Context context, int balance, Token token)
     {
-        viewModel.showUseToken(context, name, venue, date, address, price, balance, token);
+        viewModel.showUseToken(context, token);
     }
 }

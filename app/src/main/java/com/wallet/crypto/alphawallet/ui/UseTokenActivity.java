@@ -71,9 +71,6 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         balance = findViewById(R.id.textViewBalance);
 
         name.setText(info.name);
-        venue.setText(info.venue);
-        date.setText(info.date);
-        price.setText(String.valueOf(info.price));
         balance.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
 
         viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)

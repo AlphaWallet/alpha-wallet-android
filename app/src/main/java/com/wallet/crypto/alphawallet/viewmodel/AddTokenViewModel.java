@@ -48,21 +48,21 @@ public class AddTokenViewModel extends BaseViewModel {
         return wallet;
     }
 
-    public void save(String address, String symbol, int decimals, String name, String venue, String date, double db) {
-        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, venue, date, db);
+    public void save(String address, String symbol, int decimals, String name, boolean isStormBird) {
+        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
         addTokenInteract
                 .add(tokenInfo)
                 .subscribe(this::onSaved, this::onError);
     }
 
     //Here we decide what type of token we are dealing with
-    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, String venue, String date, double db)
+    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
         TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true);
 
-        if (venue != null && venue.length() > 0)
+        if (isStormBird)
         {
-            tokenInfo = new TicketInfo(tokenInfo, venue, date, db);
+            tokenInfo = new TicketInfo(tokenInfo);
         }
 
         return tokenInfo;

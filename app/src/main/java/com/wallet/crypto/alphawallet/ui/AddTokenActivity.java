@@ -62,6 +62,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private Dialog dialog;
     private String lastCheck;
 
+    public boolean isStormbird = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -198,11 +200,11 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         String symbol = this.symbol.getText().toString().toLowerCase();
         String rawDecimals = this.decimals.getText().toString();
         String name = this.name.getText().toString();
-        String venue = this.venue.getText().toString();
-        String date = this.date.getText().toString();
-        String rawPrice = this.price.getText().toString();
+//        String venue = this.venue.getText().toString();
+//        String date = this.date.getText().toString();
+//        String rawPrice = this.price.getText().toString();
 
-        double priceDb = 0;
+//        double priceDb = 0;
         int decimals = 0;
 
         if (TextUtils.isEmpty(address)) {
@@ -227,11 +229,11 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
-        try {
-            priceDb = Double.valueOf(rawPrice);
-        } catch (NumberFormatException ex) {
-            price.setError(getString(R.string.error_must_numeric));
-        }
+//        try {
+//            priceDb = Double.valueOf(rawPrice);
+//        } catch (NumberFormatException ex) {
+//            price.setError(getString(R.string.error_must_numeric));
+//        }
 
         if (!Address.isAddress(address)) {
             addressLayout.setError(getString(R.string.error_invalid_address));
@@ -239,7 +241,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
 
         if (isValid) {
-            viewModel.save(address, symbol, decimals, name, venue, date, priceDb);
+            viewModel.save(address, symbol, decimals, name, isStormbird);
         }
     }
 }

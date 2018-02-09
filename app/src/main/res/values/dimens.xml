@@ -31,4 +31,5 @@
 
     <dimen name="intro_height">340dp</dimen>
     <dimen name="intro_img_size">200dp</dimen>
+    <dimen name="small_margin_padding">5dp</dimen>
 </resources>

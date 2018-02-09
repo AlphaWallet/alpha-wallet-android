@@ -75,7 +75,7 @@ public class ConfirmationActivity extends BaseActivity {
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        confirmationForTicketTransfer = getIntent().getBooleanExtra(C.EXTRA_TICKET_VENUE, false);
+        confirmationForTicketTransfer = getIntent().getBooleanExtra(C.STORMBIRD, false);
         amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);

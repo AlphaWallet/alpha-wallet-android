@@ -13,11 +13,8 @@ public class RealmToken extends RealmObject {
     private long updatedTime;
     private String balance;
     private boolean isEnabled;
-
-    //So far Realm doesn't support extending RealmTokenInfo as a base class :(
-    private String venue = null;
-    private String date = null;
-    private double price = 0;
+    private int tokenId;
+    private boolean isStormbird;
 
     public int getDecimals() {
         return decimals;
@@ -83,30 +80,23 @@ public class RealmToken extends RealmObject {
         this.isEnabled = isEnabled;
     }
 
-    public String getVenue() { return venue; }
-
-    public void setVenue(String venue)
+    public int getTokenId()
     {
-        this.venue = venue;
+        return tokenId;
     }
 
-    public String getDate()
+    public void setTokenId(int tokenId)
     {
-        return date;
+        this.tokenId = tokenId;
     }
 
-    public void setDate(String date)
+    public boolean isStormbird()
     {
-        this.date = date;
+        return isStormbird;
     }
 
-    public double getPrice()
+    public void setStormbird(boolean stormbird)
     {
-        return price;
-    }
-
-    public void setPrice(double price)
-    {
-        this.price = price;
+        isStormbird = stormbird;
     }
 }

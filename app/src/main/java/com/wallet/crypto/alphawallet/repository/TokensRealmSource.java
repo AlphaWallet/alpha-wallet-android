@@ -143,8 +143,7 @@ public class TokensRealmSource implements TokenLocalSource {
                                 rawItem.getPrice(),
                                 rawItem.getPercentChange24h(),
                                 rawItem.getImage(),
-                                rawItem.getVenue(),
-                                rawItem.getDate()));
+                                rawItem.isStormbird()));
                     }
                 }
                 realm.commitTransaction();
@@ -224,8 +223,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
                 if (token instanceof Ticket) {
-                    realmToken.setVenue(((Ticket) token).ticketInfo.venue);
-                    realmToken.setDate(((Ticket) token).ticketInfo.date);
+                    realmToken.setStormbird(true);
                 }
             }
             realmToken.setBalance(token.getFullBalance());

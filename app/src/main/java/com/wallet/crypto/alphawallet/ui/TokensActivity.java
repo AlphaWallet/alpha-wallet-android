@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
@@ -17,6 +18,7 @@ import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.math.BigDecimal;
@@ -34,6 +36,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
     private TokensViewModel viewModel;
 
     private SystemView systemView;
+    private ProgressView progressView;
     private TokensAdapter adapter;
 
     @Override
@@ -49,6 +52,8 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         adapter = new TokensAdapter(this::onTokenClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
+        progressView = findViewById(R.id.progress_view);
+        progressView.hide();
 
         RecyclerView list = findViewById(R.id.list);
 
@@ -65,6 +70,8 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
+        viewModel.queueProgress().observe(this, progressView::updateProgress);
+        viewModel.pushToast().observe(this, this::displayToast);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }
@@ -133,5 +140,9 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
                 viewModel.fetchTokens();
             } break;
         }
+    }
+
+    private void displayToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 }

@@ -5,7 +5,9 @@ import android.os.Parcelable;
 
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
 
+import org.ethereum.geth.BigInt;
 import org.web3j.abi.datatypes.generated.Uint16;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -256,4 +258,7 @@ public class Ticket extends Token implements Parcelable
     public String getAddress() {
         return ticketInfo.address;
     }
+
+    @Override
+    public BigInteger getIntAddress() { return Numeric.toBigInt(ticketInfo.address); }
 }

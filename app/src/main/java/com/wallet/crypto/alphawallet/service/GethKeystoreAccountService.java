@@ -144,6 +144,28 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
     }
 
     @Override
+    public void unlockAccount(Wallet signer, String signerPassword) throws Exception {
+        org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+        keyStore.unlock(gethAccount, signerPassword);
+    }
+
+    @Override
+    public void lockAccount(Wallet signer, String signerPassword) throws Exception {
+        org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+        keyStore.lock(gethAccount.getAddress());
+    }
+
+    @Override
+    public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {
+        return Single.fromCallable(() -> {
+            byte[] messageHash = Hash.sha3(message);
+            org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+            byte[] signed = keyStore.signHash(gethAccount.getAddress(), messageHash);
+            return signed;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    @Override
     public Single<byte[]> signTransaction(Wallet signer, String signerPassword, byte[] message, long chainId)
     {
         return Single.fromCallable(() -> {

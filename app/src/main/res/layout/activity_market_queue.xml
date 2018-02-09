@@ -81,4 +81,11 @@
         android:layout_height="match_parent"
         tools:visibility="gone"
         />
+    <com.wallet.crypto.alphawallet.widget.ProgressView
+        android:id="@+id/progress_view"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"
+        />
 </android.support.design.widget.CoordinatorLayout>

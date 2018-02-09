@@ -18,6 +18,8 @@ public class BaseViewModel extends ViewModel {
 	protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
 	protected final MutableLiveData<Boolean> progress = new MutableLiveData<>();
 	protected Disposable disposable;
+	protected static final MutableLiveData<Integer> queueCompletion = new MutableLiveData<>();
+	protected static final MutableLiveData<String> pushToastMutable = new MutableLiveData<>();
 
 	@Override
 	protected void onCleared() {
@@ -38,6 +40,14 @@ public class BaseViewModel extends ViewModel {
 		return progress;
 	}
 
+	public LiveData<Integer> queueProgress() {
+		return queueCompletion;
+	}
+
+	public LiveData<String> pushToast() {
+		return pushToastMutable;
+	}
+
 	protected void onError(Throwable throwable) {
         Log.d("TAG", "Err", throwable);
         if (throwable instanceof ServiceException) {
@@ -51,14 +61,11 @@ public class BaseViewModel extends ViewModel {
 		}
 	}
 
-	public void onCompleteMarketTask(TradeInstance[] trades) {
-		for (TradeInstance t : trades) {
-			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
-		}
+	public static void onQueueUpdate(int complete) {
+		queueCompletion.postValue(complete);
 	}
 
-	public void onAllTransactions() {
-		//progress.postValue(false);
-		System.out.println("go2");
+	public static void onPushToast(String message) {
+		pushToastMutable.postValue(message);
 	}
 }

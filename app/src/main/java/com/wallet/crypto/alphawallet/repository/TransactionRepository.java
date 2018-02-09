@@ -33,10 +33,6 @@ public class TransactionRepository implements TransactionRepositoryType {
     private final TransactionLocalSource inDiskCache;
     private final TransactionsNetworkClientType blockExplorerClient;
 
-	@Nullable
-	private Disposable processMarketQueue;
-
-
 	public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
@@ -98,6 +94,23 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
 	}
 
+	@Override
+	public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password) {
+		return accountKeystoreService.signTransactionFast(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
+	}
+
+	@Override
+	public void unlockAccount(Wallet signer, String signerPassword) throws Exception
+	{
+		accountKeystoreService.unlockAccount(signer, signerPassword);
+	}
+
+	@Override
+	public void lockAccount(Wallet signer, String signerPassword) throws Exception
+	{
+		accountKeystoreService.lockAccount(signer, signerPassword);
+	}
+
 	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
 	    return inDiskCache.fetchTransaction(networkInfo, wallet);
     }
@@ -112,22 +125,4 @@ public class TransactionRepository implements TransactionRepositoryType {
                 .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
                 .andThen(inDiskCache.fetchTransaction(networkInfo, wallet));
     }
-
-
-	@Override
-	public Consumer<? super TradeInstance[]> onOrdersCreated(TradeInstance[] trades)
-	{
-		for (TradeInstance t : trades) {
-			System.out.println("Expiry: " + t.getExpiryString() + " Order Sig: " + t.getStringSig());
-		}
-
-		return null;
-	}
-
-	@Override
-	public void ProcessMarketOrders(Disposable orderQueue)
-	{
-		processMarketQueue = orderQueue;
-		//need to listen to things on this queue
-	}
 }

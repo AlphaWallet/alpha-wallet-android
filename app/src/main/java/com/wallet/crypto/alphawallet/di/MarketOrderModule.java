@@ -1,5 +1,7 @@
 package com.wallet.crypto.alphawallet.di;
 
+import android.content.Context;
+
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -12,11 +14,13 @@ import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.TicketTransferViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by James on 5/02/2018.
@@ -30,9 +34,10 @@ public class MarketOrderModule
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            CreateTransactionInteract createTransactionInteract) {
+            CreateTransactionInteract createTransactionInteract,
+            MarketQueueService marketQueueService) {
         return new MarketOrderViewModelFactory(
-                findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract);
+                findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract, marketQueueService);
     }
 
     @Provides

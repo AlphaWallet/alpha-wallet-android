@@ -28,6 +28,7 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModel;
 import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModelFactory;
 import com.wallet.crypto.alphawallet.widget.SystemView;
@@ -222,8 +223,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         try
         {
             //dismiss soft keyboard
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(idsText.getWindowToken(), 0);
+            KeyboardUtils.hideKeyboard(idsText);
             if (selectionStr == null || selectionStr.length() == 0)
             {
                 inviteUserToAddIDs();

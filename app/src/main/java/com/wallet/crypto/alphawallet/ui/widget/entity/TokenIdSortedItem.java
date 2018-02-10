@@ -1,15 +1,16 @@
 package com.wallet.crypto.alphawallet.ui.widget.entity;
 
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 
 /**
  * Created by James on 10/02/2018.
  */
 
-public class TokenIdSortedItem<T> extends SortedItem<Integer>
+public class TokenIdSortedItem extends SortedItem<TicketRange>
 {
-    public TokenIdSortedItem(int tokenId, int weight) {
-        super(TicketHolder.VIEW_TYPE, tokenId, weight);
+    public TokenIdSortedItem(TicketRange range, int weight) {
+        super(TicketHolder.VIEW_TYPE, range, weight);
     }
 
     @Override
@@ -28,6 +29,6 @@ public class TokenIdSortedItem<T> extends SortedItem<Integer>
     public boolean areItemsTheSame(SortedItem other)
     {
         return other.viewType == TicketHolder.VIEW_TYPE
-                && ((TokenIdSortedItem) other).value == value;
+                && ( ((TokenIdSortedItem) other).value.seatStart == value.seatStart && ((TokenIdSortedItem) other).value.seatCount == value.seatCount);
     }
 }

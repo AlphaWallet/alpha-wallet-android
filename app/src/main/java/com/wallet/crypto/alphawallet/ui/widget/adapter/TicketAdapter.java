@@ -7,10 +7,12 @@ import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
@@ -57,12 +59,26 @@ public class TicketAdapter extends TokensAdapter {
         {
             items.add(total);
         }
-        for (int i = 0; i < t.balanceArray.size(); i++) {
-            //initially don't sort
+        TicketRange currentRange = null;
+        char currentZone = '-';
+        for (int i = 0; i < t.balanceArray.size(); i++)
+        {
             int tokenId = t.balanceArray.get(i);
             if (tokenId != 0)
             {
-                items.add(new TokenIdSortedItem(tokenId, 10 + i));
+                char zone = TicketDecode.getZoneChar(tokenId);
+                if (currentZone != zone)
+                {
+                    if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
+                    int seatStart = TicketDecode.getSeatIdInt(tokenId);
+                    currentRange = new TicketRange(tokenId, seatStart);
+                    currentZone = zone;
+                }
+                else
+                {
+                    //update
+                    currentRange.seatCount++;
+                }
             }
         }
         items.endBatchedUpdates();

@@ -21,6 +21,7 @@ import org.web3j.utils.Convert;
  * ALT: this represents index into intermediate database which holds Shangkai tickets
  *
  */
+
 public class TicketDecode
 {
 //    public final String venue;
@@ -65,21 +66,37 @@ public class TicketDecode
         return date;
     }
 
-    public static String getZone(int ticketID)
+    public static String getZone(int ticketId)
     {
         char zone = 'A';
-        int zoneId = getZoneID(ticketID);
+        int zoneId = getZoneID(ticketId);
         zone += zoneId;
         return "Zone " + zone;
     }
 
-    public static String getSeatId(int ticketID)
+    public static char getZoneChar(int ticketId)
+    {
+        char zone = 'A';
+        int zoneId = getZoneID(ticketId);
+        zone += zoneId;
+        return zone;
+    }
+
+    public static String getSeatId(int ticketId)
     {
         int modifier = 1;
-        if (getZoneID(ticketID) == 0 && getVenueID(ticketID) == 0) modifier = 0;
+        if (getZoneID(ticketId) == 0 && getVenueID(ticketId) == 0) modifier = 0;
         int bitmask = (1 << 7) - 1;
-        int seatId = (ticketID & (bitmask)) + modifier; //mask with bottom 7 bits, add 1 except for the first run of tickets (because id 0 is a special case)
+        int seatId = (ticketId & (bitmask)) + modifier; //mask with bottom 7 bits, add 1 except for the first run of tickets (because id 0 is a special case)
         return "Seat " + seatId;
+    }
+
+    public static int getSeatIdInt(int ticketId)
+    {
+        int modifier = 1;
+        if (getZoneID(ticketId) == 0 && getVenueID(ticketId) == 0) modifier = 0;
+        int bitmask = (1 << 7) - 1;
+        return (ticketId & (bitmask)) + modifier; //mask with bottom 7 bits, add 1 except for the first run of tickets (because id 0 is a special case)
     }
 
     //get price in Wei
@@ -144,23 +161,23 @@ public class TicketDecode
     };
 
     private static final String dates[] = {
-            "28/02/2018",
-            "05/03/2018",
-            "20/03/2018",
-            "31/03/2018",
-            "01/04/2018",
-            "20/04/2018",
-            "30/04/2018",
-            "05/05/2018",
-            "15/05/2018",
-            "30/05/2018",
+            "28 Feb 2018",
+            "05 Mar 2018",
+            "20 Mar 2018",
+            "31 Mar 2018",
+            "01 Apr 2018",
+            "20 Apr 2018",
+            "30 Apr 2018",
+            "05 May 2018",
+            "15 May 2018",
+            "30 May 2018",
     };
 
     //Utility functions for generation
     //generate a string of ID's for populating a contract
     public static String generateTicketIDList(int venueCount, int zoneCount, int seatCount)
     {
-        StringBuilder sb = new StringBuilder();//
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
         boolean first = true;
         for (int j = 0; j < venueCount; j++)

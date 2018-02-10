@@ -22,6 +22,7 @@ import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTicker;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,11 +31,11 @@ import java.math.RoundingMode;
  * Created by James on 9/02/2018.
  */
 
-public class TicketHolder extends BinderViewHolder<Integer> implements View.OnClickListener {
+public class TicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1066;
 
-    private Integer thisData;
+    private TicketRange thisData;
     private OnTicketIdClickListener onTicketClickListener;
 
     public final TextView name;
@@ -56,15 +57,17 @@ public class TicketHolder extends BinderViewHolder<Integer> implements View.OnCl
     }
 
     @Override
-    public void bind(@Nullable Integer data, @NonNull Bundle addition) {
+    public void bind(@Nullable TicketRange data, @NonNull Bundle addition) {
         this.thisData = data;
         try {
+            String seatRange = String.valueOf(data.seatStart);
+            if (data.seatCount > 1) seatRange = data.seatStart + "-" + (data.seatStart+data.seatCount);
             name.setText(TicketDecode.getName());
-            amount.setText("x1");
-            venue.setText(TicketDecode.getVenue(data));
-            date.setText(TicketDecode.getDate(data));
-            ticketIds.setText(TicketDecode.getSeatId(data));
-            ticketCat.setText(TicketDecode.getZone(data));
+            amount.setText("x" + data.seatCount);
+            venue.setText(TicketDecode.getVenue(data.tokenId));
+            date.setText(TicketDecode.getDate(data.tokenId));
+            ticketIds.setText(seatRange);
+            ticketCat.setText(TicketDecode.getZone(data.tokenId));
         } catch (Exception ex) {
             fillEmpty();
         }

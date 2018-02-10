@@ -21,6 +21,7 @@ import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -35,7 +36,6 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 /**
  * Created by James on 22/01/2018.
  */
-
 public class UseTokenActivity extends BaseActivity implements View.OnClickListener
 {
     @Inject
@@ -45,11 +45,6 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     private ProgressView progressView;
 
     public TextView name;
-//    public TextView venue;
-//    public TextView date;
-//    public TextView price;
-//    public TextView balance;
-
     private Ticket ticket;
     private TicketAdapter adapter;
 
@@ -74,11 +69,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         progressView.hide();
 
         name = findViewById(R.id.textViewName);
-        RecyclerView list = findViewById(R.id.listTickets); //= findViewById(R.id.listTickets);
-//        venue = findViewById(R.id.textViewVenue);
-//        date = findViewById(R.id.textViewDate);
-//        price = findViewById(R.id.textViewPrice);
-//        balance = findViewById(R.id.textViewBalance);
+        RecyclerView list = findViewById(R.id.listTickets);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -90,12 +81,9 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         list.setClipToPadding(false);
         list.addItemDecoration(itemDecorator);
 
-        adapter.setTicket(ticket);
-
         String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
 
         name.setText(useName);
-        //balance.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
 
         viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)
                 .get(UseTokenViewModel.class);
@@ -107,13 +95,6 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
         findViewById(R.id.copy_address).setOnClickListener(this);
-
-        addTicketsToList();
-    }
-
-    private void addTicketsToList()
-    {
-        //1.
     }
 
     @Override
@@ -153,7 +134,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onTicketIdClick(View view, Integer i) {
+    private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
     }
 

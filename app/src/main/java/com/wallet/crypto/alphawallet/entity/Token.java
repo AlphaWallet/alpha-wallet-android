@@ -1,14 +1,24 @@
 package com.wallet.crypto.alphawallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
+import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
+import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.List;
+
+import static com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
@@ -21,12 +31,6 @@ public class Token implements Parcelable {
         this.tokenInfo = tokenInfo;
         this.balance = balance;
         this.updateBlancaTime = updateBlancaTime;
-    }
-
-    protected Token(Parcel in, boolean secondary) {
-        updateBlancaTime = in.readLong();
-        tokenInfo = null;
-        balance = BigDecimal.ZERO;
     }
 
     protected Token(Parcel in) {
@@ -82,4 +86,34 @@ public class Token implements Parcelable {
     }
 
     public BigInteger getIntAddress() { return Numeric.toBigInt(tokenInfo.address); }
+
+    public void clickReact(BaseViewModel viewModel, Context context)
+    {
+        viewModel.showSendToken(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals);
+    }
+
+    public String populateIDs(List<Integer> d, boolean keepZeros)
+    {
+        return "";
+    }
+
+    public void setupContent(TokenHolder holder) {
+        BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
+        BigDecimal ethBalance = tokenInfo.decimals > 0
+                ? balance.divide(decimalDivisor) : balance;
+        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
+        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
+        holder.balanceEth.setText(value);
+
+        if (ticker == null) {
+            holder.balanceCurrency.setText(EMPTY_BALANCE);
+            holder.fillIcon(null, R.mipmap.token_logo);
+        } else {
+            holder.fillCurrency(ethBalance, ticker);
+            holder.fillIcon(ticker.image, R.mipmap.token_logo);
+        }
+
+        holder.balanceEth.setVisibility(View.VISIBLE);
+        holder.arrayBalance.setVisibility(View.GONE);
+    }
 }

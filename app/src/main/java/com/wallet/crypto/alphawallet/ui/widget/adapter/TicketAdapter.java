@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
@@ -23,8 +24,11 @@ import java.math.BigDecimal;
 
 public class TicketAdapter extends TokensAdapter {
 
-    public TicketAdapter(OnTokenClickListener onTokenClickListener) {
+    private final Ticket ticket;
+
+    public TicketAdapter(OnTokenClickListener onTokenClickListener, Ticket t) {
         super(onTokenClickListener);
+        ticket = t;
     }
 
     @Override

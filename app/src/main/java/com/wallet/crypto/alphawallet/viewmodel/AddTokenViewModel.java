@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
-import com.wallet.crypto.alphawallet.entity.TicketInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
@@ -55,16 +54,9 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(this::onSaved, this::onError);
     }
 
-    //Here we decide what type of token we are dealing with
     private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
-        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true);
-
-        if (isStormBird)
-        {
-            tokenInfo = new TicketInfo(tokenInfo);
-        }
-
+        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
         return tokenInfo;
     }
 

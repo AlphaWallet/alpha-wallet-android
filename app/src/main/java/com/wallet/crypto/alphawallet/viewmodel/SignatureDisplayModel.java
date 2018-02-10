@@ -287,7 +287,7 @@ public class SignatureDisplayModel extends BaseViewModel {
             String methodId = buildMethodId(methodSignature);
 
             if (       (from != null)
-                    && (to != null && ticket().getValue().ticketInfo.address.contains(to))
+                    && (to != null && ticket().getValue().tokenInfo.address.contains(to))
                     && (input != null)
                     && (input.contains(methodId))
                     && (input.contains("dead") && input.contains(userAddr))  )

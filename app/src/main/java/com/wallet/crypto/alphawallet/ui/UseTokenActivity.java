@@ -6,14 +6,17 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
-import com.wallet.crypto.alphawallet.entity.TicketInfo;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -44,7 +47,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 //    public TextView balance;
 
     private Ticket ticket;
-    private ListView ticketDisplay;
+    private TicketAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -59,7 +62,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         ticket = getIntent().getParcelableExtra(TICKET);
 
         setTitle(getString(R.string.title_use_token));
-        TicketInfo info = ticket.ticketInfo;
+        TokenInfo info = ticket.tokenInfo;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -67,11 +70,15 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         progressView.hide();
 
         name = findViewById(R.id.textViewName);
-        ticketDisplay = findViewById(R.id.listTickets);
+        RecyclerView list = findViewById(R.id.list); //= findViewById(R.id.listTickets);
 //        venue = findViewById(R.id.textViewVenue);
 //        date = findViewById(R.id.textViewDate);
 //        price = findViewById(R.id.textViewPrice);
 //        balance = findViewById(R.id.textViewBalance);
+
+        adapter = new TicketAdapter(this::onTokenClick);
+        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setAdapter(adapter);
 
         String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
 
@@ -94,7 +101,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void addTicketsToList()
     {
-
+        //1.
     }
 
     @Override
@@ -132,6 +139,11 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
                 Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void onTokenClick(View view, Token token) {
+        Context context = view.getContext();
+        token.clickReact(viewModel, context);
     }
 
     private void displayToast(String message) {

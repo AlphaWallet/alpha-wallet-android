@@ -1,9 +1,15 @@
 package com.wallet.crypto.alphawallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
+import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
+import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import org.ethereum.geth.BigInt;
 import org.web3j.abi.datatypes.generated.Uint16;
@@ -20,29 +26,23 @@ import java.util.List;
 
 public class Ticket extends Token implements Parcelable
 {
-    public final TicketInfo ticketInfo;
     public final List<Integer> balanceArray;
+    private List<Integer> burnArray;
 
-    private List<Integer> burnArray; //mutable
-
-    public Ticket(TicketInfo tokenInfo, List<Integer> balances, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, List<Integer> balances, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
-        this.ticketInfo = tokenInfo;
         burnArray = new ArrayList<>();
     }
 
-    public Ticket(TicketInfo tokenInfo, String balances, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = parseIDListInteger(balances);
-        this.ticketInfo = tokenInfo;
         burnArray = new ArrayList<>();
     }
 
     private Ticket(Parcel in) {
-        super(in, true);
-        //now read in ticket
-        ticketInfo = in.readParcelable(TicketInfo.class.getClassLoader());
+        super(in);
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
         balanceArray = new ArrayList<Integer>();
@@ -66,13 +66,13 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getStringBalance() {
-        return ticketInfo.populateIDs(balanceArray, false);// parseList(balanceArray);
+        return populateIDs(balanceArray, false);// parseList(balanceArray);
     }
 
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return ticketInfo.populateIDs(balanceArray, true);
+        else return populateIDs(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -89,8 +89,7 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(updateBlancaTime);
-        dest.writeParcelable(ticketInfo, flags);
+        super.writeToParcel(dest, flags);
         dest.writeArray(balanceArray.toArray());
         dest.writeArray(burnArray.toArray());
     }
@@ -249,16 +248,48 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
+    public String populateIDs(List<Integer> idArray, boolean keepZeros)
+    {
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Integer id : idArray)
+        {
+            if (!keepZeros && id == 0) continue;
+            if (!first)
+            {
+                sb.append(", ");
+            }
+            first = false;
+
+            sb.append(id.toString());
+            displayIDs = sb.toString();
+        }
+
+        return displayIDs;
+    }
+
+    @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(ticketInfo.populateIDs(balanceArray, true));
+        realmToken.setBalance(populateIDs(balanceArray, true));
     }
 
     @Override
-    public String getAddress() {
-        return ticketInfo.address;
+    public void clickReact(BaseViewModel viewModel, Context context)
+    {
+        viewModel.showUseToken(context, this);
     }
 
     @Override
-    public BigInteger getIntAddress() { return Numeric.toBigInt(ticketInfo.address); }
+    public void setupContent(TokenHolder tokenHolder)
+    {
+        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
+        tokenHolder.balanceEth.setVisibility(View.GONE);
+        tokenHolder.balanceCurrency.setVisibility(View.GONE);
+        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
+
+        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
+        tokenHolder.arrayBalance.setText(String.valueOf(balanceArray.size()) + " Tickets");
+    }
 }

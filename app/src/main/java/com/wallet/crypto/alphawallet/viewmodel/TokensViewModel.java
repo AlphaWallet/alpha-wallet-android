@@ -103,10 +103,12 @@ public class TokensViewModel extends BaseViewModel {
         addTokenRouter.open(context);
     }
 
+    @Override
     public void showSendToken(Context context, String address, String symbol, int decimals) {
         sendTokenRouter.open(context, address, symbol, decimals);
     }
 
+    @Override
     public void showUseToken(Context context, Token token) {
         useTokenRouter.open(context, token);
 

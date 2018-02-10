@@ -57,7 +57,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                         ? token.tokenInfo.symbol
                         : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol));
 
-            token.tokenInfo.setupContent(this);
+            token.setupContent(this);
         } catch (Exception ex) {
             fillEmpty();
         }

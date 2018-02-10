@@ -84,8 +84,8 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         selection = findViewById(R.id.textViewSelection);
         amountInputLayout = findViewById(R.id.amount_input_layout);
 
-        name.setText(ticket.ticketInfo.name);
-        ids.setText(ticket.ticketInfo.populateIDs(ticket.balanceArray, false));
+        name.setText(ticket.tokenInfo.name);
+        ids.setText(ticket.populateIDs(ticket.balanceArray, false));
 
         viewModel = ViewModelProviders.of(this, signatureDisplayModelFactory)
                 .get(SignatureDisplayModel.class);
@@ -155,7 +155,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket.ticketInfo.address);
+        viewModel.prepare(ticket.tokenInfo.address);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
 
     private void onTicket(Ticket ticket) {
         name.setText(ticket.tokenInfo.name);
-        String idStr = ticket.tokenInfo.populateIDs(ticket.getValidIndicies(), false);
+        String idStr = ticket.populateIDs(ticket.getValidIndicies(), false);
         ids.setText(idStr);
 
         //check current list of IDs is still valid

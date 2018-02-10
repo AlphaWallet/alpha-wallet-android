@@ -9,7 +9,6 @@ import android.text.format.DateUtils;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.SubscribeWrapper;
 import com.wallet.crypto.alphawallet.entity.Ticket;
-import com.wallet.crypto.alphawallet.entity.TicketInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenFactory;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
@@ -30,7 +29,6 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -340,7 +338,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private List<Integer> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         List<Integer> result = new ArrayList<>();
-        if (tokenInfo instanceof TicketInfo) //safety check
+        if (tokenInfo.isStormbird) //safety check
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Uint16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
@@ -561,19 +559,14 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     name = getName(address);
                 }
+                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
                 TokenInfo result = new TokenInfo(
                         address,
                         name,
                         getContractData(address, stringParam("symbol")),
                         getDecimals(address),
-                        true);
-
-                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
-
-                if (isStormbird) {
-                    TicketInfo ticket = new TicketInfo(result);
-                    result = ticket;
-                }
+                        true,
+                        isStormbird);
 
                 return result;
             }

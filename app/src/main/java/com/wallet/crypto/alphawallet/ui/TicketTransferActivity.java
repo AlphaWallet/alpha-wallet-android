@@ -69,7 +69,7 @@ public class TicketTransferActivity extends BaseActivity
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        address = ticket.ticketInfo.address;
+        address = ticket.tokenInfo.address;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -100,7 +100,7 @@ public class TicketTransferActivity extends BaseActivity
 
     private void onTicket(Ticket ticket) {
         name.setText(ticket.tokenInfo.name);
-        String idStr = ticket.tokenInfo.populateIDs(ticket.balanceArray, false);
+        String idStr = ticket.populateIDs(ticket.balanceArray, false);
         ids.setText(idStr);
     }
 
@@ -174,7 +174,7 @@ public class TicketTransferActivity extends BaseActivity
             return;
         }
 
-        String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
+        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
         toInputLayout.setErrorEnabled(false);
         viewModel.openConfirmation(this, to, indexList, amount);
     }

@@ -8,8 +8,8 @@ import android.support.annotation.Nullable;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
-import com.wallet.crypto.alphawallet.entity.TicketInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -139,9 +139,9 @@ public class TicketTransferViewModel extends BaseViewModel
 
     public void openConfirmation(Context context, String to, String ids, String ticketIDs) {
         try {
-            TicketInfo ticket = (TicketInfo) (this.ticket().getValue().tokenInfo);
+            TokenInfo ticket = this.ticket().getValue().tokenInfo;
             confirmationRouter.open(context, to, ids, ticket.address, ticket.decimals, ticket.symbol, ticketIDs);
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         }
     }

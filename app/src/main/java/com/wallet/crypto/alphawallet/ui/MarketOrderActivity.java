@@ -85,7 +85,7 @@ public class MarketOrderActivity extends BaseActivity
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        address = ticket.ticketInfo.address;
+        address = ticket.tokenInfo.address;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -202,7 +202,7 @@ public class MarketOrderActivity extends BaseActivity
             return;
         }
 
-        String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
+        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
         amountInputLayout.setErrorEnabled(false);
 
         //let's try to generate a market order

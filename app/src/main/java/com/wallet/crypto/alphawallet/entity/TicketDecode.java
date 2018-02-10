@@ -38,6 +38,11 @@ public class TicketDecode
 //        price = getPrice(ticketID);
 //    }
 
+    public static String getName()
+    {
+        return "Arranging mortgage";
+    }
+
     public static String getVenue(int ticketId)
     {
         int venueID = getVenueID(ticketId);
@@ -68,10 +73,12 @@ public class TicketDecode
         return "Zone " + zone;
     }
 
-    public static String getSeatId(short ticketID)
+    public static String getSeatId(int ticketID)
     {
-        int bitmask = (1 << 8) - 1;
-        int seatId = (ticketID & (bitmask)); //mask with bottom 7 bits
+        int modifier = 1;
+        if (getZoneID(ticketID) == 0 && getVenueID(ticketID) == 0) modifier = 0;
+        int bitmask = (1 << 7) - 1;
+        int seatId = (ticketID & (bitmask)) + modifier; //mask with bottom 7 bits, add 1 except for the first run of tickets (because id 0 is a special case)
         return "Seat " + seatId;
     }
 
@@ -103,7 +110,7 @@ public class TicketDecode
     private static int getZoneID(int ticketID)
     {
         int zoneID = (ticketID >> 7);
-        int bitmask = (1 << 6) - 1;
+        int bitmask = (1 << 5) - 1;
         zoneID = (zoneID & (bitmask)); //mask with bottom 5 bits
         return zoneID;
     }

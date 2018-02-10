@@ -60,13 +60,23 @@
                 />
         </RelativeLayout>
 
-        <ListView
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/listTickets"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/contract_address_layout"
+            android:layout_above="@id/layoutButtons"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="10.0sp"
+            />
+
+        <!--<ListView
             android:id="@+id/listTickets"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/contract_address_layout"
             android:layout_above="@id/layoutButtons">
-        </ListView>
+        </ListView>-->
 
         <LinearLayout
             android:id="@+id/layoutButtons"

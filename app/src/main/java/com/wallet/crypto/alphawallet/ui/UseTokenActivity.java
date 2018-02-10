@@ -4,8 +4,12 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -70,15 +74,23 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         progressView.hide();
 
         name = findViewById(R.id.textViewName);
-        RecyclerView list = findViewById(R.id.list); //= findViewById(R.id.listTickets);
+        RecyclerView list = findViewById(R.id.listTickets); //= findViewById(R.id.listTickets);
 //        venue = findViewById(R.id.textViewVenue);
 //        date = findViewById(R.id.textViewDate);
 //        price = findViewById(R.id.textViewPrice);
 //        balance = findViewById(R.id.textViewBalance);
 
-        adapter = new TicketAdapter(this::onTokenClick);
+        adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
+
+        DividerItemDecoration itemDecorator = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider));
+        list.setHapticFeedbackEnabled(true);
+        list.setClipToPadding(false);
+        list.addItemDecoration(itemDecorator);
+
+        adapter.setTicket(ticket);
 
         String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
 
@@ -141,9 +153,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onTokenClick(View view, Token token) {
+    private void onTicketIdClick(View view, Integer i) {
         Context context = view.getContext();
-        token.clickReact(viewModel, context);
     }
 
     private void displayToast(String message) {

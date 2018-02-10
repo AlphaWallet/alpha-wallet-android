@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
-    android:paddingBottom="@dimen/small_margin_padding"
+    android:paddingBottom="10dp"
     android:paddingEnd="@dimen/small_margin_padding"
     android:paddingStart="@dimen/small_margin_padding"
     android:background="@drawable/rounded"
-    android:paddingTop="@dimen/small_margin_padding"
+    android:paddingTop="10dp"
     >
 
     <TextView
@@ -35,7 +35,7 @@
         android:text="FIFA 2018 Final"
         android:textAllCaps="true"
         android:textColor="@color/black"
-        android:textSize="16sp"/>
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/venue"
@@ -47,14 +47,14 @@
         android:layout_toEndOf="@+id/name"
         android:text="Hammersmith"
         android:textColor="@color/black"
-        android:textSize="16sp"/>
+        android:textSize="12sp"/>
 
     <LinearLayout
         android:id="@+id/bottom_part"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/amount"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
         <LinearLayout

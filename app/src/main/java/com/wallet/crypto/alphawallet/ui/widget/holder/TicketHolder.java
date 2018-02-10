@@ -17,8 +17,10 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTicker;
+import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
@@ -28,39 +30,59 @@ import java.math.RoundingMode;
  * Created by James on 9/02/2018.
  */
 
-public class TicketHolder extends TokenHolder implements View.OnClickListener {
+public class TicketHolder extends BinderViewHolder<Integer> implements View.OnClickListener {
+
+    public static final int VIEW_TYPE = 1066;
+
+    private Integer thisData;
+    private OnTicketIdClickListener onTicketClickListener;
+
+    public final TextView name;
+    public final TextView amount;
+    public final TextView venue;
+    public final TextView date;
+    public final TextView ticketIds;
+    public final TextView ticketCat;
 
     public TicketHolder(int resId, ViewGroup parent) {
         super(resId, parent);
+        name = findViewById(R.id.name);
+        amount = findViewById(R.id.amount);
+        venue = findViewById(R.id.venue);
+        date = findViewById(R.id.date);
+        ticketIds = findViewById(R.id.tickettext);
+        ticketCat = findViewById(R.id.cattext);
         itemView.setOnClickListener(this);
     }
 
     @Override
-    public void bind(@Nullable Token data, @NonNull Bundle addition) {
-        this.token = data;
+    public void bind(@Nullable Integer data, @NonNull Bundle addition) {
+        this.thisData = data;
         try {
-            // We handled NPE. Exception handling is expensive, but not impotent here
-            symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
-                    ? token.tokenInfo.symbol
-                    : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol));
-
-            token.setupContent(this);
+            name.setText(TicketDecode.getName());
+            amount.setText("x1");
+            venue.setText(TicketDecode.getVenue(data));
+            date.setText(TicketDecode.getDate(data));
+            ticketIds.setText(TicketDecode.getSeatId(data));
+            ticketCat.setText(TicketDecode.getZone(data));
         } catch (Exception ex) {
             fillEmpty();
         }
     }
 
-    public void fillIcon(String imageUrl, int defaultResId) {
-        if (TextUtils.isEmpty(imageUrl)) {
-            icon.setImageResource(defaultResId);
-        } else {
-            Picasso.with(getContext())
-                    .load(imageUrl)
-                    .fit()
-                    .centerInside()
-                    .placeholder(defaultResId)
-                    .error(defaultResId)
-                    .into(icon);
+    protected void fillEmpty() {
+        name.setText(R.string.NA);
+        venue.setText(R.string.NA);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (onTicketClickListener != null) {
+            onTicketClickListener.onTicketIdClick(v, thisData);
         }
+    }
+
+    public void setOnTokenClickListener(OnTicketIdClickListener onTokenClickListener) {
+        this.onTicketClickListener = onTokenClickListener;
     }
 }

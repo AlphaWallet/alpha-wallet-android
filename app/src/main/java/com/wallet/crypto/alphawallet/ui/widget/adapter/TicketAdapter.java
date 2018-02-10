@@ -8,8 +8,10 @@ import android.view.ViewGroup;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
@@ -24,11 +26,11 @@ import java.math.BigDecimal;
 
 public class TicketAdapter extends TokensAdapter {
 
-    private final Ticket ticket;
-
-    public TicketAdapter(OnTokenClickListener onTokenClickListener, Ticket t) {
-        super(onTokenClickListener);
-        ticket = t;
+    private OnTicketIdClickListener onTicketIdClickListener;
+    public TicketAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
+        super();
+        this.onTicketIdClickListener = onTicketIdClickListener;
+        setTicket(t);
     }
 
     @Override
@@ -37,7 +39,7 @@ public class TicketAdapter extends TokensAdapter {
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
                 TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent);
-                tokenHolder.setOnTokenClickListener(onTokenClickListener);
+                tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 holder = tokenHolder;
             } break;
             case TotalBalanceHolder.VIEW_TYPE: {
@@ -46,6 +48,24 @@ public class TicketAdapter extends TokensAdapter {
         }
 
         return holder;
+    }
+
+    public void setTicket(Ticket t) {
+        items.beginBatchedUpdates();
+        items.clear();
+        if (total != null)
+        {
+            items.add(total);
+        }
+        for (int i = 0; i < t.balanceArray.size(); i++) {
+            //initially don't sort
+            int tokenId = t.balanceArray.get(i);
+            if (tokenId != 0)
+            {
+                items.add(new TokenIdSortedItem(tokenId, 10 + i));
+            }
+        }
+        items.endBatchedUpdates();
     }
 }
 

@@ -16,6 +16,7 @@ import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import io.reactivex.disposables.Disposable;
 
@@ -90,6 +91,10 @@ public class UseTokenViewModel extends BaseViewModel {
         ticketTransferRouter.open(context, ticket);
     }
 
+    public void showTransferToken(Context context, Ticket ticket, TicketRange range) {
+        ticketTransferRouter.openRange(context, ticket, range);
+    }
+
     private void onDefaultWallet(Wallet wallet) {
         //TODO: switch on 'use' button
         progress.postValue(false);
@@ -98,5 +103,9 @@ public class UseTokenViewModel extends BaseViewModel {
 
     public void showMarketOrder(Context context, Ticket ticket) {
         marketOrderRouter.open(context, ticket);
+    }
+
+    public void showMarketOrder(Context context, Ticket ticket, TicketRange range) {
+        marketOrderRouter.openRange(context, ticket, range);
     }
 }

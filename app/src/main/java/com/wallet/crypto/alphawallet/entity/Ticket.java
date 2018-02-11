@@ -8,6 +8,7 @@ import android.view.View;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
 import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
@@ -291,5 +292,43 @@ public class Ticket extends Token implements Parcelable
 
         //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
         tokenHolder.arrayBalance.setText(String.valueOf(balanceArray.size()) + " Tickets");
+    }
+
+    public String populateRange(TicketRange range)
+    {
+        StringBuilder sb = new StringBuilder();
+        //find all ticket indexes in this range
+        //find start ID
+        int index = getIndexOf(range.tokenId); //TODO: replace with Numeric map
+
+        boolean first = true;
+
+        if (index > -1)
+        {
+            for (int i = 0; i < range.seatCount; i++)
+            {
+                if (!first) sb.append(", ");
+                sb.append(String.valueOf(balanceArray.get(index + i)));
+                first = false;
+            }
+        }
+        else
+        {
+            sb.append("none");
+        }
+
+        return sb.toString();
+    }
+
+    private int getIndexOf(int id)
+    {
+        if (balanceArray.contains(id))
+        {
+            return balanceArray.indexOf(id);
+        }
+        else
+        {
+            return -1;
+        }
     }
 }

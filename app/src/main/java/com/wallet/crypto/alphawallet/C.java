@@ -64,6 +64,7 @@ public abstract class C {
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
         String TICKET = "ticket";
+        String TICKET_RANGE = "ticket_range";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
     }
 }

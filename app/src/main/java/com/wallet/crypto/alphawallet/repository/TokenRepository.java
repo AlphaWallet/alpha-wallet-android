@@ -526,7 +526,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static byte[] createTicketTransferData(String to, String ids) {
         //params are: Address, List<Uint16> of ticket indicies
-        //convert to ticket. Re-factor this so there's no code repetition
         Ticket t = new Ticket(null, "0", 0);
         List ticketIndicies = t.parseIDList(ids); //just convert straight into a list here because we already converted into indicies
         List<Type> params = Arrays.asList(new Address(to), new DynamicArray<Uint16>(ticketIndicies));

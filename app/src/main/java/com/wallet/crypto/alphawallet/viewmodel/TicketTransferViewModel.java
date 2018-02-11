@@ -17,6 +17,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.TicketTransferInteract;
 import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +51,7 @@ public class TicketTransferViewModel extends BaseViewModel
     private Disposable getBalanceDisposable;
 
     private String address;
+    private TicketRange range;
 
     public TicketTransferViewModel(
             TicketTransferInteract ticketTransferInteract,
@@ -68,10 +70,22 @@ public class TicketTransferViewModel extends BaseViewModel
 
     public void prepare(String address) {
         this.address = address;
+        this.range = null;
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
+    }
+
+    public void prepare(Ticket ticket, TicketRange range)
+    {
+        this.address = ticket.getAddress();
+        this.range = range;
+        disposable = findDefaultNetworkInteract
+                .find()
+                .subscribe(this::onDefaultNetwork, this::onError);
+
+        onToken(ticket);
     }
 
     public void fetchTransactions() {
@@ -121,6 +135,12 @@ public class TicketTransferViewModel extends BaseViewModel
         fetchTransactions();
     }
 
+    private void onToken(Token token)
+    {
+        ticket.setValue((Ticket)token);
+        ticket.postValue((Ticket)token);
+    }
+
     private void onTokens(Token[] tokens) {
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
@@ -130,8 +150,7 @@ public class TicketTransferViewModel extends BaseViewModel
         for (Token t : tokens) {
             if (t instanceof Ticket && t.tokenInfo.address.equals(address))
             {
-                ticket.setValue((Ticket)t);
-                ticket.postValue((Ticket)t);
+                onToken(t);
                 break;
             }
         }

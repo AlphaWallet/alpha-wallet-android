@@ -34,6 +34,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.util.QRURLParser;
@@ -52,6 +53,7 @@ import dagger.android.AndroidInjection;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
 
 /**
  * Created by James on 5/02/2018.
@@ -71,6 +73,7 @@ public class MarketOrderActivity extends BaseActivity
 
     private String address;
     private Ticket ticket;
+    private TicketRange ticketRange;
 
     private EditText idsText;
     private TextInputLayout amountInputLayout;
@@ -85,6 +88,15 @@ public class MarketOrderActivity extends BaseActivity
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
+        if (getIntent().hasExtra(TICKET_RANGE))
+        {
+            ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
+        }
+        else
+        {
+            ticketRange = null;
+        }
+
         address = ticket.tokenInfo.address;
 
         systemView = findViewById(R.id.system_view);

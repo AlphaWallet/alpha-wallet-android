@@ -136,6 +136,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
+        //viewModel.showMarketOrder(this, ticket, range);
+        viewModel.showTransferToken(this, ticket, range);
     }
 
     private void displayToast(String message) {

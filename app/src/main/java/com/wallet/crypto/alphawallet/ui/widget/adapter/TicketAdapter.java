@@ -81,6 +81,8 @@ public class TicketAdapter extends TokensAdapter {
                     //update
                     currentRange.seatCount++;
                 }
+
+                currentSeat = seatNumber;
             }
         }
         items.endBatchedUpdates();

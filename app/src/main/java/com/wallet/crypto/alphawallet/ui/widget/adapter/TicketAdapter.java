@@ -60,6 +60,7 @@ public class TicketAdapter extends TokensAdapter {
             items.add(total);
         }
         TicketRange currentRange = null;
+        int currentSeat = -1;
         char currentZone = '-';
         for (int i = 0; i < t.balanceArray.size(); i++)
         {
@@ -67,7 +68,8 @@ public class TicketAdapter extends TokensAdapter {
             if (tokenId != 0)
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
-                if (currentZone != zone)
+                int seatNumber = TicketDecode.getSeatIdInt(tokenId);
+                if (seatNumber != currentSeat + 1 || zone != currentZone) //check for consecutive seats and zone is still the same
                 {
                     if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
                     int seatStart = TicketDecode.getSeatIdInt(tokenId);

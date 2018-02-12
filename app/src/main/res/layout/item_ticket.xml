@@ -19,10 +19,11 @@
         android:layout_alignParentStart="true"
         android:layout_marginStart="5dp"
         android:layout_marginTop="2dp"
+        android:textStyle="bold"
         android:text="x2"
         android:textAppearance="?attr/textAppearanceListItem"
         android:textColor="@color/green"
-        android:textSize="12sp"/>
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/name"

@@ -121,7 +121,6 @@ public class TicketTransferActivity extends BaseActivity
             idStr = ticket.populateIDs(ticket.balanceArray, false);
         }
         name.setText(ticket.tokenInfo.name);
-
         ids.setText(idStr);
     }
 

@@ -13,6 +13,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +74,9 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
         name = findViewById(R.id.textViewName);
         RecyclerView list = findViewById(R.id.listTickets);
+
+        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
+        rLL.setVisibility(View.GONE);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));

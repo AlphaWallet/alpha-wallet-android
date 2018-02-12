@@ -11,6 +11,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 

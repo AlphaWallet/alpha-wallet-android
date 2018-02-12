@@ -13,11 +13,13 @@ import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
@@ -31,44 +33,7 @@ import java.util.List;
 public class TicketAdapter extends TokensAdapter {
 
     private OnTicketIdClickListener onTicketIdClickListener;
-    protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
-        @Override
-        public int compare(SortedItem o1, SortedItem o2) {
-            return o1.compare(o2);
-        }
 
-        @Override
-        public void onChanged(int position, int count) {
-            notifyItemRangeChanged(position, count);
-        }
-
-        @Override
-        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
-            return oldItem.areContentsTheSame(newItem);
-        }
-
-        @Override
-        public boolean areItemsTheSame(SortedItem item1, SortedItem item2) {
-            return item1.areItemsTheSame(item2);
-        }
-
-        @Override
-        public void onInserted(int position, int count) {
-            notifyItemRangeInserted(position, count);
-        }
-
-        @Override
-        public void onRemoved(int position, int count) {
-            notifyItemRangeRemoved(position, count);
-        }
-
-        @Override
-        public void onMoved(int fromPosition, int toPosition) {
-            notifyItemMoved(fromPosition, toPosition);
-        }
-    });
-
-    protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
     public TicketAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
         super();
         this.onTicketIdClickListener = onTicketIdClickListener;
@@ -86,7 +51,10 @@ public class TicketAdapter extends TokensAdapter {
             } break;
             case TotalBalanceHolder.VIEW_TYPE: {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
-            }
+            } break;
+            case TokenDescriptionHolder.VIEW_TYPE: {
+                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent);
+            } break;
         }
 
         return holder;
@@ -95,10 +63,8 @@ public class TicketAdapter extends TokensAdapter {
     public void setTicket(Ticket t) {
         items.beginBatchedUpdates();
         items.clear();
-        if (total != null)
-        {
-            items.add(total);
-        }
+        items.add(new TokenBalanceSortedItem(t));
+
         TicketRange currentRange = null;
         int currentSeat = -1;
         char currentZone = '-';

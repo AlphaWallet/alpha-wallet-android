@@ -116,4 +116,9 @@ public class Token implements Parcelable {
         holder.balanceEth.setVisibility(View.VISIBLE);
         holder.arrayBalance.setVisibility(View.GONE);
     }
+
+    public int getTicketCount()
+    {
+        return balance.intValue();
+    }
 }

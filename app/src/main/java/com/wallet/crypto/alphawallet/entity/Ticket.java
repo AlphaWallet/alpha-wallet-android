@@ -124,10 +124,10 @@ public class Ticket extends Token implements Parcelable
     {
         StringBuilder sb = new StringBuilder();
         //convert selection to index list
-        List<Uint16> selectionIndex = parseIDList(selection);
+        List<org.web3j.abi.datatypes.generated.Int16> selectionIndex = parseIDList(selection);
         //add correct entries
         boolean first = true;
-        for (Uint16 id : selectionIndex) {
+        for (org.web3j.abi.datatypes.generated.Int16 id : selectionIndex) {
             if (balanceArray.contains(id.getValue().intValue()) && !burnArray.contains(id.getValue().intValue())) {
                 if (!first) sb.append(", ");
                 sb.append(String.valueOf(id.getValue().toString(10)));
@@ -138,9 +138,9 @@ public class Ticket extends Token implements Parcelable
         return sb.toString();
     }
 
-    public List<Uint16> parseIDList(String userList)
+    public List<org.web3j.abi.datatypes.generated.Int16> parseIDList(String userList)
     {
-        List<Uint16> idList = new ArrayList<>();
+        List<org.web3j.abi.datatypes.generated.Int16> idList = new ArrayList<>();
 
         try
         {
@@ -150,7 +150,31 @@ public class Ticket extends Token implements Parcelable
             {
                 //remove whitespace
                 String trim = id.trim();
-                Uint16 thisId = new Uint16(Integer.parseInt(trim));
+                org.web3j.abi.datatypes.generated.Int16 thisId = new org.web3j.abi.datatypes.generated.Int16(Integer.parseInt(trim));
+                idList.add(thisId);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = null;
+        }
+
+        return idList;
+    }
+
+    public List<BigInteger> parseIDListBI(String userList)
+    {
+        List<BigInteger> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = userList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                BigInteger thisId = BigInteger.valueOf(Integer.parseInt(trim));
                 idList.add(thisId);
             }
         }
@@ -270,6 +294,16 @@ public class Ticket extends Token implements Parcelable
         return displayIDs;
     }
 
+    public int getTicketCount()
+    {
+        int count = 0;
+        for (Integer id : balanceArray)
+        {
+            if (id > 0) count++;
+        }
+        return count;
+    }
+
     @Override
     public void setRealmBalance(RealmToken realmToken)
     {
@@ -291,7 +325,7 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
 
         //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
-        tokenHolder.arrayBalance.setText(String.valueOf(balanceArray.size()) + " Tickets");
+        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
     }
 
     public String populateRange(TicketRange range)
@@ -307,9 +341,13 @@ public class Ticket extends Token implements Parcelable
         {
             for (int i = 0; i < range.seatCount; i++)
             {
-                if (!first) sb.append(", ");
-                sb.append(String.valueOf(balanceArray.get(index + i)));
-                first = false;
+                int id = balanceArray.get(index + i);
+                if (id > 0)
+                {
+                    if (!first) sb.append(", ");
+                    sb.append(String.valueOf(id));
+                    first = false;
+                }
             }
         }
         else

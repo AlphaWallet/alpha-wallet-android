@@ -1,5 +1,6 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
@@ -24,7 +25,7 @@ import dagger.Provides;
 public class UseTokenModule {
     @Provides
     UseTokenViewModelFactory useTokenViewModelFactory(
-            UseTokenInteract useTokenInteract,
+            FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
@@ -33,7 +34,7 @@ public class UseTokenModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             MarketOrderRouter marketOrderRouter) {
         return new UseTokenViewModelFactory(
-                useTokenInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
     }
 
     @Provides
@@ -43,10 +44,9 @@ public class UseTokenModule {
     }
 
     @Provides
-    UseTokenInteract provideUseTokenInteract(
-            TokenRepositoryType tokenRepository,
-            WalletRepositoryType walletRepository) {
-        return new UseTokenInteract(walletRepository, tokenRepository);
+    FetchTokensInteract providefetchTokensInteract(
+            TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 
     @Provides

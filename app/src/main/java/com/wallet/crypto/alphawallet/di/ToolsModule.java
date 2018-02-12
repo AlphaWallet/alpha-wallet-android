@@ -38,6 +38,7 @@ class ToolsModule {
                 .connectTimeout(15, TimeUnit.MINUTES)
                 .readTimeout(30, TimeUnit.MINUTES)
                 .writeTimeout(30, TimeUnit.MINUTES)
+				.retryOnConnectionFailure(true)
                 .build();
 	}
 

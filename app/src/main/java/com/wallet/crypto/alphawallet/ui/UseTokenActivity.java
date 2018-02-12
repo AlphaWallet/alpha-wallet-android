@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.wallet.crypto.alphawallet.BuildConfig;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
@@ -47,6 +48,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView name;
     private Ticket ticket;
     private TicketAdapter adapter;
+    private int ticketCount = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -59,6 +61,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
+        ticketCount = ticket.getTicketCount();
 
         setTitle(getString(R.string.title_use_token));
         TokenInfo info = ticket.tokenInfo;
@@ -90,6 +93,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.ticket().observe(this, this::onTokenUpdate);
 
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
@@ -101,7 +105,20 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(ticket);
+    }
+
+    private void onTokenUpdate(Token t)
+    {
+        ticket = (Ticket)t;
+        int newCount = ticket.getTicketCount();
+        if (newCount != ticketCount)
+        {
+            adapter.setTicket(ticket);
+            RecyclerView list = findViewById(R.id.listTickets);
+            list.setAdapter(adapter);
+            ticketCount = newCount;
+        }
     }
 
     @Override

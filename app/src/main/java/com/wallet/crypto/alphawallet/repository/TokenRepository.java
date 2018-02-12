@@ -29,6 +29,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Int16;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -102,6 +103,15 @@ public class TokenRepository implements TokenRepositoryType {
                 updateTokens(network, wallet) // Looking for new tokens
                         .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
             .toObservable();
+    }
+
+    @Override
+    public Observable<Token> fetchActiveSingle(String walletAddress, Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return updateBalance(network, wallet, token) // Looking for new tokens
+                .toObservable();
     }
 
     @Override
@@ -218,17 +228,49 @@ public class TokenRepository implements TokenRepositoryType {
                 .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens));
     }
 
+    private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
+        return Single.fromCallable(() -> {
+            try
+            {
+                TokenFactory tFactory = new TokenFactory();
+                List<Integer> balanceArray = null;
+                BigDecimal balance = null;
+                if (token.tokenInfo.isStormbird)
+                {
+                    balanceArray = getBalanceArray(wallet, token.tokenInfo);
+                }
+                else
+                {
+                    balance = getBalance(wallet, token.tokenInfo);
+                }
+
+                Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, System.currentTimeMillis());
+                localSource.updateTokenBalance(network, wallet, token);
+                return updated;
+            }
+            finally {
+
+            }
+        });
+    }
+
     private ObservableTransformer<Token, Token> updateBalance(NetworkInfo network, Wallet wallet) {
         return upstream -> upstream.map(token -> {
             TokenFactory tFactory = new TokenFactory();
             long now = System.currentTimeMillis();
             long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
-            BigDecimal balance;
-            List<Integer> balanceArray;
+            BigDecimal balance = null;
+            List<Integer> balanceArray = null;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
-                    balance = getBalance(wallet, token.tokenInfo);
-                    balanceArray = getBalanceArray(wallet, token.tokenInfo);
+                    if (token.tokenInfo.isStormbird)
+                    {
+                        balanceArray = getBalanceArray(wallet, token.tokenInfo);
+                    }
+                    else
+                    {
+                        balance = getBalance(wallet, token.tokenInfo);
+                    }
                     token = tFactory.createToken(token.tokenInfo, balance, balanceArray, now);
                     localSource.updateTokenBalance(network, wallet, token);
                 } catch (Throwable th) { /* Quietly */ }
@@ -524,16 +566,23 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
+    private static Function getTransferFunction(String to, List<BigInteger> ticketIndices)
+    {
+        Function function = new Function(
+                "transfer",
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(to),
+                        new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Uint16>(
+                                org.web3j.abi.Utils.typeMap(ticketIndices, org.web3j.abi.datatypes.generated.Uint16.class))),
+                Collections.<TypeReference<?>>emptyList());
+        return function;
+    }
+
     public static byte[] createTicketTransferData(String to, String ids) {
         //params are: Address, List<Uint16> of ticket indicies
         Ticket t = new Ticket(null, "0", 0);
-        List ticketIndicies = t.parseIDList(ids); //just convert straight into a list here because we already converted into indicies
-        List<Type> params = Arrays.asList(new Address(to), new DynamicArray<Uint16>(ticketIndicies));
+        List ticketIndicies = t.parseIDListBI(ids);
+        Function function = getTransferFunction(to, ticketIndicies);
 
-        List<TypeReference<?>> returnTypes = Collections.singletonList(new TypeReference<Bool>() {
-        });
-
-        Function function = new Function("transfer", params, returnTypes);
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }

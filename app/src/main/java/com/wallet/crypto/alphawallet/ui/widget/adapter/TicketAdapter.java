@@ -21,6 +21,8 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by James on 9/02/2018.
@@ -29,6 +31,44 @@ import java.math.BigDecimal;
 public class TicketAdapter extends TokensAdapter {
 
     private OnTicketIdClickListener onTicketIdClickListener;
+    protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
+        @Override
+        public int compare(SortedItem o1, SortedItem o2) {
+            return o1.compare(o2);
+        }
+
+        @Override
+        public void onChanged(int position, int count) {
+            notifyItemRangeChanged(position, count);
+        }
+
+        @Override
+        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
+            return oldItem.areContentsTheSame(newItem);
+        }
+
+        @Override
+        public boolean areItemsTheSame(SortedItem item1, SortedItem item2) {
+            return item1.areItemsTheSame(item2);
+        }
+
+        @Override
+        public void onInserted(int position, int count) {
+            notifyItemRangeInserted(position, count);
+        }
+
+        @Override
+        public void onRemoved(int position, int count) {
+            notifyItemRangeRemoved(position, count);
+        }
+
+        @Override
+        public void onMoved(int fromPosition, int toPosition) {
+            notifyItemMoved(fromPosition, toPosition);
+        }
+    });
+
+    protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
     public TicketAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
         super();
         this.onTicketIdClickListener = onTicketIdClickListener;
@@ -62,9 +102,13 @@ public class TicketAdapter extends TokensAdapter {
         TicketRange currentRange = null;
         int currentSeat = -1;
         char currentZone = '-';
-        for (int i = 0; i < t.balanceArray.size(); i++)
+        int i;
+        //first sort the balance array
+        List<Integer> sortedList = t.balanceArray.subList(0, t.balanceArray.size());
+        Collections.sort(sortedList);
+        for (i = 0; i < sortedList.size(); i++)
         {
-            int tokenId = t.balanceArray.get(i);
+            int tokenId = sortedList.get(i);
             if (tokenId != 0)
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
@@ -85,6 +129,7 @@ public class TicketAdapter extends TokensAdapter {
                 currentSeat = seatNumber;
             }
         }
+        if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
         items.endBatchedUpdates();
     }
 }

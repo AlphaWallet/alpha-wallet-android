@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
@@ -19,7 +20,7 @@ import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 
 public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
 
-    private final UseTokenInteract useTokenInteract;
+    private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MyTokensRouter myTokensRouter;
     private final TicketTransferRouter ticketTransferRouter;
@@ -29,7 +30,7 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
     private final MarketOrderRouter marketOrderRouter;
 
     public UseTokenViewModelFactory(
-            UseTokenInteract useTokenInteract,
+            FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
@@ -37,7 +38,7 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             MarketOrderRouter marketOrderRouter) {
-        this.useTokenInteract = useTokenInteract;
+        this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -50,6 +51,6 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new UseTokenViewModel(useTokenInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
+        return (T) new UseTokenViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
     }
 }

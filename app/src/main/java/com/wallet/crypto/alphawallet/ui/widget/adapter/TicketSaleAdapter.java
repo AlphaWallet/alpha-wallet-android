@@ -6,11 +6,13 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.MarketOrderHeaderHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
@@ -44,6 +46,9 @@ public class TicketSaleAdapter extends TicketAdapter {
             case TokenDescriptionHolder.VIEW_TYPE: {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent);
             } break;
+            case MarketOrderHeaderHolder.VIEW_TYPE: {
+                holder = new MarketOrderHeaderHolder(R.layout.item_token_description, parent);
+            } break;
         }
 
         return holder;
@@ -52,7 +57,7 @@ public class TicketSaleAdapter extends TicketAdapter {
     public void setTicket(Ticket t) {
         items.beginBatchedUpdates();
         items.clear();
-        items.add(new TokenBalanceSortedItem(t));
+        items.add(new MarketSaleHeaderSortedItem(t));
 
         TicketRange currentRange = null;
         int currentSeat = -1;

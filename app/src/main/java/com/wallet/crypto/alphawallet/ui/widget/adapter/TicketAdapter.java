@@ -79,7 +79,8 @@ public class TicketAdapter extends TokensAdapter {
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
                 int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                if (seatNumber != currentSeat + 1 || zone != currentZone) //check for consecutive seats and zone is still the same
+                if (seatNumber != currentSeat + 1 || zone != currentZone
+                        || i == (sortedList.size() - 1)) //check consecutive seats and zone is still the same, and push final ticket
                 {
                     if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
                     int seatStart = TicketDecode.getSeatIdInt(tokenId);
@@ -95,7 +96,6 @@ public class TicketAdapter extends TokensAdapter {
                 currentSeat = seatNumber;
             }
         }
-        if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
         items.endBatchedUpdates();
     }
 }

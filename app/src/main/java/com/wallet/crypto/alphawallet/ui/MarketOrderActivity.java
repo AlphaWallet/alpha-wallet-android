@@ -26,6 +26,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -101,7 +102,6 @@ public class MarketOrderActivity extends BaseActivity
             setupMarketOrder();
         }
 
-
         toolbar();
 
         address = ticket.tokenInfo.address;
@@ -142,6 +142,8 @@ public class MarketOrderActivity extends BaseActivity
         setContentView(R.layout.activity_use_token);
 
         RecyclerView list = findViewById(R.id.listTickets);
+        LinearLayout buttons = findViewById(R.id.layoutButtons);
+        buttons.setVisibility(View.GONE);
 
         RelativeLayout rLL = findViewById(R.id.contract_address_layout);
         rLL.setVisibility(View.GONE);

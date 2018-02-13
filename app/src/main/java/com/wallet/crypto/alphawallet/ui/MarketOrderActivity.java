@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,6 +27,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -34,6 +37,8 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
@@ -74,6 +79,7 @@ public class MarketOrderActivity extends BaseActivity
     private String address;
     private Ticket ticket;
     private TicketRange ticketRange;
+    private TicketSaleAdapter adapter;
 
     private EditText idsText;
     private TextInputLayout amountInputLayout;
@@ -84,37 +90,29 @@ public class MarketOrderActivity extends BaseActivity
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_market_queue);
-        toolbar();
-
         ticket = getIntent().getParcelableExtra(TICKET);
         if (getIntent().hasExtra(TICKET_RANGE))
         {
             ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
+            setupMarketRange();
         }
         else
         {
-            ticketRange = null;
+            setupMarketOrder();
         }
 
+
+        toolbar();
+
         address = ticket.tokenInfo.address;
+
+        setTitle(getString(R.string.market_queue_title));
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
 
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
-
-        setTitle(getString(R.string.market_queue_title));
-
-        name = findViewById(R.id.textViewName);
-        ids = findViewById(R.id.textViewIDs);
-        idsText = findViewById(R.id.send_ids);
-        selected = findViewById(R.id.textViewSelection);
-        amountInputLayout = findViewById(R.id.amount_input_layout);
-
-        name.setText(address);
-        ids.setText("...");
 
         viewModel = ViewModelProviders.of(this, ticketTransferViewModelFactory)
                 .get(MarketOrderViewModel.class);
@@ -124,6 +122,47 @@ public class MarketOrderActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+    }
+
+    private void onTicket(Ticket ticket) {
+        if (ticketRange == null)
+        {
+
+        }
+        else
+        {
+            name.setText(ticket.getFullName());
+            ids.setText(ticket.getStringBalance());
+        }
+    }
+
+    private void setupMarketOrder()
+    {
+        ticketRange = null;
+        setContentView(R.layout.activity_use_token);
+
+        RecyclerView list = findViewById(R.id.listTickets);
+
+        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
+        rLL.setVisibility(View.GONE);
+
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setAdapter(adapter);
+    }
+
+    private void setupMarketRange()
+    {
+        setContentView(R.layout.activity_market_queue);
+
+        name = findViewById(R.id.textViewName);
+        ids = findViewById(R.id.textViewIDs);
+        idsText = findViewById(R.id.send_ids);
+        selected = findViewById(R.id.textViewSelection);
+        amountInputLayout = findViewById(R.id.amount_input_layout);
+
+        name.setText(address);
+        ids.setText("...");
 
         idsText.setImeActionLabel("Done", KeyEvent.KEYCODE_ENTER);
 
@@ -164,11 +203,6 @@ public class MarketOrderActivity extends BaseActivity
                 return true;
             }
         });
-    }
-
-    private void onTicket(Ticket ticket) {
-        name.setText(ticket.getFullName());
-        ids.setText(ticket.getStringBalance());
     }
 
     @Override
@@ -240,5 +274,10 @@ public class MarketOrderActivity extends BaseActivity
     private void onSelected(String selectionStr)
     {
         selected.setText(selectionStr);
+    }
+
+    private void onTicketIdClick(View view, TicketRange range) {
+        Context context = view.getContext();
+        //TODO: what action should be performed when clicking on a range?
     }
 }

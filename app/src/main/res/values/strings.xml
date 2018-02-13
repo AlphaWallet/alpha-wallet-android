@@ -260,4 +260,5 @@
     <string name="market_queue_title">Create Market Order</string>
     <string name="selection">selection:</string>
     <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
+    <string name="select_tickets">Select Tickets to Sell:</string>
 </resources>

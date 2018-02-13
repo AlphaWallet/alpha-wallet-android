@@ -1,51 +1,40 @@
 package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
-import android.media.session.MediaSession;
-import android.support.v7.util.SortedList;
-import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TicketDecode;
-import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
-import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
-import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by James on 9/02/2018.
+ * Created by James on 12/02/2018.
  */
 
-public class TicketAdapter extends TokensAdapter {
+public class TicketSaleAdapter extends TicketAdapter {
 
-    protected OnTicketIdClickListener onTicketIdClickListener;
-
-    public TicketAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
-        super();
-        this.onTicketIdClickListener = onTicketIdClickListener;
-        setTicket(t);
+    public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
+        super(onTicketIdClickListener, t);
     }
 
     @Override
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
         switch (viewType) {
-            case TicketHolder.VIEW_TYPE: {
-                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent);
+            case TicketSaleHolder.VIEW_TYPE: {
+                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 holder = tokenHolder;
             } break;
@@ -79,9 +68,10 @@ public class TicketAdapter extends TokensAdapter {
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
                 int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                if (seatNumber != currentSeat + 1 || zone != currentZone) //check for consecutive seats and zone is still the same
+                if (seatNumber != currentSeat + 1 || zone != currentZone
+                        || i == (sortedList.size() - 1)) //check consecutive seats and zone is still the same, and push final ticket
                 {
-                    if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
+                    if (currentRange != null) items.add(new TicketSaleSortedItem(currentRange, 10 + i));
                     int seatStart = TicketDecode.getSeatIdInt(tokenId);
                     currentRange = new TicketRange(tokenId, seatStart);
                     currentZone = zone;
@@ -95,8 +85,6 @@ public class TicketAdapter extends TokensAdapter {
                 currentSeat = seatNumber;
             }
         }
-        if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
         items.endBatchedUpdates();
     }
 }
-

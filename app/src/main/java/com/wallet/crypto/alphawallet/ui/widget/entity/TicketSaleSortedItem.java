@@ -1,0 +1,34 @@
+package com.wallet.crypto.alphawallet.ui.widget.entity;
+
+import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
+
+/**
+ * Created by James on 12/02/2018.
+ */
+
+public class TicketSaleSortedItem extends SortedItem<TicketRange>
+{
+    public TicketSaleSortedItem(TicketRange range, int weight) {
+        super(TicketSaleHolder.VIEW_TYPE, range, weight);
+    }
+
+    @Override
+    public int compare(SortedItem other)
+    {
+        return weight - other.weight;
+    }
+
+    @Override
+    public boolean areContentsTheSame(SortedItem newItem)
+    {
+        return false;
+    }
+
+    @Override
+    public boolean areItemsTheSame(SortedItem other)
+    {
+        return other.viewType == TicketHolder.VIEW_TYPE
+                && ( ((TicketSaleSortedItem) other).value.seatStart == value.seatStart && ((TicketSaleSortedItem) other).value.seatCount == value.seatCount);
+    }
+}

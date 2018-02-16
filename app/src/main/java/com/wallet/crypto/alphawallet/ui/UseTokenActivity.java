@@ -137,7 +137,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
             break;
             case R.id.button_sell:
             {
-                viewModel.showMarketOrder(this, ticket);
+                viewModel.sellTicketRouter(this, ticket);// showMarketOrder(this, ticket);
             }
             break;
             case R.id.button_transfer:

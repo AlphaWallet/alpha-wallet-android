@@ -12,14 +12,7 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
-import com.wallet.crypto.alphawallet.interact.UseTokenInteract;
-import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
-import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
-import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,19 +20,14 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Created by James on 22/01/2018.
+ * Created by James on 16/02/2018.
  */
 
-public class UseTokenViewModel extends BaseViewModel {
+public class SellTicketModel  extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MyTokensRouter myTokensRouter;
-    private final TicketTransferRouter ticketTransferRouter;
-    private final SignatureGenerateInteract signatureGenerateInteract;
-    private final SignatureDisplayRouter signatureDisplayRouter;
-    private final MarketOrderRouter marketOrderRouter;
     private final SellTicketRouter sellTicketRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -49,24 +37,14 @@ public class UseTokenViewModel extends BaseViewModel {
     @Nullable
     private Disposable getBalanceDisposable;
 
-    UseTokenViewModel(
+    SellTicketModel(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            SignatureGenerateInteract signatureGenerateInteract,
-            MyTokensRouter myTokensRouter,
-            TicketTransferRouter ticketTransferRouter,
-            SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter,
             SellTicketRouter sellTicketRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.signatureDisplayRouter = signatureDisplayRouter;
-        this.signatureGenerateInteract = signatureGenerateInteract;
-        this.ticketTransferRouter = ticketTransferRouter;
-        this.marketOrderRouter = marketOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
     }
 
@@ -83,11 +61,6 @@ public class UseTokenViewModel extends BaseViewModel {
     }
     public LiveData<Token> ticket() {
         return ticket;
-    }
-
-    public void showRotatingSignature(Context context, Ticket token) {
-        signatureDisplayRouter.open(context, defaultWallet.getValue(), token);
-
     }
 
     public void fetchCurrentTicketBalance() {
@@ -118,16 +91,8 @@ public class UseTokenViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void showTransferToken(Context context, Ticket ticket) {
-        ticketTransferRouter.open(context, ticket);
-    }
-
     public void sellTicketRouter(Context ctx, Ticket ticket) {
         sellTicketRouter.open(ctx, ticket);
-    }
-
-    public void showTransferToken(Context context, Ticket ticket, TicketRange range) {
-        ticketTransferRouter.openRange(context, ticket, range);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -135,13 +100,5 @@ public class UseTokenViewModel extends BaseViewModel {
         progress.postValue(false);
         defaultWallet.setValue(wallet);
         fetchCurrentTicketBalance();
-    }
-
-    public void showMarketOrder(Context context, Ticket ticket) {
-        marketOrderRouter.open(context, ticket);
-    }
-
-    public void showMarketOrder(Context context, Ticket ticket, TicketRange range) {
-        marketOrderRouter.openRange(context, ticket, range);
     }
 }

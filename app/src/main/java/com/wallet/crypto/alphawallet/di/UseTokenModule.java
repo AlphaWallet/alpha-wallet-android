@@ -10,6 +10,7 @@ import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
@@ -32,9 +33,10 @@ public class UseTokenModule {
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter) {
+            MarketOrderRouter marketOrderRouter,
+            SellTicketRouter sellTicketRouter) {
         return new UseTokenViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter, sellTicketRouter);
     }
 
     @Provides
@@ -77,5 +79,10 @@ public class UseTokenModule {
     @Provides
     SignatureGenerateInteract provideSignatureGenerateInteract(WalletRepositoryType walletRepository) {
         return new SignatureGenerateInteract(walletRepository);
+    }
+
+    @Provides
+    SellTicketRouter provideSellTicketRouter() {
+        return new SellTicketRouter();
     }
 }

@@ -7,9 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,37 +17,34 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.MarketInstance;
 import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
-import com.wallet.crypto.alphawallet.util.KeyboardUtils;
-import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModel;
+import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.alphawallet.C.Key.TICKET;
-import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
-
 /**
- * Created by James on 13/02/2018.
+ * Created by James on 19/02/2018.
  */
 
-public class SellTicketActivity extends BaseActivity
+public class MarketBrowseActivity extends BaseActivity
 {
     @Inject
-    protected SellTicketModelFactory viewModelFactory;
-    protected SellTicketModel viewModel;
+    protected MarketBrowseModelFactory viewModelFactory;
+    protected MarketBrowseModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -58,30 +52,17 @@ public class SellTicketActivity extends BaseActivity
     public TextView ids;
     public TextView selected;
 
-    private String address;
-    private Ticket ticket;
-    private TicketRange ticketRange;
-    private TicketSaleAdapter adapter;
-
-    private EditText idsText;
-    private TextInputLayout amountInputLayout;
-
+    //private TicketBuyAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        ticket = getIntent().getParcelableExtra(TICKET);
         setupMarketOrder();
-
-        address = ticket.getAddress();
-
         toolbar();
 
-        address = ticket.tokenInfo.address;
-
-        setTitle(getString(R.string.market_queue_title));
+        setTitle(getString(R.string.market_buy_title));
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -90,40 +71,23 @@ public class SellTicketActivity extends BaseActivity
         progressView.hide();
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(SellTicketModel.class);
+                .get(MarketBrowseModel.class);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
-    }
-
-    private void onTicket(Ticket ticket) {
-        if (ticketRange == null)
-        {
-
-        }
-        else
-        {
-            name.setText(ticket.getFullName());
-            ids.setText(ticket.getStringBalance());
-        }
+        viewModel.updateMarket().observe(this, this::onMarketUpdate);
     }
 
     private void setupMarketOrder()
     {
-        ticketRange = null;
         setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
 
-        RecyclerView list = findViewById(R.id.listTickets);
         LinearLayout buttons = findViewById(R.id.layoutButtons);
         buttons.setVisibility(View.GONE);
 
         RelativeLayout rLL = findViewById(R.id.contract_address_layout);
         rLL.setVisibility(View.GONE);
-
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setAdapter(adapter);
     }
 
     @Override
@@ -132,54 +96,22 @@ public class SellTicketActivity extends BaseActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_next: {
-                onNext();
-            }
-            break;
-        }
-        return super.onOptionsItemSelected(item);
+    private void onMarketUpdate(MarketInstance[] trades)
+    {
+//        RecyclerView list = findViewById(R.id.listTickets);
+//        adapter = new TicketBuyAdapter(this::onTicketIdClick, trades);
+//        list.setLayoutManager(new LinearLayoutManager(this));
+//        list.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare();
     }
 
     private void displayToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
-    }
-
-    private void onNext() {
-        // Validate input fields
-        boolean inputValid = true;
-        //look up all checked fields
-        List<TicketRange> sellRange = adapter.getCheckedItems();
-        //add this range to the sell order confirmation
-        //Generate list of indicies and actual ids
-        StringBuilder ticketIds = new StringBuilder();
-        boolean first = true;
-        for (TicketRange thisRange : sellRange)
-        {
-            int rangeStart = thisRange.tokenId;
-            for (int ticketId = rangeStart; ticketId < (rangeStart + thisRange.seatCount); ticketId++)
-            {
-                if (!first) ticketIds.append(",");
-                ticketIds.append(ticketId);
-                first = false;
-            }
-        }
-
-        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(ticketIds.toString());
-        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
-
-        //confirm other address
-        //confirmation screen
-        //(Context context, String to, String ids, String ticketIDs)
-        viewModel.openConfirmation(this, null, indexList, ticketIds.toString());
     }
 
     boolean isValidAmount(String eth) {

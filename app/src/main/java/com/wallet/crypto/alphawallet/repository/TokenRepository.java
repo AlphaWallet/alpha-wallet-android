@@ -608,6 +608,7 @@ public class TokenRepository implements TokenRepositoryType {
                     name = getName(address);
                 }
                 Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
+                if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,
                         name,

@@ -117,6 +117,11 @@ public class Token implements Parcelable {
         holder.arrayBalance.setVisibility(View.GONE);
     }
 
+    public List<Integer> parseIndexList(String userList)
+    {
+        return null;
+    }
+
     public int getTicketCount()
     {
         return balance.intValue();

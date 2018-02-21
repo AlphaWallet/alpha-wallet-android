@@ -19,6 +19,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
+import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
@@ -50,6 +51,8 @@ public class TransactionsViewModel extends BaseViewModel {
     private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
+    private final MarketBrowseRouter marketBrowseRouter;
+
     @Nullable
     private Disposable getBalanceDisposable;
     @Nullable
@@ -67,7 +70,8 @@ public class TransactionsViewModel extends BaseViewModel {
             TransactionDetailRouter transactionDetailRouter,
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
-            ExternalBrowserRouter externalBrowserRouter) {
+            ExternalBrowserRouter externalBrowserRouter,
+            MarketBrowseRouter marketBrowseRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -79,6 +83,7 @@ public class TransactionsViewModel extends BaseViewModel {
         this.myAddressRouter = myAddressRouter;
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
+        this.marketBrowseRouter = marketBrowseRouter;
     }
 
     @Override
@@ -178,11 +183,16 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void showMyAddress(Context context) {
-        myAddressRouter.open(context, defaultWallet.getValue());
+        //myAddressRouter.open(context, defaultWallet.getValue());
+        marketBrowseRouter.open(context);
     }
 
     public void showTokens(Context context) {
         myTokensRouter.open(context, defaultWallet.getValue());
+    }
+
+    public void showMarketPlace(Context context) {
+        marketBrowseRouter.open(context);
     }
 
     public void openDeposit(Context context, Uri uri) {

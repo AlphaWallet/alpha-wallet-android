@@ -26,6 +26,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 
 /**
  * Created by James on 9/02/2018.
@@ -38,12 +39,12 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
     private TicketRange thisData;
     private OnTicketIdClickListener onTicketClickListener;
 
-    public final TextView name;
-    public final TextView amount;
-    public final TextView venue;
-    public final TextView date;
-    public final TextView ticketIds;
-    public final TextView ticketCat;
+    private final TextView name;
+    private final TextView amount;
+    private final TextView date;
+    private final TextView venue;
+    private final TextView ticketIds;
+    private final TextView ticketCat;
 
     public TicketHolder(int resId, ViewGroup parent) {
         super(resId, parent);
@@ -61,9 +62,10 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
         this.thisData = data;
         try {
             String seatRange = String.valueOf(data.seatStart);
-            if (data.seatCount > 1) seatRange = data.seatStart + "-" + (data.seatStart+data.seatCount);
+            if (data.seatCount > 1) seatRange = data.seatStart + "-" + (data.seatStart+(data.seatCount-1));
+            String seatCount = String.format(Locale.getDefault(),"x%d", data.seatCount);
             name.setText(TicketDecode.getName());
-            amount.setText("x" + data.seatCount);
+            amount.setText(seatCount);
             venue.setText(TicketDecode.getVenue(data.tokenId));
             date.setText(TicketDecode.getDate(data.tokenId));
             ticketIds.setText(seatRange);
@@ -73,7 +75,7 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
         }
     }
 
-    protected void fillEmpty() {
+    private void fillEmpty() {
         name.setText(R.string.NA);
         venue.setText(R.string.NA);
     }

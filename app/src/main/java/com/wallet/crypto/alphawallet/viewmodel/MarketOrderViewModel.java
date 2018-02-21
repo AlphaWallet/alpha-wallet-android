@@ -193,7 +193,7 @@ public class MarketOrderViewModel extends BaseViewModel
         changeSelection();
     }
 
-    public void generateMarketOrders(List<Integer> idSendList) {
+    public void generateMarketOrders(List<Integer> idSendList, int firstTicket) {
         short[] ticketIDs = new short[idSendList.size()];
         int index = 0;
         for (Integer i : idSendList) {
@@ -202,6 +202,6 @@ public class MarketOrderViewModel extends BaseViewModel
 
         BigInteger price = BigInteger.TEN;
 
-        marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue());
+        marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue().getAddress(), firstTicket);
     }
 }

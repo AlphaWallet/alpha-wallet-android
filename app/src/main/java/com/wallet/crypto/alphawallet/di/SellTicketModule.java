@@ -9,6 +9,7 @@ import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
@@ -24,18 +25,14 @@ import dagger.Provides;
 @Module
 public class SellTicketModule
 {
-    /*FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellTicketRouter sellTicketRouter) {*/
     @Provides
     SellTicketModelFactory sellTicketModelFactory(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellTicketRouter sellTicketRouter) {
+            ConfirmationRouter confirmationRouter) {
         return new SellTicketModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellTicketRouter);
+                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, confirmationRouter);
     }
 
     @Provides
@@ -50,8 +47,8 @@ public class SellTicketModule
     }
 
     @Provides
-    SellTicketRouter provideSellTicketRouter() {
-        return new SellTicketRouter();
+    ConfirmationRouter provideConfirmationTicketRouter() {
+        return new ConfirmationRouter();
     }
 
     @Provides

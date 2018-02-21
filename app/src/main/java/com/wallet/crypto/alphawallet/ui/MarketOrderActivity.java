@@ -250,17 +250,20 @@ public class MarketOrderActivity extends BaseActivity
             return;
         }
 
+        List<Integer> actualIds = viewModel.ticket().getValue().parseIDListInteger(amount);
         String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
         amountInputLayout.setErrorEnabled(false);
 
-        //let's try to generate a market order
-        viewModel.generateMarketOrders(idSendList);
+        if (actualIds != null && actualIds.size() > 0)
+        {
+            //let's try to generate a market order
+            viewModel.generateMarketOrders(idSendList, actualIds.get(0));
+        }
 
         //kill keyboard
         KeyboardUtils.hideKeyboard(idsText);
         //InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         //imm.hideSoftInputFromWindow(idsText.getWindowToken(), 0);
-
         //viewModel.openConfirmation(this, to, indexList, amount);
     }
 

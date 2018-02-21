@@ -5,14 +5,17 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
 import com.wallet.crypto.alphawallet.entity.GasSettings;
+import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
 import com.wallet.crypto.alphawallet.router.GasSettingsRouter;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -22,6 +25,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final MarketQueueService marketQueueService;
 
     private final GasSettingsRouter gasSettingsRouter;
 
@@ -30,11 +34,13 @@ public class ConfirmationViewModel extends BaseViewModel {
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
                                  CreateTransactionInteract createTransactionInteract,
-                                 GasSettingsRouter gasSettingsRouter) {
+                                 GasSettingsRouter gasSettingsRouter,
+                                 MarketQueueService marketQueueService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
+        this.marketQueueService = marketQueueService;
     }
 
     public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
@@ -99,5 +105,27 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void openGasSettings(Activity context) {
         gasSettingsRouter.open(context, gasSettings.getValue());
+    }
+
+    public void generateMarketOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
+        //generate a list of integers
+        Ticket t = new Ticket(null, "0", 0);
+        List<Integer> sends = t.parseIDListInteger(indexSendList);
+        List<Integer> iDs = t.parseIDListInteger(idList);
+
+        if (sends != null && sends.size() > 0)
+        {
+            short[] ticketIDs = new short[sends.size()];
+            int index = 0;
+
+            for (Integer i : sends)
+            {
+                ticketIDs[index++] = i.shortValue();
+            }
+
+            int firstIndex = iDs.get(0);
+
+            marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
+        }
     }
 }

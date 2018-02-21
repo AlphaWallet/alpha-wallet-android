@@ -15,6 +15,7 @@ public class TicketRange implements Parcelable
 {
     public final int seatStart;
     public int seatCount;
+    public boolean isChecked;
 
     public final int tokenId;
 
@@ -23,6 +24,7 @@ public class TicketRange implements Parcelable
         this.tokenId = tokenId;
         this.seatStart = seatStart;
         this.seatCount = 1;
+        this.isChecked = false;
     }
 
     private TicketRange(Parcel in)
@@ -30,6 +32,7 @@ public class TicketRange implements Parcelable
         this.tokenId = in.readInt();
         this.seatStart = in.readInt();
         this.seatCount = in.readInt();
+        this.isChecked = (in.readInt() == 1) ? true : false;
     }
 
     @Override
@@ -44,6 +47,7 @@ public class TicketRange implements Parcelable
         dest.writeInt(this.tokenId);
         dest.writeInt(this.seatStart);
         dest.writeInt(this.seatCount);
+        dest.writeInt(this.isChecked ? 1:0);
     }
 
     public static final Creator<TicketRange> CREATOR = new Creator<TicketRange>() {

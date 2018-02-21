@@ -18,6 +18,7 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -91,5 +92,23 @@ public class TicketSaleAdapter extends TicketAdapter {
             }
         }
         items.endBatchedUpdates();
+    }
+
+    public List<TicketRange> getCheckedItems()
+    {
+        List<TicketRange> checkedItems = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i) instanceof TicketSaleSortedItem)
+            {
+                TicketSaleSortedItem thisItem = (TicketSaleSortedItem) items.get(i);
+                if (thisItem.value.isChecked)
+                {
+                    checkedItems.add(thisItem.value);
+                }
+            }
+        }
+
+        return checkedItems;
     }
 }

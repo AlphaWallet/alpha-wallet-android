@@ -125,6 +125,8 @@ public class ConfirmationViewModel extends BaseViewModel {
 
             int firstIndex = iDs.get(0);
 
+            price = price.multiply(BigInteger.valueOf(iDs.size()));
+
             marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
         }
     }

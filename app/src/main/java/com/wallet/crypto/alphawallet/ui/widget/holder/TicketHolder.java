@@ -61,15 +61,25 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition) {
         this.thisData = data;
         try {
-            String seatRange = String.valueOf(data.seatStart);
-            if (data.seatCount > 1) seatRange = data.seatStart + "-" + (data.seatStart+(data.seatCount-1));
-            String seatCount = String.format(Locale.getDefault(),"x%d", data.seatCount);
-            name.setText(TicketDecode.getName());
-            amount.setText(seatCount);
-            venue.setText(TicketDecode.getVenue(data.tokenId));
-            date.setText(TicketDecode.getDate(data.tokenId));
-            ticketIds.setText(seatRange);
-            ticketCat.setText(TicketDecode.getZone(data.tokenId));
+            if (data.tokenIds.size() > 0)
+            {
+                int firstTokenId = data.tokenIds.get(0);
+                int seatStart = TicketDecode.getSeatIdInt(firstTokenId);
+                String seatRange = String.valueOf(seatStart);
+                if (data.tokenIds.size() > 1)
+                    seatRange = seatStart + "-" + (seatStart + (data.tokenIds.size() - 1));
+                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+                name.setText(TicketDecode.getName());
+                amount.setText(seatCount);
+                venue.setText(TicketDecode.getVenue(firstTokenId));
+                date.setText(TicketDecode.getDate(firstTokenId));
+                ticketIds.setText(seatRange);
+                ticketCat.setText(TicketDecode.getZone(firstTokenId));
+            }
+            else
+            {
+                fillEmpty();
+            }
         } catch (Exception ex) {
             fillEmpty();
         }

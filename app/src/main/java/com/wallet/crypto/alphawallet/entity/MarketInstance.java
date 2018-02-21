@@ -17,6 +17,8 @@ public class MarketInstance
     public final long expiry;
     public final double price;
     public final int[] tickets;
+    public final int ticketStart;
+    public final int ticketCount;
     public final String contractAddress;
     public final byte[] signature;
     public final byte[] message;
@@ -24,6 +26,8 @@ public class MarketInstance
     public MarketInstance(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) {
         this.price = price;
         this.expiry = expiry;
+        this.ticketStart = ticketStart;
+        this.ticketCount = ticketCount;
 
         this.tickets = new int[ticketCount];
         for (int i = 0; i < ticketCount; i++)

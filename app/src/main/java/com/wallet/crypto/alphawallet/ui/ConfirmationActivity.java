@@ -30,6 +30,8 @@ import com.wallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
+import org.web3j.utils.Convert;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -219,7 +221,9 @@ public class ConfirmationActivity extends BaseActivity {
                 break;
 
             case MARKET:
-                viewModel.generateMarketOrders(amountStr, contractAddress, BigInteger.TEN, valueText.getText().toString());
+                //price in eth
+                BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
+                viewModel.generateMarketOrders(amountStr, contractAddress, wei, valueText.getText().toString());
                 break;
 
             default:

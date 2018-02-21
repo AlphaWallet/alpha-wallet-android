@@ -20,6 +20,7 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.MarketInstance;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TradeInstance;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
@@ -52,7 +53,7 @@ public class MarketBrowseActivity extends BaseActivity
     public TextView ids;
     public TextView selected;
 
-    //private TicketBuyAdapter adapter;
+    private ERC875MarketAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -98,10 +99,10 @@ public class MarketBrowseActivity extends BaseActivity
 
     private void onMarketUpdate(MarketInstance[] trades)
     {
-//        RecyclerView list = findViewById(R.id.listTickets);
-//        adapter = new TicketBuyAdapter(this::onTicketIdClick, trades);
-//        list.setLayoutManager(new LinearLayoutManager(this));
-//        list.setAdapter(adapter);
+        RecyclerView list = findViewById(R.id.listTickets);
+        adapter = new ERC875MarketAdapter(this::onOrderClick, trades);
+        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setAdapter(adapter);
     }
 
     @Override
@@ -128,8 +129,8 @@ public class MarketBrowseActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
+    private void onOrderClick(View view, MarketInstance instance) {
         Context context = view.getContext();
-        //TODO: what action should be performed when clicking on a range?
+        //TODO: just clicked on an order.
     }
 }

@@ -160,26 +160,20 @@ public class SellTicketActivity extends BaseActivity
         List<TicketRange> sellRange = adapter.getCheckedItems();
         //add this range to the sell order confirmation
         //Generate list of indicies and actual ids
-        StringBuilder ticketIds = new StringBuilder();
-        boolean first = true;
-        for (TicketRange thisRange : sellRange)
+        List<Integer> idList = new ArrayList<>();
+        for (TicketRange tr : sellRange)
         {
-            int rangeStart = thisRange.tokenId;
-            for (int ticketId = rangeStart; ticketId < (rangeStart + thisRange.seatCount); ticketId++)
-            {
-                if (!first) ticketIds.append(",");
-                ticketIds.append(ticketId);
-                first = false;
-            }
+            idList.addAll(tr.tokenIds);
         }
 
-        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(ticketIds.toString());
+        String idListStr = viewModel.ticket().getValue().populateIDs(idList, false);
+        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(idListStr);
         String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
 
         //confirm other address
         //confirmation screen
         //(Context context, String to, String ids, String ticketIDs)
-        viewModel.openConfirmation(this, null, indexList, ticketIds.toString());
+        viewModel.openConfirmation(this, null, indexList, idListStr);
     }
 
     boolean isValidAmount(String eth) {

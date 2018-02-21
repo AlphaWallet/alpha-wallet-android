@@ -84,13 +84,13 @@ public class TicketAdapter extends TokensAdapter {
                 {
                     if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
                     int seatStart = TicketDecode.getSeatIdInt(tokenId);
-                    currentRange = new TicketRange(tokenId, seatStart);
+                    currentRange = new TicketRange(tokenId);
                     currentZone = zone;
                 }
                 else
                 {
                     //update
-                    currentRange.seatCount++;
+                    currentRange.tokenIds.add(tokenId);
                 }
 
                 currentSeat = seatNumber;

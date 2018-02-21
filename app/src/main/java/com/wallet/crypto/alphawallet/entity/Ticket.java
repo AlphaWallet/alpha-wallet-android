@@ -332,32 +332,7 @@ public class Ticket extends Token implements Parcelable
 
     public String populateRange(TicketRange range)
     {
-        StringBuilder sb = new StringBuilder();
-        //find all ticket indexes in this range
-        //find start ID
-        int index = getIndexOf(range.tokenId); //TODO: replace with Numeric map
-
-        boolean first = true;
-
-        if (index > -1)
-        {
-            for (int i = 0; i < range.seatCount; i++)
-            {
-                int id = balanceArray.get(index + i);
-                if (id > 0)
-                {
-                    if (!first) sb.append(", ");
-                    sb.append(String.valueOf(id));
-                    first = false;
-                }
-            }
-        }
-        else
-        {
-            sb.append("none");
-        }
-
-        return sb.toString();
+        return populateIDs(range.tokenIds, false);
     }
 
     private int getIndexOf(int id)

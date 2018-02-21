@@ -15,6 +15,8 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
+import org.web3j.utils.Convert;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -200,8 +202,9 @@ public class MarketOrderViewModel extends BaseViewModel
             ticketIDs[index++] = i.shortValue();
         }
 
-        BigInteger price = BigInteger.TEN;
+        //price in eth
+        BigInteger wei = Convert.toWei("2300", Convert.Unit.FINNEY).toBigInteger().multiply(BigInteger.valueOf(idSendList.size())); //FINNEY is 0.001 (milli-eth).
 
-        marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, ticket().getValue().getAddress(), firstTicket);
+        marketQueueService.createMarketOrders(defaultWallet.getValue(), wei, ticketIDs, ticket().getValue().getAddress(), firstTicket);
     }
 }

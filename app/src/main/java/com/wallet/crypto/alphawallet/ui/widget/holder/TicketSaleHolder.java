@@ -69,24 +69,34 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
         this.thisData = data;
         try
         {
-            String seatRange = String.valueOf(data.seatStart);
-            if (data.seatCount > 1) seatRange = data.seatStart + "-" + (data.seatStart+(data.seatCount-1));
-            String seatCount = String.format(Locale.getDefault(),"x%d", data.seatCount);
-            select.setVisibility(View.VISIBLE);
-            name.setText(String.format(Locale.getDefault(),"Ticket #%d", data.tokenId));//   "Ticket #" + data.tokenId); //TODO: Know Shengkai ID number for this range
-            amount.setText(seatCount);
-            venue.setText(TicketDecode.getVenue(data.tokenId));
-            date.setText(TicketDecode.getDate(data.tokenId));
-            ticketIds.setText(seatRange);
-            ticketCat.setText(TicketDecode.getZone(data.tokenId));
+            if (data.tokenIds.size() > 0)
+            {
+                int firstTokenId = data.tokenIds.get(0);
+                int seatStart = TicketDecode.getSeatIdInt(firstTokenId);
+                String seatRange = String.valueOf(seatStart);
+                if (data.tokenIds.size() > 1)
+                    seatRange = seatStart + "-" + (seatStart + (data.tokenIds.size() - 1));
+                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+                name.setText(TicketDecode.getName());
+                amount.setText(seatCount);
+                venue.setText(TicketDecode.getVenue(firstTokenId));
+                date.setText(TicketDecode.getDate(firstTokenId));
+                ticketIds.setText(seatRange);
+                ticketCat.setText(TicketDecode.getZone(firstTokenId));
 
-            select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-                {
-                    thisData.isChecked = b;
-                }
-            });
+                select.setVisibility(View.VISIBLE);
+                select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+                    {
+                        thisData.isChecked = b;
+                    }
+                });
+            }
+            else
+            {
+                fillEmpty();
+            }
         }
         catch (Exception ex)
         {

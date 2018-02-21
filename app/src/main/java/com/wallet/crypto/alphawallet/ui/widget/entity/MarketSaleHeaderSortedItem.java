@@ -9,7 +9,6 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.MarketOrderHeaderHolder;
 
 public class MarketSaleHeaderSortedItem extends SortedItem<Token>
 {
-
     public MarketSaleHeaderSortedItem(Token value)
     {
         super(MarketOrderHeaderHolder.VIEW_TYPE, value, 0);

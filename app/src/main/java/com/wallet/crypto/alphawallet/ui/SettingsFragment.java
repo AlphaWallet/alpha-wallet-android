@@ -92,7 +92,7 @@ public class SettingsFragment extends PreferenceFragment
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             } catch (Exception e) {
                 // no Twitter app, revert to browser
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/trustwalletapp"));
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/Alpha_wallet"));
             }
             startActivity(intent);
             return false;
@@ -100,7 +100,7 @@ public class SettingsFragment extends PreferenceFragment
 
         final Preference facebook = findPreference("pref_facebook");
         facebook.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/trustwalletapp"));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/AlphaWallet/"));
                 startActivity(intent);
                 return false;
         });

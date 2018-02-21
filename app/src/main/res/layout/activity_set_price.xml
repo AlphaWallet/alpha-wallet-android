@@ -31,7 +31,7 @@
                 android:layout_marginTop="@dimen/normal_margin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
+                android:layout_weight="2"
                 >
                 <EditText
                     android:id="@+id/asking_price"
@@ -42,23 +42,36 @@
                     />
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_marginTop="@dimen/normal_margin"
+            <LinearLayout
+                android:id="@+id/fiat_layout"
+                android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="bottom"
                 android:layout_weight="1"
+                android:orientation="vertical"
                 >
-
+                <TextView
+                    android:id="@+id/fiat_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:textAllCaps="true"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="@color/holo_blue"
+                    android:text="Equivalent in USD"/>
                 <TextView
                     android:id="@+id/fiat_price"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="bottom"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:textSize="16sp"
+                    android:textColor="@color/holo_blue"
                     android:layout_marginBottom="5dp"
-                    android:text=""/>
-            </android.support.design.widget.TextInputLayout>
+                    android:text="$200"/>
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -99,12 +112,12 @@
 
             <Button
                 android:id="@+id/button_sell"
-                android:text="@string/action_sell"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="wrap_content"
-                android:layout_weight="0.5"
-                android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_weight="0.5"
+                android:text="@string/action_sell"
                 />
         </LinearLayout>
 

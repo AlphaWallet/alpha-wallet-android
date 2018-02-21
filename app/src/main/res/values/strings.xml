@@ -195,7 +195,7 @@
     <string name="hint_contract_price">Price</string>
     <!-- Price -->
     <string name="hint_asking_price">Asking price in ETH</string>
-    <string name="hint_ticket_selection">Ticket Selection</string>
+    <string name="hint_ticket_selection">Ticket Count</string>
 
     <string name="action_use">Redeem</string>
     <string name="action_sell">Sell</string>

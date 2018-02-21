@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
-import com.wallet.crypto.alphawallet.entity.TicketInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
@@ -48,23 +47,16 @@ public class AddTokenViewModel extends BaseViewModel {
         return wallet;
     }
 
-    public void save(String address, String symbol, int decimals, String name, String venue, String date, double db) {
-        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, venue, date, db);
+    public void save(String address, String symbol, int decimals, String name, boolean isStormBird) {
+        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
         addTokenInteract
                 .add(tokenInfo)
                 .subscribe(this::onSaved, this::onError);
     }
 
-    //Here we decide what type of token we are dealing with
-    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, String venue, String date, double db)
+    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
-        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true);
-
-        if (venue != null && venue.length() > 0)
-        {
-            tokenInfo = new TicketInfo(tokenInfo, venue, date, db);
-        }
-
+        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
         return tokenInfo;
     }
 

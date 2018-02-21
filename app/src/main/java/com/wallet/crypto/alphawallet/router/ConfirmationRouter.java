@@ -17,7 +17,6 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
-        intent.putExtra(C.EXTRA_TICKET_VENUE, false);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
         context.startActivity(intent);
     }
@@ -29,8 +28,8 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
-        intent.putExtra(C.EXTRA_TICKET_VENUE, true);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
+        intent.putExtra(C.STORMBIRD, true);
         intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIDs);
         context.startActivity(intent);
     }

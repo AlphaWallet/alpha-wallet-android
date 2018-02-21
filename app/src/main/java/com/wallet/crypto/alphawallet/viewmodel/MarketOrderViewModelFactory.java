@@ -8,6 +8,7 @@ import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 /**
  * Created by James on 5/02/2018.
@@ -19,21 +20,24 @@ public class MarketOrderViewModelFactory implements ViewModelProvider.Factory
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final MarketQueueService marketQueueService;
 
     public MarketOrderViewModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            CreateTransactionInteract createTransactionInteract) {
+            CreateTransactionInteract createTransactionInteract,
+            MarketQueueService marketQueueService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.createTransactionInteract = createTransactionInteract;
+        this.marketQueueService = marketQueueService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new MarketOrderViewModel(findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract);
+        return (T) new MarketOrderViewModel(findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract, marketQueueService);
     }
 }

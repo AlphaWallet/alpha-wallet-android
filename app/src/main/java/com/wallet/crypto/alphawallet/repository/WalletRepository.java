@@ -98,6 +98,8 @@ public class WalletRepository implements WalletRepositoryType {
 					.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
 					.send()
 					.getBalance()))
-                .subscribeOn(Schedulers.io());
+				.subscribeOn(Schedulers.io());
 	}
+
+
 }

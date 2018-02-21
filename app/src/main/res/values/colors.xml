@@ -23,4 +23,7 @@
 	<color name="QRCodeWhiteColor">#FFFFFFFF</color>
 
     <color name="item_icon_tint">#89000000</color>
+	<color name="white_transparent">#88ffffff</color>
+    <color name="grey">#EEEEEE</color>
+	<color name="holo_blue">#FF33b5e5</color>
 </resources>

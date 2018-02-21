@@ -12,8 +12,7 @@ public class TokenTicker implements Parcelable {
     @SerializedName("percent_change_24h")
     public final String percentChange24h;
     public final String image;
-    public final String venue;
-    public final String date;
+    public final boolean isStormbird;
 
     public TokenTicker(String id, String contract, String price, String percentChange24h, String image) {
         this.id = id;
@@ -21,18 +20,16 @@ public class TokenTicker implements Parcelable {
         this.price = price;
         this.percentChange24h = percentChange24h;
         this.image = image;
-        this.venue = null;
-        this.date = null;
+        this.isStormbird = false;
     }
 
-    public TokenTicker(String id, String contract, String price, String percentChange24h, String image, String venue, String date) {
+    public TokenTicker(String id, String contract, String price, String percentChange24h, String image, boolean isStormbird) {
         this.id = id;
         this.contract = contract;
         this.price = price;
         this.percentChange24h = percentChange24h;
         this.image = image;
-        this.venue = venue;
-        this.date = date;
+        this.isStormbird = isStormbird;
     }
 
     private TokenTicker(Parcel in) {
@@ -45,16 +42,13 @@ public class TokenTicker implements Parcelable {
         switch (type)
         {
             case 0:
-                venue = null;
-                date = null;
+                isStormbird = false;
                 break;
             case 1:
-                venue = in.readString();
-                date = in.readString();
+                isStormbird = true;
                 break;
             default:
-                venue = null;
-                date = null;
+                isStormbird = false;
                 break;
         }
     }
@@ -83,16 +77,6 @@ public class TokenTicker implements Parcelable {
         dest.writeString(price);
         dest.writeString(percentChange24h);
         dest.writeString(image);
-
-        if (venue != null)
-        {
-            dest.writeByte((byte)1);
-            dest.writeString(venue);
-            dest.writeString(date);
-        }
-        else
-        {
-            dest.writeByte((byte)0);
-        }
+        dest.writeInt(isStormbird?0:1);
     }
 }

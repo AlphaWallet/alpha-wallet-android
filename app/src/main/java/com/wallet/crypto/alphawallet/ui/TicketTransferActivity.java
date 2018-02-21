@@ -19,6 +19,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.QRURLParser;
 import com.wallet.crypto.alphawallet.viewmodel.TicketTransferViewModel;
@@ -34,6 +35,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
 
 /**
  * Created by James on 28/01/2018.
@@ -53,6 +55,7 @@ public class TicketTransferActivity extends BaseActivity
 
     private String address;
     private Ticket ticket;
+    private TicketRange ticketRange;
 
     private EditText toAddressText;
     private EditText idsText;
@@ -69,7 +72,15 @@ public class TicketTransferActivity extends BaseActivity
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        address = ticket.ticketInfo.address;
+        if (getIntent().hasExtra(TICKET_RANGE))
+        {
+            ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
+        }
+        else
+        {
+            ticketRange = null;
+        }
+        address = ticket.tokenInfo.address;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -99,8 +110,17 @@ public class TicketTransferActivity extends BaseActivity
     }
 
     private void onTicket(Ticket ticket) {
+        String idStr;
+        if (ticketRange != null)
+        {
+            //display range of tickets, display ids
+            idStr = ticket.populateRange(ticketRange);
+        }
+        else
+        {
+            idStr = ticket.populateIDs(ticket.balanceArray, false);
+        }
         name.setText(ticket.tokenInfo.name);
-        String idStr = ticket.tokenInfo.populateIDs(ticket.balanceArray, false);
         ids.setText(idStr);
     }
 
@@ -150,7 +170,14 @@ public class TicketTransferActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(address);
+        if (ticketRange != null)
+        {
+            viewModel.prepare(ticket, ticketRange);
+        }
+        else
+        {
+            viewModel.prepare(address);
+        }
     }
 
     private void onNext() {
@@ -174,7 +201,7 @@ public class TicketTransferActivity extends BaseActivity
             return;
         }
 
-        String indexList = viewModel.ticket().getValue().tokenInfo.populateIDs(idSendList, true);
+        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
         toInputLayout.setErrorEnabled(false);
         viewModel.openConfirmation(this, to, indexList, amount);
     }

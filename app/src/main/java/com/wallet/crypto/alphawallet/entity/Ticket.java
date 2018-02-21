@@ -1,11 +1,20 @@
 package com.wallet.crypto.alphawallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
+import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
+import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
+import org.ethereum.geth.BigInt;
 import org.web3j.abi.datatypes.generated.Uint16;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -18,29 +27,23 @@ import java.util.List;
 
 public class Ticket extends Token implements Parcelable
 {
-    public final TicketInfo ticketInfo;
     public final List<Integer> balanceArray;
+    private List<Integer> burnArray;
 
-    private List<Integer> burnArray; //mutable
-
-    public Ticket(TicketInfo tokenInfo, List<Integer> balances, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, List<Integer> balances, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
-        this.ticketInfo = tokenInfo;
         burnArray = new ArrayList<>();
     }
 
-    public Ticket(TicketInfo tokenInfo, String balances, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = parseIDListInteger(balances);
-        this.ticketInfo = tokenInfo;
         burnArray = new ArrayList<>();
     }
 
     private Ticket(Parcel in) {
-        super(in, true);
-        //now read in ticket
-        ticketInfo = in.readParcelable(TicketInfo.class.getClassLoader());
+        super(in);
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
         balanceArray = new ArrayList<Integer>();
@@ -64,13 +67,13 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getStringBalance() {
-        return ticketInfo.populateIDs(balanceArray, false);// parseList(balanceArray);
+        return populateIDs(balanceArray, false);// parseList(balanceArray);
     }
 
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return ticketInfo.populateIDs(balanceArray, true);
+        else return populateIDs(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -87,8 +90,7 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(updateBlancaTime);
-        dest.writeParcelable(ticketInfo, flags);
+        super.writeToParcel(dest, flags);
         dest.writeArray(balanceArray.toArray());
         dest.writeArray(burnArray.toArray());
     }
@@ -122,10 +124,10 @@ public class Ticket extends Token implements Parcelable
     {
         StringBuilder sb = new StringBuilder();
         //convert selection to index list
-        List<Uint16> selectionIndex = parseIDList(selection);
+        List<org.web3j.abi.datatypes.generated.Int16> selectionIndex = parseIDList(selection);
         //add correct entries
         boolean first = true;
-        for (Uint16 id : selectionIndex) {
+        for (org.web3j.abi.datatypes.generated.Int16 id : selectionIndex) {
             if (balanceArray.contains(id.getValue().intValue()) && !burnArray.contains(id.getValue().intValue())) {
                 if (!first) sb.append(", ");
                 sb.append(String.valueOf(id.getValue().toString(10)));
@@ -136,9 +138,9 @@ public class Ticket extends Token implements Parcelable
         return sb.toString();
     }
 
-    public List<Uint16> parseIDList(String userList)
+    public List<org.web3j.abi.datatypes.generated.Int16> parseIDList(String userList)
     {
-        List<Uint16> idList = new ArrayList<>();
+        List<org.web3j.abi.datatypes.generated.Int16> idList = new ArrayList<>();
 
         try
         {
@@ -148,7 +150,31 @@ public class Ticket extends Token implements Parcelable
             {
                 //remove whitespace
                 String trim = id.trim();
-                Uint16 thisId = new Uint16(Integer.parseInt(trim));
+                org.web3j.abi.datatypes.generated.Int16 thisId = new org.web3j.abi.datatypes.generated.Int16(Integer.parseInt(trim));
+                idList.add(thisId);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = null;
+        }
+
+        return idList;
+    }
+
+    public List<BigInteger> parseIDListBI(String userList)
+    {
+        List<BigInteger> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = userList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                BigInteger thisId = BigInteger.valueOf(Integer.parseInt(trim));
                 idList.add(thisId);
             }
         }
@@ -247,13 +273,101 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void setRealmBalance(RealmToken realmToken)
+    public String populateIDs(List<Integer> idArray, boolean keepZeros)
     {
-        realmToken.setBalance(ticketInfo.populateIDs(balanceArray, true));
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Integer id : idArray)
+        {
+            if (!keepZeros && id == 0) continue;
+            if (!first)
+            {
+                sb.append(", ");
+            }
+            first = false;
+
+            sb.append(id.toString());
+            displayIDs = sb.toString();
+        }
+
+        return displayIDs;
     }
 
     @Override
-    public String getAddress() {
-        return ticketInfo.address;
+    public int getTicketCount()
+    {
+        int count = 0;
+        for (Integer id : balanceArray)
+        {
+            if (id > 0) count++;
+        }
+        return count;
+    }
+
+    @Override
+    public void setRealmBalance(RealmToken realmToken)
+    {
+        realmToken.setBalance(populateIDs(balanceArray, true));
+    }
+
+    @Override
+    public void clickReact(BaseViewModel viewModel, Context context)
+    {
+        viewModel.showUseToken(context, this);
+    }
+
+    @Override
+    public void setupContent(TokenHolder tokenHolder)
+    {
+        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
+        tokenHolder.balanceEth.setVisibility(View.GONE);
+        tokenHolder.balanceCurrency.setVisibility(View.GONE);
+        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
+
+        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
+        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
+    }
+
+    public String populateRange(TicketRange range)
+    {
+        StringBuilder sb = new StringBuilder();
+        //find all ticket indexes in this range
+        //find start ID
+        int index = getIndexOf(range.tokenId); //TODO: replace with Numeric map
+
+        boolean first = true;
+
+        if (index > -1)
+        {
+            for (int i = 0; i < range.seatCount; i++)
+            {
+                int id = balanceArray.get(index + i);
+                if (id > 0)
+                {
+                    if (!first) sb.append(", ");
+                    sb.append(String.valueOf(id));
+                    first = false;
+                }
+            }
+        }
+        else
+        {
+            sb.append("none");
+        }
+
+        return sb.toString();
+    }
+
+    private int getIndexOf(int id)
+    {
+        if (balanceArray.contains(id))
+        {
+            return balanceArray.indexOf(id);
+        }
+        else
+        {
+            return -1;
+        }
     }
 }

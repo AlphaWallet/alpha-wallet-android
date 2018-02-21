@@ -1,5 +1,6 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
@@ -9,6 +10,7 @@ import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
@@ -24,16 +26,17 @@ import dagger.Provides;
 public class UseTokenModule {
     @Provides
     UseTokenViewModelFactory useTokenViewModelFactory(
-            UseTokenInteract useTokenInteract,
+            FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter) {
+            MarketOrderRouter marketOrderRouter,
+            SellTicketRouter sellTicketRouter) {
         return new UseTokenViewModelFactory(
-                useTokenInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter, sellTicketRouter);
     }
 
     @Provides
@@ -43,10 +46,9 @@ public class UseTokenModule {
     }
 
     @Provides
-    UseTokenInteract provideUseTokenInteract(
-            TokenRepositoryType tokenRepository,
-            WalletRepositoryType walletRepository) {
-        return new UseTokenInteract(walletRepository, tokenRepository);
+    FetchTokensInteract providefetchTokensInteract(
+            TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 
     @Provides
@@ -77,5 +79,10 @@ public class UseTokenModule {
     @Provides
     SignatureGenerateInteract provideSignatureGenerateInteract(WalletRepositoryType walletRepository) {
         return new SignatureGenerateInteract(walletRepository);
+    }
+
+    @Provides
+    SellTicketRouter provideSellTicketRouter() {
+        return new SellTicketRouter();
     }
 }

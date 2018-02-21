@@ -7,6 +7,7 @@ import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepository;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.GasSettingsRepository;
 import com.wallet.crypto.alphawallet.repository.GasSettingsRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import com.wallet.crypto.alphawallet.repository.SharedPreferenceRepository;
 import com.wallet.crypto.alphawallet.repository.TokenLocalSource;
@@ -23,6 +24,7 @@ import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
 import com.wallet.crypto.alphawallet.service.CoinmarketcapTickerService;
 import com.wallet.crypto.alphawallet.service.EthplorerTokenService;
 import com.wallet.crypto.alphawallet.service.GethKeystoreAccountService;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.service.RealmManager;
 import com.wallet.crypto.alphawallet.service.TickerService;
 import com.wallet.crypto.alphawallet.service.TokenExplorerClientType;
@@ -144,5 +146,13 @@ public class RepositoriesModule {
 	@Provides
 	GasSettingsRepositoryType provideGasSettingsRepository(EthereumNetworkRepositoryType ethereumNetworkRepository) {
 		return new GasSettingsRepository(ethereumNetworkRepository);
+	}
+
+	@Singleton
+	@Provides
+	MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
+												 TransactionRepositoryType transactionRepository,
+												 PasswordStore passwordStore) {
+		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
 	}
 }

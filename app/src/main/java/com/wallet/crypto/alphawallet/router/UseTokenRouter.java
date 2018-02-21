@@ -14,15 +14,9 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 
 public class UseTokenRouter {
 
-    public void open(Context context, String name, String venue, String date, String address, double price, double balance, Token ticket) {
+    public void open(Context context, Token ticket) {
         Intent intent = new Intent(context, UseTokenActivity.class);
         intent.putExtra(TICKET, ticket);
-//        intent.putExtra(C.EXTRA_CONTRACT_NAME, name);
-//        intent.putExtra(C.EXTRA_TICKET_DATE, date);
-//        intent.putExtra(C.EXTRA_TICKET_PRICE, price);
-//        intent.putExtra(C.EXTRA_TICKET_VENUE, venue);
-//        intent.putExtra(C.EXTRA_TOKEN_BALANCE, balance);
-//        intent.putExtra(C.EXTRA_ADDRESS, address);
         context.startActivity(intent);
     }
 }

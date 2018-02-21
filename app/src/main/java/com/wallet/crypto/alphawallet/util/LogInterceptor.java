@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,8 @@ public class LogInterceptor implements Interceptor {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	@Override
-	public Response intercept(@NonNull Chain chain) throws IOException {
+	public Response intercept(@NonNull Chain chain) throws IOException
+	{
 		Request request = chain.request();
 		RequestBody requestBody = request.body();
 		StringBuilder logBuilder = new StringBuilder();
@@ -48,6 +50,7 @@ public class LogInterceptor implements Interceptor {
 		}
 		logBuilder.append("\n=============== END Headers ===============\n");
 
+
 		if (requestBody != null) {
 			Buffer buffer = new Buffer();
 			requestBody.writeTo(buffer);
@@ -60,7 +63,19 @@ public class LogInterceptor implements Interceptor {
 			logBuilder.append(buffer.readString(UTF8));
 		}
 		long startNs = System.nanoTime();
-		Response response = chain.proceed(request);
+
+			Response response = null;
+
+
+		try
+		{
+			response = chain.proceed(request);
+		}
+		catch (InterruptedIOException e)
+		{
+			e.printStackTrace();
+		}
+
 		long tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
 
 		ResponseBody responseBody = response.body();

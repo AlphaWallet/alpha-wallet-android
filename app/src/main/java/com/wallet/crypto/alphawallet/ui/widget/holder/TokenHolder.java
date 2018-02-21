@@ -57,7 +57,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                         ? token.tokenInfo.symbol
                         : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol));
 
-            token.tokenInfo.setupContent(this);
+            token.setupContent(this);
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -100,7 +100,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         this.balanceCurrency.setText(spannable);
     }
 
-    private void fillEmpty() {
+    protected void fillEmpty() {
         balanceEth.setText(R.string.NA);
         balanceCurrency.setText(EMPTY_BALANCE);
     }

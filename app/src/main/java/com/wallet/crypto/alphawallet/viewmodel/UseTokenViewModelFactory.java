@@ -4,12 +4,14 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import com.wallet.crypto.alphawallet.interact.UseTokenInteract;
 import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 
@@ -19,7 +21,7 @@ import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 
 public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
 
-    private final UseTokenInteract useTokenInteract;
+    private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MyTokensRouter myTokensRouter;
     private final TicketTransferRouter ticketTransferRouter;
@@ -27,17 +29,19 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final MarketOrderRouter marketOrderRouter;
+    private final SellTicketRouter sellTicketRouter;
 
     public UseTokenViewModelFactory(
-            UseTokenInteract useTokenInteract,
+            FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter) {
-        this.useTokenInteract = useTokenInteract;
+            MarketOrderRouter marketOrderRouter,
+            SellTicketRouter sellTicketRouter) {
+        this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -45,11 +49,12 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.ticketTransferRouter = ticketTransferRouter;
         this.marketOrderRouter = marketOrderRouter;
+        this.sellTicketRouter = sellTicketRouter;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new UseTokenViewModel(useTokenInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter);
+        return (T) new UseTokenViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter, sellTicketRouter);
     }
 }

@@ -11,6 +11,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
@@ -18,8 +19,8 @@ import java.math.BigDecimal;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
-     private final OnTokenClickListener onTokenClickListener;
-     private final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
+     protected final OnTokenClickListener onTokenClickListener;
+     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
          @Override
          public int compare(SortedItem o1, SortedItem o2) {
              return o1.compare(o2);
@@ -55,10 +56,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
              notifyItemMoved(fromPosition, toPosition);
          }
      });
-    private TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
+    protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
     public TokensAdapter(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
+    }
+
+    public TokensAdapter() {
+        onTokenClickListener = null;
     }
 
     @Override

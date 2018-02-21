@@ -18,7 +18,7 @@ public class TokenFactory
     public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, long updateBlancaTime)
     {
         Token thisToken;
-        if (tokenInfo instanceof TicketInfo)
+        if (tokenInfo.isStormbird)
         {
             if (balances == null)
             {
@@ -26,7 +26,7 @@ public class TokenFactory
             }
             else
             {
-                thisToken = new Ticket((TicketInfo)tokenInfo, balances, updateBlancaTime);
+                thisToken = new Ticket(tokenInfo, balances, updateBlancaTime);
             }
         }
         else
@@ -40,10 +40,10 @@ public class TokenFactory
     public Token createToken(TokenInfo tokenInfo, RealmToken realmItem, long updateBlancaTime)
     {
         Token thisToken;
-        if (tokenInfo instanceof TicketInfo)
+        if (tokenInfo.isStormbird)
         {
             String balances = realmItem.getBalance();
-            thisToken = new Ticket((TicketInfo)tokenInfo, balances, updateBlancaTime);
+            thisToken = new Ticket(tokenInfo, balances, updateBlancaTime);
         }
         else
         {
@@ -59,9 +59,9 @@ public class TokenFactory
     public Token createToken(TokenInfo tokenInfo)
     {
         Token thisToken;
-        if (tokenInfo instanceof TicketInfo)
+        if (tokenInfo.isStormbird)
         {
-            thisToken = new Ticket((TicketInfo)tokenInfo, (List<Integer>)null, 0);
+            thisToken = new Ticket(tokenInfo, (List<Integer>)null, 0);
         }
         else
         {
@@ -79,18 +79,7 @@ public class TokenFactory
 
     public TokenInfo createTokenInfo(RealmToken realmItem)
     {
-        TokenInfo ti;
-        TokenInfo token = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
-                realmItem.getDecimals(), true);
-        if (realmItem.getVenue() != null && realmItem.getVenue().length() > 0)
-        {
-            ti = new TicketInfo(token, realmItem.getVenue(), realmItem.getDate(), realmItem.getPrice());
-        }
-        else
-        {
-            ti = token;
-        }
-
-        return ti;
+        return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
+                realmItem.getDecimals(), true, realmItem.isStormbird());
     }
 }

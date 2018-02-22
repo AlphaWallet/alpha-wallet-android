@@ -78,8 +78,7 @@ public class TicketSaleAdapter extends TicketAdapter {
                         || i == (sortedList.size() - 1)) //check consecutive seats and zone is still the same, and push final ticket
                 {
                     if (currentRange != null) items.add(new TicketSaleSortedItem(currentRange, 10 + i));
-                    int seatStart = TicketDecode.getSeatIdInt(tokenId);
-                    currentRange = new TicketRange(tokenId);
+                    currentRange = new TicketRange(tokenId, t.getAddress());
                     currentZone = zone;
                 }
                 else

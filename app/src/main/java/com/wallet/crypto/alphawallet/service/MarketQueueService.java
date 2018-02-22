@@ -271,7 +271,7 @@ public class MarketQueueService {
         return transactionRepository.getSignature(wallet, data, password);
     }
 
-    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, String contractAddr, int firstIndex) {
+    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
@@ -287,7 +287,7 @@ public class MarketQueueService {
             //Recover public key
             BigInteger recoveredKey = ecRecoverPublicKey(wallet, password);
 
-            TradeInstance trade = new TradeInstance(price, BigInteger.valueOf(initialExpiry), tickets, contractAddr, recoveredKey, firstIndex);
+            TradeInstance trade = new TradeInstance(price, BigInteger.valueOf(initialExpiry), tickets, contractAddr, recoveredKey, firstTicketId);
 
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
@@ -301,9 +301,9 @@ public class MarketQueueService {
         });
     }
 
-    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstIndex) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
         return passwordStore.getPassword(wallet)
-                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstIndex));
+                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
     }
 
     private Single<byte[]> getTradeSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, String contractAddr) {
@@ -315,8 +315,8 @@ public class MarketQueueService {
         return Single.fromCallable(() -> getTradeBytes(price, expiryTimestamp, tickets, Numeric.toBigInt(contractAddr)));
     }
 
-    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstIndex) {
-        return getTradeMessages(wallet, price, tickets, contractAddr, firstIndex).toObservable()
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+        return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -328,8 +328,8 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createMarketOrders(Wallet wallet, BigInteger price, short[] ticketIDs, String contractAddr, int firstIndex) {
-        marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstIndex)
+    public void createMarketOrders(Wallet wallet, BigInteger price, short[] ticketIDs, String contractAddr, int firstTicketId) {
+        marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
 

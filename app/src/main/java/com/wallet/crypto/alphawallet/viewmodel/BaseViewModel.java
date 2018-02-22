@@ -11,13 +11,10 @@ import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.ServiceException;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.entity.TradeInstance;
-
 import io.reactivex.disposables.Disposable;
 
 public class BaseViewModel extends ViewModel
 {
-
 	protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
 	protected final MutableLiveData<Boolean> progress = new MutableLiveData<>();
 	protected Disposable disposable;

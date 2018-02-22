@@ -17,13 +17,15 @@ public class TicketRange implements Parcelable
     //public final int seatStart;
     //public int seatCount;
     public boolean isChecked;
+    public String contractAddress; // Should this be address or actual token?
 
     //public final int tokenId;
 
     public List<Integer> tokenIds;
 
-    public TicketRange(int tokenId)
+    public TicketRange(int tokenId, String contractAddress)
     {
+        this.contractAddress = contractAddress;
         tokenIds = new ArrayList<>();
         tokenIds.add(tokenId);
 //        this.tokenId = tokenId;
@@ -44,6 +46,7 @@ public class TicketRange implements Parcelable
 //        this.seatStart = in.readInt();
 //        this.seatCount = in.readInt();
         this.isChecked = (in.readInt() == 1) ? true : false;
+        this.contractAddress = in.readString();
     }
 
     @Override
@@ -60,6 +63,7 @@ public class TicketRange implements Parcelable
 //        dest.writeInt(this.seatStart);
 //        dest.writeInt(this.seatCount);
         dest.writeInt(this.isChecked ? 1:0);
+        dest.writeString(this.contractAddress);
     }
 
     public static final Creator<TicketRange> CREATOR = new Creator<TicketRange>() {

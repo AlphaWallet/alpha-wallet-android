@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     >
     <include layout="@layout/layout_simple_toolbar" />
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
     <RelativeLayout
         android:orientation="vertical"
         android:layout_marginLeft="@dimen/big_padding"
-        android:layout_marginTop="?actionBarSize"
         android:layout_marginRight="@dimen/big_padding"
-        android:layout_marginBottom="@dimen/big_padding"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/contract_address_layout"
-            android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -28,7 +32,6 @@
             >
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/symbol_input_layout"
-                android:layout_marginTop="@dimen/normal_margin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
@@ -36,7 +39,7 @@
                 <EditText
                     android:id="@+id/asking_price"
                     android:hint="@string/hint_asking_price"
-                    android:inputType="textNoSuggestions"
+                    android:inputType="numberDecimal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     />
@@ -85,7 +88,7 @@
             <EditText
                 android:id="@+id/ticket_selection"
                 android:hint="@string/hint_ticket_selection"
-                android:inputType="textNoSuggestions"
+                android:inputType="numberDecimal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
@@ -94,7 +97,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/listTickets"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@id/symbol_input_selection"
             android:layout_above="@id/layoutButtons"
             android:divider="@android:color/transparent"
@@ -122,6 +125,7 @@
         </LinearLayout>
 
     </RelativeLayout>
+    </LinearLayout>
     <com.wallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
@@ -137,4 +141,4 @@
         android:layout_height="match_parent"
         tools:visibility="gone"
         />
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

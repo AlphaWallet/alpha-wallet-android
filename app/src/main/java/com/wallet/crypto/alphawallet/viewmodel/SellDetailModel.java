@@ -5,10 +5,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
 import com.wallet.crypto.alphawallet.entity.GasSettings;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
 import com.wallet.crypto.alphawallet.router.GasSettingsRouter;
@@ -24,12 +26,16 @@ import java.util.List;
 public class SellDetailModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
+    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
 
+    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
 
-    SellDetailModel(FindDefaultWalletInteract findDefaultWalletInteract,
+    SellDetailModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
+            FindDefaultWalletInteract findDefaultWalletInteract,
                           MarketQueueService marketQueueService) {
+        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
     }
@@ -39,6 +45,13 @@ public class SellDetailModel extends BaseViewModel {
     }
 
     public void prepare(Ticket ticket) {
+        disposable = findDefaultNetworkInteract
+                .find()
+                .subscribe(this::onDefaultNetwork, this::onError);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        defaultNetwork.postValue(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -48,27 +61,13 @@ public class SellDetailModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void generateMarketOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
-        //generate a list of integers
-        Ticket t = new Ticket(null, "0", 0);
-        List<Integer> sends = t.parseIDListInteger(indexSendList);
-        List<Integer> iDs = t.parseIDListInteger(idList);
+    public void generateMarketOrders(String contractAddr, BigInteger price, short[] ticketIndicies, int firstTicketId)
+    {
+        marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId);
+    }
 
-        if (sends != null && sends.size() > 0)
-        {
-            short[] ticketIDs = new short[sends.size()];
-            int index = 0;
-
-            for (Integer i : sends)
-            {
-                ticketIDs[index++] = i.shortValue();
-            }
-
-            int firstIndex = iDs.get(0);
-
-            price = price.multiply(BigInteger.valueOf(iDs.size()));
-
-            marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
-        }
+    public void setWallet(Wallet wallet)
+    {
+        defaultWallet.setValue(wallet);
     }
 }

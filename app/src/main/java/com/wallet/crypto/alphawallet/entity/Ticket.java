@@ -19,6 +19,7 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -345,5 +346,17 @@ public class Ticket extends Token implements Parcelable
         {
             return -1;
         }
+    }
+
+    @Override
+    public short[] getTicketIndicies(String ticketIds)
+    {
+        List<Integer> indexList = parseIndexList(ticketIds);
+        short[] indicies = new short[indexList.size()];
+        int i = 0;
+        for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
+            indicies[i] = (short)(int)iterator.next();
+        }
+        return indicies;
     }
 }

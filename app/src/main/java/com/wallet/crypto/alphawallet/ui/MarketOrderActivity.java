@@ -44,6 +44,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.util.QRURLParser;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -228,10 +229,6 @@ public class MarketOrderActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         viewModel.prepare(address);
-    }
-
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 
     private void onNext() {

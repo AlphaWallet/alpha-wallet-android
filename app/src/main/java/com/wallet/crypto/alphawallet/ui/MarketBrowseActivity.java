@@ -24,6 +24,7 @@ import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
@@ -109,10 +110,6 @@ public class MarketBrowseActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         viewModel.prepare();
-    }
-
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 
     boolean isValidAmount(String eth) {

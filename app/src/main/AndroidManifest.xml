@@ -105,6 +105,10 @@
             android:label="@string/marketplace_title" />
 
         <activity
+            android:name="com.wallet.crypto.alphawallet.ui.SellDetailActivity"
+            android:label="@string/action_sell" />
+
+        <activity
             android:name=".ui.CustomPinActivity"
             />
 

@@ -25,6 +25,7 @@ import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
@@ -149,10 +150,6 @@ public class SellTicketActivity extends BaseActivity
         viewModel.prepare(ticket);
     }
 
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
-    }
-
     private void onNext() {
         // Validate input fields
         boolean inputValid = true;
@@ -173,7 +170,7 @@ public class SellTicketActivity extends BaseActivity
         //confirm other address
         //confirmation screen
         //(Context context, String to, String ids, String ticketIDs)
-        viewModel.openConfirmation(this, null, indexList, idListStr);
+        viewModel.openSellDialog(this, idListStr);
     }
 
     boolean isValidAmount(String eth) {

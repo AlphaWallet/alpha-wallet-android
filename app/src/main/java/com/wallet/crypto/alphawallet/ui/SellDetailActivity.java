@@ -17,11 +17,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.util.KeyboardUtils;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
@@ -29,6 +34,11 @@ import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
+import org.web3j.utils.Convert;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +46,9 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.wallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 
 /**
  * Created by James on 21/02/2018.
@@ -52,12 +64,15 @@ public class SellDetailActivity extends BaseActivity
 
     private Ticket ticket;
     private TicketRange ticketRange;
-    private TicketSaleAdapter adapter;
+    private TicketAdapter adapter;
     private TextView usdPrice;
     private Button sell;
 
-    private EditText sellPrice;     //TODO: Numeric
-    private EditText count;         //TODO: Numeric
+    private TextInputLayout toInputLayout;
+    private TextInputLayout amountInputLayout;
+
+    private EditText sellPrice;
+    private EditText count;
     private String ticketIds;
 
     @Override
@@ -66,25 +81,24 @@ public class SellDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
+        Wallet wallet = getIntent().getParcelableExtra(WALLET);
+        ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
 
         setContentView(R.layout.activity_set_price); //use token just provides a simple list view.
 
         //we should import a token and a list of chosen ids
-
         RecyclerView list = findViewById(R.id.listTickets);
-        LinearLayout buttons = findViewById(R.id.layoutButtons);
-        buttons.setVisibility(View.GONE);
+        sell = findViewById(R.id.button_sell);
 
-        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
-        rLL.setVisibility(View.GONE);
-
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
         toolbar();
 
         setTitle(getString(R.string.action_sell));
+        toInputLayout = findViewById(R.id.to_input_layout);
+        amountInputLayout = findViewById(R.id.amount_input_layout);
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -92,22 +106,86 @@ public class SellDetailActivity extends BaseActivity
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
+        sellPrice = findViewById(R.id.asking_price);
+        count = findViewById(R.id.ticket_selection);
+
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailModel.class);
+
+        viewModel.setWallet(wallet);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+
+        sell.setOnClickListener((View v) -> {
+            sellTicketFinal();
+        });
+    }
+
+    private void sellTicketFinal()
+    {
+        if (!isValidAmount(sellPrice.getText().toString())) {
+            toInputLayout.setError(getString(R.string.error_invalid_address));
+            return;
+        }
+
+        //1. validate price
+        BigInteger price = getPriceInWei();
+        //2. get indicies
+        short[] indicies = ticket.getTicketIndicies(ticketIds);
+
+        //TODO: use the count value from the 'count' EditText - see the invision UX plan
+
+        if (price.doubleValue() > 0.0 && indicies != null)
+        {
+            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
+            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
+            viewModel.generateMarketOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
+            finish();
+        }
+
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        //go back to previous screen
+    }
+
+    private BigInteger getPriceInWei()
+    {
+        String textPrice = sellPrice.getText().toString();
+
+        //convert to a double value
+        double value = Double.valueOf(textPrice);
+
+        //now convert to milliWei
+        int milliEth = (int)(value*1000.0f);
+
+        //now convert to ETH
+        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
+
+        return weiValue;
+    }
+
+    private double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    boolean isValidAmount(String eth) {
+        try {
+            String wei = BalanceUtils.EthToWei(eth);
+            return wei != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         viewModel.prepare(ticket);
-    }
-
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 
     private void onTicketIdClick(View view, TicketRange range) {

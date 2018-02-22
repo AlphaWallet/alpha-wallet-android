@@ -7,6 +7,7 @@ import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
 import com.wallet.crypto.alphawallet.ui.MarketBrowseActivity;
 import com.wallet.crypto.alphawallet.ui.MarketOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
+import com.wallet.crypto.alphawallet.ui.SellDetailActivity;
 import com.wallet.crypto.alphawallet.ui.SellTicketActivity;
 import com.wallet.crypto.alphawallet.ui.SendActivity;
 import com.wallet.crypto.alphawallet.ui.SettingsActivity;
@@ -100,4 +101,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = MarketBrowseModule.class)
 	abstract MarketBrowseActivity bindMarketBrowseActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SellDetailModule.class)
+	abstract SellDetailActivity bindSellDetailsActivity();
 }

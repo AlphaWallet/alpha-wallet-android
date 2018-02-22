@@ -16,6 +16,7 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -140,9 +141,5 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
                 viewModel.fetchTokens();
             } break;
         }
-    }
-
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 }

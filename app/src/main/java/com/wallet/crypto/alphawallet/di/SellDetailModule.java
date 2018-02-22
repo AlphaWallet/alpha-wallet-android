@@ -1,39 +1,33 @@
 package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
-import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
-import com.wallet.crypto.alphawallet.router.SellDetailRouter;
-import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
-import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by James on 16/02/2018.
+ * Created by James on 22/02/2018.
  */
 
 @Module
-public class SellTicketModule
-{
+public class SellDetailModule {
+
     @Provides
-    SellTicketModelFactory sellTicketModelFactory(
-            FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+    SellDetailModelFactory sellDetailModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellDetailRouter sellDetailRouter) {
-        return new SellTicketModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellDetailRouter);
+            FindDefaultWalletInteract findDefaultWalletInteract,
+            MarketQueueService marketQueueService) {
+        return new SellDetailModelFactory(
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService);
     }
 
     @Provides
@@ -46,15 +40,4 @@ public class SellTicketModule
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
     }
-
-    @Provides
-    SellDetailRouter provideSellDetailRouter() {
-        return new SellDetailRouter();
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
-    }
 }
-

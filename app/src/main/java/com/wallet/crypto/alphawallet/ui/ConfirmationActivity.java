@@ -24,6 +24,7 @@ import com.wallet.crypto.alphawallet.entity.GasSettings;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
@@ -285,9 +286,5 @@ public class ConfirmationActivity extends BaseActivity {
                 viewModel.gasSettings().postValue(settings);
             }
         }
-    }
-
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 }

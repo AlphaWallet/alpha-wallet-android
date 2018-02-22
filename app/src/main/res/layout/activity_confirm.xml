@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
-    <include layout="@layout/layout_simple_toolbar" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <include layout="@layout/layout_app_bar" />
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:padding="16dp">
 
         <TextView
             android:id="@+id/text_value"
@@ -126,19 +125,4 @@
 
 
     </android.support.constraint.ConstraintLayout>
-    <com.wallet.crypto.alphawallet.widget.SystemView
-        android:id="@+id/system_view"
-        android:background="@color/white"
-        android:layout_marginTop="?actionBarSize"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:visibility="gone"
-        />
-    <com.wallet.crypto.alphawallet.widget.ProgressView
-        android:id="@+id/progress_view"
-        android:layout_marginTop="?actionBarSize"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:visibility="gone"
-        />
-</FrameLayout>
+</LinearLayout>

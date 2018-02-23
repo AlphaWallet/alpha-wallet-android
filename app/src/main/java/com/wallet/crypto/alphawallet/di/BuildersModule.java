@@ -1,6 +1,5 @@
 package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.alphawallet.router.PurchaseTicketRouter;
 import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
@@ -109,6 +108,6 @@ public abstract class BuildersModule {
 	abstract SellDetailActivity bindSellDetailsActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = PurchaseTicketRouter.class)
+	@ContributesAndroidInjector(modules = PurchaseTicketsModule.class)
 	abstract PurchaseTicketsActivity bindPurchaseTicketsActivity();
 }

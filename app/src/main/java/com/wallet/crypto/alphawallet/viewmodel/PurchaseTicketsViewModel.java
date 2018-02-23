@@ -11,13 +11,12 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
-import java.math.BigInteger;
-
 /**
  * Created by James on 23/02/2018.
  */
 
-public class PurchaseTicketsViewModel extends BaseViewModel {
+public class PurchaseTicketsViewModel extends BaseViewModel
+{
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -27,8 +26,8 @@ public class PurchaseTicketsViewModel extends BaseViewModel {
     private final MarketQueueService marketQueueService;
 
     PurchaseTicketsViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
-                    FindDefaultWalletInteract findDefaultWalletInteract,
-                    MarketQueueService marketQueueService) {
+                             FindDefaultWalletInteract findDefaultWalletInteract,
+                             MarketQueueService marketQueueService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -38,7 +37,7 @@ public class PurchaseTicketsViewModel extends BaseViewModel {
         return defaultWallet;
     }
 
-    public void prepare(Ticket ticket) {
+    public void prepare() {
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);

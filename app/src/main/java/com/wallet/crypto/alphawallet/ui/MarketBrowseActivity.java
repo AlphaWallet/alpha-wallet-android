@@ -129,5 +129,6 @@ public class MarketBrowseActivity extends BaseActivity
     private void onOrderClick(View view, MarketInstance instance) {
         Context context = view.getContext();
         //TODO: just clicked on an order.
+        viewModel.showPurchaseTicket(context, instance);
     }
 }

@@ -1,12 +1,12 @@
 package com.wallet.crypto.alphawallet.di;
 
+
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

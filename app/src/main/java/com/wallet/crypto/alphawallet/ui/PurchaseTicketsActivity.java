@@ -16,27 +16,22 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.MarketInstance;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
-import com.wallet.crypto.alphawallet.viewmodel.SellDetailModel;
-import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
-import org.web3j.utils.Convert;
-
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
@@ -44,18 +39,16 @@ import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
 /**
  * Created by James on 23/02/2018.
  */
-
 public class PurchaseTicketsActivity extends BaseActivity
 {
     @Inject
-    protected SellDetailModelFactory viewModelFactory;
-    protected SellDetailModel viewModel;
+    protected PurchaseTicketsViewModelFactory viewModelFactory;
+    protected PurchaseTicketsViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
-    private Ticket ticket;
     private MarketInstance ticketRange;
-    private TicketAdapter adapter;
+    private ERC875MarketAdapter adapter;
     private TextView ethPrice;
     private TextView usdPrice;
     private Button purchase;
@@ -70,17 +63,18 @@ public class PurchaseTicketsActivity extends BaseActivity
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        ticket = getIntent().getParcelableExtra(TICKET);
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(MARKET_INSTANCE);
 
-        setContentView(R.layout.activity_set_price); //use token just provides a simple list view.
+        setContentView(R.layout.activity_purchase_ticket); //use token just provides a simple list view.
 
         //we should import a token and a list of chosen ids
-        RecyclerView list = findViewById(R.id.listTickets);
         purchase = findViewById(R.id.button_purchase);
 
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds);
+        RecyclerView list = findViewById(R.id.listTickets);
+        MarketInstance[] singleInstance = new MarketInstance[1];
+        singleInstance[0] = ticketRange;
+        adapter = new ERC875MarketAdapter(this::onOrderClick, singleInstance);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -99,7 +93,7 @@ public class PurchaseTicketsActivity extends BaseActivity
         usdPrice = findViewById(R.id.fiat_price);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(SellDetailModel.class);
+                .get(PurchaseTicketsViewModel.class);
 
         viewModel.setWallet(wallet);
 
@@ -110,6 +104,11 @@ public class PurchaseTicketsActivity extends BaseActivity
         purchase.setOnClickListener((View v) -> {
             purchaseTicketsFinal();
         });
+    }
+
+    private void onOrderClick(View view, MarketInstance instance)
+    {
+        //do nothing
     }
 
     private void purchaseTicketsFinal()
@@ -165,7 +164,7 @@ public class PurchaseTicketsActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare();
     }
 
     private void onTicketIdClick(View view, TicketRange range) {

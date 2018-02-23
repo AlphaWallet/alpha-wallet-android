@@ -7,9 +7,7 @@ import com.wallet.crypto.alphawallet.entity.MarketInstance;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
 
-import static com.wallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
-import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
 
 

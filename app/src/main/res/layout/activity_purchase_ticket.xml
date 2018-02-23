@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <include layout="@layout/layout_simple_toolbar" />
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <RelativeLayout
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/big_padding"
+            android:layout_marginRight="@dimen/big_padding"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/contract_address_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_gravity="center"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                >
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/symbol_input_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    >
+                    <EditText
+                        android:id="@+id/purchase_quantity"
+                        android:hint="@string/quantity_to_purchase"
+                        android:inputType="numberDecimal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+                </android.support.design.widget.TextInputLayout>
+
+            </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/listTickets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/contract_address_layout"
+                android:layout_above="@id/fiat_layout"
+                android:divider="@android:color/transparent"
+                android:layout_marginTop="20dp"
+                android:dividerHeight="10.0sp"
+                />
+
+            <LinearLayout
+                android:id="@+id/fiat_layout"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/layoutButtons"
+                android:layout_gravity="center"
+                android:gravity="bottom"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                >
+                <TextView
+                    android:id="@+id/fiat_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:textAllCaps="true"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="@color/holo_blue"
+                    android:text="Total Cost"/>
+                <TextView
+                    android:id="@+id/eth_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="16sp"
+                    android:textColor="@color/holo_blue"
+                    android:layout_marginBottom="5dp"
+                    android:text="6.05 ETH"/>
+                <TextView
+                    android:id="@+id/fiat_price_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="5dp"
+                    android:text="Equivalent in USD"/>
+                <TextView
+                    android:id="@+id/fiat_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/holo_blue"
+                    android:layout_marginBottom="5dp"
+                    android:text="$6300"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_sell"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:layout_weight="0.5"
+                    android:text="@string/action_purchase"
+                    />
+            </LinearLayout>
+
+        </RelativeLayout>
+    </LinearLayout>
+    <com.wallet.crypto.alphawallet.widget.SystemView
+        android:id="@+id/system_view"
+        android:background="@color/white"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"
+        />
+    <com.wallet.crypto.alphawallet.widget.ProgressView
+        android:id="@+id/progress_view"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"
+        />
+</android.support.design.widget.CoordinatorLayout>

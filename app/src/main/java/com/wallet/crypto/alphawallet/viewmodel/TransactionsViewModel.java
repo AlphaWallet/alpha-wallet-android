@@ -183,7 +183,10 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void showMyAddress(Context context) {
-        //myAddressRouter.open(context, defaultWallet.getValue());
+        myAddressRouter.open(context, defaultWallet.getValue());
+    }
+
+    public void showMarketplace(Context context) {
         marketBrowseRouter.open(context);
     }
 

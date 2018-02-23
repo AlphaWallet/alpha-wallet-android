@@ -48,8 +48,8 @@ public class ConfirmationActivity extends BaseActivity {
     ConfirmationViewModelFactory confirmationViewModelFactory;
     ConfirmationViewModel viewModel;
 
-    private SystemView systemView;
-    private ProgressView progressView;
+//    private SystemView systemView;
+//    private ProgressView progressView;
 
     private TextView fromAddressText;
     private TextView toAddressText;
@@ -87,10 +87,10 @@ public class ConfirmationActivity extends BaseActivity {
         sendButton = findViewById(R.id.send_button);
         sendButton.setOnClickListener(view -> onSend());
 
-        systemView = findViewById(R.id.system_view);
-        systemView.hide();
-        progressView = findViewById(R.id.progress_view);
-        progressView.hide();
+//        systemView = findViewById(R.id.system_view);
+//        systemView.hide();
+//        progressView = findViewById(R.id.progress_view);
+//        progressView.hide();
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
@@ -141,8 +141,8 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.sendTransaction().observe(this, this::onTransaction);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.error().observe(this, this::onError);
-        viewModel.progress().observe(this, systemView::showProgress);
-        viewModel.queueProgress().observe(this, progressView::updateProgress);
+//        viewModel.progress().observe(this, systemView::showProgress);
+//        viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
     }
 

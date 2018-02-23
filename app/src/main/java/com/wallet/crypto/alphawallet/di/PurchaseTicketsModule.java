@@ -1,9 +1,12 @@
 package com.wallet.crypto.alphawallet.di;
 
 
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModelFactory;
@@ -22,9 +25,10 @@ public class PurchaseTicketsModule
     PurchaseTicketsViewModelFactory purchaseTicketsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
+            CreateTransactionInteract createTransactionInteract,
             MarketQueueService marketQueueService) {
         return new PurchaseTicketsViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, marketQueueService);
     }
 
     @Provides
@@ -36,5 +40,10 @@ public class PurchaseTicketsModule
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
+    }
+
+    @Provides
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
+        return new CreateTransactionInteract(transactionRepository, passwordStore);
     }
 }

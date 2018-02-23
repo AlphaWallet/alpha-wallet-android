@@ -1,15 +1,19 @@
 package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
@@ -41,6 +45,8 @@ import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
  */
 public class PurchaseTicketsActivity extends BaseActivity
 {
+    AlertDialog dialog;
+
     @Inject
     protected PurchaseTicketsViewModelFactory viewModelFactory;
     protected PurchaseTicketsViewModel viewModel;
@@ -70,6 +76,8 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         purchase = findViewById(R.id.button_purchase);
+        ethPrice = findViewById(R.id.eth_price);
+        usdPrice = findViewById(R.id.fiat_price);
 
         RecyclerView list = findViewById(R.id.listTickets);
         MarketInstance[] singleInstance = new MarketInstance[1];
@@ -77,6 +85,16 @@ public class PurchaseTicketsActivity extends BaseActivity
         adapter = new ERC875MarketAdapter(this::onOrderClick, singleInstance);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
+
+        //calculate total price
+        double totalEthPrice = round(ticketRange.price * ticketRange.tickets.length, 2);
+        String priceStr = String.valueOf(totalEthPrice) + " ETH";
+        ethPrice.setText(priceStr);
+
+        //TODO: Remove Ghastly hack and get latest ETH/USD price
+        double totalUsdPrice = round(totalEthPrice * 1000.0, 2);
+        String totalUsdStr = "$" + String.valueOf(totalUsdPrice);
+        usdPrice.setText(totalUsdStr);
 
         toolbar();
 
@@ -100,10 +118,48 @@ public class PurchaseTicketsActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.sendTransaction().observe(this, this::onTransaction);
+        viewModel.progress().observe(this, this::onProgress);
 
         purchase.setOnClickListener((View v) -> {
             purchaseTicketsFinal();
         });
+    }
+
+    private void onProgress(boolean shouldShowProgress) {
+        hideDialog();
+        if (shouldShowProgress) {
+            dialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.title_dialog_sending)
+                    .setView(new ProgressBar(this))
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
+        }
+    }
+
+    private void hideDialog() {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+    }
+
+    private void onTransaction(String hash) {
+        hideDialog();
+        dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.transaction_succeeded)
+                .setMessage(hash)
+                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
+                    finish();
+                })
+                .setNeutralButton(R.string.copy, (dialog1, id) -> {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("transaction hash", hash);
+                    clipboard.setPrimaryClip(clip);
+                    finish();
+                })
+                .create();
+        dialog.show();
     }
 
     private void onOrderClick(View view, MarketInstance instance)
@@ -113,11 +169,12 @@ public class PurchaseTicketsActivity extends BaseActivity
 
     private void purchaseTicketsFinal()
     {
+        viewModel.buyRange(ticketRange);
 //        if (!isValidAmount(sellPrice.getText().toString())) {
 //            toInputLayout.setError(getString(R.string.error_invalid_address));
 //            return;
 //        }
-//
+//'
 //        //1. validate price
 //        BigInteger price = getPriceInWei();
 //        //2. get indicies

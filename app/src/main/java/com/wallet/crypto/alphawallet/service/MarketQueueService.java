@@ -15,14 +15,25 @@ import com.wallet.crypto.alphawallet.entity.TokenTicker;
 import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.TokenRepository;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.spongycastle.jce.interfaces.ECKey;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Uint16;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 
@@ -47,6 +58,7 @@ import java.nio.ShortBuffer;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,6 +270,49 @@ public class MarketQueueService {
         }
 
         return result;
+    }
+
+    public byte[] generateReverseTradeData(Wallet wallet, MarketInstance marketInstance)
+    {
+        byte[] data = null;
+        try
+        {
+            BigInteger expiry = BigInteger.valueOf(marketInstance.expiry);
+            List<BigInteger> ticketIndices = new ArrayList<>();//Uint16[marketInstance.tickets.length];
+            for (int ticketIndex : marketInstance.tickets)
+            {
+                ticketIndices.add(BigInteger.valueOf(ticketIndex));
+            }
+            //convert to signature representation
+            Sign.SignatureData sellerSig = sigFromByteArray(marketInstance.signature);
+
+            Uint8 v = new Uint8(sellerSig.getV());
+            Bytes32 r = new Bytes32(sellerSig.getR());
+            Bytes32 s = new Bytes32(sellerSig.getS());
+
+            //fetch price from message, first 32 bytes
+            //first create byte array
+            byte[] priceBytes = Arrays.copyOfRange(marketInstance.message, 0, 32);
+            BigInteger price = new BigInteger(priceBytes);
+
+            //quick sanity check, dump price
+            BigInteger milliWei = Convert.fromWei(price.toString(), Convert.Unit.FINNEY).toBigInteger();
+            double recreatePrice = milliWei.doubleValue() / 1000.0;
+
+            System.out.println("Approx value of trade: " + recreatePrice);
+
+            int vVal = (int)sellerSig.getV();
+            String byteR = bytesToHex(sellerSig.getR());
+            String byteS = bytesToHex(sellerSig.getS());
+
+            data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return data;
     }
 
     public interface ApiMarketQueue

@@ -26,21 +26,28 @@ public class MarketInstance implements Parcelable
     public final byte[] message;
 
     public MarketInstance(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) {
+        this.message = Base64.decode(msg, Base64.DEFAULT);
         this.price = price;
         this.expiry = expiry;
         this.ticketStart = ticketStart;
         this.ticketCount = ticketCount;
-
         this.tickets = new int[ticketCount];
+
+        //now we have to extract the ticket indicies out of the message
+        //they start at byte 84
+
+        int offset = 84;
+
         for (int i = 0; i < ticketCount; i++)
         {
-            this.tickets[i] = ticketStart;
-            ticketStart++;
+            short index = 0;
+            index = (short) (this.message[offset]*256 + this.message[offset+1]);
+            this.tickets[i] = index;
+            offset += 2;
         }
 
         this.contractAddress = contractAddress;
         this.signature = Base64.decode(sig, Base64.DEFAULT);
-        this.message = Base64.decode(msg, Base64.DEFAULT);
     }
 
     private MarketInstance(Parcel in) {

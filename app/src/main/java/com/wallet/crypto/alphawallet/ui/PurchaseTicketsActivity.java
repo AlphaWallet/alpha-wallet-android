@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.MarketInstance;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
@@ -38,6 +39,7 @@ import dagger.android.AndroidInjection;
 import static com.wallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 import static com.wallet.crypto.alphawallet.C.Key.WALLET;
+import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
 
 /**
  * Created by James on 23/02/2018.
@@ -52,16 +54,15 @@ public class PurchaseTicketsActivity extends BaseActivity
     private ProgressView progressView;
 
     private Ticket ticket;
-    private TicketRange ticketRange;
+    private MarketInstance ticketRange;
     private TicketAdapter adapter;
+    private TextView ethPrice;
     private TextView usdPrice;
-    private Button sell;
+    private Button purchase;
 
-    private TextInputLayout toInputLayout;
     private TextInputLayout amountInputLayout;
 
-    private EditText sellPrice;
-    private EditText count;
+    private EditText purchaseQuantity;
     private String ticketIds;
 
     @Override
@@ -71,13 +72,13 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         ticket = getIntent().getParcelableExtra(TICKET);
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
-        ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
+        ticketRange = getIntent().getParcelableExtra(MARKET_INSTANCE);
 
         setContentView(R.layout.activity_set_price); //use token just provides a simple list view.
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        sell = findViewById(R.id.button_sell);
+        purchase = findViewById(R.id.button_purchase);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -85,9 +86,8 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         toolbar();
 
-        setTitle(getString(R.string.action_sell));
-        toInputLayout = findViewById(R.id.to_input_layout);
-        amountInputLayout = findViewById(R.id.amount_input_layout);
+        setTitle(getString(R.string.title_market_purchase));
+        amountInputLayout = findViewById(R.id.symbol_input_layout);
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -95,8 +95,8 @@ public class PurchaseTicketsActivity extends BaseActivity
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        sellPrice = findViewById(R.id.asking_price);
-        count = findViewById(R.id.ticket_selection);
+        ethPrice = findViewById(R.id.eth_price);
+        usdPrice = findViewById(R.id.fiat_price);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailModel.class);
@@ -107,52 +107,52 @@ public class PurchaseTicketsActivity extends BaseActivity
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
 
-        sell.setOnClickListener((View v) -> {
-            sellTicketFinal();
+        purchase.setOnClickListener((View v) -> {
+            purchaseTicketsFinal();
         });
     }
 
-    private void sellTicketFinal()
+    private void purchaseTicketsFinal()
     {
-        if (!isValidAmount(sellPrice.getText().toString())) {
-            toInputLayout.setError(getString(R.string.error_invalid_address));
-            return;
-        }
-
-        //1. validate price
-        BigInteger price = getPriceInWei();
-        //2. get indicies
-        short[] indicies = ticket.getTicketIndicies(ticketIds);
-
-        //TODO: use the count value from the 'count' EditText - see the invision UX plan
-
-        if (price.doubleValue() > 0.0 && indicies != null)
-        {
-            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
-            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
-            viewModel.generateMarketOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
-            finish();
-        }
+//        if (!isValidAmount(sellPrice.getText().toString())) {
+//            toInputLayout.setError(getString(R.string.error_invalid_address));
+//            return;
+//        }
+//
+//        //1. validate price
+//        BigInteger price = getPriceInWei();
+//        //2. get indicies
+//        short[] indicies = ticket.getTicketIndicies(ticketIds);
+//
+//        //TODO: use the count value from the 'count' EditText - see the invision UX plan
+//
+//        if (price.doubleValue() > 0.0 && indicies != null)
+//        {
+//            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
+//            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
+//            viewModel.generateMarketOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
+//            finish();
+//        }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());
         //go back to previous screen
     }
 
-    private BigInteger getPriceInWei()
-    {
-        String textPrice = sellPrice.getText().toString();
-
-        //convert to a double value
-        double value = Double.valueOf(textPrice);
-
-        //now convert to milliWei
-        int milliEth = (int)(value*1000.0f);
-
-        //now convert to ETH
-        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
-
-        return weiValue;
-    }
+//    private BigInteger getPriceInWei()
+//    {
+//        String textPrice = sellPrice.getText().toString();
+//
+//        //convert to a double value
+//        double value = Double.valueOf(textPrice);
+//
+//        //now convert to milliWei
+//        int milliEth = (int)(value*1000.0f);
+//
+//        //now convert to ETH
+//        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
+//
+//        return weiValue;
+//    }
 
     private double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
@@ -160,15 +160,6 @@ public class PurchaseTicketsActivity extends BaseActivity
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
-    }
-
-    boolean isValidAmount(String eth) {
-        try {
-            String wei = BalanceUtils.EthToWei(eth);
-            return wei != null;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     @Override

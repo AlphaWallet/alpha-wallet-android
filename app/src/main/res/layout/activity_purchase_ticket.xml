@@ -70,7 +70,7 @@
                 android:orientation="vertical"
                 >
                 <TextView
-                    android:id="@+id/fiat_txt"
+                    android:id="@+id/eth_txt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="10sp"
@@ -117,7 +117,7 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/button_sell"
+                    android:id="@+id/button_purchase"
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

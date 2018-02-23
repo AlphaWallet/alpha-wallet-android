@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
+import com.wallet.crypto.alphawallet.router.PurchaseTicketRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 /**
@@ -15,17 +16,20 @@ public class MarketBrowseModelFactory implements ViewModelProvider.Factory
 {
     private final MarketQueueService marketQueueService;
     private final MarketBuyRouter marketBuyRouter;
+    private final PurchaseTicketRouter purchaseTicketRouter;
 
     public MarketBrowseModelFactory(
             MarketQueueService marketQueueService,
-            MarketBuyRouter marketBuyRouter) {
+            MarketBuyRouter marketBuyRouter,
+            PurchaseTicketRouter purchaseTicketRouter) {
         this.marketQueueService = marketQueueService;
         this.marketBuyRouter = marketBuyRouter;
+        this.purchaseTicketRouter = purchaseTicketRouter;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new MarketBrowseModel(marketQueueService, marketBuyRouter);
+        return (T) new MarketBrowseModel(marketQueueService, marketBuyRouter, purchaseTicketRouter);
     }
 }

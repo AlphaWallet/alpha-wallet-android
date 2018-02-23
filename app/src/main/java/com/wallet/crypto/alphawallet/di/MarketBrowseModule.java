@@ -8,6 +8,7 @@ import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
+import com.wallet.crypto.alphawallet.router.PurchaseTicketRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
@@ -25,13 +26,19 @@ public class MarketBrowseModule
     @Provides
     MarketBrowseModelFactory marketBrowseModelFactory(
             MarketQueueService marketQueueService,
-            MarketBuyRouter marketBuyRouter) {
+            MarketBuyRouter marketBuyRouter,
+            PurchaseTicketRouter purchaseTicketRouter) {
         return new MarketBrowseModelFactory(
-                marketQueueService, marketBuyRouter);
+                marketQueueService, marketBuyRouter, purchaseTicketRouter);
     }
 
     @Provides
     MarketBuyRouter provideMarketBuyRouter() {
         return new MarketBuyRouter();
+    }
+
+    @Provides
+    PurchaseTicketRouter providePurchaseTicketsRouter() {
+        return new PurchaseTicketRouter();
     }
 }

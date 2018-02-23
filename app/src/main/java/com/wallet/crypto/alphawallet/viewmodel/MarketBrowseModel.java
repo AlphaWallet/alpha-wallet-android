@@ -16,6 +16,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
+import com.wallet.crypto.alphawallet.router.PurchaseTicketRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
@@ -39,6 +40,7 @@ public class MarketBrowseModel extends BaseViewModel
 
     private final MarketQueueService marketQueueService;
     private final MarketBuyRouter marketBuyRouter;
+    private final PurchaseTicketRouter purchaseTicketRouter;
 
     private final MutableLiveData<MarketInstance[]> market = new MutableLiveData<>();
     private final MutableLiveData<String> selection = new MutableLiveData<>();
@@ -48,10 +50,12 @@ public class MarketBrowseModel extends BaseViewModel
 
     public MarketBrowseModel(
             MarketQueueService marketQueueService,
-            MarketBuyRouter marketBuyRouter)
+            MarketBuyRouter marketBuyRouter,
+            PurchaseTicketRouter purchaseTicketRouter)
     {
         this.marketQueueService = marketQueueService;
         this.marketBuyRouter = marketBuyRouter;
+        this.purchaseTicketRouter = purchaseTicketRouter;
     }
 
     public LiveData<MarketInstance[]> updateMarket() {

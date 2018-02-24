@@ -78,20 +78,17 @@ public class PurchaseTicketsViewModel extends BaseViewModel
     {
         //ok let's try to drive this guy through
         final byte[] tradeData = marketQueueService.generateReverseTradeData(defaultWallet.getValue(), marketInstance);
-        //fetch price from message, first 32 bytes
-        //first create byte array
-        byte[] priceBytes = Arrays.copyOfRange(marketInstance.message, 0, 32);
-        BigInteger price = new BigInteger(priceBytes);
 
         //quick sanity check, dump price
-        BigInteger milliWei = Convert.fromWei(price.toString(), Convert.Unit.FINNEY).toBigInteger();
+        BigInteger milliWei = Convert.fromWei(marketInstance.priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         double recreatePrice = milliWei.doubleValue() / 1000.0;
 
         System.out.println("Approx value of trade: " + recreatePrice);
         //now push the transaction:
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(defaultWallet().getValue().address), marketInstance.contractAddress, price, Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
+                .create(new Wallet(defaultWallet().getValue().address), marketInstance.contractAddress, marketInstance.priceWei,
+                        Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -101,7 +98,6 @@ public class PurchaseTicketsViewModel extends BaseViewModel
         newTransaction.postValue(transaction);
     }
 
-    //TODO: get the current ETH price, update the fiat price
-    //Not now
+    //TODO: get the current ETH price, update the fiat price, use CoinmarketcapTicker
 
 }

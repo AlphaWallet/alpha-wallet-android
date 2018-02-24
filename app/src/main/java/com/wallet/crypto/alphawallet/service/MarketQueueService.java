@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.EthereumReadBuffer;
 import com.wallet.crypto.alphawallet.entity.GasSettings;
 import com.wallet.crypto.alphawallet.entity.MarketInstance;
 import com.wallet.crypto.alphawallet.entity.Ticker;
@@ -130,11 +131,11 @@ public class MarketQueueService {
     }
 
     //This is running on the main UI thread, so it's safe to push messages etc here
-    private void handleResponse(okhttp3.Response response)
+    private void handleResponse(String response)
     {
         System.out.println("handle response");
         BaseViewModel.onQueueUpdate(100);
-        if (response.code() == HttpURLConnection.HTTP_OK)
+        if (response.contains("success"))//  == HttpURLConnection.HTTP_OK)
         {
             BaseViewModel.onPushToast("Queue written");
         }
@@ -163,7 +164,7 @@ public class MarketQueueService {
         return buffer.toByteArray();
     }
 
-    private Single<okhttp3.Response> sendMarketOrders(TradeInstance trades)
+    private Single<String> sendMarketOrders(TradeInstance trades)
     {
         return Single.fromCallable(() -> {
             if (trades == null || trades.getSignatures().size() == 0)
@@ -171,7 +172,7 @@ public class MarketQueueService {
                 return null;
             }
 
-            okhttp3.Response response = null;
+            String response = null;
 
             try
             {
@@ -216,9 +217,9 @@ public class MarketQueueService {
     }
 
     //TODO: Refactor this using
-    private okhttp3.Response writeToQueue(final String writeURL, final byte[] data, final boolean post)
+    private String writeToQueue(final String writeURL, final byte[] data, final boolean post)
     {
-        okhttp3.Response response = null;
+        String result = null;
         try
         {
             final MediaType DATA
@@ -231,15 +232,16 @@ public class MarketQueueService {
                     .addHeader("Content-Type", "application/vnd.awallet-signed-orders-v0")
                     .build();
 
-            response = httpClient.newCall(request).execute();
-            System.out.println("HI: " + response.message());
+            okhttp3.Response response = httpClient.newCall(request).execute();
+            result = response.body().string();
+            System.out.println("HI: " + result);
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
 
-        return response;
+        return result;
     }
 
     private String readFromQueue(final String contractAddr)
@@ -278,32 +280,12 @@ public class MarketQueueService {
         try
         {
             BigInteger expiry = BigInteger.valueOf(marketInstance.expiry);
-            List<BigInteger> ticketIndices = new ArrayList<>();//Uint16[marketInstance.tickets.length];
-            for (int ticketIndex : marketInstance.tickets)
-            {
+            List<BigInteger> ticketIndices = new ArrayList<>();
+            for (int ticketIndex : marketInstance.tickets) {
                 ticketIndices.add(BigInteger.valueOf(ticketIndex));
             }
             //convert to signature representation
             Sign.SignatureData sellerSig = sigFromByteArray(marketInstance.signature);
-
-            Uint8 v = new Uint8(sellerSig.getV());
-            Bytes32 r = new Bytes32(sellerSig.getR());
-            Bytes32 s = new Bytes32(sellerSig.getS());
-
-            //fetch price from message, first 32 bytes
-            //first create byte array
-            byte[] priceBytes = Arrays.copyOfRange(marketInstance.message, 0, 32);
-            BigInteger price = new BigInteger(priceBytes);
-
-            //quick sanity check, dump price
-            BigInteger milliWei = Convert.fromWei(price.toString(), Convert.Unit.FINNEY).toBigInteger();
-            double recreatePrice = milliWei.doubleValue() / 1000.0;
-
-            System.out.println("Approx value of trade: " + recreatePrice);
-
-            int vVal = (int)sellerSig.getV();
-            String byteR = bytesToHex(sellerSig.getR());
-            String byteS = bytesToHex(sellerSig.getS());
 
             data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
         }
@@ -427,15 +409,6 @@ public class MarketQueueService {
 
             return trades;
         });
-
-//        return Single.fromCallable( () -> {
-//            BigInteger gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT);
-//            if (forTokenTransfer) {
-//                gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
-//            }
-//            return new GasSettings(cachedGasPrice, gasLimit);
-//        });
-
     }
 
     private void onError(Throwable error) {
@@ -505,15 +478,15 @@ public class MarketQueueService {
         return sb.toString();
     }
 
-    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
+    private BigInteger ecRecoverPublicKey(Wallet wallet, String password) throws Exception
+    {
+        String testSigMsg = "obtain public key";
+        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, testSigMsg.getBytes(), password).blockingGet();
+        Sign.SignatureData testSig = sigFromByteArray(testSigBytes);
+        BigInteger recoveredKey = Sign.signedMessageToKey(testSigMsg.getBytes(), testSig);
+        String publicKeyString = Keys.getAddress(recoveredKey); //TODO: Remove - this is here for debug/testing
+
+        return recoveredKey;
     }
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig) throws Exception
@@ -529,16 +502,5 @@ public class MarketQueueService {
         Sign.SignatureData ecSig = new Sign.SignatureData(subv, subrRev, subsRev);
 
         return ecSig;
-    }
-
-    private BigInteger ecRecoverPublicKey(Wallet wallet, String password) throws Exception
-    {
-        String testSigMsg = "obtain public key";
-        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, testSigMsg.getBytes(), password).blockingGet();
-        Sign.SignatureData testSig = sigFromByteArray(testSigBytes);
-        BigInteger recoveredKey = Sign.signedMessageToKey(testSigMsg.getBytes(), testSig);
-        String publicKeyString = Keys.getAddress(recoveredKey);
-
-        return recoveredKey;
     }
 }

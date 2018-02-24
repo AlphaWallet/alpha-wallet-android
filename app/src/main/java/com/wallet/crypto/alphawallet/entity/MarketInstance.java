@@ -6,6 +6,8 @@ import android.util.Base64;
 
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ public class MarketInstance implements Parcelable
 {
     public final long expiry;
     public final double price;
+    public final BigInteger priceWei;
     public final int[] tickets;
     public final int ticketStart;
     public final int ticketCount;
@@ -25,27 +28,19 @@ public class MarketInstance implements Parcelable
     public final byte[] signature;
     public final byte[] message;
 
-    public MarketInstance(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) {
+    public MarketInstance(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) throws Exception
+    {
         this.message = Base64.decode(msg, Base64.DEFAULT);
         this.price = price;
         this.expiry = expiry;
         this.ticketStart = ticketStart;
         this.ticketCount = ticketCount;
-        this.tickets = new int[ticketCount];
-
-        //now we have to extract the ticket indicies out of the message
-        //they start at byte 84
-
-        int offset = 84;
-
-        for (int i = 0; i < ticketCount; i++)
-        {
-            short index = 0;
-            index = (short) (this.message[offset]*256 + this.message[offset+1]);
-            this.tickets[i] = index;
-            offset += 2;
-        }
-
+        ByteArrayInputStream bas = new ByteArrayInputStream(message);
+        EthereumReadBuffer ds = new EthereumReadBuffer(bas);
+        priceWei = ds.readBI();
+        ds.readBI();
+        ds.readAddress();
+        this.tickets = ds.readShortIndicies(ticketCount);
         this.contractAddress = contractAddress;
         this.signature = Base64.decode(sig, Base64.DEFAULT);
     }
@@ -67,6 +62,7 @@ public class MarketInstance implements Parcelable
         int messageLength = in.readInt();
         message = new byte[messageLength]; // in theory we shouldn't need to do this, always is 65 bytes
         in.readByteArray(message);
+        priceWei = new BigInteger(in.readString());
     }
 
     public static final Creator<MarketInstance> CREATOR = new Creator<MarketInstance>() {
@@ -100,5 +96,6 @@ public class MarketInstance implements Parcelable
         parcel.writeByteArray(signature);
         parcel.writeInt(message.length);
         parcel.writeByteArray(message);
+        parcel.writeString(priceWei.toString(10));
     }
 }

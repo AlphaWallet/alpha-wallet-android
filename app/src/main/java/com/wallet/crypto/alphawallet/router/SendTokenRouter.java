@@ -8,9 +8,9 @@ import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.ui.SendActivity;
 
 public class SendTokenRouter {
-    public void open(Context context, String address, String symbol, int decimals) {
+    public void open(Context context, String address, String symbol, int decimals, boolean isToken) {
         Intent intent = new Intent(context, SendActivity.class);
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, isToken);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);

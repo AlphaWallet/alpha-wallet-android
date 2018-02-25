@@ -118,7 +118,6 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
     @Override
     protected void onResume() {
         super.onResume();
-
         viewModel.fetchTokens();
     }
 

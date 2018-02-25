@@ -18,6 +18,7 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -77,19 +78,36 @@ public class TicketSaleAdapter extends TicketAdapter {
                         || i == (sortedList.size() - 1)) //check consecutive seats and zone is still the same, and push final ticket
                 {
                     if (currentRange != null) items.add(new TicketSaleSortedItem(currentRange, 10 + i));
-                    int seatStart = TicketDecode.getSeatIdInt(tokenId);
-                    currentRange = new TicketRange(tokenId, seatStart);
+                    currentRange = new TicketRange(tokenId, t.getAddress());
                     currentZone = zone;
                 }
                 else
                 {
                     //update
-                    currentRange.seatCount++;
+                    currentRange.tokenIds.add(tokenId);
                 }
 
                 currentSeat = seatNumber;
             }
         }
         items.endBatchedUpdates();
+    }
+
+    public List<TicketRange> getCheckedItems()
+    {
+        List<TicketRange> checkedItems = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i) instanceof TicketSaleSortedItem)
+            {
+                TicketSaleSortedItem thisItem = (TicketSaleSortedItem) items.get(i);
+                if (thisItem.value.isChecked)
+                {
+                    checkedItems.add(thisItem.value);
+                }
+            }
+        }
+
+        return checkedItems;
     }
 }

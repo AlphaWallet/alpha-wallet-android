@@ -4,10 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
-    android:fitsSystemWindows="true"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
+    <!--android:fitsSystemWindows="true"-->
     <include layout="@layout/layout_app_bar" />
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
@@ -30,11 +31,15 @@
         android:layout_height="match_parent"
         tools:visibility="gone"
         />
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:background="?android:attr/windowBackground"
-        android:layout_gravity="bottom"
+
+    <!--android:background="?android:attr/windowBackground"-->
+    <com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx
+        android:id="@+id/bottom_navigation_ex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        app:itemTextColor="@color/holo_blue"
+        app:menu="@menu/menu_main_network"
         />
 </android.support.design.widget.CoordinatorLayout>

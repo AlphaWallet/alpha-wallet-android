@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.security.Signature;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -21,19 +22,26 @@ public class TradeInstance
     public final BigInteger price;
     public final short[] tickets;
     public final BigInteger contractAddress;
+    public final int ticketStart;
+    public final String publicKey;
     List<byte[]> signatures = new ArrayList<byte[]>();
 
-    public TradeInstance(BigInteger price, BigInteger expiry, short[] tickets, String contractAddress) {
+    public TradeInstance(BigInteger price, BigInteger expiry, short[] tickets, String contractAddress, BigInteger publicKey, int ticketStartId) {
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;
-        this.contractAddress = Numeric.toBigInt(contractAddress);//Numeric.cleanHexPrefix(ticket.getAddress());
+        byte[] keyBytes = publicKey.toByteArray();
+        this.publicKey = padLeft(Numeric.toHexString(keyBytes, 0, keyBytes.length, false), 128);
+        this.ticketStart = ticketStartId;
+        this.contractAddress = Numeric.toBigInt(contractAddress);
     }
 
     public TradeInstance(TradeInstance t, byte[] sig) {
         this.price = t.price;
         this.expiry = t.expiry;
         this.tickets = t.tickets;
+        this.publicKey = t.publicKey;
+        this.ticketStart = t.ticketStart;
         this.contractAddress = t.contractAddress;
     }
 
@@ -78,10 +86,25 @@ public class TradeInstance
     public void addSignatures(DataOutputStream ds) throws Exception
     {
         //now add the signatures
-        for (byte[] sig : signatures)
+        for (int i = 0; i < 500; i++)
         {
+            byte[] sig = signatures.get(i);
             ds.write(sig);
         }
+//        for (byte[] sig : signatures)
+//        {
+//            ds.write(sig);
+//        }
+    }
+
+    private String padLeft(String source, int length)
+    {
+        if(source.length() > length) return source;
+        char[] out = new char[length];
+        int sourceOffset = length - source.length();
+        System.arraycopy(source.toCharArray(), 0, out, sourceOffset, source.length());
+        Arrays.fill(out, 0, sourceOffset, '0');
+        return new String(out);
     }
 
     public int sigCount()

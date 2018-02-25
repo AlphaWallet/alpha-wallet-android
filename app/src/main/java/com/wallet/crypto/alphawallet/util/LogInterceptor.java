@@ -76,50 +76,67 @@ public class LogInterceptor implements Interceptor {
 			e.printStackTrace();
 		}
 
-		long tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
+		try
+		{
+			long tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
 
-		ResponseBody responseBody = response.body();
-		logBuilder.append("\n");
-		logBuilder.append("Response timeout: ").append(tookMs).append("ms");
-		logBuilder.append("\n");
-		logBuilder.append("Response message: ").append(response.message());
-		logBuilder.append("\n");
-		logBuilder.append("Response code: ").append(response.code());
+			ResponseBody responseBody = null;
 
-		if (responseBody != null) {
-			BufferedSource source = responseBody.source();
-			source.request(Long.MAX_VALUE); // Buffer the entire body.
-			Buffer buffer = source.buffer();
+			responseBody = response.body();
 
-			Charset charset = null;
-			MediaType contentType = responseBody.contentType();
-			if (contentType != null) {
-				charset = contentType.charset(UTF8);
+
+			logBuilder.append("\n");
+			logBuilder.append("Response timeout: ").append(tookMs).append("ms");
+			logBuilder.append("\n");
+			logBuilder.append("Response message: ").append(response.message());
+			logBuilder.append("\n");
+			logBuilder.append("Response code: ").append(response.code());
+
+			if (responseBody != null)
+			{
+				BufferedSource source = responseBody.source();
+				source.request(Long.MAX_VALUE); // Buffer the entire body.
+				Buffer buffer = source.buffer();
+
+				Charset charset = null;
+				MediaType contentType = responseBody.contentType();
+				if (contentType != null)
+				{
+					charset = contentType.charset(UTF8);
+				}
+
+				if (charset == null)
+				{
+					charset = UTF8;
+				}
+
+				if (responseBody.contentLength() != 0)
+				{
+					logBuilder.append("\n");
+					logBuilder
+							.append("Response body: \n")
+							.append(buffer.clone().readString(charset));
+				}
 			}
+			headers = response.headers();
+			logBuilder.append("\n=============== Headers ===============\n");
+			for (int i = headers.size() - 1; i > -1; i--)
+			{
+				logBuilder.append(headers.name(i)).append(" : ").append(headers.get(headers.name(i))).append("\n");
 
-			if (charset == null) {
-				charset = UTF8;
 			}
+			logBuilder.append("\n=============== END Headers ===============\n");
 
-			if (responseBody.contentLength() != 0) {
-				logBuilder.append("\n");
-				logBuilder
-						.append("Response body: \n")
-						.append(buffer.clone().readString(charset));
-			}
+			logBuilder.append("\n");
+			logBuilder.append("<-----------------------------END REQUEST--------------------------------->");
+			logBuilder.append("\n\n\n");
+			Log.d(TAG, logBuilder.toString());
 		}
-		headers = response.headers();
-		logBuilder.append("\n=============== Headers ===============\n");
-		for (int i = headers.size() - 1; i > -1; i--) {
-			logBuilder.append(headers.name(i)).append(" : ").append(headers.get(headers.name(i))).append("\n");
+		catch (Exception e)
+		{
 
 		}
-		logBuilder.append("\n=============== END Headers ===============\n");
 
-		logBuilder.append("\n");
-		logBuilder.append("<-----------------------------END REQUEST--------------------------------->");
-		logBuilder.append("\n\n\n");
-		Log.d(TAG, logBuilder.toString());
 		return response;
 	}
 

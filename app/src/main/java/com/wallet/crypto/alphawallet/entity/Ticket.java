@@ -19,6 +19,7 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -209,6 +210,7 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
+    @Override
     public List<Integer> parseIndexList(String userList)
     {
         //read given indicies and convert into internal format, error checking to ensure
@@ -331,32 +333,7 @@ public class Ticket extends Token implements Parcelable
 
     public String populateRange(TicketRange range)
     {
-        StringBuilder sb = new StringBuilder();
-        //find all ticket indexes in this range
-        //find start ID
-        int index = getIndexOf(range.tokenId); //TODO: replace with Numeric map
-
-        boolean first = true;
-
-        if (index > -1)
-        {
-            for (int i = 0; i < range.seatCount; i++)
-            {
-                int id = balanceArray.get(index + i);
-                if (id > 0)
-                {
-                    if (!first) sb.append(", ");
-                    sb.append(String.valueOf(id));
-                    first = false;
-                }
-            }
-        }
-        else
-        {
-            sb.append("none");
-        }
-
-        return sb.toString();
+        return populateIDs(range.tokenIds, false);
     }
 
     private int getIndexOf(int id)
@@ -369,5 +346,17 @@ public class Ticket extends Token implements Parcelable
         {
             return -1;
         }
+    }
+
+    @Override
+    public short[] getTicketIndicies(String ticketIds)
+    {
+        List<Integer> indexList = parseIndexList(ticketIds);
+        short[] indicies = new short[indexList.size()];
+        int i = 0;
+        for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
+            indicies[i] = (short)(int)iterator.next();
+        }
+        return indicies;
     }
 }

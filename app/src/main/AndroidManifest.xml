@@ -101,6 +101,18 @@
             android:label="@string/market_queue_title" />
 
         <activity
+            android:name="com.wallet.crypto.alphawallet.ui.MarketBrowseActivity"
+            android:label="@string/marketplace_title" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.SellDetailActivity"
+            android:label="@string/action_sell" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity"
+            android:label="@string/title_marketplace" />
+
+        <activity
             android:name=".ui.CustomPinActivity"
             />
 

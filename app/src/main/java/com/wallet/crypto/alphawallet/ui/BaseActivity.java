@@ -4,8 +4,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -70,5 +72,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 				break;
 		}
 		return true;
+	}
+
+	public void displayToast(String message) {
+		if (message != null)
+		{
+			Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+			BaseViewModel.onPushToast(null);
+		}
 	}
 }

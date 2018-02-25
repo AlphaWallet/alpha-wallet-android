@@ -13,6 +13,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,6 +29,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 
 /**
  * Created by James on 12/02/2018.
@@ -67,16 +69,34 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
         this.thisData = data;
         try
         {
-            String seatRange = String.valueOf(data.seatStart);
-            if (data.seatCount > 1)
-                seatRange = data.seatStart + "-" + (data.seatStart + data.seatCount);
-            select.setVisibility(View.VISIBLE);
-            name.setText("Ticket #" + data.tokenId); //TODO: Know Shengkai ID number for this range
-            amount.setText("x" + data.seatCount);
-            venue.setText(TicketDecode.getVenue(data.tokenId));
-            date.setText(TicketDecode.getDate(data.tokenId));
-            ticketIds.setText(seatRange);
-            ticketCat.setText(TicketDecode.getZone(data.tokenId));
+            if (data.tokenIds.size() > 0)
+            {
+                int firstTokenId = data.tokenIds.get(0);
+                int seatStart = TicketDecode.getSeatIdInt(firstTokenId);
+                String seatRange = String.valueOf(seatStart);
+                if (data.tokenIds.size() > 1)
+                    seatRange = seatStart + "-" + (seatStart + (data.tokenIds.size() - 1));
+                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+                name.setText(TicketDecode.getName());
+                amount.setText(seatCount);
+                venue.setText(TicketDecode.getVenue(firstTokenId));
+                date.setText(TicketDecode.getDate(firstTokenId));
+                ticketIds.setText(seatRange);
+                ticketCat.setText(TicketDecode.getZone(firstTokenId));
+
+                select.setVisibility(View.VISIBLE);
+                select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+                    {
+                        thisData.isChecked = b;
+                    }
+                });
+            }
+            else
+            {
+                fillEmpty();
+            }
         }
         catch (Exception ex)
         {

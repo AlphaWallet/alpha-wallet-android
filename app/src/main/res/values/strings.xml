@@ -195,7 +195,7 @@
     <string name="hint_contract_price">Price</string>
     <!-- Price -->
     <string name="hint_asking_price">Asking price in ETH</string>
-    <string name="hint_ticket_selection">Ticket Selection</string>
+    <string name="hint_ticket_selection">Ticket Count</string>
 
     <string name="action_use">Redeem</string>
     <string name="action_sell">Sell</string>
@@ -265,4 +265,10 @@
     <string name="selection">selection:</string>
     <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
     <string name="select_tickets">Select Tickets to Sell:</string>
+    <string name="market_buy_title">Browse Ticket Market</string>
+    <string name="marketplace_title">Marketplace</string>
+    <string name="title_marketplace">Marketplace</string>
+    <string name="quantity_to_purchase">Quantity of Tickets</string>
+    <string name="action_purchase">PURCHASE</string>
+    <string name="title_market_purchase">Purchase Tickets</string>
 </resources>

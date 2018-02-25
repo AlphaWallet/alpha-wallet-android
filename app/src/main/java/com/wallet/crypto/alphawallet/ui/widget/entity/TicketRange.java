@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by James on 10/02/2018.
@@ -13,23 +14,39 @@ import java.util.ArrayList;
 
 public class TicketRange implements Parcelable
 {
-    public final int seatStart;
-    public int seatCount;
+    //public final int seatStart;
+    //public int seatCount;
+    public boolean isChecked;
+    public String contractAddress; // Should this be address or actual token?
 
-    public final int tokenId;
+    //public final int tokenId;
 
-    public TicketRange(int tokenId, int seatStart)
+    public List<Integer> tokenIds;
+
+    public TicketRange(int tokenId, String contractAddress)
     {
-        this.tokenId = tokenId;
-        this.seatStart = seatStart;
-        this.seatCount = 1;
+        this.contractAddress = contractAddress;
+        tokenIds = new ArrayList<>();
+        tokenIds.add(tokenId);
+//        this.tokenId = tokenId;
+//        this.seatStart = seatStart;
+//        this.seatCount = 1;
+        this.isChecked = false;
     }
 
     private TicketRange(Parcel in)
     {
-        this.tokenId = in.readInt();
-        this.seatStart = in.readInt();
-        this.seatCount = in.readInt();
+        Object[] readObjArray = in.readArray(Object.class.getClassLoader());
+        this.tokenIds = new ArrayList<>();
+        for (Object o : readObjArray)
+        {
+            this.tokenIds.add((Integer)o);
+        }
+//        this.tokenId = in.readInt();
+//        this.seatStart = in.readInt();
+//        this.seatCount = in.readInt();
+        this.isChecked = (in.readInt() == 1) ? true : false;
+        this.contractAddress = in.readString();
     }
 
     @Override
@@ -41,9 +58,12 @@ public class TicketRange implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
-        dest.writeInt(this.tokenId);
-        dest.writeInt(this.seatStart);
-        dest.writeInt(this.seatCount);
+        dest.writeArray(tokenIds.toArray());
+//        dest.writeInt(this.tokenId);
+//        dest.writeInt(this.seatStart);
+//        dest.writeInt(this.seatCount);
+        dest.writeInt(this.isChecked ? 1:0);
+        dest.writeString(this.contractAddress);
     }
 
     public static final Creator<TicketRange> CREATOR = new Creator<TicketRange>() {

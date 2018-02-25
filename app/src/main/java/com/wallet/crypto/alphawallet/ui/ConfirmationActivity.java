@@ -14,19 +14,28 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ConfirmationType;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.GasSettings;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
+import com.wallet.crypto.alphawallet.widget.ProgressView;
+import com.wallet.crypto.alphawallet.widget.SystemView;
+
+import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -38,6 +47,9 @@ public class ConfirmationActivity extends BaseActivity {
     @Inject
     ConfirmationViewModelFactory confirmationViewModelFactory;
     ConfirmationViewModel viewModel;
+
+//    private SystemView systemView;
+//    private ProgressView progressView;
 
     private TextView fromAddressText;
     private TextView toAddressText;
@@ -51,8 +63,11 @@ public class ConfirmationActivity extends BaseActivity {
     private int decimals;
     private String contractAddress;
     private String amountStr;
-    private boolean confirmationForTicketTransfer = false; //TODO: Refactor this!
-    private boolean confirmationForTokenTransfer = false;
+
+    private ConfirmationType confirmationType;
+    private boolean tokenTransfer;
+
+    private List<TicketRange> marketOrderRange = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,31 +85,50 @@ public class ConfirmationActivity extends BaseActivity {
         gasLimitText = findViewById(R.id.text_gas_limit);
         networkFeeText = findViewById(R.id.text_network_fee);
         sendButton = findViewById(R.id.send_button);
-
         sendButton.setOnClickListener(view -> onSend());
+
+//        systemView = findViewById(R.id.system_view);
+//        systemView.hide();
+//        progressView = findViewById(R.id.progress_view);
+//        progressView.hide();
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        confirmationForTicketTransfer = getIntent().getBooleanExtra(C.STORMBIRD, false);
+        confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
         amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
+        String amountString;
 
-        confirmationForTokenTransfer = contractAddress != null;
-        if (!confirmationForTicketTransfer) {
-            amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        switch (confirmationType)
+        {
+            case ETH:
+                amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+                amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+                tokenTransfer = false;
+                break;
+            case ERC20:
+                amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+                tokenTransfer = true;
+                break;
+            case ERC875:
+                amountString = tokenList;
+                tokenTransfer = true;
+                break;
+            case MARKET:
+                amountString = tokenList;
+                toAddress = "Stormbird market";
+                tokenTransfer = false;
+                break;
+            default:
+                amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+                tokenTransfer = false;
+                break;
         }
 
         toAddressText.setText(toAddress);
-        String amountString;
-
-        if (!confirmationForTicketTransfer) {
-            amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
-        } else {
-            amountString = tokenList;
-        }
 
         valueText.setText(amountString);
         valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
@@ -107,12 +141,14 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.sendTransaction().observe(this, this::onTransaction);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.error().observe(this, this::onError);
+//        viewModel.progress().observe(this, systemView::showProgress);
+//        viewModel.queueProgress().observe(this, progressView::updateProgress);
+        viewModel.pushToast().observe(this, this::displayToast);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.confirmation_menu, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -130,8 +166,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        viewModel.prepare(confirmationForTokenTransfer);
+        viewModel.prepare(tokenTransfer);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -155,29 +190,45 @@ public class ConfirmationActivity extends BaseActivity {
     private void onSend() {
         GasSettings gasSettings = viewModel.gasSettings().getValue();
 
-        if (confirmationForTicketTransfer) {
-            viewModel.createTicketTransfer(
-                    fromAddressText.getText().toString(),
-                    toAddressText.getText().toString(),
-                    contractAddress,
-                    amountStr,
-                    gasSettings.gasPrice,
-                    gasSettings.gasLimit);
-        } else if (!confirmationForTokenTransfer) {
-            viewModel.createTransaction(
-                    fromAddressText.getText().toString(),
-                    toAddressText.getText().toString(),
-                    amount,
-                    gasSettings.gasPrice,
-                    gasSettings.gasLimit);
-        } else {
-            viewModel.createTokenTransfer(
-                    fromAddressText.getText().toString(),
-                    toAddressText.getText().toString(),
-                    contractAddress,
-                    amount,
-                    gasSettings.gasPrice,
-                    gasSettings.gasLimit);
+        switch (confirmationType)
+        {
+            case ETH:
+                viewModel.createTransaction(
+                        fromAddressText.getText().toString(),
+                        toAddressText.getText().toString(),
+                        amount,
+                        gasSettings.gasPrice,
+                        gasSettings.gasLimit);
+                break;
+
+            case ERC20:
+                viewModel.createTokenTransfer(
+                        fromAddressText.getText().toString(),
+                        toAddressText.getText().toString(),
+                        contractAddress,
+                        amount,
+                        gasSettings.gasPrice,
+                        gasSettings.gasLimit);
+                break;
+
+            case ERC875:
+                viewModel.createTicketTransfer(
+                        fromAddressText.getText().toString(),
+                        toAddressText.getText().toString(),
+                        contractAddress,
+                        amountStr,
+                        gasSettings.gasPrice,
+                        gasSettings.gasLimit);
+                break;
+
+            case MARKET:
+                //price in eth
+                BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
+                viewModel.generateMarketOrders(amountStr, contractAddress, wei, valueText.getText().toString());
+                break;
+
+            default:
+                break;
         }
     }
 

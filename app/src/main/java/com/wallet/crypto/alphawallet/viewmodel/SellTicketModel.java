@@ -8,10 +8,13 @@ import android.support.annotation.Nullable;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
+import com.wallet.crypto.alphawallet.router.SellDetailRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 
 import java.util.concurrent.TimeUnit;
@@ -28,7 +31,7 @@ public class SellTicketModel  extends BaseViewModel {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final SellTicketRouter sellTicketRouter;
+    private final SellDetailRouter sellDetailRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -41,11 +44,11 @@ public class SellTicketModel  extends BaseViewModel {
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellTicketRouter sellTicketRouter) {
+            SellDetailRouter sellDetailRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.sellTicketRouter = sellTicketRouter;
+        this.sellDetailRouter = sellDetailRouter;
     }
 
     @Override
@@ -91,14 +94,19 @@ public class SellTicketModel  extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void sellTicketRouter(Context ctx, Ticket ticket) {
-        sellTicketRouter.open(ctx, ticket);
-    }
-
     private void onDefaultWallet(Wallet wallet) {
         //TODO: switch on 'use' button
         progress.postValue(false);
         defaultWallet.setValue(wallet);
         fetchCurrentTicketBalance();
+    }
+
+    public void openSellDialog(Context context, String ticketIDs) {
+        try {
+            Token ticket = this.ticket().getValue();
+            sellDetailRouter.open(context, ticket, ticketIDs, defaultWallet.getValue());
+        } catch (Exception e) {
+
+        }
     }
 }

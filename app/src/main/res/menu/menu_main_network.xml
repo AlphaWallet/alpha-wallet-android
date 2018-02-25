@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/action_marketplace"
+        android:icon="@drawable/ic_action_market"
+        android:title="@string/title_marketplace"
+        />
+    <item
         android:id="@+id/action_send"
         android:icon="@drawable/ic_send_white_24dp"
         android:title="@string/title_send"

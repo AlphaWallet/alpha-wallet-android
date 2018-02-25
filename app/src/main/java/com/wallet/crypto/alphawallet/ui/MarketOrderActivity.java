@@ -44,6 +44,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.util.QRURLParser;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -230,10 +231,6 @@ public class MarketOrderActivity extends BaseActivity
         viewModel.prepare(address);
     }
 
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
-    }
-
     private void onNext() {
         // Validate input fields
         boolean inputValid = true;
@@ -250,17 +247,20 @@ public class MarketOrderActivity extends BaseActivity
             return;
         }
 
+        List<Integer> actualIds = viewModel.ticket().getValue().parseIDListInteger(amount);
         String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
         amountInputLayout.setErrorEnabled(false);
 
-        //let's try to generate a market order
-        viewModel.generateMarketOrders(idSendList);
+        if (actualIds != null && actualIds.size() > 0)
+        {
+            //let's try to generate a market order
+            viewModel.generateMarketOrders(idSendList, actualIds.get(0));
+        }
 
         //kill keyboard
         KeyboardUtils.hideKeyboard(idsText);
         //InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         //imm.hideSoftInputFromWindow(idsText.getWindowToken(), 0);
-
         //viewModel.openConfirmation(this, to, indexList, amount);
     }
 

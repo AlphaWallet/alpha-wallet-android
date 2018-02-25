@@ -29,6 +29,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Int16;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -36,7 +37,9 @@ import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -587,6 +590,27 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
+    public static byte[] createTrade(BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
+    {
+        Function function = getTradeFunction(expiry, ticketIndices, v, r, s);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    private static Function getTradeFunction(BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
+    {
+        Function function = new Function(
+                "trade",
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
+                        new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Uint16>(
+                                org.web3j.abi.Utils.typeMap(ticketIndices, org.web3j.abi.datatypes.generated.Uint16.class)),
+                        new org.web3j.abi.datatypes.generated.Uint8(v),
+                        new org.web3j.abi.datatypes.generated.Bytes32(r),
+                        new org.web3j.abi.datatypes.generated.Bytes32(s)),
+                Collections.<TypeReference<?>>emptyList());
+        return function;
+    }
+
     private Token[] mapToTokens(TokenInfo[] items) {
         int len = items.length;
         Token[] tokens = new Token[len];
@@ -608,6 +632,7 @@ public class TokenRepository implements TokenRepositoryType {
                     name = getName(address);
                 }
                 Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
+                if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,
                         name,

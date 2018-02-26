@@ -2,7 +2,7 @@ package com.wallet.crypto.alphawallet.di;
 
 import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -15,10 +15,10 @@ import dagger.Provides;
 public class MarketBrowseModule
 {
     @Provides
-    MarketBrowseViewModelFactory marketBrowseModelFactory(
+    BrowseMarketViewModelFactory marketBrowseModelFactory(
             MarketQueueService marketQueueService,
             MarketBuyRouter marketBuyRouter) {
-        return new MarketBrowseViewModelFactory(
+        return new BrowseMarketViewModelFactory(
                 marketQueueService, marketBuyRouter);
     }
 

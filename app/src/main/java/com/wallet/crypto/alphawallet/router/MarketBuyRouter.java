@@ -4,11 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
-import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.ui.MarketBrowseActivity;
 import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
 
-import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
 
 /**

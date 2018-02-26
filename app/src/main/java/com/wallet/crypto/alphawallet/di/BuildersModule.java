@@ -1,10 +1,10 @@
 package com.wallet.crypto.alphawallet.di;
 
 import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
-import com.wallet.crypto.alphawallet.ui.MarketBrowseActivity;
 import com.wallet.crypto.alphawallet.ui.SalesOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
 import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
@@ -99,7 +99,7 @@ public abstract class BuildersModule {
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = MarketBrowseModule.class)
-	abstract MarketBrowseActivity bindMarketBrowseActivity();
+	abstract BrowseMarketActivity bindMarketBrowseActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SellDetailModule.class)

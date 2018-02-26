@@ -101,7 +101,7 @@
             android:label="@string/market_queue_title" />
 
         <activity
-            android:name="com.wallet.crypto.alphawallet.ui.MarketBrowseActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.BrowseMarketActivity"
             android:label="@string/marketplace_title" />
 
         <activity

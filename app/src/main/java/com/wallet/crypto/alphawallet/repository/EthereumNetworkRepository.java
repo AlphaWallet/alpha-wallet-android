@@ -42,7 +42,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
                     "https://kovan.etherscan.io/tx/", 42, false),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
                     //"https://ropsten.infura.io/LY55hqqffzZcQ0b513JJ",
-					"http://192.168.1.135:8545/",
+					"http://stormbird.duckdns.org:8545/",
                     "https://ropsten.trustwalletapp.com/",
                     "https://ropsten.etherscan.io/tx/",3, false),
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,

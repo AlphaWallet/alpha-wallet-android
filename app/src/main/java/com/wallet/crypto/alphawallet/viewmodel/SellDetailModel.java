@@ -1,6 +1,5 @@
 package com.wallet.crypto.alphawallet.viewmodel;
 
-import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
@@ -8,16 +7,11 @@ import com.wallet.crypto.alphawallet.entity.GasSettings;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
-import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
-import com.wallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.repository.TokenRepository;
-import com.wallet.crypto.alphawallet.router.GasSettingsRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  * Created by James on 21/02/2018.
@@ -61,9 +55,9 @@ public class SellDetailModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void generateMarketOrders(String contractAddr, BigInteger price, short[] ticketIndicies, int firstTicketId)
+    public void generateSalesOrders(String contractAddr, BigInteger price, short[] ticketIndicies, int firstTicketId)
     {
-        marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId);
     }
 
     public void setWallet(Wallet wallet)

@@ -8,8 +8,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
-import com.wallet.crypto.alphawallet.interact.UseTokenInteract;
-import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
+import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
@@ -28,7 +27,7 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
     private final SignatureDisplayRouter signatureDisplayRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
-    private final MarketOrderRouter marketOrderRouter;
+    private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
 
     public UseTokenViewModelFactory(
@@ -39,7 +38,7 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter,
+            SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -48,13 +47,13 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
         this.signatureDisplayRouter = signatureDisplayRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.ticketTransferRouter = ticketTransferRouter;
-        this.marketOrderRouter = marketOrderRouter;
+        this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new UseTokenViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter, sellTicketRouter);
+        return (T) new UseTokenViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
     }
 }

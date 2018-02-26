@@ -16,7 +16,7 @@ import java.util.List;
  * Created by James on 21/02/2018.
  */
 
-public class MarketInstance implements Parcelable
+public class SalesOrder implements Parcelable
 {
     public final long expiry;
     public final double price;
@@ -28,7 +28,7 @@ public class MarketInstance implements Parcelable
     public final byte[] signature;
     public final byte[] message;
 
-    public MarketInstance(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) throws Exception
+    public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) throws Exception
     {
         this.message = Base64.decode(msg, Base64.DEFAULT);
         this.price = price;
@@ -45,7 +45,7 @@ public class MarketInstance implements Parcelable
         this.signature = Base64.decode(sig, Base64.DEFAULT);
     }
 
-    private MarketInstance(Parcel in) {
+    private SalesOrder(Parcel in) {
         expiry = in.readLong();
         price = in.readDouble();
         ticketStart = in.readInt();
@@ -65,15 +65,15 @@ public class MarketInstance implements Parcelable
         priceWei = new BigInteger(in.readString());
     }
 
-    public static final Creator<MarketInstance> CREATOR = new Creator<MarketInstance>() {
+    public static final Creator<SalesOrder> CREATOR = new Creator<SalesOrder>() {
         @Override
-        public MarketInstance createFromParcel(Parcel in) {
-            return new MarketInstance(in);
+        public SalesOrder createFromParcel(Parcel in) {
+            return new SalesOrder(in);
         }
 
         @Override
-        public MarketInstance[] newArray(int size) {
-            return new MarketInstance[size];
+        public SalesOrder[] newArray(int size) {
+            return new SalesOrder[size];
         }
     };
 

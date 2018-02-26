@@ -1,56 +1,33 @@
 package com.wallet.crypto.alphawallet.ui;
 
-import android.app.ActionBar;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Point;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.Toolbar;
 
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
-import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
-import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
-import com.wallet.crypto.alphawallet.util.QRURLParser;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.SalesOrderViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.SalesOrderViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
-
-import org.ethereum.geth.Address;
 
 import java.util.List;
 
@@ -58,7 +35,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
 
@@ -66,11 +42,11 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
  * Created by James on 5/02/2018.
  */
 
-public class MarketOrderActivity extends BaseActivity
+public class SalesOrderActivity extends BaseActivity
 {
     @Inject
-    protected MarketOrderViewModelFactory ticketTransferViewModelFactory;
-    protected MarketOrderViewModel viewModel;
+    protected SalesOrderViewModelFactory ticketTransferViewModelFactory;
+    protected SalesOrderViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -100,7 +76,7 @@ public class MarketOrderActivity extends BaseActivity
         }
         else
         {
-            setupMarketOrder();
+            setupSalesOrder();
         }
 
         toolbar();
@@ -116,7 +92,7 @@ public class MarketOrderActivity extends BaseActivity
         progressView.hide();
 
         viewModel = ViewModelProviders.of(this, ticketTransferViewModelFactory)
-                .get(MarketOrderViewModel.class);
+                .get(SalesOrderViewModel.class);
 
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
@@ -137,7 +113,7 @@ public class MarketOrderActivity extends BaseActivity
         }
     }
 
-    private void setupMarketOrder()
+    private void setupSalesOrder()
     {
         ticketRange = null;
         setContentView(R.layout.activity_use_token);
@@ -254,7 +230,7 @@ public class MarketOrderActivity extends BaseActivity
         if (actualIds != null && actualIds.size() > 0)
         {
             //let's try to generate a market order
-            viewModel.generateMarketOrders(idSendList, actualIds.get(0));
+            viewModel.generateSalesOrders(idSendList, actualIds.get(0));
         }
 
         //kill keyboard

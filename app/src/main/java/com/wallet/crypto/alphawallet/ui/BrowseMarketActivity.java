@@ -13,11 +13,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -29,11 +29,11 @@ import dagger.android.AndroidInjection;
  * Created by James on 19/02/2018.
  */
 
-public class MarketBrowseActivity extends BaseActivity
+public class BrowseMarketActivity extends BaseActivity
 {
     @Inject
-    protected MarketBrowseViewModelFactory viewModelFactory;
-    protected MarketBrowseViewModel viewModel;
+    protected BrowseMarketViewModelFactory viewModelFactory;
+    protected BrowseMarketViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -48,7 +48,7 @@ public class MarketBrowseActivity extends BaseActivity
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        setupMarketOrder();
+        setupSalesOrder();
         toolbar();
 
         setTitle(getString(R.string.market_buy_title));
@@ -60,7 +60,7 @@ public class MarketBrowseActivity extends BaseActivity
         progressView.hide();
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(MarketBrowseViewModel.class);
+                .get(BrowseMarketViewModel.class);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
@@ -68,7 +68,7 @@ public class MarketBrowseActivity extends BaseActivity
         viewModel.updateMarket().observe(this, this::onMarketUpdate);
     }
 
-    private void setupMarketOrder()
+    private void setupSalesOrder()
     {
         setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
 
@@ -85,7 +85,7 @@ public class MarketBrowseActivity extends BaseActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void onMarketUpdate(MarketInstance[] trades)
+    private void onMarketUpdate(SalesOrder[] trades)
     {
         RecyclerView list = findViewById(R.id.listTickets);
         adapter = new ERC875MarketAdapter(this::onOrderClick, trades);
@@ -113,7 +113,7 @@ public class MarketBrowseActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onOrderClick(View view, MarketInstance instance) {
+    private void onOrderClick(View view, SalesOrder instance) {
         Context context = view.getContext();
         //TODO: just clicked on an order.
         viewModel.showPurchaseTicket(context, instance);

@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
@@ -53,7 +53,7 @@ public class PurchaseTicketsActivity extends BaseActivity
     private SystemView systemView;
     private ProgressView progressView;
 
-    private MarketInstance ticketRange;
+    private SalesOrder ticketRange;
     private ERC875MarketAdapter adapter;
     private TextView ethPrice;
     private TextView usdPrice;
@@ -80,7 +80,7 @@ public class PurchaseTicketsActivity extends BaseActivity
         usdPrice = findViewById(R.id.fiat_price);
 
         RecyclerView list = findViewById(R.id.listTickets);
-        MarketInstance[] singleInstance = new MarketInstance[1];
+        SalesOrder[] singleInstance = new SalesOrder[1];
         singleInstance[0] = ticketRange;
         adapter = new ERC875MarketAdapter(this::onOrderClick, singleInstance);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -162,7 +162,7 @@ public class PurchaseTicketsActivity extends BaseActivity
         dialog.show();
     }
 
-    private void onOrderClick(View view, MarketInstance instance)
+    private void onOrderClick(View view, SalesOrder instance)
     {
         //do nothing
     }
@@ -186,7 +186,7 @@ public class PurchaseTicketsActivity extends BaseActivity
 //        {
 //            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
 //            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
-//            viewModel.generateMarketOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
+//            viewModel.generateSalesOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
 //            finish();
 //        }
 

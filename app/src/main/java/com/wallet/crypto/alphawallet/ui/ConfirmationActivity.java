@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.R;
@@ -24,12 +23,9 @@ import com.wallet.crypto.alphawallet.entity.GasSettings;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
 import com.wallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
-import com.wallet.crypto.alphawallet.widget.ProgressView;
-import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import org.web3j.utils.Convert;
 
@@ -67,7 +63,7 @@ public class ConfirmationActivity extends BaseActivity {
     private ConfirmationType confirmationType;
     private boolean tokenTransfer;
 
-    private List<TicketRange> marketOrderRange = null;
+    private List<TicketRange> salesOrderRange = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -224,7 +220,7 @@ public class ConfirmationActivity extends BaseActivity {
             case MARKET:
                 //price in eth
                 BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
-                viewModel.generateMarketOrders(amountStr, contractAddress, wei, valueText.getText().toString());
+                viewModel.generateSalesOrders(amountStr, contractAddress, wei, valueText.getText().toString());
                 break;
 
             default:

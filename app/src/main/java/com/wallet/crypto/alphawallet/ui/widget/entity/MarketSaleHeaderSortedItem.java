@@ -1,7 +1,7 @@
 package com.wallet.crypto.alphawallet.ui.widget.entity;
 
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.ui.widget.holder.MarketOrderHeaderHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
 
 /**
  * Created by James on 13/02/2018.
@@ -11,7 +11,7 @@ public class MarketSaleHeaderSortedItem extends SortedItem<Token>
 {
     public MarketSaleHeaderSortedItem(Token value)
     {
-        super(MarketOrderHeaderHolder.VIEW_TYPE, value, 0);
+        super(SalesOrderHeaderHolder.VIEW_TYPE, value, 0);
     }
 
     @Override

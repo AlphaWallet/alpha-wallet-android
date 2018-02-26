@@ -107,7 +107,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         gasSettingsRouter.open(context, gasSettings.getValue());
     }
 
-    public void generateMarketOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
+    public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
         //generate a list of integers
         Ticket t = new Ticket(null, "0", 0);
         List<Integer> sends = t.parseIDListInteger(indexSendList);
@@ -127,7 +127,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
             price = price.multiply(BigInteger.valueOf(iDs.size()));
 
-            marketQueueService.createMarketOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
+            marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
         }
     }
 }

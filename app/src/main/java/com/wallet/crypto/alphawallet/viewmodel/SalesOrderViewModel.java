@@ -30,7 +30,7 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by James on 5/02/2018.
  */
 
-public class MarketOrderViewModel extends BaseViewModel
+public class SalesOrderViewModel extends BaseViewModel
 {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final long CHECK_SELECTION_INTERVAL = 1;
@@ -59,7 +59,7 @@ public class MarketOrderViewModel extends BaseViewModel
     private String lastSelection;
     private String newSelection;
 
-    public MarketOrderViewModel(
+    public SalesOrderViewModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -195,7 +195,7 @@ public class MarketOrderViewModel extends BaseViewModel
         changeSelection();
     }
 
-    public void generateMarketOrders(List<Integer> idSendList, int firstTicket) {
+    public void generateSalesOrders(List<Integer> idSendList, int firstTicket) {
         short[] ticketIDs = new short[idSendList.size()];
         int index = 0;
         for (Integer i : idSendList) {
@@ -205,6 +205,6 @@ public class MarketOrderViewModel extends BaseViewModel
         //price in eth
         BigInteger wei = Convert.toWei("2300", Convert.Unit.FINNEY).toBigInteger().multiply(BigInteger.valueOf(idSendList.size())); //FINNEY is 0.001 (milli-eth).
 
-        marketQueueService.createMarketOrders(defaultWallet.getValue(), wei, ticketIDs, ticket().getValue().getAddress(), firstTicket);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), wei, ticketIDs, ticket().getValue().getAddress(), firstTicket);
     }
 }

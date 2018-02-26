@@ -4,7 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
 import com.wallet.crypto.alphawallet.entity.GasSettings;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
@@ -74,7 +74,7 @@ public class PurchaseTicketsViewModel extends BaseViewModel
         defaultWallet.setValue(wallet);
     }
 
-    public void buyRange(MarketInstance marketInstance)
+    public void buyRange(SalesOrder marketInstance)
     {
         //ok let's try to drive this guy through
         final byte[] tradeData = marketQueueService.generateReverseTradeData(defaultWallet.getValue(), marketInstance);

@@ -12,7 +12,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
-import com.wallet.crypto.alphawallet.ui.widget.holder.MarketOrderHeaderHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
@@ -47,8 +47,8 @@ public class TicketSaleAdapter extends TicketAdapter {
             case TokenDescriptionHolder.VIEW_TYPE: {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent);
             } break;
-            case MarketOrderHeaderHolder.VIEW_TYPE: {
-                holder = new MarketOrderHeaderHolder(R.layout.item_token_description, parent);
+            case SalesOrderHeaderHolder.VIEW_TYPE: {
+                holder = new SalesOrderHeaderHolder(R.layout.item_token_description, parent);
             } break;
         }
 

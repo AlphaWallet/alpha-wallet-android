@@ -186,7 +186,7 @@ public class PurchaseTicketsActivity extends BaseActivity
 //        {
 //            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
 //            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
-//            viewModel.generateMarketOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
+//            viewModel.generateSalesOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
 //            finish();
 //        }
 

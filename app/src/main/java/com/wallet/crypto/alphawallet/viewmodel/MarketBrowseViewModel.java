@@ -63,12 +63,12 @@ public class MarketBrowseViewModel extends BaseViewModel
     {
         String contractAddr = "0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4";
         disposable = marketQueueService
-                .fetchMarketOrders(contractAddr)
+                .fetchSalesOrders(contractAddr)
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(this::onMarketOrders, this::onError);
+                .subscribe(this::onSalesOrders, this::onError);
     }
 
-    private void onMarketOrders(SalesOrder[] tradeInstances)
+    private void onSalesOrders(SalesOrder[] tradeInstances)
     {
         market.postValue(tradeInstances);
     }

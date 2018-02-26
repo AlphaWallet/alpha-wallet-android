@@ -2,7 +2,7 @@ package com.wallet.crypto.alphawallet.ui.widget.entity;
 
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.ui.widget.holder.MarketOrderHeaderHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.OrderHolder;
 
 /**

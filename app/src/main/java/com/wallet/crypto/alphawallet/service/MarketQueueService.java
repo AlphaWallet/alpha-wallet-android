@@ -124,7 +124,7 @@ public class MarketQueueService {
 
     private void processMarketTrades(TradeInstance trades)
     {
-        marketQueueProcessing = sendMarketOrders(trades)
+        marketQueueProcessing = sendSalesOrders(trades)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleResponse);
@@ -164,7 +164,7 @@ public class MarketQueueService {
         return buffer.toByteArray();
     }
 
-    private Single<String> sendMarketOrders(TradeInstance trades)
+    private Single<String> sendSalesOrders(TradeInstance trades)
     {
         return Single.fromCallable(() -> {
             if (trades == null || trades.getSignatures().size() == 0)
@@ -365,12 +365,12 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createMarketOrders(Wallet wallet, BigInteger price, short[] ticketIDs, String contractAddr, int firstTicketId) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, short[] ticketIDs, String contractAddr, int firstTicketId) {
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
 
-    public Single<SalesOrder[]> fetchMarketOrders(String contractAddress) {
+    public Single<SalesOrder[]> fetchSalesOrders(String contractAddress) {
         return Single.fromCallable(() -> {
             String result = readFromQueue(contractAddress);
 

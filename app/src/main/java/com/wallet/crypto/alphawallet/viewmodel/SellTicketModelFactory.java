@@ -7,14 +7,7 @@ import android.support.annotation.NonNull;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
-import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
-import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
-import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellDetailRouter;
-import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
-import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 
 /**
  * Created by James on 16/02/2018.

@@ -48,7 +48,7 @@ public class MarketBrowseActivity extends BaseActivity
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        setupMarketOrder();
+        setupSalesOrder();
         toolbar();
 
         setTitle(getString(R.string.market_buy_title));
@@ -68,7 +68,7 @@ public class MarketBrowseActivity extends BaseActivity
         viewModel.updateMarket().observe(this, this::onMarketUpdate);
     }
 
-    private void setupMarketOrder()
+    private void setupSalesOrder()
     {
         setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
 

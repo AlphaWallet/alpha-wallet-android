@@ -138,7 +138,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
             break;
             case R.id.button_sell:
             {
-                viewModel.sellTicketRouter(this, ticket);// showMarketOrder(this, ticket);
+                viewModel.sellTicketRouter(this, ticket);// showSalesOrder(this, ticket);
             }
             break;
             case R.id.button_transfer:
@@ -158,7 +158,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
-        //viewModel.showMarketOrder(this, ticket, range);
+        //viewModel.showSalesOrder(this, ticket, range);
         viewModel.showTransferToken(this, ticket, range);
     }
 }

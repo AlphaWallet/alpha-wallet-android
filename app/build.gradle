@@ -112,14 +112,14 @@ dependencies {
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
     implementation 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
     // Tests
-//    testImplementation "junit:junit:4.12"
-//    androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {
-//        exclude group: "com.android.support", module: "support-annotations"
-//    })
-//    androidTestCompile('tools.fastlane:screengrab:1.1.0', {
-//        exclude group: 'com.android.support', module: 'support-annotations'
-//    })
-//
+    testImplementation "junit:junit:4.12"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {
+        exclude group: "com.android.support", module: "support-annotations"
+    })
+    androidTestCompile('tools.fastlane:screengrab:1.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
     // Fabric
     implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true

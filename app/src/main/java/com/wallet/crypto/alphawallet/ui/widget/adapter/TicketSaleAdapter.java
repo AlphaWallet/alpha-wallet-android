@@ -1,11 +1,14 @@
 package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
+import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
@@ -28,8 +31,12 @@ import java.util.List;
 
 public class TicketSaleAdapter extends TicketAdapter {
 
+    private OnTokenCheckListener onTokenCheckListener;
+    private TicketRange selectedTicketRange;
     public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
         super(onTicketIdClickListener, t);
+        onTokenCheckListener = this::onTokenCheck;
+        selectedTicketRange = null;
     }
 
     @Override
@@ -39,6 +46,7 @@ public class TicketSaleAdapter extends TicketAdapter {
             case TicketSaleHolder.VIEW_TYPE: {
                 TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
+                tokenHolder.setOnTokenCheckListener(onTokenCheckListener);
                 holder = tokenHolder;
             } break;
             case TotalBalanceHolder.VIEW_TYPE: {
@@ -74,11 +82,10 @@ public class TicketSaleAdapter extends TicketAdapter {
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
                 int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                if (seatNumber != currentSeat + 1 || zone != currentZone
-                        || i == (sortedList.size() - 1)) //check consecutive seats and zone is still the same, and push final ticket
+                if (currentRange == null || seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
                 {
-                    if (currentRange != null) items.add(new TicketSaleSortedItem(currentRange, 10 + i));
                     currentRange = new TicketRange(tokenId, t.getAddress());
+                    items.add(new TicketSaleSortedItem(currentRange, 10 + i));
                     currentZone = zone;
                 }
                 else
@@ -109,5 +116,14 @@ public class TicketSaleAdapter extends TicketAdapter {
         }
 
         return checkedItems;
+    }
+
+    private void onTokenCheck(TicketRange range) {
+        if (selectedTicketRange != null)
+            selectedTicketRange.isChecked = false;
+        range.isChecked = true;
+        selectedTicketRange = range;
+        //user clicked a radio button, now invalidate all the other radio buttons
+        notifyDataSetChanged();
     }
 }

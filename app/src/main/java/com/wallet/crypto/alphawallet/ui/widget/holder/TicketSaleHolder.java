@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -24,6 +25,7 @@ import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTicker;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
@@ -41,8 +43,9 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
 
     private TicketRange thisData;
     private OnTicketIdClickListener onTicketClickListener;
+    private OnTokenCheckListener onTokenCheckListener;
 
-    public final CheckBox select;
+    public final AppCompatRadioButton select;
     public final TextView name;
     public final TextView amount;
     public final TextView venue;
@@ -59,7 +62,7 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
         date = findViewById(R.id.date);
         ticketIds = findViewById(R.id.tickettext);
         ticketCat = findViewById(R.id.cattext);
-        select = findViewById(R.id.checkBox);
+        select = findViewById(R.id.radioBox);
         itemView.setOnClickListener(this);
     }
 
@@ -83,13 +86,21 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
                 date.setText(TicketDecode.getDate(firstTokenId));
                 ticketIds.setText(seatRange);
                 ticketCat.setText(TicketDecode.getZone(firstTokenId));
-
                 select.setVisibility(View.VISIBLE);
+
+                if (thisData.isChecked)
+                {
+                    select.setOnCheckedChangeListener(null); //have to invalidate listener first otherwise we trigger cached listener and create infinite loop
+                    select.setChecked(true);
+                }
+
                 select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean b)
                     {
-                        thisData.isChecked = b;
+                        if (b) {
+                            onTokenCheckListener.onTokenCheck(thisData);
+                        }
                     }
                 });
             }
@@ -122,5 +133,10 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
     public void setOnTokenClickListener(OnTicketIdClickListener onTokenClickListener)
     {
         this.onTicketClickListener = onTokenClickListener;
+    }
+
+    public void setOnTokenCheckListener(OnTokenCheckListener onTokenCheckListener)
+    {
+        this.onTokenCheckListener = onTokenCheckListener;
     }
 }

@@ -21,8 +21,6 @@ import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
 import com.wallet.crypto.alphawallet.ui.UseTokenActivity;
 import com.wallet.crypto.alphawallet.ui.WalletsActivity;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModel;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;

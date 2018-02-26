@@ -1,16 +1,8 @@
 package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
-import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
-import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
-import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
-import com.wallet.crypto.alphawallet.router.ConfirmationRouter;
 import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -23,10 +15,10 @@ import dagger.Provides;
 public class MarketBrowseModule
 {
     @Provides
-    MarketBrowseModelFactory marketBrowseModelFactory(
+    MarketBrowseViewModelFactory marketBrowseModelFactory(
             MarketQueueService marketQueueService,
             MarketBuyRouter marketBuyRouter) {
-        return new MarketBrowseModelFactory(
+        return new MarketBrowseViewModelFactory(
                 marketQueueService, marketBuyRouter);
     }
 

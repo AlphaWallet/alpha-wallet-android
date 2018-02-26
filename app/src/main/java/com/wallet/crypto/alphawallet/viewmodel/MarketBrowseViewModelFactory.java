@@ -11,12 +11,12 @@ import com.wallet.crypto.alphawallet.service.MarketQueueService;
  * Created by James on 20/02/2018.
  */
 
-public class MarketBrowseModelFactory implements ViewModelProvider.Factory
+public class MarketBrowseViewModelFactory implements ViewModelProvider.Factory
 {
     private final MarketQueueService marketQueueService;
     private final MarketBuyRouter marketBuyRouter;
 
-    public MarketBrowseModelFactory(
+    public MarketBrowseViewModelFactory(
             MarketQueueService marketQueueService,
             MarketBuyRouter marketBuyRouter) {
         this.marketQueueService = marketQueueService;
@@ -26,6 +26,6 @@ public class MarketBrowseModelFactory implements ViewModelProvider.Factory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new MarketBrowseModel(marketQueueService, marketBuyRouter);
+        return (T) new MarketBrowseViewModel(marketQueueService, marketBuyRouter);
     }
 }

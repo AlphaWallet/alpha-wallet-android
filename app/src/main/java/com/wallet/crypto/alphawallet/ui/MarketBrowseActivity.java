@@ -4,35 +4,22 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.MarketInstance;
-import com.wallet.crypto.alphawallet.entity.Ticket;
-import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
-import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModel;
-import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -45,8 +32,8 @@ import dagger.android.AndroidInjection;
 public class MarketBrowseActivity extends BaseActivity
 {
     @Inject
-    protected MarketBrowseModelFactory viewModelFactory;
-    protected MarketBrowseModel viewModel;
+    protected MarketBrowseViewModelFactory viewModelFactory;
+    protected MarketBrowseViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -73,7 +60,7 @@ public class MarketBrowseActivity extends BaseActivity
         progressView.hide();
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(MarketBrowseModel.class);
+                .get(MarketBrowseViewModel.class);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);

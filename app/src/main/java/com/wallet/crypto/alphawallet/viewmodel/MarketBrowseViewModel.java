@@ -34,7 +34,7 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by James on 19/02/2018.
  */
 
-public class MarketBrowseModel extends BaseViewModel
+public class MarketBrowseViewModel extends BaseViewModel
 {
     private static final long CHECK_MARKET_INTERVAL = 30;
 
@@ -47,7 +47,7 @@ public class MarketBrowseModel extends BaseViewModel
     @Nullable
     private Disposable checkMarketDisposable;
 
-    public MarketBrowseModel(
+    public MarketBrowseViewModel(
             MarketQueueService marketQueueService,
             MarketBuyRouter marketBuyRouter)
     {

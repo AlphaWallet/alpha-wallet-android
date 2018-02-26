@@ -88,11 +88,8 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
                 ticketCat.setText(TicketDecode.getZone(firstTokenId));
                 select.setVisibility(View.VISIBLE);
 
-                if (thisData.isChecked)
-                {
-                    select.setOnCheckedChangeListener(null); //have to invalidate listener first otherwise we trigger cached listener and create infinite loop
-                    select.setChecked(true);
-                }
+                select.setOnCheckedChangeListener(null); //have to invalidate listener first otherwise we trigger cached listener and create infinite loop
+                select.setChecked(thisData.isChecked);
 
                 select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override

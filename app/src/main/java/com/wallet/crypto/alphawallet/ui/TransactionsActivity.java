@@ -34,7 +34,6 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TransactionsAdapter;
 import com.wallet.crypto.alphawallet.util.RootUtil;
 import com.wallet.crypto.alphawallet.viewmodel.BaseNavigationActivity;
-import com.wallet.crypto.alphawallet.viewmodel.BottomNavigationViewHelper;
 import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.DepositView;

@@ -1,6 +1,6 @@
 package com.wallet.crypto.alphawallet.ui.widget.entity;
 
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.holder.MarketOrderHeaderHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.OrderHolder;
@@ -9,9 +9,9 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.OrderHolder;
  * Created by James on 21/02/2018.
  */
 
-public class MarketInstanceSortedItem extends SortedItem<MarketInstance>
+public class SalesOrderSortedItem extends SortedItem<SalesOrder>
 {
-    public MarketInstanceSortedItem(MarketInstance value, int weight)
+    public SalesOrderSortedItem(SalesOrder value, int weight)
     {
         super(OrderHolder.VIEW_TYPE, value, weight);
     }
@@ -26,8 +26,8 @@ public class MarketInstanceSortedItem extends SortedItem<MarketInstance>
     public boolean areContentsTheSame(SortedItem newItem)
     {
         return newItem.viewType == viewType
-                || (((MarketInstanceSortedItem) newItem).value.contractAddress == value.contractAddress)
-                && ((MarketInstanceSortedItem) newItem).value.signature.hashCode() == value.signature.hashCode();
+                || (((SalesOrderSortedItem) newItem).value.contractAddress == value.contractAddress)
+                && ((SalesOrderSortedItem) newItem).value.signature.hashCode() == value.signature.hashCode();
     }
 
     @Override

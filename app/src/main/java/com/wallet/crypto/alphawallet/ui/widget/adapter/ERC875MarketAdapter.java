@@ -5,11 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.ui.widget.OnMarketInstanceClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
-import com.wallet.crypto.alphawallet.ui.widget.entity.MarketInstanceSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.SalesOrderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
@@ -27,7 +27,7 @@ import java.math.BigDecimal;
 
 public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
-    protected final OnMarketInstanceClickListener onMarketInstanceClickListener;
+    protected final OnSalesOrderClickListener onSalesOrderClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem o1, SortedItem o2) {
@@ -66,13 +66,13 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     });
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public ERC875MarketAdapter(OnMarketInstanceClickListener onTokenClickListener, MarketInstance[] orders) {
-        this.onMarketInstanceClickListener = onTokenClickListener;
+    public ERC875MarketAdapter(OnSalesOrderClickListener onTokenClickListener, SalesOrder[] orders) {
+        this.onSalesOrderClickListener = onTokenClickListener;
         setOrders(orders);
     }
 
     public ERC875MarketAdapter() {
-        onMarketInstanceClickListener = null;
+        onSalesOrderClickListener = null;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         switch (viewType) {
             case OrderHolder.VIEW_TYPE: {
                 OrderHolder tokenHolder = new OrderHolder(R.layout.item_market_order, parent);
-                tokenHolder.setOnOrderClickListener(onMarketInstanceClickListener);
+                tokenHolder.setOnOrderClickListener(onSalesOrderClickListener);
                 holder = tokenHolder;
             } break;
             case TokenDescriptionHolder.VIEW_TYPE: {
@@ -107,7 +107,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         return items.size();
     }
 
-    public void setOrders(MarketInstance[] orders) {
+    public void setOrders(SalesOrder[] orders) {
         items.beginBatchedUpdates();
         items.clear();
 
@@ -115,7 +115,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
         for (i = 0; i < orders.length; i++)
         {
-            MarketInstanceSortedItem newItem = new MarketInstanceSortedItem(orders[i], 10 + i);
+            SalesOrderSortedItem newItem = new SalesOrderSortedItem(orders[i], 10 + i);
             items.add(newItem);
         }
         items.endBatchedUpdates();

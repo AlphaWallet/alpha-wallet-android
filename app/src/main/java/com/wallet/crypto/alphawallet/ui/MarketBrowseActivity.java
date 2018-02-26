@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.viewmodel.MarketBrowseViewModel;
@@ -85,7 +85,7 @@ public class MarketBrowseActivity extends BaseActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void onMarketUpdate(MarketInstance[] trades)
+    private void onMarketUpdate(SalesOrder[] trades)
     {
         RecyclerView list = findViewById(R.id.listTickets);
         adapter = new ERC875MarketAdapter(this::onOrderClick, trades);
@@ -113,7 +113,7 @@ public class MarketBrowseActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onOrderClick(View view, MarketInstance instance) {
+    private void onOrderClick(View view, SalesOrder instance) {
         Context context = view.getContext();
         //TODO: just clicked on an order.
         viewModel.showPurchaseTicket(context, instance);

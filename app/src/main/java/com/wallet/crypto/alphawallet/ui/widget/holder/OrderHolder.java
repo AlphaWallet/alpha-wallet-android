@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.TicketDecode;
-import com.wallet.crypto.alphawallet.ui.widget.OnMarketInstanceClickListener;
+import com.wallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
@@ -20,12 +20,12 @@ import java.util.Locale;
  * Created by James on 21/02/2018.
  */
 
-public class OrderHolder extends BinderViewHolder<MarketInstance> implements View.OnClickListener {
+public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1166;
 
-    private MarketInstance thisData;
-    private OnMarketInstanceClickListener onOrderClickListener;
+    private SalesOrder thisData;
+    private OnSalesOrderClickListener onOrderClickListener;
 
     private final TextView price;
     private final TextView count;
@@ -46,7 +46,7 @@ public class OrderHolder extends BinderViewHolder<MarketInstance> implements Vie
     }
 
     @Override
-    public void bind(@Nullable MarketInstance data, @NonNull Bundle addition) {
+    public void bind(@Nullable SalesOrder data, @NonNull Bundle addition) {
         this.thisData = data;
         try {
             int seatStart = TicketDecode.getSeatIdInt(data.ticketStart);
@@ -75,7 +75,7 @@ public class OrderHolder extends BinderViewHolder<MarketInstance> implements Vie
         }
     }
 
-    public void setOnOrderClickListener(OnMarketInstanceClickListener onTokenClickListener) {
+    public void setOnOrderClickListener(OnSalesOrderClickListener onTokenClickListener) {
         this.onOrderClickListener = onTokenClickListener;
     }
 }

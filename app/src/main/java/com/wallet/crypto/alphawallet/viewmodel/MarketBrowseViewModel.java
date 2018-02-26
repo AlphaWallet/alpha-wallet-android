@@ -6,7 +6,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
@@ -41,7 +41,7 @@ public class MarketBrowseViewModel extends BaseViewModel
     private final MarketQueueService marketQueueService;
     private final MarketBuyRouter marketBuyRouter;
 
-    private final MutableLiveData<MarketInstance[]> market = new MutableLiveData<>();
+    private final MutableLiveData<SalesOrder[]> market = new MutableLiveData<>();
     private final MutableLiveData<String> selection = new MutableLiveData<>();
 
     @Nullable
@@ -55,7 +55,7 @@ public class MarketBrowseViewModel extends BaseViewModel
         this.marketBuyRouter = marketBuyRouter;
     }
 
-    public LiveData<MarketInstance[]> updateMarket() {
+    public LiveData<SalesOrder[]> updateMarket() {
         return market;
     }
 
@@ -68,13 +68,13 @@ public class MarketBrowseViewModel extends BaseViewModel
                 .subscribe(this::onMarketOrders, this::onError);
     }
 
-    private void onMarketOrders(MarketInstance[] tradeInstances)
+    private void onMarketOrders(SalesOrder[] tradeInstances)
     {
         market.postValue(tradeInstances);
     }
 
-    //Context context, Token token, MarketInstance instance
-    public void showPurchaseTicket(Context context, MarketInstance instance)
+    //Context context, Token token, SalesOrder instance
+    public void showPurchaseTicket(Context context, SalesOrder instance)
     {
         marketBuyRouter.open(context, instance);
     }

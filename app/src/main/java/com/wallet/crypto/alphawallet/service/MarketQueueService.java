@@ -9,7 +9,7 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.EthereumReadBuffer;
 import com.wallet.crypto.alphawallet.entity.GasSettings;
-import com.wallet.crypto.alphawallet.entity.MarketInstance;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.Ticker;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.TokenTicker;
@@ -274,7 +274,7 @@ public class MarketQueueService {
         return result;
     }
 
-    public byte[] generateReverseTradeData(Wallet wallet, MarketInstance marketInstance)
+    public byte[] generateReverseTradeData(Wallet wallet, SalesOrder marketInstance)
     {
         byte[] data = null;
         try
@@ -370,7 +370,7 @@ public class MarketQueueService {
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
 
-    public Single<MarketInstance[]> fetchMarketOrders(String contractAddress) {
+    public Single<SalesOrder[]> fetchMarketOrders(String contractAddress) {
         return Single.fromCallable(() -> {
             String result = readFromQueue(contractAddress);
 
@@ -391,7 +391,7 @@ public class MarketQueueService {
             JSONObject stateData = new JSONObject(result);
             JSONArray orders = stateData.getJSONArray("orders");
 
-            MarketInstance[] trades = new MarketInstance[orders.length()];
+            SalesOrder[] trades = new SalesOrder[orders.length()];
 
             for (int i = 0; i < orders.length(); i++)
             {
@@ -404,7 +404,7 @@ public class MarketQueueService {
                 String base64Msg = order.getString("message");
                 String base64Sig = order.getString("signature");
 
-                trades[i] = new MarketInstance(price, expiry, start, count, contractAddress, base64Sig, base64Msg);
+                trades[i] = new SalesOrder(price, expiry, start, count, contractAddress, base64Sig, base64Msg);
             }
 
             return trades;

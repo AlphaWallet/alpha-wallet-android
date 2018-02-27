@@ -1,14 +1,12 @@
 package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
-import com.wallet.crypto.alphawallet.router.RedeemTokenRouter;
-import com.wallet.crypto.alphawallet.router.RedeemTokenSelectRouter;
-import com.wallet.crypto.alphawallet.router.SellDetailRouter;
-import com.wallet.crypto.alphawallet.viewmodel.RedeemTokenSelectViewModelFactory;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
+import com.wallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -18,16 +16,16 @@ import dagger.Provides;
  */
 
 @Module
-public class RedeemTokenSelectModule
+public class RedeemAssetSelectModule
 {
     @Provides
-    RedeemTokenSelectViewModelFactory redeemTokenSelectViewModelFactory(
+    RedeemAssetSelectViewModelFactory redeemTokenSelectViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            RedeemTokenRouter redeemTokenRouter) {
+            RedeemSignatureDisplayRouter redeemSignatureDisplayRouter) {
 
-        return new RedeemTokenSelectViewModelFactory(
-                findDefaultWalletInteract, findDefaultNetworkInteract, redeemTokenRouter);
+        return new RedeemAssetSelectViewModelFactory(
+                findDefaultWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter);
     }
 
     @Provides
@@ -42,7 +40,7 @@ public class RedeemTokenSelectModule
     }
 
     @Provides
-    RedeemTokenRouter provideRedeemTokenRouter() {
-        return new RedeemTokenRouter();
+    RedeemSignatureDisplayRouter provideRedeemSignatureDisplayRouter() {
+        return new RedeemSignatureDisplayRouter();
     }
 }

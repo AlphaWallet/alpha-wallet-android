@@ -7,10 +7,10 @@ import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModelFactory;
 
@@ -30,12 +30,12 @@ public class AssetDisplayModule {
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
-            SignatureDisplayRouter signatureDisplayRouter,
+            RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
     }
 
     @Provides
@@ -71,8 +71,8 @@ public class AssetDisplayModule {
     }
 
     @Provides
-    SignatureDisplayRouter provideSignatureDisplayRouter() {
-        return new SignatureDisplayRouter();
+    RedeemAssetSelectRouter provideRedeemAssetRouter() {
+        return new RedeemAssetSelectRouter();
     }
 
     @Provides

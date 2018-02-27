@@ -4,37 +4,34 @@ import android.arch.lifecycle.MutableLiveData;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
-import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.Wallet;
-import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
-import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.router.RedeemTokenRouter;
-import com.wallet.crypto.alphawallet.service.MarketQueueService;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
+import com.wallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
 
 /**
  * Created by James on 27/02/2018.
  */
 
-public class RedeemTokenSelectViewModel extends BaseViewModel
+public class RedeemAssetSelectViewModel extends BaseViewModel
 {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final RedeemTokenRouter redeemTokenRouter;
+    private final RedeemSignatureDisplayRouter redeemSignatureDisplayRouter;
 
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
 
-    public RedeemTokenSelectViewModel(
+    public RedeemAssetSelectViewModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            RedeemTokenRouter redeemTokenRouter) {
+            RedeemSignatureDisplayRouter redeemSignatureDisplayRouter) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.redeemTokenRouter = redeemTokenRouter;
+        this.redeemSignatureDisplayRouter = redeemSignatureDisplayRouter;
     }
 
     public void prepare() {

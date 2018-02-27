@@ -11,7 +11,7 @@ import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
-import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -21,16 +21,16 @@ import dagger.Provides;
  */
 
 @Module
-public class SignatureModule {
+public class RedeemSignatureDisplayModule {
     @Provides
-    SignatureDisplayModelFactory signatureDisplayModelFactory(
+    RedeemSignatureDisplayModelFactory signatureDisplayModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract) {
-        return new SignatureDisplayModelFactory(
+        return new RedeemSignatureDisplayModelFactory(
                 findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract);
     }
 

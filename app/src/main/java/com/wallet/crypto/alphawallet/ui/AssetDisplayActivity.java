@@ -133,7 +133,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         {
             case R.id.button_use:
             {
-                viewModel.showRotatingSignature(this, ticket);
+                viewModel.selectAssetIdsToRedeem(this, ticket);
             }
             break;
             case R.id.button_sell:

@@ -12,7 +12,7 @@ import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
-import com.wallet.crypto.alphawallet.router.RedeemTokenRouter;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 
 import java.math.BigDecimal;
 
@@ -26,7 +26,7 @@ public class TokensViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
-    private final RedeemTokenRouter redeemTokenRouter;
+    private final AssetDisplayRouter assetDisplayRouter;
     private final TransactionsRouter transactionsRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
@@ -36,11 +36,11 @@ public class TokensViewModel extends BaseViewModel {
             SendTokenRouter sendTokenRouter,
             TransactionsRouter transactionsRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
-            RedeemTokenRouter redeemTokenRouter) {
+            AssetDisplayRouter assetDisplayRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
-        this.redeemTokenRouter = redeemTokenRouter;
+        this.assetDisplayRouter = assetDisplayRouter;
         this.transactionsRouter = transactionsRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
     }
@@ -111,7 +111,7 @@ public class TokensViewModel extends BaseViewModel {
     }
     @Override
     public void showRedeemToken(Context context, Token token) {
-        redeemTokenRouter.open(context, token);
+        assetDisplayRouter.open(context, token);
     }
 
     public void showTransactions(Context context) {

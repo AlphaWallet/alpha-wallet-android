@@ -72,7 +72,7 @@
             />
 
         <activity
-            android:name="com.wallet.crypto.alphawallet.ui.SignatureDisplayActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity"
             android:label="@string/title_use_token"
             />
 
@@ -113,7 +113,7 @@
             android:label="@string/title_marketplace" />
 
         <activity
-            android:name="com.wallet.crypto.alphawallet.ui.RedeemTokenSelectActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.RedeemAssetSelectActivity"
             android:label="@string/title_redeem" />
 
         <activity

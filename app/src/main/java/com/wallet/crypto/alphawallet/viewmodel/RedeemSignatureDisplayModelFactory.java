@@ -19,7 +19,7 @@ import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
  * Created by James on 22/01/2018.
  */
 
-public class SignatureDisplayModelFactory implements ViewModelProvider.Factory {
+public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Factory {
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -28,7 +28,7 @@ public class SignatureDisplayModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memPoolInteract;
 
-    public SignatureDisplayModelFactory(
+    public RedeemSignatureDisplayModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
@@ -46,6 +46,6 @@ public class SignatureDisplayModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract);
+        return (T) new RedeemSignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract);
     }
 }

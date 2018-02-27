@@ -37,7 +37,7 @@ import rx.functions.Action1;
  * Created by James on 25/01/2018.
  */
 
-public class SignatureDisplayModel extends BaseViewModel {
+public class RedeemSignatureDisplayModel extends BaseViewModel {
     private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final long CHECK_SELECTION_INTERVAL = 1;
@@ -77,7 +77,7 @@ public class SignatureDisplayModel extends BaseViewModel {
     private String newSelection;
     private int unchangedCount = 10;
 
-    SignatureDisplayModel(
+    RedeemSignatureDisplayModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,

@@ -6,7 +6,8 @@ import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
-import com.wallet.crypto.alphawallet.ui.RedeemTokenSelectActivity;
+import com.wallet.crypto.alphawallet.ui.RedeemAssetSelectActivity;
+import com.wallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.SalesOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
 import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
@@ -14,7 +15,6 @@ import com.wallet.crypto.alphawallet.ui.SellDetailActivity;
 import com.wallet.crypto.alphawallet.ui.SellTicketActivity;
 import com.wallet.crypto.alphawallet.ui.SendActivity;
 import com.wallet.crypto.alphawallet.ui.SettingsActivity;
-import com.wallet.crypto.alphawallet.ui.SignatureDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.SplashActivity;
 import com.wallet.crypto.alphawallet.ui.TicketTransferActivity;
 import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
@@ -79,12 +79,12 @@ public abstract class BuildersModule {
 	abstract TokenChangeCollectionActivity bindChangeTokenCollectionActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = SignatureModule.class)
-	abstract SignatureDisplayActivity bindSignatureDisplayActivity();
+	@ContributesAndroidInjector(modules = RedeemSignatureDisplayModule.class)
+	abstract RedeemSignatureDisplayActivity bindSignatureDisplayActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AssetDisplayModule.class)
-	abstract AssetDisplayActivity bindRedeemTokenActivity();
+	abstract AssetDisplayActivity bindAssetDisplayActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TicketTransferModule.class)
@@ -111,6 +111,6 @@ public abstract class BuildersModule {
 	abstract PurchaseTicketsActivity bindPurchaseTicketsActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = RedeemTokenSelectModule.class)
-	abstract RedeemTokenSelectActivity bindRedeemTokenSelectActivity();
+	@ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
+	abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
 }

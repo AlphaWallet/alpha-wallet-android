@@ -12,7 +12,7 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET;
  * Created by James on 22/01/2018.
  */
 
-public class RedeemTokenRouter {
+public class AssetDisplayRouter {
 
     public void open(Context context, Token ticket) {
         Intent intent = new Intent(context, AssetDisplayActivity.class);

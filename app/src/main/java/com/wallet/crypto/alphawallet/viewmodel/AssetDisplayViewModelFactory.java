@@ -8,10 +8,11 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
+import com.wallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 
 /**
@@ -24,7 +25,7 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MyTokensRouter myTokensRouter;
     private final TicketTransferRouter ticketTransferRouter;
-    private final SignatureDisplayRouter signatureDisplayRouter;
+    private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final SalesOrderRouter salesOrderRouter;
@@ -36,7 +37,7 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
-            SignatureDisplayRouter signatureDisplayRouter,
+            RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
@@ -44,7 +45,7 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.signatureDisplayRouter = signatureDisplayRouter;
+        this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.ticketTransferRouter = ticketTransferRouter;
         this.salesOrderRouter = salesOrderRouter;
@@ -54,6 +55,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
+        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
     }
 }

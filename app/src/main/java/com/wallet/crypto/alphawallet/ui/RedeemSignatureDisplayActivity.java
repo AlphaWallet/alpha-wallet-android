@@ -13,8 +13,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,8 +27,8 @@ import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
-import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModel;
-import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
@@ -44,13 +42,13 @@ import static com.wallet.crypto.alphawallet.C.Key.WALLET;
  * Created by James on 24/01/2018.
  */
 
-public class SignatureDisplayActivity extends BaseActivity implements View.OnClickListener {
+public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
 
     @Inject
-    protected SignatureDisplayModelFactory signatureDisplayModelFactory;
-    private SignatureDisplayModel viewModel;
+    protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
+    private RedeemSignatureDisplayModel viewModel;
     private SystemView systemView;
 
     public TextView name;
@@ -87,8 +85,8 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         name.setText(ticket.tokenInfo.name);
         ids.setText(ticket.populateIDs(ticket.balanceArray, false));
 
-        viewModel = ViewModelProviders.of(this, signatureDisplayModelFactory)
-                .get(SignatureDisplayModel.class);
+        viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
+                .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);

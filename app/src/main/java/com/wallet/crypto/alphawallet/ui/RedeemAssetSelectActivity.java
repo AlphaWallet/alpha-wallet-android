@@ -17,16 +17,10 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.util.BalanceUtils;
-import com.wallet.crypto.alphawallet.viewmodel.RedeemTokenSelectViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.RedeemTokenSelectViewModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -41,11 +35,11 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 /**
  * This is where we select tickets to redeem
  */
-public class RedeemTokenSelectActivity extends BaseActivity
+public class RedeemAssetSelectActivity extends BaseActivity
 {
     @Inject
-    protected RedeemTokenSelectViewModelFactory viewModelFactory;
-    protected RedeemTokenSelectViewModel viewModel;
+    protected RedeemAssetSelectViewModelFactory viewModelFactory;
+    protected RedeemAssetSelectViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -76,7 +70,7 @@ public class RedeemTokenSelectActivity extends BaseActivity
         progressView.hide();
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(RedeemTokenSelectViewModel.class);
+                .get(RedeemAssetSelectViewModel.class);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);

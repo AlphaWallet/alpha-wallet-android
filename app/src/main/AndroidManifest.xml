@@ -67,7 +67,7 @@
             />
 
         <activity
-            android:name="com.wallet.crypto.alphawallet.ui.RedeemTokenActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.AssetDisplayActivity"
             android:label="@string/title_use_token"
             />
 
@@ -111,6 +111,10 @@
         <activity
             android:name="com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity"
             android:label="@string/title_marketplace" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.RedeemTokenSelectActivity"
+            android:label="@string/title_redeem" />
 
         <activity
             android:name=".ui.CustomPinActivity"

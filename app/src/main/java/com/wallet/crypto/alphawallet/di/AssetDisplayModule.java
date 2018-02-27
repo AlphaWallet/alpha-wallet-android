@@ -12,7 +12,7 @@ import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
-import com.wallet.crypto.alphawallet.viewmodel.RedeemTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -22,9 +22,9 @@ import dagger.Provides;
  */
 
 @Module
-public class RedeemTokenModule {
+public class AssetDisplayModule {
     @Provides
-    RedeemTokenViewModelFactory redeemTokenViewModelFactory(
+    AssetDisplayViewModelFactory redeemTokenViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
@@ -34,7 +34,7 @@ public class RedeemTokenModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
-        return new RedeemTokenViewModelFactory(
+        return new AssetDisplayViewModelFactory(
                 fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
     }
 

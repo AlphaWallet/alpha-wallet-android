@@ -272,4 +272,6 @@
     <string name="action_purchase">PURCHASE</string>
     <string name="title_market_purchase">Purchase Tickets</string>
     <string name="title_redeem_token">Redeem Asset</string>
+    <string name="title_redeem">Redeem Ticket</string>
+    <string name="title_show_tickets">Ticket Operations</string>
 </resources>

@@ -112,7 +112,6 @@ public class TokensViewModel extends BaseViewModel {
     @Override
     public void showRedeemToken(Context context, Token token) {
         redeemTokenRouter.open(context, token);
-
     }
 
     public void showTransactions(Context context) {

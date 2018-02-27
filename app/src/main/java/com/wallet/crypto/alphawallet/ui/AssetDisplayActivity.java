@@ -21,8 +21,8 @@ import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.viewmodel.RedeemTokenViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.RedeemTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -39,11 +39,11 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 /**
  *
  */
-public class RedeemTokenActivity extends BaseActivity implements View.OnClickListener
+public class AssetDisplayActivity extends BaseActivity implements View.OnClickListener
 {
     @Inject
-    protected RedeemTokenViewModelFactory redeemTokenViewModelFactory;
-    private RedeemTokenViewModel viewModel;
+    protected AssetDisplayViewModelFactory assetDisplayViewModelFactory;
+    private AssetDisplayViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -65,7 +65,7 @@ public class RedeemTokenActivity extends BaseActivity implements View.OnClickLis
         ticket = getIntent().getParcelableExtra(TICKET);
         ticketCount = ticket.getTicketCount();
 
-        setTitle(getString(R.string.title_redeem_token));
+        setTitle(getString(R.string.title_show_tickets));
         TokenInfo info = ticket.tokenInfo;
 
         systemView = findViewById(R.id.system_view);
@@ -93,8 +93,8 @@ public class RedeemTokenActivity extends BaseActivity implements View.OnClickLis
 
         name.setText(useName);
 
-        viewModel = ViewModelProviders.of(this, redeemTokenViewModelFactory)
-                .get(RedeemTokenViewModel.class);
+        viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
+                .get(AssetDisplayViewModel.class);
 
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);

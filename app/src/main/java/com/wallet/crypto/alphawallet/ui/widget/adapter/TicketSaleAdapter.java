@@ -10,11 +10,13 @@ import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.RedeemHeaderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.RedeemTicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
@@ -58,6 +60,9 @@ public class TicketSaleAdapter extends TicketAdapter {
             case SalesOrderHeaderHolder.VIEW_TYPE: {
                 holder = new SalesOrderHeaderHolder(R.layout.item_token_description, parent);
             } break;
+            case RedeemTicketHolder.VIEW_TYPE: {
+                holder = new RedeemTicketHolder(R.layout.item_token_description, parent);
+            } break;
         }
 
         return holder;
@@ -67,6 +72,43 @@ public class TicketSaleAdapter extends TicketAdapter {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new MarketSaleHeaderSortedItem(t));
+
+        TicketRange currentRange = null;
+        int currentSeat = -1;
+        char currentZone = '-';
+        int i;
+        //first sort the balance array
+        List<Integer> sortedList = t.balanceArray.subList(0, t.balanceArray.size());
+        Collections.sort(sortedList);
+        for (i = 0; i < sortedList.size(); i++)
+        {
+            int tokenId = sortedList.get(i);
+            if (tokenId != 0)
+            {
+                char zone = TicketDecode.getZoneChar(tokenId);
+                int seatNumber = TicketDecode.getSeatIdInt(tokenId);
+                if (currentRange == null || seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
+                {
+                    currentRange = new TicketRange(tokenId, t.getAddress());
+                    items.add(new TicketSaleSortedItem(currentRange, 10 + i));
+                    currentZone = zone;
+                }
+                else
+                {
+                    //update
+                    currentRange.tokenIds.add(tokenId);
+                }
+
+                currentSeat = seatNumber;
+            }
+        }
+        items.endBatchedUpdates();
+    }
+
+    public void setRedeemTicket(Ticket t) {
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(new RedeemHeaderSortedItem(t));
 
         TicketRange currentRange = null;
         int currentSeat = -1;

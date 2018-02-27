@@ -90,6 +90,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
         rLL.setVisibility(View.GONE);
 
         adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        adapter.setRedeemTicket(ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }

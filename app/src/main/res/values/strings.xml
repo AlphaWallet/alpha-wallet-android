@@ -265,6 +265,7 @@
     <string name="selection">selection:</string>
     <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
     <string name="select_tickets">Select Tickets to Sell:</string>
+    <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
     <string name="market_buy_title">Browse Ticket Market</string>
     <string name="marketplace_title">Marketplace</string>
     <string name="title_marketplace">Marketplace</string>

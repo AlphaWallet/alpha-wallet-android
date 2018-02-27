@@ -22,6 +22,8 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
+import org.web3j.abi.datatypes.Int;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +40,14 @@ public class TicketAdapter extends TokensAdapter {
         super();
         this.onTicketIdClickListener = onTicketIdClickListener;
         setTicket(t);
+    }
+
+    public TicketAdapter(OnTicketIdClickListener onTicketIdClick, Ticket ticket, String ticketIds)
+    {
+        super();
+        this.onTicketIdClickListener = onTicketIdClick;
+        //setTicket(ticket);
+        setTicketRange(ticket, ticketIds);
     }
 
     @Override
@@ -60,6 +70,45 @@ public class TicketAdapter extends TokensAdapter {
         return holder;
     }
 
+    private void setTicketRange(Ticket ticket, String ticketIds)
+    {
+        items.beginBatchedUpdates();
+        items.clear();
+        //items.add(new TokenBalanceSortedItem(ticket));
+
+        //first convert to integer array
+        List<Integer> sortedList = ticket.parseIDListInteger(ticketIds);
+        Collections.sort(sortedList);
+
+        int currentSeat = -1;
+        char currentZone = '-';
+        TicketRange currentRange = null;
+        //now generate the ticket display
+        for (int i = 0; i < sortedList.size(); i++)
+        {
+            int tokenId = sortedList.get(i);
+            if (tokenId != 0)
+            {
+                char zone = TicketDecode.getZoneChar(tokenId);
+                int seatNumber = TicketDecode.getSeatIdInt(tokenId);
+                if (seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
+                {
+                    currentRange = new TicketRange(tokenId, ticket.getAddress());
+                    items.add(new TokenIdSortedItem(currentRange, 10 + i));
+                    currentZone = zone;
+                }
+                else
+                {
+                    //update
+                    currentRange.tokenIds.add(tokenId);
+                }
+
+                currentSeat = seatNumber;
+            }
+        }
+        items.endBatchedUpdates();
+    }
+
     public void setTicket(Ticket t) {
         items.beginBatchedUpdates();
         items.clear();
@@ -68,29 +117,26 @@ public class TicketAdapter extends TokensAdapter {
         TicketRange currentRange = null;
         int currentSeat = -1;
         char currentZone = '-';
-        int i;
         //first sort the balance array
         List<Integer> sortedList = t.balanceArray.subList(0, t.balanceArray.size());
         Collections.sort(sortedList);
-        for (i = 0; i < sortedList.size(); i++)
+        for (int i = 0; i < sortedList.size(); i++)
         {
             int tokenId = sortedList.get(i);
             if (tokenId != 0)
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
                 int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                if (seatNumber != currentSeat + 1 || zone != currentZone
-                        || i == (sortedList.size() - 1)) //check consecutive seats and zone is still the same, and push final ticket
+                if (seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
                 {
-                    if (currentRange != null) items.add(new TokenIdSortedItem(currentRange, 10 + i));
-                    int seatStart = TicketDecode.getSeatIdInt(tokenId);
-                    currentRange = new TicketRange(tokenId, seatStart);
+                    currentRange = new TicketRange(tokenId, t.getAddress());
+                    items.add(new TokenIdSortedItem(currentRange, 10 + i));
                     currentZone = zone;
                 }
                 else
                 {
                     //update
-                    currentRange.seatCount++;
+                    currentRange.tokenIds.add(tokenId);
                 }
 
                 currentSeat = seatNumber;

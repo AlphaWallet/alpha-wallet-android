@@ -16,6 +16,7 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
@@ -117,8 +118,18 @@ public class Token implements Parcelable {
         holder.arrayBalance.setVisibility(View.GONE);
     }
 
+    public List<Integer> parseIndexList(String userList)
+    {
+        return null;
+    }
+
     public int getTicketCount()
     {
         return balance.intValue();
+    }
+
+    public short[] getTicketIndicies(String ticketIds)
+    {
+        return null;
     }
 }

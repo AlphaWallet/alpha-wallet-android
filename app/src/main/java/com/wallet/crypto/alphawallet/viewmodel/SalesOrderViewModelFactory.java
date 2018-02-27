@@ -14,7 +14,7 @@ import com.wallet.crypto.alphawallet.service.MarketQueueService;
  * Created by James on 5/02/2018.
  */
 
-public class MarketOrderViewModelFactory implements ViewModelProvider.Factory
+public class SalesOrderViewModelFactory implements ViewModelProvider.Factory
 {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -22,7 +22,7 @@ public class MarketOrderViewModelFactory implements ViewModelProvider.Factory
     private final CreateTransactionInteract createTransactionInteract;
     private final MarketQueueService marketQueueService;
 
-    public MarketOrderViewModelFactory(
+    public SalesOrderViewModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -38,6 +38,6 @@ public class MarketOrderViewModelFactory implements ViewModelProvider.Factory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new MarketOrderViewModel(findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract, marketQueueService);
+        return (T) new SalesOrderViewModel(findDefaultWalletInteract, fetchTokensInteract, findDefaultNetworkInteract, createTransactionInteract, marketQueueService);
     }
 }

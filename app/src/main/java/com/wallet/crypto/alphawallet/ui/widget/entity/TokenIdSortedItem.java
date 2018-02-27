@@ -29,6 +29,7 @@ public class TokenIdSortedItem extends SortedItem<TicketRange>
     public boolean areItemsTheSame(SortedItem other)
     {
         return other.viewType == TicketHolder.VIEW_TYPE
-                && ( ((TokenIdSortedItem) other).value.seatStart == value.seatStart && ((TokenIdSortedItem) other).value.seatCount == value.seatCount);
+                && ( ((TokenIdSortedItem) other).value.tokenIds.size() == value.tokenIds.size()
+                && ((TokenIdSortedItem) other).value.tokenIds.get(0) == value.tokenIds.get(0));
     }
 }

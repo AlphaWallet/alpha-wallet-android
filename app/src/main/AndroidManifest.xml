@@ -93,12 +93,24 @@
             android:label="@string/ticket_transfer_title" />
 
         <activity
-            android:name="com.wallet.crypto.alphawallet.ui.MarketOrderActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.SalesOrderActivity"
             android:label="@string/market_queue_title" />
 
         <activity
             android:name="com.wallet.crypto.alphawallet.ui.SellTicketActivity"
             android:label="@string/market_queue_title" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.BrowseMarketActivity"
+            android:label="@string/marketplace_title" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.SellDetailActivity"
+            android:label="@string/action_sell" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity"
+            android:label="@string/title_marketplace" />
 
         <activity
             android:name=".ui.CustomPinActivity"

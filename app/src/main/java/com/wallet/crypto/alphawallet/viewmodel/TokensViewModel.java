@@ -105,9 +105,10 @@ public class TokensViewModel extends BaseViewModel {
 
     @Override
     public void showSendToken(Context context, String address, String symbol, int decimals) {
-        sendTokenRouter.open(context, address, symbol, decimals);
+        boolean isToken = true;
+        if (address.equalsIgnoreCase(wallet().getValue().address)) isToken = false;
+        sendTokenRouter.open(context, address, symbol, decimals, isToken);
     }
-
     @Override
     public void showUseToken(Context context, Token token) {
         useTokenRouter.open(context, token);

@@ -63,11 +63,11 @@ public class ProgressView extends RelativeLayout {
         }
     }
 
-    public void displayToast(String msg)
-    {
-        hide();
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT);
-    }
+//    public void displayToast(String msg)
+//    {
+//        hide();
+//        Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+//    }
 
     public void hide() {
         hideAllComponents();

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.wallet.crypto.alphawallet.controller.Controller;
-import com.wallet.crypto.alphawallet.model.VMAccount;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,31 +15,31 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class WalletTest {
-    @Test
-    public void useAppContext() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-    }
-
-    @Test
-    public void deleteAccountTest() throws Exception {
-        Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
-        VMAccount account = controller.createAccount("test password");
-        assert(account != null);
-
-        try {
-            controller.deleteAccount(account.getAddress());
-        } catch (Exception e) {
-            assert(false);
-        }
-
-        assert(controller.getAccount(account.getAddress()) != null);
-    }
-
-    @Test
-    public void createAccountTest() throws Exception {
-        Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
-        VMAccount account = controller.createAccount("test password");
-        assert(account != null);
-    }
+//    @Test
+//    public void useAppContext() throws Exception {
+//        // Context of the app under test.
+//        Context appContext = InstrumentationRegistry.getTargetContext();
+//    }
+//
+//    @Test
+//    public void deleteAccountTest() throws Exception {
+//        Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
+//        VMAccount account = controller.createAccount("test password");
+//        assert(account != null);
+//
+//        try {
+//            controller.deleteAccount(account.getAddress());
+//        } catch (Exception e) {
+//            assert(false);
+//        }
+//
+//        assert(controller.getAccount(account.getAddress()) != null);
+//    }
+//
+//    @Test
+//    public void createAccountTest() throws Exception {
+//        Controller controller = Controller.with(InstrumentationRegistry.getTargetContext());
+//        VMAccount account = controller.createAccount("test password");
+//        assert(account != null);
+//    }
 }

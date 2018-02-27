@@ -22,9 +22,10 @@ public class ConfirmationModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchGasSettingsInteract fetchGasSettingsInteract,
             CreateTransactionInteract createTransactionInteract,
-            GasSettingsRouter gasSettingsRouter
+            GasSettingsRouter gasSettingsRouter,
+            MarketQueueService marketQueueService
     ) {
-        return new ConfirmationViewModelFactory(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter);
+        return new ConfirmationViewModelFactory(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter, marketQueueService);
     }
 
     @Provides

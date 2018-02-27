@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     >
     <include layout="@layout/layout_simple_toolbar" />
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:layout_marginTop="?actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
     <RelativeLayout
         android:orientation="vertical"
         android:layout_marginLeft="@dimen/big_padding"
-        android:layout_marginTop="?actionBarSize"
         android:layout_marginRight="@dimen/big_padding"
-        android:layout_marginBottom="@dimen/big_padding"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/contract_address_layout"
-            android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -28,37 +32,49 @@
             >
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/symbol_input_layout"
-                android:layout_marginTop="@dimen/normal_margin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
+                android:layout_weight="2"
                 >
                 <EditText
                     android:id="@+id/asking_price"
                     android:hint="@string/hint_asking_price"
-                    android:inputType="textNoSuggestions"
+                    android:inputType="numberDecimal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     />
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_marginTop="@dimen/normal_margin"
+            <LinearLayout
+                android:id="@+id/fiat_layout"
+                android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="bottom"
                 android:layout_weight="1"
+                android:orientation="vertical"
                 >
-
+                <TextView
+                    android:id="@+id/fiat_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:textAllCaps="true"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="@color/holo_blue"
+                    android:text="Equivalent in USD"/>
                 <TextView
                     android:id="@+id/fiat_price"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="bottom"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:textSize="16sp"
+                    android:textColor="@color/holo_blue"
                     android:layout_marginBottom="5dp"
-                    android:text=""/>
-            </android.support.design.widget.TextInputLayout>
+                    android:text="$200"/>
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -72,7 +88,7 @@
             <EditText
                 android:id="@+id/ticket_selection"
                 android:hint="@string/hint_ticket_selection"
-                android:inputType="textNoSuggestions"
+                android:inputType="numberDecimal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
@@ -81,7 +97,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/listTickets"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@id/symbol_input_selection"
             android:layout_above="@id/layoutButtons"
             android:divider="@android:color/transparent"
@@ -99,16 +115,17 @@
 
             <Button
                 android:id="@+id/button_sell"
-                android:text="@string/action_sell"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="wrap_content"
-                android:layout_weight="0.5"
-                android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_weight="0.5"
+                android:text="@string/action_sell"
                 />
         </LinearLayout>
 
     </RelativeLayout>
+    </LinearLayout>
     <com.wallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
@@ -124,4 +141,4 @@
         android:layout_height="match_parent"
         tools:visibility="gone"
         />
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -1,17 +1,12 @@
 package com.wallet.crypto.alphawallet.di;
 
-import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
-import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
-import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.service.MarketQueueService;
-import com.wallet.crypto.alphawallet.viewmodel.MarketOrderViewModelFactory;
+import com.wallet.crypto.alphawallet.router.SellDetailRouter;
 import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 
 import dagger.Module;
@@ -24,18 +19,14 @@ import dagger.Provides;
 @Module
 public class SellTicketModule
 {
-    /*FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellTicketRouter sellTicketRouter) {*/
     @Provides
     SellTicketModelFactory sellTicketModelFactory(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellTicketRouter sellTicketRouter) {
+            SellDetailRouter sellDetailRouter) {
         return new SellTicketModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellTicketRouter);
+                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellDetailRouter);
     }
 
     @Provides
@@ -50,8 +41,8 @@ public class SellTicketModule
     }
 
     @Provides
-    SellTicketRouter provideSellTicketRouter() {
-        return new SellTicketRouter();
+    SellDetailRouter provideSellDetailRouter() {
+        return new SellDetailRouter();
     }
 
     @Provides

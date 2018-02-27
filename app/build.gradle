@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.25.1'
     }
 }
 apply plugin: 'com.android.application'
@@ -18,7 +18,7 @@ repositories {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.wallet.crypto.alphawallet"
         minSdkVersion 18
@@ -82,8 +82,8 @@ dependencies {
     implementation "com.google.code.gson:gson:$project.gsonVersion"
     implementation "com.squareup.picasso:picasso:$project.picassoVersion"
 
-    implementation "android.arch.lifecycle:runtime:1.0.3"
-    implementation "android.arch.lifecycle:extensions:1.0.0"
+    implementation "android.arch.lifecycle:runtime:1.1.0"
+    implementation "android.arch.lifecycle:extensions:1.1.0"
 
     implementation "com.android.support:appcompat-v7:$project.supportVersion"
     implementation "com.android.support:design:$project.supportVersion"
@@ -91,13 +91,13 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:$project.supportVersion"
     implementation "com.android.support:multidex:1.0.2"
     // Bar code scanning
-    implementation "com.google.zxing:core:3.2.1"
+    implementation "com.google.zxing:core:3.3.0"
     implementation "com.google.android.gms:play-services-vision:11.8.0"
     // Sugar
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
     implementation "com.github.apl-devs:appintro:v4.2.2"
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
-    implementation "com.journeyapps:zxing-android-embedded:3.2.0@aar"
+    implementation "com.journeyapps:zxing-android-embedded:3.5.0@aar"
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$project.rxAndroidVersion"
@@ -110,6 +110,7 @@ dependencies {
     annotationProcessor "com.google.dagger:dagger-android-processor:$project.daggerVersion"
     // if you are not using support library, include this instead
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
+    implementation 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
     // Tests
     testImplementation "junit:junit:4.12"
     androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {
@@ -118,16 +119,17 @@ dependencies {
     androidTestCompile('tools.fastlane:screengrab:1.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
     // Fabric
-    compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
     }
-    compile('com.crashlytics.sdk.android:answers:1.4.1@aar') {
+    implementation('com.crashlytics.sdk.android:answers:1.4.1@aar') {
         transitive = true
     }
     // PW
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":tn")
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":tn")
 
     // Pincode Lollipin
 //    compile('com.github.omadahealth:lollipin:2.1.0@aar') {

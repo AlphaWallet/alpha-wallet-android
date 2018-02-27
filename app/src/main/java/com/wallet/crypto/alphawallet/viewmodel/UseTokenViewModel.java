@@ -13,8 +13,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
-import com.wallet.crypto.alphawallet.interact.UseTokenInteract;
-import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
+import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
@@ -39,7 +38,7 @@ public class UseTokenViewModel extends BaseViewModel {
     private final TicketTransferRouter ticketTransferRouter;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final SignatureDisplayRouter signatureDisplayRouter;
-    private final MarketOrderRouter marketOrderRouter;
+    private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -57,7 +56,7 @@ public class UseTokenViewModel extends BaseViewModel {
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter,
+            SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -66,7 +65,7 @@ public class UseTokenViewModel extends BaseViewModel {
         this.signatureDisplayRouter = signatureDisplayRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.ticketTransferRouter = ticketTransferRouter;
-        this.marketOrderRouter = marketOrderRouter;
+        this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
     }
 
@@ -137,11 +136,11 @@ public class UseTokenViewModel extends BaseViewModel {
         fetchCurrentTicketBalance();
     }
 
-    public void showMarketOrder(Context context, Ticket ticket) {
-        marketOrderRouter.open(context, ticket);
+    public void showSalesOrder(Context context, Ticket ticket) {
+        salesOrderRouter.open(context, ticket);
     }
 
-    public void showMarketOrder(Context context, Ticket ticket, TicketRange range) {
-        marketOrderRouter.openRange(context, ticket, range);
+    public void showSalesOrder(Context context, Ticket ticket, TicketRange range) {
+        salesOrderRouter.openRange(context, ticket, range);
     }
 }

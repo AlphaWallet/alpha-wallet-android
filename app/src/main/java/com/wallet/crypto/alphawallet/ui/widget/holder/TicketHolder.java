@@ -26,6 +26,7 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 
 /**
  * Created by James on 9/02/2018.
@@ -38,12 +39,12 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
     private TicketRange thisData;
     private OnTicketIdClickListener onTicketClickListener;
 
-    public final TextView name;
-    public final TextView amount;
-    public final TextView venue;
-    public final TextView date;
-    public final TextView ticketIds;
-    public final TextView ticketCat;
+    private final TextView name;
+    private final TextView amount;
+    private final TextView date;
+    private final TextView venue;
+    private final TextView ticketIds;
+    private final TextView ticketCat;
 
     public TicketHolder(int resId, ViewGroup parent) {
         super(resId, parent);
@@ -60,20 +61,31 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition) {
         this.thisData = data;
         try {
-            String seatRange = String.valueOf(data.seatStart);
-            if (data.seatCount > 1) seatRange = data.seatStart + "-" + (data.seatStart+data.seatCount);
-            name.setText(TicketDecode.getName());
-            amount.setText("x" + data.seatCount);
-            venue.setText(TicketDecode.getVenue(data.tokenId));
-            date.setText(TicketDecode.getDate(data.tokenId));
-            ticketIds.setText(seatRange);
-            ticketCat.setText(TicketDecode.getZone(data.tokenId));
+            if (data.tokenIds.size() > 0)
+            {
+                int firstTokenId = data.tokenIds.get(0);
+                int seatStart = TicketDecode.getSeatIdInt(firstTokenId);
+                String seatRange = String.valueOf(seatStart);
+                if (data.tokenIds.size() > 1)
+                    seatRange = seatStart + "-" + (seatStart + (data.tokenIds.size() - 1));
+                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+                name.setText(TicketDecode.getName());
+                amount.setText(seatCount);
+                venue.setText(TicketDecode.getVenue(firstTokenId));
+                date.setText(TicketDecode.getDate(firstTokenId));
+                ticketIds.setText(seatRange);
+                ticketCat.setText(TicketDecode.getZone(firstTokenId));
+            }
+            else
+            {
+                fillEmpty();
+            }
         } catch (Exception ex) {
             fillEmpty();
         }
     }
 
-    protected void fillEmpty() {
+    private void fillEmpty() {
         name.setText(R.string.NA);
         venue.setText(R.string.NA);
     }

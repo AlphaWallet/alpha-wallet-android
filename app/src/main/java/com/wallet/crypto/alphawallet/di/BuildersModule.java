@@ -1,11 +1,14 @@
 package com.wallet.crypto.alphawallet.di;
 
 import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
-import com.wallet.crypto.alphawallet.ui.MarketOrderActivity;
+import com.wallet.crypto.alphawallet.ui.SalesOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
+import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
+import com.wallet.crypto.alphawallet.ui.SellDetailActivity;
 import com.wallet.crypto.alphawallet.ui.SellTicketActivity;
 import com.wallet.crypto.alphawallet.ui.SendActivity;
 import com.wallet.crypto.alphawallet.ui.SettingsActivity;
@@ -18,7 +21,6 @@ import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
 import com.wallet.crypto.alphawallet.ui.UseTokenActivity;
 import com.wallet.crypto.alphawallet.ui.WalletsActivity;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -88,10 +90,22 @@ public abstract class BuildersModule {
 	abstract TicketTransferActivity bindTicketTransferActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = MarketOrderModule.class)
-	abstract MarketOrderActivity bindMarketOrderActivity();
+	@ContributesAndroidInjector(modules = SalesOrderModule.class)
+	abstract SalesOrderActivity bindSalesOrderActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SellTicketModule.class)
 	abstract SellTicketActivity bindSellTicketActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = MarketBrowseModule.class)
+	abstract BrowseMarketActivity bindMarketBrowseActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = SellDetailModule.class)
+	abstract SellDetailActivity bindSellDetailsActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = PurchaseTicketsModule.class)
+	abstract PurchaseTicketsActivity bindPurchaseTicketsActivity();
 }

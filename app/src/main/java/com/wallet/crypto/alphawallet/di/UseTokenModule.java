@@ -4,11 +4,10 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
-import com.wallet.crypto.alphawallet.interact.UseTokenInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
-import com.wallet.crypto.alphawallet.router.MarketOrderRouter;
+import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
 import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
@@ -33,10 +32,10 @@ public class UseTokenModule {
             TicketTransferRouter ticketTransferRouter,
             SignatureDisplayRouter signatureDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            MarketOrderRouter marketOrderRouter,
+            SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
         return new UseTokenViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, marketOrderRouter, sellTicketRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
     }
 
     @Provides
@@ -62,8 +61,8 @@ public class UseTokenModule {
     }
 
     @Provides
-    MarketOrderRouter provideMarketOrderRouter() {
-        return new MarketOrderRouter();
+    SalesOrderRouter provideSalesOrderRouter() {
+        return new SalesOrderRouter();
     }
 
     @Provides

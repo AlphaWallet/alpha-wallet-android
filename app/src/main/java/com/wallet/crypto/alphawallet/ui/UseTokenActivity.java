@@ -24,6 +24,7 @@ import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -137,7 +138,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
             break;
             case R.id.button_sell:
             {
-                viewModel.sellTicketRouter(this, ticket);// showMarketOrder(this, ticket);
+                viewModel.sellTicketRouter(this, ticket);// showSalesOrder(this, ticket);
             }
             break;
             case R.id.button_transfer:
@@ -157,11 +158,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
-        //viewModel.showMarketOrder(this, ticket, range);
+        //viewModel.showSalesOrder(this, ticket, range);
         viewModel.showTransferToken(this, ticket, range);
-    }
-
-    private void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT ).show();
     }
 }

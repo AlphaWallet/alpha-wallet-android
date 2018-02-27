@@ -10,6 +10,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
+import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
@@ -29,6 +30,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
+    private final MarketBrowseRouter marketBrowseRouter;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -41,7 +43,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             TransactionDetailRouter transactionDetailRouter,
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
-            ExternalBrowserRouter externalBrowserRouter) {
+            ExternalBrowserRouter externalBrowserRouter,
+            MarketBrowseRouter marketBrowseRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -53,6 +56,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.myAddressRouter = myAddressRouter;
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
+        this.marketBrowseRouter = marketBrowseRouter;
     }
 
     @NonNull
@@ -69,6 +73,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 transactionDetailRouter,
                 myAddressRouter,
                 myTokensRouter,
-                externalBrowserRouter);
+                externalBrowserRouter,
+                marketBrowseRouter);
     }
 }

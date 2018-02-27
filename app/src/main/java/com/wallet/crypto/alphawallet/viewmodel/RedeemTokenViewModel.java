@@ -29,7 +29,7 @@ import io.reactivex.disposables.Disposable;
  * Created by James on 22/01/2018.
  */
 
-public class UseTokenViewModel extends BaseViewModel {
+public class RedeemTokenViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -48,7 +48,7 @@ public class UseTokenViewModel extends BaseViewModel {
     @Nullable
     private Disposable getBalanceDisposable;
 
-    UseTokenViewModel(
+    RedeemTokenViewModel(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,

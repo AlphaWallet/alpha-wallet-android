@@ -18,7 +18,7 @@ import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
  * Created by James on 22/01/2018.
  */
 
-public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
+public class RedeemTokenViewModelFactory implements ViewModelProvider.Factory {
 
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -30,7 +30,7 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
     private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
 
-    public UseTokenViewModelFactory(
+    public RedeemTokenViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
@@ -54,6 +54,6 @@ public class UseTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new UseTokenViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
+        return (T) new RedeemTokenViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, signatureDisplayRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter);
     }
 }

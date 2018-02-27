@@ -7,14 +7,9 @@ import android.view.View;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
-import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
-
-import org.ethereum.geth.BigInt;
-import org.web3j.abi.datatypes.generated.Uint16;
-import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -316,7 +311,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showUseToken(context, this);
+        viewModel.showRedeemToken(context, this);
     }
 
     @Override

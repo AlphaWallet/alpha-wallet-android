@@ -271,4 +271,5 @@
     <string name="quantity_to_purchase">Quantity of Tickets</string>
     <string name="action_purchase">PURCHASE</string>
     <string name="title_market_purchase">Purchase Tickets</string>
+    <string name="title_redeem_token">Redeem Asset</string>
 </resources>

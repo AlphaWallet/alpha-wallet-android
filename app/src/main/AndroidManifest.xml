@@ -67,7 +67,7 @@
             />
 
         <activity
-            android:name="com.wallet.crypto.alphawallet.ui.UseTokenActivity"
+            android:name="com.wallet.crypto.alphawallet.ui.RedeemTokenActivity"
             android:label="@string/title_use_token"
             />
 

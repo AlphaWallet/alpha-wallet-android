@@ -5,6 +5,7 @@ import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
+import com.wallet.crypto.alphawallet.ui.RedeemTokenActivity;
 import com.wallet.crypto.alphawallet.ui.SalesOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
 import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
@@ -19,7 +20,6 @@ import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.alphawallet.ui.TokensActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
-import com.wallet.crypto.alphawallet.ui.UseTokenActivity;
 import com.wallet.crypto.alphawallet.ui.WalletsActivity;
 
 import dagger.Module;
@@ -82,8 +82,8 @@ public abstract class BuildersModule {
 	abstract SignatureDisplayActivity bindSignatureDisplayActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = UseTokenModule.class)
-	abstract UseTokenActivity bindUseTokenActivity();
+	@ContributesAndroidInjector(modules = RedeemTokenModule.class)
+	abstract RedeemTokenActivity bindRedeemTokenActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TicketTransferModule.class)

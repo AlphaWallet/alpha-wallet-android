@@ -165,6 +165,7 @@ public class SignatureDisplayModel extends BaseViewModel {
 
     private void onSignMessage(MessagePair pair) {
         //now run this guy through the signed message system
+        if (pair != null)
         disposable = createTransactionInteract
                 .sign(defaultWallet.getValue(), pair)
                 .subscribe(this::onSignedMessage, this::onError);

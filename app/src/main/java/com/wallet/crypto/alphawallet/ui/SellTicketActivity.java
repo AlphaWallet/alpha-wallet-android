@@ -55,10 +55,6 @@ public class SellTicketActivity extends BaseActivity
     private TicketRange ticketRange;
     private TicketSaleAdapter adapter;
 
-    private EditText idsText;
-    private TextInputLayout amountInputLayout;
-
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -87,18 +83,6 @@ public class SellTicketActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
-    }
-
-    private void onTicket(Ticket ticket) {
-        if (ticketRange == null)
-        {
-
-        }
-        else
-        {
-            name.setText(ticket.getFullName());
-            ids.setText(ticket.getStringBalance());
-        }
     }
 
     private void setupSalesOrder()

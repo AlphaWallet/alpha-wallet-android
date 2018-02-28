@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset>
+  <fields>
+    <!--
+    There are 64 matches (1-64), each has up to 16 ticket classes,
+    within each class, there are less than 65536 tickets.  A compact
+    format identifier would consist of 26 bits:
+
+    [6] [4] [16]
+
+    Representing:
+
+	    Match ID: 1-64
+	    Class: 1-16
+	    Seat: 0-65536
+
+    These are represented by 7 hex codes. Therefore 0x40F0481 means
+    the final match (64th), class F (highest) ticket number 1153. But
+    we didn't end up using this compatct form.
+
+    Information about a match, like Venue, City, Date, which team
+    against which, can all be looked up by MatchID. There are
+    advantages and disadvantages in encoding them by a look up table
+    or by a bit field.
+
+    The advantage of storing them as a bit field is that one can
+    enquiry the range of it in the market queue server without the
+    server kowing the meaning of the bitfields. Furthermore it make
+    the android and ios library which accesses the XML file a bit
+    easier to write, but at the cost that the ticket issuing
+    (authorisation) server is a bit more complicated.
+
+    For now we decide to use bit-fields.  The fields, together with
+    its bitwidth or byte-width are represented in this table:
+
+    Fields:           City,   Venue,  Date,   TeamA,  TeamB,  Match, Category
+    Maximum, 2018:    11,     12,     32,     32,     32,     64,    16
+    Maximum, all time:64,     64,     64,     32,     32,     64,    64
+    Bitwidth:         6,      6,      6,      5,      5,      6,     6
+    Bytewidth:        1,      1,      4,      3,      3,      1,     1,
+
+    In practise, because this XML file is used in 3 to 4 places
+    (authorisation server, ios, android, potentially market-queue),
+    Weiwu thought that it helps the developers if we use byte-fields
+    instead of bit-fields.
+  -->
+    <field bitmask="0xFF000000000000000000000000000000" id="locality"
+	   type="Enumeration">
+      <name lang="en">City</name>
+      <name lang="zh">城市</name>
+      <name lang="es">Ciudad</name>
+      <mapping>
+        <entity key="1">
+          <name lang="ru">Москва́</name>
+          <name lang="en">Moscow</name>
+          <name lang="zh">莫斯科</name>
+          <name lang="es">Moscú</name>
+        </entity>
+        <entity key="2">
+          <name lang="ru">Санкт-Петербу́рг</name>
+          <name lang="en">Saint Petersburg</name>
+          <name lang="zh">圣彼得堡</name>
+          <name lang="es">San Petersburgo</name>
+        </entity>
+        <entity key="3">
+          <name lang="ru">Калининград</name>
+          <name lang="en">Kaliningrad</name>
+          <name lang="zh">加里宁格勒</name>
+          <name lang="es">Kaliningrado</name>
+        </entity>
+      </mapping>
+    </field>
+    <field bitmask="0x00FF0000000000000000000000000000" id="venue"
+	   type="Enumeration">
+      <name lang="en">Venue</name>
+      <name lang="zh">场馆</name>
+      <name lang="es">Lugar</name>
+      <mapping>
+        <entity key="0">
+          <name lang="ru">стадион „Лужники“</name>
+          <name lang="en">Luzhniki Stadium</name>
+          <name lang="zh">卢日尼基体育场</name>
+          <name lang="es">Estadio Olímpico Luzhnikí</name>
+        </entity>
+        <entity key="1">
+          <name lang="ru">Открытие Арена</name>
+          <name lang="en">Otkrytiye Arena</name>
+          <name lang="zh">斯巴达克体育场</name>
+          <name lang="es">Otkrytie Arena</name>
+        </entity>
+        <entity key="2">
+          <name lang="ru">Стадион Калининград</name>
+          <name lang="en">Kaliningrad Stadium</name>
+          <name lang="zh">加里宁格勒体育场</name>
+          <name lang="es">Estadio de Kaliningrado</name>
+        </entity>
+      </mapping>     
+    </field>
+    <field bitmask="0x0000FFFFFFFF00000000000000000000" id="time"
+	   type="BinaryTime">
+      <name lang="en">Time</name>
+      <name lang="zh">时间</name>
+      <name lang="es">Tiempo</name>
+    </field>
+    <field bitmask="0x000000000000FFFFFF00000000000000" id="countryA"
+	   type="IA5String"/>
+    <field bitmask="0x000000000000000000FFFFFF00000000" id="countryB"
+	   type="IA5String"/>
+    <field bitmask="0x000000000000000000000000FF000000" id="match"
+	   type="Integer"/>
+    <field bitmask="0x00000000000000000000000000FF0000" id="category"
+	   type="Integer"/>
+    <field bitmask="0x0000000000000000000000000000FFFF" id="number"
+	   type="Integer"/>
+  </fields>
+</asset>

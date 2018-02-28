@@ -29,6 +29,7 @@ public class SettingsActivity extends BaseActivity implements HasFragmentInjecto
         getFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new SettingsFragment())
                 .commit();
+        setTitle("Settings");
     }
 
     @Override

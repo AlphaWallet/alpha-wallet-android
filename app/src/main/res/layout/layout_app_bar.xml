@@ -6,11 +6,11 @@
 	android:theme="@style/AppTheme.AppBarOverlay"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
+	app:elevation="0dp"
 	> <!--android:background="@color/colorPrimaryDark"-->
 	<android.support.v7.widget.Toolbar
 		android:id="@+id/toolbar"
 		android:background="@color/colorPrimaryDark"
-		android:elevation="8dp"
 		app:popupTheme="@style/AppTheme.PopupOverlay"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"

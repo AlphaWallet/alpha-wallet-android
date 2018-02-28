@@ -10,15 +10,15 @@ import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.QuantitySelectorSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.RedeemHeaderSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.QuantitySelectorHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.RedeemTicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
-import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
@@ -35,6 +35,8 @@ public class TicketSaleAdapter extends TicketAdapter {
 
     private OnTokenCheckListener onTokenCheckListener;
     private TicketRange selectedTicketRange;
+    private QuantitySelectorHolder quantitySelector;
+
     public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
         super(onTicketIdClickListener, t);
         onTokenCheckListener = this::onTokenCheck;
@@ -62,6 +64,10 @@ public class TicketSaleAdapter extends TicketAdapter {
             } break;
             case RedeemTicketHolder.VIEW_TYPE: {
                 holder = new RedeemTicketHolder(R.layout.item_token_description, parent);
+            } break;
+            case QuantitySelectorHolder.VIEW_TYPE: {
+                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent);
+                holder = quantitySelector;
             } break;
         }
 
@@ -158,6 +164,29 @@ public class TicketSaleAdapter extends TicketAdapter {
         }
 
         return checkedItems;
+    }
+
+    public void setRedeemTicketQuantity(TicketRange range, Ticket ticket)
+    {
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(new QuantitySelectorSortedItem(ticket));
+
+        //now add the single range entry
+        items.add(new TicketSaleSortedItem(range, 10));
+        items.endBatchedUpdates();
+    }
+
+    public int getSelectedQuantity()
+    {
+        if (quantitySelector != null)
+        {
+            return quantitySelector.getCurrentQuantity();
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     private void onTokenCheck(TicketRange range) {

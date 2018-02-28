@@ -42,6 +42,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
     protected RedeemAssetSelectViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
+    private int currentMenu = R.menu.send_menu;
 
     public TextView name;
     public TextView ids;
@@ -97,7 +98,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_menu, menu);
+        getMenuInflater().inflate(currentMenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -106,6 +107,10 @@ public class RedeemAssetSelectActivity extends BaseActivity
         switch (item.getItemId()) {
             case R.id.action_next: {
                 onNext();
+            }
+            break;
+            case R.id.action_redeem: {
+                onRedeem();
             }
             break;
         }
@@ -119,6 +124,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
     }
 
     private void onNext() {
+
         // Validate input fields
 //        boolean inputValid = true;
 //        //look up all checked fields
@@ -141,14 +147,27 @@ public class RedeemAssetSelectActivity extends BaseActivity
 //        viewModel.startRedeemActivity(this, idListStr);
     }
 
+    private void onRedeem()
+    {
+        //TODO
+        int quantity =  adapter.getSelectedQuantity();
+        System.out.println("Quantity: " + quantity);
+    }
+
     private void onSelected(String selectionStr)
     {
         selected.setText(selectionStr);
     }
 
     private void onTicketIdClick(View view, TicketRange range) {
-        Context context = view.getContext();
+        currentMenu = R.menu.redeem_menu;
+        invalidateOptionsMenu();
         //TODO: what action should be performed when clicking on a range?
         //Suggest we go straight to select quantity
+        //select quantity
+        adapter.setRedeemTicketQuantity(range, ticket);
+        RecyclerView list = findViewById(R.id.listTickets);
+        list.setAdapter(null);
+        list.setAdapter(adapter);
     }
 }

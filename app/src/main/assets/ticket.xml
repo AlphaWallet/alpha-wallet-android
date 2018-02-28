@@ -111,6 +111,12 @@
           <name lang="zh">伏尔加格勒</name>
           <name lang="es">Volgogrado</name>
         </entity>
+        <entity key="11">
+          <name lang="ru">Калининград</name>
+          <name lang="en">Kaliningrad</name>
+          <name lang="zh">加里宁格勒</name>
+          <name lang="es">Kaliningrad</name>
+        </entity>
       </mapping>
     </field>
     <field bitmask="0x00FF0000000000000000000000000000" id="venue"

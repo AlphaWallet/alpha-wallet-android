@@ -5,9 +5,9 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import com.wallet.crypto.alphawallet.repository.AssetDefinition;
 import com.wallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 
@@ -39,12 +39,11 @@ public class AssetDefinitionTest {
         }
     }
 
-
     @Test
     public void AssetDefinitionShouldLoad() {
         AssetDefinition ticketAsset;
         String path = "/home/weiwu/StudioProjects/trust-wallet-android/app/src/main/assets/ticket.xml";
-        ticketAsset = new AssetDefinition(new File(path));
+        ticketAsset = new AssetDefinition(new File(path), "en");
         assertFalse(ticketAsset.fields.isEmpty());
     }
 
@@ -52,12 +51,15 @@ public class AssetDefinitionTest {
     public void AssetDefinitionShouldParse() {
         AssetDefinition ticketAsset;
         String path = "/home/weiwu/StudioProjects/trust-wallet-android/app/src/main/assets/ticket.xml";
-        ticketAsset = new AssetDefinition(new File(path));
+        ticketAsset = new AssetDefinition(new File(path), "en");
+        assertFalse(ticketAsset.fields.isEmpty());
 
         Ticket ticket = new Ticket();
-        BigInteger ticketID = BigInteger.valueOf(838483);
-        ticketAsset.parseField(ticketID, ticket);
-        assertTrue(ticket.getFieldText("number").equals("52051"));
+        ticketAsset.parseField(BigInteger.valueOf(838483), ticket);
+        assertEquals("Number", ticket.getFieldName("number"));
+        assertEquals(Integer.valueOf(838483 % 65536).toString(), ticket.getFieldText("number"));
+        /* Epoch */
+        assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getFieldText("time"));
     }
 
 }

@@ -1,5 +1,4 @@
 package com.wallet.crypto.alphawallet.repository;
-import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.wallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,34 +13,34 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
 public class AssetDefinition {
     protected Document xml;
-    public Set<field> fields = new HashSet<>();
-    public String locale = "en";
+    public Set<Field> fields = new HashSet<>();
+    public String locale;
 
-    class field {
+    class Field {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
         public String name;
         public String id;
         public int bitshift = 0;
-        public field(Element field) {
+        public Field(Element field) {
             name = getLocalisedName(field);
             id = field.getAttribute("id");
             bitmask = new BigInteger(field.getAttribute("bitmask"), 16);
-
             while(bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)); // !!
             bitshift--;
+            // System.out.println("New Field :" + name);
         }
         public String getTextValue(BigInteger data) {
-            return data.toString(16);
+            return data.toString();
         }
     }
 
-    class IA5String extends field {
+    class IA5String extends Field {
         public IA5String(Element field) {
             super(field);
         }
@@ -54,16 +53,18 @@ public class AssetDefinition {
         }
     }
 
-    class Integer extends field {
-        public Integer(Element field) {
+    class BinaryTime extends Field {
+        public BinaryTime(Element field) {
             super(field);
         }
         public String getTextValue(BigInteger data) {
-            return data.toString();
+            Date date=new Date(data.longValue());
+            return date.toString();
+
         }
     }
 
-    class Enumeration extends field {
+    class Enumeration extends Field {
         private Map<BigInteger, String> members = new HashMap<>();
         public Enumeration(Element field) {
             super(field);
@@ -73,7 +74,7 @@ public class AssetDefinition {
                 }
             }
         }
-        public void populate(Element mapping) {
+        void populate(Element mapping) {
             Element entity;
             for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
                 if (child.getNodeType() == Node.ELEMENT_NODE) {
@@ -81,25 +82,29 @@ public class AssetDefinition {
                     members.put(new BigInteger(entity.getAttribute("key")), getLocalisedName(entity));
                 }
             }
-            // System.out.println("\nPopulated Element :" + mapping.getTextContent());
         }
         public String getTextValue(BigInteger data) {
             return members.get(data);
         }
     }
 
-    protected String getLocalisedName(Element nameContainer) {
-        for(Node name=nameContainer.getFirstChild();
-            name!=null; name=name.getNextSibling()){
-            if (name.getNodeType() == Node.ELEMENT_NODE && name.getNodeName().equals("name")
-                    && ((Element) name).getAttribute("lang") == locale) {
-                return name.getTextContent();
+    String getLocalisedName(Element nameContainer) {
+        Element name = null;
+        for(Node node=nameContainer.getLastChild();
+            node!=null; node=node.getPreviousSibling()){
+            if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("name")) {
+                // System.out.println("\nFound a name field: " + node.getNodeName());
+                name = (Element) node;
+                if (name.getAttribute("lang").equals(locale)) {
+                    return name.getTextContent();
+                }
             }
         }
-        return null;
+        return name.getTextContent(); /* Should be the first occurrence of <name> */
     }
 
-    public AssetDefinition(File fXmlFile) {
+    public AssetDefinition(File fXmlFile, String locale) {
+        this.locale = locale;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -108,21 +113,21 @@ public class AssetDefinition {
             NodeList nList = xml.getElementsByTagName("field");
             for (int i = 0; i < nList.getLength(); i++) {
                 Node nNode = nList.item(i);
-                System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                // System.out.println("\nParsing Element :" + nNode.getNodeName());
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
                     switch (eElement.getAttribute("type")) {
                         case "Enumeration":
                             fields.add(new Enumeration(eElement));
                             break;
-                        case "Integer":
-                            fields.add(new Integer(eElement));
+                        case "BinaryTime":
+                            fields.add(new BinaryTime(eElement));
                             break;
                         case "IA5String":
                             fields.add(new IA5String(eElement));
                             break;
-                        default:
-                            fields.add(new field(eElement));
+                        default: /* Integer */
+                            fields.add(new Field(eElement));
                     }
                 }
             }
@@ -132,7 +137,7 @@ public class AssetDefinition {
     }
 
     public void parseField(BigInteger id, NonFungibleToken token) {
-        for(field f: fields) {
+        for(Field f: fields) {
             BigInteger value = id.and(f.bitmask).shiftRight(f.bitshift);
             token.setField(f.id, f.name, f.getTextValue(value));
             //System.out.println("name :" + f.name + "\n");

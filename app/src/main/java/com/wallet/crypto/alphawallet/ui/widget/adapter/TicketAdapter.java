@@ -25,6 +25,7 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 import org.web3j.abi.datatypes.Int;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -118,7 +119,8 @@ public class TicketAdapter extends TokensAdapter {
         int currentSeat = -1;
         char currentZone = '-';
         //first sort the balance array
-        List<Integer> sortedList = t.balanceArray.subList(0, t.balanceArray.size());
+        List<Integer> sortedList = new ArrayList<>();
+        sortedList.addAll(t.balanceArray);
         Collections.sort(sortedList);
         for (int i = 0; i < sortedList.size(); i++)
         {

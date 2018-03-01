@@ -18,6 +18,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.MemPoolInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 
 import org.web3j.crypto.Hash;
@@ -25,6 +26,8 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +43,6 @@ import rx.functions.Action1;
 public class RedeemSignatureDisplayModel extends BaseViewModel {
     private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private static final long CHECK_BALANCE_INTERVAL = 10;
-    private static final long CHECK_SELECTION_INTERVAL = 1;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -59,8 +61,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<String> selection = new MutableLiveData<>();
 
     private SubscribeWrapper wrapper;
-
-    private Subscription poolListener;
+    private TicketRange ticketRange;
+    private List<Integer> ticketIndicies;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -68,11 +70,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     @Nullable
     private Disposable cycleSignatureDisposable;
 
-    @Nullable
-    private Disposable checkSelectionDisposable;
-
     private String address;
-    private BigInteger bitFieldLookup;
+    //private BigInteger bitFieldLookup;
     private String lastSelection;
     private String newSelection;
     private int unchangedCount = 10;
@@ -115,9 +114,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
-        if (checkSelectionDisposable != null) {
-            checkSelectionDisposable.dispose();
-        }
 
         if (wrapper != null && wrapper.wrapperInteraction != null) {
             wrapper.wrapperInteraction.sendEmptyMessage(1);
@@ -125,11 +121,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         }
     }
 
-    public void prepare(String address) {
+    public void prepare(String address, Ticket ticket, TicketRange ticketRange) {
         this.address = address;
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
+        this.ticketRange = ticketRange;
+        this.ticket.setValue(ticket);
+        this.ticketIndicies = ticket.ticketIdToTicketIndex(ticketRange.tokenIds);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -139,21 +138,12 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void fetchTransactions() {
-        progress.postValue(true);
-        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .fetch(defaultWallet.getValue())
-                        .subscribe(this::onTokens, t -> {}))
-                .subscribe(l -> {}, t -> {});
-    }
-
     //TODO: Modulate the wallet message
     //TODO: Collect all the IDs to be sent, encode them into QR code
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(bitFieldLookup)
+                        .getMessage(ticketIndicies)
                         .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
     }
@@ -175,103 +165,42 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         signature.postValue(sigPair);
     }
 
-    private void startSelectionCheck() {
-        checkSelectionDisposable = Observable.interval(0, CHECK_SELECTION_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> checkSelectionChanged())
-                .subscribe(l -> {}, t -> {});
-    }
-
-    private void checkSelectionChanged()
-    {
-        unchangedCount++;
-
-        if (unchangedCount == 2)
-        {
-            //do the new selection
-            changeSelection();
-
-            //push to QR
-            signatureGenerateInteract
-                    .getMessage(bitFieldLookup)
-                    .subscribe(this::onSignMessage, this::onError);
-        }
-
-        if (newSelection != null && !newSelection.equals(lastSelection))
-        {
-            lastSelection = newSelection;
-            unchangedCount = 0;
-        }
-    }
-
-    private void changeSelection()
-    {
-        //convert to array of indicies
-        try {
-            List<Integer> indexList = ticket.getValue().parseIndexList(newSelection);
-            //convert this to a bitfield
-            if (indexList != null && indexList.size() > 0) {
-                bitFieldLookup = BigInteger.ZERO;
-                for (Integer i : indexList)
-                {
-                    BigInteger adder = BigInteger.valueOf(2).pow(i);
-                    bitFieldLookup = bitFieldLookup.add(adder);
-                }
-
-                //now convert back to parsed string, with checked indicies
-                String neatSelection = ticket.getValue().parseList(indexList);
-                selection.postValue(neatSelection);
-            } else {
-                selection.postValue("");
-                bitFieldLookup = BigInteger.ZERO;
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
     public void newBalanceArray(String balanceArray) {
         newSelection = balanceArray;
-    }
-
-    public void generateNewSelection(String selection) {
-        newSelection = selection;
-        //do the new selection
-        changeSelection();
-
-        //push to QR
-        signatureGenerateInteract
-                .getMessage(bitFieldLookup)
-                .subscribe(this::onSignMessage, this::onError);
     }
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         startCycleSignature();
-        fetchTransactions();
-        startSelectionCheck();
+        //fetchTransactions();
         startMemoryPoolListener();
-    }
 
-    private void onTokens(Token[] tokens) {
-        if (tokens != null && tokens.length > 0) {
-            progress.postValue(true);
-        }
-        this.tokens.setValue(tokens);
-
-        for (Token t : tokens) {
-            if (t instanceof Ticket && t.tokenInfo.address.equals(address))
-            {
-                ticket.setValue((Ticket)t);
-                ticket.postValue((Ticket)t);
-                break;
-            }
-        }
+        //Push initial QR
+        signatureGenerateInteract
+                .getMessage(ticketIndicies)
+                .subscribe(this::onSignMessage, this::onError);
     }
 
     private void markUsedIndicies(List<BigInteger> burnList) {
         Ticket t = ticket().getValue();
-        t.addToBurnList(burnList);
-        ticket.postValue(t);
+        for (BigInteger bi : burnList)
+        {
+            if (ticketIndicies.contains(bi.intValue()))
+            {
+                Integer index = bi.intValue();
+                ticketIndicies.remove(index);
+            }
+        }
+
+        if (ticketIndicies.size() == 0)
+        {
+            signature.postValue(null);
+        }
+        else {
+            signatureGenerateInteract
+                    .getMessage(ticketIndicies)
+                    .subscribe(this::onSignMessage, this::onError);
+        }
     }
 
     //Handle each new transaction on memory pool
@@ -288,7 +217,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             String methodId = buildMethodId(methodSignature);
 
             if (       (from != null)
-                    && (to != null && ticket().getValue().tokenInfo.address.contains(to))
+                    && (to != null && ticket.getValue().tokenInfo.address.contains(to))
                     && (input != null)
                     && (input.contains(methodId))
                     && (input.contains("dead") && input.contains(userAddr))  )
@@ -308,7 +237,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     };
 

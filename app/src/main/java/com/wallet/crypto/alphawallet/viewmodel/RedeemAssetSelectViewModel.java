@@ -1,6 +1,7 @@
 package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Ticket;
@@ -9,6 +10,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 import com.wallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 /**
  * Created by James on 27/02/2018.
@@ -49,5 +51,10 @@ public class RedeemAssetSelectViewModel extends BaseViewModel
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
+    }
+
+    public void showRedeemSignature(Context ctx, TicketRange range, Ticket ticket)
+    {
+        redeemSignatureDisplayRouter.open(ctx, defaultWallet.getValue(), ticket, range);
     }
 }

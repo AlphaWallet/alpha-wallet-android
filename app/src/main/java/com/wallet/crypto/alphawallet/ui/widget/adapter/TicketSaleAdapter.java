@@ -84,7 +84,8 @@ public class TicketSaleAdapter extends TicketAdapter {
         char currentZone = '-';
         int i;
         //first sort the balance array
-        List<Integer> sortedList = t.balanceArray.subList(0, t.balanceArray.size());
+        List<Integer> sortedList = new ArrayList<>();
+        sortedList.addAll(t.balanceArray);
         Collections.sort(sortedList);
         for (i = 0; i < sortedList.size(); i++)
         {
@@ -121,7 +122,8 @@ public class TicketSaleAdapter extends TicketAdapter {
         char currentZone = '-';
         int i;
         //first sort the balance array
-        List<Integer> sortedList = t.balanceArray.subList(0, t.balanceArray.size());
+        List<Integer> sortedList = new ArrayList<>();
+        sortedList.addAll(t.balanceArray);
         Collections.sort(sortedList);
         for (i = 0; i < sortedList.size(); i++)
         {
@@ -166,11 +168,18 @@ public class TicketSaleAdapter extends TicketAdapter {
         return checkedItems;
     }
 
+    public TicketRange getCheckedItem()
+    {
+        return selectedTicketRange;
+    }
+
     public void setRedeemTicketQuantity(TicketRange range, Ticket ticket)
     {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new QuantitySelectorSortedItem(ticket));
+
+        selectedTicketRange = range;
 
         //now add the single range entry
         items.add(new TicketSaleSortedItem(range, 10));

@@ -1,6 +1,5 @@
 package com.wallet.crypto.alphawallet.repository;
 
-import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 
@@ -9,8 +8,6 @@ import java.math.BigInteger;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 
 public interface TransactionRepositoryType {
 	Observable<Transaction[]> fetchTransaction(Wallet wallet);

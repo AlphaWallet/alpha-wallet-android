@@ -42,7 +42,7 @@ public class CreateTransactionInteract
     {
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> transactionRepository.getSignature(wallet, messagePair.message.getBytes(), password))
-                .map(sig -> new SignaturePair(messagePair.selection, sig));
+                .map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data)

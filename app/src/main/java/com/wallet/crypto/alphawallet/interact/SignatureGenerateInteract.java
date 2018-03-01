@@ -1,9 +1,11 @@
 package com.wallet.crypto.alphawallet.interact;
 
 import com.wallet.crypto.alphawallet.entity.MessagePair;
+import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import io.reactivex.Single;
 
@@ -20,21 +22,14 @@ public class SignatureGenerateInteract {
     }
 
     //TODO: Sign message here not in the additional field
-    public Single<MessagePair> getMessage(BigInteger bitField) {
+    public Single<MessagePair> getMessage(List<Integer> indexList) {
         return Single.fromCallable(() -> {
-            if (bitField != null) {
-                //convert biginteger to hex
-                String hexField = bitField.toString(16);
-                long currentTime = System.currentTimeMillis();
-                long minsT = currentTime / (30 * 1000);
-                int minsTime = (int) minsT;
-                String plainMessage = hexField + "," + String.valueOf(minsTime);
-                return new MessagePair(hexField, plainMessage);
-            }
-            else
-            {
-                return null;
-            }
+            String selectionStr = SignaturePair.generateSelection(indexList);
+            long currentTime = System.currentTimeMillis();
+            long minsT = currentTime / (30 * 1000);
+            int minsTime = (int) minsT;
+            String plainMessage = selectionStr + "," + String.valueOf(minsTime);
+            return new MessagePair(selectionStr, plainMessage);
         });
     }
 }

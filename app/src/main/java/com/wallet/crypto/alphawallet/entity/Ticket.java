@@ -205,6 +205,39 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
+    public List<Integer> ticketIdToTicketIndex(List<Integer> ticketIds)
+    {
+        //read given indicies and convert into internal format, error checking to ensure
+        List<Integer> idList = new ArrayList<>();
+
+        try
+        {
+            for (Integer id : ticketIds) {
+                if (id > 0) {
+                    int index = balanceArray.indexOf(id);
+                    if (index > -1) {
+                        if (!idList.contains(index)) {  //just make sure they didn't already add this one
+                            idList.add(index);
+                        }
+                    } else {
+                        idList = null;
+                        break;
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            idList = null;
+        }
+
+        return idList;
+    }
+
+    /**
+     * Function to convert a list of ticket IDs into ticket indicies for the account address given
+     * @param userList
+     * @return
+     */
     @Override
     public List<Integer> parseIndexList(String userList)
     {

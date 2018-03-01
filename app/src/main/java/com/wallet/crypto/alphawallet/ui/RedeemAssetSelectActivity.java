@@ -124,34 +124,26 @@ public class RedeemAssetSelectActivity extends BaseActivity
     }
 
     private void onNext() {
-
-        // Validate input fields
-//        boolean inputValid = true;
-//        //look up all checked fields
-//        List<TicketRange> sellRange = adapter.getCheckedItems();
-//        //add this range to the sell order confirmation
-//        //Generate list of indicies and actual ids
-//        List<Integer> idList = new ArrayList<>();
-//        for (TicketRange tr : sellRange)
-//        {
-//            idList.addAll(tr.tokenIds);
-//        }
-//
-//        String idListStr = viewModel.ticket().getValue().populateIDs(idList, false);
-//        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(idListStr);
-//        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
-//
-//        //confirm other address
-//        //confirmation screen
-//        //(Context context, String to, String ids, String ticketIDs)
-//        viewModel.startRedeemActivity(this, idListStr);
+        //first get range selection
+        TicketRange range = adapter.getCheckedItem();
+        if (range != null)
+        {
+            onTicketIdClick(null, range);
+        }
     }
 
     private void onRedeem()
     {
-        //TODO
         int quantity =  adapter.getSelectedQuantity();
-        System.out.println("Quantity: " + quantity);
+        TicketRange range = adapter.getCheckedItem();
+
+        //check params
+        if (range != null && quantity > 0 && quantity <= range.tokenIds.size())
+        {
+            //form a new Ticket Range with the required tickets to burn
+            range.selectSubRange(quantity);
+            viewModel.showRedeemSignature(this, range, ticket);
+        }
     }
 
     private void onSelected(String selectionStr)
@@ -159,12 +151,9 @@ public class RedeemAssetSelectActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
+    private void onTicketIdClick(View v, TicketRange range) {
         currentMenu = R.menu.redeem_menu;
         invalidateOptionsMenu();
-        //TODO: what action should be performed when clicking on a range?
-        //Suggest we go straight to select quantity
-        //select quantity
         adapter.setRedeemTicketQuantity(range, ticket);
         RecyclerView list = findViewById(R.id.listTickets);
         list.setAdapter(null);

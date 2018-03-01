@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/quantity_txt"
         android:layout_gravity="center"
+        android:layout_marginTop="10dp"
         android:gravity="bottom"
         android:orientation="horizontal"
         >

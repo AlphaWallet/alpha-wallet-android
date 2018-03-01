@@ -44,7 +44,7 @@
     Weiwu thought that it helps the developers if we use byte-fields
     instead of bit-fields.
   -->
-    <field bitmask="0xFF000000000000000000000000000000" id="locality"
+    <field bitmask="FF000000000000000000000000000000" id="locality"
 	   type="Enumeration">
       <name lang="ru">город</name>
       <name lang="en">City</name>
@@ -113,7 +113,7 @@
         </entity>
       </mapping>
     </field>
-    <field bitmask="0x00FF0000000000000000000000000000" id="venue"
+    <field bitmask="00FF0000000000000000000000000000" id="venue"
 	   type="Enumeration">
       <name lang="ru">место встречи</name>
       <name lang="en">Venue</name>
@@ -194,22 +194,42 @@
         </entity>
       </mapping>
     </field>
-    <field bitmask="0x0000FFFFFFFF00000000000000000000" id="time"
+    <field bitmask="0000FFFFFFFF00000000000000000000" id="time"
 	   type="BinaryTime">
       <name lang="es">время</name>
       <name lang="en">Time</name>
       <name lang="zh">时间</name>
       <name lang="es">Tiempo</name>
     </field>
-    <field bitmask="0x000000000000FFFFFF00000000000000" id="countryA"
-	   type="IA5String"/>
-    <field bitmask="0x000000000000000000FFFFFF00000000" id="countryB"
-	   type="IA5String"/>
-    <field bitmask="0x000000000000000000000000FF000000" id="match"
-	   type="Integer"/>
-    <field bitmask="0x00000000000000000000000000FF0000" id="category"
-	   type="Integer"/>
-    <field bitmask="0x0000000000000000000000000000FFFF" id="number"
-	   type="Integer"/>
+    <field bitmask="000000000000FFFFFF00000000000000" id="countryA"
+	   type="IA5String">
+      <name lang="en">Team A</name>
+      <name lang="zh">甲队</name>
+      <name lang="es">Equipo A</name>
+    </field>
+    <field bitmask="000000000000000000FFFFFF00000000" id="countryB"
+	   type="IA5String">
+      <name lang="en">Team B</name>
+      <name lang="zh">乙队</name>
+      <name lang="es">Equipo B</name>
+    </field>
+    <field bitmask="000000000000000000000000FF000000" id="match"
+	   type="Integer">
+      <name lang="en">Match</name>
+      <name lang="zh">场次</name>
+      <name lang="es">Evento</name>
+    </field>
+    <field bitmask="00000000000000000000000000FF0000" id="category"
+	   type="Integer">
+      <name lang="en">Cat</name>
+      <name lang="zh">等级</name>
+      <name lang="es">Cat</name>
+    </field>
+    <field bitmask="0000000000000000000000000000FFFF" id="number"
+	   type="Integer">
+      <name lang="en">Number</name>
+      <name lang="zh">票号</name>
+      <name lang="es">Número</name>
+    </field>
   </fields>
 </asset>

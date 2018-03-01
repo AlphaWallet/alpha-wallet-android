@@ -42,7 +42,7 @@ public class AssetDefinitionTest {
     @Test
     public void AssetDefinitionShouldLoad() {
         AssetDefinition ticketAsset;
-        String path = "/home/weiwu/StudioProjects/trust-wallet-android/app/src/main/assets/ticket.xml";
+        String path = "app/src/main/assets/ticket.xml";
         ticketAsset = new AssetDefinition(new File(path), "en");
         assertFalse(ticketAsset.fields.isEmpty());
     }
@@ -50,7 +50,7 @@ public class AssetDefinitionTest {
     @Test
     public void AssetDefinitionShouldParse() {
         AssetDefinition ticketAsset;
-        String path = "/home/weiwu/StudioProjects/trust-wallet-android/app/src/main/assets/ticket.xml";
+        String path = "app/src/main/assets/ticket.xml";
         ticketAsset = new AssetDefinition(new File(path), "en");
         assertFalse(ticketAsset.fields.isEmpty());
 

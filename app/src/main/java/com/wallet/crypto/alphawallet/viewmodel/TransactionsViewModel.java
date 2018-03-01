@@ -20,11 +20,13 @@ import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
+import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
+import com.wallet.crypto.alphawallet.router.WalletRouter;
 
 import java.util.Map;
 
@@ -52,6 +54,8 @@ public class TransactionsViewModel extends BaseViewModel {
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final MarketBrowseRouter marketBrowseRouter;
+    private final WalletRouter walletRouter;
+    private final MarketplaceRouter marketplaceRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -71,7 +75,9 @@ public class TransactionsViewModel extends BaseViewModel {
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            MarketBrowseRouter marketBrowseRouter) {
+            MarketBrowseRouter marketBrowseRouter,
+            WalletRouter walletRouter,
+            MarketplaceRouter marketplaceRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -84,6 +90,8 @@ public class TransactionsViewModel extends BaseViewModel {
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.marketBrowseRouter = marketBrowseRouter;
+        this.walletRouter = walletRouter;
+        this.marketplaceRouter = marketplaceRouter;
     }
 
     @Override
@@ -133,7 +141,8 @@ public class TransactionsViewModel extends BaseViewModel {
                     defaultWalletBalance.postValue(values);
                     handler.removeCallbacks(startGetBalanceTask);
                     handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
-                }, t -> {});
+                }, t -> {
+                });
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -176,7 +185,9 @@ public class TransactionsViewModel extends BaseViewModel {
         settingsRouter.open(context);
     }
 
-    public void showSend(Context context) { sendRouter.open(context, defaultNetwork.getValue().symbol); }
+    public void showSend(Context context) {
+        sendRouter.open(context, defaultNetwork.getValue().symbol);
+    }
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
@@ -194,8 +205,12 @@ public class TransactionsViewModel extends BaseViewModel {
         myTokensRouter.open(context, defaultWallet.getValue());
     }
 
-    public void showMarketPlace(Context context) {
-        marketBrowseRouter.open(context);
+    public void showWalletFragment(Context context, int resId) {
+        walletRouter.open(context, resId);
+    }
+
+    public void showMarketplaceFragment(Context context, int resId) {
+        marketplaceRouter.open(context, resId);
     }
 
     public void openDeposit(Context context, Uri uri) {

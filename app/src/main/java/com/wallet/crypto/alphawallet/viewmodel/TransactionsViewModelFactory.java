@@ -11,11 +11,13 @@ import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
+import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
+import com.wallet.crypto.alphawallet.router.WalletRouter;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 
@@ -31,6 +33,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final MarketBrowseRouter marketBrowseRouter;
+    private final WalletRouter walletRouter;
+    private final MarketplaceRouter marketplaceRouter;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -44,7 +48,9 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            MarketBrowseRouter marketBrowseRouter) {
+            MarketBrowseRouter marketBrowseRouter,
+            WalletRouter walletRouter,
+            MarketplaceRouter marketplaceRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -57,6 +63,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.marketBrowseRouter = marketBrowseRouter;
+        this.walletRouter = walletRouter;
+        this.marketplaceRouter = marketplaceRouter;
     }
 
     @NonNull
@@ -74,6 +82,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 myAddressRouter,
                 myTokensRouter,
                 externalBrowserRouter,
-                marketBrowseRouter);
+                marketBrowseRouter,
+                walletRouter,
+                marketplaceRouter);
     }
 }

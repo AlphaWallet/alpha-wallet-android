@@ -20,6 +20,7 @@
 
 	<color name="semitransparentWhite">#AAFFFFFF</color>
 
+	<color name="white20">#32FFFFFF</color>
 	<color name="translucentWhite">#80FFFFFF</color>
 
 	<color name="QRCodeBlackColor">#FF000000</color>
@@ -30,4 +31,5 @@
 	<color name="white_transparent">#88ffffff</color>
     <color name="grey">#EEEEEE</color>
 	<color name="holo_blue">#FF33b5e5</color>
+
 </resources>

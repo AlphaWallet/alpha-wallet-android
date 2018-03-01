@@ -2,6 +2,7 @@ package com.wallet.crypto.alphawallet;
 
 import android.app.Activity;
 import android.support.multidex.MultiDexApplication;
+import android.support.v4.app.Fragment;
 
 import com.wallet.crypto.alphawallet.di.DaggerAppComponent;
 
@@ -10,12 +11,16 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
+import dagger.android.support.HasSupportFragmentInjector;
 import io.realm.Realm;
 
-public class App extends MultiDexApplication implements HasActivityInjector {
+public class App extends MultiDexApplication implements HasActivityInjector, HasSupportFragmentInjector {
 
 	@Inject
 	DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
+
+	@Inject
+	DispatchingAndroidInjector<Fragment> dispatchingAndroidSupportInjector;
 
 	@Override
 	public void onCreate() {
@@ -38,4 +43,8 @@ public class App extends MultiDexApplication implements HasActivityInjector {
 		return dispatchingAndroidInjector;
 	}
 
+	@Override
+	public AndroidInjector<Fragment> supportFragmentInjector() {
+		return dispatchingAndroidSupportInjector;
+	}
 }

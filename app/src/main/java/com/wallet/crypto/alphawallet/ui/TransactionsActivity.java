@@ -97,13 +97,9 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
-
-        WalletFragment walletFragment = new WalletFragment();
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.frame_layout, walletFragment)
-                .commit();
+        viewModel.showWalletFragment(this, R.id.frame_layout);
         selectNavigationItem(1);
+        setTitle(getString(R.string.toolbar_header_wallet));
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -114,7 +110,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     @Override
     protected void onResume() {
         super.onResume();
-
 //        setTitle(getString(R.string.unknown_balance_without_symbol));
 //        setSubtitle("");
         adapter.clear();
@@ -174,13 +169,16 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_marketplace: {
-                viewModel.showMarketplace(this);
                 selectNavigationItem(0);
+                setTitle(getString(R.string.toolbar_header_marketplace));
+                viewModel.showMarketplaceFragment(this, R.id.frame_layout);
                 return true;
             }
             case R.id.action_send: {
 //                viewModel.showSend(this);
                 selectNavigationItem(1);
+                setTitle(getString(R.string.toolbar_header_wallet));
+                viewModel.showWalletFragment(this, R.id.frame_layout);
                 return true;
             }
             case R.id.action_my_address: {
@@ -227,8 +225,8 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         adapter.setDefaultNetwork(networkInfo);
         setBottomMenu(R.menu.menu_main_network);
-        selectNavigationItem(1);
-        setTitle("Wallet");
+//        selectNavigationItem(1);
+//        setTitle("Wallet");
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

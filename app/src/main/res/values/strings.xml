@@ -271,4 +271,9 @@
     <string name="quantity_to_purchase">Quantity of Tickets</string>
     <string name="action_purchase">PURCHASE</string>
     <string name="title_market_purchase">Purchase Tickets</string>
+    <string name="view_listings">View Listings</string>
+    <string name="show_marketplace">Show Marketplace</string>
+    <string name="search">Search</string>
+    <string name="toolbar_header_wallet">Wallet</string>
+    <string name="toolbar_header_marketplace">Marketplace</string>
 </resources>

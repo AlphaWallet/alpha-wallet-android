@@ -10,11 +10,13 @@ import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
+import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
+import com.wallet.crypto.alphawallet.router.WalletRouter;
 import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModelFactory;
 
 import dagger.Module;
@@ -35,7 +37,9 @@ class TransactionsModule {
             MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            MarketBrowseRouter marketBrowseRouter) {
+            MarketBrowseRouter marketBrowseRouter,
+            WalletRouter walletRouter,
+            MarketplaceRouter marketplaceRouter) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -48,7 +52,9 @@ class TransactionsModule {
                 myAddressRouter,
                 myTokensRouter,
                 externalBrowserRouter,
-                marketBrowseRouter);
+                marketBrowseRouter,
+                walletRouter,
+                marketplaceRouter);
     }
 
     @Provides
@@ -108,4 +114,10 @@ class TransactionsModule {
 
     @Provides
     MarketBrowseRouter provideMarketBrowseRouter() { return new MarketBrowseRouter(); }
+
+    @Provides
+    WalletRouter providesWalletRouter() { return new WalletRouter(); }
+
+    @Provides
+    MarketplaceRouter providesMarketplaceRouter() { return new MarketplaceRouter(); }
 }

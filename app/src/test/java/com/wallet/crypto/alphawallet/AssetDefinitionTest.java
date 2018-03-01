@@ -60,8 +60,8 @@ public class AssetDefinitionTest {
         ticketAsset.parseField(BigInteger.valueOf(838483), ticket);
         assertEquals("Number", ticket.getFieldName("number"));
         assertEquals(Integer.valueOf(838483 % 65536).toString(), ticket.getFieldText("number"));
-        /* Epoch */
-        assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getFieldText("time"));
+        /* Epoch, the following test only works from Singapore 
+        assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getFieldText("time")); */
     }
 
 }

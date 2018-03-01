@@ -1,13 +1,21 @@
 package com.wallet.crypto.alphawallet;
 
 import org.junit.Test;
+import org.xml.sax.SAXException;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+
 import com.wallet.crypto.alphawallet.repository.AssetDefinition;
 import com.wallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 
@@ -40,18 +48,12 @@ public class AssetDefinitionTest {
     }
 
     @Test
-    public void AssetDefinitionShouldLoad() {
-        AssetDefinition ticketAsset;
-        String path = "app/src/main/assets/ticket.xml";
-        ticketAsset = new AssetDefinition(new File(path), "en");
-        assertFalse(ticketAsset.fields.isEmpty());
-    }
-
-    @Test
-    public void AssetDefinitionShouldParse() {
-        AssetDefinition ticketAsset;
-        String path = "app/src/main/assets/ticket.xml";
-        ticketAsset = new AssetDefinition(new File(path), "en");
+    public void AssetDefinitionShouldParse() throws IOException, SAXException {
+        File file = new File("src/main/assets/ticket.xml");
+        assertTrue(file.exists());
+        InputStream in =  new FileInputStream(file);
+        assertNotNull(in);
+        AssetDefinition ticketAsset = new AssetDefinition(in, "en");
         assertFalse(ticketAsset.fields.isEmpty());
 
         Ticket ticket = new Ticket();

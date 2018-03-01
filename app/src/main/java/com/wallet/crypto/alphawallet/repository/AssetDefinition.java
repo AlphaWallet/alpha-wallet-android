@@ -3,12 +3,15 @@ import com.wallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-import java.io.File;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -103,36 +106,39 @@ public class AssetDefinition {
         return name.getTextContent(); /* Should be the first occurrence of <name> */
     }
 
-    public AssetDefinition(File fXmlFile, String locale) {
+    public AssetDefinition(InputStream xmlAsset, String locale) throws IOException, SAXException{
         this.locale = locale;
+        DocumentBuilder dBuilder;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document xml = dBuilder.parse(fXmlFile);
-            xml.getDocumentElement().normalize(); // also good for parcel
-            NodeList nList = xml.getElementsByTagName("field");
-            for (int i = 0; i < nList.getLength(); i++) {
-                Node nNode = nList.item(i);
-                // System.out.println("\nParsing Element :" + nNode.getNodeName());
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    switch (eElement.getAttribute("type")) {
-                        case "Enumeration":
-                            fields.add(new Enumeration(eElement));
-                            break;
-                        case "BinaryTime":
-                            fields.add(new BinaryTime(eElement));
-                            break;
-                        case "IA5String":
-                            fields.add(new IA5String(eElement));
-                            break;
-                        default: /* Integer */
-                            fields.add(new Field(eElement));
-                    }
+             dBuilder = dbFactory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            // TODO: if schema has problems (e.g. defined twice). Now, no schema, no exception.
+            e.printStackTrace();
+            return;
+        }
+        Document xml = dBuilder.parse(xmlAsset);
+        xml.getDocumentElement().normalize(); // also good for parcel
+        NodeList nList = xml.getElementsByTagName("field");
+        for (int i = 0; i < nList.getLength(); i++) {
+            Node nNode = nList.item(i);
+            // System.out.println("\nParsing Element :" + nNode.getNodeName());
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = (Element) nNode;
+                switch (eElement.getAttribute("type")) {
+                    case "Enumeration":
+                        fields.add(new Enumeration(eElement));
+                        break;
+                    case "BinaryTime":
+                        fields.add(new BinaryTime(eElement));
+                        break;
+                    case "IA5String":
+                        fields.add(new IA5String(eElement));
+                        break;
+                    default: /* Integer */
+                        fields.add(new Field(eElement));
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

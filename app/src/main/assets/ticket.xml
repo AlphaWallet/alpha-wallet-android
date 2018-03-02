@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
+  <contracts>
+    <contract address="" type="issuing"/>
+  </contracts>
+  <actions>
+    <action type="redeem">
+      <!-- the asset can be destroied in exchange for something else -->
+      <method name="SignatureDisplay">
+	<!-- the asset can be destroied by dipslaying a QR signature
+	     to someone-->
+	<!-- TODO: here, refer to the UI definition file -->
+      </method>
+    </action>
+  </actions>
   <fields>
     <!--
     There are 64 matches (1-64), each has up to 16 ticket classes,

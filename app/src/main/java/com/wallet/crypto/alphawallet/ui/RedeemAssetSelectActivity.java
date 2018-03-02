@@ -58,6 +58,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
+        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
         setupRedeemSelector();
 
         toolbar();
@@ -81,7 +82,9 @@ public class RedeemAssetSelectActivity extends BaseActivity
     private void setupRedeemSelector()
     {
         ticketRange = null;
-        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
+
+        currentMenu = R.menu.send_menu;
+        invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
         LinearLayout buttons = findViewById(R.id.layoutButtons);
@@ -113,6 +116,12 @@ public class RedeemAssetSelectActivity extends BaseActivity
                 onRedeem();
             }
             break;
+            case android.R.id.home: {
+                if (currentMenu == R.menu.redeem_menu) {
+                    setupRedeemSelector();
+                    return true;
+                }
+            }
         }
         return super.onOptionsItemSelected(item);
     }

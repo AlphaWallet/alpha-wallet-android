@@ -15,10 +15,12 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.RedeemHeaderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.QuantitySelectorHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.RedeemTicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
@@ -47,6 +49,11 @@ public class TicketSaleAdapter extends TicketAdapter {
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
         switch (viewType) {
+            case TicketHolder.VIEW_TYPE: {
+                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent);
+                tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
+                holder = tokenHolder;
+            } break;
             case TicketSaleHolder.VIEW_TYPE: {
                 TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
@@ -180,9 +187,7 @@ public class TicketSaleAdapter extends TicketAdapter {
         items.add(new QuantitySelectorSortedItem(ticket));
 
         selectedTicketRange = range;
-
-        //now add the single range entry
-        items.add(new TicketSaleSortedItem(range, 10));
+        items.add(new TokenIdSortedItem(range, 10));
         items.endBatchedUpdates();
     }
 

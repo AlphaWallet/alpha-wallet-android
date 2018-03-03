@@ -118,9 +118,11 @@ public class TicketAdapter extends TokensAdapter {
         TicketRange currentRange = null;
         int currentSeat = -1;
         char currentZone = '-';
+        boolean currentBurn = false;
         //first sort the balance array
         List<Integer> sortedList = new ArrayList<>();
         sortedList.addAll(t.balanceArray);
+        sortedList.addAll(t.getBurnList());
         Collections.sort(sortedList);
         for (int i = 0; i < sortedList.size(); i++)
         {
@@ -129,11 +131,16 @@ public class TicketAdapter extends TokensAdapter {
             {
                 char zone = TicketDecode.getZoneChar(tokenId);
                 int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                if (seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
+                boolean isBurned = false;
+                if (t.getBurnList().contains((Integer)tokenId)) {
+                    isBurned = true;
+                }
+                if (seatNumber != currentSeat + 1 || zone != currentZone || isBurned != currentBurn) //check consecutive seats and zone is still the same, and push final ticket
                 {
-                    currentRange = new TicketRange(tokenId, t.getAddress());
+                    currentRange = new TicketRange(tokenId, t.getAddress(), isBurned);
                     items.add(new TokenIdSortedItem(currentRange, 10 + i));
                     currentZone = zone;
+                    currentBurn = isBurned;
                 }
                 else
                 {

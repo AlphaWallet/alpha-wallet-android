@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import jnr.ffi.annotations.In;
+
 /**
  * Created by James on 27/01/2018.
  */
@@ -26,17 +28,23 @@ public class Ticket extends Token implements Parcelable
     public final List<Integer> balanceArray;
     private List<Integer> burnArray;
 
-    public Ticket(TokenInfo tokenInfo, List<Integer> balances, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, List<Integer> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
-        burnArray = new ArrayList<>();
+        burnArray = burned;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = parseIDListInteger(balances);
-        burnArray = new ArrayList<>();
+        burnArray = parseIDListInteger(burnList);
     }
+//
+//    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
+//        super(tokenInfo, BigDecimal.ZERO, blancaTime);
+//        this.balanceArray   = parseIDListInteger(balances);
+//        this.burnArray      = parseIDListInteger(burnList);
+//    }
 
     private Ticket(Parcel in) {
         super(in);
@@ -54,10 +62,7 @@ public class Ticket extends Token implements Parcelable
         for (Object o : readBurnArray)
         {
             Integer val = (Integer)o;
-            if (balanceArray.contains(val))
-            {
-                burnArray.add(val);
-            }
+            burnArray.add(val);
         }
     }
 
@@ -134,7 +139,7 @@ public class Ticket extends Token implements Parcelable
         return sb.toString();
     }
 
-    public List<org.web3j.abi.datatypes.generated.Int16> parseIDList(String userList)
+    private List<org.web3j.abi.datatypes.generated.Int16> parseIDList(String userList)
     {
         List<org.web3j.abi.datatypes.generated.Int16> idList = new ArrayList<>();
 
@@ -199,7 +204,7 @@ public class Ticket extends Token implements Parcelable
         }
         catch (Exception e)
         {
-            idList = null;
+            idList = new ArrayList<>();
         }
 
         return idList;
@@ -302,9 +307,16 @@ public class Ticket extends Token implements Parcelable
         return validIndicies;
     }
 
+    /**
+     * Produce a string CSV of integer IDs given an input list of
+     * @param idArray
+     * @param keepZeros
+     * @return
+     */
     @Override
     public String populateIDs(List<Integer> idArray, boolean keepZeros)
     {
+        if (idArray == null) return "";
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
@@ -339,6 +351,12 @@ public class Ticket extends Token implements Parcelable
     public void setRealmBalance(RealmToken realmToken)
     {
         realmToken.setBalance(populateIDs(balanceArray, true));
+    }
+
+    @Override
+    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
+    {
+        realmToken.setBurnList(populateIDs(burnList, false));
     }
 
     @Override
@@ -386,5 +404,15 @@ public class Ticket extends Token implements Parcelable
             indicies[i] = (short)(int)iterator.next();
         }
         return indicies;
+    }
+
+    public List<Integer> getBurnList()
+    {
+        return burnArray;
+    }
+
+    @Override
+    public String getBurnListStr() {
+        return populateIDs(burnArray, false);
     }
 }

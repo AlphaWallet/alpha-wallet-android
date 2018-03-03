@@ -29,9 +29,23 @@
         >
 
         <TextView
+            android:id="@+id/redeemed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/symbol"
+            android:background="@drawable/small_curved"
+            android:text="Redeemed"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:textStyle="bold|italic" />
+
+        <TextView
             android:id="@+id/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/redeemed"
             android:layout_alignParentStart="true"
             android:layout_marginStart="5dp"
             android:layout_marginTop="2dp"

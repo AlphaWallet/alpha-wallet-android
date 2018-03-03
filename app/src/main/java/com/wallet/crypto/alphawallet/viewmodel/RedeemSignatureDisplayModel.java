@@ -191,7 +191,22 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 ticketIndicies.remove(index);
             }
         }
+        //now write to burn indicies
+        t.addToBurnList(burnList);
 
+        updateBurnInfo(t.getBurnList());
+    }
+
+    private void updateBurnInfo(List<Integer> burnList)
+    {
+        fetchTokensInteract
+                .updateBalance(defaultWallet().getValue(), ticket().getValue(), burnList)
+                .subscribe(this::onSaved, this::onError);
+    }
+
+    private void onSaved()
+    {
+        //display 'burn complete'
         if (ticketIndicies.size() == 0)
         {
             signature.postValue(null);

@@ -109,7 +109,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
         //generate a list of integers
-        Ticket t = new Ticket(null, "0", 0);
+        Ticket t = new Ticket(null, "0", "0", 0);
         List<Integer> sends = t.parseIDListInteger(indexSendList);
         List<Integer> iDs = t.parseIDListInteger(idList);
 

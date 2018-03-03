@@ -277,4 +277,5 @@
     <string name="title_redeem">Redeem Ticket</string>
     <string name="title_show_tickets">Ticket Operations</string>
     <string name="quantity_to_redeem">Quantity to Redeem</string>
+    <string name="waiting_for_blockchain">Waiting for blockchain ...</string>
 </resources>

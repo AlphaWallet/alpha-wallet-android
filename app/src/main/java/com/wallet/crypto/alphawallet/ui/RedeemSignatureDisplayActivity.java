@@ -96,6 +96,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
+
+        displayWaitingQR();
     }
 
     private Bitmap createQRImage(String address) {
@@ -134,6 +136,13 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
+    private void displayWaitingQR()
+    {
+        ticketBurnNotice();
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText(getString(R.string.waiting_for_blockchain));
+    }
+
     private void ticketBurnNotice()
     {
         final Bitmap qrCode = createQRImage(wallet.address);
@@ -141,6 +150,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         findViewById(R.id.qr_image).setAlpha(0.1f);
 
         TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText(getString(R.string.add_ids_to_redeem));
         tv.setVisibility(View.VISIBLE);
     }
 

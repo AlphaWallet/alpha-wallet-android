@@ -103,6 +103,7 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         toolbar();
 
+        setTitle("");
 //        setTitle(getString(R.string.title_market_purchase));
 //        amountInputLayout = findViewById(R.id.symbol_input_layout);
 

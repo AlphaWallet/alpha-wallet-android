@@ -1,7 +1,15 @@
 package com.wallet.crypto.alphawallet.entity;
 
+import org.web3j.utils.Numeric;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,20 +24,22 @@ public class SignaturePair {
     public String signatureStr;
     public String selectionStr;
 
-    public SignaturePair(String selection, byte[] sig, String digest)
+    public SignaturePair(String selection, byte[] sig, String message)
     {
         selectionStr = selection;
-        signature = sig;
+        signature = rearrangeToVRS(sig);
+
         BigInteger bi = new BigInteger(signature);
         signatureStr  = bi.toString(10);
-        message = digest;
+        this.message = message;
+    }
 
-        //check if the produced number was negative
-        if (signatureStr.charAt(0) == '-')
-        {
-            BigInteger twosComplement = twosComplement(bi);
-            signatureStr  = twosComplement.toString(10);
-        }
+    /**
+     * Helper function to get the large number for sending QR code
+     */
+    public String formQRMessage()
+    {
+        return selectionStr + signatureStr;
     }
 
     public static String generateSelection(List<Integer> indexList)
@@ -45,7 +55,6 @@ public class SignaturePair {
                 //now reduce the index to base of this value
                 int correctionFactor = zeroCount * NIBBLE;
                 Integer highestValue = indexList.get(indexList.size() - 1); //TODO: Check for highest value out of range of bitfield
-
 
                 BigInteger bitFieldLookup = BigInteger.ZERO;
                 for (Integer i : indexList) {
@@ -111,10 +120,45 @@ public class SignaturePair {
         // prepend byte of opposite sign
         byte[] result = new byte[contents.length + 1];
         System.arraycopy(contents, 0, result, 1, contents.length);
+
         result[0] = (contents[0] < 0) ? 0 : (byte)-1;
 
         // this will be two's complement
         return new BigInteger(result);
+    }
+
+    /**
+     * Re-arrange signature to VRS (Connor Web3j format) to ensure we don't run into problems with two's compliment representation of signature in decimal
+     * @param sigRSV Signature in RSV
+     * @return signature in VRS
+     */
+    private byte[] rearrangeToVRS(byte[] sigRSV)
+    {
+        ByteArrayOutputStream sigVRS = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(sigVRS);
+
+        try
+        {
+            ByteArrayInputStream input = new ByteArrayInputStream(sigRSV);
+            DataInputStream ds = new DataInputStream(input);
+            byte[] r = new byte[32];
+            byte[] s = new byte[32];
+            int v;
+
+            ds.read(r);
+            ds.read(s);
+            v = ds.readByte();
+
+            out.writeByte(v+27);
+            out.write(r);
+            out.write(s);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return sigVRS.toByteArray();
     }
 
     //got from a received byte[] message to produce selection and signature inputs
@@ -139,17 +183,5 @@ public class SignaturePair {
             System.arraycopy(signature, 1, sigCopy, 0, 65);
             signature = sigCopy;
         }
-    }
-
-    private int getTrailingZeros(String s)
-    {
-        int i = (s.length() - 1);
-        int trailingZeros = 0;
-        while (s.charAt(i--) == '0')
-        {
-            trailingZeros++;
-        }
-
-        return trailingZeros;
     }
 }

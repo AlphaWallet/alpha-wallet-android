@@ -32,4 +32,10 @@
     <color name="grey">#EEEEEE</color>
 	<color name="holo_blue">#FF33b5e5</color>
 
+	<color name="semi_dark_grey">#707070</color>
+	<color name="text_black">#2f2f2f</color>
+	<color name="light_gray">#9b9b9b</color>
+	<color name="super_light_grey">#ececec</color>
+	<color name="button_green">#75b943</color>
+
 </resources>

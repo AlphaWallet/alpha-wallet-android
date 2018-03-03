@@ -5,36 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark">
 
-    <RelativeLayout
-        android:id="@+id/search_container"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
-        android:background="@drawable/background_search"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp">
-
-        <ImageView
-            android:id="@+id/search_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_search" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@id/search_icon"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/search"
-            android:textColor="@color/semitransparentWhite"
-            android:textSize="15sp" />
-    </RelativeLayout>
+    <include layout="@layout/search_bar"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_marketplace"
@@ -43,5 +14,4 @@
         android:layout_below="@id/search_container"
         android:divider="@android:color/transparent"
         android:dividerHeight="10.0sp" />
-
 </RelativeLayout>

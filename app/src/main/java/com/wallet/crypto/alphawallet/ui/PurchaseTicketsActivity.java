@@ -13,7 +13,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
@@ -28,6 +31,8 @@ import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
+
+import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,7 +64,7 @@ public class PurchaseTicketsActivity extends BaseActivity
     private TextView usdPrice;
     private Button purchase;
 
-    private TextInputLayout amountInputLayout;
+//    private TextInputLayout amountInputLayout;
 
     private EditText purchaseQuantity;
     private String ticketIds;
@@ -98,8 +103,8 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         toolbar();
 
-        setTitle(getString(R.string.title_market_purchase));
-        amountInputLayout = findViewById(R.id.symbol_input_layout);
+//        setTitle(getString(R.string.title_market_purchase));
+//        amountInputLayout = findViewById(R.id.symbol_input_layout);
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -123,6 +128,24 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         purchase.setOnClickListener((View v) -> {
             purchaseTicketsFinal();
+        });
+
+        TextView quantityText = findViewById(R.id.text_quantity);
+
+        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
+        plusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(quantityText.getText().toString());
+            quantity++;
+            quantityText.setText(String.valueOf(quantity));
+        });
+
+        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
+        minusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(quantityText.getText().toString());
+            if ((quantity-1) >= 0) {
+                quantity--;
+                quantityText.setText(String.valueOf(quantity));
+            }
         });
     }
 

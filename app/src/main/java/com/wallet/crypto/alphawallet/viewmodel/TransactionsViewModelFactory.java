@@ -14,6 +14,7 @@ import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.NewSettingsRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
@@ -35,6 +36,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final MarketBrowseRouter marketBrowseRouter;
     private final WalletRouter walletRouter;
     private final MarketplaceRouter marketplaceRouter;
+    private final NewSettingsRouter newSettingsRouter;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -50,7 +52,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
-            MarketplaceRouter marketplaceRouter) {
+            MarketplaceRouter marketplaceRouter,
+            NewSettingsRouter newSettingsRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -65,6 +68,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.marketBrowseRouter = marketBrowseRouter;
         this.walletRouter = walletRouter;
         this.marketplaceRouter = marketplaceRouter;
+        this.newSettingsRouter = newSettingsRouter;
     }
 
     @NonNull
@@ -84,6 +88,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 externalBrowserRouter,
                 marketBrowseRouter,
                 walletRouter,
-                marketplaceRouter);
+                marketplaceRouter,
+                newSettingsRouter);
     }
 }

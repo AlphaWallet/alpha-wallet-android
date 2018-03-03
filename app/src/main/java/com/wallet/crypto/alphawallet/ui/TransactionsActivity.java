@@ -128,7 +128,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
 //
 //        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
 //        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
@@ -183,12 +183,16 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
             }
             case R.id.action_my_address: {
 //                viewModel.showMyAddress(this);
-                viewModel.showSettings(this);
+//                viewModel.showSettings(this);
+                viewModel.showNewSettings(this, R.id.frame_layout);
+                setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(2);
                 return true;
             }
             case R.id.action_my_tokens: {
                 viewModel.showTokens(this);
+
+                setTitle(getString(R.string.toolbar_header_help));
                 selectNavigationItem(3);
                 return true;
             }

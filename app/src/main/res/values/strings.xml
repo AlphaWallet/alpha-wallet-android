@@ -276,4 +276,9 @@
     <string name="search">Search</string>
     <string name="toolbar_header_wallet">Wallet</string>
     <string name="toolbar_header_marketplace">Marketplace</string>
+    <string name="toolbar_header_settings">Settings</string>
+    <string name="toolbar_header_help">Help \u0026 FAQ</string>
+    <string name="settings_my_wallet_address">My Wallet Address</string>
+    <string name="settings_notification">Notification Settings</string>
+    <string name="settings_logout">Log Out</string>
 </resources>

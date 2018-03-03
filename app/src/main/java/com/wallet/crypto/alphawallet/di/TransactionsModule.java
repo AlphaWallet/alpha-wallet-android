@@ -13,6 +13,7 @@ import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.NewSettingsRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
@@ -39,7 +40,8 @@ class TransactionsModule {
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
-            MarketplaceRouter marketplaceRouter) {
+            MarketplaceRouter marketplaceRouter,
+            NewSettingsRouter newSettingsRouter) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -54,7 +56,8 @@ class TransactionsModule {
                 externalBrowserRouter,
                 marketBrowseRouter,
                 walletRouter,
-                marketplaceRouter);
+                marketplaceRouter,
+                newSettingsRouter);
     }
 
     @Provides
@@ -120,4 +123,7 @@ class TransactionsModule {
 
     @Provides
     MarketplaceRouter providesMarketplaceRouter() { return new MarketplaceRouter(); }
+
+    @Provides
+    NewSettingsRouter providesNewSettingsRouter() { return new NewSettingsRouter(); }
 }

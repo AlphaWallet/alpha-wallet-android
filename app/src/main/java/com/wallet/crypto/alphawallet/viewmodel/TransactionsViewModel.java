@@ -23,6 +23,7 @@ import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.NewSettingsRouter;
 import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
@@ -56,6 +57,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private final MarketBrowseRouter marketBrowseRouter;
     private final WalletRouter walletRouter;
     private final MarketplaceRouter marketplaceRouter;
+    private final NewSettingsRouter newSettingsRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -77,7 +79,8 @@ public class TransactionsViewModel extends BaseViewModel {
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
-            MarketplaceRouter marketplaceRouter) {
+            MarketplaceRouter marketplaceRouter,
+            NewSettingsRouter newSettingsRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -92,6 +95,7 @@ public class TransactionsViewModel extends BaseViewModel {
         this.marketBrowseRouter = marketBrowseRouter;
         this.walletRouter = walletRouter;
         this.marketplaceRouter = marketplaceRouter;
+        this.newSettingsRouter = newSettingsRouter;
     }
 
     @Override
@@ -183,6 +187,10 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void showSettings(Context context) {
         settingsRouter.open(context);
+    }
+
+    public void showNewSettings(Context context, int resId) {
+        newSettingsRouter.open(context, resId);
     }
 
     public void showSend(Context context) {

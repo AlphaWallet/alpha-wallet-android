@@ -1,8 +1,6 @@
 package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,9 +9,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
@@ -47,7 +42,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private SystemView systemView;
     private ProgressView progressView;
 
-    public TextView name;
     private Ticket ticket;
     private TicketAdapter adapter;
     private int ticketCount = 0;
@@ -59,7 +53,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_use_token);
+        setContentView(R.layout.activity_asset_display);
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
@@ -73,11 +67,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        name = findViewById(R.id.textViewName);
         RecyclerView list = findViewById(R.id.listTickets);
-
-        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
-        rLL.setVisibility(View.GONE);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -91,7 +81,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
         String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
 
-        name.setText(useName);
 
         viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
                 .get(AssetDisplayViewModel.class);
@@ -103,7 +92,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
-        findViewById(R.id.copy_address).setOnClickListener(this);
     }
 
     @Override
@@ -146,13 +134,13 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
                 viewModel.showTransferToken(this, ticket);
             }
             break;
-            case R.id.copy_address:
-            {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.copy_addr_to_clipboard), ticket.getAddress());
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
-            }
+//            case R.id.copy_address:
+//            {
+//                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+//                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.copy_addr_to_clipboard), ticket.getAddress());
+//                clipboard.setPrimaryClip(clip);
+//                Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
+//            }
         }
     }
 

@@ -1,51 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/background_card"
     android:clickable="true"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:paddingEnd="@dimen/big_padding"
-    android:paddingStart="@dimen/big_padding"
-    >
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
 
-    <TextView
-        android:id="@+id/amount"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="2dp"
-        android:textStyle="bold"
-        android:text="5"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:textColor="@color/black"
-        android:textSize="18sp"/>
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_alignBaseline="@+id/amount"
-        android:layout_alignBottom="@+id/amount"
-        android:layout_toEndOf="@+id/amount"
-        android:text="FIFA 2018 Final"
-        android:textAllCaps="true"
-        android:textColor="@color/black"
-        android:textSize="18sp"/>
+        <TextView
+            android:id="@+id/amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:text="5"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_light"
+            android:text="FIFA 2018 Final"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/name"
-        android:layout_marginTop="10dp"
-        android:layout_alignParentStart="true"
-        android:textColor="@color/holo_blue"
-        android:layout_marginStart="5dp"
-        android:text="@string/contract_issuer"/>
+        android:fontFamily="@font/font_semibold"
+        android:text="@string/contract_issuer"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="11sp" />
 
+    <!--<LinearLayout-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:background="@color/white"-->
+    <!--android:orientation="horizontal">-->
 
-</RelativeLayout>
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_semibold"-->
+    <!--android:text="Ethereum Blockchain"-->
+    <!--android:textColor="@color/colorPrimaryDark"-->
+    <!--android:textSize="11sp" />-->
+
+    <!--<View-->
+    <!--android:layout_width="1dp"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_marginBottom="2dp"-->
+    <!--android:layout_marginLeft="10dp"-->
+    <!--android:layout_marginRight="10dp"-->
+    <!--android:layout_marginTop="2dp"-->
+    <!--android:background="@color/colorPrimaryDark" />-->
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_semibold"-->
+    <!--android:text="Issuer: "-->
+    <!--android:textColor="@color/colorPrimaryDark"-->
+    <!--android:textSize="11sp" />-->
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_semibold"-->
+    <!--android:text="Ethereum"-->
+    <!--android:textColor="@color/colorPrimaryDark"-->
+    <!--android:textSize="11sp" />-->
+    <!--</LinearLayout>-->
+
+</LinearLayout>

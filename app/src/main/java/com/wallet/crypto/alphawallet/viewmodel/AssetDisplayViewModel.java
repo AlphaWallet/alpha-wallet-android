@@ -13,10 +13,11 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.SignatureDisplayRouter;
+import com.wallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
 import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
@@ -29,15 +30,14 @@ import io.reactivex.disposables.Disposable;
  * Created by James on 22/01/2018.
  */
 
-public class UseTokenViewModel extends BaseViewModel {
+public class AssetDisplayViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MyTokensRouter myTokensRouter;
     private final TicketTransferRouter ticketTransferRouter;
-    private final SignatureGenerateInteract signatureGenerateInteract;
-    private final SignatureDisplayRouter signatureDisplayRouter;
+    private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
 
@@ -48,13 +48,13 @@ public class UseTokenViewModel extends BaseViewModel {
     @Nullable
     private Disposable getBalanceDisposable;
 
-    UseTokenViewModel(
+    AssetDisplayViewModel(
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
             TicketTransferRouter ticketTransferRouter,
-            SignatureDisplayRouter signatureDisplayRouter,
+            RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter) {
@@ -62,8 +62,7 @@ public class UseTokenViewModel extends BaseViewModel {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.signatureDisplayRouter = signatureDisplayRouter;
-        this.signatureGenerateInteract = signatureGenerateInteract;
+        this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.ticketTransferRouter = ticketTransferRouter;
         this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
@@ -84,9 +83,8 @@ public class UseTokenViewModel extends BaseViewModel {
         return ticket;
     }
 
-    public void showRotatingSignature(Context context, Ticket token) {
-        signatureDisplayRouter.open(context, defaultWallet.getValue(), token);
-
+    public void selectAssetIdsToRedeem(Context context, Ticket token) {
+        redeemAssetSelectRouter.open(context, token);
     }
 
     public void fetchCurrentTicketBalance() {

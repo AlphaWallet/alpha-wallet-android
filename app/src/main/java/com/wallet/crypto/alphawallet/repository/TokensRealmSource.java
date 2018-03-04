@@ -162,6 +162,7 @@ public class TokensRealmSource implements TokenLocalSource {
     public void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled) {
         Realm realm = null;
         try {
+            token.tokenInfo.isEnabled = isEnabled;
             realm = realmManager.getRealmInstance(network, wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", token.tokenInfo.address)

@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.wallet.crypto.alphawallet.entity.Ticket;
 
+import org.web3j.abi.datatypes.Int;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +21,6 @@ public class TicketRange implements Parcelable
     public boolean isChecked;
     public String contractAddress; // Should this be address or actual token?
 
-    //public final int tokenId;
-
     public List<Integer> tokenIds;
 
     public TicketRange(int tokenId, String contractAddress)
@@ -28,10 +28,15 @@ public class TicketRange implements Parcelable
         this.contractAddress = contractAddress;
         tokenIds = new ArrayList<>();
         tokenIds.add(tokenId);
-//        this.tokenId = tokenId;
-//        this.seatStart = seatStart;
-//        this.seatCount = 1;
         this.isChecked = false;
+    }
+
+    public void selectSubRange(int count)
+    {
+        if (count < tokenIds.size())
+        {
+            tokenIds = tokenIds.subList(0, count);
+        }
     }
 
     private TicketRange(Parcel in)

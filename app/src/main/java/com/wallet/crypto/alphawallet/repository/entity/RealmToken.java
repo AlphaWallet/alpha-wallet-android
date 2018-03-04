@@ -76,6 +76,8 @@ public class RealmToken extends RealmObject {
         return isEnabled;
     }
 
+    public boolean isEnabled() { return isEnabled; }
+
     public void setEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
     }

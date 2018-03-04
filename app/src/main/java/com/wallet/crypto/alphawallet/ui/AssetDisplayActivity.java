@@ -4,8 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -17,16 +15,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.wallet.crypto.alphawallet.BuildConfig;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.UseTokenViewModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -39,11 +35,15 @@ import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 /**
  * Created by James on 22/01/2018.
  */
-public class UseTokenActivity extends BaseActivity implements View.OnClickListener
+
+/**
+ *
+ */
+public class AssetDisplayActivity extends BaseActivity implements View.OnClickListener
 {
     @Inject
-    protected UseTokenViewModelFactory useTokenViewModelFactory;
-    private UseTokenViewModel viewModel;
+    protected AssetDisplayViewModelFactory assetDisplayViewModelFactory;
+    private AssetDisplayViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
 
@@ -65,7 +65,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         ticket = getIntent().getParcelableExtra(TICKET);
         ticketCount = ticket.getTicketCount();
 
-        setTitle(getString(R.string.title_use_token));
+        setTitle(getString(R.string.title_show_tickets));
         TokenInfo info = ticket.tokenInfo;
 
         systemView = findViewById(R.id.system_view);
@@ -93,8 +93,8 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
 
         name.setText(useName);
 
-        viewModel = ViewModelProviders.of(this, useTokenViewModelFactory)
-                .get(UseTokenViewModel.class);
+        viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
+                .get(AssetDisplayViewModel.class);
 
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -133,7 +133,7 @@ public class UseTokenActivity extends BaseActivity implements View.OnClickListen
         {
             case R.id.button_use:
             {
-                viewModel.showRotatingSignature(this, ticket);
+                viewModel.selectAssetIdsToRedeem(this, ticket);
             }
             break;
             case R.id.button_sell:

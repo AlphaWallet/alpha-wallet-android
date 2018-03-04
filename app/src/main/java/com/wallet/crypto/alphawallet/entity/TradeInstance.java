@@ -86,11 +86,6 @@ public class TradeInstance
     public void addSignatures(DataOutputStream ds) throws Exception
     {
         //now add the signatures
-//        for (int i = 0; i < 500; i++)
-//        {
-//            byte[] sig = signatures.get(i);
-//            ds.write(sig);
-//        }
         for (byte[] sig : signatures)
         {                 
             ds.write(sig);

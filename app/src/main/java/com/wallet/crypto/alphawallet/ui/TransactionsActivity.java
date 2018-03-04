@@ -98,8 +98,10 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
         viewModel.showWalletFragment(this, R.id.frame_layout);
-        selectNavigationItem(1);
         setTitle(getString(R.string.toolbar_header_wallet));
+
+        setBottomMenu(R.menu.menu_main_network);
+        selectNavigationItem(1);
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -228,7 +230,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         adapter.setDefaultNetwork(networkInfo);
-        setBottomMenu(R.menu.menu_main_network);
+//        setBottomMenu(R.menu.menu_main_network);
 //        selectNavigationItem(1);
 //        setTitle("Wallet");
     }

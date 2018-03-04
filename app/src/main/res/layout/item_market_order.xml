@@ -24,7 +24,10 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/background_marketplace_event"
         android:orientation="vertical"
-        android:padding="15dp">
+        android:paddingTop="15dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:id="@+id/ticketPriceLayout"
@@ -124,7 +127,7 @@
                 android:id="@+id/datelayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="1.5"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -152,7 +155,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
                 android:orientation="horizontal">
 
                 <ImageView

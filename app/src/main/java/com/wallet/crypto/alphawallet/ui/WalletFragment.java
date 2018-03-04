@@ -1,154 +1,184 @@
 package com.wallet.crypto.alphawallet.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
+import com.wallet.crypto.alphawallet.util.TabUtils;
+import com.wallet.crypto.alphawallet.viewmodel.WalletViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.WalletViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.ProgressView;
+import com.wallet.crypto.alphawallet.widget.SystemView;
 
-import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
+
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 /**
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment {
+public class WalletFragment extends Fragment implements View.OnClickListener {
+    @Inject
+    WalletViewModelFactory walletViewModelFactory;
+    private WalletViewModel viewModel;
+
+    private SystemView systemView;
+    private ProgressView progressView;
+    private TokensAdapter adapter;
+
+    private Wallet wallet;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
-        ViewPager viewPager = view.findViewById(R.id.view_pager);
-        PagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getActivity().getSupportFragmentManager());
-        viewPager.setAdapter(pagerAdapter);
+
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        tabLayout.setupWithViewPager(viewPager);
-        changeTabsFont(tabLayout);
-        reflex(tabLayout);
+        tabLayout.addTab(tabLayout.newTab().setText("All"));
+        tabLayout.addTab(tabLayout.newTab().setText("Tickets"));
+        tabLayout.addTab(tabLayout.newTab().setText("Currency"));
+        tabLayout.addTab(tabLayout.newTab().setText("Assets"));
+
+        TabUtils.changeTabsFont(getContext(), tabLayout);
+        TabUtils.reflex(tabLayout);
+
+        adapter = new TokensAdapter(this::onTokenClick);
+        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
+        systemView = view.findViewById(R.id.system_view);
+        progressView = view.findViewById(R.id.progress_view);
+        progressView.hide();
+
+        RecyclerView list = view.findViewById(R.id.list);
+
+        list.setLayoutManager(new LinearLayoutManager(getContext()));
+        list.setAdapter(adapter);
+
+        systemView.attachRecyclerView(list);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
+
+        viewModel = ViewModelProviders.of(this, walletViewModelFactory)
+                .get(WalletViewModel.class);
+        viewModel.progress().observe(this, systemView::showProgress);
+        viewModel.error().observe(this, this::onError);
+        viewModel.tokens().observe(this, this::onTokens);
+        viewModel.total().observe(this, this::onTotal);
+//        viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
+        viewModel.queueProgress().observe(this, progressView::updateProgress);
+//        viewModel.pushToast().observe(this, this::displayToast);
+
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+
+        refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
         return view;
     }
 
-    private void changeTabsFont(TabLayout tabLayout) {
-        Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.font_regular);
-        ViewGroup vg = (ViewGroup) tabLayout.getChildAt(0);
-        int tabsCount = vg.getChildCount();
-        for (int j = 0; j < tabsCount; j++) {
-            ViewGroup vgTab = (ViewGroup) vg.getChildAt(j);
-            int tabChildsCount = vgTab.getChildCount();
-            for (int i = 0; i < tabChildsCount; i++) {
-                View tabViewChild = vgTab.getChildAt(i);
-                if (tabViewChild instanceof TextView) {
-                    ((TextView) tabViewChild).setTypeface(typeface);
-                }
+    private void onTotal(BigDecimal totalInCurrency) {
+        adapter.setTotal(totalInCurrency);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add: {
+                viewModel.showAddToken(getContext());
             }
+            break;
+            case R.id.action_edit: {
+                viewModel.showEditTokens(getContext());
+            }
+            break;
+            case android.R.id.home: {
+                adapter.clear();
+                viewModel.showTransactions(getContext());
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void onTokenClick(View view, Token token) {
+        Context context = view.getContext();
+        token.clickReact(viewModel, context);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewModel.prepare();
+    }
+
+    private void onTokens(Token[] tokens) {
+        adapter.setTokens(tokens);
+    }
+
+    private void onError(ErrorEnvelope errorEnvelope) {
+        if (errorEnvelope.code == EMPTY_COLLECTION) {
+            systemView.showEmpty(getString(R.string.no_tokens));
+        } else {
+            systemView.showError(getString(R.string.error_fail_load_tokens), this);
         }
     }
 
-    public static float dipToPixels(Context context, float dipValue) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.try_again: {
+                viewModel.fetchTokens();
+            }
+            break;
+        }
     }
 
-    public void reflex(final TabLayout tabLayout){
-        tabLayout.post(() -> {
-            try {
-                LinearLayout mTabStrip = (LinearLayout) tabLayout.getChildAt(0);
-
-                int dp10 = (int) dipToPixels(tabLayout.getContext(), 10);
-
-                for (int i = 0; i < mTabStrip.getChildCount(); i++) {
-                    View tabView = mTabStrip.getChildAt(i);
-
-
-                    Field mTextViewField = tabView.getClass().getDeclaredField("mTextView");
-                    mTextViewField.setAccessible(true);
-
-                    TextView mTextView = (TextView) mTextViewField.get(tabView);
-
-                    tabView.setPadding(0, 0, 0, 0);
-
-                    int width = 0;
-                    width = mTextView.getWidth();
-                    if (width == 0) {
-                        mTextView.measure(0, 0);
-                        width = mTextView.getMeasuredWidth();
-                    }
-
-
-                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tabView.getLayoutParams();
-                    params.width = width ;
-                    params.leftMargin = dp10;
-                    params.rightMargin = dp10;
-                    tabView.setLayoutParams(params);
-
-                    tabView.invalidate();
-                }
-
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        });
-
+    private void onDefaultWallet(Wallet wallet) {
+//        adapter.setDefaultWallet(wallet);
+        this.wallet = wallet;
+        viewModel.fetchTokens();
     }
 
-    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+//        adapter.setDefaultNetwork(networkInfo);
+//        setBottomMenu(R.menu.menu_main_network);
+    }
 
-        @Override
-        public Fragment getItem(int position) {
-//            switch (position) {
-//                case 0:
-//                    return new WalletAllFragment();
-//                case 1:
-//                    return new WalletTicketsFragment();
-//                case 3:
-//                    return new WalletCurrencyFragment();
-//                case 4:
-//                    return new WalletAssetsFragment();
-//            }
-            return new WalletTestFragment();
-        }
-
-        @Override
-        public int getCount() {
-            return 4;
-        }
-
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "All";
-                case 1:
-                    return "Tickets";
-                case 2:
-                    return "Currency";
-                case 3:
-                    return "Assets";
-                default:
-                    return null;
-            }
-        }
+    private void onBalanceChanged(Map<String, String> balance) {
+//        ActionBar actionBar = getSupportActionBar();
+//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
+//        Wallet wallet = viewModel.defaultWallet().getValue();
+//        if (actionBar == null || networkInfo == null || wallet == null) {
+//            return;
+//        }
+//        if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
+//            actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
+//            actionBar.setSubtitle("");
+//        } else {
+//            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
+//            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
+//        }
     }
 }

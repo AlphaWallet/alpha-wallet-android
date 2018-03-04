@@ -352,11 +352,13 @@ public class Ticket extends Token implements Parcelable
     {
         tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
         tokenHolder.balanceEth.setVisibility(View.GONE);
-        tokenHolder.balanceCurrency.setVisibility(View.GONE);
+//        tokenHolder.balanceCurrency.setVisibility(View.GONE);
+        tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
 
         //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
-        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
+//        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
+        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
     }
 
     public String populateRange(TicketRange range)

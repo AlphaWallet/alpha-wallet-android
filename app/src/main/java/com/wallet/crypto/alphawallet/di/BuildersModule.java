@@ -23,6 +23,7 @@ import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.alphawallet.ui.TokensActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
+import com.wallet.crypto.alphawallet.ui.WalletFragment;
 import com.wallet.crypto.alphawallet.ui.WalletsActivity;
 
 import dagger.Module;
@@ -119,7 +120,12 @@ public abstract class BuildersModule {
 	@FragmentScope
 	@ContributesAndroidInjector(modules = NewSettingsModule.class)
 	abstract NewSettingsFragment bindNewSettingsFragment();
+
 	@ActivityScope
 	@ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
 	abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = WalletModule.class)
+	abstract WalletFragment bindWalletFragment();
 }

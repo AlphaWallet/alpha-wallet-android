@@ -106,6 +106,7 @@
 
         <activity
             android:name="com.wallet.crypto.alphawallet.ui.SellDetailActivity"
+            android:windowSoftInputMode="adjustPan"
             android:label="@string/action_sell" />
 
         <activity

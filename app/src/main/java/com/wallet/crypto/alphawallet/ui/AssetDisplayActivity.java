@@ -73,11 +73,11 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        DividerItemDecoration itemDecorator = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider));
+//        DividerItemDecoration itemDecorator = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+//        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider));
         list.setHapticFeedbackEnabled(true);
-        list.setClipToPadding(false);
-        list.addItemDecoration(itemDecorator);
+//        list.setClipToPadding(false);
+//        list.addItemDecoration(itemDecorator);
 
         String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
 

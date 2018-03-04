@@ -67,10 +67,10 @@ public class TicketSaleAdapter extends TicketAdapter {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent);
             } break;
             case SalesOrderHeaderHolder.VIEW_TYPE: {
-                holder = new SalesOrderHeaderHolder(R.layout.item_token_description, parent);
+                holder = new SalesOrderHeaderHolder(R.layout.item_redeem_ticket, parent);
             } break;
             case RedeemTicketHolder.VIEW_TYPE: {
-                holder = new RedeemTicketHolder(R.layout.item_token_description, parent);
+                holder = new RedeemTicketHolder(R.layout.item_redeem_ticket, parent);
             } break;
             case QuantitySelectorHolder.VIEW_TYPE: {
                 quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent);

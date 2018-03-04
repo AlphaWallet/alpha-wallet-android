@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -46,7 +47,6 @@ public class SellTicketActivity extends BaseActivity
     private SystemView systemView;
     private ProgressView progressView;
 
-    public TextView name;
     public TextView ids;
     public TextView selected;
 
@@ -69,7 +69,8 @@ public class SellTicketActivity extends BaseActivity
 
         address = ticket.tokenInfo.address;
 
-        setTitle(getString(R.string.market_queue_title));
+//        setTitle(getString(R.string.market_queue_title));
+        setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -83,19 +84,20 @@ public class SellTicketActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+
+        Button nextButton = findViewById(R.id.button_next);
+        nextButton.setOnClickListener(v -> {
+            onNext();
+        });
+
     }
 
     private void setupSalesOrder()
     {
         ticketRange = null;
-        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
+        setContentView(R.layout.activity_sell_ticket);
 
         RecyclerView list = findViewById(R.id.listTickets);
-        LinearLayout buttons = findViewById(R.id.layoutButtons);
-        buttons.setVisibility(View.GONE);
-
-        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
-        rLL.setVisibility(View.GONE);
 
         adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -104,18 +106,18 @@ public class SellTicketActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_menu, menu);
+//        getMenuInflater().inflate(R.menu.send_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_next: {
-                onNext();
-            }
-            break;
-        }
+//        switch (item.getItemId()) {
+//            case R.id.action_next: {
+//                onNext();
+//            }
+//            break;
+//        }
         return super.onOptionsItemSelected(item);
     }
 

@@ -116,7 +116,7 @@ public class SalesOrderActivity extends BaseActivity
     private void setupSalesOrder()
     {
         ticketRange = null;
-        setContentView(R.layout.activity_use_token);
+        setContentView(R.layout.activity_sales_order);
 
         RecyclerView list = findViewById(R.id.listTickets);
         LinearLayout buttons = findViewById(R.id.layoutButtons);

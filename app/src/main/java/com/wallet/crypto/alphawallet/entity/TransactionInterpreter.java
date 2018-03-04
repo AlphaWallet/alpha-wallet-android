@@ -35,29 +35,33 @@ public class TransactionInterpreter
         //1. check function
         thisData = new TransactionData();
 
-        while (parseIndex < input.length())
-        {
-            switch (parseState)
-            {
-                case 0: //get function
-                    parseIndex += setFunction(input.substring(0, 10));
-                    parseState = 1;
-                    break;
-                case 1: //now get params
-                    parseIndex += getParams(input);
-                    parseState = 2;
-                    break;
-                case 2:
-                    break;
-            }
+        try {
+            while (parseIndex < input.length()) {
+                switch (parseState) {
+                    case 0: //get function
+                        parseIndex += setFunction(input.substring(0, 10));
+                        parseState = 1;
+                        break;
+                    case 1: //now get params
+                        parseIndex += getParams(input);
+                        parseState = 2;
+                        break;
+                    case 2:
+                        break;
+                }
 
-            if (parseIndex < 0) break; //error
+                if (parseIndex < 0) break; //error
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
         return thisData;
     }
 
-    public int setFunction(String input)
+    public int setFunction(String input) throws Exception
     {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
@@ -69,11 +73,15 @@ public class TransactionInterpreter
             thisData.addresses.clear();
             thisData.sigData.clear();
         }
+        else
+        {
+            System.out.println("What?");
+        }
 
         return input.length();
     }
 
-    private int getParams(String input)
+    private int getParams(String input) throws Exception
     {
         if (thisData.functionData.args != null)
         {
@@ -188,10 +196,8 @@ public class TransactionInterpreter
     }
 }
 //0xa6fb475f000000000000000000000000951c19daead668bfa8391c94286f8ce7cbda2fe3000000000000000000000000879230570f360424bc5baa99906d5f640a75551e000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004
-
 //000000000000000000000000cb53390d32495163936ee451fee7089cd30be33c000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001
-
-//trade:
+//trade(uint,[],v,r,s)
 /*
 0x696ecc55
 000000000000000000000000000000000000000000000000000000005a9a00e2 - expiry

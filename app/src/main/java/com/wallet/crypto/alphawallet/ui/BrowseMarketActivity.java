@@ -70,7 +70,7 @@ public class BrowseMarketActivity extends BaseActivity
 
     private void setupSalesOrder()
     {
-        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
+        setContentView(R.layout.activity_browse_market); //use token just provides a simple list view.
 
         LinearLayout buttons = findViewById(R.id.layoutButtons);
         buttons.setVisibility(View.GONE);

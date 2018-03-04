@@ -14,23 +14,24 @@ import java.util.Map;
  * Created by James on 2/02/2018.
  */
 
-public class TransactionInput
+// TODO: Should be a factory class that emits an object containing transaction interpretation
+public class TransactionInterpreter
 {
-    public String functionName;
-    public String function;
-    public List<String> params;
-    public List<String> addresses;
-    public List<BigInteger> paramValues;
+    TransactionData thisData;
 
     private Map<String, FunctionData> functionList;
 
-    public TransactionInput(String input)
+    public TransactionInterpreter()
     {
         setupKnownFunctions();
+    }
 
+    public TransactionData InterpretTransation(String input)
+    {
         int parseState = 0;
         int parseIndex = 0;
         //1. check function
+        thisData = new TransactionData();
 
         while (parseIndex < input.length())
         {
@@ -50,6 +51,8 @@ public class TransactionInput
 
             if (parseIndex < 0) break; //error
         }
+
+        return thisData;
     }
 
     public int setFunction(String input)
@@ -59,10 +62,10 @@ public class TransactionInput
 
         if (data != null)
         {
-            params = data.args;
-            functionName = data.functionName;
-            paramValues = new ArrayList<>();
-            addresses = new ArrayList<>();
+            thisData.functionData = data;
+            thisData.paramValues.clear();
+            thisData.addresses.clear();
+            thisData.sigData.clear();
         }
 
         return input.length();
@@ -72,9 +75,9 @@ public class TransactionInput
     {
         int parseIndex = 0;
 
-        if (params != null)
+        if (thisData.functionData.args != null)
         {
-            for (String type : params)
+            for (String type : thisData.functionData.args)
             {
                 switch (type.charAt(0))
                 {
@@ -84,7 +87,15 @@ public class TransactionInput
                             //read 64 from input
                             String addr = input.substring(parseIndex, parseIndex+64);
                             parseIndex += 64;
-                            addresses.add(addr);
+                            thisData.addresses.add(addr);
+                        }
+                        break;
+                    case 'b':
+                        if (type.equals("bytes32"))
+                        {
+                            //read 64 from input
+                            String data = input.substring(parseIndex, parseIndex+64);
+                            thisData.sigData.add(data);
                         }
                         break;
                     case 'u':
@@ -97,10 +108,23 @@ public class TransactionInput
                             parseIndex += 64;
                             for (int i = 0; i < count.intValue(); i++)
                             {
-                                paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
+                                thisData.paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
                                 parseIndex += 64;
                             }
                         }
+                        else if (type.equals("uint256"))
+                        {
+                            thisData.paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
+                            parseIndex += 64;
+                        }
+                        else if (type.equals("uint8")) //In the transaction input uint8 is still written as uint256
+                        {
+                            thisData.paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
+                            parseIndex += 64;
+                            thisData.sigData.add(input.substring(parseIndex, parseIndex+64));
+                        }
+                        break;
+                    default:
                         break;
                 }
             }
@@ -113,10 +137,18 @@ public class TransactionInput
     private void setupKnownFunctions()
     {
         functionList = new HashMap<>();
-        String methodSignature = "transferFrom(address,address,uint16[])";
-        FunctionData data = getArgs(methodSignature);
-        functionList.put(buildMethodId(methodSignature), data);
+        for (String methodSignature : KNOWN_FUNCTIONS)
+        {
+            FunctionData data = getArgs(methodSignature);
+            functionList.put(buildMethodId(methodSignature), data);
+        }
     }
+
+    static final String[] KNOWN_FUNCTIONS = {
+            "transferFrom(address,address,uint16[])",
+            "transfer(address,uint16[])",
+            "trade(uint256,uint16[],uint8,bytes32,bytes32)"
+            };
 
     private FunctionData getArgs(String methodSig)
     {
@@ -128,6 +160,7 @@ public class TransactionInput
         String args = methodSig.substring(b1Index + 1, b2Index);
         String[] argArray = args.split(",");
         data.args = Arrays.asList(argArray);
+        data.functionFullName = methodSig;
 
         return data;
     }

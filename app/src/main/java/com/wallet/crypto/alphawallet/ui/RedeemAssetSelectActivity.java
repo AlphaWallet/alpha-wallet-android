@@ -4,13 +4,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -19,14 +17,10 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.util.BalanceUtils;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModel;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -35,22 +29,25 @@ import dagger.android.AndroidInjection;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 
 /**
- * Created by James on 13/02/2018.
+ * Created by James on 27/02/2018.
  */
 
-public class SellTicketActivity extends BaseActivity
+/**
+ * This is where we select tickets to redeem
+ */
+public class RedeemAssetSelectActivity extends BaseActivity
 {
     @Inject
-    protected SellTicketModelFactory viewModelFactory;
-    protected SellTicketModel viewModel;
+    protected RedeemAssetSelectViewModelFactory viewModelFactory;
+    protected RedeemAssetSelectViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
+    private int currentMenu = R.menu.send_menu;
 
     public TextView name;
     public TextView ids;
     public TextView selected;
 
-    private String address;
     private Ticket ticket;
     private TicketRange ticketRange;
     private TicketSaleAdapter adapter;
@@ -61,15 +58,12 @@ public class SellTicketActivity extends BaseActivity
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        setupSalesOrder();
-
-        address = ticket.getAddress();
+        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
+        setupRedeemSelector();
 
         toolbar();
 
-        address = ticket.tokenInfo.address;
-
-        setTitle(getString(R.string.market_queue_title));
+        setTitle(getString(R.string.title_redeem_token));
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -78,17 +72,19 @@ public class SellTicketActivity extends BaseActivity
         progressView.hide();
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(SellTicketModel.class);
+                .get(RedeemAssetSelectViewModel.class);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
     }
 
-    private void setupSalesOrder()
+    private void setupRedeemSelector()
     {
         ticketRange = null;
-        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
+
+        currentMenu = R.menu.send_menu;
+        invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
         LinearLayout buttons = findViewById(R.id.layoutButtons);
@@ -98,13 +94,14 @@ public class SellTicketActivity extends BaseActivity
         rLL.setVisibility(View.GONE);
 
         adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        adapter.setRedeemTicket(ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_menu, menu);
+        getMenuInflater().inflate(currentMenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -115,6 +112,16 @@ public class SellTicketActivity extends BaseActivity
                 onNext();
             }
             break;
+            case R.id.action_redeem: {
+                onRedeem();
+            }
+            break;
+            case android.R.id.home: {
+                if (currentMenu == R.menu.redeem_menu) {
+                    setupRedeemSelector();
+                    return true;
+                }
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -122,38 +129,29 @@ public class SellTicketActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare();
     }
 
     private void onNext() {
-        // Validate input fields
-        boolean inputValid = true;
-        //look up all checked fields
-        List<TicketRange> sellRange = adapter.getCheckedItems();
-        //add this range to the sell order confirmation
-        //Generate list of indicies and actual ids
-        List<Integer> idList = new ArrayList<>();
-        for (TicketRange tr : sellRange)
+        //first get range selection
+        TicketRange range = adapter.getCheckedItem();
+        if (range != null)
         {
-            idList.addAll(tr.tokenIds);
+            onTicketIdClick(null, range);
         }
-
-        String idListStr = viewModel.ticket().getValue().populateIDs(idList, false);
-        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(idListStr);
-        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
-
-        //confirm other address
-        //confirmation screen
-        //(Context context, String to, String ids, String ticketIDs)
-        viewModel.openSellDialog(this, idListStr);
     }
 
-    boolean isValidAmount(String eth) {
-        try {
-            String wei = BalanceUtils.EthToWei(eth);
-            return wei != null;
-        } catch (Exception e) {
-            return false;
+    private void onRedeem()
+    {
+        int quantity =  adapter.getSelectedQuantity();
+        TicketRange range = adapter.getCheckedItem();
+
+        //check params
+        if (range != null && quantity > 0 && quantity <= range.tokenIds.size())
+        {
+            //form a new Ticket Range with the required tickets to burn
+            range.selectSubRange(quantity);
+            viewModel.showRedeemSignature(this, range, ticket);
         }
     }
 
@@ -162,8 +160,12 @@ public class SellTicketActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
-        Context context = view.getContext();
-        //TODO: what action should be performed when clicking on a range?
+    private void onTicketIdClick(View v, TicketRange range) {
+        currentMenu = R.menu.redeem_menu;
+        invalidateOptionsMenu();
+        adapter.setRedeemTicketQuantity(range, ticket);
+        RecyclerView list = findViewById(R.id.listTickets);
+        list.setAdapter(null);
+        list.setAdapter(adapter);
     }
 }

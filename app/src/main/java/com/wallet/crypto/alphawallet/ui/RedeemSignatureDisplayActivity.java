@@ -13,8 +13,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,29 +26,32 @@ import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
-import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModel;
-import com.wallet.crypto.alphawallet.viewmodel.SignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
+import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.wallet.crypto.alphawallet.C.EXTRA_AMOUNT;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
+import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
 import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 
 /**
  * Created by James on 24/01/2018.
  */
 
-public class SignatureDisplayActivity extends BaseActivity implements View.OnClickListener {
+public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
 
     @Inject
-    protected SignatureDisplayModelFactory signatureDisplayModelFactory;
-    private SignatureDisplayModel viewModel;
+    protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
+    private RedeemSignatureDisplayModel viewModel;
     private SystemView systemView;
 
     public TextView name;
@@ -62,6 +63,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
 
     private Wallet wallet;
     private Ticket ticket;
+    private TicketRange ticketRange;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,11 +74,15 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         setContentView(R.layout.activity_rotating_signature);
         toolbar();
 
+        ticketBurnNotice();
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText(getString(R.string.waiting_for_blockchain));
+        tv.setVisibility(View.VISIBLE);
+
         ticket = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
-        findViewById(R.id.advanced_options).setOnClickListener(this);
-
-        inviteUserToAddIDs();
+        ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
+        findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
         name = findViewById(R.id.textViewName);
         ids = findViewById(R.id.textViewIDs);
@@ -85,51 +91,16 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         amountInputLayout = findViewById(R.id.amount_input_layout);
 
         name.setText(ticket.tokenInfo.name);
-        ids.setText(ticket.populateIDs(ticket.balanceArray, false));
+        ids.setVisibility(View.GONE);
+        idsText.setVisibility(View.GONE);
+        selection.setVisibility(View.GONE);
+        amountInputLayout.setVisibility(View.GONE);
 
-        viewModel = ViewModelProviders.of(this, signatureDisplayModelFactory)
-                .get(SignatureDisplayModel.class);
+        viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
+                .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
-
-        idsText.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                final String balanceArray = idsText.getText().toString();
-                //convert to an index array
-                viewModel.newBalanceArray(balanceArray);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        idsText.setOnEditorActionListener(new TextView.OnEditorActionListener()
-        {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent)
-            {
-                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN)
-                {
-                    if (keyEvent.getKeyCode() == keyEvent.KEYCODE_ENTER)
-                    {
-                        final String balanceArray = idsText.getText().toString();
-                        viewModel.generateNewSelection(balanceArray);
-                    }
-                }
-
-                return true;
-            }
-        });
     }
 
     private Bitmap createQRImage(String address) {
@@ -155,7 +126,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket.tokenInfo.address);
+        viewModel.prepare(ticket.tokenInfo.address, ticket, ticketRange);
     }
 
     @Override
@@ -168,7 +139,7 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
-    private void inviteUserToAddIDs()
+    private void ticketBurnNotice()
     {
         final Bitmap qrCode = createQRImage(wallet.address);
         ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
@@ -181,12 +152,17 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
     private void onSignatureChanged(SignaturePair sigPair) {
         try
         {
-            if (sigPair.selectionStr == null) return;
-            String qrMessage = sigPair.selectionStr + sigPair.signatureStr;
-            final Bitmap qrCode = createQRImage(qrMessage);
-            ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
-            findViewById(R.id.qr_image).setAlpha(1.0f);
-            findViewById(R.id.textAddIDs).setVisibility(View.GONE);
+            if (sigPair == null || sigPair.selectionStr == null)
+            {
+                ticketBurnNotice();
+            }
+            else {
+                String qrMessage = sigPair.selectionStr + sigPair.signatureStr;
+                final Bitmap qrCode = createQRImage(qrMessage);
+                ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
+                findViewById(R.id.qr_image).setAlpha(1.0f);
+                findViewById(R.id.textAddIDs).setVisibility(View.GONE);
+            }
         }
         catch (Exception e)
         {
@@ -194,27 +170,11 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         }
     }
 
-    private void onTicket(Ticket ticket) {
+    private void onTicket(Ticket ticket)
+    {
         name.setText(ticket.tokenInfo.name);
         String idStr = ticket.populateIDs(ticket.getValidIndicies(), false);
         ids.setText(idStr);
-
-        //check current list of IDs is still valid
-        String currentList = selection.getText().toString();
-        if (currentList.length() > 0) {
-            String correctList = ticket.checkBalance(currentList);
-
-            if (!correctList.equals(currentList))
-            {
-                // ticket was burned, used or transferred
-                selection.setText(correctList);
-                idsText.setText(correctList);
-                viewModel.newBalanceArray(correctList);
-                if (correctList.length() == 0) {
-                    inviteUserToAddIDs();
-                }
-            }
-        }
     }
 
     private void onSelected(String selectionStr)
@@ -224,10 +184,6 @@ public class SignatureDisplayActivity extends BaseActivity implements View.OnCli
         {
             //dismiss soft keyboard
             KeyboardUtils.hideKeyboard(idsText);
-            if (selectionStr == null || selectionStr.length() == 0)
-            {
-                inviteUserToAddIDs();
-            }
         }
         catch (Exception e)
         {

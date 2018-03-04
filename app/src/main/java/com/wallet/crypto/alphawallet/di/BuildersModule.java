@@ -1,12 +1,15 @@
 package com.wallet.crypto.alphawallet.di;
 
 import com.wallet.crypto.alphawallet.ui.AddTokenActivity;
+import com.wallet.crypto.alphawallet.ui.AssetDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
 import com.wallet.crypto.alphawallet.ui.MarketplaceFragment;
 import com.wallet.crypto.alphawallet.ui.NewSettingsFragment;
+import com.wallet.crypto.alphawallet.ui.RedeemAssetSelectActivity;
+import com.wallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.SalesOrderActivity;
 import com.wallet.crypto.alphawallet.ui.MyAddressActivity;
 import com.wallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
@@ -14,14 +17,12 @@ import com.wallet.crypto.alphawallet.ui.SellDetailActivity;
 import com.wallet.crypto.alphawallet.ui.SellTicketActivity;
 import com.wallet.crypto.alphawallet.ui.SendActivity;
 import com.wallet.crypto.alphawallet.ui.SettingsActivity;
-import com.wallet.crypto.alphawallet.ui.SignatureDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.SplashActivity;
 import com.wallet.crypto.alphawallet.ui.TicketTransferActivity;
 import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.alphawallet.ui.TokensActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
-import com.wallet.crypto.alphawallet.ui.UseTokenActivity;
 import com.wallet.crypto.alphawallet.ui.WalletsActivity;
 
 import dagger.Module;
@@ -80,12 +81,12 @@ public abstract class BuildersModule {
 	abstract TokenChangeCollectionActivity bindChangeTokenCollectionActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = SignatureModule.class)
-	abstract SignatureDisplayActivity bindSignatureDisplayActivity();
+	@ContributesAndroidInjector(modules = RedeemSignatureDisplayModule.class)
+	abstract RedeemSignatureDisplayActivity bindSignatureDisplayActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = UseTokenModule.class)
-	abstract UseTokenActivity bindUseTokenActivity();
+	@ContributesAndroidInjector(modules = AssetDisplayModule.class)
+	abstract AssetDisplayActivity bindAssetDisplayActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TicketTransferModule.class)
@@ -118,4 +119,7 @@ public abstract class BuildersModule {
 	@FragmentScope
 	@ContributesAndroidInjector(modules = NewSettingsModule.class)
 	abstract NewSettingsFragment bindNewSettingsFragment();
+	@ActivityScope
+	@ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
+	abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
 }

@@ -8,7 +8,7 @@ import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
-import com.wallet.crypto.alphawallet.router.UseTokenRouter;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
 
 import dagger.Module;
@@ -24,14 +24,14 @@ class TokensModule {
             SendTokenRouter sendTokenRouter,
             TransactionsRouter transactionsRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
-            UseTokenRouter useTokenRouter) {
+            AssetDisplayRouter assetDisplayRouter) {
         return new TokensViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
                 transactionsRouter,
                 changeTokenCollectionRouter,
-                useTokenRouter);
+                assetDisplayRouter);
     }
 
     @Provides
@@ -56,8 +56,8 @@ class TokensModule {
     }
 
     @Provides
-    UseTokenRouter provideUseTokenRouter() {
-        return new UseTokenRouter();
+    AssetDisplayRouter provideRedeemTokenRouter() {
+        return new AssetDisplayRouter();
     }
 
     @Provides

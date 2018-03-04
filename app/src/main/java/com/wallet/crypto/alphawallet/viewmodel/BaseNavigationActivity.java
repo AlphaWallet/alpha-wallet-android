@@ -8,22 +8,20 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.ui.BaseActivity;
 
-public class BaseNavigationActivity extends BaseActivity implements BottomNavigationViewEx.OnNavigationItemSelectedListener {
+public abstract class BaseNavigationActivity extends BaseActivity implements BottomNavigationViewEx.OnNavigationItemSelectedListener {
 
     private BottomNavigationViewEx navigation;
 
-    protected void initBottomNavigation() {
+    protected void initBottomNavigation()
+    {
         navigation = findViewById(R.id.bottom_navigation_ex);
-        //BottomNavigationViewEx bnve = (BottomNavigationViewEx) findViewById(R.id.bnve);
         navigation.setOnNavigationItemSelectedListener(this);
         navigation.setTextVisibility(false);
         navigation.setIconsMarginTop(10);
     }
 
-    protected void setBottomMenu(@MenuRes int menuRes) {
-
-        int count = navigation.getItemCount();
-
+    protected void setBottomMenu(@MenuRes int menuRes)
+    {
         navigation.getMenu().clear();
         navigation.inflateMenu(menuRes);
 

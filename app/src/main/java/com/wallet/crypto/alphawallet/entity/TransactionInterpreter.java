@@ -19,6 +19,8 @@ public class TransactionInterpreter
 {
     TransactionData thisData;
 
+    private int parseIndex;
+    private int parseState;
     private Map<String, FunctionData> functionList;
 
     public TransactionInterpreter()
@@ -28,8 +30,8 @@ public class TransactionInterpreter
 
     public TransactionData InterpretTransation(String input)
     {
-        int parseState = 0;
-        int parseIndex = 0;
+        parseState = 0;
+        parseIndex = 0;
         //1. check function
         thisData = new TransactionData();
 
@@ -42,7 +44,7 @@ public class TransactionInterpreter
                     parseState = 1;
                     break;
                 case 1: //now get params
-                    parseIndex += getParams(input.substring(parseIndex));
+                    parseIndex += getParams(input);
                     parseState = 2;
                     break;
                 case 2:
@@ -73,8 +75,6 @@ public class TransactionInterpreter
 
     private int getParams(String input)
     {
-        int parseIndex = 0;
-
         if (thisData.functionData.args != null)
         {
             for (String type : thisData.functionData.args)
@@ -84,44 +84,32 @@ public class TransactionInterpreter
                     case 'a':
                         if (type.equals("address"))
                         {
-                            //read 64 from input
-                            String addr = input.substring(parseIndex, parseIndex+64);
-                            parseIndex += 64;
-                            thisData.addresses.add(addr);
+                            thisData.addresses.add(readNumber256(input));
                         }
                         break;
                     case 'b':
                         if (type.equals("bytes32"))
                         {
-                            //read 64 from input
-                            String data = input.substring(parseIndex, parseIndex+64);
-                            thisData.sigData.add(data);
+                            thisData.sigData.add(readNumber256(input));
                         }
                         break;
                     case 'u':
                         if (type.equals("uint16[]")) //TODO: handle dynamic types separately
                         {
-                            //read in dynamic array
-                            String offset = input.substring(parseIndex, parseIndex+64);
-                            parseIndex += 64;
-                            BigInteger count = new BigInteger(input.substring(parseIndex, parseIndex+64), 16);
-                            parseIndex += 64;
+                            BigInteger count = new BigInteger(readNumber256(input), 16);
                             for (int i = 0; i < count.intValue(); i++)
                             {
-                                thisData.paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
-                                parseIndex += 64;
+                                thisData.paramValues.add(new BigInteger(readNumber256(input), 16));
                             }
                         }
                         else if (type.equals("uint256"))
                         {
-                            thisData.paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
-                            parseIndex += 64;
+                            thisData.sigData.add(readNumber256(input));
                         }
                         else if (type.equals("uint8")) //In the transaction input uint8 is still written as uint256
                         {
-                            thisData.paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
-                            parseIndex += 64;
-                            thisData.sigData.add(input.substring(parseIndex, parseIndex+64));
+                            String data = readNumber256(input);
+                            thisData.sigData.add(data);
                         }
                         break;
                     default:
@@ -131,6 +119,20 @@ public class TransactionInterpreter
         }
 
         return parseIndex;
+    }
+
+    private String readNumber256(String input)
+    {
+        if ((parseIndex + 64) <= input.length())
+        {
+            String value = input.substring(parseIndex, parseIndex+64);
+            parseIndex += 64;
+            return value;
+        }
+        else
+        {
+            return "0";
+        }
     }
 
 
@@ -159,8 +161,22 @@ public class TransactionInterpreter
         data.functionName = methodSig.substring(0, b1Index);
         String args = methodSig.substring(b1Index + 1, b2Index);
         String[] argArray = args.split(",");
-        data.args = Arrays.asList(argArray);
+        List<String> temp = Arrays.asList(argArray);
+        data.args = new ArrayList<>();
+        data.args.addAll(temp);
         data.functionFullName = methodSig;
+
+        for (int i = 0; i < temp.size(); i++)//String arg : data.args)
+        {
+            String arg = temp.get(i);
+            if (arg.contains("[]"))
+            {
+                //rearrange to end, but read in arg decl
+                data.args.add(arg);
+                String argPlaceholder = "uint256";
+                data.args.set(i, argPlaceholder);
+            }
+        }
 
         return data;
     }
@@ -174,3 +190,24 @@ public class TransactionInterpreter
 //0xa6fb475f000000000000000000000000951c19daead668bfa8391c94286f8ce7cbda2fe3000000000000000000000000879230570f360424bc5baa99906d5f640a75551e000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004
 
 //000000000000000000000000cb53390d32495163936ee451fee7089cd30be33c000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001
+
+//trade:
+/*
+0x696ecc55
+000000000000000000000000000000000000000000000000000000005a9a00e2 - expiry
+00000000000000000000000000000000000000000000000000000000000000a0 - varargs decl
+000000000000000000000000000000000000000000000000000000000000001b - 27: v
+c59d6718734043600a49ec2419e566fa03676058e88326ff1161c579c6b8e799 - R
+51d22461ab6f27bedd72d6b56c1fecf9f4cbb79a7728c510022617a9e42782ea - S
+000000000000000000000000000000000000000000000000000000000000000a
+0000000000000000000000000000000000000000000000000000000000000009
+000000000000000000000000000000000000000000000000000000000000000a
+000000000000000000000000000000000000000000000000000000000000000b
+000000000000000000000000000000000000000000000000000000000000000c
+000000000000000000000000000000000000000000000000000000000000000d
+000000000000000000000000000000000000000000000000000000000000000e
+000000000000000000000000000000000000000000000000000000000000000f
+0000000000000000000000000000000000000000000000000000000000000010
+0000000000000000000000000000000000000000000000000000000000000011
+0000000000000000000000000000000000000000000000000000000000000012
+ */

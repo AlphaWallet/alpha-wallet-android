@@ -7,6 +7,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.wallet.crypto.alphawallet.BuildConfig;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 import com.wallet.crypto.alphawallet.viewmodel.SplashViewModel;
@@ -41,7 +42,8 @@ public class SplashActivity extends BaseActivity {
         if (wallets.length == 0) {
             new ManageWalletsRouter().open(this, true);
         } else {
-            new TransactionsRouter().open(this, true);
+//            new TransactionsRouter().open(this, true);
+            new HomeRouter().open(this, true);
         }
     }
 }

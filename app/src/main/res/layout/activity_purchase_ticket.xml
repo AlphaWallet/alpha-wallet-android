@@ -1,147 +1,254 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
     <include layout="@layout/layout_simple_toolbar" />
+
+
     <LinearLayout
-        android:padding="16dp"
-        android:orientation="vertical"
-        android:layout_marginTop="?actionBarSize"
+        android:id="@+id/purchase_layout_top"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_card"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp">
 
-        <RelativeLayout
-            android:orientation="vertical"
-            android:layout_marginLeft="@dimen/big_padding"
-            android:layout_marginRight="@dimen/big_padding"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/title_purchase_ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:text="Purchase Tickets"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
 
-            <LinearLayout
-                android:id="@+id/contract_address_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_gravity="center"
-                android:gravity="bottom"
-                android:orientation="horizontal"
-                >
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/symbol_input_layout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    >
-                    <EditText
-                        android:id="@+id/purchase_quantity"
-                        android:hint="@string/quantity_to_purchase"
-                        android:inputType="numberDecimal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        />
-                </android.support.design.widget.TextInputLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/font_regular"
+            android:text="Quantity of Tickets"
+            android:textAllCaps="true"
+            android:textColor="@color/light_gray"
+            android:textSize="10sp" />
 
-            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_ticket_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/background_quantity"
+            android:orientation="horizontal">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/listTickets"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/contract_address_layout"
-                android:layout_above="@id/fiat_layout"
-                android:divider="@android:color/transparent"
-                android:layout_marginTop="20dp"
-                android:dividerHeight="10.0sp"
-                />
+            <RelativeLayout
+                android:id="@+id/layout_quantity_add"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp">
 
-            <LinearLayout
-                android:id="@+id/fiat_layout"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@id/layoutButtons"
-                android:layout_gravity="center"
-                android:gravity="bottom"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                >
-                <TextView
-                    android:id="@+id/fiat_txt"
+                <ImageView
+                    android:id="@+id/img_quantity_add"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10sp"
-                    android:textAllCaps="true"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="5dp"
-                    android:textColor="@color/holo_blue"
-                    android:text="Total Cost"/>
-                <TextView
-                    android:id="@+id/eth_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:textSize="16sp"
-                    android:textColor="@color/holo_blue"
-                    android:layout_marginBottom="5dp"
-                    android:text="6.05 ETH"/>
-                <TextView
-                    android:id="@+id/fiat_price_txt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:textSize="12sp"
-                    android:textColor="@color/black"
-                    android:layout_marginBottom="5dp"
-                    android:text="Equivalent in USD"/>
-                <TextView
-                    android:id="@+id/fiat_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:textSize="14sp"
-                    android:textColor="@color/holo_blue"
-                    android:layout_marginBottom="5dp"
-                    android:text="$6300"/>
-            </LinearLayout>
+                    android:layout_centerInParent="true"
+                    android:contentDescription="@string/empty"
+                    android:src="@drawable/ic_plus" />
+            </RelativeLayout>
 
-            <LinearLayout
-                android:id="@+id/layoutButtons"
+
+            <TextView
+                android:id="@+id/text_quantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal">
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="1"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="21sp" />
 
-                <Button
-                    android:id="@+id/button_purchase"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="0dp"
+            <RelativeLayout
+                android:id="@+id/layout_quantity_minus"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginRight="10dp"
+                android:layout_weight="2"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp">
+
+                <ImageView
+                    android:id="@+id/img_quantity_minus"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/big_margin"
-                    android:layout_weight="0.5"
-                    android:text="@string/action_purchase"
-                    />
-            </LinearLayout>
+                    android:layout_centerInParent="true"
+                    android:contentDescription="@string/empty"
+                    android:src="@drawable/ic_minus" />
 
-        </RelativeLayout>
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!--<LinearLayout-->
+        <!--android:id="@+id/contract_address_layout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<android.support.design.widget.TextInputLayout-->
+        <!--android:id="@+id/symbol_input_layout"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="1">-->
+
+        <!--<EditText-->
+        <!--android:id="@+id/purchase_quantity"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="@string/quantity_to_purchase"-->
+        <!--android:inputType="numberDecimal" />-->
+        <!--</android.support.design.widget.TextInputLayout>-->
+
+        <!--</LinearLayout>-->
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/listTickets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_card_shadow"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="10.0sp" />
+
     </LinearLayout>
-    <com.wallet.crypto.alphawallet.widget.SystemView
-        android:id="@+id/system_view"
-        android:background="@color/white"
-        android:layout_marginTop="?actionBarSize"
+
+    <RelativeLayout
+        android:paddingTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:visibility="gone"
-        />
-    <com.wallet.crypto.alphawallet.widget.ProgressView
-        android:id="@+id/progress_view"
-        android:layout_marginTop="?actionBarSize"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:visibility="gone"
-        />
-</android.support.design.widget.CoordinatorLayout>
+        android:background="@color/white">
+
+        <LinearLayout
+            android:id="@+id/fiat_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp">
+
+            <TextView
+                android:id="@+id/fiat_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_light"
+                android:gravity="center"
+                android:text="Total Cost:"
+                android:textColor="@color/text_black"
+                android:textSize="21sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/grey" />
+
+            <TextView
+                android:id="@+id/eth_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_bold"
+                android:gravity="center"
+                android:text="6.05 ETH"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="21sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/grey" />
+
+            <TextView
+                android:id="@+id/fiat_price_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:gravity="center"
+                android:text="Equivalent in USD"
+                android:textAllCaps="true"
+                android:textColor="@color/light_gray"
+                android:textSize="10sp" />
+
+
+            <TextView
+                android:id="@+id/fiat_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/background_round_grey"
+                android:paddingBottom="10dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="10dp"
+                android:text="$6300"
+                android:textColor="@color/light_gray"
+                android:textSize="21sp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_purchase"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@color/button_green"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:text="@string/action_purchase"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <com.wallet.crypto.alphawallet.widget.SystemView
+            android:id="@+id/system_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?actionBarSize"
+            android:background="@color/white"
+            tools:visibility="gone" />
+
+        <com.wallet.crypto.alphawallet.widget.ProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?actionBarSize"
+            tools:visibility="gone" />
+
+    </RelativeLayout>
+</LinearLayout>

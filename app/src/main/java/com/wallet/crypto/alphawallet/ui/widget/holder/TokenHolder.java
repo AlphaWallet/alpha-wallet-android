@@ -33,6 +33,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView balanceCurrency;
     public final ImageView icon;
     public final TextView arrayBalance;
+    public final TextView text24Hours;
+    public final TextView textAppreciation;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -45,6 +47,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
         arrayBalance = findViewById(R.id.balanceArray);
+        text24Hours = findViewById(R.id.text_24_hrs);
+        textAppreciation = findViewById(R.id.text_appreciation);
         itemView.setOnClickListener(this);
     }
 
@@ -89,15 +93,18 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         try {
             double percentage = Double.valueOf(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = "(" + (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%)";
+            formattedPercents = (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%";
+            text24Hours.setText(formattedPercents);
+            text24Hours.setTextColor(color);
         } catch (Exception ex) { /* Quietly */ }
         String lbl = getString(R.string.token_balance,
                 ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
-                converted, formattedPercents);
+                converted);
         Spannable spannable = new SpannableString(lbl);
         spannable.setSpan(new ForegroundColorSpan(color),
                 converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         this.balanceCurrency.setText(spannable);
+
     }
 
     protected void fillEmpty() {

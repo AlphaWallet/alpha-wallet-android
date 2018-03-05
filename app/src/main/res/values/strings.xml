@@ -82,6 +82,7 @@
     <string name="message_delete_account">Permanently deleting wallet. Make sure that it has been exported and stored elsewhere.</string>
     <string name="error_import">Error importing keystore</string>
     <string name="message_this_is_your_address">My public Ethereum wallet address</string>
+    <string name="copy_wallet_address">Copy Wallet Address</string>
     <string name="message_attending_venue">Entry Code for Venue Ticket</string>
     <string name="min_pwd_length">Password must be at least %d chars long</string>
     <string name="backup_warning_text">
@@ -257,7 +258,8 @@
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
-    <string name="token_balance">%1$s%2$s %3$s</string>
+    <string name="token_balance">%1$s%2$s</string>
+    <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
     <string name="action_edit_tokens">Edit tokens</string>
     <string name="token_name">%1$s (%2$s)</string>
     <string name="copy_addr_to_clipboard">copy address to clipboard</string>
@@ -271,11 +273,22 @@
     <string name="marketplace_title">Marketplace</string>
     <string name="title_marketplace">Marketplace</string>
     <string name="quantity_to_purchase">Quantity of Tickets</string>
-    <string name="action_purchase">PURCHASE</string>
+    <string name="action_purchase">Purchase</string>
     <string name="title_market_purchase">Purchase Tickets</string>
+    <string name="view_listings">View Listings</string>
+    <string name="show_marketplace">Show Marketplace</string>
+    <string name="search">Search</string>
+    <string name="toolbar_header_wallet">Wallet</string>
+    <string name="toolbar_header_marketplace">Marketplace</string>
+    <string name="toolbar_header_settings">Settings</string>
+    <string name="toolbar_header_help">Help \u0026 FAQ</string>
+    <string name="settings_my_wallet_address">My Wallet Address</string>
+    <string name="settings_notification">Notification Settings</string>
+    <string name="settings_logout">Log Out</string>
     <string name="title_redeem_token">Redeem Asset</string>
     <string name="title_redeem">Redeem Ticket</string>
     <string name="title_show_tickets">Ticket Operations</string>
     <string name="quantity_to_redeem">Quantity to Redeem</string>
     <string name="waiting_for_blockchain">Waiting for blockchain ...</string>
+    <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
 </resources>

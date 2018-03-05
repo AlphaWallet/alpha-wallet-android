@@ -3,22 +3,22 @@
 
     <item
         android:id="@+id/action_marketplace"
-        android:icon="@drawable/ic_action_market"
-        android:title="@string/title_marketplace"
+        android:icon="@drawable/ic_market"
+        android:title="Marketplace"
         />
     <item
         android:id="@+id/action_send"
-        android:icon="@drawable/ic_send_white_24dp"
-        android:title="@string/title_send"
+        android:icon="@drawable/ic_wallet"
+        android:title="Wallet"
         />
     <item
         android:id="@+id/action_my_address"
-        android:icon="@mipmap/qr_code_icon"
-        android:title="@string/title_request"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings"
         />
     <item
         android:id="@+id/action_my_tokens"
-        android:icon="@drawable/token_icon"
-        android:title="@string/title_tokens"
+        android:icon="@drawable/ic_about"
+        android:title="Help"
         />
 </menu>

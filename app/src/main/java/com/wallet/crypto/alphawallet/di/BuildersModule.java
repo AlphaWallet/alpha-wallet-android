@@ -5,7 +5,10 @@ import com.wallet.crypto.alphawallet.ui.AssetDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
+import com.wallet.crypto.alphawallet.ui.HomeActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
+import com.wallet.crypto.alphawallet.ui.MarketplaceFragment;
+import com.wallet.crypto.alphawallet.ui.NewSettingsFragment;
 import com.wallet.crypto.alphawallet.ui.RedeemAssetSelectActivity;
 import com.wallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.SalesOrderActivity;
@@ -21,6 +24,7 @@ import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.alphawallet.ui.TokensActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
+import com.wallet.crypto.alphawallet.ui.WalletFragment;
 import com.wallet.crypto.alphawallet.ui.WalletsActivity;
 
 import dagger.Module;
@@ -110,7 +114,24 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = PurchaseTicketsModule.class)
 	abstract PurchaseTicketsActivity bindPurchaseTicketsActivity();
 
+	@FragmentScope
+	@ContributesAndroidInjector(modules = MarketplaceModule.class)
+	abstract MarketplaceFragment bindMarketplaceFragment();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = NewSettingsModule.class)
+	abstract NewSettingsFragment bindNewSettingsFragment();
+
 	@ActivityScope
 	@ContributesAndroidInjector(modules = RedeemAssetSelectModule.class)
 	abstract RedeemAssetSelectActivity bindRedeemTokenSelectActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = WalletModule.class)
+	abstract WalletFragment bindWalletFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = HomeModule.class)
+	abstract HomeActivity bindHomeActivity();
+
 }

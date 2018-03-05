@@ -2,7 +2,6 @@ package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.view.MenuItem;
 
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
@@ -17,6 +16,8 @@ public abstract class BaseNavigationActivity extends BaseActivity implements Bot
     {
         navigation = findViewById(R.id.bottom_navigation_ex);
         navigation.setOnNavigationItemSelectedListener(this);
+        navigation.setTextVisibility(false);
+        navigation.setIconsMarginTop(10);
     }
 
     protected void setBottomMenu(@MenuRes int menuRes)
@@ -27,6 +28,14 @@ public abstract class BaseNavigationActivity extends BaseActivity implements Bot
         navigation.enableAnimation(false);
         navigation.enableShiftingMode(false);
         navigation.enableItemShiftingMode(false);
+    }
+
+    protected void selectNavigationItem(int position) {
+        navigation.getMenu().getItem(position).setChecked(true);
+    }
+
+    protected int getSelectedNavigationItem() {
+        return navigation.getCurrentItem();
     }
 
     @Override

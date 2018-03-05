@@ -6,7 +6,8 @@
 	<color name="black">#313849</color>
 
 	<color name="colorPrimary">#2e91db</color>
-	<color name="colorPrimaryDark">#1E76CE</color>
+	<!--<color name="colorPrimaryDark">#1E76CE</color>-->
+	<color name="colorPrimaryDark">#54C1E3</color>
 	<color name="colorAccent">#2e91db</color>
 
     <!--<color name="title">#89000000</color>-->
@@ -19,11 +20,22 @@
 
 	<color name="semitransparentWhite">#AAFFFFFF</color>
 
+	<color name="white20">#32FFFFFF</color>
+	<color name="translucentWhite">#80FFFFFF</color>
+
 	<color name="QRCodeBlackColor">#FF000000</color>
 	<color name="QRCodeWhiteColor">#FFFFFFFF</color>
 
+	<color name="transparent">#00000000</color>
     <color name="item_icon_tint">#89000000</color>
 	<color name="white_transparent">#88ffffff</color>
     <color name="grey">#EEEEEE</color>
 	<color name="holo_blue">#FF33b5e5</color>
+
+	<color name="semi_dark_grey">#707070</color>
+	<color name="text_black">#2f2f2f</color>
+	<color name="light_gray">#9b9b9b</color>
+	<color name="super_light_grey">#ececec</color>
+	<color name="button_green">#75b943</color>
+
 </resources>

@@ -1,153 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_select"
-    android:clickable="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:layout_marginBottom="10dp"
     android:orientation="horizontal">
 
     <android.support.v7.widget.AppCompatRadioButton
         android:id="@+id/radioBox"
-        android:layout_gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:buttonTint="@color/green"
-        android:visibility="gone"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/selector_radio_check"
         android:checked="false"
-        android:text=""/>
+        android:text=""
+        android:layout_marginRight="15dp"
+        android:visibility="gone"
+        app:buttonTint="@color/transparent" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:paddingEnd="@dimen/small_margin_padding"
-        android:paddingStart="@dimen/small_margin_padding"
-        android:background="@drawable/rounded"
-        android:paddingTop="10dp"
-        >
+        android:background="@drawable/background_card_shadow"
+        android:orientation="vertical"
+        android:paddingTop="15dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
 
-        <TextView
-            android:id="@+id/amount"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="2dp"
-            android:textStyle="bold"
-            android:text="x2"
-            android:textAppearance="?attr/textAppearanceListItem"
-            android:textColor="@color/green"
-            android:textSize="14sp"/>
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_alignBaseline="@+id/amount"
-            android:layout_alignBottom="@+id/amount"
-            android:layout_toEndOf="@+id/amount"
-            android:text="FIFA 2018 Final"
-            android:textAllCaps="true"
-            android:textColor="@color/black"
-            android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_bold"
+                android:layout_marginRight="5dp"
+                android:text="x2"
+                android:textColor="@color/green"
+                android:textSize="21sp" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FIFA 2018 Final"
+                android:fontFamily="@font/font_light"
+                android:textColor="@color/text_black"
+                android:textSize="21sp" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/venue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_alignBaseline="@+id/name"
-            android:layout_alignBottom="@+id/name"
-            android:layout_toEndOf="@+id/name"
             android:text="Hammersmith"
-            android:textColor="@color/black"
-            android:textSize="12sp"/>
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/text_black"
+            android:textSize="12sp" />
 
         <LinearLayout
             android:id="@+id/bottom_part"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/amount"
-            android:layout_marginTop="25dp"
             android:orientation="horizontal">
 
             <LinearLayout
                 android:id="@+id/datelayout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="1.5"
                 android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/calendar"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
                     android:contentDescription="@string/empty"
-                    android:src="@drawable/cal_trans"
-                    />
+                    android:src="@drawable/ic_calendar" />
 
                 <TextView
                     android:id="@+id/date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="@font/font_semibold"
                     android:text="30 Mar 2018"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:textColor="@color/semi_dark_grey"
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ticketlayout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.3"
+                android:layout_weight="1"
                 android:orientation="horizontal">
+
                 <ImageView
                     android:id="@+id/ticketicon"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="3dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
                     android:contentDescription="@string/empty"
-                    android:src="@drawable/ticket_trans"
-                    />
+                    android:src="@drawable/ic_ticket" />
 
                 <TextView
                     android:id="@+id/tickettext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="@font/font_semibold"
                     android:text="51-52"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:textColor="@color/semi_dark_grey"
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/catlayout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.3"
+                android:layout_weight="1"
                 android:orientation="horizontal">
+
                 <ImageView
                     android:id="@+id/caticon"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="3dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
                     android:contentDescription="@string/empty"
-                    android:src="@drawable/cat_trans"
-                    />
+                    android:src="@drawable/ic_category" />
 
                 <TextView
                     android:id="@+id/cattext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="@font/font_semibold"
                     android:text="Cat 1"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:textColor="@color/semi_dark_grey"
+                    android:textSize="15sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -175,8 +179,7 @@
             android:textAppearance="?attr/textAppearanceListItem"
             android:textSize="12sp"
             android:visibility="gone"
-            tools:text="TRST"
-            />
+            tools:text="TRST" />
 
         <LinearLayout
             android:id="@+id/balance_container"
@@ -195,17 +198,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="8888888"
                 android:visibility="gone"
-                />
+                tools:text="8888888" />
 
             <TextView
                 android:id="@+id/balance_currency"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="$8888888"
                 android:visibility="gone"
-                />
+                tools:text="$8888888" />
         </LinearLayout>
 
         <TextView
@@ -218,7 +219,6 @@
             android:maxWidth="80dp"
             android:textSize="10sp"
             android:visibility="gone"
-            tools:text=""
-            />
-    </RelativeLayout>
+            tools:text="" />
+    </LinearLayout>
 </LinearLayout>

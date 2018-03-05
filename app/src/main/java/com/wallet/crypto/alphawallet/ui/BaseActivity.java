@@ -4,6 +4,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
@@ -24,9 +25,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 	protected void setTitle(String title) {
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(title);
-        }
+//        if (actionBar != null) {
+//            actionBar.setTitle(title);
+//        }
+		TextView toolbarTitle = findViewById(R.id.toolbar_title);
+		if (toolbarTitle != null) {
+			if (actionBar != null) {
+				actionBar.setTitle("");
+			}
+			toolbarTitle.setText(title);
+		}
+
     }
 
     protected void setSubtitle(String subtitle) {

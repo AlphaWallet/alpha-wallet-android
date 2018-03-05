@@ -47,6 +47,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
         toolbar();
 
+        setTitle(getString(R.string.empty));
+
         wallet = getIntent().getParcelableExtra(WALLET);
         NetworkInfo networkInfo = ethereumNetworkRepository.getDefaultNetwork();
         String suggestion = getString(R.string.suggestion_this_is_your_address, networkInfo.name);

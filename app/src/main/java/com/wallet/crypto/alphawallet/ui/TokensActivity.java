@@ -10,13 +10,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
@@ -49,6 +47,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         setContentView(R.layout.activity_tokens);
 
         toolbar();
+        setTitle(getString(R.string.toolbar_header_wallet));
 
         adapter = new TokensAdapter(this::onTokenClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);

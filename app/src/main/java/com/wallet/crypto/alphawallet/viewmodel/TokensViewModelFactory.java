@@ -8,6 +8,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 
@@ -18,7 +19,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final TransactionsRouter transactionsRouter;
+    private final HomeRouter homeRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
 
@@ -26,7 +27,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                                   FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
-                                  TransactionsRouter transactionsRouter,
+                                  HomeRouter homeRouter,
                                   ChangeTokenCollectionRouter changeTokenCollectionRouter,
                                   AssetDisplayRouter assetDisplayRouter) {
         //this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -34,7 +35,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.transactionsRouter = transactionsRouter;
+        this.homeRouter = homeRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
     }
 
@@ -46,7 +47,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
-                transactionsRouter,
+                homeRouter,
                 changeTokenCollectionRouter,
                 assetDisplayRouter);
     }

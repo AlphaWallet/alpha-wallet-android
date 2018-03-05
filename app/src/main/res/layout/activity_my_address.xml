@@ -1,59 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
     <include layout="@layout/layout_simple_toolbar" />
-    <FrameLayout
-        android:background="@color/white"
-        android:layout_marginTop="?actionBarSize"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <LinearLayout
-            android:orientation="vertical"
-            android:padding="@dimen/big_padding"
-            android:layout_gravity="center_vertical"
+        android:background="@drawable/background_card"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp">
+
+        <TextView
+            android:id="@+id/title_purchase_ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:text="My Wallet Address"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
-            <TextView
-                android:id="@+id/address_suggestion"
-                android:gravity="center"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                tools:text="@string/message_this_is_your_address"
-                />
-            <ImageView
-                android:id="@+id/qr_image"
-                app:srcCompat="@drawable/ic_autorenew_black_24dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/address"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                />
-            <Button
-                android:id="@+id/copy_action"
-                android:text="@string/copy"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-        </LinearLayout>
-    </FrameLayout>
-</FrameLayout>
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:text="Scan the QR Code or copy the text below:"
+            android:textColor="@color/text_black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/background_round_grey"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/copy_action"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/background_round_primary"
+            android:fontFamily="@font/font_regular"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:text="@string/copy_wallet_address"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/address_suggestion"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:text="@string/message_this_is_your_address" />
+
+        <ImageView
+            android:id="@+id/qr_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/big_margin"
+            app:srcCompat="@drawable/ic_autorenew_black_24dp" />
+    </LinearLayout>
+</LinearLayout>

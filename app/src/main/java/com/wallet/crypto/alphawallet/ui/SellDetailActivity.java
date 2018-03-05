@@ -4,33 +4,23 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
-import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModel;
-import com.wallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -39,7 +29,6 @@ import org.web3j.utils.Convert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -68,11 +57,8 @@ public class SellDetailActivity extends BaseActivity
     private TextView usdPrice;
     private Button sell;
 
-    private TextInputLayout toInputLayout;
-    private TextInputLayout amountInputLayout;
-
     private EditText sellPrice;
-    private EditText count;
+    private TextView textQuantity;
     private String ticketIds;
 
     @Override
@@ -96,9 +82,8 @@ public class SellDetailActivity extends BaseActivity
 
         toolbar();
 
-        setTitle(getString(R.string.action_sell));
-        toInputLayout = findViewById(R.id.to_input_layout);
-        amountInputLayout = findViewById(R.id.amount_input_layout);
+//        setTitle(getString(R.string.action_sell));
+        setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -107,7 +92,6 @@ public class SellDetailActivity extends BaseActivity
         progressView.hide();
 
         sellPrice = findViewById(R.id.asking_price);
-        count = findViewById(R.id.ticket_selection);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailModel.class);
@@ -121,12 +105,29 @@ public class SellDetailActivity extends BaseActivity
         sell.setOnClickListener((View v) -> {
             sellTicketFinal();
         });
+
+        textQuantity = findViewById(R.id.text_quantity);
+
+        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
+        plusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            quantity++;
+            textQuantity.setText(String.valueOf(quantity));
+        });
+
+        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
+        minusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            if ((quantity-1) >= 0) {
+                quantity--;
+                textQuantity.setText(String.valueOf(quantity));
+            }
+        });
     }
 
     private void sellTicketFinal()
     {
         if (!isValidAmount(sellPrice.getText().toString())) {
-            toInputLayout.setError(getString(R.string.error_invalid_address));
             return;
         }
 
@@ -135,7 +136,7 @@ public class SellDetailActivity extends BaseActivity
         //2. get indicies
         short[] indicies = ticket.getTicketIndicies(ticketIds);
 
-        //TODO: use the count value from the 'count' EditText - see the invision UX plan
+        //TODO: use the textQuantity value from the 'textQuantity' EditText - see the invision UX plan
 
         if (price.doubleValue() > 0.0 && indicies != null)
         {

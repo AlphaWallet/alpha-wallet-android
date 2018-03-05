@@ -1,7 +1,6 @@
 package com.wallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,8 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
@@ -44,9 +42,11 @@ public class RedeemAssetSelectActivity extends BaseActivity
     private ProgressView progressView;
     private int currentMenu = R.menu.send_menu;
 
-    public TextView name;
     public TextView ids;
     public TextView selected;
+
+    private Button nextButton;
+    private Button redeemButton;
 
     private Ticket ticket;
     private TicketRange ticketRange;
@@ -58,12 +58,25 @@ public class RedeemAssetSelectActivity extends BaseActivity
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        setContentView(R.layout.activity_use_token); //use token just provides a simple list view.
+        setContentView(R.layout.activity_redeem_asset);
+
+        nextButton = findViewById(R.id.button_next);
+        nextButton.setOnClickListener(v -> {
+            onNext();
+        });
+
+        redeemButton = findViewById(R.id.button_redeem);
+        redeemButton.setOnClickListener(v -> {
+            onRedeem();
+        });
+
         setupRedeemSelector();
 
         toolbar();
 
-        setTitle(getString(R.string.title_redeem_token));
+//        setTitle(getString(R.string.title_redeem_token));
+
+        setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -87,21 +100,19 @@ public class RedeemAssetSelectActivity extends BaseActivity
         invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
-        LinearLayout buttons = findViewById(R.id.layoutButtons);
-        buttons.setVisibility(View.GONE);
-
-        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
-        rLL.setVisibility(View.GONE);
 
         adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
         adapter.setRedeemTicket(ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
+
+        nextButton.setVisibility(View.VISIBLE);
+        redeemButton.setVisibility(View.GONE);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(currentMenu, menu);
+//        getMenuInflater().inflate(currentMenu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -138,6 +149,14 @@ public class RedeemAssetSelectActivity extends BaseActivity
         if (range != null)
         {
             onTicketIdClick(null, range);
+
+            adapter.setRedeemTicketQuantity(range, ticket);
+            RecyclerView list = findViewById(R.id.listTickets);
+            list.setAdapter(null);
+            list.setAdapter(adapter);
+
+            nextButton.setVisibility(View.GONE);
+            redeemButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -163,9 +182,9 @@ public class RedeemAssetSelectActivity extends BaseActivity
     private void onTicketIdClick(View v, TicketRange range) {
         currentMenu = R.menu.redeem_menu;
         invalidateOptionsMenu();
-        adapter.setRedeemTicketQuantity(range, ticket);
-        RecyclerView list = findViewById(R.id.listTickets);
-        list.setAdapter(null);
-        list.setAdapter(adapter);
+//        adapter.setRedeemTicketQuantity(range, ticket);
+//        RecyclerView list = findViewById(R.id.listTickets);
+//        list.setAdapter(null);
+//        list.setAdapter(adapter);
     }
 }

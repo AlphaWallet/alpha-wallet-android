@@ -10,8 +10,8 @@ import com.wallet.crypto.alphawallet.interact.ExportWalletInteract;
 import com.wallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SetDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.ImportWalletRouter;
-import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 
 import javax.inject.Inject;
 
@@ -25,7 +25,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final ExportWalletInteract exportWalletInteract;
 
 	private final ImportWalletRouter importWalletRouter;
-    private final TransactionsRouter transactionsRouter;
+    private final HomeRouter homeRouter;
 
 
     @Inject
@@ -37,7 +37,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             FindDefaultWalletInteract findDefaultWalletInteract,
             ExportWalletInteract exportWalletInteract,
             ImportWalletRouter importWalletRouter,
-            TransactionsRouter transactionsRouter) {
+            HomeRouter homeRouter) {
 		this.createWalletInteract = createWalletInteract;
 		this.setDefaultWalletInteract = setDefaultWalletInteract;
 		this.deleteWalletInteract = deleteWalletInteract;
@@ -45,7 +45,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
 		this.findDefaultWalletInteract = findDefaultWalletInteract;
 		this.exportWalletInteract = exportWalletInteract;
 		this.importWalletRouter = importWalletRouter;
-		this.transactionsRouter = transactionsRouter;
+		this.homeRouter = homeRouter;
 	}
 
 	@NonNull
@@ -59,6 +59,6 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultWalletInteract,
                 exportWalletInteract,
                 importWalletRouter,
-                transactionsRouter);
+                homeRouter);
 	}
 }

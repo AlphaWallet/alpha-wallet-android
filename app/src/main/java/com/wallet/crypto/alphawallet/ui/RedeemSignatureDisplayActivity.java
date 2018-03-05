@@ -8,12 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,18 +20,20 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
 import com.wallet.crypto.alphawallet.widget.SystemView;
+
+import java.util.Locale;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.alphawallet.C.EXTRA_AMOUNT;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 import static com.wallet.crypto.alphawallet.C.Key.TICKET_RANGE;
 import static com.wallet.crypto.alphawallet.C.Key.WALLET;
@@ -54,16 +51,11 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private RedeemSignatureDisplayModel viewModel;
     private SystemView systemView;
 
-    public TextView name;
-    public TextView ids;
-    private EditText idsText;
-    private TextView selected;
-    private TextInputLayout amountInputLayout;
-    private TextView selection;
-
     private Wallet wallet;
     private Ticket ticket;
     private TicketRange ticketRange;
+
+    TicketAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,33 +66,55 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         setContentView(R.layout.activity_rotating_signature);
         toolbar();
 
-        ticketBurnNotice();
-        TextView tv = findViewById(R.id.textAddIDs);
-        tv.setText(getString(R.string.waiting_for_blockchain));
-        tv.setVisibility(View.VISIBLE);
+        setTitle(getString(R.string.empty));
 
         ticket = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
-        name = findViewById(R.id.textViewName);
-        ids = findViewById(R.id.textViewIDs);
-        idsText = findViewById(R.id.send_ids);
-        selection = findViewById(R.id.textViewSelection);
-        amountInputLayout = findViewById(R.id.amount_input_layout);
-
-        name.setText(ticket.tokenInfo.name);
-        ids.setVisibility(View.GONE);
-        idsText.setVisibility(View.GONE);
-        selection.setVisibility(View.GONE);
-        amountInputLayout.setVisibility(View.GONE);
-
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
                 .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
+
+        ticketBurnNotice();
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText(getString(R.string.waiting_for_blockchain));
+        tv.setVisibility(View.VISIBLE);
+
+        setupTicket();
+    }
+
+    private void setupTicket() {
+        TextView textAmount = findViewById(R.id.amount);
+        TextView textTicketName = findViewById(R.id.name);
+        TextView textVenue = findViewById(R.id.venue);
+        TextView textDate = findViewById(R.id.date);
+        TextView textRange = findViewById(R.id.tickettext);
+        TextView textCat = findViewById(R.id.cattext);
+
+        int numberOfTickets = ticketRange.tokenIds.size();
+        if (numberOfTickets > 0) {
+            Integer firstTicket = ticketRange.tokenIds.get(0);
+            Integer lastTicket = ticketRange.tokenIds.get(numberOfTickets-1);
+
+            String ticketTitle = ticket.getFullName();
+            String venue = TicketDecode.getVenue(firstTicket);
+            String date = TicketDecode.getDate(firstTicket);
+            int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
+            int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
+            String cat = TicketDecode.getZone(firstTicket);
+            String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
+
+            textAmount.setText(seatCount);
+            textTicketName.setText(ticketTitle);
+            textVenue.setText(venue);
+            textDate.setText(date);
+            textRange.setText(rangeFirst + "-" + rangeLast);
+            textCat.setText(cat);
+        }
     }
 
     private Bitmap createQRImage(String address) {
@@ -172,22 +186,21 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private void onTicket(Ticket ticket)
     {
-        name.setText(ticket.tokenInfo.name);
         String idStr = ticket.populateIDs(ticket.getValidIndicies(), false);
-        ids.setText(idStr);
+//        ids.setText(idStr);
     }
 
     private void onSelected(String selectionStr)
     {
-        selection.setText(selectionStr);
-        try
-        {
-            //dismiss soft keyboard
-            KeyboardUtils.hideKeyboard(idsText);
-        }
-        catch (Exception e)
-        {
-
-        }
+//        selection.setText(selectionStr);
+//        try
+//        {
+//            //dismiss soft keyboard
+//            KeyboardUtils.hideKeyboard(idsText);
+//        }
+//        catch (Exception e)
+//        {
+//
+//        }
     }
 }

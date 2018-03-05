@@ -8,8 +8,8 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.ImportWalletRouter;
-import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 import com.wallet.crypto.alphawallet.viewmodel.WalletsViewModelFactory;
 
 import dagger.Module;
@@ -27,7 +27,7 @@ class AccountsManageModule {
 			FindDefaultWalletInteract findDefaultWalletInteract,
 			ExportWalletInteract exportWalletInteract,
 			ImportWalletRouter importWalletRouter,
-            TransactionsRouter transactionsRouter) {
+            HomeRouter homeRouter) {
 		return new WalletsViewModelFactory(createWalletInteract,
                 setDefaultWalletInteract,
                 deleteWalletInteract,
@@ -35,7 +35,7 @@ class AccountsManageModule {
                 findDefaultWalletInteract,
                 exportWalletInteract,
                 importWalletRouter,
-                transactionsRouter);
+                homeRouter);
 	}
 
 	@Provides
@@ -77,7 +77,7 @@ class AccountsManageModule {
 	}
 
 	@Provides
-    TransactionsRouter provideTransactionsRouter() {
-	    return new TransactionsRouter();
+    HomeRouter provideHomeRouter() {
+	    return new HomeRouter();
     }
 }

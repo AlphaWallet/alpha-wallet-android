@@ -5,10 +5,10 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
-import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
-import com.wallet.crypto.alphawallet.router.SendTokenRouter;
-import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
+import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
+import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.viewmodel.TokensViewModelFactory;
 
 import dagger.Module;
@@ -22,14 +22,14 @@ class TokensModule {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            TransactionsRouter transactionsRouter,
+            HomeRouter homeRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter) {
         return new TokensViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
-                transactionsRouter,
+                homeRouter,
                 changeTokenCollectionRouter,
                 assetDisplayRouter);
     }
@@ -61,8 +61,8 @@ class TokensModule {
     }
 
     @Provides
-    TransactionsRouter provideTransactionsRouter() {
-        return new TransactionsRouter();
+    HomeRouter provideHomeRouter() {
+        return new HomeRouter();
     }
 
     @Provides

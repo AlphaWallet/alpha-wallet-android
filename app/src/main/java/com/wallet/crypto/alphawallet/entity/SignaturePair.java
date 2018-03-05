@@ -50,9 +50,9 @@ public class SignaturePair {
     }
 
     /**
-     * Helper function to get the combined message for sending QR code
+     * Helper function to get the large number for sending QR code
      */
-    public String getQRMessage()
+    public String formQRMessage()
     {
         return selectionStr + signatureStr;
     }
@@ -64,6 +64,7 @@ public class SignaturePair {
      * parameter of the constructor */
     public static String generateSelection(List<Integer> indexList)
     {
+        String selection = null;
         Collections.sort(indexList); // just to find the lowest value
         // since sorting is not needed to make the bitFieldLookup
         Integer lowestValue = indexList.get(0);
@@ -82,7 +83,6 @@ public class SignaturePair {
             BigInteger adder = BigInteger.valueOf(2).pow(i - correctionFactor);
             bitFieldLookup = bitFieldLookup.add(adder);
         }
-
         String truncatedValueDecimal = bitFieldLookup.toString(10); //decimal of reduced bitfield
 
         // to create string

@@ -74,6 +74,11 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         setContentView(R.layout.activity_rotating_signature);
         toolbar();
 
+        ticketBurnNotice();
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText(getString(R.string.waiting_for_blockchain));
+        tv.setVisibility(View.VISIBLE);
+
         ticket = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);

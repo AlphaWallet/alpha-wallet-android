@@ -136,8 +136,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    //TODO: Modulate the wallet message
-    //TODO: Collect all the IDs to be sent, encode them into QR code
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract

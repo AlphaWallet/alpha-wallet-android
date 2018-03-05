@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
-import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.TransactionOperation;
 import com.wallet.crypto.alphawallet.ui.widget.OnTransactionClickListener;
@@ -22,9 +21,13 @@ import java.math.RoundingMode;
 
 import static com.wallet.crypto.alphawallet.C.ETHER_DECIMALS;
 
-public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
+/**
+ * Created by James on 4/03/2018.
+ */
 
-    public static final int VIEW_TYPE = 1003;
+public class ContractTransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
+
+    public static final int VIEW_TYPE = 1689;
 
     private static final int SIGNIFICANT_FIGURES = 3;
 
@@ -35,20 +38,18 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     private final TextView address;
     private final TextView value;
     private final ImageView typeIcon;
-    private final TextView supplimental;
 
     private Transaction transaction;
     private String defaultAddress;
     private OnTransactionClickListener onTransactionClickListener;
 
-    public TransactionHolder(int resId, ViewGroup parent) {
+    public ContractTransactionHolder(int resId, ViewGroup parent) {
         super(resId, parent);
 
         typeIcon = findViewById(R.id.type_icon);
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        supplimental = findViewById(R.id.supplimental);
 
         typeIcon.setColorFilter(
                 ContextCompat.getColor(getContext(), R.color.item_icon_tint),
@@ -64,7 +65,6 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             return;
         }
         defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
-        supplimental.setText("");
 
         String networkSymbol = addition.getString(DEFAULT_SYMBOL_ADDITIONAL);
         // If operations include token transfer, display token transfer instead
@@ -75,39 +75,10 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             // default to ether transaction
             fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
                     ETHER_DECIMALS, transaction.timeStamp);
-        } else if (operation.contract instanceof ERC875ContractTransaction)
-        {
-            fillERC875(transaction, (ERC875ContractTransaction)operation.contract);
         } else {
             fill(transaction.error, operation.from, operation.to, operation.contract.symbol, operation.value,
                     operation.contract.decimals, transaction.timeStamp);
         }
-    }
-
-    private void fillERC875(Transaction trans, ERC875ContractTransaction ct)
-    {
-        int colourResource;
-        switch (ct.type)
-        {
-            case 1:
-                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
-                colourResource = R.color.green;
-                break;
-            case -1:
-                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
-                colourResource = R.color.red;
-                break;
-            default:
-                typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
-                colourResource = R.color.black;
-                break;
-        }
-        type.setText(ct.operation);
-        address.setText(ct.name);
-        value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
-        String valueStr = "x" + ct.indicies.size() + " Tickets";
-        value.setText(valueStr);
-        supplimental.setText(""); //looks bad
     }
 
     private void fill(

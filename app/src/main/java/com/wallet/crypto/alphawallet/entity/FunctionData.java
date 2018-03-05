@@ -9,5 +9,6 @@ import java.util.List;
 public class FunctionData
 {
     public String functionName;
+    public String functionFullName;
     public List<String> args;
 }

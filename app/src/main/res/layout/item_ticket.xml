@@ -45,15 +45,13 @@
             android:id="@+id/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/redeemed"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="2dp"
-            android:textStyle="bold"
+            android:layout_alignParentTop="true"
             android:text="x2"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textColor="@color/green"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/name"

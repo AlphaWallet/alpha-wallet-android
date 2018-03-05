@@ -41,4 +41,12 @@ public class TransactionData
 
         return hasAddr;
     }
+
+    public String getAddress() {
+        String address = "";
+        if (addresses.size() > 0) {
+            address = "0x" + addresses.get(0).substring(64 - 40);
+        }
+        return address;
+    }
 }

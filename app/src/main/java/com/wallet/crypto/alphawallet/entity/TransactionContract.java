@@ -11,6 +11,7 @@ public class TransactionContract implements Parcelable {
     public String symbol;
 
     public TransactionContract() {
+
     }
 
     private TransactionContract(Parcel in) {

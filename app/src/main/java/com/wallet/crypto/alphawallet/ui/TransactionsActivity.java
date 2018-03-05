@@ -210,6 +210,10 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         invalidateOptionsMenu();
     }
 
+    private void onContractTransactions() {
+
+    }
+
     private void onDefaultWallet(Wallet wallet) {
         adapter.setDefaultWallet(wallet);
     }

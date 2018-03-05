@@ -1,10 +1,12 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
@@ -27,6 +29,7 @@ class TransactionsModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
+            FetchTokensInteract fetchTokensInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
@@ -40,6 +43,7 @@ class TransactionsModule {
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 fetchTransactionsInteract,
+                fetchTokensInteract,
                 getDefaultWalletBalance,
                 manageWalletsRouter,
                 settingsRouter,
@@ -65,6 +69,11 @@ class TransactionsModule {
     @Provides
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
         return new FetchTransactionsInteract(transactionRepository);
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 
     @Provides

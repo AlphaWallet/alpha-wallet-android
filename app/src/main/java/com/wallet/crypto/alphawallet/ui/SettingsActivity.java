@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 
 import javax.inject.Inject;
@@ -36,7 +37,8 @@ public class SettingsActivity extends BaseActivity implements HasFragmentInjecto
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                new TransactionsRouter().open(this, true);
+//                new TransactionsRouter().open(this, true);
+                new HomeRouter().open(this, true);
                 finish();
                 return true;
             }
@@ -46,7 +48,8 @@ public class SettingsActivity extends BaseActivity implements HasFragmentInjecto
 
     @Override
     public void onBackPressed() {
-        new TransactionsRouter().open(this, true);
+//        new TransactionsRouter().open(this, true);
+        new HomeRouter().open(this, true);
         finish();
     }
 

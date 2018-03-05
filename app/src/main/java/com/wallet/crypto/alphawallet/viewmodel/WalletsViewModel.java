@@ -17,7 +17,7 @@ import com.wallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SetDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.router.ImportWalletRouter;
-import com.wallet.crypto.alphawallet.router.TransactionsRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 
 import static com.wallet.crypto.alphawallet.C.IMPORT_REQUEST_CODE;
 
@@ -31,7 +31,7 @@ public class WalletsViewModel extends BaseViewModel {
     private final ExportWalletInteract exportWalletInteract;
 
 	private final ImportWalletRouter importWalletRouter;
-    private final TransactionsRouter transactionsRouter;
+    private final HomeRouter homeRouter;
 
 	private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
 	private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -49,7 +49,7 @@ public class WalletsViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             ExportWalletInteract exportWalletInteract,
             ImportWalletRouter importWalletRouter,
-            TransactionsRouter transactionsRouter) {
+            HomeRouter homeRouter) {
 		this.createWalletInteract = createWalletInteract;
 		this.setDefaultWalletInteract = setDefaultWalletInteract;
 		this.deleteWalletInteract = deleteWalletInteract;
@@ -57,7 +57,7 @@ public class WalletsViewModel extends BaseViewModel {
 		this.findDefaultWalletInteract = findDefaultWalletInteract;
 		this.importWalletRouter = importWalletRouter;
 		this.exportWalletInteract = exportWalletInteract;
-		this.transactionsRouter = transactionsRouter;
+		this.homeRouter = homeRouter;
 
 		fetchWallets();
 	}
@@ -163,6 +163,6 @@ public class WalletsViewModel extends BaseViewModel {
 	}
 
     public void showTransactions(Context context) {
-        transactionsRouter.open(context, true);
+        homeRouter.open(context, true);
     }
 }

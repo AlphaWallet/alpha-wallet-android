@@ -118,6 +118,11 @@
             android:label="@string/title_redeem" />
 
         <activity
+            android:name="com.wallet.crypto.alphawallet.ui.HomeActivity"
+            android:label="@string/toolbar_header_wallet" />
+
+
+        <activity
             android:name=".ui.CustomPinActivity"
             />
 

@@ -10,6 +10,7 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
@@ -27,21 +28,21 @@ public class TokensViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final TransactionsRouter transactionsRouter;
+    private final HomeRouter homeRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
     TokensViewModel(
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            TransactionsRouter transactionsRouter,
+            HomeRouter homeRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.transactionsRouter = transactionsRouter;
+        this.homeRouter = homeRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
     }
 
@@ -115,7 +116,7 @@ public class TokensViewModel extends BaseViewModel {
     }
 
     public void showTransactions(Context context) {
-        transactionsRouter.open(context, true);
+        homeRouter.open(context, true);
     }
 
     public void showEditTokens(Context context) {

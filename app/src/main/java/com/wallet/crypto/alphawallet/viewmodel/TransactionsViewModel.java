@@ -18,6 +18,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
@@ -58,6 +59,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private final WalletRouter walletRouter;
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
+    private final HomeRouter homeRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -80,7 +82,8 @@ public class TransactionsViewModel extends BaseViewModel {
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
             MarketplaceRouter marketplaceRouter,
-            NewSettingsRouter newSettingsRouter) {
+            NewSettingsRouter newSettingsRouter,
+            HomeRouter homeRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -96,6 +99,7 @@ public class TransactionsViewModel extends BaseViewModel {
         this.walletRouter = walletRouter;
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
+        this.homeRouter = homeRouter;
     }
 
     @Override
@@ -219,6 +223,10 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void showMarketplaceFragment(Context context, int resId) {
         marketplaceRouter.open(context, resId);
+    }
+
+    public void showHome(Context context) {
+        homeRouter.open(context, true);
     }
 
     public void openDeposit(Context context, Uri uri) {

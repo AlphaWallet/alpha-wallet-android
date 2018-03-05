@@ -59,7 +59,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_transactions);
+        setContentView(R.layout.activity_home);
 
         toolbar();
 //        setTitle(getString(R.string.unknown_balance_with_symbol));

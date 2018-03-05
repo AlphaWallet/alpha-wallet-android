@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
@@ -63,7 +65,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 //        setTitle(getString(R.string.unknown_balance_with_symbol));
 //        setSubtitle("");
         initBottomNavigation();
-        dissableDisplayHomeAsUp();
+//        dissableDisplayHomeAsUp();
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
@@ -97,11 +99,14 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
-        viewModel.showWalletFragment(this, R.id.frame_layout);
-        setTitle(getString(R.string.toolbar_header_wallet));
+//        viewModel.showWalletFragment(this, R.id.frame_layout);
+        setTitle("Transactions");
 
         setBottomMenu(R.menu.menu_main_network);
         selectNavigationItem(1);
+
+        BottomNavigationViewEx bottomBar = findViewById(R.id.bottom_navigation_ex);
+        bottomBar.setVisibility(View.GONE);
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -130,7 +135,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        getMenuInflater().inflate(R.menu.send_menu, menu);
 //
 //        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
 //        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
@@ -142,6 +147,10 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:{
+                viewModel.showHome(this);
+            }
+            break;
             case R.id.action_settings: {
                 viewModel.showSettings(this);
             }

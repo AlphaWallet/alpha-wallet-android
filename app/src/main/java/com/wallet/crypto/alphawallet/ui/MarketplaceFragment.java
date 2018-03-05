@@ -50,7 +50,7 @@ public class MarketplaceFragment extends Fragment implements View.OnClickListene
     }
 
     private void onMarketplaceEventClick(View view, MarketplaceEvent marketplaceEvent) {
-        viewModel.showMarketplace(getContext());
+        viewModel.showMarketplace(getContext(), marketplaceEvent);
     }
 
     @Override

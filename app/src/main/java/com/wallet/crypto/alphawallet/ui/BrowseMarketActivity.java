@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.MarketplaceEvent;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
@@ -24,6 +25,8 @@ import com.wallet.crypto.alphawallet.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+
+import static com.wallet.crypto.alphawallet.C.Key.MARKETPLACE_EVENT;
 
 /**
  * Created by James on 19/02/2018.
@@ -51,7 +54,9 @@ public class BrowseMarketActivity extends BaseActivity
         setupSalesOrder();
         toolbar();
 
-        setTitle(getString(R.string.market_buy_title));
+        MarketplaceEvent marketplaceEvent = getIntent().getParcelableExtra(MARKETPLACE_EVENT);
+
+        setTitle(marketplaceEvent.getEventName());
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -72,11 +77,6 @@ public class BrowseMarketActivity extends BaseActivity
     {
         setContentView(R.layout.activity_browse_market); //use token just provides a simple list view.
 
-        LinearLayout buttons = findViewById(R.id.layoutButtons);
-        buttons.setVisibility(View.GONE);
-
-        RelativeLayout rLL = findViewById(R.id.contract_address_layout);
-        rLL.setVisibility(View.GONE);
     }
 
     @Override

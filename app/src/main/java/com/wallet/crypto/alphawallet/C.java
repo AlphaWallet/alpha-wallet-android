@@ -68,6 +68,7 @@ public abstract class C {
         String TRANSACTION = "transaction";
         String TICKET = "ticket";
         String TICKET_RANGE = "ticket_range";
+        String MARKETPLACE_EVENT = "marketplace_event";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
     }
 }

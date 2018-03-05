@@ -34,6 +34,10 @@ public abstract class BaseNavigationActivity extends BaseActivity implements Bot
         navigation.getMenu().getItem(position).setChecked(true);
     }
 
+    protected int getSelectedNavigationItem() {
+        return navigation.getCurrentItem();
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         return false;

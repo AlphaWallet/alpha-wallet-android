@@ -171,31 +171,38 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_marketplace: {
-                selectNavigationItem(0);
-                setTitle(getString(R.string.toolbar_header_marketplace));
-                viewModel.showMarketplaceFragment(this, R.id.frame_layout);
+                if (getSelectedNavigationItem() != 0) {
+                    selectNavigationItem(0);
+                    setTitle(getString(R.string.toolbar_header_marketplace));
+                    viewModel.showMarketplaceFragment(this, R.id.frame_layout);
+                }
                 return true;
             }
             case R.id.action_send: {
 //                viewModel.showSend(this);
-                selectNavigationItem(1);
-                setTitle(getString(R.string.toolbar_header_wallet));
-                viewModel.showWalletFragment(this, R.id.frame_layout);
+                if (getSelectedNavigationItem() != 1) {
+                    selectNavigationItem(1);
+                    setTitle(getString(R.string.toolbar_header_wallet));
+                    viewModel.showWalletFragment(this, R.id.frame_layout);
+                }
                 return true;
             }
             case R.id.action_my_address: {
 //                viewModel.showMyAddress(this);
 //                viewModel.showSettings(this);
-                viewModel.showNewSettings(this, R.id.frame_layout);
-                setTitle(getString(R.string.toolbar_header_settings));
-                selectNavigationItem(2);
+                if (getSelectedNavigationItem() != 2) {
+                    selectNavigationItem(2);
+                    setTitle(getString(R.string.toolbar_header_settings));
+                    viewModel.showNewSettings(this, R.id.frame_layout);
+                }
                 return true;
             }
             case R.id.action_my_tokens: {
-                viewModel.showTokens(this);
-
-                setTitle(getString(R.string.toolbar_header_help));
-                selectNavigationItem(3);
+                if (getSelectedNavigationItem() != 3) {
+                    selectNavigationItem(3);
+                    setTitle(getString(R.string.toolbar_header_help));
+                    viewModel.showTokens(this);
+                }
                 return true;
             }
 

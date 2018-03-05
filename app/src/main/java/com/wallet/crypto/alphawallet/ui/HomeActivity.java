@@ -248,11 +248,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
-            EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
-            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
-            systemView.showEmpty(emptyView);
-        }/* else {
+//        if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
+//            EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
+//            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
+//            systemView.showEmpty(emptyView);
+//        }
+        /* else {
             systemView.showError(getString(R.string.error_fail_load_transaction), this);
         }*/
     }

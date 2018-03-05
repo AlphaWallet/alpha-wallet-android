@@ -39,7 +39,7 @@ public class TransactionInterpreter
             while (parseIndex < input.length()) {
                 switch (parseState) {
                     case 0: //get function
-                        parseIndex += setFunction(input.substring(0, 10));
+                        parseIndex += setFunction(input.substring(0, 10), input.length());
                         parseState = 1;
                         break;
                     case 1: //now get params
@@ -61,7 +61,7 @@ public class TransactionInterpreter
         return thisData;
     }
 
-    public int setFunction(String input) throws Exception
+    public int setFunction(String input, int length) throws Exception
     {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
@@ -75,7 +75,9 @@ public class TransactionInterpreter
         }
         else
         {
-            System.out.println("What?");
+            System.out.println("Unhandled Transaction: " + input);
+            //unknown
+            return length;
         }
 
         return input.length();

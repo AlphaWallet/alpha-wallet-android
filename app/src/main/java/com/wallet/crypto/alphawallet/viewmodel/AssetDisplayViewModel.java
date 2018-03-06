@@ -84,6 +84,9 @@ public class AssetDisplayViewModel extends BaseViewModel {
     }
 
     public void selectAssetIdsToRedeem(Context context, Ticket token) {
+        if (getBalanceDisposable != null) {
+            getBalanceDisposable.dispose();
+        }
         redeemAssetSelectRouter.open(context, token);
     }
 
@@ -116,6 +119,9 @@ public class AssetDisplayViewModel extends BaseViewModel {
     }
 
     public void showTransferToken(Context context, Ticket ticket) {
+        if (getBalanceDisposable != null) {
+            getBalanceDisposable.dispose();
+        }
         ticketTransferRouter.open(context, ticket);
     }
 

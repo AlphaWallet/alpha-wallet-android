@@ -236,8 +236,16 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     private void onTransactions(Transaction[] transaction) {
+        RecyclerView list = findViewById(R.id.list);
         adapter.addTransactions(transaction);
+        list.setAdapter(null);
+        adapter.notifyDataSetChanged();
+        list.setAdapter(adapter);
         invalidateOptionsMenu();
+    }
+
+    private void onContractTransactions() {
+
     }
 
     private void onDefaultWallet(Wallet wallet) {

@@ -3,6 +3,8 @@ package com.wallet.crypto.alphawallet.repository;
 import android.support.annotation.Nullable;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
@@ -52,6 +54,26 @@ public class TransactionRepository implements TransactionRepositoryType {
 	            fetchAndCacheFromNetwork(networkInfo, wallet))
                 .toObservable();
     }
+
+    //TODO: Needs a small refactor to be more fluid
+	@Override
+	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		Transaction[] txList = Single.merge(
+				fetchFromCache(networkInfo, wallet),
+				fetchAndCacheFromNetwork(networkInfo, wallet)).blockingLast();
+
+		TokenTransaction[] ttxList = new TokenTransaction[txList.length];
+
+		for (int i = 0; i < txList.length ; i++)
+		{
+			ttxList[i] = new TokenTransaction(token, txList[i]);
+		}
+
+		return Single.fromCallable(() -> {
+			return ttxList;
+		}).toObservable();
+	}
 
 	@Override
 	public Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash) {

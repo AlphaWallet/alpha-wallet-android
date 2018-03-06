@@ -83,7 +83,6 @@ public class SignaturePair {
             BigInteger adder = BigInteger.valueOf(2).pow(i - correctionFactor);
             bitFieldLookup = bitFieldLookup.add(adder);
         }
-
         String truncatedValueDecimal = bitFieldLookup.toString(10); //decimal of reduced bitfield
 
         // to create string

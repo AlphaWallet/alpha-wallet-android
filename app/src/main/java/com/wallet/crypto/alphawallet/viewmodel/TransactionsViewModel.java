@@ -9,10 +9,19 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
 import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Ticket;
+import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionContract;
+import com.wallet.crypto.alphawallet.entity.TransactionData;
+import com.wallet.crypto.alphawallet.entity.TransactionInterpreter;
+import com.wallet.crypto.alphawallet.entity.TransactionOperation;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -30,10 +39,17 @@ import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 import com.wallet.crypto.alphawallet.router.WalletRouter;
 
+import org.web3j.utils.Numeric;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+
+import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -47,6 +63,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final FetchTokensInteract fetchTokensInteract;
 
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
@@ -65,12 +82,15 @@ public class TransactionsViewModel extends BaseViewModel {
     private Disposable getBalanceDisposable;
     @Nullable
     private Disposable fetchTransactionDisposable;
+    @Nullable
+    private Disposable fetchTokensDisposable;
     private Handler handler = new Handler();
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
+            FetchTokensInteract fetchTokensInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
@@ -100,6 +120,7 @@ public class TransactionsViewModel extends BaseViewModel {
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
         this.homeRouter = homeRouter;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     @Override
@@ -108,6 +129,10 @@ public class TransactionsViewModel extends BaseViewModel {
 
         handler.removeCallbacks(startFetchTransactionsTask);
         handler.removeCallbacks(startGetBalanceTask);
+        if (fetchTokensDisposable != null && !fetchTokensDisposable.isDisposed())
+        {
+            fetchTokensDisposable.dispose();
+        }
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -166,6 +191,133 @@ public class TransactionsViewModel extends BaseViewModel {
         fetchTransactions(true);
     }
 
+    private void getTokenTransactions()
+    {
+        fetchTokensInteract
+                .fetch(defaultWallet.getValue())
+                .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+    }
+
+    private void onFetchTokensCompletable() {
+
+    }
+
+    private void onTokens(Token[] tokens) {
+        //see if there's any ERC875 tokens
+        for (Token t : tokens)
+        {
+            if (t.tokenInfo.isStormbird)
+            {
+                //let's get all the transactions from this guy and see if any relate to us.
+                handler.removeCallbacks(startFetchTransactionsTask);
+                /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
+                Observable<TokenTransaction[]> fetch = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t);
+                fetchTransactionDisposable = fetch
+                        .subscribe(this::onTokenTransactions, this::onError, this::onTokenTransactionsFetchCompleted);
+            }
+        }
+    }
+
+    private void onTokenTransactions(TokenTransaction[] transactions)
+    {
+        TransactionInterpreter interpreter = new TransactionInterpreter();
+        List<Transaction> txList = new ArrayList<>();
+        txList.addAll(Arrays.asList(this.transactions().getValue()));
+        for (TokenTransaction thisTokenTrans : transactions)
+        {
+            Transaction thisTrans = thisTokenTrans.transaction;
+            TransactionData data = interpreter.InterpretTransation(thisTrans.input);
+            if (walletInvolvedInTransaction(thisTrans, data))
+            {
+                //now display the transaction in the list
+                TransactionOperation op = new TransactionOperation();
+                ERC875ContractTransaction ct = new ERC875ContractTransaction();
+                op.contract = ct;
+
+                ct.address = thisTokenTrans.token.getAddress();
+                ct.addIndicies(data.paramValues);
+                ct.name = thisTokenTrans.token.getFullName();
+                ct.operation = data.functionData.functionName;
+
+                TransactionOperation[] newOps = new TransactionOperation[1];
+                newOps[0] = op;
+
+                Transaction newTransaction = new Transaction(thisTrans.hash,
+                        thisTrans.error,
+                        thisTrans.blockNumber,
+                        thisTrans.timeStamp,
+                        thisTrans.nonce,
+                        thisTrans.from,
+                        thisTrans.to,
+                        thisTrans.value,
+                        thisTrans.gas,
+                        thisTrans.gasPrice,
+                        thisTrans.input,
+                        thisTrans.gasUsed,
+                        newOps);
+
+                txList.add(newTransaction);
+
+                //we could ecrecover the seller here
+                switch (data.functionData.functionName)
+                {
+                    case "trade":
+                        ct.operation = "Market purchase";
+                        //until we can ecrecover from a signauture, we can't show our ticket as sold, but we can conclude it sold elsewhere, so this must be a buy
+                        ct.type = 1; //buy/receive
+                        break;
+                    case "transferFrom":
+                        ct.operation = "Redeem";
+                        //one of our tickets was burned
+                        ct.type = -1; //redeem
+                        break;
+                    case "transfer":
+                        //this could be transfer to or from
+                        //if addresses contains our address then it must be a recieve
+                        if (data.containsAddress(defaultWallet().getValue().address))
+                        {
+                            ct.operation = "Receive From";
+                            ct.type = 1; //buy/receive
+                            ct.otherParty = thisTrans.from;
+                        }
+                        else
+                        {
+                            ct.operation = "Transfer To";
+                            ct.type = -1; //sell
+                            ct.otherParty = data.getAddress();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (transactions.length > 0)
+        {
+            Transaction[] txArray = new Transaction[txList.size()];
+            txArray = txList.toArray(txArray);
+
+            this.transactions.setValue(txArray);
+            this.transactions.postValue(txArray);
+        }
+    }
+
+    private boolean walletInvolvedInTransaction(Transaction trans, TransactionData data)
+    {
+        boolean involved = false;
+        if (data.functionData == null) return false; //early return
+        String walletAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
+        if (data.containsAddress(defaultWallet().getValue().address)) involved = true;
+        if (trans.from.contains(walletAddr)) involved = true;
+        return involved;
+    }
+
+    private void onTokenTransactionsFetchCompleted()
+    {
+
+    }
+
     private void onTransactions(Transaction[] transactions) {
         this.transactions.setValue(transactions);
         Boolean last = progress.getValue();
@@ -183,6 +335,9 @@ public class TransactionsViewModel extends BaseViewModel {
         handler.postDelayed(
                 startFetchTransactionsTask,
                 FETCH_TRANSACTIONS_INTERVAL * DateUtils.SECOND_IN_MILLIS);
+
+
+        getTokenTransactions();
     }
 
     public void showWallets(Context context) {

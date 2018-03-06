@@ -15,6 +15,7 @@ public class RealmToken extends RealmObject {
     private boolean isEnabled;
     private int tokenId;
     private boolean isStormbird;
+    private String burnList;
 
     public int getDecimals() {
         return decimals;
@@ -70,6 +71,15 @@ public class RealmToken extends RealmObject {
 
     public void setBalance(String balance) {
         this.balance = balance;
+    }
+
+    public String getBurnList()
+    {
+        return burnList;
+    }
+    public void setBurnList(String burnList)
+    {
+        this.burnList = burnList;
     }
 
     public boolean getEnabled() {

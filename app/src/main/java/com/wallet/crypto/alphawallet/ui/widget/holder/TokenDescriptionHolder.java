@@ -30,8 +30,7 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token> {
     }
 
     @Override
-    public void bind(@Nullable Token token, @NonNull Bundle addition)
-    {
+    public void bind(@Nullable Token token, @NonNull Bundle addition) {
         count.setText(String.valueOf(token.getTicketCount()));
         title.setText(token.tokenInfo.name);
     }

@@ -10,7 +10,8 @@ import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.SubscribeWrapper;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.entity.TransactionInput;
+import com.wallet.crypto.alphawallet.entity.TransactionData;
+import com.wallet.crypto.alphawallet.entity.TransactionInterpreter;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -26,14 +27,11 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -189,7 +187,22 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 ticketIndicies.remove(index);
             }
         }
+        //now write to burn indicies
+        t.addToBurnList(burnList);
 
+        updateBurnInfo(t.getBurnList());
+    }
+
+    private void updateBurnInfo(List<Integer> burnList)
+    {
+        fetchTokensInteract
+                .updateBalance(defaultWallet().getValue(), ticket().getValue(), burnList)
+                .subscribe(this::onSaved, this::onError);
+    }
+
+    private void onSaved()
+    {
+        //display 'burn complete'
         if (ticketIndicies.size() == 0)
         {
             signature.postValue(null);
@@ -221,14 +234,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                     && (input.contains("dead") && input.contains(userAddr))  )
             {
                 System.out.println("Burn Transaction!");
+                TransactionInterpreter t = new TransactionInterpreter();
 
-                //TODO: Add the burn transaction to a temporary list of burns that override the received transactions
-                TransactionInput t = new TransactionInput(input);
+                TransactionData data = t.InterpretTransation(input);
 
-                if (t.functionName.equals("transferFrom"))
+                if (data.functionData.functionName.equals("transferFrom"))
                 {
                     //pass the list of args back into token listing
-                    List<BigInteger> transferIndicies = t.paramValues;
+                    List<BigInteger> transferIndicies = data.paramValues;
                     markUsedIndicies(transferIndicies);
                 }
             }

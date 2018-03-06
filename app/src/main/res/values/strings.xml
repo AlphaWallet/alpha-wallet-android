@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Alpha Wallet</string>
+    <string name="all">All</string>
+    <string name="currency">Currency</string>
+    <string name="assets">Assets</string>
     <string name="balance">Balance</string>
     <string name="title_send">Send</string>
     <string name="title_request">My Address</string>

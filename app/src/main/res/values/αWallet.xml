@@ -1,13 +1,9 @@
 <resources>
      <string name="app_name">Alpha Wallet</string>
-42a43
      <string name="advanced">Advanced Options</string>
-83a85,86
      <string name="copy_wallet_address">Copy Wallet Address</string>
      <string name="message_attending_venue">Entry Code for Venue Ticket</string>
-149a153
      <string name="entrance_token_address">Entrance token address %s</string>
-188a193,205
      <string name="hint_contract_name">Name</string>
      <string name="hint_contract_venue">Venue</string>
      <string name="hint_contract_date">Date</string>
@@ -15,21 +11,16 @@
      <!-- Price -->
      <string name="hint_asking_price">Asking price in ETH</string>
      <string name="hint_ticket_selection">Ticket Count</string>
- 
      <string name="action_use">Redeem</string>
      <string name="action_sell">Sell</string>
      <string name="action_transfer">Transfer</string>
      <string name="hint_token_balance">Balance</string>
      <string name="address">address</string>
-206a224
      <string name="action_redeem">Redeem</string>
-228a247,248
      <string name="hint_ids">Enter Ticket IDs</string>
      <string name="add_ids_to_redeem">Tickets Redeemed</string>
-231a252,253
      <string name="title_use_token">Use Token</string>
      <string name="ticket_transfer_title">Transfer Ticket</string>
-238a261,293
      <string name="token_balance">%1$s%2$s</string>
      <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
      <string name="action_edit_tokens">Edit tokens</string>

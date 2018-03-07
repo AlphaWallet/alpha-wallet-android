@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.wallet.crypto.alphawallet.entity.TransactionDecoder.ReadState.ARGS;
+
 /**
  * Created by James on 2/02/2018.
  *
@@ -28,6 +30,9 @@ public class TransactionDecoder
 
     private int parseIndex;
     private Map<String, FunctionData> functionList;
+
+    private ReadState state = ARGS;
+    private int sigCount = 0;
 
     public TransactionDecoder()
     {
@@ -78,6 +83,7 @@ public class TransactionDecoder
             thisData.paramValues.clear();
             thisData.addresses.clear();
             thisData.sigData.clear();
+            thisData.miscData.clear();
         }
         else
         {
@@ -89,44 +95,46 @@ public class TransactionDecoder
         return input.length();
     }
 
+    enum ReadState
+    {
+        ARGS,
+        SIGNATURE
+    };
+
     private int getParams(String input) throws Exception
     {
+        state = ARGS;
         if (thisData.functionData.args != null)
         {
             for (String type : thisData.functionData.args)
             {
-                switch (type.charAt(0))
+                String argData = read256bits(input);
+                switch (type)
                 {
-                    case 'a':
-                        if (type.equals("address"))
-                        {
-                            thisData.addresses.add(readNumber256(input));
+                    case "address":
+                        thisData.addresses.add(argData);
+                        break;
+                    case "bytes32":
+                        addArg(argData);
+                        break;
+                    case "uint16[]":
+                        BigInteger count = new BigInteger(argData, 16);
+                        for (int i = 0; i < count.intValue(); i++) {
+                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
                         }
                         break;
-                    case 'b':
-                        if (type.equals("bytes32"))
-                        {
-                            thisData.sigData.add(readNumber256(input));
-                        }
+                    case "uint256":
+                        addArg(argData);
                         break;
-                    case 'u':
-                        if (type.equals("uint16[]")) //TODO: handle dynamic types separately
-                        {
-                            BigInteger count = new BigInteger(readNumber256(input), 16);
-                            for (int i = 0; i < count.intValue(); i++)
-                            {
-                                thisData.paramValues.add(new BigInteger(readNumber256(input), 16));
-                            }
+                    case "uint8": //In our standards, we will put uint8 as the signature marker
+                        if (thisData.functionData.hasSig) {
+                            state = ReadState.SIGNATURE;
+                            sigCount = 0;
                         }
-                        else if (type.equals("uint256"))
-                        {
-                            thisData.sigData.add(readNumber256(input));
-                        }
-                        else if (type.equals("uint8")) //In the transaction input uint8 is still written as uint256
-                        {
-                            String data = readNumber256(input);
-                            thisData.sigData.add(data);
-                        }
+                        addArg(argData);
+                        break;
+                    case "nodata":
+                        //no need to store this data - eg placeholder to indicate presence of a vararg
                         break;
                     default:
                         break;
@@ -137,7 +145,21 @@ public class TransactionDecoder
         return parseIndex;
     }
 
-    private String readNumber256(String input)
+    private void addArg(String input)
+    {
+        switch (state)
+        {
+            case ARGS:
+                thisData.miscData.add(input);
+                break;
+            case SIGNATURE:
+                thisData.sigData.add(input);
+                if (++sigCount == 3) state = ARGS;
+                break;
+        }
+    }
+
+    private String read256bits(String input)
     {
         if ((parseIndex + 64) <= input.length())
         {
@@ -155,9 +177,11 @@ public class TransactionDecoder
     private void setupKnownFunctions()
     {
         functionList = new HashMap<>();
-        for (String methodSignature : KNOWN_FUNCTIONS)
+        for (int index = 0; index < KNOWN_FUNCTIONS.length; index++)
         {
+            String methodSignature = KNOWN_FUNCTIONS[index];
             FunctionData data = getArgs(methodSignature);
+            data.hasSig = HAS_SIG[index];
             functionList.put(buildMethodId(methodSignature), data);
         }
     }
@@ -167,6 +191,12 @@ public class TransactionDecoder
             "transfer(address,uint16[])",
             "trade(uint256,uint16[],uint8,bytes32,bytes32)"
             };
+
+    static final boolean[] HAS_SIG = {
+            false,
+            false,
+            true
+    };
 
     private FunctionData getArgs(String methodSig)
     {
@@ -187,9 +217,9 @@ public class TransactionDecoder
             String arg = temp.get(i);
             if (arg.contains("[]"))
             {
-                //rearrange to end, but read in arg decl
+                //rearrange to end, no need to store this arg
                 data.args.add(arg);
-                String argPlaceholder = "uint256";
+                String argPlaceholder = "nodata";
                 data.args.set(i, argPlaceholder);
             }
         }

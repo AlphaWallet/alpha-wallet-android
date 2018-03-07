@@ -24,12 +24,14 @@ public class TransactionInput
     public List<String> addresses;
     public List<BigInteger> paramValues;
     public List<String> sigData;
+    public List<String> miscData;
 
     public TransactionInput()
     {
         paramValues = new ArrayList<>();
         addresses = new ArrayList<>();
         sigData = new ArrayList<>();
+        miscData = new ArrayList<>();
     }
 
     //Addresses are in 256bit format

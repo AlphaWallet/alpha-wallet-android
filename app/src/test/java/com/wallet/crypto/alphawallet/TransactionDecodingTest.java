@@ -40,6 +40,6 @@ public class TransactionDecodingTest {
         i = t.decodeInput(transfer_transaction);
         assertEquals("0x951c19daead668bfa8391c94286f8ce7cbda2fe3", i.getFirstAddress());
         i = t.decodeInput(trade_transaction);
-        assertEquals(BigInteger.valueOf(0x1b), i.sigData.get(0));
+        assertEquals(BigInteger.valueOf(0x1b), new BigInteger(i.sigData.get(0), 16));
     }
 }

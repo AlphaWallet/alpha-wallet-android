@@ -114,7 +114,7 @@ public class TransactionInterpreter
                         }
                         else if (type.equals("uint256"))
                         {
-                            thisData.sigData.add(readNumber256(input));
+                            thisData.miscData.add(readNumber256(input));
                         }
                         else if (type.equals("uint8")) //In the transaction input uint8 is still written as uint256
                         {

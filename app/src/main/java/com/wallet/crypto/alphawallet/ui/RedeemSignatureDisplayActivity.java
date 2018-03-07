@@ -170,7 +170,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             {
                 ticketBurnNotice();
             }
-            else {
+            else
+            {
                 String qrMessage = sigPair.formQRMessage();
                 final Bitmap qrCode = createQRImage(qrMessage);
                 ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);

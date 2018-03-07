@@ -15,6 +15,7 @@ public class TransactionData
     public FunctionData functionData;
     public List<String> addresses;
     public List<BigInteger> paramValues;
+    public List<String> miscData;
     public List<String> sigData;
 
     public TransactionData()
@@ -22,6 +23,7 @@ public class TransactionData
         paramValues = new ArrayList<>();
         addresses = new ArrayList<>();
         sigData = new ArrayList<>();
+        miscData = new ArrayList<>();
     }
 
     //Addresses are in 256bit format

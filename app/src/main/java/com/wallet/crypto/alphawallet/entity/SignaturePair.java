@@ -88,7 +88,7 @@ public class SignaturePair {
         // to create string
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%1$02d", truncatedValueDecimal.length()));
-        sb.append(String.format("%1$02d", zeroCount));
+        sb.append(String.format("%1$03d", zeroCount));
         sb.append(String.valueOf(truncatedValueDecimal));
 
         return sb.toString();

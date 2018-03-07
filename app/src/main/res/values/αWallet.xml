@@ -1,0 +1,66 @@
+<resources>
+     <string name="app_name">Alpha Wallet</string>
+42a43
+     <string name="advanced">Advanced Options</string>
+83a85,86
+     <string name="copy_wallet_address">Copy Wallet Address</string>
+     <string name="message_attending_venue">Entry Code for Venue Ticket</string>
+149a153
+     <string name="entrance_token_address">Entrance token address %s</string>
+188a193,205
+     <string name="hint_contract_name">Name</string>
+     <string name="hint_contract_venue">Venue</string>
+     <string name="hint_contract_date">Date</string>
+     <string name="hint_contract_price">Price</string>
+     <!-- Price -->
+     <string name="hint_asking_price">Asking price in ETH</string>
+     <string name="hint_ticket_selection">Ticket Count</string>
+ 
+     <string name="action_use">Redeem</string>
+     <string name="action_sell">Sell</string>
+     <string name="action_transfer">Transfer</string>
+     <string name="hint_token_balance">Balance</string>
+     <string name="address">address</string>
+206a224
+     <string name="action_redeem">Redeem</string>
+228a247,248
+     <string name="hint_ids">Enter Ticket IDs</string>
+     <string name="add_ids_to_redeem">Tickets Redeemed</string>
+231a252,253
+     <string name="title_use_token">Use Token</string>
+     <string name="ticket_transfer_title">Transfer Ticket</string>
+238a261,293
+     <string name="token_balance">%1$s%2$s</string>
+     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
+     <string name="action_edit_tokens">Edit tokens</string>
+     <string name="token_name">%1$s (%2$s)</string>
+     <string name="copy_addr_to_clipboard">copy address to clipboard</string>
+     <string name="hint_ids_to_sell">Enter Ticket IDs to place on market</string>
+     <string name="market_queue_title">Create Market Order</string>
+     <string name="selection">selection:</string>
+     <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
+     <string name="select_tickets">Select Tickets to Sell:</string>
+     <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
+     <string name="market_buy_title">Browse Ticket Market</string>
+     <string name="marketplace_title">Marketplace</string>
+     <string name="title_marketplace">Marketplace</string>
+     <string name="quantity_to_purchase">Quantity of Tickets</string>
+     <string name="action_purchase">Purchase</string>
+     <string name="title_market_purchase">Purchase Tickets</string>
+     <string name="view_listings">View Listings</string>
+     <string name="show_marketplace">Show Marketplace</string>
+     <string name="search">Search</string>
+     <string name="toolbar_header_wallet">Wallet</string>
+     <string name="toolbar_header_marketplace">Marketplace</string>
+     <string name="toolbar_header_settings">Settings</string>
+     <string name="toolbar_header_help">Help \u0026 FAQ</string>
+     <string name="settings_my_wallet_address">My Wallet Address</string>
+     <string name="settings_notification">Notification Settings</string>
+     <string name="settings_logout">Log Out</string>
+     <string name="title_redeem_token">Redeem Asset</string>
+     <string name="title_redeem">Redeem Ticket</string>
+     <string name="title_show_tickets">Ticket Operations</string>
+     <string name="quantity_to_redeem">Quantity to Redeem</string>
+     <string name="waiting_for_blockchain">Waiting for blockchain ...</string>
+     <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
+</resources>

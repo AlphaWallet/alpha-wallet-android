@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Alpha Wallet</string>
     <string name="balance">Balance</string>
     <string name="title_send">Send</string>
     <string name="title_request">My Address</string>
@@ -40,7 +39,6 @@
     <string name="action_export">Backup private key</string>
     <string name="message_save_this">Keep this someplace safe</string>
     <string name="copy">Copy to clipboard</string>
-    <string name="advanced">Advanced Options</string>
     <string name="close">Close</string>
     <string name="keystore_keyword">KEYSTORE</string>
     <string name="prompt_confirm_password">Confirm password</string>
@@ -82,8 +80,6 @@
     <string name="message_delete_account">Permanently deleting wallet. Make sure that it has been exported and stored elsewhere.</string>
     <string name="error_import">Error importing keystore</string>
     <string name="message_this_is_your_address">My public Ethereum wallet address</string>
-    <string name="copy_wallet_address">Copy Wallet Address</string>
-    <string name="message_attending_venue">Entry Code for Venue Ticket</string>
     <string name="min_pwd_length">Password must be at least %d chars long</string>
     <string name="backup_warning_text">
         Since only you control your money, you\'ll need to save your backup keystore in case this app is deleted. \n\n
@@ -150,7 +146,6 @@
     <string name="suggestion_private_key">Private key has to be 64 characters long</string>
     <string name="suggestion_empty_password_available">The password can be left blank.</string>
     <string name="suggestion_this_is_your_address">My public %s wallet address</string>
-    <string name="entrance_token_address">Entrance token address %s</string>
     <!-- Hints -->
     <string name="hint_private_key_field">Private key *</string>
     <string name="hint_keystore">Keystore *</string>
@@ -190,19 +185,6 @@
     <string name="hint_contract_address">Contract address</string>
     <string name="hint_contract_symbol">Symbol</string>
     <string name="hint_contract_decimals">Decimals</string>
-    <string name="hint_contract_name">Name</string>
-    <string name="hint_contract_venue">Venue</string>
-    <string name="hint_contract_date">Date</string>
-    <string name="hint_contract_price">Price</string>
-    <!-- Price -->
-    <string name="hint_asking_price">Asking price in ETH</string>
-    <string name="hint_ticket_selection">Ticket Count</string>
-
-    <string name="action_use">Redeem</string>
-    <string name="action_sell">Sell</string>
-    <string name="action_transfer">Transfer</string>
-    <string name="hint_token_balance">Balance</string>
-    <string name="address">address</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
@@ -221,7 +203,6 @@
     <string name="action_next">Next</string>
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
-    <string name="action_redeem">Redeem</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_load_transaction">Failed to load transaction list</string>
@@ -244,13 +225,9 @@
     <string name="welcome.erc20.label.description">Support for ERC20 tokens by default.</string>
     <string name="i_understand">I understand</string>
     <string name="scan_qr">Get address from QR Code</string>
-    <string name="hint_ids">Enter Ticket IDs</string>
-    <string name="add_ids_to_redeem">Tickets Redeemed</string>
     <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your transaction will be processed by the Ethereum network.</string>
     <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
     <string name="title_send_settings">Advanced</string>
-    <string name="title_use_token">Use Token</string>
-    <string name="ticket_transfer_title">Transfer Ticket</string>
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
     <string name="facebook">Facebook</string>
@@ -258,37 +235,4 @@
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
-    <string name="token_balance">%1$s%2$s</string>
-    <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
-    <string name="action_edit_tokens">Edit tokens</string>
-    <string name="token_name">%1$s (%2$s)</string>
-    <string name="copy_addr_to_clipboard">copy address to clipboard</string>
-    <string name="hint_ids_to_sell">Enter Ticket IDs to place on market</string>
-    <string name="market_queue_title">Create Market Order</string>
-    <string name="selection">selection:</string>
-    <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
-    <string name="select_tickets">Select Tickets to Sell:</string>
-    <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
-    <string name="market_buy_title">Browse Ticket Market</string>
-    <string name="marketplace_title">Marketplace</string>
-    <string name="title_marketplace">Marketplace</string>
-    <string name="quantity_to_purchase">Quantity of Tickets</string>
-    <string name="action_purchase">Purchase</string>
-    <string name="title_market_purchase">Purchase Tickets</string>
-    <string name="view_listings">View Listings</string>
-    <string name="show_marketplace">Show Marketplace</string>
-    <string name="search">Search</string>
-    <string name="toolbar_header_wallet">Wallet</string>
-    <string name="toolbar_header_marketplace">Marketplace</string>
-    <string name="toolbar_header_settings">Settings</string>
-    <string name="toolbar_header_help">Help \u0026 FAQ</string>
-    <string name="settings_my_wallet_address">My Wallet Address</string>
-    <string name="settings_notification">Notification Settings</string>
-    <string name="settings_logout">Log Out</string>
-    <string name="title_redeem_token">Redeem Asset</string>
-    <string name="title_redeem">Redeem Ticket</string>
-    <string name="title_show_tickets">Ticket Operations</string>
-    <string name="quantity_to_redeem">Quantity to Redeem</string>
-    <string name="waiting_for_blockchain">Waiting for blockchain ...</string>
-    <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
 </resources>

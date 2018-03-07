@@ -1,5 +1,8 @@
 <resources>
      <string name="app_name">Alpha Wallet</string>
+     <string name="all">All</string>
+     <string name="currency">Currency</string>
+     <string name="assets">Assets</string>
      <string name="advanced">Advanced Options</string>
      <string name="copy_wallet_address">Copy Wallet Address</string>
      <string name="message_attending_venue">Entry Code for Venue Ticket</string>

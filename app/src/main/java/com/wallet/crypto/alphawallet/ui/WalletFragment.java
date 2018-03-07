@@ -58,10 +58,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("All"));
-        tabLayout.addTab(tabLayout.newTab().setText("Tickets"));
-        tabLayout.addTab(tabLayout.newTab().setText("Currency"));
-        tabLayout.addTab(tabLayout.newTab().setText("Assets"));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
 
         TabUtils.changeTabsFont(getContext(), tabLayout);
         TabUtils.reflex(tabLayout);

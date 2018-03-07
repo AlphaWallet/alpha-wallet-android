@@ -26,7 +26,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
 
     }
 
-    public void addIndicies(List<BigInteger> indicies)
+    public void setIndicies(List<BigInteger> indicies)
     {
         this.indicies = new ArrayList<>();
         for (BigInteger index : indicies)

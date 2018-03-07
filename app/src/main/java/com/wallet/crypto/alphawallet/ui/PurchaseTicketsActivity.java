@@ -194,45 +194,8 @@ public class PurchaseTicketsActivity extends BaseActivity
     private void purchaseTicketsFinal()
     {
         viewModel.buyRange(ticketRange);
-//        if (!isValidAmount(sellPrice.getText().toString())) {
-//            toInputLayout.setError(getString(R.string.error_invalid_address));
-//            return;
-//        }
-//'
-//        //1. validate price
-//        BigInteger price = getPriceInWei();
-//        //2. get indicies
-//        short[] indicies = ticket.getTicketIndicies(ticketIds);
-//
-//        //TODO: use the count value from the 'count' EditText - see the invision UX plan
-//
-//        if (price.doubleValue() > 0.0 && indicies != null)
-//        {
-//            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
-//            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
-//            viewModel.generateSalesOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
-//            finish();
-//        }
-
         KeyboardUtils.hideKeyboard(getCurrentFocus());
-        //go back to previous screen
     }
-
-//    private BigInteger getPriceInWei()
-//    {
-//        String textPrice = sellPrice.getText().toString();
-//
-//        //convert to a double value
-//        double value = Double.valueOf(textPrice);
-//
-//        //now convert to milliWei
-//        int milliEth = (int)(value*1000.0f);
-//
-//        //now convert to ETH
-//        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
-//
-//        return weiValue;
-//    }
 
     private double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();

@@ -12,11 +12,9 @@ import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
-import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
-import com.wallet.crypto.alphawallet.entity.TransactionContract;
 import com.wallet.crypto.alphawallet.entity.TransactionData;
 import com.wallet.crypto.alphawallet.entity.TransactionInterpreter;
 import com.wallet.crypto.alphawallet.entity.TransactionOperation;
@@ -48,8 +46,6 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-
-import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -235,7 +231,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 op.contract = ct;
 
                 ct.address = thisTokenTrans.token.getAddress();
-                ct.addIndicies(data.paramValues);
+                ct.setIndicies(data.paramValues);
                 ct.name = thisTokenTrans.token.getFullName();
                 ct.operation = data.functionData.functionName;
 

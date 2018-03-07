@@ -142,4 +142,16 @@ public class SignaturePair {
             signature = sigCopy;
         }
     }
+
+    public boolean isValid()
+    {
+        if (selectionStr == null || selectionStr.length() == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }

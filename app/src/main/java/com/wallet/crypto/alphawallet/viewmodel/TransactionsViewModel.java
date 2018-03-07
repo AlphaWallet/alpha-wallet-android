@@ -12,13 +12,11 @@ import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
-import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
-import com.wallet.crypto.alphawallet.entity.TransactionContract;
-import com.wallet.crypto.alphawallet.entity.TransactionData;
-import com.wallet.crypto.alphawallet.entity.TransactionInterpreter;
+import com.wallet.crypto.alphawallet.entity.TransactionInput;
+import com.wallet.crypto.alphawallet.entity.TransactionDecoder;
 import com.wallet.crypto.alphawallet.entity.TransactionOperation;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -44,8 +42,6 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-
-import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -203,13 +199,13 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void onTokenTransactions(TokenTransaction[] transactions)
     {
-        TransactionInterpreter interpreter = new TransactionInterpreter();
+        TransactionDecoder interpreter = new TransactionDecoder();
         List<Transaction> txList = new ArrayList<>();
         txList.addAll(Arrays.asList(this.transactions().getValue()));
         for (TokenTransaction thisTokenTrans : transactions)
         {
             Transaction thisTrans = thisTokenTrans.transaction;
-            TransactionData data = interpreter.InterpretTransation(thisTrans.input);
+            TransactionInput data = interpreter.decodeInput(thisTrans.input);
             if (walletInvolvedInTransaction(thisTrans, data))
             {
                 //now display the transaction in the list
@@ -267,7 +263,7 @@ public class TransactionsViewModel extends BaseViewModel {
                         {
                             ct.operation = "Transfer To";
                             ct.type = -1; //sell
-                            ct.otherParty = data.getAddress();
+                            ct.otherParty = data.getFirstAddress();
                         }
                         break;
                     default:
@@ -286,7 +282,7 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
-    private boolean walletInvolvedInTransaction(Transaction trans, TransactionData data)
+    private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data)
     {
         boolean involved = false;
         if (data.functionData == null) return false; //early return

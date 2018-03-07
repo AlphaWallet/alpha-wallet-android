@@ -8,16 +8,24 @@ import java.util.List;
 
 /**
  * Created by James on 4/03/2018.
+ *
+ * A data structure that consists part of the transaction: it has the
+ * parameters for a function call (currently, only transactions to a
+ * contract is dealt in this class) and it is only returned by using
+ * TransactionDecoder. Note that the address of the contract, the name
+ * of the function called and the signature from transaction sender
+ * are all not in this class.
+ *
  */
 
-public class TransactionData
+public class TransactionInput
 {
     public FunctionData functionData;
     public List<String> addresses;
     public List<BigInteger> paramValues;
     public List<String> sigData;
 
-    public TransactionData()
+    public TransactionInput()
     {
         paramValues = new ArrayList<>();
         addresses = new ArrayList<>();
@@ -42,7 +50,7 @@ public class TransactionData
         return hasAddr;
     }
 
-    public String getAddress() {
+    public String getFirstAddress() {
         String address = "";
         if (addresses.size() > 0) {
             address = "0x" + addresses.get(0).substring(64 - 40);

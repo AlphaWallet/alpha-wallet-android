@@ -97,6 +97,7 @@
             android:textSize="11sp" />
 
         <TextView
+            android:id="@+id/issuer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
@@ -134,6 +135,7 @@
                 android:text="+10%" />
 
             <TextView
+                android:id="@+id/text_24_hrs_sub"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_regular"
@@ -161,6 +163,7 @@
                 android:text="$1,514" />
 
             <TextView
+                android:id="@+id/text_appreciation_sub"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_regular"

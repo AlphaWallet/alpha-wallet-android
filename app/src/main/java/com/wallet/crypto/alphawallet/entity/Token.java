@@ -102,6 +102,8 @@ public class Token implements Parcelable {
         return "";
     }
 
+    public static final String EMPTY_BALANCE = "\u2014\u2014";
+
     public void setupContent(TokenHolder holder) {
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
@@ -113,6 +115,8 @@ public class Token implements Parcelable {
         if (ticker == null) {
             holder.balanceCurrency.setText(EMPTY_BALANCE);
             holder.fillIcon(null, R.mipmap.token_logo);
+            holder.text24Hours.setText(EMPTY_BALANCE);
+            holder.textAppreciation.setText(EMPTY_BALANCE);
         } else {
             holder.fillCurrency(ethBalance, ticker);
             holder.fillIcon(ticker.image, R.mipmap.token_logo);

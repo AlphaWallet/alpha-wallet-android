@@ -45,6 +45,7 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
     private final TextView venue;
     private final TextView ticketIds;
     private final TextView ticketCat;
+    private final TextView ticketRedeemed;
 
     public TicketHolder(int resId, ViewGroup parent) {
         super(resId, parent);
@@ -55,6 +56,7 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
         ticketIds = findViewById(R.id.tickettext);
         ticketCat = findViewById(R.id.cattext);
         itemView.setOnClickListener(this);
+        ticketRedeemed = findViewById(R.id.redeemed);
     }
 
     @Override
@@ -75,6 +77,15 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
                 date.setText(TicketDecode.getDate(firstTokenId));
                 ticketIds.setText(seatRange);
                 ticketCat.setText(TicketDecode.getZone(firstTokenId));
+
+                if (data.isBurned)
+                {
+                    ticketRedeemed.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    ticketRedeemed.setVisibility(View.GONE);
+                }
             }
             else
             {

@@ -20,6 +20,7 @@ public class TicketRange implements Parcelable
     //public int seatCount;
     public boolean isChecked;
     public String contractAddress; // Should this be address or actual token?
+    public final boolean isBurned;
 
     public List<Integer> tokenIds;
 
@@ -29,6 +30,16 @@ public class TicketRange implements Parcelable
         tokenIds = new ArrayList<>();
         tokenIds.add(tokenId);
         this.isChecked = false;
+        this.isBurned = false;
+    }
+
+    public TicketRange(int tokenId, String contractAddress, boolean isBurned)
+    {
+        this.contractAddress = contractAddress;
+        tokenIds = new ArrayList<>();
+        tokenIds.add(tokenId);
+        this.isChecked = false;
+        this.isBurned = isBurned;
     }
 
     public void selectSubRange(int count)
@@ -51,6 +62,7 @@ public class TicketRange implements Parcelable
 //        this.seatStart = in.readInt();
 //        this.seatCount = in.readInt();
         this.isChecked = (in.readInt() == 1) ? true : false;
+        this.isBurned = (in.readInt() == 1) ? true : false;
         this.contractAddress = in.readString();
     }
 
@@ -68,6 +80,7 @@ public class TicketRange implements Parcelable
 //        dest.writeInt(this.seatStart);
 //        dest.writeInt(this.seatCount);
         dest.writeInt(this.isChecked ? 1:0);
+        dest.writeInt(this.isBurned ? 1:0);
         dest.writeString(this.contractAddress);
     }
 

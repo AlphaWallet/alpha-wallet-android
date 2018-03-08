@@ -166,12 +166,13 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private void onSignatureChanged(SignaturePair sigPair) {
         try
         {
-            if (sigPair == null || sigPair.selectionStr == null)
+            if (sigPair == null || !sigPair.isValid())
             {
                 ticketBurnNotice();
             }
-            else {
-                String qrMessage = sigPair.selectionStr + sigPair.signatureStr;
+            else
+            {
+                String qrMessage = sigPair.formQRMessage();
                 final Bitmap qrCode = createQRImage(qrMessage);
                 ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
                 findViewById(R.id.qr_image).setAlpha(1.0f);

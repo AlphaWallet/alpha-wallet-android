@@ -109,11 +109,21 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Observable<Token[]> fetchActiveCache(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchCachedEnabledTokens(network, wallet) // Immediately show the cache.
+                .toObservable();
+    }
+
+    @Override
     public Observable<Token> fetchActiveSingle(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-        return updateBalance(network, wallet, token) // Looking for new tokens
+        return Single.merge(
+                fetchCachedToken(network, wallet, token),
+                updateBalance(network, wallet, token)) // Looking for new tokens
                 .toObservable();
     }
 
@@ -166,6 +176,12 @@ public class TokenRepository implements TokenRepositoryType {
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         return Completable.fromAction(() -> localSource.setEnable(network, wallet, token, isEnabled));
+    }
+
+    @Override
+    public Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        return Completable.fromAction(() -> localSource.updateTokenBurn(network, wallet, token, burnList));
     }
 
     @Override
@@ -237,17 +253,20 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 TokenFactory tFactory = new TokenFactory();
                 List<Integer> balanceArray = null;
+                List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 if (token.tokenInfo.isStormbird)
                 {
-                    balanceArray = getBalanceArray(wallet, token.tokenInfo);
+                    Ticket t = (Ticket) token;
+                    balanceArray = getBalanceArray(wallet, t.tokenInfo);
+                    burnArray = t.getBurnList();
                 }
                 else
                 {
                     balance = getBalance(wallet, token.tokenInfo);
                 }
 
-                Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, System.currentTimeMillis());
+                Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, token);
                 return updated;
             }
@@ -264,17 +283,19 @@ public class TokenRepository implements TokenRepositoryType {
             long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
             BigDecimal balance = null;
             List<Integer> balanceArray = null;
+            List<Integer> burnArray = null;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
                     if (token.tokenInfo.isStormbird)
                     {
                         balanceArray = getBalanceArray(wallet, token.tokenInfo);
+                        burnArray = ((Ticket)token).getBurnList();
                     }
                     else
                     {
                         balance = getBalance(wallet, token.tokenInfo);
                     }
-                    token = tFactory.createToken(token.tokenInfo, balance, balanceArray, now);
+                    token = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, now);
                     localSource.updateTokenBalance(network, wallet, token);
                 } catch (Throwable th) { /* Quietly */ }
             }
@@ -354,6 +375,11 @@ public class TokenRepository implements TokenRepositoryType {
                 .map(list -> list.toArray(new Token[list.size()]))
                 .compose(attachTicker(network, wallet))
                 .compose(attachEthereum(network, wallet));
+    }
+
+    private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, Token token) {
+        return localSource
+                .fetchEnabledToken(network, wallet, token);
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
@@ -582,7 +608,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static byte[] createTicketTransferData(String to, String ids) {
         //params are: Address, List<Uint16> of ticket indicies
-        Ticket t = new Ticket(null, "0", 0);
+        Ticket t = new Ticket(null, "0", "0", 0);
         List ticketIndicies = t.parseIDListBI(ids);
         Function function = getTransferFunction(to, ticketIndicies);
 

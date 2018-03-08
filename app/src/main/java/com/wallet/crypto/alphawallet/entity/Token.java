@@ -50,6 +50,10 @@ public class Token implements Parcelable {
         else return "0";
     }
 
+    public String getBurnListStr() {
+        return "";
+    }
+
     public static final Creator<Token> CREATOR = new Creator<Token>() {
         @Override
         public Token createFromParcel(Parcel in) {
@@ -116,6 +120,11 @@ public class Token implements Parcelable {
 
         holder.balanceEth.setVisibility(View.VISIBLE);
         holder.arrayBalance.setVisibility(View.GONE);
+    }
+
+    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
+    {
+
     }
 
     public List<Integer> parseIndexList(String userList)

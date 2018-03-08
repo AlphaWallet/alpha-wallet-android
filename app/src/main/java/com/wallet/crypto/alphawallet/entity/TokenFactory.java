@@ -15,7 +15,7 @@ import static com.wallet.crypto.alphawallet.repository.TokensRealmSource.ACTUAL_
 
 public class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, long updateBlancaTime)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, List<Integer> burned, long updateBlancaTime)
     {
         Token thisToken;
         if (tokenInfo.isStormbird)
@@ -26,7 +26,7 @@ public class TokenFactory
             }
             else
             {
-                thisToken = new Ticket(tokenInfo, balances, updateBlancaTime);
+                thisToken = new Ticket(tokenInfo, balances, burned, updateBlancaTime);
             }
         }
         else
@@ -43,7 +43,8 @@ public class TokenFactory
         if (tokenInfo.isStormbird)
         {
             String balances = realmItem.getBalance();
-            thisToken = new Ticket(tokenInfo, balances, updateBlancaTime);
+            String burnList = realmItem.getBurnList();
+            thisToken = new Ticket(tokenInfo, balances, burnList, updateBlancaTime);
         }
         else
         {
@@ -61,7 +62,7 @@ public class TokenFactory
         Token thisToken;
         if (tokenInfo.isStormbird)
         {
-            thisToken = new Ticket(tokenInfo, (List<Integer>)null, 0);
+            thisToken = new Ticket(tokenInfo, (List<Integer>)null, (List<Integer>)null, 0);
         }
         else
         {

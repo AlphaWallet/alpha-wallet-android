@@ -43,6 +43,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
+import static java.security.AccessController.getContext;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
 
@@ -135,6 +136,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add, menu);
         getMenuInflater().inflate(R.menu.menu_settings, menu);
 //
 //        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
@@ -153,6 +155,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             break;
             case R.id.action_deposit: {
                 openExchangeDialog();
+            }
+            break;
+            case R.id.action_add: {
+                viewModel.showAddToken(this);
             }
             break;
         }

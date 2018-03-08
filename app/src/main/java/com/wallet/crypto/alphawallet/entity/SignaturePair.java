@@ -83,13 +83,12 @@ public class SignaturePair {
             BigInteger adder = BigInteger.valueOf(2).pow(i - correctionFactor);
             bitFieldLookup = bitFieldLookup.add(adder);
         }
-
         String truncatedValueDecimal = bitFieldLookup.toString(10); //decimal of reduced bitfield
 
         // to create string
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%1$02d", truncatedValueDecimal.length()));
-        sb.append(String.format("%1$02d", zeroCount));
+        sb.append(String.format("%1$03d", zeroCount));
         sb.append(String.valueOf(truncatedValueDecimal));
 
         return sb.toString();
@@ -141,6 +140,18 @@ public class SignaturePair {
             //prune the first digit
             System.arraycopy(signature, 1, sigCopy, 0, 65);
             signature = sigCopy;
+        }
+    }
+
+    public boolean isValid()
+    {
+        if (selectionStr == null || selectionStr.length() == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 }

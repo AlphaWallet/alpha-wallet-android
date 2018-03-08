@@ -14,9 +14,9 @@ import com.wallet.crypto.alphawallet.repository.entity.RealmToken;
 import com.wallet.crypto.alphawallet.repository.entity.RealmTokenTicker;
 import com.wallet.crypto.alphawallet.service.RealmManager;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -42,6 +42,26 @@ public class TokensRealmSource implements TokenLocalSource {
             Date now = new Date();
             for (Token token : items) {
                 saveToken(networkInfo, wallet, token, now);
+            }
+        });
+    }
+
+    @Override
+    public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, Token token) {
+        return Single.fromCallable(() -> {
+            Realm realm = null;
+
+            try {
+                realm = realmManager.getRealmInstance(networkInfo, wallet);
+                RealmResults<RealmToken> realmItem = realm.where(RealmToken.class)
+                        .equalTo("address", token.tokenInfo.address)
+                        .findAll();
+
+                return convertSingle(realmItem, System.currentTimeMillis());
+            } finally {
+                if (realm != null) {
+                    realm.close();
+                }
             }
         });
     }
@@ -185,6 +205,30 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public void updateTokenBurn(NetworkInfo network, Wallet wallet, Token token, List<Integer> burn) {
+        Realm realm = null;
+        try {
+            realm = realmManager.getRealmInstance(network, wallet);
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", token.tokenInfo.address)
+                    .findFirst();
+            realm.beginTransaction();
+            if (realmToken != null) {
+                token.setRealmBurn(realmToken, burn);
+            }
+            realm.commitTransaction();
+        } catch (Exception ex) {
+            if (realm != null) {
+                realm.cancelTransaction();
+            }
+        } finally {
+            if (realm != null) {
+                realm.close();
+            }
+        }
+    }
+
+    @Override
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token) {
         Realm realm = null;
         try {
@@ -223,6 +267,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setDecimals(token.tokenInfo.decimals);
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
+                realmToken.setBurnList("");
                 if (token instanceof Ticket) {
                     realmToken.setStormbird(true);
                 }
@@ -251,6 +296,18 @@ public class TokensRealmSource implements TokenLocalSource {
                 result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
             }
         }
+        return result;
+    }
+
+    private Token convertSingle(RealmResults<RealmToken> realmItems, long now) {
+        int len = realmItems.size();
+        TokenFactory tf = new TokenFactory();
+        Token result = null;
+        RealmToken realmItem = realmItems.get(0);
+            if (realmItem != null) {
+                TokenInfo info = tf.createTokenInfo(realmItem);
+                result = tf.createToken(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
+            }
         return result;
     }
 }

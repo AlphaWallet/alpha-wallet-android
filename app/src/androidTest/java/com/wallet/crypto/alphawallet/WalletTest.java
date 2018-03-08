@@ -28,12 +28,12 @@ public class WalletTest {
 //        assert(account != null);
 //
 //        try {
-//            controller.deleteAccount(account.getAddress());
+//            controller.deleteAccount(account.getFirstAddress());
 //        } catch (Exception e) {
 //            assert(false);
 //        }
 //
-//        assert(controller.getAccount(account.getAddress()) != null);
+//        assert(controller.getAccount(account.getFirstAddress()) != null);
 //    }
 //
 //    @Test

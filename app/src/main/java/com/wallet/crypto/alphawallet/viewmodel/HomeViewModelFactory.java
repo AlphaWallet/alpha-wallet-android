@@ -8,6 +8,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
@@ -37,6 +38,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final WalletRouter walletRouter;
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
+    private final AddTokenRouter addTokenRouter;
 
     public HomeViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -53,7 +55,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
             MarketplaceRouter marketplaceRouter,
-            NewSettingsRouter newSettingsRouter) {
+            NewSettingsRouter newSettingsRouter,
+            AddTokenRouter addTokenRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -69,6 +72,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.walletRouter = walletRouter;
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
+        this.addTokenRouter = addTokenRouter;
     }
 
     @NonNull
@@ -89,6 +93,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 marketBrowseRouter,
                 walletRouter,
                 marketplaceRouter,
-                newSettingsRouter);
+                newSettingsRouter,
+                addTokenRouter);
     }
 }

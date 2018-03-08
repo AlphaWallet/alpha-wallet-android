@@ -78,13 +78,11 @@ public class PurchaseTicketsViewModel extends BaseViewModel
     {
         //ok let's try to drive this guy through
         final byte[] tradeData = marketQueueService.generateReverseTradeData(defaultWallet.getValue(), marketInstance);
-
         //quick sanity check, dump price
         BigInteger milliWei = Convert.fromWei(marketInstance.priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         double recreatePrice = milliWei.doubleValue() / 1000.0;
-
         System.out.println("Approx value of trade: " + recreatePrice);
-        //now push the transaction:
+        //now push the transaction
         progress.postValue(true);
         disposable = createTransactionInteract
                 .create(new Wallet(defaultWallet().getValue().address), marketInstance.contractAddress, marketInstance.priceWei,

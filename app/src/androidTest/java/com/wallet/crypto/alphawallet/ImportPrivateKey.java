@@ -30,6 +30,6 @@ public class ImportPrivateKey {
 //        String passphrase = "x";
 //        WalletFile w = EtherStoreUtils.convertPrivateKeyToKeystoreFile(privateKey, passphrase);
 //
-//        assert(w.getAddress().equals("7d788fc8df7165b11a19f201558fcc3590fd8d97"));
+//        assert(w.getFirstAddress().equals("7d788fc8df7165b11a19f201558fcc3590fd8d97"));
 //    }
 }

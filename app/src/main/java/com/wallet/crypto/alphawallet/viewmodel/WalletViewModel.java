@@ -53,6 +53,8 @@ public class WalletViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
 
+    private Token[] tokenCache = null;
+
     @Nullable
     private Disposable getBalanceDisposable;
     @Nullable
@@ -100,6 +102,7 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     private void onFetchTokensCompletable() {
+        this.tokens.setValue(tokenCache);
         progress.postValue(false);
         Token[] tokens = tokens().getValue();
         if (tokens == null || tokens.length == 0) {
@@ -108,7 +111,7 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     private void onTokens(Token[] tokens) {
-        this.tokens.setValue(tokens);
+        tokenCache = tokens;
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
             showTotalBalance(tokens);

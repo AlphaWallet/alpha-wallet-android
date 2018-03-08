@@ -1,143 +1,62 @@
 package com.wallet.crypto.alphawallet.entity;
 
-import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Created by James on 2/02/2018.
+ * Created by James on 4/03/2018.
+ *
+ * A data structure that consists part of the transaction: it has the
+ * parameters for a function call (currently, only transactions to a
+ * contract is dealt in this class) and it is only returned by using
+ * TransactionDecoder. Note that the address of the contract, the name
+ * of the function called and the signature from transaction sender
+ * are all not in this class.
+ *
  */
 
 public class TransactionInput
 {
-    public String functionName;
-    public String function;
-    public List<String> params;
+    public FunctionData functionData;
     public List<String> addresses;
     public List<BigInteger> paramValues;
+    public List<String> sigData;
+    public List<String> miscData;
 
-    private Map<String, FunctionData> functionList;
-
-    public TransactionInput(String input)
+    public TransactionInput()
     {
-        setupKnownFunctions();
-
-        int parseState = 0;
-        int parseIndex = 0;
-        //1. check function
-
-        while (parseIndex < input.length())
-        {
-            switch (parseState)
-            {
-                case 0: //get function
-                    parseIndex += setFunction(input.substring(0, 10));
-                    parseState = 1;
-                    break;
-                case 1: //now get params
-                    parseIndex += getParams(input.substring(parseIndex));
-                    parseState = 2;
-                    break;
-                case 2:
-                    break;
-            }
-
-            if (parseIndex < 0) break; //error
-        }
+        paramValues = new ArrayList<>();
+        addresses = new ArrayList<>();
+        sigData = new ArrayList<>();
+        miscData = new ArrayList<>();
     }
 
-    public int setFunction(String input)
+    //Addresses are in 256bit format
+    public boolean containsAddress(String address)
     {
-        //first get expected arg list:
-        FunctionData data = functionList.get(input);
-
-        if (data != null)
+        boolean hasAddr = false;
+        //Scan addresses for this address
+        address = Numeric.cleanHexPrefix(address);
+        for (String thisAddr : addresses)
         {
-            params = data.args;
-            functionName = data.functionName;
-            paramValues = new ArrayList<>();
-            addresses = new ArrayList<>();
-        }
-
-        return input.length();
-    }
-
-    private int getParams(String input)
-    {
-        int parseIndex = 0;
-
-        if (params != null)
-        {
-            for (String type : params)
+            if (thisAddr.contains(address))
             {
-                switch (type.charAt(0))
-                {
-                    case 'a':
-                        if (type.equals("address"))
-                        {
-                            //read 64 from input
-                            String addr = input.substring(parseIndex, parseIndex+64);
-                            parseIndex += 64;
-                            addresses.add(addr);
-                        }
-                        break;
-                    case 'u':
-                        if (type.equals("uint16[]")) //TODO: handle dynamic types separately
-                        {
-                            //read in dynamic array
-                            String offset = input.substring(parseIndex, parseIndex+64);
-                            parseIndex += 64;
-                            BigInteger count = new BigInteger(input.substring(parseIndex, parseIndex+64), 16);
-                            parseIndex += 64;
-                            for (int i = 0; i < count.intValue(); i++)
-                            {
-                                paramValues.add(new BigInteger(input.substring(parseIndex, parseIndex+64), 16));
-                                parseIndex += 64;
-                            }
-                        }
-                        break;
-                }
+                hasAddr = true;
+                break;
             }
         }
 
-        return parseIndex;
+        return hasAddr;
     }
 
-
-    private void setupKnownFunctions()
-    {
-        functionList = new HashMap<>();
-        String methodSignature = "transferFrom(address,address,uint16[])";
-        FunctionData data = getArgs(methodSignature);
-        functionList.put(buildMethodId(methodSignature), data);
-    }
-
-    private FunctionData getArgs(String methodSig)
-    {
-        int b1Index = methodSig.indexOf("(");
-        int b2Index = methodSig.lastIndexOf(")");
-
-        FunctionData data = new FunctionData();
-        data.functionName = methodSig.substring(0, b1Index);
-        String args = methodSig.substring(b1Index + 1, b2Index);
-        String[] argArray = args.split(",");
-        data.args = Arrays.asList(argArray);
-
-        return data;
-    }
-
-    private String buildMethodId(String methodSignature) {
-        byte[] input = methodSignature.getBytes();
-        byte[] hash = Hash.sha3(input);
-        return Numeric.toHexString(hash).substring(0, 10);
+    public String getFirstAddress() {
+        String address = "";
+        if (addresses.size() > 0) {
+            address = "0x" + addresses.get(0).substring(64 - 40);
+        }
+        return address;
     }
 }
-//0xa6fb475f000000000000000000000000951c19daead668bfa8391c94286f8ce7cbda2fe3000000000000000000000000879230570f360424bc5baa99906d5f640a75551e000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004
-
-//000000000000000000000000cb53390d32495163936ee451fee7089cd30be33c000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001

@@ -17,6 +17,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
@@ -29,6 +30,7 @@ import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 import com.wallet.crypto.alphawallet.router.WalletRouter;
 
+import java.security.AccessControlContext;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -58,6 +60,7 @@ public class HomeViewModel extends BaseViewModel {
     private final WalletRouter walletRouter;
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
+    private final AddTokenRouter addTokenRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -80,7 +83,8 @@ public class HomeViewModel extends BaseViewModel {
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
             MarketplaceRouter marketplaceRouter,
-            NewSettingsRouter newSettingsRouter) {
+            NewSettingsRouter newSettingsRouter,
+            AddTokenRouter addTokenRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -96,6 +100,7 @@ public class HomeViewModel extends BaseViewModel {
         this.walletRouter = walletRouter;
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
+        this.addTokenRouter = addTokenRouter;
     }
 
     @Override
@@ -228,4 +233,8 @@ public class HomeViewModel extends BaseViewModel {
     private final Runnable startFetchTransactionsTask = () -> this.fetchTransactions(false);
 
     private final Runnable startGetBalanceTask = this::getBalance;
+
+    public void showAddToken(Context context) {
+        addTokenRouter.open(context);
+    }
 }

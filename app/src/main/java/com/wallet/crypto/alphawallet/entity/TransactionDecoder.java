@@ -10,30 +10,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.wallet.crypto.alphawallet.entity.TransactionDecoder.ReadState.ARGS;
+
 /**
  * Created by James on 2/02/2018.
+ *
+ * TransactionDecoder currently only decode a transaction input in the
+ * string format, which is strictly a string starting with "0x" and
+ * with an even number of hex digits followed. (Probably should be
+ * bytes but we work with string for now.) It is used only for one
+ * thing at the moment: decodeInput(), which returns the decoded
+ * input.
  */
 
 // TODO: Should be a factory class that emits an object containing transaction interpretation
-public class TransactionInterpreter
+public class TransactionDecoder
 {
-    TransactionData thisData;
+    TransactionInput thisData;
 
     private int parseIndex;
-    private int parseState;
     private Map<String, FunctionData> functionList;
 
-    public TransactionInterpreter()
+    private ReadState state = ARGS;
+    private int sigCount = 0;
+
+    public TransactionDecoder()
     {
         setupKnownFunctions();
     }
 
-    public TransactionData InterpretTransation(String input)
+    public TransactionInput decodeInput(String input)
     {
-        parseState = 0;
+        int parseState = 0;
         parseIndex = 0;
         //1. check function
-        thisData = new TransactionData();
+        thisData = new TransactionInput();
 
         try {
             while (parseIndex < input.length()) {
@@ -72,6 +83,7 @@ public class TransactionInterpreter
             thisData.paramValues.clear();
             thisData.addresses.clear();
             thisData.sigData.clear();
+            thisData.miscData.clear();
         }
         else
         {
@@ -83,44 +95,46 @@ public class TransactionInterpreter
         return input.length();
     }
 
+    enum ReadState
+    {
+        ARGS,
+        SIGNATURE
+    };
+
     private int getParams(String input) throws Exception
     {
+        state = ARGS;
         if (thisData.functionData.args != null)
         {
             for (String type : thisData.functionData.args)
             {
-                switch (type.charAt(0))
+                String argData = read256bits(input);
+                switch (type)
                 {
-                    case 'a':
-                        if (type.equals("address"))
-                        {
-                            thisData.addresses.add(readNumber256(input));
+                    case "address":
+                        thisData.addresses.add(argData);
+                        break;
+                    case "bytes32":
+                        addArg(argData);
+                        break;
+                    case "uint16[]":
+                        BigInteger count = new BigInteger(argData, 16);
+                        for (int i = 0; i < count.intValue(); i++) {
+                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
                         }
                         break;
-                    case 'b':
-                        if (type.equals("bytes32"))
-                        {
-                            thisData.sigData.add(readNumber256(input));
-                        }
+                    case "uint256":
+                        addArg(argData);
                         break;
-                    case 'u':
-                        if (type.equals("uint16[]")) //TODO: handle dynamic types separately
-                        {
-                            BigInteger count = new BigInteger(readNumber256(input), 16);
-                            for (int i = 0; i < count.intValue(); i++)
-                            {
-                                thisData.paramValues.add(new BigInteger(readNumber256(input), 16));
-                            }
+                    case "uint8": //In our standards, we will put uint8 as the signature marker
+                        if (thisData.functionData.hasSig) {
+                            state = ReadState.SIGNATURE;
+                            sigCount = 0;
                         }
-                        else if (type.equals("uint256"))
-                        {
-                            thisData.miscData.add(readNumber256(input));
-                        }
-                        else if (type.equals("uint8")) //In the transaction input uint8 is still written as uint256
-                        {
-                            String data = readNumber256(input);
-                            thisData.sigData.add(data);
-                        }
+                        addArg(argData);
+                        break;
+                    case "nodata":
+                        //no need to store this data - eg placeholder to indicate presence of a vararg
                         break;
                     default:
                         break;
@@ -131,7 +145,21 @@ public class TransactionInterpreter
         return parseIndex;
     }
 
-    private String readNumber256(String input)
+    private void addArg(String input)
+    {
+        switch (state)
+        {
+            case ARGS:
+                thisData.miscData.add(input);
+                break;
+            case SIGNATURE:
+                thisData.sigData.add(input);
+                if (++sigCount == 3) state = ARGS;
+                break;
+        }
+    }
+
+    private String read256bits(String input)
     {
         if ((parseIndex + 64) <= input.length())
         {
@@ -149,9 +177,11 @@ public class TransactionInterpreter
     private void setupKnownFunctions()
     {
         functionList = new HashMap<>();
-        for (String methodSignature : KNOWN_FUNCTIONS)
+        for (int index = 0; index < KNOWN_FUNCTIONS.length; index++)
         {
+            String methodSignature = KNOWN_FUNCTIONS[index];
             FunctionData data = getArgs(methodSignature);
+            data.hasSig = HAS_SIG[index];
             functionList.put(buildMethodId(methodSignature), data);
         }
     }
@@ -161,6 +191,12 @@ public class TransactionInterpreter
             "transfer(address,uint16[])",
             "trade(uint256,uint16[],uint8,bytes32,bytes32)"
             };
+
+    static final boolean[] HAS_SIG = {
+            false,
+            false,
+            true
+    };
 
     private FunctionData getArgs(String methodSig)
     {
@@ -181,9 +217,9 @@ public class TransactionInterpreter
             String arg = temp.get(i);
             if (arg.contains("[]"))
             {
-                //rearrange to end, but read in arg decl
+                //rearrange to end, no need to store this arg
                 data.args.add(arg);
-                String argPlaceholder = "uint256";
+                String argPlaceholder = "nodata";
                 data.args.set(i, argPlaceholder);
             }
         }
@@ -197,25 +233,4 @@ public class TransactionInterpreter
         return Numeric.toHexString(hash).substring(0, 10);
     }
 }
-//0xa6fb475f000000000000000000000000951c19daead668bfa8391c94286f8ce7cbda2fe3000000000000000000000000879230570f360424bc5baa99906d5f640a75551e000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004
-//000000000000000000000000cb53390d32495163936ee451fee7089cd30be33c000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001
-//trade(uint,[],v,r,s)
-/*
-0x696ecc55
-000000000000000000000000000000000000000000000000000000005a9a00e2 - expiry
-00000000000000000000000000000000000000000000000000000000000000a0 - varargs decl
-000000000000000000000000000000000000000000000000000000000000001b - 27: v
-c59d6718734043600a49ec2419e566fa03676058e88326ff1161c579c6b8e799 - R
-51d22461ab6f27bedd72d6b56c1fecf9f4cbb79a7728c510022617a9e42782ea - S
-000000000000000000000000000000000000000000000000000000000000000a
-0000000000000000000000000000000000000000000000000000000000000009
-000000000000000000000000000000000000000000000000000000000000000a
-000000000000000000000000000000000000000000000000000000000000000b
-000000000000000000000000000000000000000000000000000000000000000c
-000000000000000000000000000000000000000000000000000000000000000d
-000000000000000000000000000000000000000000000000000000000000000e
-000000000000000000000000000000000000000000000000000000000000000f
-0000000000000000000000000000000000000000000000000000000000000010
-0000000000000000000000000000000000000000000000000000000000000011
-0000000000000000000000000000000000000000000000000000000000000012
- */
+

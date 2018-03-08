@@ -10,8 +10,8 @@ import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.SubscribeWrapper;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.entity.TransactionData;
-import com.wallet.crypto.alphawallet.entity.TransactionInterpreter;
+import com.wallet.crypto.alphawallet.entity.TransactionInput;
+import com.wallet.crypto.alphawallet.entity.TransactionDecoder;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -234,9 +234,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                     && (input.contains("dead") && input.contains(userAddr))  )
             {
                 System.out.println("Burn Transaction!");
-                TransactionInterpreter t = new TransactionInterpreter();
+                TransactionDecoder t = new TransactionDecoder();
 
-                TransactionData data = t.InterpretTransation(input);
+                TransactionInput data = t.decodeInput(input);
 
                 if (data.functionData.functionName.equals("transferFrom"))
                 {

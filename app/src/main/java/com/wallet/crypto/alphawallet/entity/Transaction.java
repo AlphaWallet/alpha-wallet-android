@@ -7,6 +7,17 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
 
+/**
+ *
+ * This is supposed to be a generic transaction class which can
+ * contain all of 3 stages of a transaction:
+ * 
+ * 1. being compiled, in progress, or ready to be signed;
+ * 2. compiled and signed, or ready to be broadcasted;
+ * 2. already broadcasted, obtained in its raw format from a node, 
+ *    including the signatures in it;
+ * 4. already included in a blockchain.
+ */
 public class Transaction implements Parcelable {
     @SerializedName("id")
     public final String hash;

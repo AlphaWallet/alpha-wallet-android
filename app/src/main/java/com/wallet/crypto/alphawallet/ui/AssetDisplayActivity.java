@@ -44,7 +44,8 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
     private Ticket ticket;
     private TicketAdapter adapter;
-    private int ticketCount = 0;
+    private String balance = null;
+    private String burnList = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -57,8 +58,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         toolbar();
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        ticketCount = ticket.getTicketCount();
-
         setTitle(getString(R.string.title_show_tickets));
         TokenInfo info = ticket.tokenInfo;
 
@@ -104,13 +103,14 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private void onTokenUpdate(Token t)
     {
         ticket = (Ticket)t;
-        int newCount = ticket.getTicketCount();
-        if (newCount != ticketCount)
+        if (!ticket.getBurnListStr().equals(burnList) || !ticket.getFullBalance().equals(balance))
         {
             adapter.setTicket(ticket);
             RecyclerView list = findViewById(R.id.listTickets);
+            list.setAdapter(null);
             list.setAdapter(adapter);
-            ticketCount = newCount;
+            balance = ticket.getFullBalance();
+            burnList = ticket.getBurnListStr();
         }
     }
 

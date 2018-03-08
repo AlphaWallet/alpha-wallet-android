@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -27,6 +28,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final FetchTokensInteract fetchTokensInteract;
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
     private final SendRouter sendRouter;
@@ -44,6 +46,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
+            FetchTokensInteract fetchTokensInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             ManageWalletsRouter manageWalletsRouter,
             SettingsRouter settingsRouter,
@@ -73,6 +76,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
         this.homeRouter = homeRouter;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     @NonNull
@@ -82,6 +86,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 fetchTransactionsInteract,
+                fetchTokensInteract,
                 getDefaultWalletBalance,
                 manageWalletsRouter,
                 settingsRouter,

@@ -99,6 +99,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void setTokens(Token[] tokens) {
+        //TODO: check tokens for change
         items.beginBatchedUpdates();
         items.clear();
         items.add(total);

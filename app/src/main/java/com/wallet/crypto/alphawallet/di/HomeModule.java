@@ -7,6 +7,7 @@ import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
@@ -42,7 +43,8 @@ class HomeModule {
             MarketBrowseRouter marketBrowseRouter,
             WalletRouter walletRouter,
             MarketplaceRouter marketplaceRouter,
-            NewSettingsRouter newSettingsRouter) {
+            NewSettingsRouter newSettingsRouter,
+            AddTokenRouter addTokenRouter) {
         return new HomeViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -58,7 +60,8 @@ class HomeModule {
                 marketBrowseRouter,
                 walletRouter,
                 marketplaceRouter,
-                newSettingsRouter);
+                newSettingsRouter,
+                addTokenRouter);
     }
 
     @Provides
@@ -91,6 +94,11 @@ class HomeModule {
     @Provides
     SettingsRouter provideSettingsRouter() {
         return new SettingsRouter();
+    }
+
+    @Provides
+    AddTokenRouter provideAddTokenRouter() {
+        return new AddTokenRouter();
     }
 
     @Provides

@@ -185,7 +185,7 @@ public class MarketQueueService {
                 ds.flush();
 
                 Map<String, String> prologData = new HashMap<>();
-                prologData.put("public-key", trades.publicKey);
+                prologData.put("public-key", trades.publicKey)  ;
                 String urlProlog = formPrologData(prologData)   ;
 
                 Map<String, String> paramData = new HashMap<>();

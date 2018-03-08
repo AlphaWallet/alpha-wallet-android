@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
@@ -78,7 +79,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         String symbol;
         long decimals = 18;
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-        if (transaction.operations == null || transaction.operations.length == 0) {
+        if (transaction.operations == null || transaction.operations.length == 0 || transaction.operations[0].contract instanceof ERC875ContractTransaction) {
             rawValue = transaction.value;
             symbol = networkInfo == null ? "" : networkInfo.symbol;
         } else {

@@ -37,7 +37,7 @@ public class Ticket extends Token implements Parcelable
     public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = parseIDListInteger(balances);
-        burnArray = parseIDListInteger(burnList);
+        burnArray = parseIDListInteger(burnList, true);
     }
 //
 //    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
@@ -189,6 +189,11 @@ public class Ticket extends Token implements Parcelable
 
     public List<Integer> parseIDListInteger(String userList)
     {
+        return parseIDListInteger(userList, false);
+    }
+
+    public List<Integer> parseIDListInteger(String userList, boolean removeDuplicates)
+    {
         List<Integer> idList = new ArrayList<>();
 
         try
@@ -199,7 +204,13 @@ public class Ticket extends Token implements Parcelable
             {
                 //remove whitespace
                 String trim = id.trim();
-                idList.add(Integer.parseInt(trim));
+                Integer intId = Integer.parseInt(trim);
+                if (removeDuplicates) {
+                    if (!idList.contains(intId)) idList.add(intId);
+                }
+                else {
+                    idList.add(intId);
+                }
             }
         }
         catch (Exception e)
@@ -288,7 +299,7 @@ public class Ticket extends Token implements Parcelable
             if (balanceArray.size() > index)
             {
                 Integer value = balanceArray.get(index);
-                if (value > 0) {
+                if (value > 0 && !burnArray.contains(value)) {
                     burnArray.add(value);
                 }
             }

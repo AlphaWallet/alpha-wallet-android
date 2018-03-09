@@ -43,10 +43,12 @@ public class SplashActivity extends BaseActivity {
         if (data != null)
         {
             String urlData = data.toString();
-            final String importTemplate = "https://www.awallet.io/import?tickets=";
-            if (urlData.contains(importTemplate))
+            final String importTemplate = "/import?tickets=";
+            int offset = urlData.indexOf(importTemplate);
+            if (offset > 0)
             {
-                importData = urlData.substring(importTemplate.length());
+                offset += importTemplate.length();
+                importData = urlData.substring(offset);
             }
         }
 

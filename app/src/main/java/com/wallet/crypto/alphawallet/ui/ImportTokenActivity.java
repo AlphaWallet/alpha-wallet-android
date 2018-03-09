@@ -58,10 +58,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         viewModel = ViewModelProviders.of(this, importTokenViewModelFactory)
                 .get(ImportTokenViewModel.class);
-
-        //display the raw import data
-
-
     }
 
     @Override
@@ -72,6 +68,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-
+        viewModel.performImport();
     }
 }

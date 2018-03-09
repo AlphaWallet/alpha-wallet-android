@@ -1,6 +1,11 @@
 package com.wallet.crypto.alphawallet.service;
 
 
+import android.arch.lifecycle.MutableLiveData;
+import android.util.Base64;
+
+import com.wallet.crypto.alphawallet.entity.MessagePair;
+import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
@@ -9,12 +14,21 @@ import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Created by James on 9/03/2018.
@@ -30,7 +44,7 @@ public class ImportTokenService {
     private final TransactionRepositoryType transactionRepository;
     private final PasswordStore passwordStore;
 
-    private Disposable marketQueueProcessing;
+    private Disposable authorisationServerRequest;
     private MarketQueueService.ApiMarketQueue marketQueueConnector;
 
     public ImportTokenService(OkHttpClient httpClient,
@@ -41,16 +55,64 @@ public class ImportTokenService {
         this.passwordStore = passwordStore;
     }
 
-    private void handleTicketImport(Wallet wallet, String importMessage)
+    public Single<byte[]> sign(Wallet wallet, byte[] importMessage)
+    {
+        return passwordStore.getPassword(wallet)
+                .flatMap(password -> transactionRepository.getSignature(wallet, importMessage, password));
+                //.map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
+    }
+
+    public void importTickets(Wallet wallet, byte[] importMessage) throws Exception
     {
         //1. generate the signature (observe)
-        //2. package up the params
+        byte[] signature = sign(wallet, importMessage).blockingGet();
+
+        //break signature down
+        Sign.SignatureData sigData = sigFromByteArray(signature);
+        String r = bytesToHex(sigData.getR());
+        String s = bytesToHex(sigData.getS());
+        String v = Integer.toHexString(sigData.getV());
+        String sigStr = r+","+s+","+v;
+
+        //2. package up the params:
+        //ticketData,sig
+        Map<String, String> paramData = new HashMap<>();
+        String ticketDataBase64 = Base64.encodeToString(importMessage, Base64.DEFAULT);
+        paramData.put("ticketData", ticketDataBase64);
+        paramData.put("sig", Base64.encodeToString(sigStr.getBytes(), Base64.DEFAULT));
+        String args = formEncodedData(paramData);
+        String url = IMPORT_TOKEN_URL + IMPORT_ARG + args;
+
+        authorisationServerRequest = sendImportData(url)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleResponse);
+
+
         //3. send the import link to server (observe)
 
-//        marketQueueProcessing = sendImportData(trades)
+//        authorisationServerRequest = sendImportData(trades)
 //                .subscribeOn(Schedulers.newThread())
 //                .observeOn(AndroidSchedulers.mainThread())
 //                .subscribe(this::handleResponse);
+    }
+
+    private Single<String> sendImportData(String url)
+    {
+        return Single.fromCallable(() -> {
+            String response = null;
+
+            try
+            {
+                response = serverRequest(url);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return response;
+        });
     }
 
     //This is running on the main UI thread, so it's safe to push messages etc here
@@ -60,14 +122,14 @@ public class ImportTokenService {
         BaseViewModel.onQueueUpdate(100);
         if (response.contains("success"))//  == HttpURLConnection.HTTP_OK)
         {
-            BaseViewModel.onPushToast("Queue written");
+            BaseViewModel.onPushToast("Import processed");
         }
         else
         {
-            BaseViewModel.onPushToast("ERROR: Trade not processed");
+            BaseViewModel.onPushToast("ERROR: import failed");
         }
 
-        marketQueueProcessing.dispose();
+        authorisationServerRequest.dispose();
     }
 
 //    private Single<String> sendImportData(TradeInstance trades)
@@ -110,33 +172,30 @@ public class ImportTokenService {
 //        });
 //    }
 
-//    //TODO: Refactor this using
-//    private String writeToQueue(final String writeURL, final byte[] data, final boolean post)
-//    {
-//        String result = null;
-//        try
-//        {
-//            final MediaType DATA
-//                    = MediaType.parse("application/vnd.awallet-signed-orders-v0");
-//
-//            RequestBody body = RequestBody.create(DATA, data);
-//            Request request = new Request.Builder()
-//                    .url(writeURL)
-//                    .put(body)
-//                    .addHeader("Content-Type", "application/vnd.awallet-signed-orders-v0")
-//                    .build();
-//
-//            okhttp3.Response response = httpClient.newCall(request).execute();
-//            result = response.body().string();
-//            System.out.println("HI: " + result);
-//        }
-//        catch(Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-//
-//        return result;
-//    }
+    private String serverRequest(final String writeURL)
+    {
+        String result = null;
+        try
+        {
+            MediaType mediaType = MediaType.parse("application/octet-stream");
+            RequestBody body = RequestBody.create(mediaType, "{\"jsonrpc\":\"2.0\",\"method\":\"txpool_content\",\"params\":[],\"id\":0}");
+            Request request = new Request.Builder()
+                    .url(writeURL)
+                    .post(body)
+                    .addHeader("Cache-Control", "no-cache")
+                    .build();
+
+            okhttp3.Response response = httpClient.newCall(request).execute();
+            result = response.body().string();
+            System.out.println("HI: " + result);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
     //sign the ticket data
     public Single<byte[]> sign(Wallet wallet, String password, byte[] data) {
@@ -209,5 +268,51 @@ public class ImportTokenService {
         Sign.SignatureData ecSig = new Sign.SignatureData(subv, subrRev, subsRev);
 
         return ecSig;
+    }
+
+    private String formEncodedData(Map<String, String> data)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("?");
+        boolean first = true;
+        for (String key : data.keySet())
+        {
+            String value = null;
+            try
+            {
+                value = URLEncoder.encode(data.get(key), "UTF-8");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+
+            if (!first)
+            {
+                sb.append("&");
+            }
+            else
+            {
+                first = false;
+            }
+
+            sb.append(key + "=" + value);
+        }
+
+        return sb.toString();
+    }
+
+    private static String bytesToHex(byte[] bytes)
+    {
+        final char[] hexArray = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ )
+        {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        String finalHex = new String(hexChars);
+        return finalHex;
     }
 }

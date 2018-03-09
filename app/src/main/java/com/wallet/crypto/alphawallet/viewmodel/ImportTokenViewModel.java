@@ -58,4 +58,17 @@ public class ImportTokenViewModel extends BaseViewModel  {
             error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
         }
     }
+
+    public void performImport()
+    {
+        try {
+            importTokenService.importTickets(wallet.getValue(), importData);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //Wait for feedback. Refactor as an observable
+    }
 }

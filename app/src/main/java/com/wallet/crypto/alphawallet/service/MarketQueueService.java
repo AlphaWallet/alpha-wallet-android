@@ -147,23 +147,6 @@ public class MarketQueueService {
         marketQueueProcessing.dispose();
     }
 
-    private byte[] getTradeBytes(BigInteger price, BigInteger expiryTimestamp, short[] tickets, BigInteger contractAddr) throws Exception
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream ds = new DataOutputStream(buffer);
-        ds.write(Numeric.toBytesPadded(price, 32));
-        ds.write(Numeric.toBytesPadded(expiryTimestamp, 32));
-        ds.write(Numeric.toBytesPadded(contractAddr, 20));
-
-        for (short ticketIndex : tickets)
-        {
-            ds.writeShort(ticketIndex);
-        }
-        ds.flush();
-
-        return buffer.toByteArray();
-    }
-
     private Single<String> sendSalesOrders(TradeInstance trades)
     {
         return Single.fromCallable(() -> {
@@ -176,7 +159,7 @@ public class MarketQueueService {
 
             try
             {
-                byte[] trade = getTradeBytes(trades.price, trades.expiry, trades.tickets, trades.contractAddress);
+                byte[] trade = trades.getTradeBytes();
 
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 DataOutputStream ds = new DataOutputStream(buffer);
@@ -329,7 +312,7 @@ public class MarketQueueService {
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
                 BigInteger expiryTimestamp = BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
-                trade.addSignature(getTradeSignature(wallet, password, price, expiryTimestamp, tickets, contractAddr).blockingGet());
+                trade.addSignature(getTradeSignature(wallet, password, trade).blockingGet());
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 BaseViewModel.onQueueUpdate((int)upd);
             }
@@ -343,13 +326,13 @@ public class MarketQueueService {
                 .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
     }
 
-    private Single<byte[]> getTradeSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, String contractAddr) {
-        return encodeMessageForTrade(price, expiryTimestamp, tickets, contractAddr)
+    private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade) {
+        return encodeMessageForTrade(trade)
                 .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password));
     }
 
-    private Single<byte[]> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, String contractAddr) {
-        return Single.fromCallable(() -> getTradeBytes(price, expiryTimestamp, tickets, Numeric.toBigInt(contractAddr)));
+    private Single<byte[]> encodeMessageForTrade(TradeInstance trade) {
+        return Single.fromCallable(trade::getTradeBytes);
     }
 
     public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {

@@ -2,6 +2,7 @@ package com.wallet.crypto.alphawallet.entity;
 
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.security.Signature;
@@ -90,6 +91,23 @@ public class TradeInstance
         {                 
             ds.write(sig);
         }
+    }
+
+    public byte[] getTradeBytes() throws Exception
+    {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        DataOutputStream ds = new DataOutputStream(buffer);
+        ds.write(Numeric.toBytesPadded(price, 32));
+        ds.write(Numeric.toBytesPadded(expiry, 32));
+        ds.write(Numeric.toBytesPadded(contractAddress, 20));
+
+        for (short ticketIndex : tickets)
+        {
+            ds.writeShort(ticketIndex);
+        }
+        ds.flush();
+
+        return buffer.toByteArray();
     }
 
     private String padLeft(String source, int length)

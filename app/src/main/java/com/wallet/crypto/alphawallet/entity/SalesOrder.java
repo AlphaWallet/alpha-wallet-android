@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 
+import org.ethereum.geth.BigInt;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayInputStream;
@@ -28,7 +29,7 @@ public class SalesOrder implements Parcelable
     public final byte[] signature;
     public final byte[] message;
 
-    public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg) throws Exception
+    public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
     {
         this.message = Base64.decode(msg, Base64.DEFAULT);
         this.price = price;
@@ -43,6 +44,18 @@ public class SalesOrder implements Parcelable
         this.tickets = ds.readShortIndicies(ticketCount);
         this.contractAddress = contractAddress;
         this.signature = Base64.decode(sig, Base64.DEFAULT);
+    }
+
+    public SalesOrder(byte[] message, int v, BigInteger r, BigInteger s) {
+    }
+
+    public static SalesOrder parseUniversalLink(String link) {
+            BigInteger r = BigInteger.ONE;
+            BigInteger s = BigInteger.ZERO;
+            int v = 27;
+            byte[] message = new byte[32];
+            /* TODO: parse the link */
+            return new SalesOrder(message, v, r, s);
     }
 
     private SalesOrder(Parcel in) {

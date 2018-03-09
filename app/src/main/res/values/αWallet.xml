@@ -92,4 +92,5 @@
      <string name="total_cost_label">Total Cost:</string>
      <string name="equivalent_in_usd">Equivalent in USD</string>
      <string name="total_cost">%s ETH</string>
+     <string name="select_quantity_tickets">Select Quantity of Tickets</string>
 </resources>

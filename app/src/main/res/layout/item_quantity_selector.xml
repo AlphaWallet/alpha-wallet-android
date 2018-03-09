@@ -15,7 +15,7 @@
         android:layout_marginTop="20dp"
         android:fontFamily="@font/font_light"
         android:gravity="center"
-        android:text="Select Quantity of Tickets"
+        android:text="@string/select_quantity_tickets"
         android:textColor="@color/text_black"
         android:textSize="25sp" />
 
@@ -25,7 +25,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="5dp"
         android:fontFamily="@font/font_regular"
-        android:text="Quantity of Tickets"
+        android:text="@string/quantity_of_tickets"
         android:textAllCaps="true"
         android:textColor="@color/light_gray"
         android:textSize="10sp" />

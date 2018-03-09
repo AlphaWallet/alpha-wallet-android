@@ -73,7 +73,7 @@ public class TicketSaleAdapter extends TicketAdapter {
                 holder = new RedeemTicketHolder(R.layout.item_redeem_ticket, parent);
             } break;
             case QuantitySelectorHolder.VIEW_TYPE: {
-                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent);
+                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, getCheckedItem().tokenIds.size());
                 holder = quantitySelector;
             } break;
         }

@@ -6,13 +6,19 @@ import android.util.Base64;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
 import com.wallet.crypto.alphawallet.service.ImportTokenService;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
+
+import org.web3j.tx.Contract;
+
+import java.math.BigInteger;
 
 /**
  * Created by James on 9/03/2018.
@@ -21,18 +27,21 @@ import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
 public class ImportTokenViewModel extends BaseViewModel  {
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final ImportTokenService importTokenService;
+    private final CreateTransactionInteract createTransactionInteract;
 
+    private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private byte[] importData;
+    private String univeralImportLink;
 
     ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
-                         ImportTokenService importTokenService) {
+                         CreateTransactionInteract createTransactionInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.importTokenService = importTokenService;
+        this.createTransactionInteract = createTransactionInteract;
     }
 
     public void prepare(String importDataStr) {
+        univeralImportLink = importDataStr;
         importData = Base64.decode(importDataStr.getBytes(), Base64.DEFAULT); //get import data
         progress.postValue(true);
         disposable = findDefaultWalletInteract
@@ -59,16 +68,32 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
-    public void performImport()
-    {
-        try {
-            importTokenService.importTickets(wallet.getValue(), importData);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+    public void performImport() {
+        SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
+        //ok let's try to drive this guy through
+        final byte[] tradeData = SalesOrder.generateReverseTradeData(order);
+        System.out.println("Approx value of trade: " + order.price);
+        //now push the transaction
+        progress.postValue(true);
+        disposable = createTransactionInteract
+                .create(wallet.getValue(), order.contractAddress, order.priceWei,
+                        Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
 
-        //Wait for feedback. Refactor as an observable
+    private void onCreateTransaction(String transaction)
+    {
+        progress.postValue(false);
+        newTransaction.postValue(transaction);
     }
 }
+
+// 0x696ecc55
+// 0000000000000000000000000000000000000000000000000000000000000000
+// 00000000000000000000000000000000000000000000000000000000000000a0
+// 000000000000000000000000000000000000000000000000000000000000001c
+// a85af7810c4dee72477b8cffc78589bffd59310c81e904a0248be2e6c2ddc09d
+// 1b68176f496a041a2dc2d37b654e2ba57e232d9bea4a871a14752ea545a1f2a1
+// 0000000000000000000000000000000000000000000000000000000000000002
+// 00000000000000000000000000000000000000000000000000000000000000a4
+// 00000000000000000000000000000000000000000000000000000000000000a5

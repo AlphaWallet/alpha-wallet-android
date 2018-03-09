@@ -134,7 +134,7 @@ public class SellDetailActivity extends BaseActivity
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        short[] indicies = ticket.getTicketIndicies(ticketIds);
+        int[] indicies = ticket.getTicketIndicies(ticketIds);
 
         //TODO: use the textQuantity value from the 'textQuantity' EditText - see the invision UX plan
 

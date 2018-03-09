@@ -8,7 +8,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by James on 24/02/2018.
@@ -49,7 +51,7 @@ public class EthereumReadBuffer extends DataInputStream
         {
             byte[] buffer20 = new byte[20];
             read(buffer20);
-            addr = bytesToHex(readBuffer);
+            addr = "0x" + bytesToHex(buffer20);
         }
         catch (IOException e)
         {
@@ -57,6 +59,50 @@ public class EthereumReadBuffer extends DataInputStream
         }
 
         return addr;
+    }
+
+    @Override
+    public void close()
+    {
+        try
+        {
+            super.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public int available()
+    {
+        int remains = 0;
+        try
+        {
+            remains = super.available();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return remains;
+    }
+
+    public int readInt32()
+    {
+        int value = 0;
+        try
+        {
+            value = readInt();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return value;
     }
 
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -70,7 +116,7 @@ public class EthereumReadBuffer extends DataInputStream
         return new String(hexChars);
     }
 
-    public int[] readShortIndicies(int count)
+    public int[] readShortIndices(int count)
     {
         int[] intArray = new int[count];
         try
@@ -86,5 +132,19 @@ public class EthereumReadBuffer extends DataInputStream
         }
 
         return intArray;
+    }
+
+    public byte[] readSignature()
+    {
+        byte[] sig = new byte[65];
+        try
+        {
+            read(sig);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return sig;
     }
 }

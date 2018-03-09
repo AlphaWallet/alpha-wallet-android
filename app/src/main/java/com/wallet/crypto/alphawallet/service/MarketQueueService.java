@@ -291,7 +291,7 @@ public class MarketQueueService {
         return transactionRepository.getSignature(wallet, data, password);
     }
 
-    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
@@ -321,7 +321,7 @@ public class MarketQueueService {
         });
     }
 
-    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
     }
@@ -335,7 +335,7 @@ public class MarketQueueService {
         return Single.fromCallable(trade::getTradeBytes);
     }
 
-    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
         return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -348,7 +348,7 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createSalesOrders(Wallet wallet, BigInteger price, short[] ticketIDs, String contractAddr, int firstTicketId) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, int firstTicketId) {
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
@@ -474,7 +474,8 @@ public class MarketQueueService {
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig) throws Exception
     {
-        byte   subv = (byte)(sig[64] + 27);
+        byte   subv = (byte)(sig[64]);
+        if (subv < 27) subv += 27;
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
         byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);

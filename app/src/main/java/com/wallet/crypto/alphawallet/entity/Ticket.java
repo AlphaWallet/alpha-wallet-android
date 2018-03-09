@@ -397,13 +397,13 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public short[] getTicketIndicies(String ticketIds)
+    public int[] getTicketIndicies(String ticketIds)
     {
         List<Integer> indexList = parseIndexList(ticketIds);
-        short[] indicies = new short[indexList.size()];
+        int[] indicies = new int[indexList.size()];
         int i = 0;
         for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
-            indicies[i] = (short)(int)iterator.next();
+            indicies[i] = (int)iterator.next();
         }
         return indicies;
     }

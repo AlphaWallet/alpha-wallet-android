@@ -137,7 +137,7 @@ public class Token implements Parcelable {
         return balance.intValue();
     }
 
-    public short[] getTicketIndicies(String ticketIds)
+    public int[] getTicketIndicies(String ticketIds)
     {
         return null;
     }

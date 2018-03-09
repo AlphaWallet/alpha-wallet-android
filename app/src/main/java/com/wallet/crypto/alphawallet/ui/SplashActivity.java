@@ -43,7 +43,7 @@ public class SplashActivity extends BaseActivity {
         if (data != null)
         {
             String urlData = data.toString();
-            final String importTemplate = "/import?tickets=";
+            final String importTemplate = "/import?";
             int offset = urlData.indexOf(importTemplate);
             if (offset > 0)
             {

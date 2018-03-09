@@ -47,7 +47,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         setTitle(getString(R.string.empty));
 
-        importString = getIntent().getParcelableExtra(IMPORT_STRING);
+        importString = getIntent().getStringExtra(IMPORT_STRING);
         findViewById(R.id.advanced_options).setVisibility(View.VISIBLE); //setOnClickListener(this);
 
         Button importTickets = findViewById(R.id.advanced_options);

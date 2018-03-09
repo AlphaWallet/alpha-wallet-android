@@ -36,6 +36,21 @@ public class SplashActivity extends BaseActivity {
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
+        String importData = "";
+        if (data != null)
+        {
+            String urlData = data.toString();
+            final String importTemplate = "https://www.awallet.io/import?tickets=";
+            if (urlData.contains(importTemplate))
+            {
+                importData = urlData.substring(importTemplate.length());
+            }
+        }
+
+        if (importData.length() > 0)
+        {
+
+        }
 
         splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)
                 .get(SplashViewModel.class);

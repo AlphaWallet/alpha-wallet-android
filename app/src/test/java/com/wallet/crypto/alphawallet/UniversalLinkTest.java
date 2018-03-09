@@ -23,7 +23,7 @@ public class UniversalLinkTest {
     public void UniversalLinkShouldBeParsedCorrectly() {
         SalesOrder order = SalesOrder.parseUniversalLink(link);
         assertEquals(new BigInteger("0x2c68af0bb140000", 16), order.priceWei );
-        assertEquals(new Date(0x5aa28441 * 1000), order.expiry);
+        assertEquals(0x5aa28441, order.expiry);
         assertEquals("0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4", order.contractAddress);
         assertArrayEquals(indices, order.tickets);
         assertTrue(verifySignature(order.message, order.signature));

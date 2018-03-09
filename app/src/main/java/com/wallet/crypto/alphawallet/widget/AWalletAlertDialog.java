@@ -40,13 +40,19 @@ public class AWalletAlertDialog extends Dialog {
         titleText = findViewById(R.id.dialog_main_text);
         messageText = findViewById(R.id.dialog_sub_text);
         button = findViewById(R.id.dialog_button1);
+
+        titleText.setVisibility(View.GONE);
+        messageText.setVisibility(View.GONE);
+        button.setVisibility(View.GONE);
     }
 
     public void setTitle(int resId) {
+        titleText.setVisibility(View.VISIBLE);
         titleText.setText(context.getResources().getString(resId));
     }
 
     public void setButtonText(int resId) {
+        button.setVisibility(View.VISIBLE);
         button.setText(context.getResources().getString(resId));
     }
 
@@ -55,6 +61,7 @@ public class AWalletAlertDialog extends Dialog {
     }
 
     public void setMessage(int resId) {
+        messageText.setVisibility(View.VISIBLE);
         messageText.setText(context.getResources().getString(resId));
     }
 

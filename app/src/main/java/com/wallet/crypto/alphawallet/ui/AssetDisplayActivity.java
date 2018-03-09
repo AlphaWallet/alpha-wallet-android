@@ -167,6 +167,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
         //viewModel.showSalesOrder(this, ticket, range);
-        viewModel.showTransferToken(this, ticket, range);
+//        viewModel.showTransferToken(this, ticket, range);
     }
 }

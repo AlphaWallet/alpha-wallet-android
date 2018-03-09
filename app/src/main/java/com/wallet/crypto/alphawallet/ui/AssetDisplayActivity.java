@@ -8,7 +8,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
@@ -41,6 +48,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private AssetDisplayViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
+    private RecyclerView list;
 
     private Ticket ticket;
     private TicketAdapter adapter;
@@ -66,7 +74,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        RecyclerView list = findViewById(R.id.listTickets);
+        list = findViewById(R.id.listTickets);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -91,6 +99,18 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        //Dynamically add margin below RecyclerView to prevent overlapping with the button layout
+        LinearLayout layoutButtons = findViewById(R.id.layoutButtons);
+        ViewGroup.MarginLayoutParams marginLayoutParams =
+                (ViewGroup.MarginLayoutParams) list.getLayoutParams();
+        float extra = 15 * ((float)getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        marginLayoutParams.setMargins(0,0,0, (int) (layoutButtons.getHeight() + extra));
+        list.setLayoutParams(marginLayoutParams);
     }
 
     @Override

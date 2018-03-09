@@ -24,13 +24,13 @@ import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
 import com.wallet.crypto.alphawallet.service.CoinmarketcapTickerService;
 import com.wallet.crypto.alphawallet.service.EthplorerTokenService;
 import com.wallet.crypto.alphawallet.service.GethKeystoreAccountService;
+import com.wallet.crypto.alphawallet.service.ImportTokenService;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.service.RealmManager;
 import com.wallet.crypto.alphawallet.service.TickerService;
 import com.wallet.crypto.alphawallet.service.TokenExplorerClientType;
 import com.wallet.crypto.alphawallet.service.TransactionsNetworkClient;
 import com.wallet.crypto.alphawallet.service.TransactionsNetworkClientType;
-import com.wallet.crypto.alphawallet.service.TrustWalletTickerService;
 
 import java.io.File;
 
@@ -154,5 +154,13 @@ public class RepositoriesModule {
 												 TransactionRepositoryType transactionRepository,
 												 PasswordStore passwordStore) {
 		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
+	}
+
+	@Singleton
+	@Provides
+	ImportTokenService provideImportTokenService(OkHttpClient okHttpClient,
+												 TransactionRepositoryType transactionRepository,
+												 PasswordStore passwordStore) {
+		return new ImportTokenService(okHttpClient, transactionRepository, passwordStore);
 	}
 }

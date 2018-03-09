@@ -32,7 +32,7 @@
 
                 <data
                     android:host="www.awallet.io"
-                    android:path="/doobrey"
+                    android:path="/import"
                     android:scheme="https"/>
             </intent-filter>
         </activity>
@@ -130,6 +130,10 @@
         <activity
             android:name="com.wallet.crypto.alphawallet.ui.HomeActivity"
             android:label="@string/toolbar_header_wallet" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.ImportTokenActivity"
+            android:label="@string/title_import_token" />
 
 
         <activity

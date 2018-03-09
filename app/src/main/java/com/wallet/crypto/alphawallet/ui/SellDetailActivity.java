@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -61,6 +63,8 @@ public class SellDetailActivity extends BaseActivity
     private TextView textQuantity;
     private String ticketIds;
 
+    private TextView totalCostText;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -106,13 +110,39 @@ public class SellDetailActivity extends BaseActivity
             sellTicketFinal();
         });
 
+        totalCostText = findViewById(R.id.eth_price);
         textQuantity = findViewById(R.id.text_quantity);
+
+        sellPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                int quantity = Integer.parseInt(textQuantity.getText().toString());
+                double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
-            quantity++;
-            textQuantity.setText(String.valueOf(quantity));
+            if ((quantity+1) <= adapter.getTicketRangeCount()) {
+                quantity++;
+                textQuantity.setText(String.valueOf(quantity));
+                if (!sellPrice.getText().toString().isEmpty()) {
+                    double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                    totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                }
+            }
         });
 
         RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
@@ -121,6 +151,10 @@ public class SellDetailActivity extends BaseActivity
             if ((quantity-1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
+                if (!sellPrice.getText().toString().isEmpty()) {
+                    double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                    totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                }
             }
         });
     }

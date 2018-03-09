@@ -105,6 +105,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             String date = TicketDecode.getDate(firstTicket);
             int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
             int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
+            String range = (numberOfTickets == 1) ? String.valueOf(rangeFirst) : getString(R.string.range_formatter, rangeFirst, rangeLast);
             String cat = TicketDecode.getZone(firstTicket);
             String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
 
@@ -112,7 +113,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             textTicketName.setText(ticketTitle);
             textVenue.setText(venue);
             textDate.setText(date);
-            textRange.setText(rangeFirst + "-" + rangeLast);
+            textRange.setText(range);
             textCat.setText(cat);
         }
     }

@@ -93,4 +93,5 @@
      <string name="equivalent_in_usd">Equivalent in USD</string>
      <string name="total_cost">%s ETH</string>
      <string name="select_quantity_tickets">Select Quantity of Tickets</string>
+     <string name="range_formatter">%1d - %2d</string>
 </resources>

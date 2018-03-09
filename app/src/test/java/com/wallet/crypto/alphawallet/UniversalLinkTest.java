@@ -13,6 +13,21 @@ import java.util.Date;
  * Created by weiwu on 9/3/18.
  */
 
+/**
+ * Universal link format (so that we can reform the ticket range to be imported BEFORE we import - this makes a good UI.
+ *
+ * bytes32: price Wei
+ * bytes32: expiry
+ * bytes20: contract address
+ * Uint16[]: ticket indices
+ * int32: ticket ID start value   <---- Added for UI ticket preview
+ * byte: v
+ * bytes32: r
+ * bytes32: s
+ * 
+ */
+
+
 public class UniversalLinkTest {
     String link = "https://app.awallet.io/?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsaK8LsUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWqKEQbyaECakvG8LqLvkhtHQnaVzKznkAD4=";
     int[] indices = new int[] { 0x3e };

@@ -235,4 +235,32 @@
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
+    <string name="btn_text_apply">Apply</string>
+
+    <!-- Filter Dialog -->
+    <string name="filter_by">Filter by:</string>
+    <string name="filter_date_label">Date</string>
+    <string name="filter_price_label">Price</string>
+    <string name="filter_distance_label">Distance</string>
+    <string name="filter_timeframe_label">Timeframe</string>
+    <string-array name="filter_date">
+        <item>Most Recent</item>
+        <item>Oldest</item>
+    </string-array>
+    <string-array name="filter_price">
+        <item>Low to High</item>
+        <item>High to Low</item>
+    </string-array>
+    <string-array name="filter_distance">
+        <item>Any</item>
+        <item>1km</item>
+        <item>5km</item>
+        <item>10km</item>
+    </string-array>
+    <string-array name="filter_timeframe">
+        <item>Any</item>
+        <item>1 week</item>
+        <item>1 month</item>
+        <item>1 year</item>
+    </string-array>
 </resources>

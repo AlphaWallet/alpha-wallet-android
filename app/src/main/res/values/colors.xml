@@ -39,4 +39,6 @@
 	<color name="super_light_grey">#ececec</color>
 	<color name="button_green">#75b943</color>
 
+	<color name="onboarding_indicator_unselected">#d8d8d8</color>
+	<color name="onboarding_indicator_selected">#b7b7b7</color>
 </resources>

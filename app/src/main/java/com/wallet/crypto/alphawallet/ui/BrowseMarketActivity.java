@@ -7,10 +7,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.MarketplaceEvent;
@@ -19,6 +19,7 @@ import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.FilterDialog;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -81,8 +82,20 @@ public class BrowseMarketActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_menu, menu);
+        getMenuInflater().inflate(R.menu.menu_filter, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_filter: {
+                FilterDialog dialog = new FilterDialog(this);
+                dialog.show();
+            }
+            break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void onMarketUpdate(SalesOrder[] trades)

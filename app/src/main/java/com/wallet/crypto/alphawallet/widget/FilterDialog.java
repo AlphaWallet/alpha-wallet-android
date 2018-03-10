@@ -13,6 +13,8 @@ import android.widget.SpinnerAdapter;
 
 import com.wallet.crypto.alphawallet.R;
 
+import dagger.android.AndroidInjection;
+
 public class FilterDialog extends Dialog {
     private Spinner spinnerDate;
     private Spinner spinnerPrice;
@@ -23,10 +25,7 @@ public class FilterDialog extends Dialog {
     public FilterDialog(Activity activity) {
         super(activity);
         setupDialog();
-        initViews(activity);
-    }
 
-    private void initViews(Activity activity) {
         spinnerDate = findViewById(R.id.spinner_date);
         spinnerDate.setAdapter(createAdapter(activity, R.array.filter_date));
 
@@ -40,6 +39,7 @@ public class FilterDialog extends Dialog {
         spinnerTimeframe.setAdapter(createAdapter(activity, R.array.filter_timeframe));
 
         btnApply = findViewById(R.id.btn_filter);
+
         btnApply.setOnClickListener(v -> {
             filter();
             dismiss();
@@ -56,6 +56,10 @@ public class FilterDialog extends Dialog {
 
     private void filter() {
         //TODO: Filter action
+//        int dateFilterId = (int) spinnerDate.getSelectedItemId();
+//        int priceFilterId = (int) spinnerPrice.getSelectedItemId();
+//        int distanceFilterId = (int) spinnerDistance.getSelectedItemId();
+//        int timeframeFilterId = (int) spinnerTimeframe.getSelectedItemId();
     }
 
     private ArrayAdapter<CharSequence> createAdapter(Activity activity, int resId) {

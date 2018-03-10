@@ -14,22 +14,34 @@ import java.util.Date;
  */
 
 /**
- * Universal link format (so that we can reform the ticket range to be imported BEFORE we import - this makes a good UI.
+ * Universal link format
  *
+ * Android requires the link to be in the form:
+ *
+ * https://www.awallet.io/import?
+ *
+ * The format forbids using a prefix other than 'www'.
+ * There needs to be text in the specific link too, in this case 'import'.
+ *
+ * AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==;
+ * 1b;
+ * 2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105;
+ * 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
+ *
+ * Base64 message: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==
  * bytes32: price Wei
  * bytes32: expiry
  * bytes20: contract address
  * Uint16[]: ticket indices
- * int32: ticket ID start value   <---- Added for UI ticket preview
- * byte: v
- * bytes32: r
- * bytes32: s
+ *
+ * byte: 1b
+ * bytes32: 2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105
+ * bytes32: 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
  *
  */
 
-
 public class UniversalLinkTest {
-    String link = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKQApQAAUIUqPzGusqG4jDWy4WUbXPs3vTtZgZnJungxzz7TmzwMSSi/VfTEW0dZduwWdwYqvVR4c2dD9TppFl4JPHQ5mJwxHA==";
+    String link = "https://www.awallet.io/import?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==;1b;2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105;30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B";
     int[] indices = new int[] { 0xa4, 0xa5 };
     boolean verifySignature(byte[] message, byte[] signature) {
         return false;

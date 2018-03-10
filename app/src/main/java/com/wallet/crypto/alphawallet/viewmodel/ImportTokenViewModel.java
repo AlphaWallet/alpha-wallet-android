@@ -31,7 +31,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
-    private byte[] importData;
     private String univeralImportLink;
 
     ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
@@ -42,7 +41,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
-        importData = Base64.decode(importDataStr.getBytes(), Base64.DEFAULT); //get import data
         progress.postValue(true);
         disposable = findDefaultWalletInteract
                 .find()

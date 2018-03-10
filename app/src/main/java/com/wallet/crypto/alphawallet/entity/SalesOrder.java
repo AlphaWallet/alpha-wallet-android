@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.wallet.crypto.alphawallet.service.MarketQueueService.hexStringToBytes;
 import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -33,7 +34,7 @@ public class SalesOrder implements Parcelable
     public final double price;
     public final BigInteger priceWei;
     public final int[] tickets;
-    public final int ticketStart;
+    public int ticketStart;
     public final int ticketCount;
     public final String contractAddress;
     public final byte[] signature;
@@ -57,32 +58,81 @@ public class SalesOrder implements Parcelable
         ds.close();
     }
 
-    public SalesOrder(String universalLink) {
-        byte[] message = Base64.decode(universalLink, Base64.DEFAULT);
+    /**
+     * Universal link format
+     *
+     * AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==;
+     * 1b;
+     * 2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105;
+     * 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
+     *
+     * Base64 message: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==
+     * bytes32: price Wei
+     * bytes32: expiry
+     * bytes20: contract address
+     * Uint16[]: ticket indices
+     *
+     * byte: 1b
+     * bytes32: 2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105
+     * bytes32: 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
+     *
+     */
+    public SalesOrder(String linkData) {
+        //separate the args
+        String[] linkArgs = linkData.split(";");
+        message = Base64.decode(linkArgs[0], Base64.DEFAULT);
+        byte v = (byte)(int)Integer.valueOf(linkArgs[1], 16);
+        byte[] r = hexStringToBytes(linkArgs[2]);
+        byte[] s = hexStringToBytes(linkArgs[3]);
+
         ByteArrayInputStream bas = new ByteArrayInputStream(message);
         EthereumReadBuffer ds = new EthereumReadBuffer(bas);
         priceWei = ds.readBI();
         expiry = ds.readBI().intValue();
         contractAddress = ds.readAddress();
-        //calculate how many tickets there must be:
-        final int sigPlusIdStart = 4 + 65;
-        ticketCount = (ds.available() - sigPlusIdStart) / 2;
-        //now read uint16's until we hit the delimiter
+        ticketCount = ds.available() / 2;
         tickets = ds.readShortIndices(ticketCount);
-        ticketStart = ds.readInt32();
-        signature = ds.readSignature();
         ds.close();
 
-        //now write the message
-        this.message = writeMessage();
+        signature = writeSignature(r,s,v);
 
         BigInteger milliWei = Convert.fromWei(priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         price = milliWei.doubleValue() / 1000.0;
     }
 
+    private byte[] writeSignature(byte[] r, byte[] s, byte v)
+    {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        DataOutputStream ds = new DataOutputStream(buffer);
+        try
+        {
+            ds.write(r);
+            ds.write(s);
+            ds.writeByte(v);
+            ds.flush();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return buffer.toByteArray();
+    }
+
     public static SalesOrder parseUniversalLink(String link)
     {
-        return new SalesOrder(link);
+        final String importTemplate = "/import?";
+        int offset = link.indexOf(importTemplate);
+        if (offset > 0)
+        {
+            offset += importTemplate.length();
+            String linkData = link.substring(offset);
+            return new SalesOrder(linkData);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public byte[] writeMessage()

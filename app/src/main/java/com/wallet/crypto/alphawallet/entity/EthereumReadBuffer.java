@@ -123,7 +123,9 @@ public class EthereumReadBuffer extends DataInputStream
         {
             for (int i = 0; i < count; i++)
             {
-                intArray[i] = readShort();
+                int value = readByte() * 0x100;
+                value += (int) (readByte()&0xFF);
+                intArray[i] = value;
             }
         }
         catch (IOException e)

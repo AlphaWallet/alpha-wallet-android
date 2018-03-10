@@ -39,17 +39,10 @@ public class SplashActivity extends BaseActivity {
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
-        importData = "";
+
         if (data != null)
         {
-            String urlData = data.toString();
-            final String importTemplate = "/import?";
-            int offset = urlData.indexOf(importTemplate);
-            if (offset > 0)
-            {
-                offset += importTemplate.length();
-                importData = urlData.substring(offset);
-            }
+            importData = data.toString();
         }
 
         splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)
@@ -59,7 +52,7 @@ public class SplashActivity extends BaseActivity {
 
     private void onWallets(Wallet[] wallets) {
         // Start home activity
-        if (importData.length() > 0) {
+        if (importData != null) {
             new ImportTokenRouter().open(this, importData);
         }
         else if (wallets.length == 0) {

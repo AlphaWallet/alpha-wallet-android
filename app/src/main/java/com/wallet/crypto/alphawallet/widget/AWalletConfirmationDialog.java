@@ -38,6 +38,8 @@ public class AWalletConfirmationDialog extends Dialog {
         extraText = findViewById(R.id.dialog_extra_text);
         btnPrimary = findViewById(R.id.dialog_button1);
         btnSecondary = findViewById(R.id.dialog_button2);
+
+        extraText.setVisibility(View.GONE);
     }
 
     public void setTitle(int resId) {
@@ -60,6 +62,10 @@ public class AWalletConfirmationDialog extends Dialog {
         btnSecondary.setOnClickListener(listener);
     }
 
+    public void setBigText(String text) {
+        bigText.setText(text);
+    }
+
     public void setBigText(int resId) {
         bigText.setText(context.getResources().getString(resId));
     }
@@ -69,6 +75,7 @@ public class AWalletConfirmationDialog extends Dialog {
     }
 
     public void setExtraText(int resId) {
+        extraText.setVisibility(View.VISIBLE);
         extraText.setText(context.getResources().getString(resId));
     }
 }

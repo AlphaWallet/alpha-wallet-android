@@ -23,6 +23,7 @@ import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
+import com.wallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -106,10 +107,6 @@ public class SellDetailActivity extends BaseActivity
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
 
-        sell.setOnClickListener((View v) -> {
-            sellTicketFinal();
-        });
-
         totalCostText = findViewById(R.id.eth_price);
         textQuantity = findViewById(R.id.text_quantity);
 
@@ -155,6 +152,22 @@ public class SellDetailActivity extends BaseActivity
                     double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
                     totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
                 }
+            }
+        });
+
+        sell.setOnClickListener((View v) -> {
+            if (Integer.parseInt(textQuantity.getText().toString()) > 0
+                    && !sellPrice.getText().toString().isEmpty()
+                    && Double.parseDouble(sellPrice.getText().toString()) > 0) {
+                AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+                dialog.setTitle(R.string.confirm_sale_title);
+                dialog.setSmallText(R.string.confirm_sale_small_text);
+                dialog.setBigText(totalCostText.getText().toString());
+                dialog.setPrimaryButtonText(R.string.action_sell);
+                dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+                dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());
+                dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+                dialog.show();
             }
         });
     }

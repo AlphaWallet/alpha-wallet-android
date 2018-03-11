@@ -142,4 +142,7 @@
     <string name="root_body">Any \'rooted\' app can access aWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
     <string name="toolbar_add_custom_token">Add Custom Token</string>
     <string name="contact_us">Still need help? Contact us</string>
+    <string name="confirm_sale_title">Confirm Sale?</string>
+    <string name="confirm_sale_small_text">You will receive:</string>
+    <string name="dialog_cancel_back">Cancel and Go Back</string>
 </resources>

@@ -131,6 +131,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+
+        setTitle(getString(R.string.toolbar_add_custom_token));
     }
 
     @Override

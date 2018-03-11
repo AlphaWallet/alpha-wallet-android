@@ -19,6 +19,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
+import com.wallet.crypto.alphawallet.router.HelpRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
@@ -61,6 +62,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
+    private final HelpRouter helpRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -84,7 +86,8 @@ public class HomeViewModel extends BaseViewModel {
             WalletRouter walletRouter,
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
-            AddTokenRouter addTokenRouter) {
+            AddTokenRouter addTokenRouter,
+            HelpRouter helpRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -101,6 +104,7 @@ public class HomeViewModel extends BaseViewModel {
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
+        this.helpRouter = helpRouter;
     }
 
     @Override
@@ -236,5 +240,9 @@ public class HomeViewModel extends BaseViewModel {
 
     public void showAddToken(Context context) {
         addTokenRouter.open(context);
+    }
+
+    public void showHelp(Context context, int resId) {
+        helpRouter.open(context, resId);
     }
 }

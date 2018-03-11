@@ -10,6 +10,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
+import com.wallet.crypto.alphawallet.router.HelpRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
@@ -39,6 +40,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
+    private final HelpRouter helpRouter;
 
     public HomeViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -56,7 +58,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             WalletRouter walletRouter,
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
-            AddTokenRouter addTokenRouter) {
+            AddTokenRouter addTokenRouter,
+            HelpRouter helpRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -73,6 +76,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
+        this.helpRouter = helpRouter;
     }
 
     @NonNull
@@ -94,6 +98,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 walletRouter,
                 marketplaceRouter,
                 newSettingsRouter,
-                addTokenRouter);
+                addTokenRouter,
+                helpRouter);
     }
 }

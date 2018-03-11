@@ -1,7 +1,6 @@
 package com.wallet.crypto.alphawallet.ui;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
@@ -12,6 +11,11 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,10 +34,8 @@ import com.wallet.crypto.alphawallet.util.RootUtil;
 import com.wallet.crypto.alphawallet.viewmodel.BaseNavigationActivity;
 import com.wallet.crypto.alphawallet.viewmodel.HomeViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.HomeViewModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModel;
-import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import com.wallet.crypto.alphawallet.widget.DepositView;
-import com.wallet.crypto.alphawallet.widget.EmptyTransactionsView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.util.Map;
@@ -42,10 +44,11 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
-import static java.security.AccessController.getContext;
-
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
+    private static final int MARKETPLACE = 0;
+    private static final int WALLET = 1;
+    private static final int SETTINGS = 2;
+    private static final int HELP = 3;
 
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -54,6 +57,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private SystemView systemView;
     private TransactionsAdapter adapter;
     private Dialog dialog;
+    private ViewPager viewPager;
+    private PagerAdapter pagerAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,10 +68,27 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         setContentView(R.layout.activity_home);
 
         toolbar();
-//        setTitle(getString(R.string.unknown_balance_with_symbol));
-//        setSubtitle("");
 
+        viewPager = findViewById(R.id.view_pager);
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                showPage(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         initBottomNavigation();
         dissableDisplayHomeAsUp();
@@ -103,11 +125,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
-        viewModel.showWalletFragment(this, R.id.frame_layout);
-        setTitle(getString(R.string.toolbar_header_wallet));
+        showPage(WALLET);
 
         setBottomMenu(R.menu.menu_main_network);
-        selectNavigationItem(1);
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -118,8 +138,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onResume() {
         super.onResume();
-//        setTitle(getString(R.string.unknown_balance_without_symbol));
-//        setSubtitle("");
         adapter.clear();
         viewModel.prepare();
         checkRoot();
@@ -128,7 +146,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onPause() {
         super.onPause();
-
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
@@ -183,36 +200,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (item.getItemId()) {
             case R.id.action_marketplace: {
                 if (getSelectedNavigationItem() != 0) {
-                    selectNavigationItem(0);
-                    setTitle(getString(R.string.toolbar_header_marketplace));
-                    viewModel.showMarketplaceFragment(this, R.id.frame_layout);
+                    showPage(MARKETPLACE);
                 }
                 return true;
             }
-            case R.id.action_send: {
-//                viewModel.showSend(this);
+            case R.id.action_wallet: {
                 if (getSelectedNavigationItem() != 1) {
-                    selectNavigationItem(1);
-                    setTitle(getString(R.string.toolbar_header_wallet));
-                    viewModel.showWalletFragment(this, R.id.frame_layout);
+                    showPage(WALLET);
                 }
                 return true;
             }
-            case R.id.action_my_address: {
-//                viewModel.showMyAddress(this);
-//                viewModel.showSettings(this);
+            case R.id.action_settings: {
                 if (getSelectedNavigationItem() != 2) {
-                    selectNavigationItem(2);
-                    setTitle(getString(R.string.toolbar_header_settings));
-                    viewModel.showNewSettings(this, R.id.frame_layout);
+                    showPage(SETTINGS);
                 }
                 return true;
             }
-            case R.id.action_my_tokens: {
+            case R.id.action_help: {
                 if (getSelectedNavigationItem() != 3) {
-                    selectNavigationItem(3);
-                    setTitle(getString(R.string.toolbar_header_help));
-                    viewModel.showTokens(this);
+                    showPage(HELP);
                 }
                 return true;
             }
@@ -268,12 +274,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         if (RootUtil.isDeviceRooted() && pref.getBoolean("should_show_root_warning", true)) {
             pref.edit().putBoolean("should_show_root_warning", false).apply();
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.root_title)
-                    .setMessage(R.string.root_body)
-                    .setNegativeButton(R.string.ok, (dialog, which) -> {
-                    })
-                    .show();
+            AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+            dialog.setTitle(R.string.root_title);
+            dialog.setMessage(R.string.root_body);
+            dialog.setButtonText(R.string.ok);
+            dialog.setButtonListener(v -> dialog.dismiss());
+            dialog.show();
         }
     }
 
@@ -294,5 +300,66 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onDepositClick(View view, Uri uri) {
         viewModel.openDeposit(view.getContext(), uri);
+    }
+
+    private void showPage(int page) {
+        switch (page) {
+            case MARKETPLACE: {
+                viewPager.setCurrentItem(MARKETPLACE);
+                setTitle(getString(R.string.toolbar_header_marketplace));
+                selectNavigationItem(MARKETPLACE);
+                break;
+            }
+            case WALLET: {
+                viewPager.setCurrentItem(WALLET);
+                setTitle(getString(R.string.toolbar_header_wallet));
+                selectNavigationItem(WALLET);
+                break;
+            }
+            case SETTINGS: {
+                viewPager.setCurrentItem(SETTINGS);
+                setTitle(getString(R.string.toolbar_header_settings));
+                selectNavigationItem(SETTINGS);
+                break;
+            }
+            case HELP: {
+                viewPager.setCurrentItem(HELP);
+                setTitle(getString(R.string.toolbar_header_help));
+                selectNavigationItem(HELP);
+                break;
+            }
+            default:
+                viewPager.setCurrentItem(WALLET);
+                setTitle(getString(R.string.toolbar_header_wallet));
+                selectNavigationItem(WALLET);
+                break;
+        }
+    }
+
+    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case MARKETPLACE:
+                    return new MarketplaceFragment();
+                case WALLET:
+                    return new WalletFragment();
+                case SETTINGS:
+                    return new NewSettingsFragment();
+                case HELP:
+                    return new HelpFragment();
+                default:
+                    return new WalletFragment();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 4;
+        }
     }
 }

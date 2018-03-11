@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
@@ -65,7 +66,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         TabUtils.changeTabsFont(getContext(), tabLayout);
         TabUtils.reflex(tabLayout);
 
-        adapter = new TokensAdapter(this::onTokenClick);
+        adapter = new TokensAdapter(getContext(), this::onTokenClick);
+        adapter.setHasStableIds(true);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);

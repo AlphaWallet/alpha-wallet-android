@@ -145,4 +145,7 @@
     <string name="confirm_sale_title">Confirm Sale?</string>
     <string name="confirm_sale_small_text">You will receive:</string>
     <string name="dialog_cancel_back">Cancel and Go Back</string>
+    <string name="seekbar_max">Max</string>
+    <string name="seekbar_min">Min</string>
+    <string name="seekbar_label_default_value">$0.00</string>
 </resources>

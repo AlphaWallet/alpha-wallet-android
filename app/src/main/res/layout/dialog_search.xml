@@ -140,13 +140,66 @@
 
     </LinearLayout>
 
-    <SeekBar
-        android:thumbTint="@color/colorPrimaryDark"
-        android:tickMarkTint="@color/colorPrimaryDark"
+    <TextView
+        android:id="@+id/seek_bar_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/seekbar_label_default_value"
+        android:textAllCaps="true"
+        android:textColor="@color/light_gray"
+        android:textSize="10sp" />
+
+    <android.support.v7.widget.AppCompatSeekBar
         android:id="@+id/seek_bar_price"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:progressTint="@color/colorPrimaryDark"
+        android:thumbTint="@color/colorPrimaryDark"
+        android:tickMarkTint="@color/colorPrimaryDark" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/font_regular"
+            android:text="@string/seekbar_min"
+            android:textAllCaps="true"
+            android:textColor="@color/light_gray"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center_horizontal"
+            android:text="@string/filter_price_label"
+            android:textAllCaps="true"
+            android:textColor="@color/light_gray"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/font_regular"
+            android:gravity="right"
+            android:text="@string/seekbar_max"
+            android:textAllCaps="true"
+            android:textColor="@color/light_gray"
+            android:textSize="10sp" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_filter"

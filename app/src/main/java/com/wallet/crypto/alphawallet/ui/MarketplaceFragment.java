@@ -40,8 +40,8 @@ public class MarketplaceFragment extends Fragment implements View.OnClickListene
         adapter = new MarketplaceEventAdapter(this::onMarketplaceEventClick);
 
         /* Placeholder only */
-        MarketplaceEvent testEvent1 = new MarketplaceEvent("My Listings");
-        MarketplaceEvent testEvent2 = new MarketplaceEvent("FIFA 2018");
+        MarketplaceEvent testEvent1 = new MarketplaceEvent(getString(R.string.my_listings));
+        MarketplaceEvent testEvent2 = new MarketplaceEvent(getString(R.string.fifa_2018));
         MarketplaceEvent[] testEvents = { testEvent1, testEvent2 };
         adapter.setMarketplaceEvents(testEvents);
 

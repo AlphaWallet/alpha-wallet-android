@@ -78,6 +78,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
+        viewModel.burnNotice().observe(this, this::onBurned);
 
         ticketBurnNotice();
         TextView tv = findViewById(R.id.textAddIDs);
@@ -162,6 +163,15 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         TextView tv = findViewById(R.id.textAddIDs);
         tv.setVisibility(View.VISIBLE);
+    }
+
+    private void onBurned(Boolean burn)
+    {
+        //TODO: This method is called once the ticket has been redeemed. Variable 'burn' will only ever be 'true'.
+        System.out.println("Redeemed: " + (burn ? "Yes" : "No"));
+        ticketBurnNotice();
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText("Tickets Redeemed");
     }
 
     private void onSignatureChanged(SignaturePair sigPair) {

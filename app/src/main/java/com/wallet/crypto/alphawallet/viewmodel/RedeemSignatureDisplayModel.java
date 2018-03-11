@@ -57,6 +57,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
 
     private final MutableLiveData<String> selection = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
 
     private SubscribeWrapper wrapper;
     private TicketRange ticketRange;
@@ -101,6 +102,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     public LiveData<String> selection() {
         return selection;
     }
+    public LiveData<Boolean> burnNotice() {
+        return burnNotice;
+    }
 
     @Override
     protected void onCleared() {
@@ -117,6 +121,58 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             wrapper.wrapperInteraction.sendEmptyMessage(1);
             wrapper = null;
         }
+    }
+
+    public void fetchTokenBalance() {
+        progress.postValue(true);
+        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchTokensInteract
+                        .fetch(defaultWallet.getValue())
+                        .subscribe(this::onTokens, t -> {}))
+                .subscribe(l -> {}, t -> {});
+    }
+
+    /**
+     * This is a fallback check - it polls balance. If we somehow miss the memory pool pickup
+     * then this method will pick up when the transaction is written to blockchain
+     */
+    private void onTokens(Token[] tokens) {
+        this.tokens.setValue(tokens);
+
+        for (Token t : tokens) {
+            if (t instanceof Ticket && t.tokenInfo.address.equals(address))
+            {
+                boolean allBurned = true;
+                //See if our tickets got burned
+                for (Integer index : this.ticketIndicies)
+                {
+                    if (((Ticket) t).balanceArray.get(index) > 0)
+                    {
+                        allBurned = false;
+                        break;
+                    }
+                }
+
+                if (allBurned)
+                {
+                    ticketsBurned();
+                }
+                break;
+            }
+        }
+    }
+
+    private void ticketsBurned()
+    {
+        if (cycleSignatureDisposable != null) {
+            cycleSignatureDisposable.dispose();
+        }
+        if (getBalanceDisposable != null) {
+            getBalanceDisposable.dispose();
+        }
+
+        ticketIndicies.clear();
+        burnNotice.postValue(true);
     }
 
     public void prepare(String address, Ticket ticket, TicketRange ticketRange) {
@@ -168,7 +224,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         startCycleSignature();
-        //fetchTransactions();
+        fetchTokenBalance();
         startMemoryPoolListener();
 
         //Push initial QR
@@ -189,7 +245,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         }
         //now write to burn indicies
         t.addToBurnList(burnList);
-
         updateBurnInfo(t.getBurnList());
     }
 
@@ -205,7 +260,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         //display 'burn complete'
         if (ticketIndicies.size() == 0)
         {
-            signature.postValue(null);
+            ticketsBurned();
         }
         else {
             signatureGenerateInteract

@@ -44,21 +44,44 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="import" />
+                android:layout_marginBottom="10dp"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:text="Importing tickets" />
 
             <include layout="@layout/item_ticket" />
+            <include layout="@layout/item_ticket_overlay" />
+            <include layout="@layout/item_ticket_invalid" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
 
             <Button
-                android:id="@+id/advanced_options"
+                android:id="@+id/import_ticket"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/big_margin"
-                android:text="@string/import_ticket" />
+                android:layout_weight="0.5"
+                android:text="@string/action_import" />
+
+            <Button
+                android:id="@+id/cancel_button"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/big_margin"
+                android:layout_weight="0.5"
+                android:text="@string/action_cancel" />
         </LinearLayout>
 
     </FrameLayout>
-
 
 </RelativeLayout>

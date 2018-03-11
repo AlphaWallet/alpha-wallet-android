@@ -16,6 +16,7 @@ public class ImportTokenRouter
 {
     public void open(Context context, String importTxt) {
         Intent intent = new Intent(context, ImportTokenActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(IMPORT_STRING, importTxt);
         context.startActivity(intent);
     }

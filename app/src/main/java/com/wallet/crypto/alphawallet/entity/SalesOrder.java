@@ -67,10 +67,10 @@ public class SalesOrder implements Parcelable
      * 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
      *
      * Base64 message: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==
-     * bytes32: price Wei
-     * bytes32: expiry
-     * bytes20: contract address
-     * Uint16[]: ticket indices
+     *     - bytes32: price Wei
+     *     - bytes32: expiry
+     *     - bytes20: contract address
+     *     - Uint16[]: ticket indices
      *
      * byte: 1b
      * bytes32: 2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105

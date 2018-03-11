@@ -100,6 +100,4 @@ public class WalletRepository implements WalletRepositoryType {
 					.getBalance()))
 				.subscribeOn(Schedulers.io());
 	}
-
-
 }

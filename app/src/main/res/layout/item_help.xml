@@ -18,7 +18,7 @@
         <RelativeLayout
             android:id="@+id/layout_question"
             android:layout_width="wrap_content"
-            android:layout_height="56dp"
+            android:layout_height="60dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp">
 

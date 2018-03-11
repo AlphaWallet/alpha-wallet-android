@@ -16,9 +16,14 @@ import com.wallet.crypto.alphawallet.service.ImportTokenService;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
 
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
+import java.security.Signature;
+
+import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
  * Created by James on 9/03/2018.
@@ -54,6 +59,28 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void onWallet(Wallet wallet) {
         progress.postValue(false);
         this.wallet.postValue(wallet);
+        SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
+        //now ecrecover the owner
+
+        byte[] message = order.message;
+        Sign.SignatureData sigData;
+        String recoveredAddress = "";
+        try {
+            sigData = sigFromByteArray(order.signature);
+            BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
+            recoveredAddress = Keys.getAddress(recoveredKey);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //now get balance at recovered address
+        //1. add required interact
+        //2. after we get balance, check these tokens are still at that address, get the ID's and update the import token
+        //3. allow import to continue.
+        System.out.println(recoveredAddress);
+
     }
 
     public void onError(Throwable throwable) {
@@ -79,19 +106,11 @@ public class ImportTokenViewModel extends BaseViewModel  {
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
+
+
     private void onCreateTransaction(String transaction)
     {
         progress.postValue(false);
         newTransaction.postValue(transaction);
     }
 }
-
-// 0x696ecc55
-// 0000000000000000000000000000000000000000000000000000000000000000
-// 00000000000000000000000000000000000000000000000000000000000000a0
-// 000000000000000000000000000000000000000000000000000000000000001c
-// a85af7810c4dee72477b8cffc78589bffd59310c81e904a0248be2e6c2ddc09d
-// 1b68176f496a041a2dc2d37b654e2ba57e232d9bea4a871a14752ea545a1f2a1
-// 0000000000000000000000000000000000000000000000000000000000000002
-// 00000000000000000000000000000000000000000000000000000000000000a4
-// 00000000000000000000000000000000000000000000000000000000000000a5

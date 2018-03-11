@@ -54,6 +54,7 @@ public class SplashActivity extends BaseActivity {
         // Start home activity
         if (importData != null) {
             new ImportTokenRouter().open(this, importData);
+            finish();
         }
         else if (wallets.length == 0) {
             new ManageWalletsRouter().open(this, true);

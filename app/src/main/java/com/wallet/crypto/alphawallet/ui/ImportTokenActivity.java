@@ -257,6 +257,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             case R.id.cancel_button:
                 //go to main screen
                 new HomeRouter().open(this, true);
+                finish();
                 break;
         }
     }

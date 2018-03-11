@@ -11,6 +11,7 @@
         android:name="com.wallet.crypto.alphawallet.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
+        android:launchMode="singleTask"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"

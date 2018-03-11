@@ -141,4 +141,5 @@
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Any \'rooted\' app can access aWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
     <string name="toolbar_add_custom_token">Add Custom Token</string>
+    <string name="contact_us">Still need help? Contact us</string>
 </resources>

@@ -86,6 +86,22 @@
         <item>1 month</item>
         <item>1 year</item>
     </string-array>
+    <string-array name="filter_match">
+        <item>Any</item>
+        <item>1-64</item>
+    </string-array>
+    <string-array name="filter_class">
+        <item>Any</item>
+        <item>VIP</item>
+    </string-array>
+    <string-array name="filter_seats">
+        <item>Any</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="filter_search_date">
+        <item>DD/MM/YY</item>
+    </string-array>
     <string name="eth">ETH</string>
     <string name="recommended_market_price">Recommended Market Price per Ticket</string>
     <string name="quantity_of_tickets">Quantity of Tickets</string>
@@ -107,4 +123,12 @@
     <string name="onboarding_1">Hold all your Crypto assets in one place</string>
     <string name="onboarding_2">Powered by blockchain technology, smart tickets, fraud free</string>
     <string name="onboarding_3">Buy, sell and transfer your favourite tokens</string>
+
+    <string name="help_question1">What is ETH/Ethereum?</string>
+    <string name="help_question2">Why does aWallet use Ethereum?</string>
+    <string name="help_question3">How do I get my money?</string>
+    <string name="help_question4">What is a Seed Phrase?</string>
+    <string name="help_question5">How do I transfer ETH int my wallet?</string>
+
+    <string name="help_answer1">Lorem ipsum dolor sit amet</string>
 </resources>

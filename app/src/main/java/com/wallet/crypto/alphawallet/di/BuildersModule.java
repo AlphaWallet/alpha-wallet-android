@@ -5,6 +5,7 @@ import com.wallet.crypto.alphawallet.ui.AssetDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
+import com.wallet.crypto.alphawallet.ui.HelpFragment;
 import com.wallet.crypto.alphawallet.ui.HomeActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
 import com.wallet.crypto.alphawallet.ui.MarketplaceFragment;
@@ -134,4 +135,7 @@ public abstract class BuildersModule {
 	@ContributesAndroidInjector(modules = HomeModule.class)
 	abstract HomeActivity bindHomeActivity();
 
+	@FragmentScope
+	@ContributesAndroidInjector(modules = HelpModule.class)
+	abstract HelpFragment bindHelpFragment();
 }

@@ -3,6 +3,7 @@ package com.wallet.crypto.alphawallet.ui.widget.adapter;
 import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -15,14 +16,18 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
-import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
-    Context context;
+    public static final int FILTER_ALL = 0;
+    public static final int FILTER_CURRENCY = 1;
+    public static final int FILTER_ASSETS = 2;
+
+    private int filterType;
+    private Context context;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -119,8 +124,19 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.beginBatchedUpdates();
         items.clear();
         items.add(total);
+
         for (int i = 0; i < tokens.length; i++) {
-            items.add(new TokenSortedItem(tokens[i], 10 + i));
+            if (filterType == FILTER_CURRENCY) {
+                if (tokens[i].isCurrency()) {
+                    items.add(new TokenSortedItem(tokens[i], 10 + i));
+                }
+            } else if (filterType == FILTER_ASSETS) {
+                if (!tokens[i].isCurrency()) {
+                    items.add(new TokenSortedItem(tokens[i], 10 + i));
+                }
+            } else {
+                items.add(new TokenSortedItem(tokens[i], 10 + i));
+            }
         }
         items.endBatchedUpdates();
     }
@@ -128,6 +144,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void setTotal(BigDecimal totalInCurrency) {
         total = new TotalBalanceSortedItem(totalInCurrency);
         items.add(total);
+    }
+
+    public void setFilterType(int filterType) {
+        this.filterType = filterType;
     }
 
     public void clear() {

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -58,14 +59,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
-
-        TabUtils.changeTabsFont(getContext(), tabLayout);
-        TabUtils.reflex(tabLayout);
-
         adapter = new TokensAdapter(getContext(), this::onTokenClick);
         adapter.setHasStableIds(true);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
@@ -97,7 +90,54 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
+        initTabLayout(view);
+
         return view;
+    }
+
+    private void initTabLayout(View view) {
+        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch(tab.getPosition()) {
+                    case 0: {
+                        adapter.setFilterType(TokensAdapter.FILTER_ALL);
+                        viewModel.fetchTokens();
+                        break;
+                    }
+                    case 1: {
+                        adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
+                        viewModel.fetchTokens();
+                        break;
+                    }
+                    case 2: {
+                        adapter.setFilterType(TokensAdapter.FILTER_ASSETS);
+                        viewModel.fetchTokens();
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        TabUtils.changeTabsFont(getContext(), tabLayout);
+        TabUtils.reflex(tabLayout);
     }
 
     private void onTotal(BigDecimal totalInCurrency) {

@@ -26,6 +26,7 @@ import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.util.Locale;
@@ -172,6 +173,15 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         ticketBurnNotice();
         TextView tv = findViewById(R.id.textAddIDs);
         tv.setText("Tickets Redeemed");
+
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.ticket_redeemed);
+        dialog.setIcon(AWalletAlertDialog.SUCCESS);
+        dialog.setOnDismissListener(v -> {
+            viewModel.showAssets(this, ticket, true);
+            this.finish();
+        });
+        dialog.show();
     }
 
     private void onSignatureChanged(SignaturePair sigPair) {

@@ -19,4 +19,13 @@ public class AssetDisplayRouter {
         intent.putExtra(TICKET, ticket);
         context.startActivity(intent);
     }
+
+    public void open(Context context, Token ticket, boolean isClearStack) {
+        Intent intent = new Intent(context, AssetDisplayActivity.class);
+        if (isClearStack) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        }
+        intent.putExtra(TICKET, ticket);
+        context.startActivity(intent);
+    }
 }

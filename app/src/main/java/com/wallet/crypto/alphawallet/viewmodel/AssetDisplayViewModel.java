@@ -13,6 +13,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
@@ -40,6 +41,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
+    private final HomeRouter homeRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -57,7 +59,8 @@ public class AssetDisplayViewModel extends BaseViewModel {
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
-            SellTicketRouter sellTicketRouter) {
+            SellTicketRouter sellTicketRouter,
+            HomeRouter homeRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -66,6 +69,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
         this.ticketTransferRouter = ticketTransferRouter;
         this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
+        this.homeRouter = homeRouter;
     }
 
     @Override
@@ -146,5 +150,9 @@ public class AssetDisplayViewModel extends BaseViewModel {
 
     public void showSalesOrder(Context context, Ticket ticket, TicketRange range) {
         salesOrderRouter.openRange(context, ticket, range);
+    }
+
+    public void showHome(Context context, boolean isClearStack) {
+        homeRouter.open(context, isClearStack);
     }
 }

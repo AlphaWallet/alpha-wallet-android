@@ -11,6 +11,7 @@ import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
 
 import dagger.Module;
@@ -29,9 +30,10 @@ public class RedeemSignatureDisplayModule {
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
-            MemPoolInteract memPoolInteract) {
+            MemPoolInteract memPoolInteract,
+            AssetDisplayRouter assetDisplayRouter) {
         return new RedeemSignatureDisplayModelFactory(
-                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract);
+                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter);
     }
 
     @Provides
@@ -63,5 +65,10 @@ public class RedeemSignatureDisplayModule {
     @Provides
     MemPoolInteract provideMemPoolInteract(TokenRepositoryType tokenRepository) {
         return new MemPoolInteract(tokenRepository);
+    }
+
+    @Provides
+    AssetDisplayRouter provideAssetDisplayRouter() {
+        return new AssetDisplayRouter();
     }
 }

@@ -2,6 +2,7 @@ package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.wallet.crypto.alphawallet.entity.MessagePair;
@@ -19,6 +20,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.MemPoolInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 
@@ -48,6 +50,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memoryPoolInteract;
+    private final AssetDisplayRouter assetDisplayRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -81,13 +84,15 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
-            MemPoolInteract memoryPoolInteract) {
+            MemPoolInteract memoryPoolInteract,
+            AssetDisplayRouter assetDisplayRouter) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.memoryPoolInteract = memoryPoolInteract;
+        this.assetDisplayRouter = assetDisplayRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -311,5 +316,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         byte[] input = methodSignature.getBytes();
         byte[] hash = Hash.sha3(input);
         return Numeric.toHexString(hash).substring(0, 10);
+    }
+
+    public void showAssets(Context context, Ticket t, boolean isClearStack) {
+        assetDisplayRouter.open(context, t, isClearStack);
     }
 }

@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.FilterDialog;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
+import com.wallet.crypto.alphawallet.widget.SearchDialog;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
@@ -72,6 +74,16 @@ public class BrowseMarketActivity extends BaseActivity
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.updateMarket().observe(this, this::onMarketUpdate);
+
+        setupSearchBar();
+    }
+
+    private void setupSearchBar() {
+        SearchDialog dialog = new SearchDialog(this);
+        RelativeLayout searchLayout = findViewById(R.id.search_container);
+        searchLayout.setOnClickListener(v -> {
+            dialog.show();
+        });
     }
 
     private void setupSalesOrder()

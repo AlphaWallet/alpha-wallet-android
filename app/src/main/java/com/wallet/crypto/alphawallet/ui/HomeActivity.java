@@ -124,10 +124,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.transactions().observe(this, this::onTransactions);
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
-
-        showPage(WALLET);
-
+        
         setBottomMenu(R.menu.menu_main_network);
+        showPage(WALLET);
     }
 
     private void onTransactionClick(View view, Transaction transaction) {

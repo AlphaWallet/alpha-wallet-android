@@ -31,6 +31,9 @@ import com.wallet.crypto.alphawallet.viewmodel.ImportTokenViewModelFactory;
 import com.wallet.crypto.alphawallet.widget.DepositView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -55,6 +58,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private String importString;
     private Dialog dialog;
 
+    private TextView priceETH;
+    private TextView priceUSD;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -68,6 +74,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         importString = getIntent().getStringExtra(IMPORT_STRING);
         systemView = findViewById(R.id.system_view);
+        priceETH = findViewById(R.id.textImportPrice);
+        priceUSD = findViewById(R.id.textImportPriceUSD);
+        priceETH.setVisibility(View.GONE);
+        priceUSD.setVisibility(View.GONE);
 
         setTicket(false, true, false);
 
@@ -146,6 +156,25 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         //now update the import token
         ticketRange = importTokens;
         Ticket ticket = viewModel.getImportToken();
+        SalesOrder order = viewModel.getSalesOrder();
+
+        String ethPrice = getEthString(order.price) + " ETH";
+        String priceUsd = "$" + getUsdString(viewModel.getUSDPrice());
+
+        if (order.price == 0) {
+            priceETH.setText("Free import");
+            priceETH.setVisibility(View.VISIBLE);
+            priceUSD.setVisibility(View.GONE);
+        }
+        else
+        {
+            priceETH.setText(ethPrice);
+            priceUSD.setText(priceUsd);
+            priceETH.setVisibility(View.VISIBLE);
+            priceUSD.setVisibility(View.VISIBLE);
+            Button importTickets = findViewById(R.id.import_ticket);
+            importTickets.setText("PURCHASE");
+        }
 
         Button importTickets = findViewById(R.id.import_ticket);
         importTickets.setVisibility(View.VISIBLE);
@@ -214,6 +243,23 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
+    private void confirmPurchaseDialog() {
+        hideDialog();
+        SalesOrder order = viewModel.getSalesOrder();
+        String purchsse = "Confirm purchase of " + order.ticketCount + " tickets at " + getEthString(order.price) + " ETH total";
+        dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.confirm_purchase)
+                .setMessage(purchsse)
+                .setPositiveButton(R.string.action_purchase, (dialog1, id) -> {
+                    viewModel.performImport();
+                })
+                .setNegativeButton(R.string.cancel, (dialog1, id) -> {
+
+                })
+                .create();
+        dialog.show();
+    }
+
     private void onTransaction(String hash) {
         hideDialog();
         dialog = new AlertDialog.Builder(this)
@@ -250,8 +296,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         switch (v.getId()) {
             case R.id.import_ticket:
                 if (ticketRange != null) {
-                    onProgress(true);
-                    viewModel.performImport();
+                    if (viewModel.getSalesOrder().price > 0.0)
+                    {
+                        confirmPurchaseDialog();
+                    }
+                    else {
+                        onProgress(true);
+                        viewModel.performImport();
+                    }
                 }
                 break;
             case R.id.cancel_button:
@@ -260,5 +312,21 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 finish();
                 break;
         }
+    }
+
+    public static String getUsdString(double usdPrice)
+    {
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.CEILING);
+        String formatted = df.format(usdPrice);
+        return formatted;
+    }
+
+    public static String getEthString(double ethPrice)
+    {
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setRoundingMode(RoundingMode.CEILING);
+        String formatted = df.format(ethPrice);
+        return formatted;
     }
 }

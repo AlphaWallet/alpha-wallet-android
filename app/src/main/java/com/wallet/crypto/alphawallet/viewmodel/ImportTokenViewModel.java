@@ -20,10 +20,12 @@ import com.wallet.crypto.alphawallet.service.ImportTokenService;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import com.wallet.crypto.alphawallet.util.BalanceUtils;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
+import org.web3j.utils.Convert;
 
 import java.math.BigInteger;
 import java.security.Signature;
@@ -57,6 +59,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private String ownerAddress;
     private Ticket importToken;
     private List<Integer> availableBalance = new ArrayList<>();
+    private double priceUsd;
+    private double ethToUsd;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -74,6 +78,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     }
     public LiveData<Integer> invalidRange() { return invalidRange; }
     public LiveData<String> newTransaction() { return newTransaction; }
+    public double getUSDPrice() { return priceUsd; };
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
@@ -94,6 +99,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         return wallet;
     }
     public Ticket getImportToken() { return importToken; }
+    public SalesOrder getSalesOrder() { return importOrder; }
 
     private void onWallet(Wallet wallet) {
         this.wallet.setValue(wallet);
@@ -132,6 +138,11 @@ public class ImportTokenViewModel extends BaseViewModel  {
         //check the required balance
         for (Token t : tokens)
         {
+            if (t.ticker != null)
+            {
+                //get the current exchange rate
+                ethToUsd = Double.valueOf(t.ticker.price);
+            }
             if (t.addressMatches(importOrder.contractAddress) && t instanceof Ticket)
             {
                 importToken = (Ticket)t;
@@ -144,6 +155,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void updateToken()
     {
         List<Integer> newBalance = new ArrayList<>();
+        //calculate USD price of tickets
+        priceUsd = importOrder.price * ethToUsd;
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {
@@ -192,6 +205,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
+    //TODO: Confirm purchase if required
     public void performImport() {
         SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
         //ok let's try to drive this guy through

@@ -238,4 +238,5 @@
     <string name="import_ticket">Import Tickets</string>
     <string name="title_import_token">Import Tickets</string>
     <string name="action_cancel">Cancel</string>
+    <string name="confirm_purchase">Confirm Purchase</string>
 </resources>

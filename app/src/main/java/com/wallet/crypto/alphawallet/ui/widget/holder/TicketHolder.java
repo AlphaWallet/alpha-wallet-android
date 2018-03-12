@@ -79,7 +79,7 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
                     ticketRedeemed.setVisibility(View.GONE);
                 }
 
-                ticketLayout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+//                ticketLayout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
                 ticketLayout.setOnClickListener(v -> {
                     if (ticketDetailsLayout.getVisibility() == View.VISIBLE) {
                         ticketDetailsLayout.setVisibility(View.GONE);

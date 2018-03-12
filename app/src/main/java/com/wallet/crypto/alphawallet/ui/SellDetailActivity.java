@@ -118,9 +118,15 @@ public class SellDetailActivity extends BaseActivity
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                int quantity = Integer.parseInt(textQuantity.getText().toString());
-                double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                try {
+                    int quantity = Integer.parseInt(textQuantity.getText().toString());
+                    double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                    totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                }
+                catch (NumberFormatException e)
+                {
+                    //silent fail, just don't update
+                }
             }
 
             @Override
@@ -135,10 +141,7 @@ public class SellDetailActivity extends BaseActivity
             if ((quantity+1) <= adapter.getTicketRangeCount()) {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
-                if (!sellPrice.getText().toString().isEmpty()) {
-                    double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
-                    totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
-                }
+                updateSellPrice(quantity);
             }
         });
 
@@ -148,10 +151,7 @@ public class SellDetailActivity extends BaseActivity
             if ((quantity-1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                if (!sellPrice.getText().toString().isEmpty()) {
-                    double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
-                    totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
-                }
+                updateSellPrice(quantity);
             }
         });
 
@@ -170,6 +170,20 @@ public class SellDetailActivity extends BaseActivity
                 dialog.show();
             }
         });
+    }
+
+    private void updateSellPrice(int quantity)
+    {
+        if (!sellPrice.getText().toString().isEmpty()) {
+            try {
+                double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+            }
+            catch (NumberFormatException e)
+            {
+                //silent fail, just don't update
+            }
+        }
     }
 
     private void sellTicketFinal()

@@ -20,5 +20,4 @@ public class EthereumReadWriteTest {
         indices = in.readUint16Indices(2);
         Assert.assertEquals(0xE0F4, indices[0]);
     }
-
 }

@@ -4,12 +4,15 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark">
 
+    <include layout="@layout/layout_simple_toolbar" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_help"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/search_container"
         android:layout_marginBottom="?actionBarSize"
+        android:layout_marginTop="?actionBarSize"
         android:divider="@android:color/transparent"
         android:dividerHeight="10.0sp"
         android:paddingLeft="10dp"

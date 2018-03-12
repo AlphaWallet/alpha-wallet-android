@@ -45,10 +45,10 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
-    private static final int MARKETPLACE = 0;
-    private static final int WALLET = 1;
-    private static final int SETTINGS = 2;
-    private static final int HELP = 3;
+    private static final int TRANSACTIONS = 0;
+    private static final int MARKETPLACE = 1;
+    private static final int WALLET = 2;
+    private static final int SETTINGS = 3;
 
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -124,7 +124,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.transactions().observe(this, this::onTransactions);
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
-        
+
         setBottomMenu(R.menu.menu_main_network);
         showPage(WALLET);
     }
@@ -197,31 +197,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_marketplace: {
+            case R.id.action_transactions: {
                 if (getSelectedNavigationItem() != 0) {
+                    showPage(TRANSACTIONS);
+                }
+                return true;
+            }
+            case R.id.action_marketplace: {
+                if (getSelectedNavigationItem() != 1) {
                     showPage(MARKETPLACE);
                 }
                 return true;
             }
             case R.id.action_wallet: {
-                if (getSelectedNavigationItem() != 1) {
+                if (getSelectedNavigationItem() != 2) {
                     showPage(WALLET);
                 }
                 return true;
             }
             case R.id.action_settings: {
-                if (getSelectedNavigationItem() != 2) {
+                if (getSelectedNavigationItem() != 3) {
                     showPage(SETTINGS);
                 }
                 return true;
             }
-            case R.id.action_help: {
-                if (getSelectedNavigationItem() != 3) {
-                    showPage(HELP);
-                }
-                return true;
-            }
-
         }
         return false;
     }
@@ -321,10 +320,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 selectNavigationItem(SETTINGS);
                 break;
             }
-            case HELP: {
-                viewPager.setCurrentItem(HELP);
-                setTitle(getString(R.string.toolbar_header_help));
-                selectNavigationItem(HELP);
+            case TRANSACTIONS: {
+                viewPager.setCurrentItem(TRANSACTIONS);
+                setTitle(getString(R.string.toolbar_header_transactions));
+                selectNavigationItem(TRANSACTIONS);
                 break;
             }
             default:
@@ -349,8 +348,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     return new WalletFragment();
                 case SETTINGS:
                     return new NewSettingsFragment();
-                case HELP:
-                    return new HelpFragment();
+                case TRANSACTIONS:
+                    return new TransactionsFragment();
                 default:
                     return new WalletFragment();
             }

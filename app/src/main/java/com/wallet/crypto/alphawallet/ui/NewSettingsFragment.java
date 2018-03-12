@@ -39,9 +39,13 @@ public class NewSettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
-
         layoutWalletAddress.setOnClickListener(v -> {
             viewModel.showMyAddress(getContext());
+        });
+
+        LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
+        layoutHelp.setOnClickListener(v -> {
+            viewModel.showHelp(getContext());
         });
 
         return view;

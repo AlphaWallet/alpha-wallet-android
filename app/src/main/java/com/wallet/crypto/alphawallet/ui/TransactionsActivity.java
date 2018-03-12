@@ -61,10 +61,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         setContentView(R.layout.activity_transactions);
 
         toolbar();
-//        setTitle(getString(R.string.unknown_balance_with_symbol));
-//        setSubtitle("");
-
-//        dissableDisplayHomeAsUp();
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
@@ -209,7 +205,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 }
                 return true;
             }
-            case R.id.action_help: {
+            case R.id.action_transactions: {
                 if (getSelectedNavigationItem() != 3) {
                     selectNavigationItem(3);
                     setTitle(getString(R.string.toolbar_header_help));

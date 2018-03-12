@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.router.HelpRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 
 public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
@@ -15,16 +16,19 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
+    private final HelpRouter helpRouter;
 
     public NewSettingsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            HelpRouter helpRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
+        this.helpRouter = helpRouter;
     }
 
     @NonNull
@@ -34,7 +38,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
-                myAddressRouter
+                myAddressRouter,
+                helpRouter
         );
     }
 }

@@ -8,6 +8,7 @@ import android.util.Base64;
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
+import com.wallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
@@ -27,6 +28,7 @@ import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.Signature;
 import java.util.ArrayList;
@@ -103,17 +105,20 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private void onWallet(Wallet wallet) {
         this.wallet.setValue(wallet);
-        importOrder = SalesOrder.parseUniversalLink(univeralImportLink);
-
-        //ecrecover the owner
-        byte[] message = importOrder.message;
-        Sign.SignatureData sigData;
         try {
+            importOrder = SalesOrder.parseUniversalLink(univeralImportLink);
+            //ecrecover the owner
+            byte[] message = importOrder.message;
+            Sign.SignatureData sigData;
             sigData = sigFromByteArray(importOrder.signature);
             BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
             ownerAddress = "0x" + Keys.getAddress(recoveredKey);
             //start looking at the ticket details
             fetchBalance();
+        }
+        catch (SalesOrderMalformed e)
+        {
+            // TODO: tell the user that the link is broken
         }
         catch (Exception e)
         {
@@ -207,15 +212,21 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     //TODO: Confirm purchase if required
     public void performImport() {
-        SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
-        //ok let's try to drive this guy through
-        final byte[] tradeData = SalesOrder.generateReverseTradeData(order);
-        System.out.println("Approx value of trade: " + order.price);
-        //now push the transaction
-        disposable = createTransactionInteract
+        try {
+            SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
+            //ok let's try to drive this guy through
+            final byte[] tradeData = SalesOrder.generateReverseTradeData(order);
+            System.out.println("Approx value of trade: " + order.price);
+            //now push the transaction
+            disposable = createTransactionInteract
                 .create(wallet.getValue(), order.contractAddress, order.priceWei,
                         Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
                 .subscribe(this::onCreateTransaction, this::onError);
+        }
+        catch (SalesOrderMalformed e)
+        {
+            e.printStackTrace(); // TODO: add user interface handling of the exception.
+        }
     }
 
     private void onCreateTransaction(String transaction)

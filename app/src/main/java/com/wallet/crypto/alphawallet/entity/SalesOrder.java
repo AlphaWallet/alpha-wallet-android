@@ -41,6 +41,7 @@ public class SalesOrder implements Parcelable
     public final byte[] message;
 
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
+            throws SalesOrderMalformed
     {
         this.message = Base64.decode(msg, Base64.DEFAULT);
         this.price = price;
@@ -48,14 +49,19 @@ public class SalesOrder implements Parcelable
         this.ticketStart = ticketStart;
         this.ticketCount = ticketCount;
         ByteArrayInputStream bas = new ByteArrayInputStream(message);
-        EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-        priceWei = ds.readBI();
-        ds.readBI();
-        ds.readAddress();
-        this.tickets = ds.readShortIndices(ticketCount);
-        this.contractAddress = contractAddress;
-        this.signature = Base64.decode(sig, Base64.DEFAULT);
-        ds.close();
+        try {
+            EthereumReadBuffer ds = new EthereumReadBuffer(bas);
+            priceWei = ds.readBI();
+            ds.readBI();
+            ds.readAddress();
+            this.tickets = ds.readShortIndices(ticketCount);
+            this.contractAddress = contractAddress;
+            this.signature = Base64.decode(sig, Base64.DEFAULT);
+            ds.close();
+        }
+        catch(IOException e) {
+            throw new SalesOrderMalformed();
+        }
     }
 
     /**
@@ -77,7 +83,7 @@ public class SalesOrder implements Parcelable
      * bytes32: 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
      *
      */
-    public SalesOrder(String linkData) {
+    public SalesOrder(String linkData) throws SalesOrderMalformed {
         //separate the args
         String[] linkArgs = linkData.split(";");
         message = Base64.decode(linkArgs[0], Base64.DEFAULT);
@@ -85,15 +91,18 @@ public class SalesOrder implements Parcelable
         byte[] r = hexStringToBytes(linkArgs[2]);
         byte[] s = hexStringToBytes(linkArgs[3]);
 
-        ByteArrayInputStream bas = new ByteArrayInputStream(message);
-        EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-        priceWei = ds.readBI();
-        expiry = ds.readBI().intValue();
-        contractAddress = ds.readAddress();
-        ticketCount = ds.available() / 2;
-        tickets = ds.readShortIndices(ticketCount);
-        ds.close();
-
+        try {
+            ByteArrayInputStream bas = new ByteArrayInputStream(message);
+            EthereumReadBuffer ds = new EthereumReadBuffer(bas);
+            priceWei = ds.readBI();
+            expiry = ds.readBI().intValue();
+            contractAddress = ds.readAddress();
+            ticketCount = ds.available() / 2;
+            tickets = ds.readShortIndices(ticketCount);
+            ds.close();
+        } catch (IOException e) {
+            throw new SalesOrderMalformed();
+        }
         signature = writeSignature(r,s,v);
 
         BigInteger milliWei = Convert.fromWei(priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
@@ -119,7 +128,7 @@ public class SalesOrder implements Parcelable
         return buffer.toByteArray();
     }
 
-    public static SalesOrder parseUniversalLink(String link)
+    public static SalesOrder parseUniversalLink(String link) throws SalesOrderMalformed
     {
         final String importTemplate = "/import?";
         int offset = link.indexOf(importTemplate);

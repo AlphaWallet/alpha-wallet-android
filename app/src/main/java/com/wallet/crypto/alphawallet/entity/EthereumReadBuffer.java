@@ -90,21 +90,6 @@ public class EthereumReadBuffer extends DataInputStream
         return remains;
     }
 
-    public int readInt32()
-    {
-        int value = 0;
-        try
-        {
-            value = readInt();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return value;
-    }
-
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -116,37 +101,22 @@ public class EthereumReadBuffer extends DataInputStream
         return new String(hexChars);
     }
 
-    public int[] readShortIndices(int count)
+    public int[] readShortIndices(int count) throws IOException
     {
         int[] intArray = new int[count];
-        try
+        for (int i = 0; i < count; i++)
         {
-            for (int i = 0; i < count; i++)
-            {
-                int value = readByte() * 0x100;
-                value += (int) (readByte()&0xFF);
-                intArray[i] = value;
-            }
+            int value = readByte() * 0x100;
+            value += (int) (readByte()&0xFF);
+            intArray[i] = value;
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
         return intArray;
     }
 
-    public byte[] readSignature()
+    public byte[] readSignature() throws IOException
     {
         byte[] sig = new byte[65];
-        try
-        {
-            read(sig);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        read(sig);
         return sig;
     }
 }

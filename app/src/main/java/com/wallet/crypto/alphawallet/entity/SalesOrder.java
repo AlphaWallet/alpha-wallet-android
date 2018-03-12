@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
 
-import org.ethereum.geth.BigInt;
 import org.spongycastle.util.encoders.Base64;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
@@ -13,10 +12,8 @@ import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +51,7 @@ public class SalesOrder implements Parcelable
             priceWei = ds.readBI();
             ds.readBI();
             ds.readAddress();
-            this.tickets = ds.readShortIndices(ticketCount);
+            this.tickets = ds.readUint16Indices(ticketCount);
             this.contractAddress = contractAddress;
             this.signature = Base64.decode(sig);
             ds.close();
@@ -98,7 +95,7 @@ public class SalesOrder implements Parcelable
             expiry = ds.readBI().intValue();
             contractAddress = ds.readAddress();
             ticketCount = ds.available() / 2;
-            tickets = ds.readShortIndices(ticketCount);
+            tickets = ds.readUint16Indices(ticketCount);
             ds.close();
         } catch (IOException e) {
             throw new SalesOrderMalformed();

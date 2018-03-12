@@ -101,13 +101,13 @@ public class EthereumReadBuffer extends DataInputStream
         return new String(hexChars);
     }
 
-    public int[] readShortIndices(int count) throws IOException
+    public int[] readUint16Indices(int count) throws IOException
     {
         int[] intArray = new int[count];
         for (int i = 0; i < count; i++)
         {
-            int value = readByte() * 0x100;
-            value += (int) (readByte()&0xFF);
+            int value = byteToUint(readByte()) * 0x100;
+            value += byteToUint(readByte());
             intArray[i] = value;
         }
         return intArray;
@@ -118,5 +118,10 @@ public class EthereumReadBuffer extends DataInputStream
         byte[] sig = new byte[65];
         read(sig);
         return sig;
+    }
+
+    private int byteToUint(byte b)
+    {
+        return (int) b & 0xFF;
     }
 }

@@ -105,7 +105,7 @@
     </string-array>
     <string name="eth">ETH</string>
     <string name="recommended_market_price">建议市场单价</string>
-    <string name="quantity_of_tickets">门票数量s</string>
+    <string name="quantity_of_tickets">门票数量</string>
     <string name="total_cost_label">总价:</string>
     <string name="equivalent_in_usd">相当于USD</string>
     <string name="total_cost">%s ETH</string>

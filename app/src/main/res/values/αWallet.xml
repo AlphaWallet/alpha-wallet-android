@@ -148,4 +148,7 @@
     <string name="seekbar_max">Max</string>
     <string name="seekbar_min">Min</string>
     <string name="seekbar_label_default_value">$0.00</string>
+    <string name="confirm_purchase_title">Confirm Purchase?</string>
+    <string name="confirm_purchase_small_text">Total Cost:</string>
+    <string name="confirm_purchase_button_text">Confirm Purchase</string>
 </resources>

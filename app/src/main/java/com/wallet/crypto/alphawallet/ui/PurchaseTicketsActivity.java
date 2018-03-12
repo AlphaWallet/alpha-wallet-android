@@ -6,33 +6,27 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
-import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
-import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
-
-import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -41,7 +35,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.wallet.crypto.alphawallet.C.Key.TICKET;
 import static com.wallet.crypto.alphawallet.C.Key.WALLET;
 import static com.wallet.crypto.alphawallet.C.MARKET_INSTANCE;
 
@@ -84,15 +77,21 @@ public class PurchaseTicketsActivity extends BaseActivity
         ethPrice = findViewById(R.id.eth_price);
         usdPrice = findViewById(R.id.fiat_price);
 
+        TextView quantityText = findViewById(R.id.text_quantity);
+
         RecyclerView list = findViewById(R.id.listTickets);
         SalesOrder[] singleInstance = new SalesOrder[1];
         singleInstance[0] = ticketRange;
         adapter = new ERC875MarketAdapter(this::onOrderClick, singleInstance);
+
+        double pricePerTicket = ticketRange.price;
+        int ticketCount = ticketRange.ticketCount;
+
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
         //calculate total price
-        double totalEthPrice = round(ticketRange.price * ticketRange.tickets.length, 2);
+        double totalEthPrice = round(ticketRange.price * Integer.parseInt(quantityText.getText().toString()), 2);
         String priceStr = String.valueOf(totalEthPrice) + " ETH";
         ethPrice.setText(priceStr);
 
@@ -104,8 +103,6 @@ public class PurchaseTicketsActivity extends BaseActivity
         toolbar();
 
         setTitle("");
-//        setTitle(getString(R.string.title_market_purchase));
-//        amountInputLayout = findViewById(R.id.symbol_input_layout);
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -128,16 +125,29 @@ public class PurchaseTicketsActivity extends BaseActivity
         viewModel.progress().observe(this, this::onProgress);
 
         purchase.setOnClickListener((View v) -> {
-            purchaseTicketsFinal();
+            if (Integer.parseInt(quantityText.getText().toString()) > 0) {
+                AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+                dialog.setTitle(R.string.confirm_purchase_title);
+                dialog.setSmallText(R.string.confirm_purchase_small_text);
+                dialog.setBigText(ethPrice.getText().toString());
+                dialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
+                dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+                dialog.setPrimaryButtonListener(v1 -> purchaseTicketsFinal());
+                dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+                dialog.show();
+            }
         });
-
-        TextView quantityText = findViewById(R.id.text_quantity);
 
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(quantityText.getText().toString());
-            quantity++;
-            quantityText.setText(String.valueOf(quantity));
+            if (quantity + 1 <= ticketCount) {
+                quantity++;
+                quantityText.setText(String.valueOf(quantity));
+                double total = round(ticketRange.price * quantity, 2);
+                String totalStr = String.valueOf(total) + " ETH";
+                ethPrice.setText(totalStr);
+            }
         });
 
         RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
@@ -146,6 +156,9 @@ public class PurchaseTicketsActivity extends BaseActivity
             if ((quantity-1) >= 0) {
                 quantity--;
                 quantityText.setText(String.valueOf(quantity));
+                double total = round(ticketRange.price * quantity, 2);
+                String totalStr = String.valueOf(total) + " ETH";
+                ethPrice.setText(totalStr);
             }
         });
     }

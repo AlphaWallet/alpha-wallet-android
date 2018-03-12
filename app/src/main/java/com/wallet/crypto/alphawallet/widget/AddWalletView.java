@@ -75,22 +75,14 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 
 	private static class IntroPagerAdapter extends PagerAdapter {
         private int[] titles = new int[] {
-                R.string.intro_title_first_page,
-                R.string.welcome_erc20_label_title,
-                R.string.intro_title_second_page,
-                R.string.intro_title_third_page,
-        };
-        private int[] messages = new int[] {
-                R.string.intro_message_first_page,
-                R.string.welcome_erc20_label_description,
-                R.string.intro_message_second_page,
-                R.string.intro_message_third_page,
+                R.string.onboarding_1,
+                R.string.onboarding_2,
+                R.string.onboarding_3,
         };
         private int[] images = new int[] {
-                R.mipmap.onboarding_lock,
-                R.drawable.onboarding_erc20,
-                R.mipmap.onboarding_open_source,
-                R.mipmap.onboarding_rocket
+                R.drawable.ic_onboarding1,
+                R.drawable.ic_onboarding2,
+                R.drawable.ic_onboarding3
         };
 
         @NonNull
@@ -99,7 +91,6 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
             View view = LayoutInflater.from(container.getContext())
                     .inflate(R.layout.layout_page_intro, container, false);
             ((TextView) view.findViewById(R.id.title)).setText(titles[position]);
-            ((TextView) view.findViewById(R.id.message)).setText(messages[position]);
             ((ImageView) view.findViewById(R.id.img)).setImageResource(images[position]);
             container.addView(view);
             return view;

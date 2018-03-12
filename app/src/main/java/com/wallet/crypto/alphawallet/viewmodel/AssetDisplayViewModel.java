@@ -13,12 +13,12 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
-import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.router.TransferTicketRouter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.util.concurrent.TimeUnit;
@@ -36,10 +36,11 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MyTokensRouter myTokensRouter;
-    private final TicketTransferRouter ticketTransferRouter;
+    private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
+    private final HomeRouter homeRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -53,19 +54,21 @@ public class AssetDisplayViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
-            TicketTransferRouter ticketTransferRouter,
+            TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
-            SellTicketRouter sellTicketRouter) {
+            SellTicketRouter sellTicketRouter,
+            HomeRouter homeRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
-        this.ticketTransferRouter = ticketTransferRouter;
+        this.transferTicketRouter = transferTicketRouter;
         this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
+        this.homeRouter = homeRouter;
     }
 
     @Override
@@ -122,7 +125,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
-        ticketTransferRouter.open(context, ticket);
+        transferTicketRouter.open(context, ticket);
     }
 
     public void sellTicketRouter(Context ctx, Ticket ticket) {
@@ -130,7 +133,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
     }
 
     public void showTransferToken(Context context, Ticket ticket, TicketRange range) {
-        ticketTransferRouter.openRange(context, ticket, range);
+//        transferTicketRouter.openRange(context, ticket, range);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -146,5 +149,9 @@ public class AssetDisplayViewModel extends BaseViewModel {
 
     public void showSalesOrder(Context context, Ticket ticket, TicketRange range) {
         salesOrderRouter.openRange(context, ticket, range);
+    }
+
+    public void showHome(Context context, boolean isClearStack) {
+        homeRouter.open(context, isClearStack);
     }
 }

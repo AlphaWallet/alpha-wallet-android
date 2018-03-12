@@ -12,7 +12,7 @@ import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
-import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 
 public class AddTokenViewModel extends BaseViewModel {
 
@@ -25,7 +25,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final SetupTokensInteract setupTokensInteract;
     private final AddTokenInteract addTokenInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MyTokensRouter myTokensRouter;
+    private final HomeRouter homeRouter;
 
     private final MutableLiveData<Boolean> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> update = new MutableLiveData<>();
@@ -33,12 +33,12 @@ public class AddTokenViewModel extends BaseViewModel {
     AddTokenViewModel(
             AddTokenInteract addTokenInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            MyTokensRouter myTokensRouter,
+            HomeRouter homeRouter,
             SetupTokensInteract setupTokenInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.addTokenInteract = addTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.myTokensRouter = myTokensRouter;
+        this.homeRouter = homeRouter;
         this.setupTokensInteract = setupTokenInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
@@ -96,7 +96,7 @@ public class AddTokenViewModel extends BaseViewModel {
     public void showTokens(Context context) {
         findDefaultWalletInteract
                 .find()
-                .subscribe(w -> myTokensRouter.open(context, w), this::onError);
+                .subscribe(w -> homeRouter.open(context, true), this::onError);
     }
 
     private void onTokensSetup(TokenInfo tokenData) {

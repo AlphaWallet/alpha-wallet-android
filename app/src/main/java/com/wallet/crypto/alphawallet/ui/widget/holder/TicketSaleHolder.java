@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -46,6 +47,7 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
     private OnTokenCheckListener onTokenCheckListener;
 
     public final AppCompatRadioButton select;
+    public final LinearLayout ticketLayout;
     public final TextView name;
     public final TextView amount;
     public final TextView venue;
@@ -56,6 +58,7 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
     public TicketSaleHolder(int resId, ViewGroup parent)
     {
         super(resId, parent);
+        ticketLayout = findViewById(R.id.layout_select);
         name = findViewById(R.id.name);
         amount = findViewById(R.id.amount);
         venue = findViewById(R.id.venue);
@@ -99,6 +102,10 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
                             onTokenCheckListener.onTokenCheck(thisData);
                         }
                     }
+                });
+
+                ticketLayout.setOnClickListener(v -> {
+                    select.setChecked(true);
                 });
             }
             else

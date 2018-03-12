@@ -35,6 +35,9 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView arrayBalance;
     public final TextView text24Hours;
     public final TextView textAppreciation;
+    public final TextView issuer;
+    public final TextView text24HoursSub;
+    public final TextView textAppreciationSub;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -49,6 +52,9 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         arrayBalance = findViewById(R.id.balanceArray);
         text24Hours = findViewById(R.id.text_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
+        issuer = findViewById(R.id.issuer);
+        text24HoursSub = findViewById(R.id.text_24_hrs_sub);
+        textAppreciationSub = findViewById(R.id.text_appreciation_sub);
         itemView.setOnClickListener(this);
     }
 
@@ -58,8 +64,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         try {
             // We handled NPE. Exception handling is expensive, but not impotent here
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
-                        ? token.tokenInfo.symbol
-                        : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol));
+                        ? token.tokenInfo.symbol.toUpperCase()
+                        : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
             token.setupContent(this);
         } catch (Exception ex) {
@@ -90,8 +96,9 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                 .toPlainString();
         String formattedPercents = "";
         int color = Color.RED;
+        double percentage = 0;
         try {
-            double percentage = Double.valueOf(ticker.percentChange24h);
+            percentage = Double.valueOf(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
             formattedPercents = (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%";
             text24Hours.setText(formattedPercents);
@@ -104,6 +111,29 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         spannable.setSpan(new ForegroundColorSpan(color),
                 converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         this.balanceCurrency.setText(spannable);
+
+        //calculate the appreciation value
+        double dBalance = ethBalance.multiply(new BigDecimal(ticker.price)).doubleValue();
+        double nPercentage = (100.0 + percentage)/100.0;
+        double dAppreciation = dBalance - (dBalance/nPercentage);
+        BigDecimal appreciation = BigDecimal.valueOf(dAppreciation);
+
+        //BigDecimal appreciation = balance.subtract(balance.divide((BigDecimal.valueOf(percentage).add(BigDecimal.ONE))) );
+        String convertedAppreciation =
+                appreciation
+                .setScale(2, RoundingMode.HALF_UP)
+                .stripTrailingZeros()
+                .toPlainString();
+
+        lbl = getString(R.string.token_balance,
+                ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
+                convertedAppreciation);
+
+        spannable = new SpannableString(lbl);
+        spannable.setSpan(new ForegroundColorSpan(color),
+                convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        this.textAppreciation.setText(spannable);
+
 
     }
 

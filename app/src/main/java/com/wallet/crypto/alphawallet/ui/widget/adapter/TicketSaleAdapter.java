@@ -1,7 +1,5 @@
 package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
-import android.content.Context;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
@@ -12,10 +10,10 @@ import com.wallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.QuantitySelectorSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.RedeemHeaderSortedItem;
-import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
+import com.wallet.crypto.alphawallet.ui.widget.entity.TransferHeaderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.QuantitySelectorHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.RedeemTicketHolder;
@@ -24,6 +22,7 @@ import com.wallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
+import com.wallet.crypto.alphawallet.ui.widget.holder.TransferHeaderHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,12 +72,53 @@ public class TicketSaleAdapter extends TicketAdapter {
                 holder = new RedeemTicketHolder(R.layout.item_redeem_ticket, parent);
             } break;
             case QuantitySelectorHolder.VIEW_TYPE: {
-                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent);
+                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, getCheckedItem().tokenIds.size());
                 holder = quantitySelector;
+            } break;
+            case TransferHeaderHolder.VIEW_TYPE: {
+                holder = new TransferHeaderHolder(R.layout.item_redeem_ticket, parent);
             } break;
         }
 
         return holder;
+    }
+
+    public void setTransferTicket(Ticket t) {
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(new TransferHeaderSortedItem(t));
+
+        TicketRange currentRange = null;
+        int currentSeat = -1;
+        char currentZone = '-';
+        int i;
+        //first sort the balance array
+        List<Integer> sortedList = new ArrayList<>();
+        sortedList.addAll(t.balanceArray);
+        Collections.sort(sortedList);
+        for (i = 0; i < sortedList.size(); i++)
+        {
+            int tokenId = sortedList.get(i);
+            if (tokenId != 0)
+            {
+                char zone = TicketDecode.getZoneChar(tokenId);
+                int seatNumber = TicketDecode.getSeatIdInt(tokenId);
+                if (currentRange == null || seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
+                {
+                    currentRange = new TicketRange(tokenId, t.getAddress());
+                    items.add(new TicketSaleSortedItem(currentRange, 10 + i));
+                    currentZone = zone;
+                }
+                else
+                {
+                    //update
+                    currentRange.tokenIds.add(tokenId);
+                }
+
+                currentSeat = seatNumber;
+            }
+        }
+        items.endBatchedUpdates();
     }
 
     public void setTicket(Ticket t) {

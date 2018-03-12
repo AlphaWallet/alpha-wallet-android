@@ -141,10 +141,13 @@
             android:name="com.wallet.crypto.alphawallet.ui.ImportTokenActivity"
             android:label="@string/title_import_token" />
 
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.TransferTicketActivity"
+            android:label="@string/label_transfer_ticket" />
 
         <activity
-            android:name=".ui.CustomPinActivity"
-            />
+            android:name="com.wallet.crypto.alphawallet.ui.TransferTicketDetailActivity"
+            android:label="@string/label_transfer_ticket_detail" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

@@ -8,7 +8,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Ticket;
@@ -41,6 +49,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private AssetDisplayViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
+    private RecyclerView list;
 
     private Ticket ticket;
     private TicketAdapter adapter;
@@ -66,7 +75,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        RecyclerView list = findViewById(R.id.listTickets);
+        list = findViewById(R.id.listTickets);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -144,9 +153,25 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                viewModel.showHome(this, true);
+                break;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        viewModel.showHome(this, true);
+    }
+
     private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
         //viewModel.showSalesOrder(this, ticket, range);
-        viewModel.showTransferToken(this, ticket, range);
+//        viewModel.showTransferToken(this, ticket, range);
     }
 }

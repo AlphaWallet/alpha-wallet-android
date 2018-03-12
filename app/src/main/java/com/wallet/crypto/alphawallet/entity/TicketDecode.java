@@ -173,6 +173,8 @@ public class TicketDecode
             "30 May 2018",
     };
 
+    private static String issuer = "Shengkai";
+
     //Utility functions for generation
     //generate a string of ID's for populating a contract
     public static String generateTicketIDList(int venueCount, int zoneCount, int seatCount)
@@ -201,5 +203,9 @@ public class TicketDecode
         System.out.println(sb.toString());
 
         return sb.toString();
+    }
+
+    public static String getIssuer() {
+        return issuer;
     }
 }

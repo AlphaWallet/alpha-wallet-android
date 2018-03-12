@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white"
@@ -10,10 +10,14 @@
     >
     <TextView
         android:id="@+id/title"
-        android:textSize="28sp"
-        android:textColor="@color/colorPrimary"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="@dimen/big_margin"
+        android:textSize="30sp"
+        android:fontFamily="@font/font_light"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="120dp"
+        android:gravity="center"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        android:textColor="@color/text_black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="Private and Secure"
@@ -21,20 +25,23 @@
     <ImageView
         android:id="@+id/img"
         android:contentDescription="@string/empty"
-        android:layout_gravity="center_horizontal"
-        android:layout_width="@dimen/intro_img_size"
-        android:layout_height="@dimen/intro_img_size"
-        android:src="@mipmap/onboarding_lock"
-        />
-    <TextView
-        android:id="@+id/message"
-        android:textSize="16sp"
-        android:textColor="@color/colorPrimary"
-        android:gravity="center_horizontal"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="@dimen/big_margin"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Private keys never leave your device."
+        android:paddingLeft="25dp"
+        android:src="@drawable/ic_onboarding1"
         />
-</LinearLayout>
+    <!--<TextView-->
+        <!--android:id="@+id/message"-->
+        <!--android:textSize="16sp"-->
+        <!--android:textColor="@color/colorPrimary"-->
+        <!--android:gravity="center_horizontal"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:visibility="gone"-->
+        <!--android:layout_margin="@dimen/big_margin"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--tools:text="Private keys never leave your device."-->
+        <!--/>-->
+</RelativeLayout>

@@ -7,21 +7,21 @@
     <LinearLayout
         android:id="@+id/layout_wallet_address"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/background_marketplace_event"
-        android:padding="20dp">
+        android:background="@drawable/background_marketplace_event">
 
         <RelativeLayout
             android:layout_width="40dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
             android:layout_marginRight="10dp">
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_settings_wallet" />
         </RelativeLayout>
@@ -39,21 +39,21 @@
     <LinearLayout
         android:id="@+id/layout_notification_settings"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/background_marketplace_event"
-        android:padding="20dp">
+        android:background="@drawable/background_marketplace_event">
 
         <RelativeLayout
             android:layout_width="40dp"
-            android:layout_marginRight="10dp"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp">
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_settings_notification" />
         </RelativeLayout>
@@ -71,21 +71,21 @@
     <LinearLayout
         android:id="@+id/layout_logout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/background_marketplace_event"
-        android:padding="20dp">
+        android:background="@drawable/background_marketplace_event">
 
         <RelativeLayout
             android:layout_width="40dp"
-            android:layout_marginRight="10dp"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp">
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_settings_logout" />
         </RelativeLayout>

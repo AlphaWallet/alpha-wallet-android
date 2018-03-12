@@ -12,7 +12,7 @@ import com.wallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import com.wallet.crypto.alphawallet.router.SalesOrderRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.SellTicketRouter;
-import com.wallet.crypto.alphawallet.router.TicketTransferRouter;
+import com.wallet.crypto.alphawallet.router.TransferTicketRouter;
 import com.wallet.crypto.alphawallet.viewmodel.AssetDisplayViewModelFactory;
 
 import dagger.Module;
@@ -30,14 +30,14 @@ public class AssetDisplayModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             MyTokensRouter myTokensRouter,
-            TicketTransferRouter ticketTransferRouter,
+            TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, ticketTransferRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter, homeRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter, homeRouter);
     }
 
     @Provides
@@ -68,8 +68,8 @@ public class AssetDisplayModule {
     }
 
     @Provides
-    TicketTransferRouter tiketTransferRouter() {
-        return new TicketTransferRouter();
+    TransferTicketRouter provideTransferTicketRouter() {
+        return new TransferTicketRouter();
     }
 
     @Provides

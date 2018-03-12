@@ -2,11 +2,11 @@ package com.wallet.crypto.alphawallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Base64;
 
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
 
 import org.ethereum.geth.BigInt;
+import org.spongycastle.util.encoders.Base64;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
@@ -43,7 +43,7 @@ public class SalesOrder implements Parcelable
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
             throws SalesOrderMalformed
     {
-        this.message = Base64.decode(msg, Base64.DEFAULT);
+        this.message = Base64.decode(msg);
         this.price = price;
         this.expiry = expiry;
         this.ticketStart = ticketStart;
@@ -56,7 +56,7 @@ public class SalesOrder implements Parcelable
             ds.readAddress();
             this.tickets = ds.readShortIndices(ticketCount);
             this.contractAddress = contractAddress;
-            this.signature = Base64.decode(sig, Base64.DEFAULT);
+            this.signature = Base64.decode(sig);
             ds.close();
         }
         catch(IOException e) {
@@ -86,7 +86,7 @@ public class SalesOrder implements Parcelable
     public SalesOrder(String linkData) throws SalesOrderMalformed {
         //separate the args
         String[] linkArgs = linkData.split(";");
-        message = Base64.decode(linkArgs[0], Base64.DEFAULT);
+        message = Base64.decode(linkArgs[0]);
         byte v = (byte)(int)Integer.valueOf(linkArgs[1], 16);
         byte[] r = hexStringToBytes(linkArgs[2]);
         byte[] s = hexStringToBytes(linkArgs[3]);

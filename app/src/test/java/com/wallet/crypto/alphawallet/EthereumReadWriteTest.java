@@ -14,11 +14,11 @@ import java.io.IOException;
 public class EthereumReadWriteTest {
     byte[] binaryData = new byte[] {(byte)0xe0, (byte)0xf4, (byte)0xe0, (byte)0xf5};
     @Test
-    public void SignBitShouldRemain() throws IOException{
+    public void BufferReadsCorrectly() throws IOException{
         int[] indices;
         EthereumReadBuffer in = new EthereumReadBuffer(new ByteArrayInputStream(binaryData));
         indices = in.readShortIndices(2);
-        Assert.assertEquals(0xe0F4, indices[0]);
+        Assert.assertEquals(0xE0F4, indices[0]);
     }
 
 }

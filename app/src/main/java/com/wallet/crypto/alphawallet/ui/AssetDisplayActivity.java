@@ -103,18 +103,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        //Dynamically add margin below RecyclerView to prevent overlapping with the button layout
-        LinearLayout layoutButtons = findViewById(R.id.layoutButtons);
-        ViewGroup.MarginLayoutParams marginLayoutParams =
-                (ViewGroup.MarginLayoutParams) list.getLayoutParams();
-        float extra = 15 * ((float)getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        marginLayoutParams.setMargins(0,0,0, (int) (layoutButtons.getHeight() + extra));
-        list.setLayoutParams(marginLayoutParams);
-    }
-
-    @Override
     protected void onResume()
     {
         super.onResume();

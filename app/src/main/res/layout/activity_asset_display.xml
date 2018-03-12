@@ -17,8 +17,10 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="?actionBarSize"
             android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:paddingRight="15dp"
+            android:animateLayoutChanges="true">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/listTickets"
@@ -32,7 +34,7 @@
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?actionBarSize"
             android:layout_alignParentBottom="true"
             android:layout_gravity="center"
             android:background="@color/button_green"

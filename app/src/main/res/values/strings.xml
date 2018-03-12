@@ -239,4 +239,6 @@
     <string name="title_import_token">Import Tickets</string>
     <string name="action_cancel">Cancel</string>
     <string name="confirm_purchase">Confirm Purchase</string>
+    <string name="bad_import_link">Invalid Import Link</string>
+    <string name="bad_import_link_body">Import link contains an error; please re-request the link</string>
 </resources>

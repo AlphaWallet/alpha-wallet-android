@@ -55,6 +55,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<TicketRange> importRange = new MutableLiveData<>();
     private final MutableLiveData<Integer> invalidRange = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
 
     private SalesOrder importOrder;
     private String univeralImportLink;
@@ -80,6 +81,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     }
     public LiveData<Integer> invalidRange() { return invalidRange; }
     public LiveData<String> newTransaction() { return newTransaction; }
+    public LiveData<Boolean> invalidLink() { return invalidLink; }
     public double getUSDPrice() { return priceUsd; };
 
     public void prepare(String importDataStr) {
@@ -118,11 +120,11 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
         catch (SalesOrderMalformed e)
         {
-            // TODO: tell the user that the link is broken
+            invalidLink.postValue(true);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            invalidLink.postValue(true);
         }
 
         //now get balance at recovered address

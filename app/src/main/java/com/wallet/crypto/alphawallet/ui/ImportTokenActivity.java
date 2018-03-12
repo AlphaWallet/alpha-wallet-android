@@ -97,11 +97,29 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.invalidRange().observe(this, this::invalidTicket);
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
+        viewModel.invalidLink().observe(this, this::onBadLink);
 
         ticketRange = null;
 
 //        ProgressBar progress = findViewById(R.id.progress);
 //        progress.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.white), PorterDuff.Mode.SRC_IN );
+    }
+
+    private void onBadLink(Boolean aBoolean)
+    {
+        TextView importTxt = findViewById(R.id.textImport);
+        importTxt.setText("Invalid Ticket");
+        setTicket(false, false, true);
+        //bad link
+        hideDialog();
+        dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.bad_import_link)
+                .setMessage(getString(R.string.bad_import_link_body))
+                .setNegativeButton(R.string.cancel, (dialog1, id) -> {
+
+                })
+                .create();
+        dialog.show();
     }
 
     @Override
@@ -246,10 +264,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void confirmPurchaseDialog() {
         hideDialog();
         SalesOrder order = viewModel.getSalesOrder();
-        String purchsse = "Confirm purchase of " + order.ticketCount + " tickets at " + getEthString(order.price) + " ETH total";
+        String purchase = "Confirm purchase of " + order.ticketCount + " tickets at " + getEthString(order.price) + " ETH total";
         dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.confirm_purchase)
-                .setMessage(purchsse)
+                .setMessage(purchase)
                 .setPositiveButton(R.string.action_purchase, (dialog1, id) -> {
                     viewModel.performImport();
                 })

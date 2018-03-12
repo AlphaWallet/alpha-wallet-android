@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_transactions"
+        android:icon="@drawable/ic_transactions"
+        android:title="@string/toolbar_header_transactions" />
+    <item
         android:id="@+id/action_marketplace"
         android:icon="@drawable/ic_market"
         android:title="@string/toolbar_header_marketplace" />
@@ -12,8 +16,4 @@
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
         android:title="@string/toolbar_header_settings" />
-    <item
-        android:id="@+id/action_help"
-        android:icon="@drawable/ic_about"
-        android:title="@string/toolbar_header_help" />
 </menu>

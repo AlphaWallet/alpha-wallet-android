@@ -26,66 +26,31 @@ public class EthereumReadBuffer extends DataInputStream
         readBuffer = new byte[32];
     }
 
-    public BigInteger readBI()
+    public BigInteger readBI() throws IOException
     {
-        BigInteger retVal = BigInteger.ZERO;
+        BigInteger retVal;
 
-        try
-        {
-            read(readBuffer);
-            retVal = new BigInteger(readBuffer);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        read(readBuffer);
+        retVal = new BigInteger(readBuffer);
 
         return retVal;
     }
 
-    public String readAddress()
-    {
+    public String readAddress() throws IOException {
         String addr = "0x";
 
-        try
-        {
-            byte[] buffer20 = new byte[20];
-            read(buffer20);
-            addr = "0x" + bytesToHex(buffer20);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        byte[] buffer20 = new byte[20];
+        read(buffer20);
+        addr = "0x" + bytesToHex(buffer20);
 
         return addr;
     }
 
     @Override
-    public void close()
-    {
-        try
-        {
-            super.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public int available()
+    public int available() throws IOException
     {
         int remains = 0;
-        try
-        {
-            remains = super.available();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        remains = super.available();
 
         return remains;
     }

@@ -84,11 +84,11 @@ public class SalesOrder implements Parcelable
         //separate the args
         String[] linkArgs = linkData.split(";");
         message = Base64.decode(linkArgs[0]);
-        byte v = (byte)(int)Integer.valueOf(linkArgs[1], 16);
-        byte[] r = hexStringToBytes(linkArgs[2]);
-        byte[] s = hexStringToBytes(linkArgs[3]);
-
         try {
+            byte v = (byte)(int)Integer.valueOf(linkArgs[1], 16);
+            byte[] r = hexStringToBytes(linkArgs[2]);
+            byte[] s = hexStringToBytes(linkArgs[3]);
+
             ByteArrayInputStream bas = new ByteArrayInputStream(message);
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
             priceWei = ds.readBI();
@@ -97,10 +97,16 @@ public class SalesOrder implements Parcelable
             ticketCount = ds.available() / 2;
             tickets = ds.readUint16Indices(ticketCount);
             ds.close();
+
+            signature = writeSignature(r,s,v);
+
         } catch (IOException e) {
             throw new SalesOrderMalformed();
+        } catch (StringIndexOutOfBoundsException f) {
+            throw new SalesOrderMalformed();
+        } catch (Exception e) {
+            throw new SalesOrderMalformed();
         }
-        signature = writeSignature(r,s,v);
 
         BigInteger milliWei = Convert.fromWei(priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         price = milliWei.doubleValue() / 1000.0;

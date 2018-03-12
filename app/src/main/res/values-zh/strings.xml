@@ -33,7 +33,7 @@
      <string name="hint_ids_to_sell">输入要在市场内出售的门票IDs</string>
      <string name="market_queue_title">在市场内创建卖单</string>
      <string name="selection">选择:</string>
-     <string name="contract_issuer">以太坊智能合约  |  发行方: 盛开体育旅游</string>
+     <string name="contract_issuer">基于以太坊智能合约  |  发行方: 盛开体育旅游</string>
      <string name="select_tickets">选择要出售的门票:</string>
      <string name="select_tickets_redeem">选择要兑换的门票:</string>
      <string name="market_buy_title">浏览门票市场</string>

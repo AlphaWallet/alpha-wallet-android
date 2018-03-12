@@ -151,4 +151,8 @@
     <string name="confirm_purchase_title">Confirm Purchase?</string>
     <string name="confirm_purchase_small_text">Total Cost:</string>
     <string name="confirm_purchase_button_text">Confirm Purchase</string>
+    <string name="label_transfer_ticket_detail">Transfer Ticket Details</string>
+    <string name="label_transfer_ticket">Transfer Ticket</string>
+    <string name="select_tickets_transfer">Select Tickets to Transfer:</string>
+    <string name="confirm_transfer_title">Confirm Transfer?</string>
 </resources>

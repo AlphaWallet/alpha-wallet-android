@@ -1,12 +1,21 @@
 package com.wallet.crypto.alphawallet;
 
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
+import com.wallet.crypto.alphawallet.entity.Wallet;
 
+import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.Signature;
 import java.util.Date;
 import android.util.Base64;
 
@@ -44,27 +53,60 @@ import android.util.Base64;
 public class UniversalLinkTest {
     String link = "https://www.awallet.io/import?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvBbWdOyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkALMAtA==;1b;2981CF5F9C45E9957BE897ED2EC749A8CE16086942A241BCDA4E870259B53EF4;2EFBA4BEBC7E3AE4475F4D92BADC1DD4D14D95187CD7403F701AED48CA23737B";   //
     int[] indices = new int[] { 0xb3, 0xb4 };
+    static final String OWNER_ADDR = "007bEe82BDd9e866b2bd114780a47f2261C684E3";
+
     boolean verifySignature(byte[] message, byte[] signature) {
-        return false;
+        boolean pass = false;
+        try {
+            Sign.SignatureData sig = sigFromByteArray(signature);
+            String address = ecRecoverAddress(message, sig);
+
+            if (Numeric.cleanHexPrefix(address).equalsIgnoreCase(OWNER_ADDR))
+            {
+                pass = true;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return pass;
     }
+
     @Test
     public void UniversalLinkShouldBeParsedCorrectly() {
+        SalesOrder order = SalesOrder.parseUniversalLink(link);
+        BigDecimal testPriceWei = Convert.toWei("0.5", Convert.Unit.ETHER);
+        BigInteger testPriceWeiBi = BigInteger.valueOf(testPriceWei.longValue());
 
-        //James to Weiwu - this test is broken - I get an exception thrown with this message:
-        // Mock android.util.Base64.decode() with reflection to match the byte[] type error
-        // Resolution looks like a rabbit hole to do with Mokito methods. Better to test in-situ.
-
-//        SalesOrder order = SalesOrder.parseUniversalLink(link);
-//        assertEquals(new BigInteger("0.5", 16), order.priceWei );
-//        assertEquals(0x0, order.expiry);
-//        assertEquals("0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4", order.contractAddress);
-//        assertArrayEquals(indices, order.tickets);
-//        assertTrue(verifySignature(order.message, order.signature));
+        assertEquals(testPriceWeiBi, order.priceWei);
+        assertEquals(0x0, order.expiry);
+        assertEquals("0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4", order.contractAddress.toLowerCase());
+        assertArrayEquals(indices, order.tickets);
+        assertTrue(verifySignature(order.message, order.signature));
     }
 
+    //TODO: Once we start generating the link fill this test in
     @Test
     public void UniversalLinkShouldBeGeneratedCorrectly() {
         //SalesOrder order = SalesOrder(......)
+    }
+
+    public static String ecRecoverAddress(byte[] data, Sign.SignatureData signature) //get the hex string address from the sig and data
+    {
+        String address = "";
+        try
+        {
+            BigInteger recoveredKey = Sign.signedMessageToKey(data, signature); //get embedded address
+            address = Keys.getAddress(recoveredKey);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return address;
     }
 
 }

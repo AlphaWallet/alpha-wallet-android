@@ -1,6 +1,7 @@
 package com.wallet.crypto.alphawallet.interact;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Ticker;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 
 import io.reactivex.Single;
@@ -17,5 +18,10 @@ public class FindDefaultNetworkInteract {
     public Single<NetworkInfo> find() {
         return Single.just(ethereumNetworkRepository.getDefaultNetwork())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    //get the ticker
+    public Single<Ticker> getTicker() {
+        return ethereumNetworkRepository.getTicker();
     }
 }

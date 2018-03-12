@@ -14,6 +14,7 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.router.HelpRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 
 import java.util.Map;
@@ -33,6 +34,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final GetDefaultWalletBalance getDefaultWalletBalance;
 
     private final MyAddressRouter myAddressRouter;
+    private final HelpRouter helpRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -44,11 +46,13 @@ public class NewSettingsViewModel extends BaseViewModel {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            HelpRouter helpRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
+        this.helpRouter = helpRouter;
     }
 
     @Override
@@ -101,6 +105,10 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     public void showMyAddress(Context context) {
         myAddressRouter.open(context, defaultWallet.getValue());
+    }
+
+    public void showHelp(Context context) {
+        helpRouter.open(context);
     }
 
     private final Runnable startGetBalanceTask = this::getBalance;

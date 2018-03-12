@@ -242,7 +242,7 @@ public class HomeViewModel extends BaseViewModel {
         addTokenRouter.open(context);
     }
 
-    public void showHelp(Context context, int resId) {
-        helpRouter.open(context, resId);
+    public void showHelp(Context context) {
+        helpRouter.open(context);
     }
 }

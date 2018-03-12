@@ -5,6 +5,7 @@ import com.wallet.crypto.alphawallet.ui.AssetDisplayActivity;
 import com.wallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import com.wallet.crypto.alphawallet.ui.ConfirmationActivity;
 import com.wallet.crypto.alphawallet.ui.GasSettingsActivity;
+import com.wallet.crypto.alphawallet.ui.HelpActivity;
 import com.wallet.crypto.alphawallet.ui.HelpFragment;
 import com.wallet.crypto.alphawallet.ui.HomeActivity;
 import com.wallet.crypto.alphawallet.ui.ImportWalletActivity;
@@ -25,6 +26,7 @@ import com.wallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 import com.wallet.crypto.alphawallet.ui.TokensActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionDetailActivity;
 import com.wallet.crypto.alphawallet.ui.TransactionsActivity;
+import com.wallet.crypto.alphawallet.ui.TransactionsFragment;
 import com.wallet.crypto.alphawallet.ui.TransferTicketActivity;
 import com.wallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
 import com.wallet.crypto.alphawallet.ui.WalletFragment;
@@ -148,4 +150,12 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TransferTicketModule.class)
 	abstract TransferTicketActivity bindTransferTicketActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = TransactionsModule.class)
+	abstract TransactionsFragment bindTransactionsFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = HelpModule.class)
+	abstract HelpActivity bindHelpActivity();
 }

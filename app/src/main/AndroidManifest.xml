@@ -139,6 +139,10 @@
             android:name="com.wallet.crypto.alphawallet.ui.TransferTicketDetailActivity"
             android:label="@string/label_transfer_ticket_detail" />
 
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.HelpActivity"
+            android:label="@string/toolbar_header_help" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="74d3fa8b5038a154c0c05555d27112a0d4a80d68" />

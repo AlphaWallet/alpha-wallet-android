@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
         android:id="@+id/action_marketplace"
         android:icon="@drawable/ic_market"
-        android:title="Marketplace"
-        />
+        android:title="@string/toolbar_header_marketplace" />
     <item
-        android:id="@+id/action_send"
+        android:id="@+id/action_wallet"
         android:icon="@drawable/ic_wallet"
-        android:title="Wallet"
-        />
+        android:title="@string/toolbar_header_wallet" />
     <item
-        android:id="@+id/action_my_address"
+        android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
-        android:title="Settings"
-        />
+        android:title="@string/toolbar_header_settings" />
     <item
-        android:id="@+id/action_my_tokens"
+        android:id="@+id/action_help"
         android:icon="@drawable/ic_about"
-        android:title="Help"
-        />
+        android:title="@string/toolbar_header_help" />
 </menu>

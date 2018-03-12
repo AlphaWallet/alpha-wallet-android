@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 
 import com.wallet.crypto.alphawallet.entity.GasSettings;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
+import com.wallet.crypto.alphawallet.entity.Ticker;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -21,6 +22,7 @@ public class SellDetailModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Double> ethereumPrice = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -37,6 +39,7 @@ public class SellDetailModel extends BaseViewModel {
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
+    public LiveData<Double> ethereumPrice() { return ethereumPrice; }
 
     public void prepare(Ticket ticket) {
         disposable = findDefaultNetworkInteract
@@ -51,8 +54,19 @@ public class SellDetailModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
+
+        //now get the ticker
+        disposable = findDefaultNetworkInteract
+                .getTicker()
+                .subscribe(this::onTicker, this::onError);
+    }
+
+    private void onTicker(Ticker ticker)
+    {
+        ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
     }
 
     public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, int firstTicketId)

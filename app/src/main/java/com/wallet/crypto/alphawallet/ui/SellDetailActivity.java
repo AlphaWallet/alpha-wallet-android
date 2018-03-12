@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +23,7 @@ import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
+import com.wallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
@@ -29,6 +32,7 @@ import org.web3j.utils.Convert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -60,6 +64,9 @@ public class SellDetailActivity extends BaseActivity
     private EditText sellPrice;
     private TextView textQuantity;
     private String ticketIds;
+    private double ethToUsd;
+
+    private TextView totalCostText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +82,7 @@ public class SellDetailActivity extends BaseActivity
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
         sell = findViewById(R.id.button_sell);
+        usdPrice = findViewById(R.id.fiat_price);
 
         adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds);
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -101,18 +109,45 @@ public class SellDetailActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
 
-        sell.setOnClickListener((View v) -> {
-            sellTicketFinal();
-        });
-
+        totalCostText = findViewById(R.id.eth_price);
         textQuantity = findViewById(R.id.text_quantity);
+
+        sellPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    int quantity = Integer.parseInt(textQuantity.getText().toString());
+                    updateSellPrice(quantity);
+                    //double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                    //totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                }
+                catch (NumberFormatException e)
+                {
+                    //silent fail, just don't update
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
-            quantity++;
-            textQuantity.setText(String.valueOf(quantity));
+            if ((quantity+1) <= adapter.getTicketRangeCount()) {
+                quantity++;
+                textQuantity.setText(String.valueOf(quantity));
+                updateSellPrice(quantity);
+            }
         });
 
         RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
@@ -121,8 +156,67 @@ public class SellDetailActivity extends BaseActivity
             if ((quantity-1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
+                updateSellPrice(quantity);
             }
         });
+
+        sell.setOnClickListener((View v) -> {
+            if (Integer.parseInt(textQuantity.getText().toString()) > 0
+                    && !sellPrice.getText().toString().isEmpty()
+                    && Double.parseDouble(sellPrice.getText().toString()) > 0) {
+                AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+                dialog.setTitle(R.string.confirm_sale_title);
+                dialog.setSmallText(R.string.confirm_sale_small_text);
+                dialog.setBigText(totalCostText.getText().toString());
+                dialog.setPrimaryButtonText(R.string.action_sell);
+                dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+                dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());
+                dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+                dialog.show();
+            }
+        });
+    }
+
+    private void onEthereumPrice(Double aDouble)
+    {
+        ethToUsd = aDouble;
+        //see if there's a non-zero value in the eth field
+        updateUSDBalance();
+    }
+
+    private void updateUSDBalance()
+    {
+        try
+        {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            double ethPrice = Double.parseDouble(sellPrice.getText().toString());
+            if (quantity > 0 && ethPrice > 0) {
+                double usdValue = ethPrice * ethToUsd * (double) quantity;
+                DecimalFormat df = new DecimalFormat("#.##");
+                df.setRoundingMode(RoundingMode.CEILING);
+                String usdText = "$" + df.format(usdValue);
+                usdPrice.setText(usdText);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+
+        }
+    }
+
+    private void updateSellPrice(int quantity)
+    {
+        if (!sellPrice.getText().toString().isEmpty()) {
+            try {
+                double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
+                totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                updateUSDBalance();
+            }
+            catch (NumberFormatException e)
+            {
+                //silent fail, just don't update
+            }
+        }
     }
 
     private void sellTicketFinal()

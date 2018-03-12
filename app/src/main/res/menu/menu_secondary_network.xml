@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/action_send"
+        android:id="@+id/action_wallet"
         android:icon="@drawable/ic_send_white_24dp"
         android:title="@string/title_send"
         />
     <item
-        android:id="@+id/action_my_address"
+        android:id="@+id/action_settings"
         android:icon="@mipmap/qr_code_icon"
         android:title="@string/title_request"
         />

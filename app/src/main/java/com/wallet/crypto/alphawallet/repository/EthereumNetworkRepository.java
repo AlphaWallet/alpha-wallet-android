@@ -101,11 +101,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
         onNetworkChangedListeners.add(onNetworkChanged);
 	}
 
-//    @Override
-//    public Single<Ticker> getTicker() {
-//        return Single.fromObservable(tickerService
-//                .fetchTickerPrice(getDefaultNetwork().name));
-//    }
 	@Override
     public Single<Ticker> getTicker() {
         return Single.fromObservable(tickerService

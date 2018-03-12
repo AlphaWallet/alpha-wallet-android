@@ -2,6 +2,7 @@ package com.wallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.wallet.crypto.alphawallet.entity.MessagePair;
@@ -19,6 +20,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.MemPoolInteract;
 import com.wallet.crypto.alphawallet.interact.SignatureGenerateInteract;
+import com.wallet.crypto.alphawallet.router.AssetDisplayRouter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 
@@ -48,6 +50,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memoryPoolInteract;
+    private final AssetDisplayRouter assetDisplayRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -57,6 +60,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
 
     private final MutableLiveData<String> selection = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
 
     private SubscribeWrapper wrapper;
     private TicketRange ticketRange;
@@ -80,13 +84,15 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
-            MemPoolInteract memoryPoolInteract) {
+            MemPoolInteract memoryPoolInteract,
+            AssetDisplayRouter assetDisplayRouter) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.memoryPoolInteract = memoryPoolInteract;
+        this.assetDisplayRouter = assetDisplayRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -100,6 +106,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     }
     public LiveData<String> selection() {
         return selection;
+    }
+    public LiveData<Boolean> burnNotice() {
+        return burnNotice;
     }
 
     @Override
@@ -117,6 +126,58 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             wrapper.wrapperInteraction.sendEmptyMessage(1);
             wrapper = null;
         }
+    }
+
+    public void fetchTokenBalance() {
+        progress.postValue(true);
+        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchTokensInteract
+                        .fetch(defaultWallet.getValue())
+                        .subscribe(this::onTokens, t -> {}))
+                .subscribe(l -> {}, t -> {});
+    }
+
+    /**
+     * This is a fallback check - it polls balance. If we somehow miss the memory pool pickup
+     * then this method will pick up when the transaction is written to blockchain
+     */
+    private void onTokens(Token[] tokens) {
+        this.tokens.setValue(tokens);
+
+        for (Token t : tokens) {
+            if (t instanceof Ticket && t.tokenInfo.address.equals(address))
+            {
+                boolean allBurned = true;
+                //See if our tickets got burned
+                for (Integer index : this.ticketIndicies)
+                {
+                    if (((Ticket) t).balanceArray.get(index) > 0)
+                    {
+                        allBurned = false;
+                        break;
+                    }
+                }
+
+                if (allBurned)
+                {
+                    ticketsBurned();
+                }
+                break;
+            }
+        }
+    }
+
+    private void ticketsBurned()
+    {
+        if (cycleSignatureDisposable != null) {
+            cycleSignatureDisposable.dispose();
+        }
+        if (getBalanceDisposable != null) {
+            getBalanceDisposable.dispose();
+        }
+
+        ticketIndicies.clear();
+        burnNotice.postValue(true);
     }
 
     public void prepare(String address, Ticket ticket, TicketRange ticketRange) {
@@ -168,7 +229,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         startCycleSignature();
-        //fetchTransactions();
+        fetchTokenBalance();
         startMemoryPoolListener();
 
         //Push initial QR
@@ -189,7 +250,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         }
         //now write to burn indicies
         t.addToBurnList(burnList);
-
         updateBurnInfo(t.getBurnList());
     }
 
@@ -205,7 +265,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         //display 'burn complete'
         if (ticketIndicies.size() == 0)
         {
-            signature.postValue(null);
+            ticketsBurned();
         }
         else {
             signatureGenerateInteract
@@ -256,5 +316,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         byte[] input = methodSignature.getBytes();
         byte[] hash = Hash.sha3(input);
         return Numeric.toHexString(hash).substring(0, 10);
+    }
+
+    public void showAssets(Context context, Ticket t, boolean isClearStack) {
+        assetDisplayRouter.open(context, t, isClearStack);
     }
 }

@@ -131,6 +131,10 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         items.endBatchedUpdates();
     }
 
+    public void getToken() {
+
+    }
+
     public void setTotal(BigDecimal totalInCurrency) {
         total = new TotalBalanceSortedItem(totalInCurrency);
         items.add(total);

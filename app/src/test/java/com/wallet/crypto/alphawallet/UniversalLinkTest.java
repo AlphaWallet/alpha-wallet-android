@@ -51,38 +51,22 @@ import android.util.Base64;
  */
 
 public class UniversalLinkTest {
-    String link = "https://www.awallet.io/import?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvBbWdOyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkALMAtA==;1b;2981CF5F9C45E9957BE897ED2EC749A8CE16086942A241BCDA4E870259B53EF4;2EFBA4BEBC7E3AE4475F4D92BADC1DD4D14D95187CD7403F701AED48CA23737B";   //
-    int[] indices = new int[] { 0xb3, 0xb4 };
-    static final String OWNER_ADDR = "007bEe82BDd9e866b2bd114780a47f2261C684E3";
-
-    boolean verifySignature(byte[] message, byte[] signature) {
-        boolean pass = false;
-        try {
-            Sign.SignatureData sig = sigFromByteArray(signature);
-            String address = ecRecoverAddress(message, sig);
-
-            if (Numeric.cleanHexPrefix(address).equalsIgnoreCase(OWNER_ADDR))
-            {
-                pass = true;
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return pass;
-    }
+    final String link = "https://www.awallet.io/import?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvBbWdOyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkALMAtA==;1b;2981CF5F9C45E9957BE897ED2EC749A8CE16086942A241BCDA4E870259B53EF4;2EFBA4BEBC7E3AE4475F4D92BADC1DD4D14D95187CD7403F701AED48CA23737B";   //
+    final int[] indices         = new int[] { 0xb3, 0xb4 };
+    final String OWNER_ADDR     = "0x007bEe82BDd9e866b2bd114780a47f2261C684E3";
+    final String CONTRACT_ADDR  = "0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4";
+    final String ethPrice       = "0.5";
+    final long expiry           = 0;
 
     @Test
     public void UniversalLinkShouldBeParsedCorrectly() {
         SalesOrder order = SalesOrder.parseUniversalLink(link);
-        BigDecimal testPriceWei = Convert.toWei("0.5", Convert.Unit.ETHER);
+        BigDecimal testPriceWei = Convert.toWei(ethPrice, Convert.Unit.ETHER);
         BigInteger testPriceWeiBi = BigInteger.valueOf(testPriceWei.longValue());
 
         assertEquals(testPriceWeiBi, order.priceWei);
-        assertEquals(0x0, order.expiry);
-        assertEquals("0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4", order.contractAddress.toLowerCase());
+        assertEquals(expiry, order.expiry);
+        assertEquals(CONTRACT_ADDR, order.contractAddress.toLowerCase());
         assertArrayEquals(indices, order.tickets);
         assertTrue(verifySignature(order.message, order.signature));
     }
@@ -93,7 +77,7 @@ public class UniversalLinkTest {
         //SalesOrder order = SalesOrder(......)
     }
 
-    public static String ecRecoverAddress(byte[] data, Sign.SignatureData signature) //get the hex string address from the sig and data
+    private String ecRecoverAddress(byte[] data, Sign.SignatureData signature) //get the hex string address from the sig and data
     {
         String address = "";
         try
@@ -109,4 +93,22 @@ public class UniversalLinkTest {
         return address;
     }
 
+    private boolean verifySignature(byte[] message, byte[] signature) {
+        boolean pass = false;
+        try {
+            Sign.SignatureData sig = sigFromByteArray(signature);
+            String address = ecRecoverAddress(message, sig);
+
+            if (Numeric.cleanHexPrefix(address).equalsIgnoreCase(Numeric.cleanHexPrefix(OWNER_ADDR)))
+            {
+                pass = true;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return pass;
+    }
 }

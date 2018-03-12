@@ -58,4 +58,102 @@
      <string name="quantity_to_redeem">兑换数量</string>
      <string name="waiting_for_blockchain">请等待区块链处理数据</string>
      <string name="set_price_subtext">售价是按照以太币定价的, 以太币是一种区块链加密数字货币. 一旦售出, <b>你会收到标价数值的以太币</b> 你可以在任意交易所用以太币兑换其他货币.</string>
+<string name="btn_text_apply">应用</string>
+    <string name="filter_by">筛选:</string>
+    <string name="filter_date_label">日期</string>
+    <string name="filter_price_label">价格</string>
+    <string name="filter_distance_label">距离</string>
+    <string name="filter_timeframe_label">时间</string>
+    <string name="set_a_price">设置一个价格:</string>
+    <string name="learn_more_about_ethereum">更多关于以太坊的知识</string>
+    <string name="price_per_ticket">门票单价</string>
+    <string-array name="filter_date">
+        <item>Most Recent</item>
+        <item>Oldest</item>
+    </string-array>
+    <string-array name="filter_price">
+        <item>Low to High</item>
+        <item>High to Low</item>
+    </string-array>
+    <string-array name="filter_distance">
+        <item>Any</item>
+        <item>1km</item>
+        <item>5km</item>
+        <item>10km</item>
+    </string-array>
+    <string-array name="filter_timeframe">
+        <item>Any</item>
+        <item>1 week</item>
+        <item>1 month</item>
+        <item>1 year</item>
+    </string-array>
+    <string-array name="filter_match">
+        <item>Any</item>
+        <item>1-64</item>
+    </string-array>
+    <string-array name="filter_class">
+        <item>Any</item>
+        <item>VIP</item>
+    </string-array>
+    <string-array name="filter_seats">
+        <item>Any</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="filter_search_date">
+        <item>DD/MM/YY</item>
+    </string-array>
+    <string name="eth">ETH</string>
+    <string name="recommended_market_price">建议市场单价</string>
+    <string name="quantity_of_tickets">门票数量s</string>
+    <string name="total_cost_label">总价:</string>
+    <string name="equivalent_in_usd">相当于USD</string>
+    <string name="total_cost">%s ETH</string>
+    <string name="select_quantity_tickets">选择门票数量</string>
+    <string name="range_formatter">%1d - %2d</string>
+    <string name="redeemed">已兑换</string>
+    <string name="ticket_redeemed">你的门票已经被兑换</string>
+    <string name="filter">筛选</string>
+    <string name="search_for">搜索:</string>
+    <string name="filter_search_class">等级</string>
+    <string name="filter_search_seats">连座数量</string>
+    <string name="search_label_match">比赛</string>
+    <string name="label_min">最少</string>
+    <string name="label_max">最多</string>
+    <string name="label_price">价格</string>
+    <string name="onboarding_1">支持调用各种数字资产</string>
+    <string name="onboarding_2">基于区块链技术，智能门票，杜绝欺诈</string>
+    <string name="onboarding_3">买，卖，转让各种token</string>
+    <string name="help_question1">以太币/以太坊是什么?</string>
+    <string name="help_question2">为什么AlphaWallet需要调用以太币?</string>
+    <string name="help_question3">怎样才能拿到法币?</string>
+    <string name="help_question4">助记词是做什么的?</string>
+    <string name="help_question5">怎样把以太币转到AlphaWallet内?</string>
+    <string name="help_answer1">以太坊是目前使用最广泛的支持完备应用开发的公有区块链系统，以太坊区块链上的代币称为以太币（Ether），代码为ETH，可在许多加密货币的外汇市场上交易，它也是以太坊上用来支付交易手续费和运算服务的媒介 。</string>
+    <string name="twenty_four_hours">24小时</string>
+    <string name="appreciation">升值</string>
+    <string name="usd_value">USD价值</string>
+    <string name="my_listings">我的出售列表</string>
+    <string name="fifa_2018">FIFA 2018世界杯</string>
+    <string name="eth_per_ticket">以太币/门票</string>
+    <string name="ethereum">以太坊</string>
+    <string name="ethereum_blockchain">基于以太坊智能合约</string>
+    <string name="issuer">发行方:</string>
+    <string name="root_title">设备安全性受损</string>
+    <string name="root_body">任何 \'rooted\' 应用 都可以查看到AlphaWallet\的 密匙数据并盗取你的数字资产! 请立即在此设备上删除你的钱包并在安全的设备上恢复你的钱包.</string>
+    <string name="toolbar_add_custom_token">添加自定义Token</string>
+    <string name="contact_us">需要更多的帮助? 联系我们</string>
+    <string name="confirm_sale_title">确认出售?</string>
+    <string name="confirm_sale_small_text">你会收到:</string>
+    <string name="dialog_cancel_back">取消并退回</string>
+    <string name="seekbar_max">最多</string>
+    <string name="seekbar_min">最少</string>
+    <string name="seekbar_label_default_value">$0.00</string>
+    <string name="confirm_purchase_title">确认购买?</string>
+    <string name="confirm_purchase_small_text">总价:</string>
+    <string name="confirm_purchase_button_text">确认购买</string>
+    <string name="label_transfer_ticket_detail">转让门票的具体信息</string>
+    <string name="label_transfer_ticket">转让门票</string>
+    <string name="select_tickets_transfer">选择要转让的门票:</string>
+    <string name="confirm_transfer_title">确认转让?</string>
 </resources>

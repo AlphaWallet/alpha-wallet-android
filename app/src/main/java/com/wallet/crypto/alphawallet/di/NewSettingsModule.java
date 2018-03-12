@@ -5,6 +5,7 @@ import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
+import com.wallet.crypto.alphawallet.router.HelpRouter;
 import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.viewmodel.NewSettingsViewModelFactory;
 
@@ -18,12 +19,14 @@ class NewSettingsModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            HelpRouter helpRouter) {
         return new NewSettingsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
-                myAddressRouter);
+                myAddressRouter,
+                helpRouter);
     }
 
     @Provides
@@ -44,5 +47,12 @@ class NewSettingsModule {
     }
 
     @Provides
-    MyAddressRouter provideMyAddressRouter() { return new MyAddressRouter(); }
+    MyAddressRouter provideMyAddressRouter() {
+        return new MyAddressRouter();
+    }
+
+    @Provides
+    HelpRouter provideHelpRouter() {
+        return new HelpRouter();
+    }
 }

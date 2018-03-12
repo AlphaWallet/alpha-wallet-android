@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_light"
             android:textColor="@color/text_black"
-            android:text="Ethereum"
+            android:text="@string/ethereum"
             android:textSize="21sp" />
 
         <!--<TextView-->
@@ -75,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
-            android:text="Ethereum Blockchain"
+            android:text="@string/ethereum_blockchain"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />
 
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
-            android:text="Issuer: "
+            android:text="@string/issuer"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />
 
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
-            android:text="Ethereum"
+            android:text="@string/ethereum"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />
     </LinearLayout>
@@ -143,7 +143,7 @@
                 android:textAllCaps="true"
                 android:textSize="11sp"
                 android:layout_height="wrap_content"
-                android:text="24 hours" />
+                android:text="@string/twenty_four_hours" />
         </LinearLayout>
 
         <LinearLayout
@@ -171,7 +171,7 @@
                 android:textAllCaps="true"
                 android:textSize="11sp"
                 android:layout_height="wrap_content"
-                android:text="Appreciation" />
+                android:text="@string/appreciation" />
         </LinearLayout>
 
         <LinearLayout
@@ -198,7 +198,7 @@
                 android:textAllCaps="true"
                 android:textSize="11sp"
                 android:layout_height="wrap_content"
-                android:text="USD Value" />
+                android:text="@string/usd_value" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

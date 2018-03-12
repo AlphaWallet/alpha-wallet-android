@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_bold"
-                android:text="ETH/Ticket"
+                android:text="@string/eth_per_ticket"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="21sp" />
         </LinearLayout>

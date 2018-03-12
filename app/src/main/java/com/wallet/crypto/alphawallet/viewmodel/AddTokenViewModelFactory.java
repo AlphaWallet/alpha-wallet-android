@@ -8,25 +8,25 @@ import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
-import com.wallet.crypto.alphawallet.router.MyTokensRouter;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 
 public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
 
     private final AddTokenInteract addTokenInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MyTokensRouter myTokensRouter;
+    private final HomeRouter homeRouter;
     private final SetupTokensInteract setupTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
 
     public AddTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            MyTokensRouter myTokensRouter,
+            HomeRouter homeRouter,
             SetupTokensInteract setupTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.addTokenInteract = addTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.myTokensRouter = myTokensRouter;
+        this.homeRouter = homeRouter;
         this.setupTokensInteract = setupTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
@@ -34,6 +34,6 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, myTokensRouter, setupTokensInteract, findDefaultNetworkInteract);
+        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract);
     }
 }

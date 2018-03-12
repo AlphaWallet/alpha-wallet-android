@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -64,7 +63,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         toolbar();
 //        setTitle(getString(R.string.unknown_balance_with_symbol));
 //        setSubtitle("");
-        initBottomNavigation();
+
 //        dissableDisplayHomeAsUp();
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
@@ -102,9 +101,9 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
 //        viewModel.showWalletFragment(this, R.id.frame_layout);
         setTitle("Transactions");
 
+        initBottomNavigation();
         setBottomMenu(R.menu.menu_main_network);
         selectNavigationItem(1);
-
         BottomNavigationViewEx bottomBar = findViewById(R.id.bottom_navigation_ex);
         bottomBar.setVisibility(View.GONE);
     }
@@ -125,6 +124,11 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     }
 
     @Override
+    public void onBackPressed() {
+        viewModel.showHome(this);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
 
@@ -136,7 +140,6 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.send_menu, menu);
-//
 //        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
 //        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
 //            getMenuInflater().inflate(R.menu.menu_deposit, menu);
@@ -187,7 +190,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 }
                 return true;
             }
-            case R.id.action_send: {
+            case R.id.action_wallet: {
 //                viewModel.showSend(this);
                 if (getSelectedNavigationItem() != 1) {
                     selectNavigationItem(1);
@@ -196,7 +199,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 }
                 return true;
             }
-            case R.id.action_my_address: {
+            case R.id.action_settings: {
 //                viewModel.showMyAddress(this);
 //                viewModel.showSettings(this);
                 if (getSelectedNavigationItem() != 2) {
@@ -206,7 +209,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 }
                 return true;
             }
-            case R.id.action_my_tokens: {
+            case R.id.action_help: {
                 if (getSelectedNavigationItem() != 3) {
                     selectNavigationItem(3);
                     setTitle(getString(R.string.toolbar_header_help));

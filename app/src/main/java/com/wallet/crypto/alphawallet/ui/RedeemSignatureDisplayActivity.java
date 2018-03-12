@@ -26,6 +26,7 @@ import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
 import com.wallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
+import com.wallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
 import java.util.Locale;
@@ -78,6 +79,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.ticket().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
+        viewModel.burnNotice().observe(this, this::onBurned);
 
         ticketBurnNotice();
         TextView tv = findViewById(R.id.textAddIDs);
@@ -105,6 +107,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             String date = TicketDecode.getDate(firstTicket);
             int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
             int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
+            String range = (numberOfTickets == 1) ? String.valueOf(rangeFirst) : getString(R.string.range_formatter, rangeFirst, rangeLast);
             String cat = TicketDecode.getZone(firstTicket);
             String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
 
@@ -112,7 +115,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             textTicketName.setText(ticketTitle);
             textVenue.setText(venue);
             textDate.setText(date);
-            textRange.setText(rangeFirst + "-" + rangeLast);
+            textRange.setText(range);
             textCat.setText(cat);
         }
     }
@@ -161,6 +164,24 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         TextView tv = findViewById(R.id.textAddIDs);
         tv.setVisibility(View.VISIBLE);
+    }
+
+    private void onBurned(Boolean burn)
+    {
+        //TODO: This method is called once the ticket has been redeemed. Variable 'burn' will only ever be 'true'.
+        System.out.println("Redeemed: " + (burn ? "Yes" : "No"));
+        ticketBurnNotice();
+        TextView tv = findViewById(R.id.textAddIDs);
+        tv.setText("Tickets Redeemed");
+
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.ticket_redeemed);
+        dialog.setIcon(AWalletAlertDialog.SUCCESS);
+        dialog.setOnDismissListener(v -> {
+            viewModel.showAssets(this, ticket, true);
+            this.finish();
+        });
+        dialog.show();
     }
 
     private void onSignatureChanged(SignaturePair sigPair) {

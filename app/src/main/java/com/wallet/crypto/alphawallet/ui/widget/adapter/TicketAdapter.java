@@ -34,6 +34,7 @@ import java.util.List;
  */
 
 public class TicketAdapter extends TokensAdapter {
+    TicketRange currentRange = null;
 
     protected OnTicketIdClickListener onTicketIdClickListener;
 
@@ -71,6 +72,14 @@ public class TicketAdapter extends TokensAdapter {
         return holder;
     }
 
+    public int getTicketRangeCount() {
+        int count = 0;
+        if (currentRange != null) {
+            count = currentRange.tokenIds.size();
+        }
+        return count;
+    }
+
     private void setTicketRange(Ticket ticket, String ticketIds)
     {
         items.beginBatchedUpdates();
@@ -83,7 +92,7 @@ public class TicketAdapter extends TokensAdapter {
 
         int currentSeat = -1;
         char currentZone = '-';
-        TicketRange currentRange = null;
+//        TicketRange currentRange = null;
         //now generate the ticket display
         for (int i = 0; i < sortedList.size(); i++)
         {

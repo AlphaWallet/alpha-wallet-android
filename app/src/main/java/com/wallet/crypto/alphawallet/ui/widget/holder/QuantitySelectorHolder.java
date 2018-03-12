@@ -24,18 +24,20 @@ public class QuantitySelectorHolder extends BinderViewHolder<Token> {
     private final RelativeLayout minusButton;
     private final TextView quantity;
     private int currentQuantity;
+    private int quantityLimit;
 
     public int getCurrentQuantity()
     {
         return currentQuantity;
     }
 
-    public QuantitySelectorHolder(int resId, ViewGroup parent) {
+    public QuantitySelectorHolder(int resId, ViewGroup parent, int quantityLimit) {
         super(resId, parent);
         quantity = findViewById(R.id.text_quantity);
         plusButton = findViewById(R.id.layout_quantity_add);
         minusButton = findViewById(R.id.layout_quantity_minus);
-        currentQuantity = 0;
+        currentQuantity = Integer.parseInt(quantity.getText().toString());
+        this.quantityLimit = quantityLimit;
     }
 
     @Override
@@ -43,8 +45,10 @@ public class QuantitySelectorHolder extends BinderViewHolder<Token> {
     {
         plusButton.setOnClickListener(v -> {
             int val = Integer.parseInt(quantity.getText().toString());
-            val++;
-            quantity.setText(String.valueOf(val));
+            if ((val + 1) <= quantityLimit) {
+                val++;
+                quantity.setText(String.valueOf(val));
+            }
         });
 
         minusButton.setOnClickListener(v -> {

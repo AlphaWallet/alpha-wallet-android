@@ -10,12 +10,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.MarketplaceEvent;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.MarketplaceEventAdapter;
 import com.wallet.crypto.alphawallet.viewmodel.MarketplaceViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.MarketplaceViewModelFactory;
+import com.wallet.crypto.alphawallet.widget.SearchDialog;
 
 import javax.inject.Inject;
 
@@ -40,13 +42,23 @@ public class MarketplaceFragment extends Fragment implements View.OnClickListene
         adapter = new MarketplaceEventAdapter(this::onMarketplaceEventClick);
 
         /* Placeholder only */
-        MarketplaceEvent testEvent1 = new MarketplaceEvent("My Listings");
-        MarketplaceEvent testEvent2 = new MarketplaceEvent("FIFA 2018");
+        MarketplaceEvent testEvent1 = new MarketplaceEvent(getString(R.string.my_listings));
+        MarketplaceEvent testEvent2 = new MarketplaceEvent(getString(R.string.fifa_2018));
         MarketplaceEvent[] testEvents = { testEvent1, testEvent2 };
         adapter.setMarketplaceEvents(testEvents);
 
         list.setAdapter(adapter);
+
+        setupSearchBar(view);
         return view;
+    }
+
+    private void setupSearchBar(View view) {
+        SearchDialog dialog = new SearchDialog(getActivity());
+        RelativeLayout searchLayout = view.findViewById(R.id.search_container);
+        searchLayout.setOnClickListener(v -> {
+            dialog.show();
+        });
     }
 
     private void onMarketplaceEventClick(View view, MarketplaceEvent marketplaceEvent) {

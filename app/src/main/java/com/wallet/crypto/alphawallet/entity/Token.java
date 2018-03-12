@@ -145,4 +145,8 @@ public class Token implements Parcelable {
     {
         return null;
     }
+
+    public boolean isCurrency() {
+        return !tokenInfo.isStormbird;
+    }
 }

@@ -57,8 +57,8 @@ public abstract class C {
     public static final int ETHER_DECIMALS = 18;
 
     //FOR DEMOS ETC
-    public static final boolean SHOW_NEW_ACCOUNT_PROMPT = true;   //this will switch off the splash screen 'please make a key' message
-    public static final boolean HARD_CODED_KEY = false;           //pre-loads a hard coded key in the app
+    public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
+    public static final boolean HARD_CODED_KEY = true;           //pre-loads a hard coded key in the app
     public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
 
     //Range of 3 test keys, they all have a little test eth pre-loaded on them

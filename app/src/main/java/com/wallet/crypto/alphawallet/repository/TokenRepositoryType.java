@@ -15,6 +15,7 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchActive(String walletAddress);
     Observable<Token[]> fetchActiveCache(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
+    Observable<Token> fetchActiveToken(String walletAddress, String address);
     Observable<Token[]> fetchAll(String walletAddress);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address);

@@ -1,8 +1,10 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
@@ -23,9 +25,11 @@ public class ImportTokenModule {
     ImportTokenViewModelFactory importTokenViewModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
             CreateTransactionInteract createTransactionInteract,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTokensInteract fetchTokensInteract,
+            AddTokenInteract addTokenInteract,
+            SetupTokensInteract setupTokensInteract) {
         return new ImportTokenViewModelFactory(
-                findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract);
+                findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, addTokenInteract, setupTokensInteract);
     }
 
     @Provides
@@ -41,5 +45,17 @@ public class ImportTokenModule {
     @Provides
     FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
         return new FetchTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository,
+            WalletRepositoryType walletRepository) {
+        return new AddTokenInteract(walletRepository, tokenRepository);
+    }
+
+    @Provides
+    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
+        return new SetupTokensInteract(tokenRepository);
     }
 }

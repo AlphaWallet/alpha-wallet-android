@@ -17,6 +17,7 @@ import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.HelpRouter;
@@ -49,6 +50,7 @@ public class HomeViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final ImportWalletInteract importWalletInteract;
 
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
@@ -87,7 +89,8 @@ public class HomeViewModel extends BaseViewModel {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            ImportWalletInteract importWalletInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -105,6 +108,7 @@ public class HomeViewModel extends BaseViewModel {
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
         this.helpRouter = helpRouter;
+        this.importWalletInteract = importWalletInteract;
     }
 
     @Override
@@ -244,5 +248,17 @@ public class HomeViewModel extends BaseViewModel {
 
     public void showHelp(Context context) {
         helpRouter.open(context);
+    }
+
+    public void addHardKey(String key) {
+        importWalletInteract
+                .importPrivateKey(key)
+                .subscribe(this::onWallet, this::onError);
+    }
+
+    private void onWallet(Wallet wallet)
+    {
+        //success
+        System.out.println("Imported wallet at addr: " + wallet.address);
     }
 }

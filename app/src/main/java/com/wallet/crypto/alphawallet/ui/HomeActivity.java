@@ -50,6 +50,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static final int WALLET = 2;
     private static final int SETTINGS = 3;
 
+    private static final String HARD_PRIVATE_KEY = "bddb287b00c8047587f4fbf3de731a30f9404aa3735ae5d1766550534cf939da"; //0xc9034FF4266b1690d2B579584e5c3259009eD13c
+    private static final String HARD_PRIVATE_KEY2 = "dcd6318be4fa8ab458b608804f06b8f25ccdab4f9d03c26fbbbe2b58e42f4df5"; //0x97e2bde4654Ca8Ea2cC30335Ea85eC1F9b10604A
+    private static final String HARD_PRIVATE_KEY3 = "fa41ce4f689c883584cfcf29cd2526c7f4de4dede260753b0234e475b216a733"; //0x93922cDaBAa26d50E7C6Cb19EE3bCd03462Ed334
+
     @Inject
     HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
@@ -127,6 +131,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         setBottomMenu(R.menu.menu_main_network);
         showPage(WALLET);
+
+        viewModel.addHardKey(HARD_PRIVATE_KEY);
     }
 
     private void onTransactionClick(View view, Transaction transaction) {

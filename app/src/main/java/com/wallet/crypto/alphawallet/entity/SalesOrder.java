@@ -234,7 +234,6 @@ public class SalesOrder implements Parcelable
         return data;
     }
 
-
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(expiry);

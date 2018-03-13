@@ -11,6 +11,8 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.Int;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -221,6 +223,20 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
+    public List<Integer> indexToIDList(int[] prunedIndices)
+    {
+        List<Integer> idList = new ArrayList<>();
+        for (int i : prunedIndices)
+        {
+            if (i < balanceArray.size()) {
+                Integer ticketID = balanceArray.get(i);
+                idList.add(ticketID);
+            }
+        }
+
+        return idList;
+    }
+
     public List<Integer> ticketIdToTicketIndex(List<Integer> ticketIds)
     {
         //read given indicies and convert into internal format, error checking to ensure
@@ -250,7 +266,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Function to convert a list of ticket IDs into ticket indicies for the account address given
+     * Function to convert a list of ticket IDs into ticket indices for the account address given
      * @param userList
      * @return
      */
@@ -334,6 +350,34 @@ public class Ticket extends Token implements Parcelable
         for (Integer id : idArray)
         {
             if (!keepZeros && id == 0) continue;
+            if (!first)
+            {
+                sb.append(", ");
+            }
+            first = false;
+
+            sb.append(id.toString());
+            displayIDs = sb.toString();
+        }
+
+        return displayIDs;
+    }
+
+    /**
+     * Produce a string CSV of integer IDs given an input list of
+     * @param idArray int[] array of indices
+     * @return
+     */
+    @Override
+    public String populateIDs(int[] idArray)
+    {
+        if (idArray == null) return "";
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Integer id : idArray)
+        {
+            if (id == 0) continue;
             if (!first)
             {
                 sb.append(", ");

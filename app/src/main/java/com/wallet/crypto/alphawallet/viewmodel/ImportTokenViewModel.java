@@ -227,7 +227,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
         catch (SalesOrderMalformed e)
         {
-            e.printStackTrace(); // TODO: add user interface handling of the exception.
+            //This will never be reached because the order is checked previously.
+            invalidLink.postValue(true);
         }
     }
 

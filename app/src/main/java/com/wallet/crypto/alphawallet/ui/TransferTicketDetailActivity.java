@@ -1,12 +1,16 @@
 package com.wallet.crypto.alphawallet.ui;
 
+import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -15,6 +19,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,8 +28,10 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -36,11 +44,14 @@ import com.wallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import com.wallet.crypto.alphawallet.widget.ProgressView;
 import com.wallet.crypto.alphawallet.widget.SystemView;
 
+import org.ethereum.geth.Address;
+import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -63,10 +74,13 @@ public class TransferTicketDetailActivity extends BaseActivity {
     protected TransferTicketDetailViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
+    private Dialog dialog;
 
     private Ticket ticket;
     private TicketRange ticketRange;
     private TicketAdapter adapter;
+    private EditText toAddressText;
+    private TextInputLayout toInputLayout;
 
     private String ticketIds;
 
@@ -99,8 +113,12 @@ public class TransferTicketDetailActivity extends BaseActivity {
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.newTransaction().observe(this, this::onTransaction);
+        viewModel.error().observe(this, this::onError);
 
         TextView textQuantity = findViewById(R.id.text_quantity);
+        toInputLayout = findViewById(R.id.to_input_layout);
+        toAddressText = findViewById(R.id.send_to_address);
 
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
@@ -134,13 +152,114 @@ public class TransferTicketDetailActivity extends BaseActivity {
                 dialog.show();
             }
         });
+
+        ImageButton scanBarcodeButton = findViewById(R.id.scan_barcode_button);
+        scanBarcodeButton.setOnClickListener(view -> {
+            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+        });
+    }
+
+    private void onTransaction(String hash) {
+        hideDialog();
+        dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.transaction_succeeded)
+                .setMessage(hash)
+                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
+                    //TODO: go back to ticket asset view page
+                    finish();
+                })
+                .setNeutralButton(R.string.copy, (dialog1, id) -> {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("transaction hash", hash);
+                    clipboard.setPrimaryClip(clip);
+                    finish();
+                })
+                .create();
+        dialog.show();
+    }
+
+    private void hideDialog() {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+    }
+
+    private void onProgress(boolean shouldShowProgress) {
+        hideDialog();
+        if (shouldShowProgress) {
+            dialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.title_dialog_sending)
+                    .setView(new ProgressBar(this))
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
+        }
+    }
+
+    private void onError(ErrorEnvelope error) {
+        hideDialog();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.error_transaction_failed)
+                .setMessage(error.message)
+                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
+                    // Do nothing
+                })
+                .create();
+        dialog.show();
     }
 
     private void transferTicketFinal()
     {
         //complete the transfer
         //1. get the acual IDs
-        //sdfsdf
+        try
+        {
+            //convert ticketId list to ticket index array
+            int[] indices = ticket.getTicketIndicies(ticketIds);
+
+            TextView textQuantity = findViewById(R.id.text_quantity);
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+
+            if (quantity > indices.length) {
+                //TODO: display error (should not be able to reach this)
+                quantity = indices.length;
+            }
+
+            ///chop them to the required amount
+            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
+
+            //produce ticket ID list from this array
+            List<Integer> selectedIDs = ticket.indexToIDList(prunedIndices);
+
+            //check send address
+            final String to = toAddressText.getText().toString();
+            if (!isAddressValid(to)) {
+                toInputLayout.setError(getString(R.string.error_invalid_address));
+                return;
+            }
+
+            //finally do the transfer
+            String indexList = ticket.populateIDs(prunedIndices);
+            String idList = ticket.populateIDs(selectedIDs, false);
+            toInputLayout.setErrorEnabled(false);
+
+            //viewModel.openConfirmation(this, ticket, to, indexList, idList);
+
+            onProgress(true);
+
+            viewModel.createTicketTransfer(
+                    to,
+                    ticket.getAddress(),
+                    indexList,
+                    Contract.GAS_PRICE,
+                    Contract.GAS_LIMIT);
+
+        }
+        catch (NumberFormatException n)
+        {
+            // should never happen, we don't allow user to choose invalid number
+        }
 
     }
 
@@ -157,27 +276,36 @@ public class TransferTicketDetailActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == BARCODE_READER_REQUEST_CODE) {
-//            if (resultCode == CommonStatusCodes.SUCCESS) {
-//                if (data != null) {
-//                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-//
-//                    QRURLParser parser = QRURLParser.getInstance();
-//                    String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);
-//                    if (extracted_address == null) {
-//                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-//                        return;
-//                    }
-//                    Point[] p = barcode.cornerPoints;
-//                    toAddressText.setText(extracted_address);
-//                }
-//            } else {
-//                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-//                        CommonStatusCodes.getStatusCodeString(resultCode)));
-//            }
-//        } else {
-//            super.onActivityResult(requestCode, resultCode, data);
-//        }
+        if (requestCode == BARCODE_READER_REQUEST_CODE) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (data != null) {
+                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+
+                    QRURLParser parser = QRURLParser.getInstance();
+                    String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);
+                    if (extracted_address == null) {
+                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Point[] p = barcode.cornerPoints;
+                    toAddressText.setText(extracted_address);
+                }
+            } else {
+                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                        CommonStatusCodes.getStatusCodeString(resultCode)));
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    boolean isAddressValid(String address) {
+        try {
+            new Address(address);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
 

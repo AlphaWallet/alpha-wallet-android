@@ -102,6 +102,11 @@ public class Token implements Parcelable {
         return "";
     }
 
+    public String populateIDs(int[] idArray)
+    {
+        return "";
+    }
+
     public static final String EMPTY_BALANCE = "\u2014\u2014";
 
     public void setupContent(TokenHolder holder) {
@@ -162,5 +167,10 @@ public class Token implements Parcelable {
 
     public boolean isCurrency() {
         return !tokenInfo.isStormbird;
+    }
+
+    public List<Integer> indexToIDList(int[] prunedIndices)
+    {
+        return null;
     }
 }

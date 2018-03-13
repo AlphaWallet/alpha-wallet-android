@@ -136,29 +136,12 @@ public class TransferTicketDetailActivity extends BaseActivity {
         });
     }
 
-    private void transferTicketFinal() {
-//        boolean inputValid = true;
-//        final String to = toAddressText.getText().toString();
-//        if (!isAddressValid(to)) {
-//            toInputLayout.setError(getString(R.string.error_invalid_address));
-//            inputValid = false;
-//        }
-//        final String amount = idsText.getText().toString();
-//        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(amount);
-//
-//        if (idSendList == null || idSendList.isEmpty())
-//        {
-//            amountInputLayout.setError(getString(R.string.error_invalid_amount));
-//            inputValid = false;
-//        }
-//
-//        if (!inputValid) {
-//            return;
-//        }
-//
-//        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
-//        toInputLayout.setErrorEnabled(false);
-//        viewModel.openConfirmation(this, to, indexList, amount);
+    private void transferTicketFinal()
+    {
+        //complete the transfer
+        //1. get the acual IDs
+        //sdfsdf
+
     }
 
     @Override

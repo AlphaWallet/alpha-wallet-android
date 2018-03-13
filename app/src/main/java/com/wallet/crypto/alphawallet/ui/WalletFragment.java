@@ -66,6 +66,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         progressView = view.findViewById(R.id.progress_view);
         progressView.hide();
 
+        progressView.setWhiteCircle();
+
         RecyclerView list = view.findViewById(R.id.list);
 
         list.setLayoutManager(new LinearLayoutManager(getContext()));

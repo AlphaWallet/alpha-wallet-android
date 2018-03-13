@@ -27,6 +27,14 @@
 
     <!--</android.support.v4.view.ViewPager>-->
 
+    <com.wallet.crypto.alphawallet.widget.ProgressView
+        android:id="@+id/progress_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        tools:visibility="gone" />
+
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
@@ -64,10 +72,4 @@
         android:background="@android:color/white"
         tools:visibility="gone" />
 
-    <com.wallet.crypto.alphawallet.widget.ProgressView
-        android:id="@+id/progress_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        tools:visibility="gone" />
 </RelativeLayout>

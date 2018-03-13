@@ -18,6 +18,14 @@
         android:layout_marginLeft="@dimen/big_padding"
         android:layout_marginRight="@dimen/big_padding">
 
+        <com.wallet.crypto.alphawallet.widget.ProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            tools:visibility="gone" />
+
         <RelativeLayout
             android:id="@+id/contract_address_layout"
             android:layout_width="match_parent"
@@ -117,10 +125,4 @@
         android:background="@color/white"
         tools:visibility="gone" />
 
-    <com.wallet.crypto.alphawallet.widget.ProgressView
-        android:id="@+id/progress_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        tools:visibility="gone" />
 </LinearLayout>

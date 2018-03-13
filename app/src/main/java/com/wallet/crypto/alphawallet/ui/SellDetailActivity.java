@@ -21,6 +21,7 @@ import com.wallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
 import com.wallet.crypto.alphawallet.util.KeyboardUtils;
+import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import com.wallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 import com.wallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
@@ -33,6 +34,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -125,8 +127,6 @@ public class SellDetailActivity extends BaseActivity
                 try {
                     int quantity = Integer.parseInt(textQuantity.getText().toString());
                     updateSellPrice(quantity);
-                    //double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
-                    //totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
                 }
                 catch (NumberFormatException e)
                 {
@@ -228,15 +228,16 @@ public class SellDetailActivity extends BaseActivity
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        int[] indicies = ticket.getTicketIndicies(ticketIds);
+        int[] indices = ticket.getTicketIndicies(ticketIds);
+        int quantity = Integer.parseInt(textQuantity.getText().toString());
 
-        //TODO: use the textQuantity value from the 'textQuantity' EditText - see the invision UX plan
-
-        if (price.doubleValue() > 0.0 && indicies != null)
+        if (price.doubleValue() > 0.0 && indices != null && quantity > 0)
         {
+            //get the specific ID's, pick from the start of the run
+            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
             List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
-            BigInteger totalValue = price.multiply(BigInteger.valueOf(ticketIdList.size()));
-            viewModel.generateSalesOrders(ticket.getAddress(), totalValue, indicies, ticketIdList.get(0));
+            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
+            viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
             finish();
         }
 

@@ -144,7 +144,7 @@
     <string name="toolbar_add_custom_token">添加自定义Token</string>
     <string name="contact_us">需要更多的帮助? 联系我们</string>
     <string name="confirm_sale_title">确认出售?</string>
-    <string name="confirm_sale_small_text">你会收到:</string>
+    <string name="confirm_sale_small_text">门票售出后你会收到:</string>
     <string name="dialog_cancel_back">取消并退回</string>
     <string name="seekbar_max">最多</string>
     <string name="seekbar_min">最少</string>

@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 
+import static com.wallet.crypto.alphawallet.C.SHOW_NEW_ACCOUNT_PROMPT;
+
 public class SplashActivity extends BaseActivity {
 
     @Inject
@@ -56,10 +58,9 @@ public class SplashActivity extends BaseActivity {
             new ImportTokenRouter().open(this, importData);
             finish();
         }
-        else if (wallets.length == 0) {
+        else if (wallets.length == 0 && SHOW_NEW_ACCOUNT_PROMPT) {
             new ManageWalletsRouter().open(this, true);
         } else {
-//            new TransactionsRouter().open(this, true);
             new HomeRouter().open(this, true);
         }
     }

@@ -41,7 +41,7 @@ public class TicketDecode
 
     public static String getName()
     {
-        return "Arranging mortgage";
+        return "World Series Baseball";
     }
 
     public static String getVenue(int ticketId)
@@ -148,21 +148,19 @@ public class TicketDecode
 //    };
 
     private static final String venues[] = {
-            "Barclays Pasir Ris Park",
-            "RBS Forbidden City",
-            "Rabobank Old Changi Hospital",
-            "UOB Hacking",
-            "CBA Perth",
+            "Pasir Ris Park",
+            "Bukit Panjang",
+            "Old Changi Hospital",
+            "Port Hacking",
+            "Wogga Wogga",
             "Orange Academy",
-            "StGeorge 'Pitz'",
-            "NAB NEC",
-            "McQuarrie Bierkeller",
-            "HSBC Twin Towns"
+            "Woolongabba",
+            "Darling Harbour Plaza",
+            "McQuarrie Park",
+            "Tampines Mall"
     };
 
     private static final String dates[] = {
-            "28 Feb 2018",
-            "05 Mar 2018",
             "20 Mar 2018",
             "31 Mar 2018",
             "01 Apr 2018",
@@ -171,6 +169,8 @@ public class TicketDecode
             "05 May 2018",
             "15 May 2018",
             "30 May 2018",
+            "05 Jun 2018",
+            "28 Jun 2018",
     };
 
     private static String issuer = "Shengkai";

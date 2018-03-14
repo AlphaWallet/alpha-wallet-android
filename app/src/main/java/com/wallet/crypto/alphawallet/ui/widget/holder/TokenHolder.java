@@ -118,6 +118,21 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         double dAppreciation = dBalance - (dBalance/nPercentage);
         BigDecimal appreciation = BigDecimal.valueOf(dAppreciation);
 
+        int valColor;
+        if (appreciation.compareTo(BigDecimal.ZERO) == 1)
+        {
+            valColor = ContextCompat.getColor(getContext(), R.color.black);
+            textAppreciationSub.setText(R.string.appreciation);
+            textAppreciationSub.setTextColor(valColor);
+        }
+        else
+        {
+            valColor = ContextCompat.getColor(getContext(), R.color.red);
+            textAppreciationSub.setText(R.string.depreciation);
+            textAppreciationSub.setTextColor(valColor);
+            appreciation = appreciation.multiply(BigDecimal.valueOf(-1));
+        }
+
         //BigDecimal appreciation = balance.subtract(balance.divide((BigDecimal.valueOf(percentage).add(BigDecimal.ONE))) );
         String convertedAppreciation =
                 appreciation

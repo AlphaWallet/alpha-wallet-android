@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.wallet.crypto.alphawallet.BuildConfig;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.ImportTokenRouter;
@@ -21,6 +22,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 
+import static com.wallet.crypto.alphawallet.C.DEFAULT_NETWORK;
+import static com.wallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static com.wallet.crypto.alphawallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
 public class SplashActivity extends BaseActivity {
@@ -50,6 +53,8 @@ public class SplashActivity extends BaseActivity {
         splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)
                 .get(SplashViewModel.class);
         splashViewModel.wallets().observe(this, this::onWallets);
+
+        splashViewModel.setOverrideNetwork();
     }
 
     private void onWallets(Wallet[] wallets) {

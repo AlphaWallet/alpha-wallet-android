@@ -7,6 +7,7 @@ import android.util.Base64;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
@@ -20,6 +21,8 @@ import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
 import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepository;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.service.ImportTokenService;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
@@ -41,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
+import static com.wallet.crypto.alphawallet.C.DEFAULT_NETWORK;
+import static com.wallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -141,15 +146,47 @@ public class ImportTokenViewModel extends BaseViewModel  {
     public void fetchBalance() {
         getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .fetchBalance(new Wallet(ownerAddress), importOrder.contractAddress)
+                        .fetch(wallet.getValue()) //
                         .subscribe(this::onBalance)).subscribe();
     }
 
-    private void onBalance(Token token)
+    private void onBalance(Token[] tokens)
     {
+        //check the required balance
+        for (Token t : tokens)
+        {
+            if (t.ticker != null)
+            {
+                //get the current exchange rate
+                ethToUsd = Double.valueOf(t.ticker.price);
+            }
+            if (t.addressMatches(importOrder.contractAddress) && t instanceof Ticket)
+            {
+                //get owner balance
+                fetchTokensInteract.updateBalance(new Wallet(ownerAddress), t)
+                        .subscribe(this::onUpdate);
+                break;
+            }
+        }
+    }
+
+    private void onUpdate(Token token) {
         importToken = (Ticket)token;
         updateToken();
     }
+
+//    public void fetchBalance() {
+//        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+//                .doOnNext(l -> fetchTokensInteract
+//                        //.fetchBalance(new Wallet(ownerAddress), importOrder.contractAddress)
+//                        .subscribe(this::onBalance)).subscribe();
+//    }
+//
+//    private void onBalance(Token token)
+//    {
+//        importToken = (Ticket)token;
+//        updateToken();
+//    }
 
     private void updateToken()
     {

@@ -44,9 +44,9 @@ public class FetchTokensInteract {
                         .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token> fetchBalance(Wallet wallet, String contractAddress)
+    public Observable<Token> updateBalance(Wallet wallet, Token token)
     {
-        return tokenRepository.fetchActiveToken(wallet.address, contractAddress)
+        return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

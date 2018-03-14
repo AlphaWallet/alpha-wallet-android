@@ -134,20 +134,44 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token> fetchActiveToken(String walletAddress, String address)
+    public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-        return localSource
-                .fetchEnabledToken(network, wallet, address)
-                .flatMap(token -> updateBalance(network, wallet, token))
+        return updateBalance(network, wallet, token)
                 .observeOn(Schedulers.newThread())
                 .toObservable();
+        //return
+//                setupTokensFromLocal(address)
+//                .flatMap(token -> updateBalance(network, wallet, token))
+//                .observeOn(Schedulers.newThread())
+//                .toObservable();
 
 //        return fetchCachedToken(network, wallet, address)
 //                .map(token -> updateBalance(network, wallet, token))
 //                .subscribeOn(Schedulers.io());
     }
+
+//    @Override
+//    public Observable<Token> fetchActiveToken(String walletAddress, String address)
+//    {
+//        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+//        Wallet wallet = new Wallet(walletAddress);
+//        return localSource
+//                .fetchEnabledToken(network, wallet, address)
+//                .flatMap(token -> updateBalance(network, wallet, token))
+//                .observeOn(Schedulers.newThread())
+//                .toObservable();
+//        //return
+////                setupTokensFromLocal(address)
+////                .flatMap(token -> updateBalance(network, wallet, token))
+////                .observeOn(Schedulers.newThread())
+////                .toObservable();
+//
+////        return fetchCachedToken(network, wallet, address)
+////                .map(token -> updateBalance(network, wallet, token))
+////                .subscribeOn(Schedulers.io());
+//    }
 
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {

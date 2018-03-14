@@ -60,6 +60,7 @@ public abstract class C {
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
     public static final boolean HARD_CODED_KEY = true;           //pre-loads a hard coded key in the app
     public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
+    public static final boolean OVERRIDE_DEFAULT_NETWORK = true;  //use the default network given below
 
     //Range of 3 test keys, they all have a little test eth pre-loaded on them
     public static final String HARD_PRIVATE_KEY1 = "bddb287b00c8047587f4fbf3de731a30f9404aa3735ae5d1766550534cf939da"; //0xc9034FF4266b1690d2B579584e5c3259009eD13c
@@ -72,6 +73,8 @@ public abstract class C {
     //TODO: Pick these up from blockchain
     public static final String HARD_CONTRACT_NAME = "World Series Baseball";
     public static final String HARD_CONTRACT_SYMBOL = "WSB";
+
+    public static final String DEFAULT_NETWORK = ROPSTEN_NETWORK_NAME;
 
     public interface ErrorCode {
 

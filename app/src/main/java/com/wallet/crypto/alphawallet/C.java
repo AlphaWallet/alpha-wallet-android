@@ -68,8 +68,8 @@ public abstract class C {
     public static final String HARD_PRIVATE_KEY3 = "fa41ce4f689c883584cfcf29cd2526c7f4de4dede260753b0234e475b216a733"; //0x93922cDaBAa26d50E7C6Cb19EE3bCd03462Ed334
 
     //Pick which private key to pre-install
-    public static final String PRE_LOADED_KEY = HARD_PRIVATE_KEY1;
-    public static final String HARD_CONTRACT_ADDR = "0x0B6732bAECc0793e38a98934799Abd3C7dC3Cf31";
+    public static final String PRE_LOADED_KEY = HARD_PRIVATE_KEY3;
+    public static final String HARD_CONTRACT_ADDR = "0x0B6732BAECC0793E38A98934799ABD3C7DC3CF31";
     //TODO: Pick these up from blockchain
     public static final String HARD_CONTRACT_NAME = "World Series Baseball";
     public static final String HARD_CONTRACT_SYMBOL = "WSB";

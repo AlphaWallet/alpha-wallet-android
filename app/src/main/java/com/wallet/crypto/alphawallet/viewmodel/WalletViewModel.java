@@ -24,6 +24,7 @@ import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.disposables.Disposable;
@@ -111,10 +112,19 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     private void onTokens(Token[] tokens) {
-        tokenCache = tokens;
+        //parse tokens for duplicate
+//        Map<String, Token> deDuplicate = new HashMap<>();
+//        for (Token t : tokens)
+//        {
+//            if (!deDuplicate.containsKey(t.getAddress()))
+//            {
+//                deDuplicate.put(t.getAddress(), t);
+//            }
+//        }
+        tokenCache = tokens;//deDuplicate.values().toArray(new Token[deDuplicate.size()]);
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
-            showTotalBalance(tokens);
+            showTotalBalance(tokenCache);
         }
     }
 

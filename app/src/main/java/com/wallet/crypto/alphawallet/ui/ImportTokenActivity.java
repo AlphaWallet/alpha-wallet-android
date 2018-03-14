@@ -87,9 +87,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Button cancel = findViewById(R.id.cancel_button);
         cancel.setOnClickListener(this);
 
-//        TextView importTxt = findViewById(R.id.textImport);
-//        importTxt.setText(importString);
-
         viewModel = ViewModelProviders.of(this, importTokenViewModelFactory)
                 .get(ImportTokenViewModel.class);
 
@@ -100,9 +97,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.invalidLink().observe(this, this::onBadLink);
 
         ticketRange = null;
-
-//        ProgressBar progress = findViewById(R.id.progress);
-//        progress.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.white), PorterDuff.Mode.SRC_IN );
     }
 
     private void onBadLink(Boolean aBoolean)

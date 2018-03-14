@@ -1,10 +1,14 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import com.wallet.crypto.alphawallet.repository.PasswordStore;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
@@ -21,7 +25,6 @@ import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 import com.wallet.crypto.alphawallet.router.WalletRouter;
 import com.wallet.crypto.alphawallet.viewmodel.HomeViewModelFactory;
-import com.wallet.crypto.alphawallet.viewmodel.TransactionsViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;
@@ -46,7 +49,9 @@ class HomeModule {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            ImportWalletInteract importWalletInteract,
+            AddTokenInteract addTokenInteract) {
         return new HomeViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -64,7 +69,9 @@ class HomeModule {
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,
-                helpRouter);
+                helpRouter,
+                importWalletInteract,
+                addTokenInteract);
     }
 
     @Provides
@@ -76,6 +83,13 @@ class HomeModule {
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
+    }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository,
+            WalletRepositoryType walletRepository) {
+        return new AddTokenInteract(walletRepository, tokenRepository);
     }
 
     @Provides
@@ -106,6 +120,12 @@ class HomeModule {
 
     @Provides
     SendRouter provideSendRouter() { return new SendRouter(); }
+
+    @Provides
+    ImportWalletInteract provideImportWalletInteract(
+            WalletRepositoryType walletRepository, PasswordStore passwordStore) {
+        return new ImportWalletInteract(walletRepository, passwordStore);
+    }
 
     @Provides
     TransactionDetailRouter provideTransactionDetailRouter() {

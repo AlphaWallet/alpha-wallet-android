@@ -24,6 +24,7 @@ import com.wallet.crypto.alphawallet.router.SendTokenRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.disposables.Disposable;
@@ -114,7 +115,7 @@ public class WalletViewModel extends BaseViewModel {
         tokenCache = tokens;
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
-            showTotalBalance(tokens);
+            showTotalBalance(tokenCache);
         }
     }
 

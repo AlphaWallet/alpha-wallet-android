@@ -4,10 +4,12 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
 import com.wallet.crypto.alphawallet.router.AddTokenRouter;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.HelpRouter;
@@ -41,6 +43,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
     private final HelpRouter helpRouter;
+    private final ImportWalletInteract importWalletInteract;
+    private final AddTokenInteract addTokenInteract;
 
     public HomeViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -59,7 +63,9 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            ImportWalletInteract importWalletInteract,
+            AddTokenInteract addTokenInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -77,6 +83,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
         this.helpRouter = helpRouter;
+        this.importWalletInteract = importWalletInteract;
+        this.addTokenInteract = addTokenInteract;
     }
 
     @NonNull
@@ -99,6 +107,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,
-                helpRouter);
+                helpRouter,
+                importWalletInteract,
+                addTokenInteract);
     }
 }

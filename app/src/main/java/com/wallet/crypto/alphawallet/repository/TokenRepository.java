@@ -57,6 +57,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import rx.Subscription;
 
@@ -73,6 +74,7 @@ public class TokenRepository implements TokenRepositoryType {
     private final TransactionLocalSource transactionsLocalCache;
     private final TickerService tickerService;
     private Web3j web3j;
+    private Web3j web3jFullNode = null;
 
     public TokenRepository(
             OkHttpClient okHttpClient,
@@ -95,6 +97,10 @@ public class TokenRepository implements TokenRepositoryType {
 
     private void buildWeb3jClient(NetworkInfo defaultNetwork) {
         web3j = Web3jFactory.build(new HttpService(defaultNetwork.rpcServerUrl, httpClient, false));
+        if (defaultNetwork.backupNodeUrl != null)
+        {
+            web3jFullNode = Web3jFactory.build(new HttpService(defaultNetwork.backupNodeUrl, httpClient, false));
+        }
     }
 
     @Override
@@ -122,10 +128,50 @@ public class TokenRepository implements TokenRepositoryType {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
-                fetchCachedToken(network, wallet, token),
+                fetchCachedToken(network, wallet, token.getAddress()),
                 updateBalance(network, wallet, token)) // Looking for new tokens
                 .toObservable();
     }
+
+    @Override
+    public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return updateBalance(network, wallet, token)
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+        //return
+//                setupTokensFromLocal(address)
+//                .flatMap(token -> updateBalance(network, wallet, token))
+//                .observeOn(Schedulers.newThread())
+//                .toObservable();
+
+//        return fetchCachedToken(network, wallet, address)
+//                .map(token -> updateBalance(network, wallet, token))
+//                .subscribeOn(Schedulers.io());
+    }
+
+//    @Override
+//    public Observable<Token> fetchActiveToken(String walletAddress, String address)
+//    {
+//        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+//        Wallet wallet = new Wallet(walletAddress);
+//        return localSource
+//                .fetchEnabledToken(network, wallet, address)
+//                .flatMap(token -> updateBalance(network, wallet, token))
+//                .observeOn(Schedulers.newThread())
+//                .toObservable();
+//        //return
+////                setupTokensFromLocal(address)
+////                .flatMap(token -> updateBalance(network, wallet, token))
+////                .observeOn(Schedulers.newThread())
+////                .toObservable();
+//
+////        return fetchCachedToken(network, wallet, address)
+////                .map(token -> updateBalance(network, wallet, token))
+////                .subscribeOn(Schedulers.io());
+//    }
 
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
@@ -324,46 +370,38 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public void memPoolListener(final SubscribeWrapper subscriber)
     {
-        new Thread()
-        {
-            final Object waitForUnsubscribe = new Object();
-            public void run()
-            {
-                subscriber.wrapperInteraction = new Handler(Looper.getMainLooper())
-                {
-                    @Override
-                    public void handleMessage(Message msg)
-                    {
-                        super.handleMessage(msg);
-                        //only handle shutdown message
-                        synchronized (waitForUnsubscribe)
-                        {
-                            waitForUnsubscribe.notifyAll();
+        if (web3jFullNode != null) {
+            new Thread() {
+                final Object waitForUnsubscribe = new Object();
+
+                public void run() {
+                    subscriber.wrapperInteraction = new Handler(Looper.getMainLooper()) {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            super.handleMessage(msg);
+                            //only handle shutdown message
+                            synchronized (waitForUnsubscribe) {
+                                waitForUnsubscribe.notifyAll();
+                            }
                         }
+                    };
+
+                    final Subscription transactionSubscription = web3jFullNode.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
+
+                    try {
+                        synchronized (waitForUnsubscribe) {
+                            waitForUnsubscribe.wait();
+                        }
+                    } catch (InterruptedException e) {
+
+                    } finally {
+                        //Now terminate the observable and the thread
+                        transactionSubscription.unsubscribe();
+                        subscriber.wrapperInteraction = null;
                     }
-                };
-
-                final Subscription transactionSubscription = web3j.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
-
-                try
-                {
-                    synchronized (waitForUnsubscribe)
-                    {
-                        waitForUnsubscribe.wait();
-                    }
                 }
-                catch (InterruptedException e)
-                {
-
-                }
-                finally
-                {
-                    //Now terminate the observable and the thread
-                    transactionSubscription.unsubscribe();
-                    subscriber.wrapperInteraction = null;
-                }
-            }
-        }.start();
+            }.start();
+        }
     }
 
     private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {
@@ -377,9 +415,9 @@ public class TokenRepository implements TokenRepositoryType {
                 .compose(attachEthereum(network, wallet));
     }
 
-    private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, Token token) {
+    private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address) {
         return localSource
-                .fetchEnabledToken(network, wallet, token);
+                .fetchEnabledToken(network, wallet, address);
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {

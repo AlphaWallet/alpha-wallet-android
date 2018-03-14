@@ -47,14 +47,14 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, Token token) {
+    public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address) {
         return Single.fromCallable(() -> {
             Realm realm = null;
 
             try {
                 realm = realmManager.getRealmInstance(networkInfo, wallet);
                 RealmResults<RealmToken> realmItem = realm.where(RealmToken.class)
-                        .equalTo("address", token.tokenInfo.address)
+                        .equalTo("address", address)
                         .findAll();
 
                 return convertSingle(realmItem, System.currentTimeMillis());

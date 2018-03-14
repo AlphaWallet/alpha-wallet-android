@@ -7,23 +7,27 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.TransactionInput;
 import com.wallet.crypto.alphawallet.entity.TransactionDecoder;
 import com.wallet.crypto.alphawallet.entity.TransactionOperation;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.HomeRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
@@ -41,6 +45,7 @@ import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,12 +65,11 @@ public class TransactionsViewModel extends BaseViewModel {
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final AddTokenInteract addTokenInteract;
+    private final SetupTokensInteract setupTokensInteract;
 
-    private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
-    private final SendRouter sendRouter;
     private final TransactionDetailRouter transactionDetailRouter;
-    private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final MarketBrowseRouter marketBrowseRouter;
@@ -82,17 +86,22 @@ public class TransactionsViewModel extends BaseViewModel {
     private Disposable fetchTokensDisposable;
     private Handler handler = new Handler();
 
+    private Map<String, Transaction> txMap = new HashMap<>();
+    private int tokenTxCount;
+    private boolean stopTransactionRefresh = false;
+    private List<String> detectedContracts = new ArrayList<>();
+    TransactionDecoder transactionDecoder = null;
+
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             FetchTokensInteract fetchTokensInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            ManageWalletsRouter manageWalletsRouter,
+            SetupTokensInteract setupTokensInteract,
             SettingsRouter settingsRouter,
-            SendRouter sendRouter,
+            AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
-            MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
@@ -104,11 +113,8 @@ public class TransactionsViewModel extends BaseViewModel {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
-        this.sendRouter = sendRouter;
         this.transactionDetailRouter = transactionDetailRouter;
-        this.myAddressRouter = myAddressRouter;
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.marketBrowseRouter = marketBrowseRouter;
@@ -117,6 +123,8 @@ public class TransactionsViewModel extends BaseViewModel {
         this.newSettingsRouter = newSettingsRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.addTokenInteract = addTokenInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     @Override
@@ -152,77 +160,139 @@ public class TransactionsViewModel extends BaseViewModel {
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
+
+        if (transactionDecoder == null)
+        {
+            transactionDecoder = new TransactionDecoder();
+        }
     }
 
+    //1. Get normal transactions
     public void fetchTransactions(boolean shouldShowProgress) {
+        txMap.clear();
+        detectedContracts.clear();
         handler.removeCallbacks(startFetchTransactionsTask);
         progress.postValue(shouldShowProgress);
         /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
         Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
         fetchTransactionDisposable = fetch
-                .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted);
+                .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
     }
 
-    public void getBalance() {
-        getBalanceDisposable = getDefaultWalletBalance
-                .get(defaultWallet.getValue())
-                .subscribe(values -> {
-                    defaultWalletBalance.postValue(values);
-                    handler.removeCallbacks(startGetBalanceTask);
-                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
-                }, t -> {
-                });
+    //Called from fetchTransactions
+    private void onTransactions(Transaction[] transactions) {
+        for (Transaction t : transactions)
+        {
+            if (!txMap.containsKey(t.hash))
+            {
+                txMap.put(t.hash, t);
+                detectContractTransactions(t);
+            }
+        }
+        //this.transactions.setValue(transactions);
+        Boolean last = progress.getValue();
+        if (transactions != null && transactions.length > 0 && last != null && last) {
+            progress.postValue(true);
+        }
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    private void onDefaultWallet(Wallet wallet) {
-        defaultWallet.setValue(wallet);
-        getBalance();
-        fetchTransactions(true);
-    }
-
-    private void getTokenTransactions()
+    //Once we have fetched all user account related transactions we need to fill in all the contract transactions
+    //First get a list of tokens, on each token see if it's an ERC875, if it is then scan the contract transactions
+    //for any that relate to the current user account (given by wallet address)
+    private void enumerateTokens()
     {
         fetchTokensInteract
                 .fetch(defaultWallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 
-    private void onFetchTokensCompletable() {
-
-    }
-
+    //receive a list of user tokens
     private void onTokens(Token[] tokens) {
+        tokenTxCount = 0;
+
         //see if there's any ERC875 tokens
         for (Token t : tokens)
         {
             if (t.tokenInfo.isStormbird)
             {
-                //let's get all the transactions from this guy and see if any relate to us.
-                handler.removeCallbacks(startFetchTransactionsTask);
-                /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
-                Observable<TokenTransaction[]> fetch = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t);
-                fetchTransactionDisposable = fetch
-                        .subscribe(this::onTokenTransactions, this::onError, this::onTokenTransactionsFetchCompleted);
+                tokenTxCount++;
+                //kick off a task to fetch all the contract transactions for this contract
+                fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
+                        .subscribe(this::onContractTokenTransactions, this::onError, this::onTokenTransactionsFetchCompleted);
+            }
+        }
+
+        if (tokenTxCount == 0)
+        {
+            showTransactions();
+        }
+    }
+
+    private void showTransactions()
+    {
+        if (txMap.size() > 0)
+        {
+            Transaction[] txArray = txMap.values().toArray(new Transaction[txMap.size()]);// .toArray();
+            this.transactions.postValue(txArray);
+        }
+        else
+        {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
+        }
+
+        //if there are detected contract transactions that we don't already know about add them in here
+        for (String contractAddress : detectedContracts)
+        {
+            //detected interaction with these unknown contracts
+            //add them to our watch list
+            setupTokenAddr(contractAddress);
+        }
+
+        detectedContracts.clear();
+
+        progress.postValue(false);
+
+        if (!stopTransactionRefresh) {
+            handler.postDelayed(
+                    startFetchTransactionsTask,
+                    FETCH_TRANSACTIONS_INTERVAL);
+
+            stopTransactionRefresh = false;
+        }
+    }
+
+    private void detectContractTransactions(Transaction t)
+    {
+        if (t.input != null && t.input.length() > 20)
+        {
+            try {
+                TransactionInput data = transactionDecoder.decodeInput(t.input);
+                if (data != null && data.functionData != null)
+                {
+                    if (!detectedContracts.contains(t.to))
+                    {
+                        detectedContracts.add(t.to);
+                    }
+                }
+            }
+            catch (Exception e) {
+
             }
         }
     }
 
-    private void onTokenTransactions(TokenTransaction[] transactions)
+    //receive a list of transactions for the contract
+    private void onContractTokenTransactions(TokenTransaction[] transactions)
     {
-        TransactionDecoder interpreter = new TransactionDecoder();
-        List<Transaction> txList = new ArrayList<>();
-        txList.addAll(Arrays.asList(this.transactions().getValue()));
         for (TokenTransaction thisTokenTrans : transactions)
         {
             Transaction thisTrans = thisTokenTrans.transaction;
-            TransactionInput data = interpreter.decodeInput(thisTrans.input);
+            TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
+            if (detectedContracts.contains(thisTokenTrans.token.getAddress()))
+            {
+                detectedContracts.remove(thisTokenTrans.token.getAddress());
+            }
+
             if (walletInvolvedInTransaction(thisTrans, data))
             {
                 //now display the transaction in the list
@@ -252,7 +322,12 @@ public class TransactionsViewModel extends BaseViewModel {
                         thisTrans.gasUsed,
                         newOps);
 
-                txList.add(newTransaction);
+                if (txMap.containsKey(newTransaction.hash))
+                {
+                    txMap.remove(newTransaction.hash);
+                }
+
+                txMap.put(newTransaction.hash, newTransaction);
 
                 //we could ecrecover the seller here
                 switch (data.functionData.functionName)
@@ -288,15 +363,33 @@ public class TransactionsViewModel extends BaseViewModel {
                 }
             }
         }
+    }
 
-        if (transactions.length > 0)
-        {
-            Transaction[] txArray = new Transaction[txList.size()];
-            txArray = txList.toArray(txArray);
+    public void getBalance() {
+        getBalanceDisposable = getDefaultWalletBalance
+                .get(defaultWallet.getValue())
+                .subscribe(values -> {
+                    defaultWalletBalance.postValue(values);
+                    handler.removeCallbacks(startGetBalanceTask);
+                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
+                }, t -> {
+                });
+    }
 
-            this.transactions.setValue(txArray);
-            this.transactions.postValue(txArray);
-        }
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        defaultNetwork.postValue(networkInfo);
+        disposable = findDefaultWalletInteract
+                .find()
+                .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    private void onDefaultWallet(Wallet wallet) {
+        defaultWallet.setValue(wallet);
+        getBalance();
+    }
+
+    private void onFetchTokensCompletable() {
+
     }
 
     private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data)
@@ -311,33 +404,11 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void onTokenTransactionsFetchCompleted()
     {
-
-    }
-
-    private void onTransactions(Transaction[] transactions) {
-        this.transactions.setValue(transactions);
-        Boolean last = progress.getValue();
-        if (transactions != null && transactions.length > 0 && last != null && last) {
-            progress.postValue(true);
+        tokenTxCount--;
+        if (tokenTxCount == 0)
+        {
+            showTransactions();
         }
-    }
-
-    private void onTransactionsFetchCompleted() {
-        progress.postValue(false);
-        Transaction[] transactions = this.transactions.getValue();
-        if (transactions == null || transactions.length == 0) {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
-        }
-        handler.postDelayed(
-                startFetchTransactionsTask,
-                FETCH_TRANSACTIONS_INTERVAL * DateUtils.SECOND_IN_MILLIS);
-
-
-        getTokenTransactions();
-    }
-
-    public void showWallets(Context context) {
-        manageWalletsRouter.open(context, false);
     }
 
     public void showSettings(Context context) {
@@ -348,20 +419,8 @@ public class TransactionsViewModel extends BaseViewModel {
         newSettingsRouter.open(context, resId);
     }
 
-    public void showSend(Context context) {
-        sendRouter.open(context, defaultNetwork.getValue().symbol);
-    }
-
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
-    }
-
-    public void showMyAddress(Context context) {
-        myAddressRouter.open(context, defaultWallet.getValue());
-    }
-
-    public void showMarketplace(Context context) {
-        marketBrowseRouter.open(context);
     }
 
     public void showTokens(Context context) {
@@ -387,4 +446,36 @@ public class TransactionsViewModel extends BaseViewModel {
     private final Runnable startFetchTransactionsTask = () -> this.fetchTransactions(false);
 
     private final Runnable startGetBalanceTask = this::getBalance;
+
+    public void startTransactionRefresh() {
+        stopTransactionRefresh = false;
+        fetchTransactions(true);
+    }
+
+    public void stopTransactionRefresh() {
+        stopTransactionRefresh = true;
+        handler.removeCallbacks(startFetchTransactionsTask);
+        if (fetchTokensDisposable != null && !fetchTokensDisposable.isDisposed())
+        {
+            fetchTokensDisposable.dispose();
+        }
+    }
+
+    private void setupTokenAddr(String contractAddress)
+    {
+        disposable = setupTokensInteract
+                .update(contractAddress)
+                .subscribe(this::onTokensSetup, this::onError);
+    }
+
+    private void onTokensSetup(TokenInfo tokenInfo) {
+        disposable = addTokenInteract
+                .add(tokenInfo)
+                .subscribe(this::onSaved, this::onError);
+    }
+    private void onSaved()
+    {
+        System.out.println("saved contract");
+    }
+
 }

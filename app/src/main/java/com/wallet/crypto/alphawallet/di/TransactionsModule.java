@@ -1,23 +1,22 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.HomeRouter;
-import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
-import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.NewSettingsRouter;
-import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 import com.wallet.crypto.alphawallet.router.WalletRouter;
@@ -35,11 +34,10 @@ class TransactionsModule {
             FetchTransactionsInteract fetchTransactionsInteract,
             FetchTokensInteract fetchTokensInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            ManageWalletsRouter manageWalletsRouter,
+            SetupTokensInteract setupTokensInteract,
             SettingsRouter settingsRouter,
-            SendRouter sendRouter,
+            AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
-            MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
@@ -53,11 +51,10 @@ class TransactionsModule {
                 fetchTransactionsInteract,
                 fetchTokensInteract,
                 getDefaultWalletBalance,
-                manageWalletsRouter,
+                setupTokensInteract,
                 settingsRouter,
-                sendRouter,
+                addTokenInteract,
                 transactionDetailRouter,
-                myAddressRouter,
                 myTokensRouter,
                 externalBrowserRouter,
                 marketBrowseRouter,
@@ -95,26 +92,13 @@ class TransactionsModule {
     }
 
     @Provides
-    ManageWalletsRouter provideManageWalletsRouter() {
-        return new ManageWalletsRouter();
-    }
-
-    @Provides
     SettingsRouter provideSettingsRouter() {
         return new SettingsRouter();
     }
 
     @Provides
-    SendRouter provideSendRouter() { return new SendRouter(); }
-
-    @Provides
     TransactionDetailRouter provideTransactionDetailRouter() {
         return new TransactionDetailRouter();
-    }
-
-    @Provides
-    MyAddressRouter provideMyAddressRouter() {
-        return new MyAddressRouter();
     }
 
     @Provides
@@ -141,4 +125,16 @@ class TransactionsModule {
 
     @Provides
     HomeRouter providesHomeRouter() { return new HomeRouter(); }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository,
+            WalletRepositoryType walletRepository) {
+        return new AddTokenInteract(walletRepository, tokenRepository);
+    }
+
+    @Provides
+    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
+        return new SetupTokensInteract(tokenRepository);
+    }
 }

@@ -44,6 +44,13 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
+import static com.wallet.crypto.alphawallet.C.HARD_CODED_CONTRACT;
+import static com.wallet.crypto.alphawallet.C.HARD_CODED_KEY;
+import static com.wallet.crypto.alphawallet.C.HARD_CONTRACT_ADDR;
+import static com.wallet.crypto.alphawallet.C.HARD_CONTRACT_NAME;
+import static com.wallet.crypto.alphawallet.C.HARD_CONTRACT_SYMBOL;
+import static com.wallet.crypto.alphawallet.C.PRE_LOADED_KEY;
+
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
     private static final int TRANSACTIONS = 0;
     private static final int MARKETPLACE = 1;
@@ -127,6 +134,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         setBottomMenu(R.menu.menu_main_network);
         showPage(WALLET);
+
+        if (HARD_CODED_KEY) {
+            viewModel.addHardKey(PRE_LOADED_KEY);
+        }
+        if (HARD_CODED_CONTRACT) {
+            viewModel.addContract(HARD_CONTRACT_ADDR, HARD_CONTRACT_SYMBOL, 0, HARD_CONTRACT_NAME);
+        }
     }
 
     private void onTransactionClick(View view, Transaction transaction) {

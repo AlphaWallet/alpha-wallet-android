@@ -7,16 +7,22 @@ import android.util.Base64;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
+import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
+import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepository;
+import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.alphawallet.service.ImportTokenService;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
@@ -38,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
+import static com.wallet.crypto.alphawallet.C.DEFAULT_NETWORK;
+import static com.wallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -50,6 +58,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final AddTokenInteract addTokenInteract;
+    private final SetupTokensInteract setupTokensInteract;
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -63,17 +73,21 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private Ticket importToken;
     private List<Integer> availableBalance = new ArrayList<>();
     private double priceUsd;
-    private double ethToUsd;
+    private double ethToUsd = 0;
 
     @Nullable
     private Disposable getBalanceDisposable;
 
     ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
-                         FetchTokensInteract fetchTokensInteract) {
+                         FetchTokensInteract fetchTokensInteract,
+                         AddTokenInteract addTokenInteract,
+                         SetupTokensInteract setupTokensInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.addTokenInteract = addTokenInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     public LiveData<TicketRange> importRange() {
@@ -116,7 +130,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
             BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
             ownerAddress = "0x" + Keys.getAddress(recoveredKey);
             //start looking at the ticket details
-            fetchBalance();
+            //first check if we have this token already
+            setupTokenAddr(importOrder.contractAddress);
         }
         catch (SalesOrderMalformed e)
         {
@@ -126,17 +141,12 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             invalidLink.postValue(true);
         }
-
-        //now get balance at recovered address
-        //1. add required interact
-        //2. after we get balance, check these tokens are still at that address, get the ID's and update the import token
-        //3. allow import to continue.
     }
 
     public void fetchBalance() {
         getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .fetch(new Wallet(ownerAddress))
+                        .fetch(wallet.getValue()) //
                         .subscribe(this::onBalance)).subscribe();
     }
 
@@ -152,12 +162,31 @@ public class ImportTokenViewModel extends BaseViewModel  {
             }
             if (t.addressMatches(importOrder.contractAddress) && t instanceof Ticket)
             {
-                importToken = (Ticket)t;
-                updateToken();
+                //get owner balance
+                fetchTokensInteract.updateBalance(new Wallet(ownerAddress), t)
+                        .subscribe(this::onUpdate);
                 break;
             }
         }
     }
+
+    private void onUpdate(Token token) {
+        importToken = (Ticket)token;
+        updateToken();
+    }
+
+//    public void fetchBalance() {
+//        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+//                .doOnNext(l -> fetchTokensInteract
+//                        //.fetchBalance(new Wallet(ownerAddress), importOrder.contractAddress)
+//                        .subscribe(this::onBalance)).subscribe();
+//    }
+//
+//    private void onBalance(Token token)
+//    {
+//        importToken = (Ticket)token;
+//        updateToken();
+//    }
 
     private void updateToken()
     {
@@ -230,6 +259,26 @@ public class ImportTokenViewModel extends BaseViewModel  {
             //This will never be reached because the order is checked previously.
             invalidLink.postValue(true);
         }
+    }
+
+    private void setupTokenAddr(String contractAddress)
+    {
+        disposable = setupTokensInteract
+                .update(contractAddress)
+                .subscribe(this::onTokensSetup, this::onError);
+    }
+
+    private void onTokensSetup(TokenInfo tokenInfo) {
+        addTokenInteract
+                .add(tokenInfo)
+                .subscribe(this::onSaved, this::onError);
+    }
+
+    private void onSaved()
+    {
+        System.out.println("saved contract");
+        //resume import, get balance etc
+        fetchBalance();
     }
 
     private void onCreateTransaction(String transaction)

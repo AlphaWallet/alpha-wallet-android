@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
+import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
@@ -41,6 +42,7 @@ import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,6 +83,10 @@ public class TransactionsViewModel extends BaseViewModel {
     @Nullable
     private Disposable fetchTokensDisposable;
     private Handler handler = new Handler();
+
+    private Map<String, Transaction> txMap = new HashMap<>();
+    private int tokenTxCount;
+    private boolean stopTransactionRefresh = false;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -154,71 +160,90 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
+    //1. Get normal transactions
     public void fetchTransactions(boolean shouldShowProgress) {
+        txMap.clear();
         handler.removeCallbacks(startFetchTransactionsTask);
         progress.postValue(shouldShowProgress);
         /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
         Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
         fetchTransactionDisposable = fetch
-                .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted);
+                .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
     }
 
-    public void getBalance() {
-        getBalanceDisposable = getDefaultWalletBalance
-                .get(defaultWallet.getValue())
-                .subscribe(values -> {
-                    defaultWalletBalance.postValue(values);
-                    handler.removeCallbacks(startGetBalanceTask);
-                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
-                }, t -> {
-                });
+    //Called from fetchTransactions
+    private void onTransactions(Transaction[] transactions) {
+        for (Transaction t : transactions)
+        {
+            if (!txMap.containsKey(t.hash)) txMap.put(t.hash, t);
+        }
+        //this.transactions.setValue(transactions);
+        Boolean last = progress.getValue();
+        if (transactions != null && transactions.length > 0 && last != null && last) {
+            progress.postValue(true);
+        }
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    private void onDefaultWallet(Wallet wallet) {
-        defaultWallet.setValue(wallet);
-        getBalance();
-        fetchTransactions(true);
-    }
-
-    private void getTokenTransactions()
+    //Once we have fetched all user account related transactions we need to fill in all the contract transactions
+    //First get a list of tokens, on each token see if it's an ERC875, if it is then scan the contract transactions
+    //for any that relate to the current user account (given by wallet address)
+    private void enumerateTokens()
     {
         fetchTokensInteract
                 .fetch(defaultWallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 
-    private void onFetchTokensCompletable() {
-
-    }
-
+    //receive a list of user tokens
     private void onTokens(Token[] tokens) {
+        tokenTxCount = 0;
         //see if there's any ERC875 tokens
         for (Token t : tokens)
         {
             if (t.tokenInfo.isStormbird)
             {
-                //let's get all the transactions from this guy and see if any relate to us.
-                handler.removeCallbacks(startFetchTransactionsTask);
-                /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
-                Observable<TokenTransaction[]> fetch = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t);
-                fetchTransactionDisposable = fetch
-                        .subscribe(this::onTokenTransactions, this::onError, this::onTokenTransactionsFetchCompleted);
+                tokenTxCount++;
+                //kick off a task to fetch all the contract transactions for this contract
+                fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
+                        .subscribe(this::onContractTokenTransactions, this::onError, this::onTokenTransactionsFetchCompleted);
             }
+        }
+
+        if (tokenTxCount == 0)
+        {
+            showTransactions();
         }
     }
 
-    private void onTokenTransactions(TokenTransaction[] transactions)
+    private void showTransactions()
+    {
+        if (txMap.size() > 0)
+        {
+            Transaction[] txArray = txMap.values().toArray(new Transaction[txMap.size()]);// .toArray();
+            this.transactions.postValue(txArray);
+        }
+        else
+        {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
+        }
+
+        progress.postValue(false);
+
+        if (!stopTransactionRefresh) {
+            handler.postDelayed(
+                    startFetchTransactionsTask,
+                    FETCH_TRANSACTIONS_INTERVAL);
+
+            stopTransactionRefresh = false;
+        }
+    }
+
+    //receive a list of transactions for the contract
+    private void onContractTokenTransactions(TokenTransaction[] transactions)
     {
         TransactionDecoder interpreter = new TransactionDecoder();
-        List<Transaction> txList = new ArrayList<>();
-        txList.addAll(Arrays.asList(this.transactions().getValue()));
+        //List<Transaction> txList = new ArrayList<>();
+        //txList.addAll(Arrays.asList(this.transactions().getValue()));
         for (TokenTransaction thisTokenTrans : transactions)
         {
             Transaction thisTrans = thisTokenTrans.transaction;
@@ -252,7 +277,12 @@ public class TransactionsViewModel extends BaseViewModel {
                         thisTrans.gasUsed,
                         newOps);
 
-                txList.add(newTransaction);
+                if (txMap.containsKey(newTransaction.hash))
+                {
+                    txMap.remove(newTransaction.hash);
+                }
+
+                txMap.put(newTransaction.hash, newTransaction);
 
                 //we could ecrecover the seller here
                 switch (data.functionData.functionName)
@@ -288,15 +318,33 @@ public class TransactionsViewModel extends BaseViewModel {
                 }
             }
         }
+    }
 
-        if (transactions.length > 0)
-        {
-            Transaction[] txArray = new Transaction[txList.size()];
-            txArray = txList.toArray(txArray);
+    public void getBalance() {
+        getBalanceDisposable = getDefaultWalletBalance
+                .get(defaultWallet.getValue())
+                .subscribe(values -> {
+                    defaultWalletBalance.postValue(values);
+                    handler.removeCallbacks(startGetBalanceTask);
+                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
+                }, t -> {
+                });
+    }
 
-            this.transactions.setValue(txArray);
-            this.transactions.postValue(txArray);
-        }
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        defaultNetwork.postValue(networkInfo);
+        disposable = findDefaultWalletInteract
+                .find()
+                .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    private void onDefaultWallet(Wallet wallet) {
+        defaultWallet.setValue(wallet);
+        getBalance();
+    }
+
+    private void onFetchTokensCompletable() {
+
     }
 
     private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data)
@@ -311,29 +359,11 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void onTokenTransactionsFetchCompleted()
     {
-
-    }
-
-    private void onTransactions(Transaction[] transactions) {
-        this.transactions.setValue(transactions);
-        Boolean last = progress.getValue();
-        if (transactions != null && transactions.length > 0 && last != null && last) {
-            progress.postValue(true);
+        tokenTxCount--;
+        if (tokenTxCount == 0)
+        {
+            showTransactions();
         }
-    }
-
-    private void onTransactionsFetchCompleted() {
-        progress.postValue(false);
-        Transaction[] transactions = this.transactions.getValue();
-        if (transactions == null || transactions.length == 0) {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
-        }
-        handler.postDelayed(
-                startFetchTransactionsTask,
-                FETCH_TRANSACTIONS_INTERVAL * DateUtils.SECOND_IN_MILLIS);
-
-
-        getTokenTransactions();
     }
 
     public void showWallets(Context context) {
@@ -387,4 +417,18 @@ public class TransactionsViewModel extends BaseViewModel {
     private final Runnable startFetchTransactionsTask = () -> this.fetchTransactions(false);
 
     private final Runnable startGetBalanceTask = this::getBalance;
+
+    public void startTransactionRefresh() {
+        stopTransactionRefresh = false;
+        fetchTransactions(true);
+    }
+
+    public void stopTransactionRefresh() {
+        stopTransactionRefresh = true;
+        handler.removeCallbacks(startFetchTransactionsTask);
+        if (fetchTokensDisposable != null && !fetchTokensDisposable.isDisposed())
+        {
+            fetchTokensDisposable.dispose();
+        }
+    }
 }

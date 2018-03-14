@@ -58,6 +58,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private TransactionsAdapter adapter;
     private Dialog dialog;
 
+    private boolean isVisible = false;
+
     RecyclerView list;
 
     @Nullable
@@ -115,6 +117,19 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         super.onResume();
         adapter.clear();
         viewModel.prepare();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        isVisible = isVisibleToUser;
+        if (isResumed()) { // fragment have created
+            if (isVisible) {
+                viewModel.startTransactionRefresh();
+            } else {
+                viewModel.stopTransactionRefresh();
+            }
+        }
     }
 
     @Override

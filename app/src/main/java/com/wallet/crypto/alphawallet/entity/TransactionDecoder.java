@@ -182,6 +182,7 @@ public class TransactionDecoder
             String methodSignature = KNOWN_FUNCTIONS[index];
             FunctionData data = getArgs(methodSignature);
             data.hasSig = HAS_SIG[index];
+            data.contractType = CONTRACT_TYPE[index];
             functionList.put(buildMethodId(methodSignature), data);
         }
     }
@@ -189,13 +190,31 @@ public class TransactionDecoder
     static final String[] KNOWN_FUNCTIONS = {
             "transferFrom(address,address,uint16[])",
             "transfer(address,uint16[])",
-            "trade(uint256,uint16[],uint8,bytes32,bytes32)"
+            "trade(uint256,uint16[],uint8,bytes32,bytes32)",
+            "transfer(address,uint)",
+            "transferFrom(address,address,uint)",
+            "approve(address,uint)"
             };
 
     static final boolean[] HAS_SIG = {
             false,
             false,
-            true
+            true,
+            false,
+            false,
+            false
+    };
+
+    static final int ERC20 = 1;
+    static final int ERC875 = 2;
+
+    static final int[] CONTRACT_TYPE = {
+            ERC875,
+            ERC875,
+            ERC875,
+            ERC20,
+            ERC20,
+            ERC20
     };
 
     private FunctionData getArgs(String methodSig)

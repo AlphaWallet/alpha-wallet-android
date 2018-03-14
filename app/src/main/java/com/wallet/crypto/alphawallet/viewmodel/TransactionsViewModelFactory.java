@@ -4,20 +4,19 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.HomeRouter;
-import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
-import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.NewSettingsRouter;
-import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 import com.wallet.crypto.alphawallet.router.WalletRouter;
@@ -29,11 +28,10 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final ManageWalletsRouter manageWalletsRouter;
+    private final AddTokenInteract addTokenInteract;
+    private final SetupTokensInteract setupTokensInteract;
     private final SettingsRouter settingsRouter;
-    private final SendRouter sendRouter;
     private final TransactionDetailRouter transactionDetailRouter;
-    private final MyAddressRouter myAddressRouter;
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final MarketBrowseRouter marketBrowseRouter;
@@ -48,11 +46,10 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             FetchTransactionsInteract fetchTransactionsInteract,
             FetchTokensInteract fetchTokensInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            ManageWalletsRouter manageWalletsRouter,
+            SetupTokensInteract setupTokensInteract,
             SettingsRouter settingsRouter,
-            SendRouter sendRouter,
+            AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
-            MyAddressRouter myAddressRouter,
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
@@ -64,11 +61,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.manageWalletsRouter = manageWalletsRouter;
         this.settingsRouter = settingsRouter;
-        this.sendRouter = sendRouter;
         this.transactionDetailRouter = transactionDetailRouter;
-        this.myAddressRouter = myAddressRouter;
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.marketBrowseRouter = marketBrowseRouter;
@@ -77,6 +71,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.newSettingsRouter = newSettingsRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.addTokenInteract = addTokenInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     @NonNull
@@ -88,11 +84,10 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 fetchTransactionsInteract,
                 fetchTokensInteract,
                 getDefaultWalletBalance,
-                manageWalletsRouter,
+                setupTokensInteract,
                 settingsRouter,
-                sendRouter,
+                addTokenInteract,
                 transactionDetailRouter,
-                myAddressRouter,
                 myTokensRouter,
                 externalBrowserRouter,
                 marketBrowseRouter,

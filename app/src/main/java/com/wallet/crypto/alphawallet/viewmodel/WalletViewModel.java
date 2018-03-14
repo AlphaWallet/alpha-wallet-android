@@ -112,16 +112,7 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     private void onTokens(Token[] tokens) {
-        //parse tokens for duplicate
-//        Map<String, Token> deDuplicate = new HashMap<>();
-//        for (Token t : tokens)
-//        {
-//            if (!deDuplicate.containsKey(t.getAddress()))
-//            {
-//                deDuplicate.put(t.getAddress(), t);
-//            }
-//        }
-        tokenCache = tokens;//deDuplicate.values().toArray(new Token[deDuplicate.size()]);
+        tokenCache = tokens;
         if (tokens != null && tokens.length > 0) {
             progress.postValue(true);
             showTotalBalance(tokenCache);

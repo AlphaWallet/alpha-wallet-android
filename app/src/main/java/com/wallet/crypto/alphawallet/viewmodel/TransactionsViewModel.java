@@ -45,12 +45,15 @@ import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -87,10 +90,10 @@ public class TransactionsViewModel extends BaseViewModel {
     private Handler handler = new Handler();
 
     private Map<String, Transaction> txMap = new HashMap<>();
-    private int tokenTxCount;
     private boolean stopTransactionRefresh = false;
     private List<String> detectedContracts = new ArrayList<>();
     private List<String> deadContracts = new ArrayList<>();
+    private List<Token> tokenCheckList = new ArrayList<>();
     TransactionDecoder transactionDecoder = null;
 
     TransactionsViewModel(
@@ -175,9 +178,10 @@ public class TransactionsViewModel extends BaseViewModel {
         handler.removeCallbacks(startFetchTransactionsTask);
         progress.postValue(shouldShowProgress);
         /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
-        Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
-        fetchTransactionDisposable = fetch
-                .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
+        fetchTransactionDisposable =
+                fetchTransactionsInteract.fetch(defaultWallet.getValue())
+                        .subscribeOn(Schedulers.newThread())
+                        .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
     }
 
     //Called from fetchTransactions
@@ -190,7 +194,6 @@ public class TransactionsViewModel extends BaseViewModel {
                 detectContractTransactions(t);
             }
         }
-        //this.transactions.setValue(transactions);
         Boolean last = progress.getValue();
         if (transactions != null && transactions.length > 0 && last != null && last) {
             progress.postValue(true);
@@ -202,30 +205,44 @@ public class TransactionsViewModel extends BaseViewModel {
     //for any that relate to the current user account (given by wallet address)
     private void enumerateTokens()
     {
-        fetchTokensInteract
-                .fetch(defaultWallet.getValue())
-                .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+        fetchTransactionDisposable = fetchTokensInteract
+                .fetchCache(defaultWallet.getValue())
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(this::onTokens, this::onError, this::consumeTokenCheckList);
+    }
+
+    //Consume the token check list - process each token transaction on a thread but don't simultaneously process them - this locks the UI
+    private void consumeTokenCheckList()
+    {
+        if (tokenCheckList.size() == 0)
+        {
+            showTransactions();
+        }
+        else {
+            Token t = tokenCheckList.remove(0);
+
+            fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe(this::onContractTokenTransactions, this::onConsumeError, this::consumeTokenCheckList);
+        }
+    }
+
+    private void onConsumeError(Throwable e)
+    {
+        consumeTokenCheckList();
     }
 
     //receive a list of user tokens
     private void onTokens(Token[] tokens) {
-        tokenTxCount = 0;
+        tokenCheckList.clear();
 
         //see if there's any ERC875 tokens
         for (Token t : tokens)
         {
             if (t.tokenInfo.isStormbird)
             {
-                tokenTxCount++;
-                //kick off a task to fetch all the contract transactions for this contract
-                fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
-                        .subscribe(this::onContractTokenTransactions, this::onError, this::onTokenTransactionsFetchCompleted);
+                tokenCheckList.add(t);
             }
-        }
-
-        if (tokenTxCount == 0)
-        {
-            showTransactions();
         }
     }
 
@@ -233,7 +250,9 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         if (txMap.size() > 0)
         {
-            Transaction[] txArray = txMap.values().toArray(new Transaction[txMap.size()]);// .toArray();
+            Transaction[] existing = this.transactions.getValue();
+
+            Transaction[] txArray = txMap.values().toArray(new Transaction[txMap.size()]);
             this.transactions.postValue(txArray);
         }
         else
@@ -389,10 +408,6 @@ public class TransactionsViewModel extends BaseViewModel {
         getBalance();
     }
 
-    private void onFetchTokensCompletable() {
-
-    }
-
     private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data)
     {
         boolean involved = false;
@@ -401,15 +416,6 @@ public class TransactionsViewModel extends BaseViewModel {
         if (data.containsAddress(defaultWallet().getValue().address)) involved = true;
         if (trans.from.contains(walletAddr)) involved = true;
         return involved;
-    }
-
-    private void onTokenTransactionsFetchCompleted()
-    {
-        tokenTxCount--;
-        if (tokenTxCount == 0)
-        {
-            showTransactions();
-        }
     }
 
     public void showSettings(Context context) {

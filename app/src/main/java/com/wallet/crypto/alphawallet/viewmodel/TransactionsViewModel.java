@@ -250,8 +250,6 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         if (txMap.size() > 0)
         {
-            Transaction[] existing = this.transactions.getValue();
-
             Transaction[] txArray = txMap.values().toArray(new Transaction[txMap.size()]);
             this.transactions.postValue(txArray);
         }

@@ -123,6 +123,14 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Observable<Token[]> fetchActiveStored(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredEnabledTokens(network, wallet) // Immediately show the cache.
+                .toObservable();
+    }
+
+    @Override
     public Observable<Token> fetchActiveSingle(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -402,6 +410,11 @@ public class TokenRepository implements TokenRepositoryType {
                 }
             }.start();
         }
+    }
+
+    private Single<Token[]> fetchStoredEnabledTokens(NetworkInfo network, Wallet wallet) {
+        return localSource
+                .fetchEnabledTokens(network, wallet);
     }
 
     private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {

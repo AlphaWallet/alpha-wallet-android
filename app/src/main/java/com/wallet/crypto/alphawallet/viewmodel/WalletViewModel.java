@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -95,20 +96,37 @@ public class WalletViewModel extends BaseViewModel {
         return total;
     }
 
+    //double cycle.
+    //1. fetch tokens from cache and display
+    //2. update token balance
+
     public void fetchTokens() {
-        progress.postValue(true);
         fetchTokensInteract
-                .fetch(defaultWallet.getValue())
+                .fetchStored(defaultWallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 
-    private void onFetchTokensCompletable() {
-        this.tokens.setValue(tokenCache);
+    private void onFetchTokensBalanceCompletable()
+    {
         progress.postValue(false);
+        this.tokens.setValue(tokenCache);
         Token[] tokens = tokens().getValue();
         if (tokens == null || tokens.length == 0) {
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
         }
+    }
+
+    private void onFetchTokensCompletable() {
+        onFetchTokensBalanceCompletable();
+        updateTokenBalances();
+    }
+
+    private void updateTokenBalances() {
+        progress.postValue(true);
+        fetchTokensInteract
+                .fetch(defaultWallet.getValue())
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(this::onTokens, this::onError, this::onFetchTokensBalanceCompletable);
     }
 
     private void onTokens(Token[] tokens) {

@@ -86,6 +86,25 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Single<Token[]> fetchEnabledTokensWithBalance(NetworkInfo networkInfo, Wallet wallet) {
+        return Single.fromCallable(() -> {
+            Realm realm = null;
+            try {
+                realm = realmManager.getRealmInstance(networkInfo, wallet);
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .sort("addedTime", Sort.ASCENDING)
+                        .equalTo("isEnabled", true)
+                        .findAll();
+                return convertBalance(realmItems, System.currentTimeMillis());
+            } finally {
+                if (realm != null) {
+                    realm.close();
+                }
+            }
+        });
+    }
+
+    @Override
     public Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet) {
         return Single.fromCallable(() -> {
             Realm realm = null;
@@ -294,6 +313,20 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmItem != null) {
                 TokenInfo info = tf.createTokenInfo(realmItem);
                 result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
+            }
+        }
+        return result;
+    }
+
+    private Token[] convertBalance(RealmResults<RealmToken> realmItems, long now) {
+        int len = realmItems.size();
+        TokenFactory tf = new TokenFactory();
+        Token[] result = new Token[len];
+        for (int i = 0; i < len; i++) {
+            RealmToken realmItem = realmItems.get(i);
+            if (realmItem != null) {
+                TokenInfo info = tf.createTokenInfo(realmItem);
+                result[i] = tf.createTokenBalance(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
             }
         }
         return result;

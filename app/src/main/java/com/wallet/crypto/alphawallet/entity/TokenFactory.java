@@ -57,6 +57,25 @@ public class TokenFactory
         return thisToken;
     }
 
+    public Token createTokenBalance(TokenInfo tokenInfo, RealmToken realmItem, long updateBlancaTime)
+    {
+        Token thisToken;
+        if (tokenInfo.isStormbird)
+        {
+            String balances = realmItem.getBalance();
+            String burnList = realmItem.getBurnList();
+            thisToken = new Ticket(tokenInfo, balances, burnList, updateBlancaTime);
+        }
+        else
+        {
+            long now = System.currentTimeMillis();
+            BigDecimal balance = new BigDecimal(realmItem.getBalance());
+            thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+        }
+
+        return thisToken;
+    }
+
     public Token createToken(TokenInfo tokenInfo)
     {
         Token thisToken;

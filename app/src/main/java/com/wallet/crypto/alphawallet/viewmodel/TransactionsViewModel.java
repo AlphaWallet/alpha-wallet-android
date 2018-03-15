@@ -206,7 +206,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private void enumerateTokens()
     {
         fetchTransactionDisposable = fetchTokensInteract
-                .fetchCache(defaultWallet.getValue())
+                .fetchStored(defaultWallet.getValue())
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(this::onTokens, this::onError, this::consumeTokenCheckList);
     }

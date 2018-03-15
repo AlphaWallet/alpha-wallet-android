@@ -414,7 +414,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<Token[]> fetchStoredEnabledTokens(NetworkInfo network, Wallet wallet) {
         return localSource
-                .fetchEnabledTokens(network, wallet);
+                .fetchEnabledTokensWithBalance(network, wallet);
     }
 
     private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {

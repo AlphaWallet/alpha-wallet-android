@@ -70,7 +70,7 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getStringBalance() {
-        return populateIDs(balanceArray, false);// parseList(balanceArray);
+        return populateIDs(balanceArray, false);
     }
 
     @Override

@@ -45,12 +45,13 @@ public class TransactionDecoder
         parseIndex = 0;
         //1. check function
         thisData = new TransactionInput();
+        if (input == null || input.length() < 10) return null;
 
         try {
             while (parseIndex < input.length()) {
                 switch (parseState) {
                     case 0: //get function
-                        parseIndex += setFunction(input.substring(0, 10), input.length());
+                        parseIndex += setFunction(readBytes(input, 10), input.length());
                         parseState = 1;
                         break;
                     case 1: //now get params
@@ -156,6 +157,20 @@ public class TransactionDecoder
                 thisData.sigData.add(input);
                 if (++sigCount == 3) state = ARGS;
                 break;
+        }
+    }
+
+    private String readBytes(String input, int bytes)
+    {
+        if ((parseIndex + bytes) <= input.length())
+        {
+            String value = input.substring(parseIndex, parseIndex+bytes);
+            parseIndex += bytes;
+            return value;
+        }
+        else
+        {
+            return "0";
         }
     }
 

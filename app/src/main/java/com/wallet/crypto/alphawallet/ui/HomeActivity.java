@@ -134,13 +134,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         setBottomMenu(R.menu.menu_main_network);
         showPage(WALLET);
-
-        if (HARD_CODED_KEY) {
-            viewModel.addHardKey(PRE_LOADED_KEY);
-        }
-        if (HARD_CODED_CONTRACT) {
-            viewModel.addContract(HARD_CONTRACT_ADDR, HARD_CONTRACT_SYMBOL, 0, HARD_CONTRACT_NAME);
-        }
     }
 
     private void onTransactionClick(View view, Transaction transaction) {

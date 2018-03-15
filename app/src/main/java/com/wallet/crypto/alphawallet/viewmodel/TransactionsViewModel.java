@@ -90,6 +90,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private int tokenTxCount;
     private boolean stopTransactionRefresh = false;
     private List<String> detectedContracts = new ArrayList<>();
+    private List<String> deadContracts = new ArrayList<>();
     TransactionDecoder transactionDecoder = null;
 
     TransactionsViewModel(
@@ -269,7 +270,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 TransactionInput data = transactionDecoder.decodeInput(t.input);
                 if (data != null && data.functionData != null)
                 {
-                    if (!detectedContracts.contains(t.to))
+                    if (!detectedContracts.contains(t.to) && !deadContracts.contains(t.to))
                     {
                         detectedContracts.add(t.to);
                     }
@@ -469,9 +470,18 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     private void onTokensSetup(TokenInfo tokenInfo) {
-        disposable = addTokenInteract
-                .add(tokenInfo)
-                .subscribe(this::onSaved, this::onError);
+        //check this contract is good to add
+        if ((tokenInfo.name == null || tokenInfo.name.length() < 3)
+            || tokenInfo.isEnabled == false
+            || (tokenInfo.symbol == null || tokenInfo.symbol.length() < 2))
+        {
+            this.deadContracts.add(tokenInfo.address);
+        }
+        else {
+            disposable = addTokenInteract
+                    .add(tokenInfo)
+                    .subscribe(this::onSaved, this::onError);
+        }
     }
     private void onSaved()
     {

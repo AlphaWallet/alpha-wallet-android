@@ -52,8 +52,6 @@ public class HomeViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final ImportWalletInteract importWalletInteract;
-    private final AddTokenInteract addTokenInteract;
 
     private final ManageWalletsRouter manageWalletsRouter;
     private final SettingsRouter settingsRouter;
@@ -92,9 +90,7 @@ public class HomeViewModel extends BaseViewModel {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter,
-            ImportWalletInteract importWalletInteract,
-            AddTokenInteract addTokenInteract) {
+            HelpRouter helpRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -112,8 +108,6 @@ public class HomeViewModel extends BaseViewModel {
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
         this.helpRouter = helpRouter;
-        this.importWalletInteract = importWalletInteract;
-        this.addTokenInteract = addTokenInteract;
     }
 
     @Override
@@ -253,35 +247,5 @@ public class HomeViewModel extends BaseViewModel {
 
     public void showHelp(Context context) {
         helpRouter.open(context);
-    }
-
-    public void addHardKey(String key) {
-        importWalletInteract
-                .importPrivateKey(key)
-                .subscribe(this::onWallet, this::onError);
-    }
-
-    public void addContract(String address, String symbol, int decimals, String name) {
-        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, true);
-        addTokenInteract
-                .add(tokenInfo)
-                .subscribe(this::onSaved, this::onError);
-    }
-
-    private void onSaved()
-    {
-        System.out.println("saved contract");
-    }
-
-    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
-    {
-        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
-        return tokenInfo;
-    }
-
-    private void onWallet(Wallet wallet)
-    {
-        //success
-        System.out.println("Imported wallet at addr: " + wallet.address);
     }
 }

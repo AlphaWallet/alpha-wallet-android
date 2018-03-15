@@ -54,7 +54,7 @@ public class SplashActivity extends BaseActivity {
                 .get(SplashViewModel.class);
         splashViewModel.wallets().observe(this, this::onWallets);
 
-        splashViewModel.setOverrideNetwork();
+        splashViewModel.startOverridesChain();
     }
 
     private void onWallets(Wallet[] wallets) {

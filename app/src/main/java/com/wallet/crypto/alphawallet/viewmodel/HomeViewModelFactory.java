@@ -43,8 +43,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
     private final HelpRouter helpRouter;
-    private final ImportWalletInteract importWalletInteract;
-    private final AddTokenInteract addTokenInteract;
 
     public HomeViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -63,9 +61,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter,
-            ImportWalletInteract importWalletInteract,
-            AddTokenInteract addTokenInteract) {
+            HelpRouter helpRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -83,8 +79,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
         this.helpRouter = helpRouter;
-        this.importWalletInteract = importWalletInteract;
-        this.addTokenInteract = addTokenInteract;
     }
 
     @NonNull
@@ -107,8 +101,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,
-                helpRouter,
-                importWalletInteract,
-                addTokenInteract);
+                helpRouter);
     }
 }

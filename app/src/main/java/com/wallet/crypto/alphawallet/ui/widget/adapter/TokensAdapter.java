@@ -82,6 +82,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
         switch (viewType) {
@@ -106,12 +111,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public void onBindViewHolder(BinderViewHolder holder, int position) {
+        Object t = items.get(position).value;
         holder.bind(items.get(position).value);
     }
 
     @Override
     public int getItemViewType(int position) {
-        return items.get(position).viewType;
+        int type = items.get(position).viewType;
+        return type;
     }
 
     @Override

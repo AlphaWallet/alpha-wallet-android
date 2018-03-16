@@ -1,6 +1,7 @@
 package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
 import android.content.Context;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,6 +12,9 @@ import android.view.animation.AnimationUtils;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenDiffCallback;
+import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionDiffCallback;
 import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
@@ -66,6 +70,44 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             notifyItemMoved(fromPosition, toPosition);
         }
     });
+
+    protected final SortedList<SortedItem> newItems = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
+        @Override
+        public int compare(SortedItem o1, SortedItem o2) {
+            return o1.compare(o2);
+        }
+
+        @Override
+        public void onChanged(int position, int count) {
+            notifyItemRangeChanged(position, count);
+        }
+
+        @Override
+        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
+            return oldItem.areContentsTheSame(newItem);
+        }
+
+        @Override
+        public boolean areItemsTheSame(SortedItem item1, SortedItem item2) {
+            return item1.areItemsTheSame(item2);
+        }
+
+        @Override
+        public void onInserted(int position, int count) {
+            notifyItemRangeInserted(position, count);
+        }
+
+        @Override
+        public void onRemoved(int position, int count) {
+            notifyItemRangeRemoved(position, count);
+        }
+
+        @Override
+        public void onMoved(int fromPosition, int toPosition) {
+            notifyItemMoved(fromPosition, toPosition);
+        }
+    });
+
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
     public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener) {
@@ -127,30 +169,69 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void setTokens(Token[] tokens) {
-        //TODO: check tokens for change
-        items.beginBatchedUpdates();
-        items.clear();
-        items.add(total);
+        updateTokens(tokens);
+//        //TODO: check tokens for change
+//        items.beginBatchedUpdates();
+//        items.clear();
+//        items.add(total);
+//
+//        for (int i = 0; i < tokens.length; i++) {
+//            if (filterType == FILTER_CURRENCY) {
+//                if (tokens[i].isCurrency()) {
+//                    items.add(new TokenSortedItem(tokens[i], 10 + i));
+//                }
+//            } else if (filterType == FILTER_ASSETS) {
+//                if (!tokens[i].isCurrency()) {
+//                    items.add(new TokenSortedItem(tokens[i], 10 + i));
+//                }
+//            } else {
+//                items.add(new TokenSortedItem(tokens[i], 10 + i));
+//            }
+//        }
+//        items.endBatchedUpdates();
+    }
+
+    public void updateTokens(Token[] tokens) {
+        populateTokens(newItems, tokens);
+
+        final TokenDiffCallback diffCallback = new TokenDiffCallback(items, newItems);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        populateTokens(items, tokens);
+        diffResult.dispatchUpdatesTo(this);
+    }
+
+    private void populateTokens(SortedList<SortedItem> list, Token[] tokens)
+    {
+        list.beginBatchedUpdates();
+        list.clear();
+        list.add(total);
 
         for (int i = 0; i < tokens.length; i++) {
             if (filterType == FILTER_CURRENCY) {
                 if (tokens[i].isCurrency()) {
-                    items.add(new TokenSortedItem(tokens[i], 10 + i));
+                    list.add(new TokenSortedItem(tokens[i], 10 + i));
                 }
             } else if (filterType == FILTER_ASSETS) {
                 if (!tokens[i].isCurrency()) {
-                    items.add(new TokenSortedItem(tokens[i], 10 + i));
+                    list.add(new TokenSortedItem(tokens[i], 10 + i));
                 }
             } else {
-                items.add(new TokenSortedItem(tokens[i], 10 + i));
+                list.add(new TokenSortedItem(tokens[i], 10 + i));
             }
         }
-        items.endBatchedUpdates();
+        list.endBatchedUpdates();
     }
 
     public void setTotal(BigDecimal totalInCurrency) {
         total = new TotalBalanceSortedItem(totalInCurrency);
+        newItems.add(total);
+
+        final TokenDiffCallback diffCallback = new TokenDiffCallback(items, newItems);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
         items.add(total);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     public void setFilterType(int filterType) {

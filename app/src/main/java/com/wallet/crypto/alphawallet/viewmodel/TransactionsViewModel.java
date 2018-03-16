@@ -208,7 +208,39 @@ public class TransactionsViewModel extends BaseViewModel {
         fetchTransactionDisposable = fetchTokensInteract
                 .fetchStored(defaultWallet.getValue())
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(this::onTokens, this::onError, this::consumeTokenCheckList);
+                .subscribe(this::onTokens, this::onError, this::checkLocalTokens);
+    }
+
+    //We need to parse all the transactions we detect are being sent to a known contract
+    private void checkLocalTokens()
+    {
+        List<TokenTransaction> txTrans = new ArrayList<>();
+        for (Transaction t : txMap.values())
+        {
+            Token localToken = findLocalToken(t.to);
+            if (localToken != null)
+            {
+                TokenTransaction tt = new TokenTransaction(localToken, t);
+                txTrans.add(tt);
+            }
+        }
+
+        TokenTransaction[] localTxList = txTrans.toArray(new TokenTransaction[txTrans.size()]);
+        onContractTokenTransactions(localTxList);
+
+        consumeTokenCheckList();
+    }
+
+    private Token findLocalToken(String address)
+    {
+        String addrFix = Numeric.cleanHexPrefix(address);
+        for (Token t : tokenCheckList) {
+            if (Numeric.cleanHexPrefix(t.getAddress()).equalsIgnoreCase(addrFix)) {
+                return t;
+            }
+        }
+
+        return null;
     }
 
     //Consume the token check list - process each token transaction on a thread but don't simultaneously process them - this locks the UI
@@ -357,6 +389,11 @@ public class TransactionsViewModel extends BaseViewModel {
                         break;
                     case "transferFrom":
                         ct.operation = "Redeem";
+                        if (!data.containsAddress(defaultWallet().getValue().address))
+                        {
+                            //this must be an admin redeem
+                            ct.operation = "Admin Redeem";
+                        }
                         //one of our tickets was burned
                         ct.type = -1; //redeem
                         break;

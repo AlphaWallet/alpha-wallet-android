@@ -158,8 +158,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onTransactions(Transaction[] transaction) {
         adapter.updateTransactions(transaction);
-        //list.setAdapter(null);
-        //adapter.notifyDataSetChanged();
     }
 
     private void onDefaultWallet(Wallet wallet) {

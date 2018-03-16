@@ -38,7 +38,9 @@ public class TransactionDiffCallback extends DiffUtil.Callback {
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
         Object oldItem = mOldList.get(oldItemPosition).value;
-        Object newItem = mOldList.get(oldItemPosition).value;
+        Object newItem = mNewList.get(newItemPosition).value;
+
+        if (oldItem == null || newItem == null) return false;
 
         //first spot type mismatch
         if (oldItem instanceof Date && newItem instanceof Transaction) return false;
@@ -61,7 +63,9 @@ public class TransactionDiffCallback extends DiffUtil.Callback {
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
         Object oldItem = mOldList.get(oldItemPosition).value;
-        Object newItem = mOldList.get(oldItemPosition).value;
+        Object newItem = mNewList.get(newItemPosition).value;
+
+        if (oldItem == null || newItem == null) return false;
 
         //first spot type mismatch
         if (oldItem instanceof Date && newItem instanceof Transaction) return false;

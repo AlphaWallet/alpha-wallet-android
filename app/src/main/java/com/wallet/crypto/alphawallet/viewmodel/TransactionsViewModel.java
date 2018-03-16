@@ -51,6 +51,9 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -87,12 +90,9 @@ public class TransactionsViewModel extends BaseViewModel {
     private Disposable fetchTransactionDisposable;
     private Handler handler = new Handler();
 
-    private Map<String, Transaction> txMap = new HashMap<>();
     private boolean isVisible = false;
-    private List<String> detectedContracts = new ArrayList<>();
-    private List<String> deadContracts = new ArrayList<>();
-    private List<Token> tokenCheckList = new ArrayList<>();
-    TransactionDecoder transactionDecoder = null;
+    private Transaction[] txArray;
+    private List<Token> tokenCheckList;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -162,40 +162,22 @@ public class TransactionsViewModel extends BaseViewModel {
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
-
-        if (transactionDecoder == null)
-        {
-            transactionDecoder = new TransactionDecoder();
-        }
     }
 
     //1. Get normal transactions
     public void fetchTransactions(boolean shouldShowProgress) {
-        txMap.clear();
-        detectedContracts.clear();
         handler.removeCallbacks(startFetchTransactionsTask);
         progress.postValue(shouldShowProgress);
         /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
         fetchTransactionDisposable =
                 fetchTransactionsInteract.fetch(defaultWallet.getValue())
-                        .subscribeOn(Schedulers.newThread())
+                        .subscribeOn(Schedulers.io())
                         .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
     }
 
-    //Called from fetchTransactions
+    //Store the transactions we obtained in step 1 locally
     private void onTransactions(Transaction[] transactions) {
-        for (Transaction t : transactions)
-        {
-            if (!txMap.containsKey(t.hash))
-            {
-                txMap.put(t.hash, t);
-                detectContractTransactions(t);
-            }
-        }
-        Boolean last = progress.getValue();
-        if (transactions != null && transactions.length > 0 && last != null && last) {
-            progress.postValue(true);
-        }
+        txArray = transactions;
     }
 
     //Once we have fetched all user account related transactions we need to fill in all the contract transactions
@@ -205,56 +187,69 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         fetchTransactionDisposable = fetchTokensInteract
                 .fetchStored(defaultWallet.getValue())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::onTokens, this::onError, this::categoriseAccountTransactions);
+    }
+
+    //receive cached tokens and store them in the service
+    private void onTokens(Token[] tokens) {
+        setupTokensInteract.setTokens(tokens);
+    }
+
+    //once we have a list of user tokens and transactions on the wallet account
+    //we need to build a map of transactions and associate them with local tokens
+    private void categoriseAccountTransactions()
+    {
+        Boolean last = progress.getValue();
+        if (txArray != null && txArray.length > 0 && last != null && last) {
+            progress.postValue(true);
+        }
+        else
+        {
+            if (setupTokensInteract.getLocalTokensCount() == 0) {
+                progress.postValue(false);
+                return; // no local transactions, no ERC875 tokens, no need to check any further
+            }
+        }
+
+        //go ahead and build the map associating account transactions with ERC875 tokens
+        fetchTransactionDisposable = setupTokensInteract
+                .checkTransactions(txArray)
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(this::onTokens, this::onError, this::checkLocalTokens);
+                .subscribe(this::startCheckingTokenInterations);
     }
 
     //We need to parse all the transactions we detect are being sent to a known contract
-    private void checkLocalTokens()
+    private void startCheckingTokenInterations(Object o)
     {
-        List<TokenTransaction> txTrans = new ArrayList<>();
-        for (Transaction t : txMap.values())
-        {
-            Token localToken = findLocalToken(t.to);
-            if (localToken != null)
-            {
-                TokenTransaction tt = new TokenTransaction(localToken, t);
-                txTrans.add(tt);
-            }
-        }
-
-        TokenTransaction[] localTxList = txTrans.toArray(new TokenTransaction[txTrans.size()]);
-        onContractTokenTransactions(localTxList);
-
+        tokenCheckList = setupTokensInteract.getTokenCheckList();
         consumeTokenCheckList();
     }
 
-    private Token findLocalToken(String address)
-    {
-        String addrFix = Numeric.cleanHexPrefix(address);
-        for (Token t : tokenCheckList) {
-            if (Numeric.cleanHexPrefix(t.getAddress()).equalsIgnoreCase(addrFix)) {
-                return t;
-            }
-        }
-
-        return null;
-    }
-
-    //Consume the token check list - process each token transaction on a thread but don't simultaneously process them - this locks the UI
+    //Consume the token check list
+    //called serially to get all transactions for every contract identified as being ERC875 that we have had dealings with
     private void consumeTokenCheckList()
     {
+
+
         if (tokenCheckList.size() == 0)
         {
-            showTransactions();
+            processTokenTransactions();
         }
         else {
             Token t = tokenCheckList.remove(0);
 
-            fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
-                    .subscribeOn(Schedulers.newThread())
-                    .subscribe(this::onContractTokenTransactions, this::onConsumeError, this::consumeTokenCheckList);
+            fetchTransactionDisposable = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::addTxs, this::onConsumeError, this::consumeTokenCheckList);
         }
+
+        //processTokenTransactions();
+    }
+
+    private void addTxs(TokenTransaction[] txList)
+    {
+        setupTokensInteract.addTokenTransactions(txList);
     }
 
     private void onConsumeError(Throwable e)
@@ -262,41 +257,42 @@ public class TransactionsViewModel extends BaseViewModel {
         consumeTokenCheckList();
     }
 
-    //receive a list of user tokens
-    private void onTokens(Token[] tokens) {
-        tokenCheckList.clear();
 
-        //see if there's any ERC875 tokens
-        for (Token t : tokens)
-        {
-            if (t.tokenInfo.isStormbird)
-            {
-                tokenCheckList.add(t);
-            }
-        }
+    //Now run all the transactions we obtained in the first phase (from our wallet address)
+    // and from the second (going through all the transactions from all the contracts we interact with to find the ones that affect us)
+    private void processTokenTransactions()
+    {
+        fetchTransactionDisposable = setupTokensInteract
+                .processTransactions(defaultWallet().getValue())
+                .observeOn(Schedulers.newThread())
+                .subscribe(this::showTransactions, this::onError);
     }
 
-    private void showTransactions()
+//    private void collectDetectedContracts(String[] contracts)
+//    {
+//        showTransactions();
+//    }
+
+    //finally display the processed transactions
+    private void showTransactions(Transaction[] processedTransactions)
     {
-        if (txMap.size() > 0)
+        if (processedTransactions.length > 0)
         {
-            Transaction[] txArray = txMap.values().toArray(new Transaction[txMap.size()]);
-            this.transactions.postValue(txArray);
+            this.transactions.postValue(processedTransactions);
         }
         else
         {
             error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
         }
 
+
         //if there are detected contract transactions that we don't already know about add them in here
-        for (String contractAddress : detectedContracts)
+        for (String contractAddress : setupTokensInteract.getRequiredContracts())
         {
             //detected interaction with these unknown contracts
             //add them to our watch list
             setupTokenAddr(contractAddress);
         }
-
-        detectedContracts.clear();
 
         progress.postValue(false);
 
@@ -313,115 +309,6 @@ public class TransactionsViewModel extends BaseViewModel {
                 fetchTransactionDisposable.dispose();
             }
             fetchTransactionDisposable = null; //ready to restart the fetch
-        }
-    }
-
-    private void detectContractTransactions(Transaction t)
-    {
-        if (t.input != null && t.input.length() > 20)
-        {
-            try {
-                TransactionInput data = transactionDecoder.decodeInput(t.input);
-                if (data != null && data.functionData != null)
-                {
-                    if (!detectedContracts.contains(t.to) && !deadContracts.contains(t.to))
-                    {
-                        detectedContracts.add(t.to);
-                    }
-                }
-            }
-            catch (Exception e) {
-
-            }
-        }
-    }
-
-    //receive a list of transactions for the contract
-    private void onContractTokenTransactions(TokenTransaction[] transactions)
-    {
-        for (TokenTransaction thisTokenTrans : transactions)
-        {
-            Transaction thisTrans = thisTokenTrans.transaction;
-            TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
-            if (detectedContracts.contains(thisTokenTrans.token.getAddress()))
-            {
-                detectedContracts.remove(thisTokenTrans.token.getAddress());
-            }
-
-            if (walletInvolvedInTransaction(thisTrans, data))
-            {
-                //now display the transaction in the list
-                TransactionOperation op = new TransactionOperation();
-                ERC875ContractTransaction ct = new ERC875ContractTransaction();
-                op.contract = ct;
-
-                ct.address = thisTokenTrans.token.getAddress();
-                ct.setIndicies(data.paramValues);
-                ct.name = thisTokenTrans.token.getFullName();
-                ct.operation = data.functionData.functionName;
-
-                TransactionOperation[] newOps = new TransactionOperation[1];
-                newOps[0] = op;
-
-                Transaction newTransaction = new Transaction(thisTrans.hash,
-                        thisTrans.error,
-                        thisTrans.blockNumber,
-                        thisTrans.timeStamp,
-                        thisTrans.nonce,
-                        thisTrans.from,
-                        thisTrans.to,
-                        thisTrans.value,
-                        thisTrans.gas,
-                        thisTrans.gasPrice,
-                        thisTrans.input,
-                        thisTrans.gasUsed,
-                        newOps);
-
-                if (txMap.containsKey(newTransaction.hash))
-                {
-                    txMap.remove(newTransaction.hash);
-                }
-
-                txMap.put(newTransaction.hash, newTransaction);
-
-                //we could ecrecover the seller here
-                switch (data.functionData.functionName)
-                {
-                    case "trade":
-                        ct.operation = "Market purchase";
-                        //until we can ecrecover from a signauture, we can't show our ticket as sold, but we can conclude it sold elsewhere, so this must be a buy
-                        ct.type = 1; //buy/receive
-                        break;
-                    case "transferFrom":
-                        ct.operation = "Redeem";
-                        if (!data.containsAddress(defaultWallet().getValue().address))
-                        {
-                            //this must be an admin redeem
-                            ct.operation = "Admin Redeem";
-                        }
-                        //one of our tickets was burned
-                        ct.type = -1; //redeem
-                        break;
-                    case "transfer":
-                        //this could be transfer to or from
-                        //if addresses contains our address then it must be a recieve
-                        if (data.containsAddress(defaultWallet().getValue().address))
-                        {
-                            ct.operation = "Receive From";
-                            ct.type = 1; //buy/receive
-                            ct.otherParty = thisTrans.from;
-                        }
-                        else
-                        {
-                            ct.operation = "Transfer To";
-                            ct.type = -1; //sell
-                            ct.otherParty = data.getFirstAddress();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
         }
     }
 
@@ -447,16 +334,6 @@ public class TransactionsViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
         getBalance();
         fetchTransactions(false);
-    }
-
-    private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data)
-    {
-        boolean involved = false;
-        if (data.functionData == null) return false; //early return
-        String walletAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
-        if (data.containsAddress(defaultWallet().getValue().address)) involved = true;
-        if (trans.from.contains(walletAddr)) involved = true;
-        return involved;
     }
 
     public void showSettings(Context context) {
@@ -507,6 +384,7 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         disposable = setupTokensInteract
                 .update(contractAddress)
+                .subscribeOn(Schedulers.io())
                 .subscribe(this::onTokensSetup, this::onError);
     }
 
@@ -516,11 +394,12 @@ public class TransactionsViewModel extends BaseViewModel {
             || tokenInfo.isEnabled == false
             || (tokenInfo.symbol == null || tokenInfo.symbol.length() < 2))
         {
-            this.deadContracts.add(tokenInfo.address);
+            setupTokensInteract.putDeadContract(tokenInfo.address);
         }
         else {
             disposable = addTokenInteract
                     .add(tokenInfo)
+                    .subscribeOn(Schedulers.io())
                     .subscribe(this::onSaved, this::onError);
         }
     }

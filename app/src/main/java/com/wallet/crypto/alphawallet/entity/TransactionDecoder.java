@@ -88,7 +88,6 @@ public class TransactionDecoder
         }
         else
         {
-            System.out.println("Unhandled Transaction: " + input);
             //unknown
             return length;
         }

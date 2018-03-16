@@ -7,6 +7,7 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -28,7 +29,6 @@ public class FetchTransactionsInteract {
     public Observable<TokenTransaction[]> fetch(Wallet wallet, Token t) {
         return transactionRepository
                 .fetchTokenTransaction(wallet, t)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io());
     }
 }

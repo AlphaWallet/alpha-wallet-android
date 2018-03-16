@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -52,25 +53,26 @@ public class TransactionRepository implements TransactionRepositoryType {
 	    return Single.merge(
 	            fetchFromCache(networkInfo, wallet),
 	            fetchAndCacheFromNetwork(networkInfo, wallet))
+				.observeOn(Schedulers.newThread())
                 .toObservable();
     }
 
     //TODO: Needs a small refactor to be more fluid
+	//This function is causing the remaining problems
 	@Override
 	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		Transaction[] txList = Single.merge(
-				fetchFromCache(networkInfo, wallet),
-				fetchAndCacheFromNetwork(networkInfo, wallet)).blockingLast();
-
-		TokenTransaction[] ttxList = new TokenTransaction[txList.length];
-
-		for (int i = 0; i < txList.length ; i++)
-		{
-			ttxList[i] = new TokenTransaction(token, txList[i]);
-		}
-
 		return Single.fromCallable(() -> {
+			NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+			Transaction[] txList = Single.merge(
+					fetchFromCache(networkInfo, wallet),
+					fetchAndCacheFromNetwork(networkInfo, wallet)).blockingLast();
+
+			TokenTransaction[] ttxList = new TokenTransaction[txList.length];
+
+			for (int i = 0; i < txList.length; i++) {
+				ttxList[i] = new TokenTransaction(token, txList[i]);
+			}
+
 			return ttxList;
 		}).toObservable();
 	}
@@ -145,6 +147,7 @@ public class TransactionRepository implements TransactionRepositoryType {
                 .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
                         .fetchLastTransactions(wallet, null)))
                 .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
-                .andThen(inDiskCache.fetchTransaction(networkInfo, wallet));
+                .andThen(inDiskCache.fetchTransaction(networkInfo, wallet))
+				.observeOn(Schedulers.io());
     }
 }

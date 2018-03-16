@@ -21,8 +21,8 @@ import com.wallet.crypto.alphawallet.router.HomeRouter;
 
 import static com.wallet.crypto.alphawallet.C.IMPORT_REQUEST_CODE;
 
-public class WalletsViewModel extends BaseViewModel {
-
+public class WalletsViewModel extends BaseViewModel
+{
 	private final CreateWalletInteract createWalletInteract;
 	private final SetDefaultWalletInteract setDefaultWalletInteract;
 	private final DeleteWalletInteract deleteWalletInteract;

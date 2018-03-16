@@ -135,19 +135,20 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void prepare() {
-        progress.postValue(true);
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+        progress.postValue(false);
+//        disposable = findDefaultNetworkInteract
+//                .find()
+//                .subscribe(this::onDefaultNetwork, this::onError);
     }
 
     public void fetchTransactions(boolean shouldShowProgress) {
-        handler.removeCallbacks(startFetchTransactionsTask);
-        progress.postValue(shouldShowProgress);
-        /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
-        Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
-        fetchTransactionDisposable = fetch
-                .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted);
+//
+//        handler.removeCallbacks(startFetchTransactionsTask);
+//        progress.postValue(shouldShowProgress);
+//        /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
+//        Observable<Transaction[]> fetch = fetchTransactionsInteract.fetch(defaultWallet.getValue());
+//        fetchTransactionDisposable = fetch
+//                .subscribe(this::onTransactions, this::onError, this::onTransactionsFetchCompleted);
     }
 
     public void getBalance() {
@@ -170,7 +171,6 @@ public class HomeViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-        getBalance();
         fetchTransactions(true);
     }
 

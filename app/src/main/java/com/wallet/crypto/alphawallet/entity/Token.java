@@ -122,9 +122,13 @@ public class Token implements Parcelable {
             holder.fillIcon(null, R.mipmap.token_logo);
             holder.text24Hours.setText(EMPTY_BALANCE);
             holder.textAppreciation.setText(EMPTY_BALANCE);
+            holder.textAppreciationSub.setText(R.string.appreciation);
+            holder.text24HoursSub.setText(R.string.twenty_four_hours);
         } else {
             holder.fillCurrency(ethBalance, ticker);
             holder.fillIcon(ticker.image, R.mipmap.token_logo);
+            holder.textAppreciationSub.setText(R.string.appreciation);
+            holder.text24HoursSub.setText(R.string.twenty_four_hours);
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);

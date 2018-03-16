@@ -109,15 +109,19 @@ public class WalletViewModel extends BaseViewModel {
     private void onFetchTokensBalanceCompletable()
     {
         progress.postValue(false);
-        this.tokens.setValue(tokenCache);
-        Token[] tokens = tokens().getValue();
-        if (tokens == null || tokens.length == 0) {
+        if (tokenCache != null && tokenCache.length > 0) {
+            tokens.postValue(tokenCache);
+            showTotalBalance(tokenCache);
+        }
+        else
+        {
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
         }
     }
 
     private void onFetchTokensCompletable() {
-        onFetchTokensBalanceCompletable();
+        showTotalBalance(tokenCache);
+        tokens.postValue(tokenCache);
         updateTokenBalances();
     }
 
@@ -129,12 +133,9 @@ public class WalletViewModel extends BaseViewModel {
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensBalanceCompletable);
     }
 
-    private void onTokens(Token[] tokens) {
+    private void onTokens(Token[] tokens)
+    {
         tokenCache = tokens;
-        if (tokens != null && tokens.length > 0) {
-            progress.postValue(true);
-            showTotalBalance(tokenCache);
-        }
     }
 
     private void showTotalBalance(Token[] tokens) {

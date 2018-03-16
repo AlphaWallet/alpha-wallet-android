@@ -126,8 +126,30 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchActiveStored(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokens(network, wallet) // Immediately show the cache.
+        return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
+                .compose(attachEthereumStored(network, wallet)) //add cached eth balance
                 .toObservable();
+    }
+
+    private SingleTransformer<Token[], Token[]> attachEthereumStored(NetworkInfo network, Wallet wallet)
+    {
+        return upstream -> Single.zip(
+                upstream, attachCachedEth(network, wallet),
+                (tokens, ethToken) ->
+                {
+                    List<Token> result = new ArrayList<>();
+                    result.add(ethToken);
+                    result.addAll(Arrays.asList(tokens));
+                    return result.toArray(new Token[result.size()]);
+                });
+    }
+
+    private Single<Token> attachCachedEth(NetworkInfo network, Wallet wallet) {
+        return walletRepository.balanceInWei(wallet)
+                .map(balance -> {
+                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
+                    return new Token(info, balance, System.currentTimeMillis());
+                });
     }
 
     @Override
@@ -203,6 +225,27 @@ public class TokenRepository implements TokenRepositoryType {
                             }
                             return data;
                         }));
+    }
+
+    private SingleTransformer<Token[], Token[]> attachTickerStored(NetworkInfo network, Wallet wallet) {
+        return upstream -> upstream.flatMap(tokens ->
+                Single.zip(
+                        Single.just(tokens),
+                        getTickersStored(network, wallet, tokens),
+                        (data, tokenTickers) -> {
+                            for (Token token : data) {
+                                for (TokenTicker ticker : tokenTickers) {
+                                    if (token.tokenInfo.address.equals(ticker.contract)) {
+                                        token.ticker = ticker;
+                                    }
+                                }
+                            }
+                            return data;
+                        }));
+    }
+
+    private Single<TokenTicker[]> getTickersStored(NetworkInfo network, Wallet wallet, Token[] tokens) {
+        return localSource.fetchTickers(network, wallet, tokens);
     }
 
     private Single<TokenTicker[]> getTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {

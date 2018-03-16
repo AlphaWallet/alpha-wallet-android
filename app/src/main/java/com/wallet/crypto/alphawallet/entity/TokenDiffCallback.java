@@ -84,7 +84,8 @@ public class TokenDiffCallback extends DiffUtil.Callback {
         }
         else if (oldItem instanceof BigDecimal)
         {
-            return ((BigDecimal) oldItem).compareTo((BigDecimal) newItem) == 0;
+            boolean same = ((BigDecimal) oldItem).compareTo((BigDecimal) newItem) == 0;
+            return same;
         }
         else
         {
@@ -99,6 +100,10 @@ public class TokenDiffCallback extends DiffUtil.Callback {
             else if (!oldToken.getStringBalance().equals(newToken.getStringBalance()))
             {
                 return false;
+            }
+            else if (oldToken.ticker != null && newToken.ticker != null && !oldToken.ticker.percentChange24h.equals(newToken.ticker.percentChange24h))
+            {
+                return false; //checking if ticker has updated
             }
             else
             {

@@ -85,12 +85,10 @@ public class TransactionsViewModel extends BaseViewModel {
     private Disposable getBalanceDisposable;
     @Nullable
     private Disposable fetchTransactionDisposable;
-    @Nullable
-    private Disposable fetchTokensDisposable;
     private Handler handler = new Handler();
 
     private Map<String, Transaction> txMap = new HashMap<>();
-    private boolean stopTransactionRefresh = false;
+    private boolean isVisible = false;
     private List<String> detectedContracts = new ArrayList<>();
     private List<String> deadContracts = new ArrayList<>();
     private List<Token> tokenCheckList = new ArrayList<>();
@@ -137,9 +135,9 @@ public class TransactionsViewModel extends BaseViewModel {
 
         handler.removeCallbacks(startFetchTransactionsTask);
         handler.removeCallbacks(startGetBalanceTask);
-        if (fetchTokensDisposable != null && !fetchTokensDisposable.isDisposed())
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {
-            fetchTokensDisposable.dispose();
+            fetchTransactionDisposable.dispose();
         }
     }
 
@@ -302,12 +300,19 @@ public class TransactionsViewModel extends BaseViewModel {
 
         progress.postValue(false);
 
-        if (!stopTransactionRefresh) {
+        if (isVisible) {
             handler.postDelayed(
                     startFetchTransactionsTask,
                     FETCH_TRANSACTIONS_INTERVAL);
-
-            stopTransactionRefresh = false;
+        }
+        else
+        {
+            //no longer any need to refresh
+            if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+            {
+                fetchTransactionDisposable.dispose();
+            }
+            fetchTransactionDisposable = null; //ready to restart the fetch
         }
     }
 
@@ -421,14 +426,14 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void getBalance() {
-        getBalanceDisposable = getDefaultWalletBalance
-                .get(defaultWallet.getValue())
-                .subscribe(values -> {
-                    defaultWalletBalance.postValue(values);
-                    handler.removeCallbacks(startGetBalanceTask);
-                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
-                }, t -> {
-                });
+//        getBalanceDisposable = getDefaultWalletBalance
+//                .get(defaultWallet.getValue())
+//                .subscribe(values -> {
+//                    defaultWalletBalance.postValue(values);
+//                    handler.removeCallbacks(startGetBalanceTask);
+//                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
+//                }, t -> {
+//                });
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -441,6 +446,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         getBalance();
+        fetchTransactions(false);
     }
 
     private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data)
@@ -490,16 +496,10 @@ public class TransactionsViewModel extends BaseViewModel {
     private final Runnable startGetBalanceTask = this::getBalance;
 
     public void startTransactionRefresh() {
-        stopTransactionRefresh = false;
-        fetchTransactions(true);
-    }
-
-    public void stopTransactionRefresh() {
-        stopTransactionRefresh = true;
-        handler.removeCallbacks(startFetchTransactionsTask);
-        if (fetchTokensDisposable != null && !fetchTokensDisposable.isDisposed())
+        isVisible = true;
+        if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
         {
-            fetchTokensDisposable.dispose();
+            fetchTransactions(true);
         }
     }
 
@@ -529,4 +529,7 @@ public class TransactionsViewModel extends BaseViewModel {
         System.out.println("saved contract");
     }
 
+    public void setVisibility(boolean visibility) {
+        isVisible = visibility;
+    }
 }

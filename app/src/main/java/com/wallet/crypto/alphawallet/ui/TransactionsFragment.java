@@ -123,11 +123,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         isVisible = isVisibleToUser;
-        if (isResumed()) { // fragment have created
+        if (isResumed()) { // fragment created
+            viewModel.setVisibility(isVisible);
             if (isVisible) {
                 viewModel.startTransactionRefresh();
-            } else {
-                viewModel.stopTransactionRefresh();
             }
         }
     }

@@ -10,7 +10,7 @@
     <TextView
         android:text="@string/dialog_message"
         android:textSize="16sp"
-        android:fontFamily="@font/roboto_regular"
+        android:fontFamily="@font/font_regular"
         android:gravity="center_horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

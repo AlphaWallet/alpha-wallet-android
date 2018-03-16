@@ -59,7 +59,7 @@ public abstract class C {
     //FOR DEMOS ETC
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
     public static final boolean HARD_CODED_KEY = true;           //pre-loads a hard coded key in the app
-    public static final boolean HARD_CODED_CONTRACT = true;      //pre-loads the contract as specified below
+    public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
     public static final boolean OVERRIDE_DEFAULT_NETWORK = true;  //use the default network given below
 
     //Range of 3 test keys, they all have a little test eth pre-loaded on them

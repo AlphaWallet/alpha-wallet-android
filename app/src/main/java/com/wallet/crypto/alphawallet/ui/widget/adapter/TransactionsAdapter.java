@@ -10,7 +10,6 @@ import android.widget.ListView;
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Transaction;
-import com.wallet.crypto.alphawallet.entity.TransactionDiffCallback;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.ui.widget.OnTransactionClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.DateSortedItem;
@@ -60,42 +59,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
     });
 
-    private final SortedList<SortedItem> newItems = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
-        @Override
-        public int compare(SortedItem left, SortedItem right) {
-            return left.compare(right);
-        }
-
-        @Override
-        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
-            return oldItem.areContentsTheSame(newItem);
-        }
-
-        @Override
-        public boolean areItemsTheSame(SortedItem left, SortedItem right) {
-            return left.areItemsTheSame(right);
-        }
-
-        @Override
-        public void onChanged(int position, int count) {
-            notifyItemRangeChanged(position, count);
-        }
-
-        @Override
-        public void onInserted(int position, int count) {
-            notifyItemRangeInserted(position, count);
-        }
-
-        @Override
-        public void onRemoved(int position, int count) {
-            notifyItemRangeRemoved(position, count);
-        }
-
-        @Override
-        public void onMoved(int fromPosition, int toPosition) {
-            notifyItemMoved(fromPosition, toPosition);
-        }
-    });
     private final OnTransactionClickListener onTransactionClickListener;
 
     private Wallet wallet;
@@ -151,15 +114,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     }
 
     public void addTransactions(Transaction[] transactions) {
-//        items.beginBatchedUpdates();
-//        for (Transaction transaction : transactions) {
-//            TransactionSortedItem sortedItem = new TransactionSortedItem(
-//                    TransactionHolder.VIEW_TYPE, transaction, TimestampSortedItem.DESC);
-//            items.add(sortedItem);
-//            items.add(DateSortedItem.round(transaction.timeStamp));
-//        }
-//        items.endBatchedUpdates();
-
         populateTransactions(items, transactions);
     }
 
@@ -176,13 +130,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     }
 
     public void updateTransactions(Transaction[] transactions) {
-        populateTransactions(newItems, transactions);
-
-        final TransactionDiffCallback diffCallback = new TransactionDiffCallback(items, newItems);
-        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
         populateTransactions(items, transactions);
-        diffResult.dispatchUpdatesTo(this);
     }
 
     public void clear() {

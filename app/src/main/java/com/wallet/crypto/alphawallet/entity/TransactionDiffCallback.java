@@ -43,8 +43,7 @@ public class TransactionDiffCallback extends DiffUtil.Callback {
         if (oldItem == null || newItem == null) return false;
 
         //first spot type mismatch
-        if (oldItem instanceof Date && newItem instanceof Transaction) return false;
-        if (oldItem instanceof Transaction && newItem instanceof Date) return false;
+        if (oldItem.getClass() != newItem.getClass()) return false;
 
         if (oldItem instanceof Date)
         {
@@ -68,8 +67,7 @@ public class TransactionDiffCallback extends DiffUtil.Callback {
         if (oldItem == null || newItem == null) return false;
 
         //first spot type mismatch
-        if (oldItem instanceof Date && newItem instanceof Transaction) return false;
-        if (oldItem instanceof Transaction && newItem instanceof Date) return false;
+        if (oldItem.getClass() != newItem.getClass()) return false;
 
         if (oldItem instanceof Date)
         {
@@ -81,8 +79,22 @@ public class TransactionDiffCallback extends DiffUtil.Callback {
         {
             Transaction oldTx = (Transaction)oldItem;
             Transaction newTx = (Transaction)newItem;
-            if (newTx.operations == null || newTx.operations.length == 0 || newTx.operations[0].contract == null) return true;
-            if (oldTx.operations == null || oldTx.operations.length == 0 || oldTx.operations[0].contract == null) return false; //must be new, we now have an operation
+            //check
+            if (oldTx.operations == null && newTx.operations != null) return false;
+            if (oldTx.operations != null && oldTx.operations.length == 0 && newTx.operations != null && newTx.operations.length > 0) return false;
+
+            if (oldTx.operations.length == 1 && newTx.operations.length == 1)
+            {
+                TransactionContract oldTc = oldTx.operations[0].contract;
+                TransactionContract newTc = newTx.operations[0].contract;
+
+                if (oldTc.getClass() != newTc.getClass()) return false;
+
+                if (oldTc.name == null && newTc.name != null) return false;
+            }
+            //
+            //if (newTx.operations == null || newTx.operations.length == 0 || newTx.operations[0].contract == null) return true;
+
 
 
             return true;// must be the same

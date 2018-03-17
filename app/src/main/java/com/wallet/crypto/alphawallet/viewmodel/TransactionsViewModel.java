@@ -7,19 +7,14 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
-import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.C;
-import com.wallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
-import com.wallet.crypto.alphawallet.entity.TransactionInput;
-import com.wallet.crypto.alphawallet.entity.TransactionDecoder;
-import com.wallet.crypto.alphawallet.entity.TransactionOperation;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -30,31 +25,17 @@ import com.wallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
 import com.wallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import com.wallet.crypto.alphawallet.router.HomeRouter;
-import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.MarketBrowseRouter;
 import com.wallet.crypto.alphawallet.router.MarketplaceRouter;
-import com.wallet.crypto.alphawallet.router.MyAddressRouter;
 import com.wallet.crypto.alphawallet.router.MyTokensRouter;
 import com.wallet.crypto.alphawallet.router.NewSettingsRouter;
-import com.wallet.crypto.alphawallet.router.SendRouter;
 import com.wallet.crypto.alphawallet.router.SettingsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionDetailRouter;
 import com.wallet.crypto.alphawallet.router.WalletRouter;
 
-import org.web3j.utils.Numeric;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.SingleObserver;
-import io.reactivex.SingleSource;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -84,8 +65,6 @@ public class TransactionsViewModel extends BaseViewModel {
     private final NewSettingsRouter newSettingsRouter;
     private final HomeRouter homeRouter;
 
-    @Nullable
-    private Disposable getBalanceDisposable;
     @Nullable
     private Disposable fetchTransactionDisposable;
     private Handler handler = new Handler();
@@ -135,6 +114,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
         handler.removeCallbacks(startFetchTransactionsTask);
         handler.removeCallbacks(startGetBalanceTask);
+        isVisible = false;
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {
             fetchTransactionDisposable.dispose();
@@ -164,11 +144,11 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
-    //1. Get normal transactions
+    //1. Get all transactions on wallet address
     public void fetchTransactions(boolean shouldShowProgress) {
         handler.removeCallbacks(startFetchTransactionsTask);
+        setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
         progress.postValue(shouldShowProgress);
-        /*For specific address use: new Wallet("0x60f7a1cbc59470b74b1df20b133700ec381f15d3")*/
         fetchTransactionDisposable =
                 fetchTransactionsInteract.fetch(defaultWallet.getValue())
                         .subscribeOn(Schedulers.io())
@@ -180,7 +160,7 @@ public class TransactionsViewModel extends BaseViewModel {
         txArray = transactions;
     }
 
-    //Once we have fetched all user account related transactions we need to fill in all the contract transactions
+    //2. Once we have fetched all user account related transactions we need to fill in all the contract transactions
     //First get a list of tokens, on each token see if it's an ERC875, if it is then scan the contract transactions
     //for any that relate to the current user account (given by wallet address)
     private void enumerateTokens()
@@ -196,7 +176,7 @@ public class TransactionsViewModel extends BaseViewModel {
         setupTokensInteract.setTokens(tokens);
     }
 
-    //once we have a list of user tokens and transactions on the wallet account
+    //3. once we have a list of user tokens and transactions on the wallet account
     //we need to build a map of transactions and associate them with local tokens
     private void categoriseAccountTransactions()
     {
@@ -219,19 +199,16 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::startCheckingTokenInterations);
     }
 
-    //We need to parse all the transactions we detect are being sent to a known contract
-    private void startCheckingTokenInterations(Object o)
+     private void startCheckingTokenInterations(Object o)
     {
         tokenCheckList = setupTokensInteract.getTokenCheckList();
         consumeTokenCheckList();
     }
 
-    //Consume the token check list
-    //called serially to get all transactions for every contract identified as being ERC875 that we have had dealings with
+    //4. Get all the transactions from all of our cached tokens.
+    // This funtion recursively calls itself, consuming each token we loaded in step 2.
     private void consumeTokenCheckList()
     {
-
-
         if (tokenCheckList.size() == 0)
         {
             processTokenTransactions();
@@ -243,8 +220,6 @@ public class TransactionsViewModel extends BaseViewModel {
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::addTxs, this::onConsumeError, this::consumeTokenCheckList);
         }
-
-        //processTokenTransactions();
     }
 
     private void addTxs(TokenTransaction[] txList)
@@ -257,9 +232,8 @@ public class TransactionsViewModel extends BaseViewModel {
         consumeTokenCheckList();
     }
 
-
-    //Now run all the transactions we obtained in the first phase (from our wallet address)
-    // and from the second (going through all the transactions from all the contracts we interact with to find the ones that affect us)
+    //5. Now parse all the transactions we obtained in step 1 and step 4
+    //match them against our known contracts and see what action was taking place (eg trade, transferFrom etc)
     private void processTokenTransactions()
     {
         fetchTransactionDisposable = setupTokensInteract
@@ -268,12 +242,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::showTransactions, this::onError);
     }
 
-//    private void collectDetectedContracts(String[] contracts)
-//    {
-//        showTransactions();
-//    }
-
-    //finally display the processed transactions
+    //6. finally receive the list of parsed transactions and update the list adapter
     private void showTransactions(Transaction[] processedTransactions)
     {
         if (processedTransactions.length > 0)
@@ -285,10 +254,16 @@ public class TransactionsViewModel extends BaseViewModel {
             error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
         }
 
+        boolean regenerate = false;
 
         //if there are detected contract transactions that we don't already know about add them in here
         for (String contractAddress : setupTokensInteract.getRequiredContracts())
         {
+            if (regenerate == false)
+            {
+                setupTokensInteract.regenerateTransactionList();
+                regenerate = true;
+            }
             //detected interaction with these unknown contracts
             //add them to our watch list
             setupTokenAddr(contractAddress);
@@ -312,6 +287,7 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
+    //NB: We don't need to update balance in transaction view
     public void getBalance() {
 //        getBalanceDisposable = getDefaultWalletBalance
 //                .get(defaultWallet.getValue())
@@ -372,6 +348,8 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private final Runnable startGetBalanceTask = this::getBalance;
 
+    //Called from the activity when it comes into view,
+    //start updating transactions
     public void startTransactionRefresh() {
         isVisible = true;
         if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
@@ -380,6 +358,7 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
+    //Fetch contract details
     private void setupTokenAddr(String contractAddress)
     {
         disposable = setupTokensInteract
@@ -388,6 +367,8 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::onTokensSetup, this::onError);
     }
 
+    //Store contract details if the contract is live,
+    //otherwise remove from the contract watch list
     private void onTokensSetup(TokenInfo tokenInfo) {
         //check this contract is good to add
         if ((tokenInfo.name == null || tokenInfo.name.length() < 3)
@@ -403,6 +384,7 @@ public class TransactionsViewModel extends BaseViewModel {
                     .subscribe(this::onSaved, this::onError);
         }
     }
+
     private void onSaved()
     {
         System.out.println("saved contract");

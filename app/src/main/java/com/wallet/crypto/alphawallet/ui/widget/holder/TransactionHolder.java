@@ -105,8 +105,14 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         type.setText(ct.operation);
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
-        String valueStr = "x" + ct.indicies.size() + " Tickets";
-        value.setText(valueStr);
+        if (ct.indicies != null && ct.indicies.size() > 0) {
+            String valueStr = "x" + ct.indicies.size() + " Tickets";
+            value.setText(valueStr);
+        }
+        else
+        {
+            value.setText("");
+        }
         supplimental.setText(""); //looks bad
     }
 

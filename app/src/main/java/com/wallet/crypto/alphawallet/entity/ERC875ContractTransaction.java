@@ -23,7 +23,13 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     public int type;
 
     public ERC875ContractTransaction() {
-
+        address = "";
+        name = "";
+        balance = "";
+        symbol = "";
+        operation = "";
+        otherParty = "";
+        indicies = null;
     }
 
     public void setIndicies(List<BigInteger> indicies)
@@ -43,7 +49,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         operation = in.readString();
         type = in.readInt();
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-        indicies = new ArrayList<Integer>();
+        indicies = new ArrayList<>();
         for (Object o : readObjArray)
         {
             Integer val = (Integer)o;
@@ -76,6 +82,8 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         parcel.writeString(symbol);
         parcel.writeString(operation);
         parcel.writeInt(type);
-        parcel.writeArray(indicies.toArray());
+        if (indicies != null) {
+            parcel.writeArray(indicies.toArray());
+        }
     }
 }

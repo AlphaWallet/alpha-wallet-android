@@ -46,9 +46,10 @@ public class TransactionDecoder
         //1. check function
         thisData = new TransactionInput();
         if (input == null || input.length() < 10) return null;
+        boolean finishParsing = false;
 
         try {
-            while (parseIndex < input.length()) {
+            while (parseIndex < input.length() && !finishParsing) {
                 switch (parseState) {
                     case 0: //get function
                         parseIndex += setFunction(readBytes(input, 10), input.length());
@@ -59,6 +60,7 @@ public class TransactionDecoder
                         parseState = 2;
                         break;
                     case 2:
+                        finishParsing = true;
                         break;
                 }
 
@@ -141,6 +143,10 @@ public class TransactionDecoder
                 }
             }
         }
+        else
+        {
+            return parseIndex; //skip to end of read if there are no args in the spec
+        }
 
         return parseIndex;
     }
@@ -199,6 +205,20 @@ public class TransactionDecoder
             data.contractType = CONTRACT_TYPE[index];
             functionList.put(buildMethodId(methodSignature), data);
         }
+
+        addContractCreation();
+    }
+
+    private void addContractCreation()
+    {
+        FunctionData data = new FunctionData();
+        data.functionName = "Contract Creation";
+        data.args = null;
+        data.functionFullName = data.functionName;
+        data.hasSig = false;
+        data.contractType = CREATION;
+        functionList.put("0x60606040", data);
+
     }
 
     static final String[] KNOWN_FUNCTIONS = {
@@ -221,6 +241,7 @@ public class TransactionDecoder
 
     static final int ERC20 = 1;
     static final int ERC875 = 2;
+    static final int CREATION = 3;
 
     static final int[] CONTRACT_TYPE = {
             ERC875,

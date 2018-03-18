@@ -1,7 +1,9 @@
 package com.wallet.crypto.alphawallet.interact;
 
+import com.wallet.crypto.alphawallet.entity.OrderContractAddressPair;
+import com.wallet.crypto.alphawallet.entity.SalesOrder;
+import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
 
@@ -55,5 +57,24 @@ public class FetchTokensInteract {
         return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
+    }
+
+    public Observable<OrderContractAddressPair> updateBalancePair(Token token, SalesOrder so)
+    {
+        return tokenRepository.fetchActiveTokenBalance(so.ownerAddress, token)
+                .map(updateToken -> mapToPair(updateToken, so))
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
+    }
+
+    private OrderContractAddressPair mapToPair(Token token, SalesOrder so)
+    {
+        OrderContractAddressPair pair = new OrderContractAddressPair();
+        pair.order = so;
+        if (token instanceof Ticket) {
+            Ticket t = (Ticket) token;
+            pair.balance = t.balanceArray;
+        }
+        return pair;
     }
 }

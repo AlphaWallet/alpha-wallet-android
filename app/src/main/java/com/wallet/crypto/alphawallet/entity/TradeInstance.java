@@ -19,7 +19,7 @@ import java.util.TimeZone;
 
 public class TradeInstance
 {
-    public final BigInteger expiry;
+    public BigInteger expiry;
     public final BigInteger price;
     public final int[] tickets;
     public final BigInteger contractAddress;

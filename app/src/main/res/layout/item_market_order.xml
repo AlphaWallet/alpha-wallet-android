@@ -92,7 +92,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_bold"
-                    android:text="Tickets"
+                    android:text="@string/tickets"
                     android:textColor="@color/semi_dark_grey"
                     android:textSize="21sp" />
             </LinearLayout>

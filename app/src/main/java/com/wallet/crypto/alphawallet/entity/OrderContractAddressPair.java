@@ -7,27 +7,27 @@ package com.wallet.crypto.alphawallet.entity;
 import java.util.List;
 
 /**
- * This stores a contract address -> owner address pair
+ * This stores a contract address -> owner address pair plus the received balance of the owner
+ * Note that the pair is contained within the SalesOrder. For any given contract address there could be many owner addresses in the order map
  * It's used to optimise checking balances of market orders
  * A token owner could have a lot of different tokens for sale from the same contract
  * It's unnecessary to repeat a balance check, which is quite expensive in terms of list update time
  */
-public class OrderContractAddressTrie
+public class OrderContractAddressPair
 {
-    public Token orderToken;
-    public String owningAddress;
     public SalesOrder order;
+    public List<Integer> balance;
 
-    public boolean equals(Token t, String address)
+    public boolean equals(String tokenAddr, String address)
     {
-        return (this.orderToken.getAddress().equals(t.getAddress()) && this.owningAddress.equals(address));
+        return (this.order.tokenInfo.address.equals(tokenAddr) && this.order.ownerAddress.equals(address));
     }
 
-    public static boolean addPair(List<OrderContractAddressTrie> checkList, Token t, String address) {
+    public static boolean addPair(List<OrderContractAddressPair> checkList, SalesOrder o) {
         boolean foundPair = false;
-        for (OrderContractAddressTrie pair : checkList)
+        for (OrderContractAddressPair pair : checkList)
         {
-            if (pair.equals(t, address)) {
+            if (pair.equals(o.tokenInfo.address, o.ownerAddress)) {
                 foundPair = true;
                 break;
             }
@@ -35,9 +35,8 @@ public class OrderContractAddressTrie
 
         if (!foundPair)
         {
-            OrderContractAddressTrie pair = new OrderContractAddressTrie();
-            pair.orderToken = t;
-            pair.owningAddress = address;
+            OrderContractAddressPair pair = new OrderContractAddressPair();
+            pair.order = o;
             checkList.add(pair);
             return true;
         }

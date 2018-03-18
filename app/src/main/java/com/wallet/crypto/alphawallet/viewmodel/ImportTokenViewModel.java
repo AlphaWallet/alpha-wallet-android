@@ -124,7 +124,11 @@ public class ImportTokenViewModel extends BaseViewModel  {
         try {
             importOrder = SalesOrder.parseUniversalLink(univeralImportLink);
             //ecrecover the owner
-            ownerAddress = SalesOrder.getOwnerKey(importOrder);
+            byte[] message = importOrder.message;
+            Sign.SignatureData sigData;
+            sigData = sigFromByteArray(importOrder.signature);
+            BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
+            ownerAddress = "0x" + Keys.getAddress(recoveredKey);
             //start looking at the ticket details
             //first check if we have this token already
             setupTokenAddr(importOrder.contractAddress);

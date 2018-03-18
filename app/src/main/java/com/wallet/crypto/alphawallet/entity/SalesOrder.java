@@ -37,6 +37,9 @@ public class SalesOrder implements Parcelable
     public final String contractAddress;
     public final byte[] signature;
     public final byte[] message;
+    public TokenInfo tokenInfo; //convenience pointer to token information
+    public String ownerAddress; //convenience ecrecovered owner address;
+    public List<Integer> balanceInfo = null; // received balance from blockchain check
 
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
             throws SalesOrderMalformed
@@ -226,6 +229,10 @@ public class SalesOrder implements Parcelable
             Sign.SignatureData sellerSig = sigFromByteArray(order.signature);
 
             data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+
+            //Can we recreate the seller address?
+            String addre = SalesOrder.getOwnerKey(order);
+            System.out.println("Owner: " + addre);
         }
         catch (Exception e)
         {

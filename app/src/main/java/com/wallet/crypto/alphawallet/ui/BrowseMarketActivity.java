@@ -11,10 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.MarketplaceEvent;
+import com.wallet.crypto.alphawallet.entity.OrderContractAddressPair;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import com.wallet.crypto.alphawallet.util.BalanceUtils;
@@ -73,9 +73,18 @@ public class BrowseMarketActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
-        viewModel.updateMarket().observe(this, this::onMarketUpdate);
+        viewModel.updateMarket().observe(this, this::onMarketUpdate); //receive the sales orders (some may be invalid - TODO: display progress indeterminate)
+        viewModel.updateBalance().observe(this, this::updateBalance);
+        viewModel.startUpdate().observe(this, this::startUpdate);
+        viewModel.endUpdate().observe(this, this::endUpdate);
 
         setupSearchBar();
+    }
+
+    private void updateBalance(OrderContractAddressPair balanceUpdate)
+    {
+        //now update the balances of the tokens and corresponding posts
+        adapter.updateContent(balanceUpdate);
     }
 
     private void setupSearchBar() {
@@ -142,5 +151,12 @@ public class BrowseMarketActivity extends BaseActivity
         Context context = view.getContext();
         //TODO: just clicked on an order.
         viewModel.showPurchaseTicket(context, instance);
+    }
+
+    private void startUpdate(Boolean dummy) {
+        adapter.startUpdate();
+    }
+    private void endUpdate(Boolean dummy) {
+        adapter.endUpdate();
     }
 }

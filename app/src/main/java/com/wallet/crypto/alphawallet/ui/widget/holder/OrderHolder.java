@@ -14,6 +14,8 @@ import com.wallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -33,6 +35,7 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
     private final TextView name;
     private final TextView ticketIds;
     private final TextView ticketCat;
+    private final TextView ticketTypeText;
 
     public OrderHolder(int resId, ViewGroup parent) {
         super(resId, parent);
@@ -42,6 +45,7 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
         date = findViewById(R.id.date);
         ticketIds = findViewById(R.id.tickettext);
         ticketCat = findViewById(R.id.cattext);
+        ticketTypeText = findViewById(R.id.ticket_type);
         itemView.setOnClickListener(this);
     }
 
@@ -53,8 +57,8 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
             String seatRange = String.valueOf(seatStart);
             if (data.ticketCount > 1) seatRange = seatStart + "-" + (seatStart+(data.ticketCount-1));
             price.setText(String.valueOf(data.price));
-            name.setText(TicketDecode.getName());
-            count.setText(String.valueOf(data.ticketCount));
+            name.setText(data.tokenInfo.name);
+            setBalance(data);
             date.setText(TicketDecode.getDate(data.ticketStart));
             ticketIds.setText(seatRange);
             ticketCat.setText(TicketDecode.getZone(data.ticketStart));
@@ -77,5 +81,45 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
 
     public void setOnOrderClickListener(OnSalesOrderClickListener onTokenClickListener) {
         this.onOrderClickListener = onTokenClickListener;
+    }
+
+    private void setBalance(SalesOrder data)
+    {
+        if (data.balanceInfo != null)
+        {
+            //check if the required tickets are actually here
+            List<Integer> newBalance = new ArrayList<>();
+            boolean allIndicesUnsold = true;
+            for (Integer index : data.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing?
+            {
+                if (data.balanceInfo.size() > index)
+                {
+                    Integer ticketId = data.balanceInfo.get(index);
+                    if (ticketId > 0)
+                    {
+                        newBalance.add(ticketId);
+                    }
+                    else
+                    {
+                        allIndicesUnsold = false;
+                    }
+                }
+            }
+
+            if (newBalance.size() > 0 && allIndicesUnsold)
+            {
+                ticketTypeText.setText(R.string.tickets);
+                count.setText(String.valueOf(newBalance.size()));
+            }
+            else
+            {
+                count.setText(R.string.ticket_unavailable);
+                ticketTypeText.setText("");
+            }
+        }
+        else {
+            count.setText(R.string.NA);
+            ticketTypeText.setText("");
+        }
     }
 }

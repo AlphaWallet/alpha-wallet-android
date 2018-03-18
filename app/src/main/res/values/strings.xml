@@ -242,4 +242,6 @@
     <string name="burned">REDEEMED</string>
     <string name="marketplace">Marketplace</string>
     <string name="depreciation">DEPRECIATION</string>
+    <string name="tickets">Tickets</string>
+    <string name="ticket_unavailable">Unavailable</string>
 </resources>

@@ -1,14 +1,15 @@
 package com.wallet.crypto.alphawallet.ui.widget.adapter;
 
+import android.arch.lifecycle.Observer;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.OrderContractAddressPair;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
-import com.wallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SalesOrderSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
@@ -16,10 +17,10 @@ import com.wallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import com.wallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.OrderHolder;
 import com.wallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
-import com.wallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
-import com.wallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by James on 21/02/2018.
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected final OnSalesOrderClickListener onSalesOrderClickListener;
+    private final List<SalesOrderSortedItem> currentList = new ArrayList<>();
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem o1, SortedItem o2) {
@@ -108,6 +110,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     }
 
     public void setOrders(SalesOrder[] orders) {
+        currentList.clear();
         items.beginBatchedUpdates();
         items.clear();
 
@@ -117,30 +120,42 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         {
             SalesOrderSortedItem newItem = new SalesOrderSortedItem(orders[i], 10 + i);
             items.add(newItem);
+            currentList.add(newItem);
         }
         items.endBatchedUpdates();
-    }
-
-    public void setTokens(Token[] tokens) {
-        items.beginBatchedUpdates();
-        items.clear();
-        items.add(total);
-        for (int i = 0; i < tokens.length; i++) {
-            items.add(new TokenSortedItem(tokens[i], 10 + i));
-        }
-        items.endBatchedUpdates();
-    }
-
-    public void getToken() {
-
-    }
-
-    public void setTotal(BigDecimal totalInCurrency) {
-        total = new TotalBalanceSortedItem(totalInCurrency);
-        items.add(total);
     }
 
     public void clear() {
         items.clear();
+    }
+
+    public void startUpdate()
+    {
+        items.beginBatchedUpdates();
+        items.clear();
+    }
+
+    public void endUpdate()
+    {
+        items.endBatchedUpdates();
+    }
+
+    //we received the balance from the blockchain
+    public void updateContent(OrderContractAddressPair balanceUpdate)
+    {
+        //we have sufficient information to update one of the tickets
+        for (SalesOrderSortedItem thisItem : currentList)
+        {
+            SalesOrder order = thisItem.value;
+
+            //updating this item?
+            if (    order.contractAddress.equals(balanceUpdate.order.contractAddress) //order address matches
+                &&  order.ownerAddress.equals(balanceUpdate.order.ownerAddress))
+            {
+                balanceUpdate.order.balanceInfo = balanceUpdate.balance;
+                SalesOrderSortedItem newItem = new SalesOrderSortedItem(balanceUpdate.order, thisItem.weight);
+                items.add(newItem);
+            }
+        }
     }
 }

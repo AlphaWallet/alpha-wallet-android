@@ -35,7 +35,7 @@ public class FetchTokensInteract {
     public Observable<Token[]> fetchStored(Wallet wallet) {
         return tokenRepository.fetchActiveStored(wallet.address)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(Schedulers.io());
     }
 
     public Observable<Token> fetchSingle(Wallet wallet, Token token) {
@@ -54,6 +54,6 @@ public class FetchTokensInteract {
     {
         return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(Schedulers.io());
     }
 }

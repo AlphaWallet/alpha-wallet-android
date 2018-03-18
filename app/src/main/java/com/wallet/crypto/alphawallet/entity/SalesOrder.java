@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
 
 import org.spongycastle.util.encoders.Base64;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
@@ -248,5 +249,25 @@ public class SalesOrder implements Parcelable
         parcel.writeInt(message.length);
         parcel.writeByteArray(message);
         parcel.writeString(priceWei.toString(10));
+    }
+
+    /**
+     * ECRecover the owner address from a sales order
+     * @param so
+     * @return
+     */
+    public static String getOwnerKey(SalesOrder so) {
+        String ownerAddress = "";
+        try {
+            Sign.SignatureData sigData = sigFromByteArray(so.signature);
+            BigInteger recoveredKey = Sign.signedMessageToKey(so.message, sigData);
+            ownerAddress = "0x" + Keys.getAddress(recoveredKey);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return ownerAddress;
     }
 }

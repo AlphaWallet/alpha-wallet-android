@@ -1,5 +1,9 @@
 package com.wallet.crypto.alphawallet.di;
 
+import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
+import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.alphawallet.repository.TokenRepositoryType;
+import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.viewmodel.BrowseMarketViewModelFactory;
@@ -17,13 +21,25 @@ public class MarketBrowseModule
     @Provides
     BrowseMarketViewModelFactory marketBrowseModelFactory(
             MarketQueueService marketQueueService,
-            MarketBuyRouter marketBuyRouter) {
+            MarketBuyRouter marketBuyRouter,
+            FetchTokensInteract fetchTokensInteract,
+            FindDefaultWalletInteract findDefaultWalletInteract) {
         return new BrowseMarketViewModelFactory(
-                marketQueueService, marketBuyRouter);
+                marketQueueService, marketBuyRouter, fetchTokensInteract, findDefaultWalletInteract);
     }
 
     @Provides
     MarketBuyRouter provideMarketBuyRouter() {
         return new MarketBuyRouter();
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new FindDefaultWalletInteract(walletRepository);
     }
 }

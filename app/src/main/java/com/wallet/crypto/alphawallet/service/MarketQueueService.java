@@ -353,7 +353,7 @@ public class MarketQueueService {
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
 
-    public Single<SalesOrder[]> fetchSalesOrders(String contractAddress) {
+    public Observable<SalesOrder[]> fetchSalesOrders(String contractAddress) {
         return Single.fromCallable(() -> {
             String result = readFromQueue(contractAddress);
 
@@ -391,7 +391,7 @@ public class MarketQueueService {
             }
 
             return trades;
-        });
+        }).toObservable();
     }
 
     private void onError(Throwable error) {

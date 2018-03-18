@@ -163,6 +163,13 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    /**
+     * Just updates the balance of a token
+     *
+     * @param walletAddress
+     * @param token
+     * @return
+     */
     @Override
     public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
     {
@@ -171,15 +178,6 @@ public class TokenRepository implements TokenRepositoryType {
         return updateBalance(network, wallet, token)
                 .observeOn(Schedulers.newThread())
                 .toObservable();
-        //return
-//                setupTokensFromLocal(address)
-//                .flatMap(token -> updateBalance(network, wallet, token))
-//                .observeOn(Schedulers.newThread())
-//                .toObservable();
-
-//        return fetchCachedToken(network, wallet, address)
-//                .map(token -> updateBalance(network, wallet, token))
-//                .subscribeOn(Schedulers.io());
     }
 
 //    @Override

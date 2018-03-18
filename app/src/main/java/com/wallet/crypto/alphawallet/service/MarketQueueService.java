@@ -90,7 +90,7 @@ import static com.wallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class MarketQueueService {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
-    private static final int TRADE_AMOUNT = 2016;
+    private static final int TRADE_AMOUNT = 200;
     private static final String MARKET_QUEUE_URL = "https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/";
     private static final String MARKET_QUEUE_FETCH = MARKET_QUEUE_URL + "contract/";
 
@@ -135,7 +135,9 @@ public class MarketQueueService {
     {
         System.out.println("handle response");
         BaseViewModel.onQueueUpdate(100);
-        if (response.contains("success"))//  == HttpURLConnection.HTTP_OK)
+        //TODO: Handle response correctly
+        //"{\"orders\": {\"received\": 200, \"accepted\": 200}, \"1st_order\": \"00000000000000000000000000000000000000000000000003ff2e795f500000000000000000000000000000000000000000000000000000000000005ab1b21c0b6732baecc0793e38a98934799abd3c7dc3cf3100d300d4\"}"
+        if (response.contains("accepted"))//  == HttpURLConnection.HTTP_OK)
         {
             BaseViewModel.onPushToast("Queue written");
         }
@@ -311,7 +313,7 @@ public class MarketQueueService {
 
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
-                BigInteger expiryTimestamp = BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
+                trade.expiry =  BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
                 trade.addSignature(getTradeSignature(wallet, password, trade).blockingGet());
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 BaseViewModel.onQueueUpdate((int)upd);

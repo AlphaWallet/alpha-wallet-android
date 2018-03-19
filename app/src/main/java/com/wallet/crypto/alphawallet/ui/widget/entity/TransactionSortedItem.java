@@ -43,6 +43,8 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
                 if (oldTc.getClass() != newTc.getClass()) return false;
 
                 if (oldTc.name == null && newTc.name != null) return false;
+
+                if (oldTc.name != null && newTc.name != null && !oldTc.name.equals(newTc.name)) return false;
             }
 
             return true;// must be the same

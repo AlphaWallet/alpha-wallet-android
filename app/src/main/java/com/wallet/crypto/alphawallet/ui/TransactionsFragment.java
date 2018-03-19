@@ -91,6 +91,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.transactions().observe(this, this::onTransactions);
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
+        adapter.clear();
+
         return view;
     }
 
@@ -115,7 +117,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        adapter.clear();
+        viewModel.setVisibility(isVisible);
         viewModel.prepare();
     }
 
@@ -134,6 +136,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onPause() {
         super.onPause();
+        //stop transaction refresh
+        viewModel.setVisibility(false);
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }

@@ -79,6 +79,14 @@ public class SetupTokensInteract {
             ct.address = token.getAddress();
             ct.name = token.getFullName();
         }
+        else if (deadContracts.contains(thisTrans.to)) {
+            ct.name = "[Expired Contract]";
+            ct.address = thisTrans.to;
+        }
+        else {
+            ct.name = "[Unknown Contract]";
+            ct.address = thisTrans.to;
+        }
         ct.setIndicies(data.paramValues);
         ct.operation = data.functionData.functionName;
 

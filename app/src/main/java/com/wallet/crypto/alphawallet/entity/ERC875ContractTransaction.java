@@ -13,8 +13,6 @@ import java.util.List;
 
 //TODO: there should be an abstract base class, all contracts inherit from it, only contains address, name and symbol
 public class ERC875ContractTransaction extends TransactionContract implements Parcelable {
-    public String address;
-    public String name;
     public String balance;
     public String symbol;
     public String operation;

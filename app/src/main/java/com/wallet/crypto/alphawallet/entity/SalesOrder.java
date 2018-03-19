@@ -110,6 +110,15 @@ public class SalesOrder implements Parcelable
         {
             throw new SalesOrderMalformed("Signature shorter than expected 256");
         }
+        catch (ArrayStoreException a)
+        {
+            throw new SalesOrderMalformed("Attempting to write signature too long for storage");
+        }
+        catch (NullPointerException e)
+        {
+            throw new SalesOrderMalformed("invalid import link data");
+        }
+
         message = Base64.decode(linkArgs[0]);
         try {
             ByteArrayInputStream bas = new ByteArrayInputStream(message);

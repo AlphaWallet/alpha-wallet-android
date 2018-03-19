@@ -3,7 +3,6 @@ package com.wallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
-import android.util.Base64;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
@@ -16,23 +15,17 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
-import com.wallet.crypto.alphawallet.service.ImportTokenService;
-import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
-import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.util.BalanceUtils;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Convert;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Signature;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -62,6 +55,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private String ownerAddress;
     private Ticket importToken;
     private List<Integer> availableBalance = new ArrayList<>();
+    private Map<String, Token> tokenMap = new HashMap<>();
     private double priceUsd;
     private double ethToUsd;
 
@@ -116,7 +110,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
             BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
             ownerAddress = "0x" + Keys.getAddress(recoveredKey);
             //start looking at the ticket details
-            fetchBalance();
+            fetchTokens();
         }
         catch (SalesOrderMalformed e)
         {
@@ -126,36 +120,25 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             invalidLink.postValue(true);
         }
-
-        //now get balance at recovered address
-        //1. add required interact
-        //2. after we get balance, check these tokens are still at that address, get the ID's and update the import token
-        //3. allow import to continue.
     }
 
-    public void fetchBalance() {
+    private void fetchTokens() {
         getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .fetch(new Wallet(ownerAddress))
-                        .subscribe(this::onBalance)).subscribe();
+                        .fetchList(new Wallet(ownerAddress))
+                        .subscribe(this::onTokens)).subscribe();
     }
 
-    private void onBalance(Token[] tokens)
+    private void onTokens(Map<String, Token> tokenMap)
     {
         //check the required balance
-        for (Token t : tokens)
-        {
-            if (t.ticker != null)
-            {
-                //get the current exchange rate
-                ethToUsd = Double.valueOf(t.ticker.price);
-            }
-            if (t.addressMatches(importOrder.contractAddress) && t instanceof Ticket)
-            {
-                importToken = (Ticket)t;
-                updateToken();
-                break;
-            }
+        if (tokenMap.get(wallet().getValue().address).ticker != null) {
+            ethToUsd = Double.valueOf(tokenMap.get(wallet().getValue().address).ticker.price);
+        }
+        Token contractToken = tokenMap.get(importOrder.contractAddress);
+        if (contractToken != null) {
+            importToken = (Ticket) contractToken;
+            updateToken();
         }
     }
 
@@ -192,14 +175,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private boolean balanceChange(List<Integer> newBalance)
     {
-        if (newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance))
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }
 
     public void onError(Throwable throwable) {

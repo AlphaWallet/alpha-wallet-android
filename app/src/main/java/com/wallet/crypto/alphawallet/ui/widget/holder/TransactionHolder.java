@@ -97,6 +97,12 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
                 typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
                 colourResource = R.color.red;
                 break;
+            case -2:
+            case -3:
+                //Contract creation
+                typeIcon.setImageResource(R.drawable.token_icon);
+                colourResource = R.color.black;
+                break;
             default:
                 typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
                 colourResource = R.color.black;

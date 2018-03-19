@@ -139,6 +139,16 @@ public class SetupTokensInteract {
                 break;
             case "Contract Creation":
                 ct.name = thisTrans.hash;
+                //NB We can nly determine if this is one of our contracts either by parsing the construction input
+                //or from querying a database like etherscan
+                if (token != null && token.tokenInfo.isStormbird)
+                {
+                    ct.type = -3;
+                }
+                else
+                {
+                    ct.type = -2;
+                }
                 break;
             default:
                 break;
@@ -146,7 +156,6 @@ public class SetupTokensInteract {
 
         return newTransaction;
     }
-
 
     /**
      * Once we have gathered all the transactions together, parse them for known contract interactions
@@ -158,8 +167,8 @@ public class SetupTokensInteract {
     {
         return Single.fromCallable(() -> {
             try {
-                System.out.println(String.valueOf(txMap.size()));
-                System.out.println(String.valueOf(newTxList.size()));
+                //System.out.println(String.valueOf(txMap.size()));
+                //System.out.println(String.valueOf(newTxList.size()));
 
                 for (TokenTransaction thisTokenTrans : ttxMap.values()) {
                     Transaction thisTrans = thisTokenTrans.transaction;
@@ -176,7 +185,7 @@ public class SetupTokensInteract {
 
                 Transaction[] processedTransactions = txMap.values().toArray(new Transaction[txMap.size()]);
 
-                System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
+                //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
                 return processedTransactions;
             }
             finally {

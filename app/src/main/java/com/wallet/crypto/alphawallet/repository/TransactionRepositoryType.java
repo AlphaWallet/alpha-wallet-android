@@ -3,6 +3,7 @@ package com.wallet.crypto.alphawallet.repository;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionsCallback;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 
 import java.math.BigInteger;
@@ -20,4 +21,5 @@ public interface TransactionRepositoryType {
 	Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password);
 	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
+	//void fetchTransaction2(Wallet wallet, TransactionsCallback txCallback);
 }

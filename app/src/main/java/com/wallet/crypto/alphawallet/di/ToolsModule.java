@@ -7,7 +7,6 @@ import com.wallet.crypto.alphawallet.App;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TrustPasswordStore;
 import com.wallet.crypto.alphawallet.service.RealmManager;
-import com.wallet.crypto.alphawallet.util.LogInterceptor;
 
 import java.util.concurrent.TimeUnit;
 

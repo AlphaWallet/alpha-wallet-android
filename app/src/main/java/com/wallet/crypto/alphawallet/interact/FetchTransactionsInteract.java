@@ -3,6 +3,7 @@ package com.wallet.crypto.alphawallet.interact;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionsCallback;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
 
@@ -31,4 +32,9 @@ public class FetchTransactionsInteract {
                 .fetchTokenTransaction(wallet, t)
                 .subscribeOn(Schedulers.io());
     }
+
+//    public void fetchTx2(Wallet wallet, TransactionsCallback txCallback) {
+//        transactionRepository
+//                .fetchTransaction2(wallet, txCallback);
+//    }
 }

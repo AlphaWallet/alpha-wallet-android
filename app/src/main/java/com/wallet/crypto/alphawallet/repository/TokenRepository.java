@@ -69,7 +69,6 @@ public class TokenRepository implements TokenRepositoryType {
     private final TokenExplorerClientType tokenNetworkService;
     private final WalletRepositoryType walletRepository;
     private final TokenLocalSource localSource;
-    private final OkHttpClient httpClient;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionLocalSource transactionsLocalCache;
     private final TickerService tickerService;
@@ -77,14 +76,12 @@ public class TokenRepository implements TokenRepositoryType {
     private Web3j web3jFullNode = null;
 
     public TokenRepository(
-            OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             WalletRepositoryType walletRepository,
             TokenExplorerClientType tokenNetworkService,
             TokenLocalSource localSource,
             TransactionLocalSource transactionsLocalCache,
             TickerService tickerService) {
-        this.httpClient = okHttpClient;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.walletRepository = walletRepository;
         this.tokenNetworkService = tokenNetworkService;
@@ -96,10 +93,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private void buildWeb3jClient(NetworkInfo defaultNetwork) {
-        web3j = Web3jFactory.build(new HttpService(defaultNetwork.rpcServerUrl, httpClient, false));
+        org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
+        web3j = Web3jFactory.build(publicNodeService);
         if (defaultNetwork.backupNodeUrl != null)
         {
-            web3jFullNode = Web3jFactory.build(new HttpService(defaultNetwork.backupNodeUrl, httpClient, false));
+            org.web3j.protocol.http.HttpService fullNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.backupNodeUrl);
+            web3jFullNode = Web3jFactory.build(fullNodeService);
         }
     }
 

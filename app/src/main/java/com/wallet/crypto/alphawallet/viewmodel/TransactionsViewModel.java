@@ -15,6 +15,7 @@ import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionsCallback;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -155,6 +156,21 @@ public class TransactionsViewModel extends BaseViewModel {
                         .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
     }
 
+//    public void fetchTransactions2(boolean shouldShowProgress) {
+//        handler.removeCallbacks(startFetchTransactionsTask);
+//        setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
+//        progress.postValue(shouldShowProgress);
+//        fetchTransactionsInteract.fetchTx2(defaultWallet.getValue(), txCallback);
+//    }
+
+    private TransactionsCallback txCallback = new TransactionsCallback() {
+        @Override
+        public void recieveTransactions(Transaction[] txList) {
+            txArray = txList;
+            enumerateTokens();
+        }
+    };
+
     //Store the transactions we obtained in step 1 locally
     private void onTransactions(Transaction[] transactions) {
         txArray = transactions;
@@ -279,6 +295,7 @@ public class TransactionsViewModel extends BaseViewModel {
         else
         {
             //no longer any need to refresh
+            System.out.println("TVM Finish");
             if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
             {
                 fetchTransactionDisposable.dispose();

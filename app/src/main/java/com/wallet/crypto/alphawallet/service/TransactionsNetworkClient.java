@@ -3,9 +3,11 @@ package com.wallet.crypto.alphawallet.service;
 import com.google.gson.Gson;
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionsCallback;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -32,6 +35,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	private final Gson gson;
 
     private ApiClient apiClient;
+    private TxResponse txResponse;
+
+    private int page = 0;
+    private int pages = 0;
+	List<Transaction> result = new ArrayList<>();
+	private String lastTransactionHash;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
@@ -64,37 +73,111 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				.subscribeOn(Schedulers.io());
 	}
 
-    @Override
-    public Observable<Transaction[]> fetchLastTransactions(Wallet wallet, Transaction lastTransaction) {
-	    return Observable.fromCallable(() -> {
-            @NonNull String lastTransactionHash = lastTransaction == null
-                    ? "" : lastTransaction.hash;
-            List<Transaction> result = new ArrayList<>();
-            int pages = 0;
-            int page = 0;
-            boolean hasMore = true;
-	        do {
-                page++;
-                Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
-                Response<ApiClientResponse> response = call.execute();
-                if (response.isSuccessful()) {
-                    ApiClientResponse body = response.body();
-                    if (body != null) {
-                        pages = body.pages;
-                        for (Transaction transaction : body.docs) {
-                            if (lastTransactionHash.equals(transaction.hash)) {
-                                hasMore = false;
-                                break;
-                            }
-                            result.add(transaction);
-                        }
-                    }
-                }
-            } while (page < pages && hasMore);
-	        return result.toArray(new Transaction[result.size()]);
-        })
-        .subscribeOn(Schedulers.io());
-    }
+	@Override
+	public Observable<Transaction[]> fetchLastTransactions(Wallet wallet, Transaction lastTransaction) {
+		return Observable.fromCallable(() -> {
+			@NonNull String lastTransactionHash = lastTransaction == null
+					? "" : lastTransaction.hash;
+			List<Transaction> result = new ArrayList<>();
+			int pages = 0;
+			int page = 0;
+			boolean hasMore = true;
+			do {
+				page++;
+				try {
+					Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
+					Response<ApiClientResponse> response = call.execute();
+					if (response.isSuccessful()) {
+						ApiClientResponse body = response.body();
+						if (body != null) {
+							pages = body.pages;
+							for (Transaction transaction : body.docs) {
+								if (lastTransactionHash.equals(transaction.hash)) {
+									hasMore = false;
+									break;
+								}
+								result.add(transaction);
+							}
+						}
+					}
+				}
+				catch (IOException e) //Connection gets severed if the owning fragment is cleared by Android OS
+						              //The best we can do is catch the exception thrown by OKHTTP
+				{
+					return result.toArray(new Transaction[result.size()]);
+				}
+			} while (page < pages && hasMore);
+			return result.toArray(new Transaction[result.size()]);
+		}).subscribeOn(Schedulers.io());
+	}
+
+	@Override
+	public void fetchTransactions2(Wallet wallet, Transaction lastTransaction, TransactionsCallback txCallback)
+	{
+		txResponse = new TxResponse(wallet, txCallback);
+		makeTxCall(wallet, lastTransaction);
+	}
+
+	private void makeTxCall(Wallet wallet, Transaction lastTx)
+	{
+		lastTransactionHash = lastTx == null
+				? "" : lastTx.hash;
+		txResponse.lastTx = lastTx;
+		Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
+		call.enqueue(txResponse);
+	}
+
+    private void consumeResult(Response response, Wallet wallet)
+	{
+		boolean hasMore = true;
+		ApiClientResponse body = (ApiClientResponse) response.body();
+		if (body != null) {
+			pages = body.pages;
+			for (Transaction transaction : body.docs) {
+				if (lastTransactionHash.equals(transaction.hash)) {
+					hasMore = false;
+					break;
+				}
+				result.add(transaction);
+			}
+
+			if (!hasMore)
+			{
+				//use callback
+				txResponse.txCallback.recieveTransactions(result.toArray(new Transaction[result.size()]));
+			}
+			else
+			{
+				//call again
+				makeTxCall(wallet, txResponse.lastTx);
+			}
+		}
+	}
+
+    private class TxResponse implements retrofit2.Callback<ApiClientResponse>
+	{
+		private final Wallet wallet;
+		public Transaction lastTx;
+		public final TransactionsCallback txCallback;
+
+		public TxResponse(Wallet wallet, TransactionsCallback cb)
+		{
+			this.wallet = wallet;
+			this.txCallback = cb;
+		}
+
+		@Override
+		public void onResponse(Call call, Response response) {
+			if (response.isSuccessful()) {
+				consumeResult(response, wallet);
+			}
+		}
+
+		@Override
+		public void onFailure(Call call, Throwable t) {
+
+		}
+	}
 
     private void onNetworkChanged(NetworkInfo networkInfo) {
 		buildApiClient(networkInfo.backendUrl);

@@ -4,9 +4,11 @@ import android.support.annotation.Nullable;
 
 import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.Token;
+import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.TokenTransaction;
 import com.wallet.crypto.alphawallet.entity.TradeInstance;
 import com.wallet.crypto.alphawallet.entity.Transaction;
+import com.wallet.crypto.alphawallet.entity.TransactionsCallback;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.service.AccountKeystoreService;
 import com.wallet.crypto.alphawallet.service.TransactionsNetworkClientType;
@@ -57,24 +59,33 @@ public class TransactionRepository implements TransactionRepositoryType {
                 .toObservable();
     }
 
-    //TODO: Needs a small refactor to be more fluid
-	//This function is causing the remaining problems
 	@Override
 	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
-		return Single.fromCallable(() -> {
-			NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-			Transaction[] txList = Single.merge(
-					fetchFromCache(networkInfo, wallet),
-					fetchAndCacheFromNetwork(networkInfo, wallet)).blockingLast();
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		return fetchFromCache(networkInfo, wallet)
+				.mergeWith(fetchAndCacheFromNetwork(networkInfo, wallet))
+					.observeOn(Schedulers.io())
+					.map(txs -> mapToTokenTransactions(txs, token))
+					.toObservable();
+	}
 
-			TokenTransaction[] ttxList = new TokenTransaction[txList.length];
+//	@Override
+//	public void fetchTransaction2(Wallet wallet, TransactionsCallback txCallback) {
+//		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+//
+//		Transaction lastTx = inDiskCache.findLast(networkInfo, wallet).blockingGet();
+//				blockExplorerClient
+//						.fetchTransactions2(wallet, lastTx, txCallback);
+//	}
 
-			for (int i = 0; i < txList.length; i++) {
-				ttxList[i] = new TokenTransaction(token, txList[i]);
-			}
+	private TokenTransaction[] mapToTokenTransactions(Transaction[] items, Token token)
+	{
+		TokenTransaction[] ttxList = new TokenTransaction[items.length];
+		for (int i = 0; i < items.length; i++) {
+			ttxList[i] = new TokenTransaction(token, items[i]);
+		}
 
-			return ttxList;
-		}).toObservable();
+		return ttxList;
 	}
 
 	@Override
@@ -140,6 +151,7 @@ public class TransactionRepository implements TransactionRepositoryType {
     }
 
 	private Single<Transaction[]> fetchAndCacheFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
+		System.out.println("fetchAndCacheFromNetwork: " + wallet.address);
         return inDiskCache
                 .findLast(networkInfo, wallet)
                 .flatMap(lastTransaction -> Single.fromObservable(blockExplorerClient

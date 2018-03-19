@@ -23,14 +23,11 @@ public class WalletRepository implements WalletRepositoryType {
 	private final PreferenceRepositoryType preferenceRepositoryType;
 	private final AccountKeystoreService accountKeystoreService;
 	private final EthereumNetworkRepositoryType networkRepository;
-    private final OkHttpClient httpClient;
 
     public WalletRepository(
-	        OkHttpClient okHttpClient,
 			PreferenceRepositoryType preferenceRepositoryType,
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository) {
-	    this.httpClient = okHttpClient;
 		this.preferenceRepositoryType = preferenceRepositoryType;
 		this.accountKeystoreService = accountKeystoreService;
 		this.networkRepository = networkRepository;
@@ -94,7 +91,7 @@ public class WalletRepository implements WalletRepositoryType {
 	@Override
 	public Single<BigDecimal> balanceInWei(Wallet wallet) {
 		return Single.fromCallable(() -> new BigDecimal(Web3jFactory
-					.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false))
+					.build(new org.web3j.protocol.http.HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
 					.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
 					.send()
 					.getBalance()))

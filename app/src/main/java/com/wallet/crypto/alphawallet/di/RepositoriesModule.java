@@ -73,12 +73,11 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
     WalletRepositoryType provideWalletRepository(
-            OkHttpClient okHttpClient,
 			PreferenceRepositoryType preferenceRepositoryType,
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository) {
 		return new WalletRepository(
-		        okHttpClient, preferenceRepositoryType, accountKeystoreService, networkRepository);
+		        preferenceRepositoryType, accountKeystoreService, networkRepository);
 	}
 
 	@Singleton
@@ -113,7 +112,6 @@ public class RepositoriesModule {
 	@Singleton
     @Provides
     TokenRepositoryType provideTokenRepository(
-            OkHttpClient okHttpClient,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             WalletRepositoryType walletRepository,
             TokenExplorerClientType tokenExplorerClientType,
@@ -121,7 +119,6 @@ public class RepositoriesModule {
             TransactionLocalSource inDiskCache,
             TickerService tickerService) {
 	    return new TokenRepository(
-	            okHttpClient,
 	            ethereumNetworkRepository,
 	            walletRepository,
 	            tokenExplorerClientType,

@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
+import com.wallet.crypto.alphawallet.service.MarketQueueService;
 
 import org.spongycastle.util.encoders.Base64;
 import org.web3j.crypto.Keys;
@@ -224,8 +225,7 @@ public class SalesOrder implements Parcelable
             data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
 
             //Can we recreate the seller address?
-            String addre = SalesOrder.getOwnerKey(order);
-            System.out.println("Owner: " + addre);
+            System.out.println(order.getOwnerKey());
         }
         catch (Exception e)
         {
@@ -253,21 +253,46 @@ public class SalesOrder implements Parcelable
 
     /**
      * ECRecover the owner address from a sales order
-     * @param so
+     *
      * @return
      */
-    public static String getOwnerKey(SalesOrder so) {
-        String ownerAddress = "";
+    public String getOwnerKey() {
         try {
-            Sign.SignatureData sigData = sigFromByteArray(so.signature);
-            BigInteger recoveredKey = Sign.signedMessageToKey(so.message, sigData);
+            Sign.SignatureData sigData = MarketQueueService.sigFromByteArray(signature);
+            BigInteger recoveredKey = Sign.signedMessageToKey(getTradeBytes(), sigData);
             ownerAddress = "0x" + Keys.getAddress(recoveredKey);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-
         return ownerAddress;
+    }
+
+    private byte[] getTradeBytes()
+    {
+        try {
+            BigInteger contractAddressBi = Numeric.toBigInt(contractAddress);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            DataOutputStream ds = new DataOutputStream(buffer);
+            ds.write(Numeric.toBytesPadded(priceWei, 32));
+            ds.write(Numeric.toBytesPadded(BigInteger.valueOf(expiry), 32));
+            ds.write(Numeric.toBytesPadded(contractAddressBi, 20));
+
+            byte[] uint16 = new byte[2];
+            for (int ticketIndex : tickets) {
+                //write big endian encoding
+                uint16[0] = (byte) (ticketIndex >> 8);
+                uint16[1] = (byte) (ticketIndex & 0xFF);
+                ds.write(uint16);
+            }
+            ds.flush();
+
+            return buffer.toByteArray();
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 }

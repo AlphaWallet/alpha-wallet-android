@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.wallet.crypto.alphawallet.entity.OrderContractAddressPair;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
+import com.wallet.crypto.alphawallet.entity.SignaturePair;
 import com.wallet.crypto.alphawallet.entity.Token;
 import com.wallet.crypto.alphawallet.entity.Transaction;
 import com.wallet.crypto.alphawallet.entity.Wallet;
@@ -16,6 +17,14 @@ import com.wallet.crypto.alphawallet.router.MarketBuyRouter;
 import com.wallet.crypto.alphawallet.service.MarketQueueService;
 import com.wallet.crypto.alphawallet.ui.widget.entity.SalesOrderSortedItem;
 
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.math.BigInteger;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +59,7 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private List<Token> tokens = new ArrayList<>();
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
+    private boolean refreshUINeeded = false;
 
     @Nullable
     private Disposable checkMarketDisposable;
@@ -135,14 +145,17 @@ public class BrowseMarketViewModel extends BaseViewModel
                 Token orderToken = tokenMap.get(so.contractAddress);
                 //get the token info for display
                 so.tokenInfo = orderToken.tokenInfo;
+
                 //ecrecover owner key
-                so.ownerAddress = SalesOrder.getOwnerKey(so);
+                so.getOwnerKey();
 
                 //add pair if we haven't already
                 OrderContractAddressPair.addPair(checkingPairs, so);
             }
         }
     }
+
+
 
     //4. Post the orders list to the UI and continue with fetching the balances
     private void postOrdersToUI()
@@ -167,21 +180,33 @@ public class BrowseMarketViewModel extends BaseViewModel
             //String orderAddress = defaultWallet.getValue().address;
             //get owner balance
             fetchTokensInteract.updateBalancePair(t, pair.order)
-                    .subscribe(this::onBalance, this::onError, this::checkOrderBalances);
+                    .subscribe(this::onBalance, this::onError, this::updateUI);
         }
+    }
+
+    private void updateUI()
+    {
+        if (refreshUINeeded)
+        {
+            SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
+            //We can add to the list here, start displaying order details
+            market.postValue(compiledOrders);
+        }
+        checkOrderBalances();
     }
 
     private void finishOrders()
     {
         //now update UI again
-        SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
-        //We can add to the list here, start displaying order details
-        market.postValue(compiledOrders);
+//        SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
+//        //We can add to the list here, start displaying order details
+//        market.postValue(compiledOrders);
         System.out.println("Finished displaying orders");
     }
 
     private void onBalance(OrderContractAddressPair pair)
     {
+        refreshUINeeded = false;
         //now update the orders
         for (SalesOrder order : orders)
         {
@@ -190,6 +215,7 @@ public class BrowseMarketViewModel extends BaseViewModel
                     &&  order.ownerAddress.equals(pair.order.ownerAddress))
             {
                 order.balanceInfo = pair.balance;
+                refreshUINeeded = true;
             }
         }
     }

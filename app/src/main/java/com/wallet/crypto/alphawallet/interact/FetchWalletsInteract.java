@@ -5,6 +5,7 @@ import com.wallet.crypto.alphawallet.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class FetchWalletsInteract {
 
@@ -17,6 +18,7 @@ public class FetchWalletsInteract {
 	public Single<Wallet[]> fetch() {
 		return accountRepository
 				.fetchWallets()
+				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread());
 	}
 }

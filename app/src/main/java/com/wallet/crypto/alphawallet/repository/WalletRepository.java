@@ -10,9 +10,11 @@ import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -90,11 +92,18 @@ public class WalletRepository implements WalletRepositoryType {
 
 	@Override
 	public Single<BigDecimal> balanceInWei(Wallet wallet) {
-		return Single.fromCallable(() -> new BigDecimal(Web3jFactory
-					.build(new org.web3j.protocol.http.HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
-					.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
-					.send()
-					.getBalance()))
-				.subscribeOn(Schedulers.io());
+		return Single.fromCallable(() -> {
+			try {
+				return new BigDecimal(Web3jFactory
+						.build(new org.web3j.protocol.http.HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
+						.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
+						.send()
+						.getBalance());
+			}
+			catch (IOException e)
+			{
+				return BigDecimal.ZERO;
+			}
+		}).subscribeOn(Schedulers.io());
 	}
 }

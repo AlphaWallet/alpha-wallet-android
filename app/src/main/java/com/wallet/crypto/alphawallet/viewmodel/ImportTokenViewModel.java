@@ -3,49 +3,34 @@ package com.wallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
-import android.util.Base64;
 
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
-import com.wallet.crypto.alphawallet.entity.NetworkInfo;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import com.wallet.crypto.alphawallet.entity.ServiceErrorException;
 import com.wallet.crypto.alphawallet.entity.Ticket;
 import com.wallet.crypto.alphawallet.entity.Token;
-import com.wallet.crypto.alphawallet.entity.TokenInfo;
 import com.wallet.crypto.alphawallet.entity.Wallet;
-import com.wallet.crypto.alphawallet.interact.AddTokenInteract;
 import com.wallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import com.wallet.crypto.alphawallet.interact.FetchTokensInteract;
 import com.wallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import com.wallet.crypto.alphawallet.interact.ImportWalletInteract;
-import com.wallet.crypto.alphawallet.interact.SetupTokensInteract;
-import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepository;
-import com.wallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import com.wallet.crypto.alphawallet.service.ImportTokenService;
-import com.wallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
-import com.wallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
 import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import com.wallet.crypto.alphawallet.util.BalanceUtils;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Convert;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Signature;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
-import static com.wallet.crypto.alphawallet.C.DEFAULT_NETWORK;
-import static com.wallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -58,8 +43,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final AddTokenInteract addTokenInteract;
-    private final SetupTokensInteract setupTokensInteract;
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -72,22 +55,19 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private String ownerAddress;
     private Ticket importToken;
     private List<Integer> availableBalance = new ArrayList<>();
+    private Map<String, Token> tokenMap = new HashMap<>();
     private double priceUsd;
-    private double ethToUsd = 0;
+    private double ethToUsd;
 
     @Nullable
     private Disposable getBalanceDisposable;
 
     ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
-                         FetchTokensInteract fetchTokensInteract,
-                         AddTokenInteract addTokenInteract,
-                         SetupTokensInteract setupTokensInteract) {
+                         FetchTokensInteract fetchTokensInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
-        this.addTokenInteract = addTokenInteract;
-        this.setupTokensInteract = setupTokensInteract;
     }
 
     public LiveData<TicketRange> importRange() {
@@ -130,8 +110,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
             BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
             ownerAddress = "0x" + Keys.getAddress(recoveredKey);
             //start looking at the ticket details
-            //first check if we have this token already
-            setupTokenAddr(importOrder.contractAddress);
+            fetchTokens();
         }
         catch (SalesOrderMalformed e)
         {
@@ -143,50 +122,25 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
-    public void fetchBalance() {
+    private void fetchTokens() {
         getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .fetch(wallet.getValue()) //
-                        .subscribe(this::onBalance)).subscribe();
+                        .fetchList(new Wallet(ownerAddress))
+                        .subscribe(this::onTokens)).subscribe();
     }
 
-    private void onBalance(Token[] tokens)
+    private void onTokens(Map<String, Token> tokenMap)
     {
         //check the required balance
-        for (Token t : tokens)
-        {
-            if (t.ticker != null)
-            {
-                //get the current exchange rate
-                ethToUsd = Double.valueOf(t.ticker.price);
-            }
-            if (t.addressMatches(importOrder.contractAddress) && t instanceof Ticket)
-            {
-                //get owner balance
-                fetchTokensInteract.updateBalance(new Wallet(ownerAddress), t)
-                        .subscribe(this::onUpdate);
-                break;
-            }
+        if (tokenMap.get(wallet().getValue().address).ticker != null) {
+            ethToUsd = Double.valueOf(tokenMap.get(wallet().getValue().address).ticker.price);
+        }
+        Token contractToken = tokenMap.get(importOrder.contractAddress);
+        if (contractToken != null) {
+            importToken = (Ticket) contractToken;
+            updateToken();
         }
     }
-
-    private void onUpdate(Token token) {
-        importToken = (Ticket)token;
-        updateToken();
-    }
-
-//    public void fetchBalance() {
-//        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-//                .doOnNext(l -> fetchTokensInteract
-//                        //.fetchBalance(new Wallet(ownerAddress), importOrder.contractAddress)
-//                        .subscribe(this::onBalance)).subscribe();
-//    }
-//
-//    private void onBalance(Token token)
-//    {
-//        importToken = (Ticket)token;
-//        updateToken();
-//    }
 
     private void updateToken()
     {
@@ -221,14 +175,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private boolean balanceChange(List<Integer> newBalance)
     {
-        if (newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance))
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }
 
     public void onError(Throwable throwable) {
@@ -250,35 +197,14 @@ public class ImportTokenViewModel extends BaseViewModel  {
             System.out.println("Approx value of trade: " + order.price);
             //now push the transaction
             disposable = createTransactionInteract
-                .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                        Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
-                .subscribe(this::onCreateTransaction, this::onError);
+                    .create(wallet.getValue(), order.contractAddress, order.priceWei,
+                            Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
+                    .subscribe(this::onCreateTransaction, this::onError);
         }
         catch (SalesOrderMalformed e)
         {
-            //This will never be reached because the order is checked previously.
-            invalidLink.postValue(true);
+            e.printStackTrace(); // TODO: add user interface handling of the exception.
         }
-    }
-
-    private void setupTokenAddr(String contractAddress)
-    {
-        disposable = setupTokensInteract
-                .update(contractAddress)
-                .subscribe(this::onTokensSetup, this::onError);
-    }
-
-    private void onTokensSetup(TokenInfo tokenInfo) {
-        addTokenInteract
-                .add(tokenInfo)
-                .subscribe(this::onSaved, this::onError);
-    }
-
-    private void onSaved()
-    {
-        System.out.println("saved contract");
-        //resume import, get balance etc
-        fetchBalance();
     }
 
     private void onCreateTransaction(String transaction)

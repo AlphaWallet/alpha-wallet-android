@@ -1,6 +1,7 @@
 package com.wallet.crypto.alphawallet;
 
 import org.junit.Test;
+import org.web3j.crypto.Sign;
 import org.xml.sax.SAXException;
 
 import java.io.File;

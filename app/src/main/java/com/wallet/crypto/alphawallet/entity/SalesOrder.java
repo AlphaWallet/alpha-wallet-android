@@ -19,7 +19,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.wallet.crypto.alphawallet.service.MarketQueueService.hexStringToBytes;
 import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -35,7 +34,7 @@ public class SalesOrder implements Parcelable
     public int ticketStart;
     public final int ticketCount;
     public final String contractAddress;
-    public final byte[] signature;
+    public final byte[] signature = new byte[65];
     public final byte[] message;
     public TokenInfo tokenInfo; //convenience pointer to token information
     public String ownerAddress; //convenience ecrecovered owner address;
@@ -57,7 +56,7 @@ public class SalesOrder implements Parcelable
             ds.readAddress();
             this.tickets = ds.readUint16Indices(ticketCount);
             this.contractAddress = contractAddress;
-            this.signature = Base64.decode(sig);
+            System.arraycopy(Base64.decode(sig), 0, this.signature, 0, 65);
             ds.close();
         }
         catch(IOException e) {
@@ -66,7 +65,7 @@ public class SalesOrder implements Parcelable
     }
 
     /**
-     * Universal link format
+     * Universal link's Query String section is formatted like this:
      *
      * AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkAKcAqA==;
      * 1b;
@@ -84,57 +83,6 @@ public class SalesOrder implements Parcelable
      * bytes32: 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
      *
      */
-    public SalesOrder(String linkData) throws SalesOrderMalformed {
-        //separate the args
-        String[] linkArgs = linkData.split(";");
-        message = Base64.decode(linkArgs[0]);
-        try {
-            byte v = (byte)(int)Integer.valueOf(linkArgs[1], 16);
-            byte[] r = hexStringToBytes(linkArgs[2]);
-            byte[] s = hexStringToBytes(linkArgs[3]);
-
-            ByteArrayInputStream bas = new ByteArrayInputStream(message);
-            EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-            priceWei = ds.readBI();
-            expiry = ds.readBI().intValue();
-            contractAddress = ds.readAddress();
-            ticketCount = ds.available() / 2;
-            tickets = ds.readUint16Indices(ticketCount);
-            ds.close();
-
-            signature = writeSignature(r,s,v);
-
-        } catch (IOException e) {
-            throw new SalesOrderMalformed();
-        } catch (StringIndexOutOfBoundsException f) {
-            throw new SalesOrderMalformed();
-        } catch (Exception e) {
-            throw new SalesOrderMalformed();
-        }
-
-        BigInteger milliWei = Convert.fromWei(priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
-        price = milliWei.doubleValue() / 1000.0;
-    }
-
-    private byte[] writeSignature(byte[] r, byte[] s, byte v)
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream ds = new DataOutputStream(buffer);
-        try
-        {
-            ds.write(r);
-            ds.write(s);
-            ds.writeByte(v);
-            ds.flush();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return buffer.toByteArray();
-    }
-
     public static SalesOrder parseUniversalLink(String link) throws SalesOrderMalformed
     {
         final String importTemplate = "/import?";
@@ -149,6 +97,52 @@ public class SalesOrder implements Parcelable
         {
             return null;
         }
+    }
+
+    protected SalesOrder(String linkData) throws SalesOrderMalformed {
+        //separate the args
+        String[] linkArgs = linkData.split(";");
+        byte[] r = Numeric.toBytesPadded(new BigInteger(linkArgs[2], 16), 32);
+        byte[] s = Numeric.toBytesPadded(new BigInteger(linkArgs[3], 16), 32);
+        try {
+            /* if was given in decimal by mistake, some high bytes are chopped off here */
+            System.arraycopy(r, 0, signature, 0, 32);     // r
+            System.arraycopy(s, 0, signature, 32, 32);    // s
+            signature[64] = (byte) (int) Integer.valueOf(linkArgs[1], 16); // v
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            throw new SalesOrderMalformed("Signature shorter than expected 256");
+        }
+        catch (ArrayStoreException a)
+        {
+            throw new SalesOrderMalformed("Attempting to write signature too long for storage");
+        }
+        catch (NullPointerException e)
+        {
+            throw new SalesOrderMalformed("invalid import link data");
+        }
+
+        message = Base64.decode(linkArgs[0]);
+        try {
+            ByteArrayInputStream bas = new ByteArrayInputStream(message);
+            EthereumReadBuffer ds = new EthereumReadBuffer(bas);
+            priceWei = ds.readBI();
+            expiry = ds.readBI().intValue();
+            contractAddress = ds.readAddress();
+            ticketCount = ds.available() / 2;
+            tickets = ds.readUint16Indices(ticketCount);
+            ds.close();
+        } catch (IOException e) {
+            throw new SalesOrderMalformed();
+        } catch (StringIndexOutOfBoundsException f) {
+            throw new SalesOrderMalformed();
+        } catch (Exception e) {
+            throw new SalesOrderMalformed();
+        }
+
+        BigInteger milliWei = Convert.fromWei(priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
+        price = milliWei.doubleValue() / 1000.0;
     }
 
     public byte[] writeMessage()
@@ -188,12 +182,11 @@ public class SalesOrder implements Parcelable
         tickets = new int[ticketLength];
         in.readIntArray(tickets);
 
-        int sigLength = in.readInt();
-        signature = new byte[sigLength]; // in theory we shouldn't need to do this, always is 65 bytes
-        in.readByteArray(signature);
+        int sigLength = in.readInt();   // must not be higher than 65 bytes
+        in.readByteArray(signature);    // in my guess, it's always is 65 bytes so it should fit.
 
         int messageLength = in.readInt();
-        message = new byte[messageLength]; // in theory we shouldn't need to do this, always is 65 bytes
+        message = new byte[messageLength];
         in.readByteArray(message);
         priceWei = new BigInteger(in.readString());
     }

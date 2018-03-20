@@ -223,8 +223,10 @@ public class SetupTokensInteract {
             try {
                 tokenCheckList.clear();
                 txMap.clear();
-                newTxList.clear();
+                newTxList.clear(); //Probably redundant now - maybe refactor this out.
+
                 //see if there's any ERC875 tokens
+                //this is used in the viewModel to fetch all the contract transactions - this list is consumed by consumeTokenCheckList()
                 for (Token t : contractMap.values())
                 {
                     if (t.tokenInfo.isStormbird)
@@ -232,6 +234,8 @@ public class SetupTokensInteract {
                         tokenCheckList.add(t);
                     }
                 }
+
+                //generateTestString(txArray);
 
                 for (Transaction t : txArray) {
                     if (!txMap.containsKey(t.hash)) {
@@ -253,6 +257,28 @@ public class SetupTokensInteract {
 
             }
         });
+    }
+
+    //use this function to generate unit test string
+    private void generateTestString(Transaction[] txList)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("String[] inputTestList = {");
+        boolean first = true;
+        for (Transaction t : txList) {
+            if (!first) {
+                sb.append("\n,");
+            }
+            first = false;
+            sb.append("\"");
+            sb.append(t.input);
+            sb.append("\"");
+        }
+
+        sb.append("};");
+
+        System.out.println(sb.toString());
     }
 
     /**

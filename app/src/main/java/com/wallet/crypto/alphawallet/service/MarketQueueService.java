@@ -6,6 +6,7 @@ import android.os.Looper;
 import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.wallet.crypto.alphawallet.C;
 import com.wallet.crypto.alphawallet.R;
+import com.wallet.crypto.alphawallet.entity.BaseViewCallback;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.EthereumReadBuffer;
 import com.wallet.crypto.alphawallet.entity.GasSettings;
@@ -18,7 +19,6 @@ import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.repository.PasswordStore;
 import com.wallet.crypto.alphawallet.repository.TokenRepository;
 import com.wallet.crypto.alphawallet.repository.TransactionRepositoryType;
-import com.wallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -101,6 +101,7 @@ public class MarketQueueService {
 
     private Disposable marketQueueProcessing;
     private ApiMarketQueue marketQueueConnector;
+    private BaseViewCallback messageCallback;
 
     public MarketQueueService(Context ctx, OkHttpClient httpClient,
                               TransactionRepositoryType transactionRepository,
@@ -135,16 +136,16 @@ public class MarketQueueService {
     private void handleResponse(String response)
     {
         System.out.println("handle response");
-        BaseViewModel.onQueueUpdate(100);
+        messageCallback.queueUpdate(100);
         //TODO: Handle response correctly
         //"{\"orders\": {\"received\": 200, \"accepted\": 200}, \"1st_order\": \"00000000000000000000000000000000000000000000000003ff2e795f500000000000000000000000000000000000000000000000000000000000005ab1b21c0b6732baecc0793e38a98934799abd3c7dc3cf3100d300d4\"}"
         if (response.contains("accepted"))//  == HttpURLConnection.HTTP_OK)
         {
-            BaseViewModel.onPushToast("Queue written");
+            messageCallback.pushToast("Queue written");
         }
         else
         {
-            BaseViewModel.onPushToast("ERROR: Trade not processed");
+            messageCallback.pushToast("ERROR: Trade not processed");
         }
 
         marketQueueProcessing.dispose();
@@ -301,6 +302,10 @@ public class MarketQueueService {
         return data;
     }
 
+    public void setCallback(BaseViewCallback callback) {
+        messageCallback = callback;
+    }
+
     public interface ApiMarketQueue
     {
         @POST("abc?start=12&count=11&count=3")
@@ -333,7 +338,7 @@ public class MarketQueueService {
                 trade.expiry =  BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
                 trade.addSignature(getTradeSignature(wallet, password, trade).blockingGet());
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
-                BaseViewModel.onQueueUpdate((int)upd);
+                messageCallback.queueUpdate((int)upd);
             }
             transactionRepository.lockAccount(wallet, password);
             trade.expiry = BigInteger.valueOf(initialExpiry); //ensure expiry of first order is correct
@@ -368,7 +373,8 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, int firstTicketId) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, int firstTicketId, BaseViewCallback callback) {
+        messageCallback = callback;
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }

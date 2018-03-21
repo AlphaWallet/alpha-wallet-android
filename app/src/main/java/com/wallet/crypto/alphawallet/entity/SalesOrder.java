@@ -27,8 +27,7 @@ import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromBy
  * Created by James on 21/02/2018.
  */
 
-public class SalesOrder implements Parcelable
-{
+public class SalesOrder implements Parcelable {
     public final long expiry;
     public final double price;
     public final BigInteger priceWei;
@@ -50,20 +49,30 @@ public class SalesOrder implements Parcelable
         this.expiry = expiry;
         this.ticketStart = ticketStart;
         this.ticketCount = ticketCount;
+        this.contractAddress = contractAddress;
+        MessageData data = readByteMessage(message, Base64.decode(sig), ticketCount);
+        this.priceWei = data.priceWei;
+        this.tickets = data.tickets;
+        System.arraycopy(data.signature, 0, this.signature, 0, 65);
+    }
+
+    public static MessageData readByteMessage(byte[] message, byte[] sig, int ticketCount) throws SalesOrderMalformed
+    {
+        MessageData data = new MessageData();
         ByteArrayInputStream bas = new ByteArrayInputStream(message);
         try {
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-            priceWei = ds.readBI();
+            data.priceWei = ds.readBI();
             ds.readBI();
             ds.readAddress();
-            this.tickets = ds.readUint16Indices(ticketCount);
-            this.contractAddress = contractAddress;
-            System.arraycopy(Base64.decode(sig), 0, this.signature, 0, 65);
+            data.tickets = ds.readUint16Indices(ticketCount);
+            System.arraycopy(sig, 0, data.signature, 0, 65);
             ds.close();
         }
         catch(IOException e) {
             throw new SalesOrderMalformed();
         }
+        return data;
     }
 
     /**

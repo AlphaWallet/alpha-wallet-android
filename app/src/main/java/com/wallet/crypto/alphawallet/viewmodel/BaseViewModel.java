@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.wallet.crypto.alphawallet.C;
+import com.wallet.crypto.alphawallet.entity.BaseViewCallback;
 import com.wallet.crypto.alphawallet.entity.ErrorEnvelope;
 import com.wallet.crypto.alphawallet.entity.ServiceException;
 import com.wallet.crypto.alphawallet.entity.Token;
@@ -84,6 +85,18 @@ public class BaseViewModel extends ViewModel
 	{
 		pushToastMutable.postValue(message);
 	}
+
+	protected BaseViewCallback processMessages = new BaseViewCallback() {
+		@Override
+		public void queueUpdate(int complete) {
+			onQueueUpdate(complete);
+		}
+
+		@Override
+		public void pushToast(String message) {
+			onPushToast(message);
+		}
+	};
 
 	public void showSendToken(Context context, String address, String symbol, int decimals) {
 		//do nothing

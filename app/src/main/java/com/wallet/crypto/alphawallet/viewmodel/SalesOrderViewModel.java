@@ -205,6 +205,6 @@ public class SalesOrderViewModel extends BaseViewModel
         //price in eth
         BigInteger wei = Convert.toWei("2300", Convert.Unit.FINNEY).toBigInteger().multiply(BigInteger.valueOf(idSendList.size())); //FINNEY is 0.001 (milli-eth).
 
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), wei, ticketIDs, ticket().getValue().getAddress(), firstTicket);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), wei, ticketIDs, ticket().getValue().getAddress(), firstTicket, processMessages);
     }
 }

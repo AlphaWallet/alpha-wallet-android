@@ -127,7 +127,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
             price = price.multiply(BigInteger.valueOf(iDs.size()));
 
-            marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
+            //marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
         }
     }
 }

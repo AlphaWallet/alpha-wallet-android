@@ -122,11 +122,19 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token[]> fetchActiveStored(String walletAddress) {
+    public Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
                 .compose(attachEthereumStored(network, wallet)) //add cached eth balance
+                .toObservable();
+    }
+
+    @Override
+    public Observable<Token[]> fetchActiveStored(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
                 .toObservable();
     }
 

@@ -99,10 +99,9 @@ public class WalletViewModel extends BaseViewModel {
     //double cycle.
     //1. fetch tokens from cache and display
     //2. update token balance
-
     public void fetchTokens() {
         fetchTokensInteract
-                .fetchStored(defaultWallet.getValue())
+                .fetchStoredWithEth(defaultWallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 

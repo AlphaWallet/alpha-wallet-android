@@ -108,16 +108,19 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
 
             if (newBalance.size() > 0 && allIndicesUnsold)
             {
+                //ticket bundle has been validated - it's currently available for purchase
                 ticketTypeText.setText(R.string.tickets);
                 count.setText(String.valueOf(newBalance.size()));
             }
             else
             {
+                //received balance but this bundle is now unavailable
                 count.setText(R.string.ticket_unavailable);
                 ticketTypeText.setText("");
             }
         }
         else {
+            //Waiting for balance (display waiting progress indicator)
             count.setText(R.string.NA);
             ticketTypeText.setText("");
         }

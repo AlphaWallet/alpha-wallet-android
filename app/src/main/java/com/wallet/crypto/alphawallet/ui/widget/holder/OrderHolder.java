@@ -1,22 +1,24 @@
 package com.wallet.crypto.alphawallet.ui.widget.holder;
 
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wallet.crypto.alphawallet.R;
 import com.wallet.crypto.alphawallet.entity.SalesOrder;
 import com.wallet.crypto.alphawallet.entity.TicketDecode;
 import com.wallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
-import com.wallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
-import com.wallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by James on 21/02/2018.
@@ -36,6 +38,12 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
     private final TextView ticketIds;
     private final TextView ticketCat;
     private final TextView ticketTypeText;
+    private final RelativeLayout updateOverlay;
+    private final RelativeLayout unavailableOverlay;
+    private final LinearLayout ticketLayout;
+    private ImageView calendarImg;
+    private ImageView ticketImg;
+    private ImageView catImg;
 
     public OrderHolder(int resId, ViewGroup parent) {
         super(resId, parent);
@@ -46,6 +54,12 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
         ticketIds = findViewById(R.id.tickettext);
         ticketCat = findViewById(R.id.cattext);
         ticketTypeText = findViewById(R.id.ticket_type);
+        updateOverlay = findViewById(R.id.update_overlay);
+        unavailableOverlay = findViewById(R.id.unavailable_overlay);
+        ticketLayout = findViewById(R.id.layout_select);
+        calendarImg = findViewById(R.id.calendar);
+        ticketImg = findViewById(R.id.ticketicon);
+        catImg = findViewById(R.id.caticon);
         itemView.setOnClickListener(this);
     }
 
@@ -111,18 +125,43 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
                 //ticket bundle has been validated - it's currently available for purchase
                 ticketTypeText.setText(R.string.tickets);
                 count.setText(String.valueOf(newBalance.size()));
+                unavailableOverlay.setVisibility(View.GONE);
+                updateOverlay.setVisibility(View.GONE);
+                clearColorFilter();
             }
             else
             {
                 //received balance but this bundle is now unavailable
                 count.setText(R.string.ticket_unavailable);
                 ticketTypeText.setText("");
+                unavailableOverlay.setVisibility(View.VISIBLE);
+                updateOverlay.setVisibility(View.GONE);
+                ticketLayout.setEnabled(false);
+                applyColorFilter();
             }
         }
         else {
             //Waiting for balance (display waiting progress indicator)
             count.setText(R.string.NA);
             ticketTypeText.setText("");
+            unavailableOverlay.setVisibility(View.GONE);
+            updateOverlay.setVisibility(View.VISIBLE);
+            clearColorFilter();
         }
+    }
+
+    private void applyColorFilter() {
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0);
+        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+        calendarImg.setColorFilter(filter);
+        ticketImg.setColorFilter(filter);
+        catImg.setColorFilter(filter);
+    }
+
+    private void clearColorFilter() {
+        calendarImg.clearColorFilter();
+        ticketImg.clearColorFilter();
+        catImg.clearColorFilter();
     }
 }

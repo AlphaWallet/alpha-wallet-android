@@ -30,7 +30,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -56,6 +59,7 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private List<SalesOrder> orders = new ArrayList<>();
     private List<OrderContractAddressPair> checkingPairs = new ArrayList<>();
+    private List<OrderContractAddressPair> staticPairList = new ArrayList<>();
 
     private List<Token> tokens = new ArrayList<>();
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
@@ -156,13 +160,28 @@ public class BrowseMarketViewModel extends BaseViewModel
     }
 
 
-
     //4. Post the orders list to the UI and continue with fetching the balances
     private void postOrdersToUI()
     {
+        staticPairList.addAll(checkingPairs);
         SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
         //We can add to the list here, start displaying order details
         market.postValue(compiledOrders);
+        checkingBalanceCycle();
+    }
+
+    //5. start the cycle to check balances
+    private void checkingBalanceCycle()
+    {
+        checkMarketDisposable = Observable.interval(0, CHECK_MARKET_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(this::checkOrderBalances)
+                .observeOn(Schedulers.io())
+                .subscribe();
+    }
+
+    private void checkOrderBalances(Long dummy)
+    {
+        checkingPairs.addAll(staticPairList);
         checkOrderBalances();
     }
 
@@ -180,6 +199,8 @@ public class BrowseMarketViewModel extends BaseViewModel
             //String orderAddress = defaultWallet.getValue().address;
             //get owner balance
             fetchTokensInteract.updateBalancePair(t, pair.order)
+                    .observeOn(Schedulers.io())
+                    .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onBalance, this::onError, this::updateUI);
         }
     }
@@ -197,10 +218,6 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private void finishOrders()
     {
-        //now update UI again
-//        SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
-//        //We can add to the list here, start displaying order details
-//        market.postValue(compiledOrders);
         System.out.println("Finished displaying orders");
     }
 

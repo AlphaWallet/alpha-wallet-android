@@ -88,7 +88,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
             } break;
             case TokenDescriptionHolder.VIEW_TYPE: {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent);
-            }
+            } break;
         }
 
         return holder;

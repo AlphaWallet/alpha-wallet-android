@@ -18,6 +18,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
@@ -294,5 +295,26 @@ public class SalesOrder implements Parcelable
         {
             return null;
         }
+    }
+
+    public boolean balanceChange(List<Integer> balance)
+    {
+        //compare two balances
+
+        //quick return, if sizes are different there's a change
+        if (balanceInfo == null)
+        {
+            balanceInfo = new ArrayList<>(); //initialise the balance list
+            return true;
+        }
+        if (balance.size() != balanceInfo.size()) return true;
+
+        List<Integer> oldBalance = new ArrayList<>(balanceInfo);
+        List<Integer> newBalance = new ArrayList<>(balance);
+
+        oldBalance.removeAll(balanceInfo);
+        newBalance.removeAll(balance);
+
+        return (oldBalance.size() != 0 || newBalance.size() != 0);
     }
 }

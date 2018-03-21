@@ -52,7 +52,6 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private final MutableLiveData<SalesOrder[]> market = new MutableLiveData<>();
     private final MutableLiveData<OrderContractAddressPair> tokenBalance = new MutableLiveData<>();
-    private final MutableLiveData<String> selection = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> startUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> endUpdate = new MutableLiveData<>();
@@ -100,6 +99,16 @@ public class BrowseMarketViewModel extends BaseViewModel
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    @Override
+    public void onCleared()
+    {
+        super.onCleared();
+        if (checkMarketDisposable != null && !checkMarketDisposable.isDisposed())
+        {
+            checkMarketDisposable.dispose();
+        }
     }
 
     //2. Now fetch the list of cached tokens for this address
@@ -185,7 +194,7 @@ public class BrowseMarketViewModel extends BaseViewModel
         checkOrderBalances();
     }
 
-    //5. Now consume the generated token/address pairs we found in step 3 to see if the balance is still valid
+    //6. Now consume the generated token/address pairs we found in step 3 to see if the balance is still valid
     private void checkOrderBalances()
     {
         if (checkingPairs.size() == 0)
@@ -231,8 +240,11 @@ public class BrowseMarketViewModel extends BaseViewModel
             if (    order.contractAddress.equals(pair.order.contractAddress) //order address matches
                     &&  order.ownerAddress.equals(pair.order.ownerAddress))
             {
-                order.balanceInfo = pair.balance;
-                refreshUINeeded = true;
+                //check for change
+                if (order.balanceChange(pair.balance)) {
+                    order.balanceInfo = pair.balance;
+                    refreshUINeeded = true;
+                }
             }
         }
     }

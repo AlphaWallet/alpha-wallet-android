@@ -11,6 +11,7 @@
         android:name="com.wallet.crypto.alphawallet.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
+        android:launchMode="singleTask"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
@@ -30,9 +31,14 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
 
+                <!--<data-->
+                    <!--android:host="stormbird.duckdns.org"-->
+                    <!--android:path="/import"-->
+                    <!--android:scheme="http"/>-->
+
                 <data
                     android:host="www.awallet.io"
-                    android:path="/doobrey"
+                    android:path="/import"
                     android:scheme="https"/>
             </intent-filter>
         </activity>
@@ -130,6 +136,10 @@
         <activity
             android:name="com.wallet.crypto.alphawallet.ui.HomeActivity"
             android:label="@string/toolbar_header_wallet" />
+
+        <activity
+            android:name="com.wallet.crypto.alphawallet.ui.ImportTokenActivity"
+            android:label="@string/title_import_token" />
 
         <activity
             android:name="com.wallet.crypto.alphawallet.ui.TransferTicketActivity"

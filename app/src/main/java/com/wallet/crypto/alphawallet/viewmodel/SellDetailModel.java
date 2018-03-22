@@ -69,7 +69,7 @@ public class SellDetailModel extends BaseViewModel {
         ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
     }
 
-    public void generateSalesOrders(String contractAddr, BigInteger price, short[] ticketIndicies, int firstTicketId)
+    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, int firstTicketId)
     {
         marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId);
     }

@@ -77,7 +77,7 @@ public class PurchaseTicketsViewModel extends BaseViewModel
     public void buyRange(SalesOrder marketInstance)
     {
         //ok let's try to drive this guy through
-        final byte[] tradeData = marketQueueService.generateReverseTradeData(defaultWallet.getValue(), marketInstance);
+        final byte[] tradeData = SalesOrder.generateReverseTradeData(marketInstance);
         //quick sanity check, dump price
         BigInteger milliWei = Convert.fromWei(marketInstance.priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         double recreatePrice = milliWei.doubleValue() / 1000.0;

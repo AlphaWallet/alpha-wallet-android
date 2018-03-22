@@ -2,6 +2,7 @@ package com.wallet.crypto.alphawallet.entity;
 
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.security.Signature;
@@ -20,13 +21,13 @@ public class TradeInstance
 {
     public final BigInteger expiry;
     public final BigInteger price;
-    public final short[] tickets;
+    public final int[] tickets;
     public final BigInteger contractAddress;
     public final int ticketStart;
     public final String publicKey;
     List<byte[]> signatures = new ArrayList<byte[]>();
 
-    public TradeInstance(BigInteger price, BigInteger expiry, short[] tickets, String contractAddress, BigInteger publicKey, int ticketStartId) {
+    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, int ticketStartId) {
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;
@@ -90,6 +91,27 @@ public class TradeInstance
         {                 
             ds.write(sig);
         }
+    }
+
+    public byte[] getTradeBytes() throws Exception
+    {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        DataOutputStream ds = new DataOutputStream(buffer);
+        ds.write(Numeric.toBytesPadded(price, 32));
+        ds.write(Numeric.toBytesPadded(expiry, 32));
+        ds.write(Numeric.toBytesPadded(contractAddress, 20));
+
+        byte[] uint16 = new byte[2];
+        for (int ticketIndex : tickets)
+        {
+            //write big endian encoding
+            uint16[0] = (byte)(ticketIndex >> 8);
+            uint16[1] = (byte)(ticketIndex & 0xFF);
+            ds.write(uint16);
+        }
+        ds.flush();
+
+        return buffer.toByteArray();
     }
 
     private String padLeft(String source, int length)

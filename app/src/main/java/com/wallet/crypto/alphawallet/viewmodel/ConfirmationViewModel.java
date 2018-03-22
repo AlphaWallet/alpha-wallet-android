@@ -115,12 +115,12 @@ public class ConfirmationViewModel extends BaseViewModel {
 
         if (sends != null && sends.size() > 0)
         {
-            short[] ticketIDs = new short[sends.size()];
+            int[] ticketIDs = new int[sends.size()];
             int index = 0;
 
             for (Integer i : sends)
             {
-                ticketIDs[index++] = i.shortValue();
+                ticketIDs[index++] = i;
             }
 
             int firstIndex = iDs.get(0);

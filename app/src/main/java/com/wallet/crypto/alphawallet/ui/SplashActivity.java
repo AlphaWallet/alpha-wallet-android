@@ -10,6 +10,7 @@ import com.crashlytics.android.core.CrashlyticsCore;
 import com.wallet.crypto.alphawallet.BuildConfig;
 import com.wallet.crypto.alphawallet.entity.Wallet;
 import com.wallet.crypto.alphawallet.router.HomeRouter;
+import com.wallet.crypto.alphawallet.router.ImportTokenRouter;
 import com.wallet.crypto.alphawallet.router.ManageWalletsRouter;
 import com.wallet.crypto.alphawallet.router.TransactionsRouter;
 import com.wallet.crypto.alphawallet.viewmodel.SplashViewModel;
@@ -26,6 +27,8 @@ public class SplashActivity extends BaseActivity {
     SplashViewModelFactory splashViewModelFactory;
     SplashViewModel splashViewModel;
 
+    private String importData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -37,6 +40,11 @@ public class SplashActivity extends BaseActivity {
         Intent intent = getIntent();
         Uri data = intent.getData();
 
+        if (data != null)
+        {
+            importData = data.toString();
+        }
+
         splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)
                 .get(SplashViewModel.class);
         splashViewModel.wallets().observe(this, this::onWallets);
@@ -44,7 +52,11 @@ public class SplashActivity extends BaseActivity {
 
     private void onWallets(Wallet[] wallets) {
         // Start home activity
-        if (wallets.length == 0) {
+        if (importData != null) {
+            new ImportTokenRouter().open(this, importData);
+            finish();
+        }
+        else if (wallets.length == 0) {
             new ManageWalletsRouter().open(this, true);
         } else {
 //            new TransactionsRouter().open(this, true);

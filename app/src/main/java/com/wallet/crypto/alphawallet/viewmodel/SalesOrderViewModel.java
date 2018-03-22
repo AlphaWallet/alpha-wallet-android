@@ -196,10 +196,10 @@ public class SalesOrderViewModel extends BaseViewModel
     }
 
     public void generateSalesOrders(List<Integer> idSendList, int firstTicket) {
-        short[] ticketIDs = new short[idSendList.size()];
+        int[] ticketIDs = new int[idSendList.size()];
         int index = 0;
         for (Integer i : idSendList) {
-            ticketIDs[index++] = i.shortValue();
+            ticketIDs[index++] = i;
         }
 
         //price in eth

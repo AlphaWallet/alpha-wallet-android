@@ -141,9 +141,23 @@ public class Token implements Parcelable {
         return balance.intValue();
     }
 
-    public short[] getTicketIndicies(String ticketIds)
+    public int[] getTicketIndicies(String ticketIds)
     {
         return null;
+    }
+
+    public boolean addressMatches(String contractAddress)
+    {
+        String checkAddress = Numeric.cleanHexPrefix(contractAddress);
+        String ourAddress = Numeric.cleanHexPrefix(getAddress());
+        if (ourAddress.equalsIgnoreCase(checkAddress))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public boolean isCurrency() {

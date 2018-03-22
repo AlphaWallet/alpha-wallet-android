@@ -147,23 +147,6 @@ public class MarketQueueService {
         marketQueueProcessing.dispose();
     }
 
-    private byte[] getTradeBytes(BigInteger price, BigInteger expiryTimestamp, short[] tickets, BigInteger contractAddr) throws Exception
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream ds = new DataOutputStream(buffer);
-        ds.write(Numeric.toBytesPadded(price, 32));
-        ds.write(Numeric.toBytesPadded(expiryTimestamp, 32));
-        ds.write(Numeric.toBytesPadded(contractAddr, 20));
-
-        for (short ticketIndex : tickets)
-        {
-            ds.writeShort(ticketIndex);
-        }
-        ds.flush();
-
-        return buffer.toByteArray();
-    }
-
     private Single<String> sendSalesOrders(TradeInstance trades)
     {
         return Single.fromCallable(() -> {
@@ -176,7 +159,7 @@ public class MarketQueueService {
 
             try
             {
-                byte[] trade = getTradeBytes(trades.price, trades.expiry, trades.tickets, trades.contractAddress);
+                byte[] trade = trades.getTradeBytes();
 
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 DataOutputStream ds = new DataOutputStream(buffer);
@@ -204,6 +187,10 @@ public class MarketQueueService {
         });
     }
 
+    /**
+     * Parse a hex string to bytes without use of two's complement.
+     * potentially unsafe once per 256 times
+     */
     public static byte[] hexStringToBytes(String s)
     {
         int len = s.length();
@@ -214,6 +201,14 @@ public class MarketQueueService {
                     + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
+        /* faster way to do it, untested:
+        byte[] array = bigInteger.toByteArray();
+        if (array[0] == 0) {
+            byte[] tmp = new byte[array.length - 1];
+            System.arraycopy(array, 1, tmp, 0, tmp.length);
+            array = tmp;
+        }
+         */
     }
 
     //TODO: Refactor this using
@@ -308,7 +303,7 @@ public class MarketQueueService {
         return transactionRepository.getSignature(wallet, data, password);
     }
 
-    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = System.currentTimeMillis() / 1000L + MARKET_INTERVAL;
@@ -329,7 +324,7 @@ public class MarketQueueService {
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
                 BigInteger expiryTimestamp = BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
-                trade.addSignature(getTradeSignature(wallet, password, price, expiryTimestamp, tickets, contractAddr).blockingGet());
+                trade.addSignature(getTradeSignature(wallet, password, trade).blockingGet());
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 BaseViewModel.onQueueUpdate((int)upd);
             }
@@ -338,21 +333,21 @@ public class MarketQueueService {
         });
     }
 
-    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
     }
 
-    private Single<byte[]> getTradeSignature(Wallet wallet, String password, BigInteger price, BigInteger expiryTimestamp, short[] tickets, String contractAddr) {
-        return encodeMessageForTrade(price, expiryTimestamp, tickets, contractAddr)
+    private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade) {
+        return encodeMessageForTrade(trade)
                 .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password));
     }
 
-    private Single<byte[]> encodeMessageForTrade(BigInteger price, BigInteger expiryTimestamp, short[] tickets, String contractAddr) {
-        return Single.fromCallable(() -> getTradeBytes(price, expiryTimestamp, tickets, Numeric.toBigInt(contractAddr)));
+    private Single<byte[]> encodeMessageForTrade(TradeInstance trade) {
+        return Single.fromCallable(trade::getTradeBytes);
     }
 
-    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, short[] tickets, String contractAddr, int firstTicketId) {
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
         return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -365,7 +360,7 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createSalesOrders(Wallet wallet, BigInteger price, short[] ticketIDs, String contractAddr, int firstTicketId) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, int firstTicketId) {
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
@@ -489,9 +484,10 @@ public class MarketQueueService {
         return recoveredKey;
     }
 
-    public static Sign.SignatureData sigFromByteArray(byte[] sig) throws Exception
+    public static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
-        byte   subv = (byte)(sig[64] + 27);
+        byte   subv = (byte)(sig[64]);
+        if (subv < 27) subv += 27;
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
         byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);

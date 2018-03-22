@@ -145,8 +145,8 @@ public class WalletViewModel extends BaseViewModel {
     public void showSendToken(Context context, String address, String symbol, int decimals) {
         boolean isToken = true;
         if (address.equalsIgnoreCase(defaultWallet().getValue().address)) isToken = false;
-//        sendTokenRouter.open(context, address, symbol, decimals, isToken);
-        showTransactions(context);
+        sendTokenRouter.open(context, address, symbol, decimals, isToken);
+//        showTransactions(context);
     }
 
     @Override

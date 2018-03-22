@@ -291,8 +291,8 @@
             android:id="@+id/unavailable_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.3"
-            android:background="@drawable/background_unavailable"/>
+            android:alpha="0.5"
+            android:background="@drawable/background_marketplace_event"/>
 
         <RelativeLayout
             android:id="@+id/update_overlay"

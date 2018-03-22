@@ -98,6 +98,9 @@ public class SalesOrder implements Parcelable
     protected SalesOrder(String linkData) throws SalesOrderMalformed {
         //separate the args
         String[] linkArgs = linkData.split(";");
+        if (linkArgs.length < 3) {
+            throw new SalesOrderMalformed("Not enough parameters");
+        }
         byte[] r = Numeric.toBytesPadded(new BigInteger(linkArgs[2], 16), 32);
         byte[] s = Numeric.toBytesPadded(new BigInteger(linkArgs[3], 16), 32);
         if (r.length > 32 || s.length > 32) {

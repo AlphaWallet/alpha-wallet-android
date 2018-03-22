@@ -227,7 +227,7 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private void finishOrders()
     {
-        System.out.println("Finished displaying orders");
+        //System.out.println("Finished displaying orders");
     }
 
     private void onBalance(OrderContractAddressPair pair)
@@ -238,13 +238,10 @@ public class BrowseMarketViewModel extends BaseViewModel
         {
             //updating this item?
             if (    order.contractAddress.equals(pair.order.contractAddress) //order address matches
-                    &&  order.ownerAddress.equals(pair.order.ownerAddress))
-            {
-                //check for change
-                if (order.balanceChange(pair.balance)) {
-                    order.balanceInfo = pair.balance;
-                    refreshUINeeded = true;
-                }
+                    && order.ownerAddress.equals(pair.order.ownerAddress)
+                    && order.balanceChange(pair.balance)) {
+                order.balanceInfo = pair.balance;
+                refreshUINeeded = true;
             }
         }
     }

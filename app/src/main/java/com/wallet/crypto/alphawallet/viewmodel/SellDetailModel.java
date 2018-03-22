@@ -71,7 +71,7 @@ public class SellDetailModel extends BaseViewModel {
 
     public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, int firstTicketId)
     {
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
     }
 
     public void setWallet(Wallet wallet)

@@ -100,8 +100,10 @@ public class SalesOrder implements Parcelable
         String[] linkArgs = linkData.split(";");
         byte[] r = Numeric.toBytesPadded(new BigInteger(linkArgs[2], 16), 32);
         byte[] s = Numeric.toBytesPadded(new BigInteger(linkArgs[3], 16), 32);
+        if (r.length > 32 || s.length > 32) {
+            throw new SalesOrderMalformed("Signature too long. Maybe decimal is used as hex?");
+        }
         try {
-            /* if was given in decimal by mistake, some high bytes are chopped off here */
             System.arraycopy(r, 0, signature, 0, 32);     // r
             System.arraycopy(s, 0, signature, 32, 32);    // s
             signature[64] = (byte) (int) Integer.valueOf(linkArgs[1], 16); // v

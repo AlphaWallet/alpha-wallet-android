@@ -44,4 +44,5 @@
 	<color name="onboarding_indicator_selected">#b7b7b7</color>
 	<color name="golden_yellow">#f9d021</color>
 	<color name="disabled_color">#888888</color>
+	<color name="cancel_red">#db393a</color>
 </resources>

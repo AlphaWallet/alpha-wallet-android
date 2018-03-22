@@ -45,7 +45,7 @@
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_bold"
             android:gravity="center"
-            android:textColor="@color/text_black"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="41sp" />
 
     </LinearLayout>
@@ -94,12 +94,11 @@
             android:layout_gravity="center_horizontal"
             android:background="@color/white"
             android:fontFamily="@font/font_regular"
-            android:paddingBottom="10dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="10dp"
             android:textAllCaps="false"
-            android:textColor="@color/text_black"
+            android:textColor="@color/cancel_red"
             android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>

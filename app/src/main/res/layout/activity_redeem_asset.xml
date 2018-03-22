@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/background_card">
 
-        <com.wallet.crypto.alphawallet.widget.ProgressView
+        <io.awallet.crypto.alphawallet.widget.ProgressView
             android:id="@+id/progress_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -68,7 +68,7 @@
 
     </RelativeLayout>
 
-    <com.wallet.crypto.alphawallet.widget.SystemView
+    <io.awallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

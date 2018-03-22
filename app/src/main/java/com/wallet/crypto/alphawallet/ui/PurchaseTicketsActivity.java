@@ -77,8 +77,6 @@ public class PurchaseTicketsActivity extends BaseActivity
         ethPrice = findViewById(R.id.eth_price);
         usdPrice = findViewById(R.id.fiat_price);
 
-        TextView quantityText = findViewById(R.id.text_quantity);
-
         RecyclerView list = findViewById(R.id.listTickets);
         SalesOrder[] singleInstance = new SalesOrder[1];
         singleInstance[0] = ticketRange;
@@ -91,7 +89,7 @@ public class PurchaseTicketsActivity extends BaseActivity
         list.setAdapter(adapter);
 
         //calculate total price
-        double totalEthPrice = round(ticketRange.price * Integer.parseInt(quantityText.getText().toString()), 2);
+        double totalEthPrice = round(ticketRange.price * ticketCount, 2);
         String priceStr = String.valueOf(totalEthPrice) + " ETH";
         ethPrice.setText(priceStr);
 
@@ -125,41 +123,15 @@ public class PurchaseTicketsActivity extends BaseActivity
         viewModel.progress().observe(this, this::onProgress);
 
         purchase.setOnClickListener((View v) -> {
-            if (Integer.parseInt(quantityText.getText().toString()) > 0) {
-                AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
-                dialog.setTitle(R.string.confirm_purchase_title);
-                dialog.setSmallText(R.string.confirm_purchase_small_text);
-                dialog.setBigText(ethPrice.getText().toString());
-                dialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
-                dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-                dialog.setPrimaryButtonListener(v1 -> purchaseTicketsFinal());
-                dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
-                dialog.show();
-            }
-        });
-
-        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
-        plusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(quantityText.getText().toString());
-            if (quantity + 1 <= ticketCount) {
-                quantity++;
-                quantityText.setText(String.valueOf(quantity));
-                double total = round(ticketRange.price * quantity, 2);
-                String totalStr = String.valueOf(total) + " ETH";
-                ethPrice.setText(totalStr);
-            }
-        });
-
-        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
-        minusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(quantityText.getText().toString());
-            if ((quantity-1) >= 0) {
-                quantity--;
-                quantityText.setText(String.valueOf(quantity));
-                double total = round(ticketRange.price * quantity, 2);
-                String totalStr = String.valueOf(total) + " ETH";
-                ethPrice.setText(totalStr);
-            }
+            AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+            dialog.setTitle(R.string.confirm_purchase_title);
+            dialog.setSmallText(R.string.confirm_purchase_small_text);
+            dialog.setBigText(ethPrice.getText().toString());
+            dialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
+            dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+            dialog.setPrimaryButtonListener(v1 -> purchaseTicketsFinal());
+            dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+            dialog.show();
         });
     }
 

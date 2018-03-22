@@ -8,7 +8,6 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -36,7 +35,6 @@
                     android:id="@+id/purchase_layout_top"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:orientation="vertical"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -54,82 +52,6 @@
                         android:textColor="@color/text_black"
                         android:textSize="25sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="5dp"
-                        android:fontFamily="@font/font_regular"
-                        android:text="Quantity of Tickets"
-                        android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
-                        android:textSize="10sp" />
-
-                    <LinearLayout
-                        android:id="@+id/layout_ticket_quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="20dp"
-                        android:background="@drawable/background_quantity"
-                        android:orientation="horizontal">
-
-                        <RelativeLayout
-                            android:id="@+id/layout_quantity_add"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="10dp"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
-                            android:paddingTop="10dp">
-
-                            <ImageView
-                                android:id="@+id/img_quantity_add"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:contentDescription="@string/empty"
-                                android:src="@drawable/ic_plus" />
-                        </RelativeLayout>
-
-
-                        <TextView
-                            android:id="@+id/text_quantity"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="20dp"
-                            android:layout_marginRight="20dp"
-                            android:fontFamily="@font/font_semibold"
-                            android:gravity="center"
-                            android:padding="10dp"
-                            android:text="1"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textSize="21sp" />
-
-                        <RelativeLayout
-                            android:id="@+id/layout_quantity_minus"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginRight="10dp"
-                            android:layout_weight="2"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
-                            android:paddingTop="10dp">
-
-                            <ImageView
-                                android:id="@+id/img_quantity_minus"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:contentDescription="@string/empty"
-                                android:src="@drawable/ic_minus" />
-
-                        </RelativeLayout>
-                    </LinearLayout>
-
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/listTickets"
                         android:layout_width="match_parent"
@@ -138,6 +60,32 @@
                         android:divider="@android:color/transparent"
                         android:dividerHeight="10.0sp" />
 
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="20dp"
+                    android:layout_width="match_parent"
+                    android:background="@color/greyf6"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_order_details"
+                        android:fontFamily="@font/font_semibold"
+                        android:textSize="15sp"
+                        android:textColor="@color/semi_dark_grey"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_regular"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_black"
+                        android:text="FIFA 2018 M63 3rd place tickets, issued by FIFA Official Agency ABC"/>
                 </LinearLayout>
 
                 <RelativeLayout

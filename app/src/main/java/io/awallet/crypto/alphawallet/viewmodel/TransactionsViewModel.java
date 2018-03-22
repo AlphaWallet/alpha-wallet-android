@@ -326,7 +326,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         getBalance();
-        fetchTransactions(false);
+        fetchTransactions(true);
     }
 
     public void showSettings(Context context) {

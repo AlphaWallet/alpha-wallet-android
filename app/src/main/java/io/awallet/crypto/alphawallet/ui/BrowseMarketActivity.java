@@ -62,7 +62,6 @@ public class BrowseMarketActivity extends BaseActivity
         setTitle(marketplaceEvent.getEventName());
 
         systemView = findViewById(R.id.system_view);
-        systemView.hide();
 
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
@@ -125,6 +124,7 @@ public class BrowseMarketActivity extends BaseActivity
         adapter = new ERC875MarketAdapter(this::onOrderClick, trades);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
+        systemView.hide();
     }
 
     @Override

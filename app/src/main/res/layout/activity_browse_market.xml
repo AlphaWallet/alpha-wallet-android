@@ -1,46 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
-    android:orientation="vertical">
+    android:background="@color/colorPrimaryDark">
 
-    <include layout="@layout/layout_simple_toolbar" />
+    <LinearLayout
+        android:id="@+id/top_part"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <include layout="@layout/search_bar" />
+        <include layout="@layout/layout_simple_toolbar" />
 
-    <RelativeLayout
+        <include layout="@layout/search_bar" />
+
+    </LinearLayout>
+
+    <io.awallet.crypto.alphawallet.widget.ProgressView
+        android:id="@+id/progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        tools:visibility="gone" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/listTickets"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layoutButtons"
+        android:layout_below="@id/top_part"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
-
-        <io.awallet.crypto.alphawallet.widget.ProgressView
-            android:id="@+id/progress_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            tools:visibility="gone" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/listTickets"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/layoutButtons"
-            android:layout_below="@id/contract_address_layout"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="10.0sp" />
-
-    </RelativeLayout>
+        android:layout_marginRight="10dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="10.0sp" />
 
     <io.awallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        android:background="@color/white"
-        tools:visibility="gone" />
-</LinearLayout>
+        tools:visibility="visible" />
+</RelativeLayout>

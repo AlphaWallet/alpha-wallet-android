@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.reactivex.Single;
 
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 import static junit.framework.Assert.assertNotNull;
@@ -11,6 +12,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
@@ -18,9 +20,12 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.Signature;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
 import android.util.Base64;
 
 /**
@@ -67,6 +72,9 @@ public class UniversalLinkTest {
     final String ethPrice       = "0.5";
     final long expiry           = 0;
 
+    //roll a new key
+    ECKeyPair testKey = ECKeyPair.create("Test Key".getBytes());
+
     @Test
     public void UniversalLinkShouldBeParsedCorrectly() throws SalesOrderMalformed, SignatureException {
         SalesOrder order = SalesOrder.parseUniversalLink(link);
@@ -102,10 +110,100 @@ public class UniversalLinkTest {
         SalesOrder order = SalesOrder.parseUniversalLink(link);
     }
 
-    //TODO: Once we start generating the link fill this test in
+    private class OrderData
+    {
+        int count;
+        BigInteger price;
+        long expiry;
+
+        String link;
+    }
+
+    int[][] tickets = new int[][]{
+            { 2 },
+            { 2, 3 },
+            { 2, 3, 4 }
+    };
+
+    //1. Test we can generate and recover a series of universal links
     @Test
     public void UniversalLinkShouldBeGeneratedCorrectly() {
-        //SalesOrder order = SalesOrder(......)
+        final int NUMBER_OF_TESTS = 100;
+
+        List<OrderData> orders = new ArrayList<>();
+
+        try {
+
+            for (int i = 0; i < NUMBER_OF_TESTS; i++) {
+                OrderData data = new OrderData();
+                data.count = (i % 3) + 1;
+                int[] thisTickets = tickets[data.count - 1];
+                double dPrice = 0.5 + (Math.random() * 3.0);
+                data.price = getPriceInWei(dPrice);
+                data.expiry = System.currentTimeMillis() / 1000 + 2000 + (int) (Math.random() * 20000);
+
+                //encode link
+                byte[] linkMessage = SalesOrder.getTradeBytes(thisTickets, CONTRACT_ADDR, data.price, data.expiry);
+
+                //sign it
+                byte[] signature = getSignature(linkMessage);
+
+                //finally generate link
+                Sign.SignatureData linkSignature = sigFromByteArray(signature); //test this function too (Yes, I know this sig is converted back and forth)
+                data.link = SalesOrder.completeUniversalLink(linkMessage, linkSignature);
+
+                orders.add(data);
+            }
+
+            String ownerAddress = "0x" + ecRecoverAddress();
+
+            //now try to read all the links
+            for (OrderData data : orders) {
+                SalesOrder order = SalesOrder.parseUniversalLink(data.link);
+                order.getOwnerKey();
+                Sign.SignatureData signature = sigFromByteArray(order.signature);
+                assertEquals(order.priceWei, data.price);
+                assertEquals(order.expiry, data.expiry);
+                assertEquals(order.tickets.length, data.count);
+                assertEquals(order.ticketCount, data.count);
+                assertNotNull(order.contractAddress);
+                assertNotNull(order.ownerAddress);
+                assertEquals(ownerAddress, order.ownerAddress.toLowerCase());
+            }
+        }
+        catch (SalesOrderMalformed e) {
+            assertTrue(e.getMessage(),false);
+        }
+        catch (Exception e) {
+            assertTrue(e.getMessage(), false);
+        }
+    }
+
+    private BigInteger getPriceInWei(double ethValue)
+    {
+        //now convert to milliWei
+        int milliEth = (int)(ethValue*1000.0f);
+
+        //now convert to ETH
+        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
+
+        return weiValue;
+    }
+
+    private byte[] getSignature(byte[] message) throws SalesOrderMalformed {
+        Sign.SignatureData sigData = Sign.signMessage(message, testKey);
+
+        byte[] sig = new byte[65];
+
+        try {
+            System.arraycopy(sigData.getR(), 0, sig, 0, 32);
+            System.arraycopy(sigData.getS(), 0, sig, 32, 32);
+            sig[64] = (byte) (int) sigData.getV();
+        } catch (IndexOutOfBoundsException e) {
+            throw new SalesOrderMalformed("Signature shorter than expected 256");
+        }
+
+        return sig;
     }
 
     private String ecRecoverAddress(byte[] data, Sign.SignatureData signature) //get the hex string address from the sig and data
@@ -141,5 +239,14 @@ public class UniversalLinkTest {
         }
 
         return pass;
+    }
+
+    private String ecRecoverAddress() throws Exception
+    {
+        String testSigMsg = "obtain public key";
+        Sign.SignatureData testSig = Sign.signMessage(testSigMsg.getBytes(), testKey);
+        BigInteger recoveredKey = Sign.signedMessageToKey(testSigMsg.getBytes(), testSig);
+
+        return Keys.getAddress(recoveredKey);
     }
 }

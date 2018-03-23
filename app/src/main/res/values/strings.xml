@@ -243,6 +243,8 @@
     <string name="marketplace">Marketplace</string>
     <string name="depreciation">DEPRECIATION</string>
     <string name="tickets">Tickets</string>
+    <string name="ticket">Ticket</string>
     <string name="ticket_unavailable">Unavailable</string>
     <string name="generate_free_transfer_link">Create free transfer link?</string>
+    <string name="send_universal_link">Generate Link</string>
 </resources>

@@ -325,13 +325,14 @@ public class TransferTicketDetailActivity extends BaseActivity {
     private void linkReady(String universalLink) {
         //how many tickets are we selling?
         TextView textQuantity = findViewById(R.id.text_quantity);
-        String qty = textQuantity.getText().toString() + " " + getResources().getString(R.string.tickets);
+        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
+        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName);
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_transfer_title);
         dialog.setSmallText(R.string.generate_free_transfer_link);
         dialog.setBigText(qty);
-        dialog.setPrimaryButtonText(R.string.action_transfer);
+        dialog.setPrimaryButtonText(R.string.send_universal_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());

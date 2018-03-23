@@ -75,7 +75,12 @@ public class UniversalLinkTest {
 
         BigInteger pubkey = new BigInteger("3766624743362555291863022291641419798817556312446913485076900228931550311167262358936119031908256138233623094427893806146688851885551327681125435090087130", 10);
         assertEquals(pubkey, Sign.signedMessageToKey(order.message, signature));
+    }
 
+    @Test(expected = SalesOrderMalformed.class)
+    public void BadLinksShouldThrow() throws SalesOrderMalformed {
+        String link = "https://www.awallet.io/import?bad";
+        SalesOrder order = SalesOrder.parseUniversalLink(link);
     }
 
     //TODO: Once we start generating the link fill this test in

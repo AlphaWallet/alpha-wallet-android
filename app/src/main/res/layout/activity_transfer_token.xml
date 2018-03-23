@@ -85,7 +85,7 @@
                 />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
-    <com.wallet.crypto.alphawallet.widget.SystemView
+    <io.awallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
         android:layout_marginTop="?actionBarSize"

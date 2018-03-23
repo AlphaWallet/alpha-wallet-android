@@ -73,7 +73,7 @@
                 />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
-    <com.wallet.crypto.alphawallet.widget.SystemView
+    <io.awallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:background="@color/white"
         android:layout_marginTop="?actionBarSize"
@@ -81,7 +81,7 @@
         android:layout_height="match_parent"
         tools:visibility="gone"
         />
-    <com.wallet.crypto.alphawallet.widget.ProgressView
+    <io.awallet.crypto.alphawallet.widget.ProgressView
         android:id="@+id/progress_view"
         android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"

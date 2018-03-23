@@ -38,8 +38,11 @@
 	<color name="light_gray">#9b9b9b</color>
 	<color name="super_light_grey">#ececec</color>
 	<color name="button_green">#75b943</color>
+	<color name="greyf6">#f6f6f6</color>
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
 	<color name="onboarding_indicator_selected">#b7b7b7</color>
 	<color name="golden_yellow">#f9d021</color>
+	<color name="disabled_color">#888888</color>
+	<color name="cancel_red">#db393a</color>
 </resources>

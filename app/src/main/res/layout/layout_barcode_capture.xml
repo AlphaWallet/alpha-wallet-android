@@ -7,10 +7,10 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-    <com.wallet.crypto.alphawallet.ui.camera.CameraSourcePreview
+    <io.awallet.crypto.alphawallet.ui.camera.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-    </com.wallet.crypto.alphawallet.ui.camera.CameraSourcePreview>
+    </io.awallet.crypto.alphawallet.ui.camera.CameraSourcePreview>
 </LinearLayout>

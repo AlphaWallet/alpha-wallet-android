@@ -13,6 +13,14 @@
         android:layout_height="match_parent"
         android:background="@drawable/background_card">
 
+        <io.awallet.crypto.alphawallet.widget.ProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            tools:visibility="gone" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -38,7 +46,6 @@
                     android:text="Transfer Tickets"
                     android:textColor="@color/text_black"
                     android:textSize="25sp" />
-
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -116,6 +123,43 @@
                     </RelativeLayout>
                 </LinearLayout>
 
+                <RelativeLayout
+                    android:id="@+id/send_to_address_layout"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/to_input_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        >
+                        <EditText
+                            android:id="@+id/send_to_address"
+                            android:hint="@string/hint_recipient_address"
+                            android:imeActionLabel="@string/prompt_to"
+                            android:imeOptions="actionUnspecified"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:paddingRight="@dimen/half_large_padding"
+                            android:paddingEnd="@dimen/half_large_padding"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            />
+                    </android.support.design.widget.TextInputLayout>
+                    <ImageButton
+                        android:id="@+id/scan_barcode_button"
+                        android:src="@mipmap/qr_code_icon"
+                        android:contentDescription="@string/scan_qr"
+                        android:background="?android:selectableItemBackground"
+                        android:padding="@dimen/big_padding"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        />
+                </RelativeLayout>
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/listTickets"
                     android:layout_width="match_parent"
@@ -123,6 +167,7 @@
                     android:divider="@android:color/transparent"
                     android:dividerHeight="10.0sp" />
             </LinearLayout>
+
         </ScrollView>
 
         <Button
@@ -141,7 +186,7 @@
     </RelativeLayout>
 
 
-    <com.wallet.crypto.alphawallet.widget.SystemView
+    <io.awallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -149,10 +194,4 @@
         android:background="@color/white"
         tools:visibility="gone" />
 
-    <com.wallet.crypto.alphawallet.widget.ProgressView
-        android:id="@+id/progress_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        tools:visibility="gone" />
 </LinearLayout>

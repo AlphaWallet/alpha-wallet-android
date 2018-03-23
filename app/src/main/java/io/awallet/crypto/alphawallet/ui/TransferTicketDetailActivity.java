@@ -17,6 +17,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -267,6 +268,8 @@ public class TransferTicketDetailActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         viewModel.prepare(ticket);
+        KeyboardUtils.hideKeyboard(toAddressText);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     private void onTicketIdClick(View view, TicketRange range) {

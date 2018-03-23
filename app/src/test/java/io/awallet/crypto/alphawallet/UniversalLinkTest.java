@@ -62,7 +62,7 @@ public class UniversalLinkTest {
             "https://app.awallet.io/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWNFeF2KAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtnMrrswHk+OKmJNHmavTx9w88xAN8=;1b;623AFBCD4B439A738EBA820B0C1AEDB50FB23155ACABF735B72213E7D935D9E6;42F4EE7C87B63E72FE24C2A9CF323588331E02E5043CC3B91EBA20F53C6842E3" };
 
     final int[] indices         = new int[] { 0xb3, 0xb4 };
-    final String OWNER_ADDR     = "0x007bEe82BDd9e866b2bd114780a47f2261C684E3";
+    final String OWNER_ADDR     = "0x007bee82bdd9e866b2bd114780a47f2261c684e3";
     final String CONTRACT_ADDR  = "0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4";
     final String ethPrice       = "0.5";
     final long expiry           = 0;
@@ -92,6 +92,7 @@ public class UniversalLinkTest {
             Sign.SignatureData signature = sigFromByteArray(order.signature);
             assertNotNull(order.contractAddress);
             assertNotNull(order.ownerAddress);
+            assertEquals(OWNER_ADDR, order.ownerAddress.toLowerCase()); //created from 0x007
         }
     }
 

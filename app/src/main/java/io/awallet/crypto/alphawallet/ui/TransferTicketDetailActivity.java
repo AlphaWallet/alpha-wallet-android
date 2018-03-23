@@ -173,7 +173,6 @@ public class TransferTicketDetailActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_share: {
-                System.out.println("share");
                 viewModel.generateUniversalLink(getTicketSendIndexList(), ticket.getAddress());
             }
             break;

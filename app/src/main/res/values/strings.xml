@@ -247,4 +247,6 @@
     <string name="ticket_unavailable">Unavailable</string>
     <string name="generate_free_transfer_link">Create free transfer link?</string>
     <string name="send_universal_link">Generate Link</string>
+    <string name="generate_sale_transfer_link">Generate Sale Link</string>
+    <string name="send_universal_sale_link">Send Sale Link</string>
 </resources>

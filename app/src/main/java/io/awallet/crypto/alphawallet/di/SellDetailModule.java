@@ -1,10 +1,13 @@
 package io.awallet.crypto.alphawallet.di;
 
+import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
+import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.router.ConfirmationRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
@@ -25,9 +28,10 @@ public class SellDetailModule {
     SellDetailModelFactory sellDetailModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            MarketQueueService marketQueueService) {
+            MarketQueueService marketQueueService,
+            CreateTransactionInteract createTransactionInteract) {
         return new SellDetailModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract);
     }
 
     @Provides
@@ -39,5 +43,10 @@ public class SellDetailModule {
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
+    }
+
+    @Provides
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
+        return new CreateTransactionInteract(transactionRepository, passwordStore);
     }
 }

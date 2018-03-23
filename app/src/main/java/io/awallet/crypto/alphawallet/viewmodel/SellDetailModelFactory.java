@@ -5,10 +5,8 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
-import io.awallet.crypto.alphawallet.interact.FetchGasSettingsInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import io.awallet.crypto.alphawallet.router.GasSettingsRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
 /**
@@ -20,19 +18,22 @@ public class SellDetailModelFactory implements ViewModelProvider.Factory {
     private FindDefaultNetworkInteract findDefaultNetworkInteract;
     private FindDefaultWalletInteract findDefaultWalletInteract;
     private MarketQueueService marketQueueService;
+    private CreateTransactionInteract createTransactionInteract;
 
     public SellDetailModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
-                                        MarketQueueService marketQueueService) {
+                                        MarketQueueService marketQueueService,
+                                  CreateTransactionInteract createTransactionInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
+        this.createTransactionInteract = createTransactionInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SellDetailModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService);
+        return (T) new SellDetailModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract);
     }
 }
 

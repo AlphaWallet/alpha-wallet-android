@@ -45,11 +45,20 @@ public class CreateTransactionInteract
                 .map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
     }
 
+    public Single<byte[]> sign(Wallet wallet, byte[] message)
+    {
+        return passwordStore.getPassword(wallet)
+                .flatMap(password -> transactionRepository.getSignature(wallet, message, password)
+                        .subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread()));
+    }
+
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data)
     {
         return passwordStore.getPassword(from)
                 .flatMap(password ->
                         transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password)
+                                .subscribeOn(Schedulers.computation())
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 }

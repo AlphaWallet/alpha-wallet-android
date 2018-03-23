@@ -17,10 +17,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static io.awallet.crypto.alphawallet.entity.EthereumReadBuffer.bytesToHex;
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -161,33 +163,6 @@ public class SalesOrder implements Parcelable {
         price = milliWei.doubleValue() / 1000.0;
     }
 
-    public byte[] writeMessage()
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream ds = new DataOutputStream(buffer);
-        try {
-            ds.write(Numeric.toBytesPadded(priceWei, 32));
-            ds.write(Numeric.toBytesPadded(BigInteger.valueOf(expiry), 32));
-            ds.write(contractAddress.getBytes());
-
-            byte[] uint16 = new byte[2];
-            for (int ticketIndex : tickets)
-            {
-                //write big endian encoding
-                uint16[0] = (byte)(ticketIndex >> 8);
-                uint16[1] = (byte)(ticketIndex & 0xFF);
-                ds.write(uint16);
-            }
-            ds.flush();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return buffer.toByteArray();
-    }
-
     private SalesOrder(Parcel in) {
         expiry = in.readLong();
         price = in.readDouble();
@@ -286,29 +261,7 @@ public class SalesOrder implements Parcelable {
 
     private byte[] getTradeBytes()
     {
-        try {
-            BigInteger contractAddressBi = Numeric.toBigInt(contractAddress);
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            DataOutputStream ds = new DataOutputStream(buffer);
-            ds.write(Numeric.toBytesPadded(priceWei, 32));
-            ds.write(Numeric.toBytesPadded(BigInteger.valueOf(expiry), 32));
-            ds.write(Numeric.toBytesPadded(contractAddressBi, 20));
-
-            byte[] uint16 = new byte[2];
-            for (int ticketIndex : tickets) {
-                //write big endian encoding
-                uint16[0] = (byte) (ticketIndex >> 8);
-                uint16[1] = (byte) (ticketIndex & 0xFF);
-                ds.write(uint16);
-            }
-            ds.flush();
-
-            return buffer.toByteArray();
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        return getTradeBytes(tickets, contractAddress, priceWei, expiry);
     }
 
     public boolean balanceChange(List<Integer> balance)
@@ -330,5 +283,62 @@ public class SalesOrder implements Parcelable {
         newBalance.removeAll(balance);
 
         return (oldBalance.size() != 0 || newBalance.size() != 0);
+    }
+
+    public static byte[] getTradeBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry)
+    {
+        try {
+            //form the transaction we need to push to buy
+            //trade bytes
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            DataOutputStream ds = new DataOutputStream(buffer);
+
+            BigInteger addrBI = new BigInteger(Numeric.cleanHexPrefix(contractAddress), 16);
+            ds.write(Numeric.toBytesPadded(priceWei, 32));
+            ds.write(Numeric.toBytesPadded(BigInteger.valueOf(expiry), 32));
+            ds.write(Numeric.toBytesPadded(addrBI, 20));
+
+            byte[] uint16 = new byte[2];
+            for (int i : ticketSendIndexList) {
+                //write big endian encoding
+                uint16[0] = (byte) (i >> 8);
+                uint16[1] = (byte) (i & 0xFF);
+                ds.write(uint16);
+            }
+
+            ds.flush();
+            ds.close();
+
+            return buffer.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static byte[] getTradeBytes(int[] ticketSendIndexList, String contractAddress, String ethPrice, long expiry)
+    {
+        BigInteger wei = Convert.toWei(String.valueOf(ethPrice), Convert.Unit.FINNEY).toBigInteger();
+        return getTradeBytes(ticketSendIndexList, contractAddress, wei, expiry);
+    }
+
+    public static String completeUniversalLink(byte[] message, Sign.SignatureData sig)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("https://app.awallet.io/");
+        byte[] b64 = Base64.encode(message);
+        sb.append(new String(b64));
+        sb.append(";");
+        sb.append(Integer.toHexString(sig.getV()));
+        sb.append(";");
+        sb.append(bytesToHex(sig.getR()));
+        sb.append(";");
+        sb.append(bytesToHex(sig.getS()));
+
+        //this trade can be claimed by anyone who pushes the transaction through and has the sig
+        return sb.toString();
     }
 }

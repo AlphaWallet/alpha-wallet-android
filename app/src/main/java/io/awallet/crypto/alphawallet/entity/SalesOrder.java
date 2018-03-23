@@ -96,9 +96,9 @@ public class SalesOrder implements Parcelable {
      */
     public static SalesOrder parseUniversalLink(String link) throws SalesOrderMalformed
     {
-        final String importTemplate = "/import?";
+        final String importTemplate = "https://app.awallet.io/";
         int offset = link.indexOf(importTemplate);
-        if (offset > 0)
+        if (offset > -1)
         {
             offset += importTemplate.length();
             String linkData = link.substring(offset);
@@ -106,7 +106,7 @@ public class SalesOrder implements Parcelable {
         }
         else
         {
-            return null;
+            throw new SalesOrderMalformed("Invalid link format");
         }
     }
 

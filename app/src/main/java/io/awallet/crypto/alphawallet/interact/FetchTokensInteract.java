@@ -30,11 +30,18 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Map<String, Token>> fetchList(Wallet wallet) {
+    public Observable<Token[]> fetchList(Wallet wallet) {
         return tokenRepository.fetchActive(wallet.address)
-                .map(this::tokensToMap)
+                //.map(this::tokensToSingle)
+                //.map(this::tokensToMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Token tokensToSingle(Token[] tokens)
+    {
+        if (tokens.length > 0) return tokens[0];
+        else return null;
     }
 
     private Map<String, Token> tokensToMap(Token[] tokenArray) {
@@ -70,7 +77,7 @@ public class FetchTokensInteract {
     public Completable updateBalance(Wallet wallet, Token token, List<Integer> burnList) {
         return tokenRepository
                         .setBurnList(wallet, token, burnList)
-                        .observeOn(Schedulers.io())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -85,6 +92,14 @@ public class FetchTokensInteract {
     {
         return tokenRepository.fetchActiveTokenBalance(so.ownerAddress, token)
                 .map(updateToken -> mapToPair(updateToken, so))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Token> updateBalance(String address, Token token)
+    {
+        return tokenRepository.fetchActiveTokenBalance(address, token)
+                //.map(updateToken -> mapToPair(updateToken, so))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

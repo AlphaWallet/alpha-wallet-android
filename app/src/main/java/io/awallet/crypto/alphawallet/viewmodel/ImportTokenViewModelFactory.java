@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.service.ImportTokenService;
 
 /**
@@ -18,19 +19,22 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final SetupTokensInteract setupTokensInteract;
 
     public ImportTokenViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
                                        CreateTransactionInteract createTransactionInteract,
-                                       FetchTokensInteract fetchTokensInteract) {
+                                       FetchTokensInteract fetchTokensInteract,
+                                       SetupTokensInteract setupTokensInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract);
+        return (T) new ImportTokenViewModel(findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract);
     }
 }
 

@@ -322,9 +322,24 @@ public class TransferTicketDetailActivity extends BaseActivity {
         }
     }
 
-    private void linkReady(String universalLink)
-    {
-        //create share intent
+    private void linkReady(String universalLink) {
+        //how many tickets are we selling?
+        TextView textQuantity = findViewById(R.id.text_quantity);
+        String qty = textQuantity.getText().toString() + " " + getResources().getString(R.string.tickets);
+
+        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+        dialog.setTitle(R.string.confirm_transfer_title);
+        dialog.setSmallText(R.string.generate_free_transfer_link);
+        dialog.setBigText(qty);
+        dialog.setPrimaryButtonText(R.string.action_transfer);
+        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
+        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void transferLinkFinal(String universalLink) {
+    //create share intent
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);

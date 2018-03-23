@@ -244,4 +244,5 @@
     <string name="depreciation">DEPRECIATION</string>
     <string name="tickets">Tickets</string>
     <string name="ticket_unavailable">Unavailable</string>
+    <string name="generate_free_transfer_link">Create free transfer link?</string>
 </resources>

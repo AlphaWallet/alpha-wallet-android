@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
+    <!--<android.support.v4.view.ViewPager-->
+        <!--android:id="@+id/view_pager"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<android.support.design.widget.TabLayout-->
+            <!--android:id="@+id/tab_layout"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--app:tabMode="scrollable"-->
+            <!--app:tabBackground="@color/transparent"-->
+            <!--app:tabIndicatorColor="@color/white"-->
+            <!--android:background="@drawable/background_tab_layout"-->
+            <!--app:tabTextColor="@color/translucentWhite"-->
+            <!--app:tabSelectedTextColor="@color/white"-->
+            <!--android:layout_gravity="top">-->
+
+        <!--</android.support.design.widget.TabLayout>-->
+
+    <!--</android.support.v4.view.ViewPager>-->
+
+    <io.awallet.crypto.alphawallet.widget.ProgressView
+        android:id="@+id/progress_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        tools:visibility="gone" />
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="scrollable"
+        app:tabContentStart="20dp"
+        app:tabBackground="@color/transparent"
+        app:tabIndicatorColor="@color/white"
+        android:background="@drawable/background_tab_layout"
+        app:tabTextColor="@color/translucentWhite"
+        app:tabSelectedTextColor="@color/white"
+        android:layout_gravity="top">
+
+    </android.support.design.widget.TabLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_below="@id/tab_layout"
+        android:id="@+id/refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <io.awallet.crypto.alphawallet.widget.SystemView
+        android:id="@+id/system_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        tools:visibility="gone" />
+
+</RelativeLayout>

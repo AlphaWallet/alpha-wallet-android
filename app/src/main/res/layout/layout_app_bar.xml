@@ -1,18 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.AppBarLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:id="@+id/app_bar"
-	android:theme="@style/AppTheme.AppBarOverlay"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	> <!--android:background="@color/colorPrimaryDark"-->
-	<android.support.v7.widget.Toolbar
-		android:id="@+id/toolbar"
-		android:background="@color/colorPrimaryDark"
-		android:elevation="8dp"
-		app:popupTheme="@style/AppTheme.PopupOverlay"
-		android:layout_width="match_parent"
-		android:layout_height="?attr/actionBarSize"
-		/>
+<android.support.design.widget.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/app_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/AppTheme.AppBarOverlay"
+    app:elevation="0dp"> <!--android:background="@color/colorPrimaryDark"-->
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:contentInsetEnd="0dp"
+        android:contentInsetLeft="0dp"
+        android:contentInsetRight="0dp"
+        android:contentInsetStart="0dp"
+        android:theme="@style/AppTheme.Toolbar"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp"
+        android:background="@color/colorPrimaryDark"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:text="@string/toolbar_header_wallet"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
+    </android.support.v7.widget.Toolbar>
 </android.support.design.widget.AppBarLayout>

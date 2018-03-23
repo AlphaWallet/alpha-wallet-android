@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
-
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
-    <!--android:fitsSystemWindows="true"-->
-    <include layout="@layout/layout_app_bar" />
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:background="@color/colorPrimaryDark">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_marginBottom="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
+        android:layout_marginTop="?actionBarSize"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
     </android.support.v4.widget.SwipeRefreshLayout>
-    <com.wallet.crypto.alphawallet.widget.SystemView
+
+    <io.awallet.crypto.alphawallet.widget.SystemView
         android:id="@+id/system_view"
-        android:background="@color/white"
-        android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:visibility="gone"
-        />
+        android:layout_marginTop="?actionBarSize"
+        android:background="@color/white"
+        tools:visibility="gone" />
 
     <!--android:background="?android:attr/windowBackground"-->
     <com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
-        app:itemTextColor="@color/holo_blue"
-        app:menu="@menu/menu_main_network"
-        />
+        app:itemIconTint="@drawable/selector_menu_item_color"
+        app:itemTextColor="@color/colorPrimaryDark"
+        app:menu="@menu/menu_main_network" />
 </android.support.design.widget.CoordinatorLayout>

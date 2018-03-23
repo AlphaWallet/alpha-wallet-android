@@ -7,22 +7,22 @@
     >
 
     <ProgressBar
-        android:id="@+id/progress"
+        android:id="@+id/progress_v"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
         android:layout_marginTop="5dp"
-        android:background="@color/white_transparent"
+        android:indeterminateTint="@color/colorPrimaryDark"
         />
 
     <TextView
         android:id="@+id/textViewProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/progress"
-        android:layout_alignStart="@id/progress"
+        android:layout_alignBottom="@id/progress_v"
+        android:layout_alignStart="@id/progress_v"
         android:layout_marginBottom="16dp"
         android:layout_marginStart="12dp"
         android:textColor="@color/black"/>

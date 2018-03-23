@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list_help"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/search_container"
+        android:layout_marginBottom="?actionBarSize"
+        android:layout_marginTop="?actionBarSize"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="10.0sp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:background="@color/golden_yellow"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_support" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_light"
+            android:text="@string/contact_us"
+            android:textColor="@color/text_black"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+</RelativeLayout>

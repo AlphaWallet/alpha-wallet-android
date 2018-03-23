@@ -1,263 +1,312 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_select"
-    android:clickable="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
     android:orientation="horizontal">
 
     <android.support.v7.widget.AppCompatRadioButton
         android:id="@+id/radioBox"
-        android:layout_gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:buttonTint="@color/green"
-        android:visibility="gone"
+        android:layout_gravity="center_vertical"
         android:checked="true"
-        android:text=""/>
+        android:text=""
+        android:visibility="gone"
+        app:buttonTint="@color/green" />
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:paddingEnd="@dimen/small_margin_padding"
-        android:paddingStart="@dimen/small_margin_padding"
-        android:background="@drawable/rounded"
-        android:paddingTop="10dp"
-        >
+        android:layout_marginBottom="10dp"
+        android:duplicateParentState="true">
 
-        <LinearLayout
-            android:id="@+id/ticketPriceLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="8dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2.4"
-                android:textStyle="bold"
-                android:textColor="@color/holo_blue"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/price_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="2dp"
-                android:text="ETH/Ticket"
-                android:textStyle="bold"
-                android:textColor="@color/holo_blue"
-                android:textSize="14sp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/middle_part"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@id/ticketPriceLayout"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="20dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:background="@drawable/background_marketplace_event"
+            android:duplicateParentState="true"
+            android:orientation="vertical"
+            android:paddingBottom="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="15dp">
 
             <LinearLayout
-                android:id="@+id/ticketCountLayout"
+                android:id="@+id/ticketPriceLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_alignParentStart="true"
+                android:duplicateParentState="true"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/ticket_count"
+                    android:id="@+id/price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:layout_marginRight="5dp"
+                    android:duplicateParentState="true"
+                    android:fontFamily="@font/font_bold"
+                    android:text="2.4"
+                    android:textColor="@color/selector_primary"
+                    android:textSize="21sp" />
 
                 <TextView
-                    android:id="@+id/ticket_type"
+                    android:id="@+id/price_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingStart="2dp"
-                    android:text="Tickets"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:duplicateParentState="true"
+                    android:fontFamily="@font/font_bold"
+                    android:text="@string/eth_per_ticket"
+                    android:textColor="@color/selector_primary"
+                    android:textSize="21sp" />
             </LinearLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/ticketPriceLayout"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/grey" />
+
+            <LinearLayout
+                android:id="@+id/middle_part"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/divider"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/ticketCountLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/ticket_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/font_bold"
+                        android:text="2"
+                        android:textColor="@color/semi_dark_grey"
+                        android:textSize="21sp" />
+
+                    <TextView
+                        android:id="@+id/ticket_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_bold"
+                        android:text="@string/tickets"
+                        android:textColor="@color/semi_dark_grey"
+                        android:textSize="21sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="3dp"
+                    android:background="@color/text_black" />
 
                 <TextView
                     android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:fontFamily="@font/font_light"
                     android:text="FIFA 2018 Final M64"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:textColor="@color/text_black"
+                    android:textSize="21sp" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/bottom_part"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/middle_part"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:id="@+id/datelayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/calendar"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/empty"
-                    android:src="@drawable/cal_trans"
-                    />
-
-                <TextView
-                    android:id="@+id/date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="30 Mar 2018"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/ticketlayout"
+                android:id="@+id/bottom_part"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.3"
+                android:layout_below="@id/middle_part"
                 android:orientation="horizontal">
-                <ImageView
-                    android:id="@+id/ticketicon"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="3dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/empty"
-                    android:src="@drawable/ticket_trans"
-                    />
 
-                <TextView
-                    android:id="@+id/tickettext"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/datelayout"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="51-52"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
+                    android:layout_weight="1.5"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/calendar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="5dp"
+                        android:contentDescription="@string/empty"
+                        android:src="@drawable/ic_calendar" />
+
+                    <TextView
+                        android:id="@+id/date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="30 Mar 2018"
+                        android:textColor="@color/semi_dark_grey"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ticketlayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/ticketicon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="5dp"
+                        android:contentDescription="@string/empty"
+                        android:src="@drawable/ic_ticket" />
+
+                    <TextView
+                        android:id="@+id/tickettext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="51-52"
+                        android:textColor="@color/semi_dark_grey"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/catlayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/caticon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="5dp"
+                        android:contentDescription="@string/empty"
+                        android:src="@drawable/ic_category" />
+
+                    <TextView
+                        android:id="@+id/cattext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="Cat 1"
+                        android:textColor="@color/semi_dark_grey"
+                        android:textSize="15sp" />
+                </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/catlayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.3"
-                android:orientation="horizontal">
-                <ImageView
-                    android:id="@+id/caticon"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginTop="3dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/empty"
-                    android:src="@drawable/cat_trans"
-                    />
-
-                <TextView
-                    android:id="@+id/cattext"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Cat 1"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!--
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_centerVertical="true"
-            android:contentDescription="@string/empty"
-            android:src="@mipmap/token_logo"
-            />
-            -->
-
-        <TextView
-            android:id="@+id/symbol"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/normal_margin"
-            android:layout_marginStart="@dimen/big_margin"
-            android:layout_toEndOf="@+id/icon"
-            android:layout_toStartOf="@+id/balance_container"
-            android:textAllCaps="true"
-            android:textAppearance="?attr/textAppearanceListItem"
-            android:textSize="12sp"
-            android:visibility="gone"
-            tools:text="TRST"
-            />
-
-        <LinearLayout
-            android:id="@+id/balance_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="13dp"
-            android:gravity="end"
-            android:orientation="vertical"
-
-            >
+            <!--
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/empty"
+                android:src="@mipmap/token_logo"
+                />
+                -->
 
             <TextView
-                android:id="@+id/balance_eth"
+                android:id="@+id/symbol"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/normal_margin"
+                android:layout_marginStart="@dimen/big_margin"
+                android:layout_toEndOf="@+id/icon"
+                android:layout_toStartOf="@+id/balance_container"
+                android:textAllCaps="true"
                 android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="8888888"
+                android:textSize="12sp"
                 android:visibility="gone"
-                />
+                tools:text="TRST" />
 
-            <TextView
-                android:id="@+id/balance_currency"
+            <LinearLayout
+                android:id="@+id/balance_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="$8888888"
-                android:visibility="gone"
-                />
-        </LinearLayout>
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="13dp"
+                android:gravity="end"
+                android:orientation="vertical"
 
-        <TextView
-            android:id="@+id/balanceArray"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="13dp"
-            android:maxWidth="80dp"
-            android:textSize="10sp"
+                >
+
+                <TextView
+                    android:id="@+id/balance_eth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceListItem"
+                    android:visibility="gone"
+                    tools:text="8888888" />
+
+                <TextView
+                    android:id="@+id/balance_currency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    tools:text="$8888888" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/balanceArray"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="13dp"
+                android:maxWidth="80dp"
+                android:textSize="10sp"
+                android:visibility="gone"
+                tools:text="" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:visibility="gone"
-            tools:text=""
-            />
-    </RelativeLayout>
+            android:id="@+id/unavailable_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:background="@drawable/background_marketplace_event"/>
+
+        <RelativeLayout
+            android:id="@+id/update_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.7"
+            android:background="@drawable/background_marketplace_event"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminateTint="@color/colorPrimaryDark" />
+        </RelativeLayout>
+    </FrameLayout>
 </LinearLayout>

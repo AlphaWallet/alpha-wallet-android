@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card">
+
+        <io.awallet.crypto.alphawallet.widget.ProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            tools:visibility="gone" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="?actionBarSize">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="15dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <TextView
+                    android:id="@+id/title_set_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/font_light"
+                    android:gravity="center"
+                    android:text="Transfer Tickets"
+                    android:textColor="@color/text_black"
+                    android:textSize="25sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/quantity_of_tickets"
+                    android:textAllCaps="true"
+                    android:textColor="@color/light_gray"
+                    android:textSize="10sp" />
+
+                <LinearLayout
+                    android:id="@+id/layout_ticket_quantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/background_quantity"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:id="@+id/layout_quantity_add"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="10dp"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="10dp">
+
+                        <ImageView
+                            android:id="@+id/img_quantity_add"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:contentDescription="@string/empty"
+                            android:src="@drawable/ic_plus" />
+                    </RelativeLayout>
+
+
+                    <TextView
+                        android:id="@+id/text_quantity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:fontFamily="@font/font_semibold"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="1"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="21sp" />
+
+                    <RelativeLayout
+                        android:id="@+id/layout_quantity_minus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginRight="10dp"
+                        android:layout_weight="2"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="10dp">
+
+                        <ImageView
+                            android:id="@+id/img_quantity_minus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:contentDescription="@string/empty"
+                            android:src="@drawable/ic_minus" />
+
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/send_to_address_layout"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/to_input_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        >
+                        <EditText
+                            android:id="@+id/send_to_address"
+                            android:hint="@string/hint_recipient_address"
+                            android:imeActionLabel="@string/prompt_to"
+                            android:imeOptions="actionUnspecified"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:paddingRight="@dimen/half_large_padding"
+                            android:paddingEnd="@dimen/half_large_padding"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            />
+                    </android.support.design.widget.TextInputLayout>
+                    <ImageButton
+                        android:id="@+id/scan_barcode_button"
+                        android:src="@mipmap/qr_code_icon"
+                        android:contentDescription="@string/scan_qr"
+                        android:background="?android:selectableItemBackground"
+                        android:padding="@dimen/big_padding"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        />
+                </RelativeLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/listTickets"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@android:color/transparent"
+                    android:dividerHeight="10.0sp" />
+            </LinearLayout>
+
+        </ScrollView>
+
+        <Button
+            android:id="@+id/button_transfer"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_alignParentBottom="true"
+            android:background="@color/button_green"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:text="@string/action_transfer"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+
+    <io.awallet.crypto.alphawallet.widget.SystemView
+        android:id="@+id/system_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:background="@color/white"
+        tools:visibility="gone" />
+
+</LinearLayout>

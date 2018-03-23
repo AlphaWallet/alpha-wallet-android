@@ -20,11 +20,11 @@ android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "com.wallet.crypto.alphawallet"
+        applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 60
-        versionName "1.4.26"
+        versionCode 70
+        versionName "0.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -52,8 +52,8 @@ android {
         abortOnError false
     }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -71,9 +71,11 @@ project.ext {
 }
 
 dependencies {
+
     // Etherium client
     implementation "org.web3j:core:$project.web3jVersion"
     implementation "org.ethereum:geth:$project.gethVersion"
+
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$project.retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$project.retrofitVersion"
@@ -81,38 +83,44 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$project.okhttpVersion"
     implementation "com.google.code.gson:gson:$project.gsonVersion"
     implementation "com.squareup.picasso:picasso:$project.picassoVersion"
-
-    implementation "android.arch.lifecycle:runtime:1.1.0"
-    implementation "android.arch.lifecycle:extensions:1.1.0"
-
+    implementation 'android.arch.lifecycle:runtime:1.1.0'
+    implementation 'android.arch.lifecycle:extensions:1.1.0'
     implementation "com.android.support:appcompat-v7:$project.supportVersion"
     implementation "com.android.support:design:$project.supportVersion"
     implementation "com.android.support:support-vector-drawable:$project.supportVersion"
     implementation "com.android.support:recyclerview-v7:$project.supportVersion"
-    implementation "com.android.support:multidex:1.0.2"
+    implementation 'com.android.support:multidex:1.0.2'
+
     // Bar code scanning
-    implementation "com.google.zxing:core:3.3.0"
-    implementation "com.google.android.gms:play-services-vision:11.8.0"
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.google.android.gms:play-services-vision:11.8.0'
+
     // Sugar
-    implementation "com.android.support.constraint:constraint-layout:1.0.2"
-    implementation "com.github.apl-devs:appintro:v4.2.2"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
-    implementation "com.journeyapps:zxing-android-embedded:3.5.0@aar"
+    implementation 'com.journeyapps:zxing-android-embedded:3.5.0@aar'
+
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$project.rxAndroidVersion"
+
     // Dagger 2
+
     // Dagger core
     implementation "com.google.dagger:dagger:$project.daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$project.daggerVersion"
+
     // Dagger Android
     implementation "com.google.dagger:dagger-android-support:$project.daggerVersion"
     annotationProcessor "com.google.dagger:dagger-android-processor:$project.daggerVersion"
+
     // if you are not using support library, include this instead
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
     implementation 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
+
     // Tests
-    testImplementation "junit:junit:4.12"
+    testImplementation 'junit:junit:4.12'
     androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {
         exclude group: "com.android.support", module: "support-annotations"
     })
@@ -127,12 +135,16 @@ dependencies {
     implementation('com.crashlytics.sdk.android:answers:1.4.1@aar') {
         transitive = true
     }
+
     // PW
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(":tn")
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':tn')
 
     // Pincode Lollipin
-//    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
-//        transitive = true
-//    }
+
+    //    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
+
+    //        transitive = true
+
+    //    }
 }

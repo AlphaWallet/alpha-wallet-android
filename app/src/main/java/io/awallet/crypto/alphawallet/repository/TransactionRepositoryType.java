@@ -1,0 +1,25 @@
+package io.awallet.crypto.alphawallet.repository;
+
+import io.awallet.crypto.alphawallet.entity.Token;
+import io.awallet.crypto.alphawallet.entity.TokenTransaction;
+import io.awallet.crypto.alphawallet.entity.Transaction;
+import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
+import io.awallet.crypto.alphawallet.entity.Wallet;
+
+import java.math.BigInteger;
+
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+
+public interface TransactionRepositoryType {
+	Observable<Transaction[]> fetchTransaction(Wallet wallet);
+	Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token);
+	Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash);
+	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password);
+	Single<byte[]> getSignature(Wallet wallet, byte[] message, String password);
+	Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password);
+	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
+	void lockAccount(Wallet signer, String signerPassword) throws Exception;
+	//void fetchTransaction2(Wallet wallet, TransactionsCallback txCallback);
+}

@@ -1,125 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    >
-    <include layout="@layout/layout_simple_toolbar" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
     <FrameLayout
-        android:background="@color/white"
-        android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <LinearLayout
-            android:orientation="vertical"
-            android:padding="@dimen/big_padding"
-            android:layout_gravity="center_vertical"
+        android:background="@color/colorPrimaryDark">
+
+        <include
+            layout="@layout/layout_simple_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
+            android:layout_alignParentTop="true" />
 
-            <TextView
-                android:id="@+id/textViewName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Ticket Name"
-                android:textColor="@color/black"/>
+        <TextView
+            android:id="@+id/title_redeem_ticket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:text="Show QR Code to Redemption Booth:"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
 
-            <TextView
-                android:id="@+id/textViewIDs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Ticket IDs"
-                android:textColor="@color/black"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginTop="80dp"
+            android:orientation="vertical"
+            android:padding="@dimen/big_padding">
 
             <RelativeLayout
-                android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <!--
-                <ImageView
-                    android:id="@+id/image_qr_blank"
-                    android:layout_centerInParent="true"
-                    android:textColor="@color/black"
-                    android:layout_marginTop="@dimen/big_margin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/basicqrcode2"
-                    android:alpha="0.4"
-                    /> -->
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="15dp">
 
                 <TextView
                     android:id="@+id/textAddIDs"
-                    android:textSize="20sp"
-                    android:layout_centerInParent="true"
-                    android:textColor="@color/black"
-                    android:layout_marginTop="@dimen/big_margin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
                     android:text="@string/add_ids_to_redeem"
-                    />
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:visibility="gone" />
 
-            <ImageView
-                android:id="@+id/qr_image"
-                app:srcCompat="@drawable/ic_autorenew_black_24dp"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
-            </RelativeLayout>
-            <TextView
-                android:id="@+id/address"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/textViewSelection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:textSize="12sp"
-                android:text=""
-                android:textColor="@color/black"/>
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/amount_input_layout"
-                android:layout_marginTop="@dimen/big_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-
-                <EditText
-                    android:id="@+id/send_ids"
-                    android:hint="@string/hint_ids"
-                    android:imeActionLabel="@string/action_sign_in_short"
-                    android:imeOptions="actionUnspecified"
-                    android:inputType="numberDecimal"
-                    android:digits="0123456789,"
-                    android:maxLines="1"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/qr_image"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    />
-            </android.support.design.widget.TextInputLayout>
+                    android:layout_centerInParent="true"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/background_marketplace_event"
+                    android:padding="30dp"
+                    app:srcCompat="@drawable/ic_autorenew_black_24dp" />
+            </RelativeLayout>
+
+            <include layout="@layout/item_ticket" />
+
             <Button
                 android:id="@+id/advanced_options"
-                android:text="@string/advanced"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/big_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/big_margin"
+                android:text="@string/advanced" />
         </LinearLayout>
     </FrameLayout>
-</FrameLayout>
+
+
+</RelativeLayout>

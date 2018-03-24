@@ -157,4 +157,8 @@
     <string name="select_tickets_transfer">Select Tickets to Transfer:</string>
     <string name="confirm_transfer_title">Confirm Transfer?</string>
     <string name="label_order_details">Order Details</string>
+    <string name="dialog_marketplace_success">Your tickets have been put up for sale in the Marketplace</string>
+    <string name="dialog_go_to_listings">Go to My Listings</string>
+    <string name="dialog_process_error">Trade not processed</string>
+    <string name="dialog_ok">OK</string>
 </resources>

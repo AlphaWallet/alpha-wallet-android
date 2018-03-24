@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
   <contracts>
-    <contract address="" type="issuing"/>
+    <address type="issuing">0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4</address>
   </contracts>
   <actions>
     <action type="redeem">

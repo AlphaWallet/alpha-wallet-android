@@ -37,13 +37,14 @@ import android.util.Base64;
  *
  * Android requires the link to be in the form:
  *
- * https://www.awallet.io/import?
+ * https://www.awallet.io/[base64]
  *
  * The format forbids using a prefix other than 'www'.
  * There needs to be text in the specific link too, in this case 'import'.
-$ echo -n 000f42405AB5B400007bee82bdd9e866b2bd114780a47f2261c684e30102030405060708090a2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE54754410530818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B1b | xxd -r -p | base64
- * Base64 message:  AA9CQFq1tAAAe+6CvdnoZrK9EUeApH8iYcaE4wECAwQFBgcICQovmCuExjW
-WeptjBu1XiafBkZFkFx433M30tZvlR1RBBTCBi4lrfSQPVsWevfIJBi7lTaejWQkFc5Z03P3Ozz6bGw
+$ echo -n https://www.awallet.io/; \
+  echo -n 000f42405AB5B400007bee82bdd9e866b2bd114780a47f2261c684e30102030405060708090a2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE54754410530818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B | xxd -r -p | base64;\
+  echo b
+https://www.awallet.io/AA9CQFq1tAAAe+6CvdnoZrK9EUeApH8iYcaE4wECAwQFBgcICQovmCuExjWWeptjBu1XiafBkZFkFx433M30tZvlR1RBBTCBi4lrfSQPVsWevfIJBi7lTaejWQkFc5Z03P3Ozz6bb
  * uint32:    price in Szabo                                           000f4240
  * uint32:    expiry in Unix Time                                      5AB5B400
  * bytes20:   contract address         007bee82bdd9e866b2bd114780a47f2261c684e3

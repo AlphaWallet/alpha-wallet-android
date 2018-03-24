@@ -42,13 +42,12 @@ import android.util.Base64;
  * The format forbids using a prefix other than 'www'.
  * There needs to be text in the specific link too, in this case 'import'.
 $ echo -n https://www.awallet.io/; \
-  echo -n 000f42405AB5B400007bee82bdd9e866b2bd114780a47f2261c684e30102030405060708090a2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE54754410530818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B | xxd -r -p | base64;\
-  echo b
-https://www.awallet.io/AA9CQFq1tAAAe+6CvdnoZrK9EUeApH8iYcaE4wECAwQFBgcICQovmCuExjWWeptjBu1XiafBkZFkFx433M30tZvlR1RBBTCBi4lrfSQPVsWevfIJBi7lTaejWQkFc5Z03P3Ozz6bb
+  echo -n 000f42405AB5B400007bee82bdd9e866b2bd114780a47f2261c684e30102030405060708092F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE54754410530818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B1b | xxd -r -p | base64 -w0
+https://www.awallet.io/AA9CQFq1tAAAe+6CvdnoZrK9EUeApH8iYcaE4wECAwQFBgcICS+YK4TGNZZ6m2MG7VeJp8GRkWQXHjfczfS1m+VHVEEFMIGLiWt9JA9WxZ698gkGLuVNp6NZCQVzlnTc/c7PPpsb
  * uint32:    price in Szabo                                           000f4240
  * uint32:    expiry in Unix Time                                      5AB5B400
  * bytes20:   contract address         007bee82bdd9e866b2bd114780a47f2261c684e3
- * Uint16[]:  ticket indices                               0102030405060708090a
+ * Uint16[]:  ticket indices (9 given as an example)         010203040506070809
  * bytes32:    2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105
  * bytes32:    30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
  * byte:                                                                     1b

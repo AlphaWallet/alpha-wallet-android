@@ -2,15 +2,14 @@ package io.awallet.crypto.alphawallet;
 
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
-import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.reactivex.Single;
 
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
+import org.ethereum.geth.BigInt;
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -22,50 +21,43 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
-import android.util.Base64;
 
 /**
  * Created by weiwu on 9/3/18.
  */
 
 /**
- * Universal link format
- *
- * Android requires the link to be in the form:
- *
- * https://www.awallet.io/[base64]
- *
- * The format forbids using a prefix other than 'www'.
- * There needs to be text in the specific link too, in this case 'import'.
-$ echo -n https://www.awallet.io/; \
-  echo -n 000f42405AB5B400007bee82bdd9e866b2bd114780a47f2261c684e30102030405060708092F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE54754410530818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B1b | xxd -r -p | base64 -w0
-https://www.awallet.io/AA9CQFq1tAAAe+6CvdnoZrK9EUeApH8iYcaE4wECAwQFBgcICS+YK4TGNZZ6m2MG7VeJp8GRkWQXHjfczfS1m+VHVEEFMIGLiWt9JA9WxZ698gkGLuVNp6NZCQVzlnTc/c7PPpsb
- * uint32:    price in Szabo                                           000f4240
- * uint32:    expiry in Unix Time                                      5AB5B400
- * bytes20:   contract address         007bee82bdd9e866b2bd114780a47f2261c684e3
- * Uint16[]:  ticket indices (9 given as an example)         010203040506070809
- * bytes32:    2F982B84C635967A9B6306ED5789A7C1919164171E37DCCDF4B59BE547544105
- * bytes32:    30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
- * byte:                                                                     1b
- *
+ * Universal link format-9 is used here. format-10 is a special case of format-9
  */
 
 public class UniversalLinkTest {
-    final String link = "https://app.awallet.io/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvBbWdOyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALyaECakvG8LqLvkhtHQnaVzKznkALMAtA==;1b;2981CF5F9C45E9957BE897ED2EC749A8CE16086942A241BCDA4E870259B53EF4;2EFBA4BEBC7E3AE4475F4D92BADC1DD4D14D95187CD7403F701AED48CA23737B";
 
-    final String[] links = { "https://app.awallet.io/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWNFeF2KAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtnMrrswHk+OKmJNHmavTx9w88xANMA1ADVANYA1wDYANkA2g==;1b;4C42984466C576E191687684A48674698510F750413A3F1F0B7F718BCBB37072;4EDF6FA41DAB5C3E6E7B468B2FE384E86B2FD93A9BF5F771C0AAA07C649106EB",
-            "https://app.awallet.io/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWNFeF2KAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtnMrrswHk+OKmJNHmavTx9w88xANsA3ADdAN4=;1c;36F33C72C0B191A0C2587F36E5F77CF5A9243D34010119DDDD98390E6FF12014;1173094E702F64EA3233B9FE515AD7516B8A128E47E9D88BE1F5CC50A5E59295",
-            "https://app.awallet.io/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWNFeF2KAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtnMrrswHk+OKmJNHmavTx9w88xAN8=;1b;623AFBCD4B439A738EBA820B0C1AEDB50FB23155ACABF735B72213E7D935D9E6;42F4EE7C87B63E72FE24C2A9CF323588331E02E5043CC3B91EBA20F53C6842E3" };
+    final String[] links = { "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICfENh9BG3IRgrrkXGuLWKddxeI/PpXzaZ/RdyUxbrKi4MSEHa8NMnKTyjVw7uODNrpcboqSWZfIrHCFoug/YGegb",
+            "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICXeC1PKTiAd0583blGKYxYj1mWcRQ9GUjd1LpqRGtcaFlvRZe3w72BFRH0xgL6zIgSYxVufa7x7MDw3DShU19r8c",
+            "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICV+rXdRsJeazdeXmisb9qLy2M2z0riLFiPbPQ0GpZUkZ3xNblCEdcv0KMm/GGts/hFrHr/MQbNMmYPBig+FwGl8b" };
 
-    final int[] indices         = new int[] { 0xb3, 0xb4 };
     final String OWNER_ADDR     = "0x007bee82bdd9e866b2bd114780a47f2261c684e3";
+    final BigInteger OWNER_PUB_KEY =  new BigInteger("47EAE0D3EEFBC60BD914F8C361C658A11746D04D9CB00DF14F2B6C8BE5C23014CFC3E36BDED38BD151A29576996CC41DDC7E038EE8DAE6CE02AEDE6B3E232CDA", 16);
+    final BigDecimal PRICE      = Convert.toWei("0.1", Convert.Unit.ETHER); //0x186A0 SZABO
+    final long EXPIRY           = 0x5AB5B400;
     final String CONTRACT_ADDR  = "0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4";
-    final String ethPrice       = "0.5";
-    final long expiry           = 0;
+    final int[] indices         = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    /* To generate the URL path on a Linux/OS X computer:
+    $ echo -n https://www.awallet.io/;\
+    echo 000186A0 5AB5B400 bc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4 010203040506070809 \
+         bfd3cb4ede61f0ccb9e7b6f589c2aa18a17024886b6be486e4cf5ffa46b887d8\
+         0xdaa357cbed5df0041082a57efc39018b205ad1bfb33a745b28fa7d53a306401a \
+         1b | xxd -r -p | base64 -w 0
+     */
+    final String link = "https://www.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICS+YK4TGNZZ6m2MG7VeJp8GRkWQXHjfczfS1m+VHVEEFMIGLiWt9JA9WxZ698gkGLuVNp6NZCQVzlnTc/c7PPpsb";
+    /* The entire message of that above order is:
+    000000000000000000000000000000000000000000000000016345785d8a0000
+    000000000000000000000000000000000000000000000000000000005ab5b400
+    bc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4
+    000100020003000400050006000700080009 */
 
     //roll a new key
     ECKeyPair testKey = ECKeyPair.create("Test Key".getBytes());
@@ -73,26 +65,20 @@ public class UniversalLinkTest {
     @Test
     public void UniversalLinkShouldBeParsedCorrectly() throws SalesOrderMalformed, SignatureException {
         SalesOrder order = SalesOrder.parseUniversalLink(link);
-        BigDecimal testPriceWei = Convert.toWei(ethPrice, Convert.Unit.ETHER);
-        BigInteger testPriceWeiBi = BigInteger.valueOf(testPriceWei.longValue());
-
-        assertEquals(testPriceWeiBi, order.priceWei);
-        assertEquals(expiry, order.expiry);
+        assertEquals(PRICE, order.priceWei);
+        assertEquals(EXPIRY, order.expiry);
         assertEquals(CONTRACT_ADDR, order.contractAddress.toLowerCase());
         assertArrayEquals(indices, order.tickets);
         assertTrue(verifySignature(order.message, order.signature));
         Sign.SignatureData signature = sigFromByteArray(order.signature);
-
-        BigInteger pubkey = new BigInteger("3766624743362555291863022291641419798817556312446913485076900228931550311167262358936119031908256138233623094427893806146688851885551327681125435090087130", 10);
-        assertEquals(pubkey, Sign.signedMessageToKey(order.message, signature));
+        assertEquals(OWNER_PUB_KEY, Sign.signedMessageToKey(order.message, signature));
     }
 
     @Test
-    public void UniversalLinksTest() throws SalesOrderMalformed, SignatureException {
+    public void UniversalLinksSignerAddressShouldBeRecoverable() throws SalesOrderMalformed, SignatureException {
         for (String link : links) {
             SalesOrder order = SalesOrder.parseUniversalLink(link);
             order.getOwnerKey();
-            Sign.SignatureData signature = sigFromByteArray(order.signature);
             assertNotNull(order.contractAddress);
             assertNotNull(order.ownerAddress);
             assertEquals(OWNER_ADDR, order.ownerAddress.toLowerCase()); //created from 0x007

@@ -198,30 +198,6 @@ public class MarketQueueService {
         });
     }
 
-    /**
-     * Parse a hex string to bytes without use of two's complement.
-     * potentially unsafe once per 256 times
-     */
-    public static byte[] hexStringToBytes(String s)
-    {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2)
-        {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-        /* faster way to do it, untested:
-        byte[] array = bigInteger.toByteArray();
-        if (array[0] == 0) {
-            byte[] tmp = new byte[array.length - 1];
-            System.arraycopy(array, 1, tmp, 0, tmp.length);
-            array = tmp;
-        }
-         */
-    }
-
     //TODO: Refactor this using
     private String writeToQueue(final String writeURL, final byte[] data, final boolean post)
     {

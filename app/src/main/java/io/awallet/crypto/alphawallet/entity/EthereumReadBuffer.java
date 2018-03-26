@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -44,13 +45,9 @@ public class EthereumReadBuffer extends DataInputStream
     }
 
     public String readAddress() throws IOException {
-        String addr = "0x";
-
         byte[] buffer20 = new byte[20];
         read(buffer20);
-        addr = "0x" + bytesToHex(buffer20);
-
-        return addr;
+        return Numeric.toHexString(buffer20);
     }
 
     @Override
@@ -60,17 +57,6 @@ public class EthereumReadBuffer extends DataInputStream
         remains = super.available();
 
         return remains;
-    }
-
-    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 
     public int[] readUint16Indices(int count) throws IOException
@@ -107,7 +93,7 @@ public class EthereumReadBuffer extends DataInputStream
     {
         byte[] buffer = new byte[4];
         read(buffer);
-        BigDecimal value = new BigDecimal(new BigInteger(buffer));
+        BigDecimal value = new BigDecimal(new BigInteger(1, buffer));
         //this is value in microeth/szabo
         //convert to wei
         BigInteger wei = Convert.toWei(value, Convert.Unit.SZABO).toBigInteger();
@@ -122,7 +108,7 @@ public class EthereumReadBuffer extends DataInputStream
         return value.longValue();
     }
 
-    public int[] readCompressedIndicies(int indiciesLength) throws IOException
+    public int[] readCompressedIndices(int indiciesLength) throws IOException
     {
         byte[] readBuffer = new byte[indiciesLength];
         read(readBuffer);
@@ -165,17 +151,5 @@ public class EthereumReadBuffer extends DataInputStream
         for (int i = 0; i < indexList.size(); i++) indexArray[i] = indexList.get(i);
 
         return indexArray;
-    }
-
-    public int[] readUint16Indices2(int count) throws IOException
-    {
-        int[] intArray = new int[count];
-        for (int i = 0; i < count; i++)
-        {
-            int value = byteToUint(readByte()) * 0x100;
-            value += byteToUint(readByte());
-            intArray[i] = value;
-        }
-        return intArray;
     }
 }

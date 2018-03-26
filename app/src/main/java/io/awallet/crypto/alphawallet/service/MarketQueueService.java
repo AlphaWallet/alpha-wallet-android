@@ -141,11 +141,11 @@ public class MarketQueueService {
         //"{\"orders\": {\"received\": 200, \"accepted\": 200}, \"1st_order\": \"00000000000000000000000000000000000000000000000003ff2e795f500000000000000000000000000000000000000000000000000000000000005ab1b21c0b6732baecc0793e38a98934799abd3c7dc3cf3100d300d4\"}"
         if (response.contains("accepted"))//  == HttpURLConnection.HTTP_OK)
         {
-            messageCallback.pushToast("Queue written");
+            messageCallback.showMarketQueueSuccessDialog(R.string.dialog_marketplace_success);
         }
         else
         {
-            messageCallback.pushToast("ERROR: Trade not processed");
+            messageCallback.showMarketQueueErrorDialog(R.string.dialog_process_error);
         }
 
         marketQueueProcessing.dispose();

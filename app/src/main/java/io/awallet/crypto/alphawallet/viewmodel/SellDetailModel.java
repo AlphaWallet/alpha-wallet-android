@@ -4,10 +4,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Convert;
 
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -95,21 +97,26 @@ public class SellDetailModel extends BaseViewModel {
     {
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
 
-        linkMessage = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, 0);
+        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, 0);
+        linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, 0);
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), linkMessage)
+                .sign(defaultWallet().getValue(), tradeBytes)
                 .subscribe(this::gotSignature, this::onError);
     }
 
     private void gotSignature(byte[] signature)
     {
-        //convert signature to internal representation
-        Sign.SignatureData linkSignature = sigFromByteArray(signature);
-        String universalLink = SalesOrder.completeUniversalLink(linkMessage, linkSignature);
-
-        //Now open the share icon
-        universalLinkReady.postValue(universalLink);
+        try {
+            String universalLink = SalesOrder.completeUniversalLink(linkMessage, signature);
+            //Now open the share icon
+            universalLinkReady.postValue(universalLink);
+        }
+        catch (SalesOrderMalformed sm)
+        {
+            //TODO: Display appropriate error to user
+            sm.printStackTrace();
+        }
     }
 }

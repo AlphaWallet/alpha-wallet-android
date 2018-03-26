@@ -7,6 +7,7 @@ import android.content.Context;
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -108,21 +109,27 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
 
-        linkMessage = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
+        //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
+        //This is what we must sign.
+        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
+        linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), linkMessage)
+                .sign(defaultWallet().getValue(), tradeBytes)
                 .subscribe(this::gotSignature, this::onError);
     }
 
     private void gotSignature(byte[] signature)
     {
-        //convert signature to internal representation
-        Sign.SignatureData linkSignature = sigFromByteArray(signature);
-        String universalLink = SalesOrder.completeUniversalLink(linkMessage, linkSignature);
-
-        //Now open the share icon
-        universalLinkReady.postValue(universalLink);
+        try {
+            String universalLink = SalesOrder.completeUniversalLink(linkMessage, signature);
+            //Now open the share icon
+            universalLinkReady.postValue(universalLink);
+        }
+        catch (SalesOrderMalformed sm) {
+            //TODO: Display appropriate error to user
+            sm.printStackTrace();
+        }
     }
 }

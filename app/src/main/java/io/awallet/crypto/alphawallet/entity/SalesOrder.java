@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.Signature;
 import java.util.ArrayList;
@@ -77,6 +78,8 @@ public class SalesOrder implements Parcelable {
         return data;
     }
 
+
+
     /**
      * Universal link's Query String section is formatted like this:
      *
@@ -112,7 +115,97 @@ public class SalesOrder implements Parcelable {
         }
     }
 
+    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry)
+    {
+        try
+        {
+            //form the transaction we need to push to buy
+            //trade bytes
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            DataOutputStream ds = new DataOutputStream(buffer);
+
+            BigInteger addrBI = new BigInteger(Numeric.cleanHexPrefix(contractAddress), 16);
+
+            BigDecimal value = new BigDecimal(priceWei);
+            byte[] max = Numeric.hexStringToByteArray("FFFFFFFF");
+            BigInteger maxValueBI = new BigInteger(1, max);
+            //this is value in microeth/szabo
+            //convert to wei
+            BigDecimal maxValue = new BigDecimal(maxValueBI);
+            BigDecimal microEth = Convert.fromWei(value, Convert.Unit.SZABO).abs();
+            if (microEth.compareTo(maxValue) > 0)
+            {
+                microEth = maxValue;    //should we signal an overflow error here, or just silently round?
+                                        //possibly irrelevant, this is a huge amount of eth.
+            }
+
+            BigInteger microEthBI = new BigInteger(microEth.toString());
+
+            ds.write(Numeric.toBytesPadded(microEthBI, 4));
+            ds.write(Numeric.toBytesPadded(BigInteger.valueOf(expiry), 4));
+            ds.write(Numeric.toBytesPadded(addrBI, 20));
+
+            byte[] uint16 = new byte[2];
+            byte[] uint8 = new byte[1];
+            final int indexMax = 1<<16;
+            for (int i : ticketSendIndexList)
+            {
+                if (i >= indexMax)
+                {
+                    throw new IOException("Index out of representation range: " + i);
+                }
+                if (i < (1 << 7))
+                {
+                    uint8[0] = (byte) (i & ~(1 << 7));
+                    ds.write(uint8);
+                }
+                else
+                {
+                    uint16[0] = (byte) ((i >> 8) | (1<<7));
+                    uint16[1] = (byte) (i & 0xFF);
+                    ds.write(uint16);
+                }
+            }
+
+            ds.flush();
+            ds.close();
+
+            return buffer.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     protected SalesOrder(String linkData) throws SalesOrderMalformed {
+        byte[] fullOrder = Base64.decode(linkData);
+        //read the order
+        try {
+            ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
+            EthereumReadBuffer ds = new EthereumReadBuffer(bas);
+            priceWei = ds.read4ByteMicroEth();
+            expiry = ds.read4ByteExpiry();
+            contractAddress = ds.readAddress();
+            //ticketCount = ds.available() / 2;
+            tickets = ds.readCompressedIndicies(ds.available() - 65);
+            ticketCount = tickets.length;
+            //now read signature
+            ds.readSignature(signature);
+            ds.close();
+        } catch (IOException e) {
+            throw new SalesOrderMalformed();
+        } catch (StringIndexOutOfBoundsException f) {
+            throw new SalesOrderMalformed();
+        } catch (Exception e) {
+            throw new SalesOrderMalformed();
+        }
+
+        //now we have to build the message that the contract is expecting the signature for
+        message = getTradeBytes();
+
+        /*
         //separate the args
         String[] linkArgs = linkData.split(";");
         if (linkArgs.length < 3) {
@@ -157,7 +250,7 @@ public class SalesOrder implements Parcelable {
             throw new SalesOrderMalformed();
         } catch (Exception e) {
             throw new SalesOrderMalformed();
-        }
+        }*/
 
         BigInteger milliWei = Convert.fromWei(priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         price = milliWei.doubleValue() / 1000.0;
@@ -259,7 +352,7 @@ public class SalesOrder implements Parcelable {
         return ownerAddress;
     }
 
-    private byte[] getTradeBytes()
+    public byte[] getTradeBytes()
     {
         return getTradeBytes(tickets, contractAddress, priceWei, expiry);
     }
@@ -267,7 +360,6 @@ public class SalesOrder implements Parcelable {
     public boolean balanceChange(List<Integer> balance)
     {
         //compare two balances
-
         //quick return, if sizes are different there's a change
         if (balanceInfo == null)
         {
@@ -324,21 +416,49 @@ public class SalesOrder implements Parcelable {
         return getTradeBytes(ticketSendIndexList, contractAddress, wei, expiry);
     }
 
-    public static String completeUniversalLink(byte[] message, Sign.SignatureData sig)
+    public static String completeUniversalLink(byte[] message, byte[] signature) throws SalesOrderMalformed
     {
+        byte[] completeLink = new byte[message.length + signature.length];
+        System.arraycopy(message, 0, completeLink, 0, message.length);
+        System.arraycopy(signature, 0, completeLink, message.length, signature.length);
+
         StringBuilder sb = new StringBuilder();
 
         sb.append("https://app.awallet.io/");
-        byte[] b64 = Base64.encode(message);
+        byte[] b64 = Base64.encode(completeLink);
         sb.append(new String(b64));
-        sb.append(";");
-        sb.append(Integer.toHexString(sig.getV()));
-        sb.append(";");
-        sb.append(bytesToHex(sig.getR()));
-        sb.append(";");
-        sb.append(bytesToHex(sig.getS()));
 
         //this trade can be claimed by anyone who pushes the transaction through and has the sig
         return sb.toString();
+    }
+
+    public static byte[] signatureToByteArray(Sign.SignatureData signature) throws SalesOrderMalformed
+    {
+        byte[] sigBytes = new byte[65];
+        try {
+            System.arraycopy(signature.getR(), 0, sigBytes, 0, 32);     // r
+            System.arraycopy(signature.getS(), 0, sigBytes, 32, 32);    // s
+            sigBytes[64] = signature.getV(); // v
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            throw new SalesOrderMalformed("Signature shorter than expected 256");
+        }
+        catch (ArrayStoreException a)
+        {
+            throw new SalesOrderMalformed("Attempting to write signature too long for storage");
+        }
+        catch (NullPointerException e)
+        {
+            throw new SalesOrderMalformed("invalid import link data");
+        }
+
+        return sigBytes;
+    }
+
+    public static String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature) throws SalesOrderMalformed
+    {
+        byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
+        return completeUniversalLink(leading, signature);
     }
 }

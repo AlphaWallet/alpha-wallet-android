@@ -32,15 +32,24 @@ import java.util.List;
  * Universal link format-9 is used here. format-10 is a special case of format-9
  */
 
-public class UniversalLinkTest {
-
+public class UniversalLinkTest
+{
     final String[] links = { "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICfENh9BG3IRgrrkXGuLWKddxeI/PpXzaZ/RdyUxbrKi4MSEHa8NMnKTyjVw7uODNrpcboqSWZfIrHCFoug/YGegb",
             "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICXeC1PKTiAd0583blGKYxYj1mWcRQ9GUjd1LpqRGtcaFlvRZe3w72BFRH0xgL6zIgSYxVufa7x7MDw3DShU19r8c",
             "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICV+rXdRsJeazdeXmisb9qLy2M2z0riLFiPbPQ0GpZUkZ3xNblCEdcv0KMm/GGts/hFrHr/MQbNMmYPBig+FwGl8b" };
 
     final String OWNER_ADDR     = "0x007bee82bdd9e866b2bd114780a47f2261c684e3";
     final BigInteger OWNER_PUB_KEY =  new BigInteger("47EAE0D3EEFBC60BD914F8C361C658A11746D04D9CB00DF14F2B6C8BE5C23014CFC3E36BDED38BD151A29576996CC41DDC7E038EE8DAE6CE02AEDE6B3E232CDA", 16);
-    final BigDecimal PRICE      = Convert.toWei("0.1", Convert.Unit.ETHER); //0x186A0 SZABO
+
+    /**
+     * these values give the key format, ie
+     * 4 bytes - price in MicroEth (Szabo)
+     * 4 bytes - expiry (Unix time stamp - unsigned, gives higher range)
+     * 20 bytes - contract addr
+     * variable length indicies, multiple of single byte with MSB specifying extension to
+     *
+     */
+    final BigInteger PRICE      = Convert.toWei("0.1", Convert.Unit.ETHER).toBigInteger(); //0x000186A0 SZABO
     final long EXPIRY           = 0x5AB5B400;
     final String CONTRACT_ADDR  = "0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4";
     final int[] indices         = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -52,7 +61,12 @@ public class UniversalLinkTest {
          0xdaa357cbed5df0041082a57efc39018b205ad1bfb33a745b28fa7d53a306401a \
          1b | xxd -r -p | base64 -w 0
      */
-    final String link = "https://www.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICS+YK4TGNZZ6m2MG7VeJp8GRkWQXHjfczfS1m+VHVEEFMIGLiWt9JA9WxZ698gkGLuVNp6NZCQVzlnTc/c7PPpsb";
+    final String link = "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICS+YK4TGNZZ6m2MG7VeJp8GRkWQXHjfczfS1m+VHVEEFMIGLiWt9JA9WxZ698gkGLuVNp6NZCQVzlnTc/c7PPpsb";
+
+    //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
+    //This is what we must sign. If we sign the order bytes the contract transaction will fail.
+    //above link is incorrectly formed somehow. Signature is wrong.
+    final String correct_link = "https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICabLOHgxkgYbO7q7XCddXu1Mr4lJ6TQfstmjZA5uScM+INfL97NCAT5ltYhrYB6pNGYz9kmakQR4gRaq9jcryfoB";
     /* The entire message of that above order is:
     000000000000000000000000000000000000000000000000016345785d8a0000
     000000000000000000000000000000000000000000000000000000005ab5b400
@@ -64,12 +78,15 @@ public class UniversalLinkTest {
 
     @Test
     public void UniversalLinkShouldBeParsedCorrectly() throws SalesOrderMalformed, SignatureException {
-        SalesOrder order = SalesOrder.parseUniversalLink(link);
+        SalesOrder order = SalesOrder.parseUniversalLink(correct_link);
         assertEquals(PRICE, order.priceWei);
         assertEquals(EXPIRY, order.expiry);
         assertEquals(CONTRACT_ADDR, order.contractAddress.toLowerCase());
         assertArrayEquals(indices, order.tickets);
-        assertTrue(verifySignature(order.message, order.signature));
+
+        byte[] tradeBytes = SalesOrder.getTradeBytes(order.tickets, CONTRACT_ADDR, order.priceWei, order.expiry);
+
+        assertTrue(verifySignature(tradeBytes, order.signature));
         Sign.SignatureData signature = sigFromByteArray(order.signature);
         assertEquals(OWNER_PUB_KEY, Sign.signedMessageToKey(order.message, signature));
     }
@@ -96,6 +113,7 @@ public class UniversalLinkTest {
         int count;
         BigInteger price;
         long expiry;
+        int [] tickets;
 
         String link;
     }
@@ -103,7 +121,7 @@ public class UniversalLinkTest {
     int[][] tickets = new int[][]{
             { 2 },
             { 2, 3 },
-            { 2, 3, 4 }
+            { 2, 3, 4, 56, 127, 345, 4563 }
     };
 
     //1. Test we can generate and recover a series of universal links
@@ -117,21 +135,18 @@ public class UniversalLinkTest {
 
             for (int i = 0; i < NUMBER_OF_TESTS; i++) {
                 OrderData data = new OrderData();
-                data.count = (i % 3) + 1;
-                int[] thisTickets = tickets[data.count - 1];
+                data.tickets = tickets[i % 3];
+                data.count = data.tickets.length;
                 double dPrice = 0.5 + (Math.random() * 3.0);
                 data.price = getPriceInWei(dPrice);
                 data.expiry = System.currentTimeMillis() / 1000 + 2000 + (int) (Math.random() * 20000);
 
-                //encode link
-                byte[] linkMessage = SalesOrder.getTradeBytes(thisTickets, CONTRACT_ADDR, data.price, data.expiry);
-
-                //sign it
-                byte[] signature = getSignature(linkMessage);
+                //NB: Trade bytes is what we send to ethereum contract
+                byte[] tradeBytes = SalesOrder.getTradeBytes(data.tickets, CONTRACT_ADDR, data.price, data.expiry);
+                byte[] signature = getSignature(tradeBytes);
 
                 //finally generate link
-                Sign.SignatureData linkSignature = sigFromByteArray(signature); //test this function too (Yes, I know this sig is converted back and forth)
-                data.link = SalesOrder.completeUniversalLink(linkMessage, linkSignature);
+                data.link = SalesOrder.generateUniversalLink(data.tickets, CONTRACT_ADDR, data.price, data.expiry, signature);
 
                 orders.add(data);
             }
@@ -147,6 +162,7 @@ public class UniversalLinkTest {
                 assertEquals(order.expiry, data.expiry);
                 assertEquals(order.tickets.length, data.count);
                 assertEquals(order.ticketCount, data.count);
+                assertArrayEquals(order.tickets, data.tickets);
                 assertNotNull(order.contractAddress);
                 assertNotNull(order.ownerAddress);
                 assertEquals(ownerAddress, order.ownerAddress.toLowerCase());

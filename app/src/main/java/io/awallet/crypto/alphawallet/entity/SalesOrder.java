@@ -67,7 +67,8 @@ public class SalesOrder implements Parcelable {
             data.priceWei = ds.readBI();
             ds.readBI();
             ds.readAddress();
-            data.tickets = ds.readUint16Indices(ticketCount);
+            data.tickets = new int[ticketCount];
+            ds.readUnsignedShort(data.tickets);
             System.arraycopy(sig, 0, data.signature, 0, 65);
             ds.close();
         }
@@ -151,12 +152,14 @@ public class SalesOrder implements Parcelable {
 
     protected SalesOrder(String linkData) throws SalesOrderMalformed {
         byte[] fullOrder = Base64.decode(linkData);
+        long szabo;
         //read the order
         try {
             ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-            priceWei = ds.read4ByteMicroEth();
-            expiry = ds.read4ByteExpiry();
+            szabo = ds.toUnsignedLong(ds.readInt());
+            expiry = ds.toUnsignedLong(ds.readInt());
+            priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
             contractAddress = ds.readAddress();
             //ticketCount = ds.available() / 2;
             tickets = ds.readCompressedIndices(ds.available() - 65);

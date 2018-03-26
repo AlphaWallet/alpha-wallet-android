@@ -2,13 +2,11 @@ package io.awallet.crypto.alphawallet.entity;
 
 import android.support.annotation.NonNull;
 
-import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,17 +52,6 @@ public class EthereumReadBuffer extends DataInputStream
         return remains;
     }
 
-    public int[] readUint16Indices(int count) throws IOException
-    {
-        int[] intArray = new int[count];
-        for (int i = 0; i < count; i++)
-        {
-            int value = byteToUint(readByte()) * 0x100;
-            value += byteToUint(readByte());
-            intArray[i] = value;
-        }
-        return intArray;
-    }
 
     public void readSignature(byte[] signature) throws IOException
     {
@@ -75,28 +62,41 @@ public class EthereumReadBuffer extends DataInputStream
         }
     }
 
-    private int byteToUint(byte b)
+    /*
+     * The java 8 recommended way is to read an unsigned Short as Short, and use it as
+     * unsigned Short. Here we still use the old method, reading unsigned shorts into int[].
+     */
+    public int[] readUnsignedShort(int[] ints) throws IOException
     {
-        return (int) b & 0xFF;
+        for (int i = 0; i < ints.length; i++)
+        {
+            int value = toUnsignedInt(readShort());
+            ints[i] = value;
+        }
+        return ints;
     }
 
-    public BigInteger read4ByteMicroEth() throws IOException
-    {
-        byte[] buffer = new byte[4];
-        read(buffer);
-        BigDecimal value = new BigDecimal(new BigInteger(1, buffer));
-        //this is value in microeth/szabo
-        //convert to wei
-        BigInteger wei = Convert.toWei(value, Convert.Unit.SZABO).toBigInteger();
-        return wei;
+    /*
+     * equivalent of Short.toUnsignedInt
+     */
+    private int toUnsignedInt(short s) {
+        return s & 0x0000FFFF;
     }
 
-    public long read4ByteExpiry() throws IOException
+    /*
+     * equivalent of Byte.toUnsignedInt
+     */
+    private int toUnsignedInt(byte b)
     {
-        byte[] buffer = new byte[4];
-        read(buffer);
-        BigDecimal value = new BigDecimal(new BigInteger(1, buffer)); //force unsigned
-        return value.longValue();
+        return b & 0x000000FF;
+    }
+
+    /*
+     * equivalent of Integer.readUnsignedLong
+     */
+    public long toUnsignedLong(int i) throws IOException
+    {
+        return i & 0x00000000ffffffffL;
     }
 
     public int[] readCompressedIndices(int indiciesLength) throws IOException
@@ -111,7 +111,7 @@ public class EthereumReadBuffer extends DataInputStream
 
         while (index < indiciesLength)
         {
-            Integer p = byteToUint(readBuffer[index]);
+            Integer p = toUnsignedInt(readBuffer[index]); // equivalent of Byte.toUnsignedInt()
             switch (state)
             {
                 case 0:

@@ -21,6 +21,8 @@ public class BaseViewModel extends ViewModel
 	protected Disposable disposable;
 	protected static final MutableLiveData<Integer> queueCompletion = new MutableLiveData<>();
 	protected static final MutableLiveData<String> pushToastMutable = new MutableLiveData<>();
+	protected static final MutableLiveData<Integer> successDialogMutable = new MutableLiveData<>();
+	protected static final MutableLiveData<Integer> errorDialogMutable = new MutableLiveData<>();
 
 	@Override
 	protected void onCleared()
@@ -54,6 +56,14 @@ public class BaseViewModel extends ViewModel
 	public LiveData<String> pushToast()
 	{
 		return pushToastMutable;
+	}
+
+	public LiveData<Integer> marketQueueSuccessDialog() {
+		return successDialogMutable;
+	}
+
+	public LiveData<Integer> marketQueueErrorDialog() {
+		return errorDialogMutable;
 	}
 
 	protected void onError(Throwable throwable)
@@ -96,7 +106,25 @@ public class BaseViewModel extends ViewModel
 		public void pushToast(String message) {
 			onPushToast(message);
 		}
+
+		@Override
+		public void showMarketQueueSuccessDialog(Integer resId) {
+			onMarketQueueSuccess(resId);
+		}
+
+		@Override
+		public void showMarketQueueErrorDialog(Integer resId) {
+			onMarketQueueError(resId);
+		}
 	};
+
+	public static void onMarketQueueError(Integer resId) {
+		errorDialogMutable.postValue(resId);
+	}
+
+	public static void onMarketQueueSuccess(Integer resId) {
+		successDialogMutable.postValue(resId);
+	}
 
 	public void showSendToken(Context context, String address, String symbol, int decimals) {
 		//do nothing

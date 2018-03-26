@@ -202,6 +202,16 @@ public class MarketOrderTest
         public void pushToast(String message) {
             System.out.println(message);
         }
+
+        @Override
+        public void showMarketQueueSuccessDialog(Integer resId) {
+            System.out.println("Market Queue Success - string resource id: " + String.valueOf(resId));
+        }
+
+        @Override
+        public void showMarketQueueErrorDialog(Integer resId) {
+            System.out.println("Market Queue Error - string resource id: " + String.valueOf(resId));
+        }
     };
 
     private void onAllTransactions()

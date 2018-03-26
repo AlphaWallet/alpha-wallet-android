@@ -51,6 +51,12 @@ public class AWalletAlertDialog extends Dialog {
         titleText.setText(context.getResources().getString(resId));
     }
 
+    @Override
+    public void setTitle(CharSequence message) {
+        titleText.setVisibility(View.VISIBLE);
+        titleText.setText(message);
+    }
+
     public void setButtonText(int resId) {
         button.setVisibility(View.VISIBLE);
         button.setText(context.getResources().getString(resId));

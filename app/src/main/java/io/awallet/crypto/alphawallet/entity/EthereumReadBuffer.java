@@ -80,7 +80,7 @@ public class EthereumReadBuffer extends DataInputStream
         return (int) b & 0xFF;
     }
 
-    public BigInteger readUintSzabo() throws IOException
+    public BigInteger read4ByteMicroEth() throws IOException
     {
         byte[] buffer = new byte[4];
         read(buffer);

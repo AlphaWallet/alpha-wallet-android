@@ -25,6 +25,7 @@
         android:layout_alignStart="@id/progress_v"
         android:layout_marginBottom="16dp"
         android:layout_marginStart="12dp"
+        android:fontFamily="@font/font_light"
         android:textColor="@color/black"/>
 
 </RelativeLayout>

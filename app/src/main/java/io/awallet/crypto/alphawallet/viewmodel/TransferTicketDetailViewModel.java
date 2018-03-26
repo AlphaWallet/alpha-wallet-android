@@ -112,7 +112,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
         byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
-        linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
+        try {
+            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
+        } catch (SalesOrderMalformed e) {
+            //TODO: Display appropriate error to user
+        }
 
         //sign this link
         disposable = createTransactionInteract

@@ -98,7 +98,11 @@ public class SellDetailModel extends BaseViewModel {
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
 
         byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, 0);
-        linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, 0);
+        try {
+            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, 0);
+        } catch (SalesOrderMalformed e) {
+            //TODO: Display appropriate error to user
+        }
 
         //sign this link
         disposable = createTransactionInteract

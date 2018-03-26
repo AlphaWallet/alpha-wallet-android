@@ -18,9 +18,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.Signature;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
@@ -32,6 +30,8 @@ import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromBy
 public class SalesOrder implements Parcelable {
     public final long expiry;
     public final double price;
+    public final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
+            Convert.Unit.SZABO).toBigInteger();
     public final BigInteger priceWei;
     public final int[] tickets;
     public int ticketStart;
@@ -126,13 +126,16 @@ public class SalesOrder implements Parcelable {
      * @param expiry Unsigned UNIX timestamp of offer expiry
      * @return First part of Universal Link (requires signature of trade bytes to be added)
      */
-    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry)
+    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
     {
         try
         {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
 
+            if (priceWei.compareTo(maxPrice) == 1) {
+                throw new SalesOrderMalformed("Order's price too high to be used in a link");
+            }
             wb.write4ByteMicroEth(priceWei);
             wb.writeUnsigned4(expiry);
             wb.writeAddress(contractAddress);

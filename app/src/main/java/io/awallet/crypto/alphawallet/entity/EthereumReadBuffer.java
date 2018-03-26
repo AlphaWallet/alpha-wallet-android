@@ -66,14 +66,13 @@ public class EthereumReadBuffer extends DataInputStream
      * The java 8 recommended way is to read an unsigned Short as Short, and use it as
      * unsigned Short. Here we still use the old method, reading unsigned shorts into int[].
      */
-    public int[] readUnsignedShort(int[] ints) throws IOException
+    public void readUnsignedShort(int[] ints) throws IOException
     {
         for (int i = 0; i < ints.length; i++)
         {
             int value = toUnsignedInt(readShort());
             ints[i] = value;
         }
-        return ints;
     }
 
     /*
@@ -89,14 +88,14 @@ public class EthereumReadBuffer extends DataInputStream
     private int toUnsignedInt(byte b)
     {
         return b & 0x000000FF;
-    }
+    } // Int is 32 bits
 
     /*
      * equivalent of Integer.readUnsignedLong
      */
     public long toUnsignedLong(int i) throws IOException
     {
-        return i & 0x00000000ffffffffL;
+        return i & 0x00000000ffffffffL; // long is always 64 bits
     }
 
     public int[] readCompressedIndices(int indiciesLength) throws IOException

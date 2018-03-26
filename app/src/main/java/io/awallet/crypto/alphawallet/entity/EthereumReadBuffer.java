@@ -2,7 +2,6 @@ package io.awallet.crypto.alphawallet.entity;
 
 import android.support.annotation.NonNull;
 
-import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
@@ -12,11 +11,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by James on 24/02/2018.
@@ -71,17 +66,13 @@ public class EthereumReadBuffer extends DataInputStream
         return intArray;
     }
 
-    public byte[] readSignature() throws IOException
-    {
-        byte[] sig = new byte[65];
-        read(sig);
-        return sig;
-    }
-
     public void readSignature(byte[] signature) throws IOException
     {
-        assertEquals(signature.length, 65);
-        read(signature);
+        if (signature.length == 65) {
+            read(signature); // would it throw already, if the data is too short? - Weiwu
+        } else {
+            throw new IOException("Data isn't a signature"); // Is this even necessary? - Weiwu
+        }
     }
 
     private int byteToUint(byte b)
@@ -89,7 +80,7 @@ public class EthereumReadBuffer extends DataInputStream
         return (int) b & 0xFF;
     }
 
-    public BigInteger read4ByteMicroEth() throws IOException
+    public BigInteger readUintSzabo() throws IOException
     {
         byte[] buffer = new byte[4];
         read(buffer);

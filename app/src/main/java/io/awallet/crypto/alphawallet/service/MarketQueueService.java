@@ -91,7 +91,7 @@ import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class MarketQueueService {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
-    private static final int TRADE_AMOUNT = 200;
+    private static final int TRADE_AMOUNT = 2016;
     private static final String MARKET_QUEUE_URL = "https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/";
     private static final String MARKET_QUEUE_FETCH = MARKET_QUEUE_URL + "contract/";
 
@@ -196,30 +196,6 @@ public class MarketQueueService {
 
             return response;
         });
-    }
-
-    /**
-     * Parse a hex string to bytes without use of two's complement.
-     * potentially unsafe once per 256 times
-     */
-    public static byte[] hexStringToBytes(String s)
-    {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2)
-        {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-        /* faster way to do it, untested:
-        byte[] array = bigInteger.toByteArray();
-        if (array[0] == 0) {
-            byte[] tmp = new byte[array.length - 1];
-            System.arraycopy(array, 1, tmp, 0, tmp.length);
-            array = tmp;
-        }
-         */
     }
 
     //TODO: Refactor this using

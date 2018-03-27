@@ -148,12 +148,19 @@ public class TransactionsViewModel extends BaseViewModel {
     //1. Get all transactions on wallet address
     public void fetchTransactions(boolean shouldShowProgress) {
         handler.removeCallbacks(startFetchTransactionsTask);
-        setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
-        progress.postValue(shouldShowProgress);
-        fetchTransactionDisposable =
-                fetchTransactionsInteract.fetch(defaultWallet.getValue())
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
+        if (defaultWallet().getValue() != null) {
+            setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
+            progress.postValue(shouldShowProgress);
+            fetchTransactionDisposable =
+                    fetchTransactionsInteract.fetch(defaultWallet.getValue())
+                            .subscribeOn(Schedulers.io())
+                            .subscribe(this::onTransactions, this::onError, this::enumerateTokens);
+        }
+        else {
+            disposable = findDefaultWalletInteract
+                    .find()
+                    .subscribe(this::onDefaultWallet, this::onError);
+        }
     }
 
 //    public void fetchTransactions2(boolean shouldShowProgress) {

@@ -3,16 +3,24 @@ package io.awallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import org.web3j.crypto.Sign;
+import org.web3j.utils.Convert;
+
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
+import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
+
+import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
  * Created by James on 21/02/2018.
@@ -20,26 +28,32 @@ import java.math.BigInteger;
 
 public class SellDetailModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Double> ethereumPrice = new MutableLiveData<>();
+    private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
+    private final CreateTransactionInteract createTransactionInteract;
+
+    private byte[] linkMessage;
 
     SellDetailModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-                          MarketQueueService marketQueueService) {
+                          MarketQueueService marketQueueService,
+                    CreateTransactionInteract createTransactionInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
+        this.createTransactionInteract = createTransactionInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
     public LiveData<Double> ethereumPrice() { return ethereumPrice; }
+    public LiveData<String> universalLinkReady() { return universalLinkReady; }
 
     public void prepare(Ticket ticket) {
         disposable = findDefaultNetworkInteract
@@ -77,5 +91,36 @@ public class SellDetailModel extends BaseViewModel {
     public void setWallet(Wallet wallet)
     {
         defaultWallet.setValue(wallet);
+    }
+
+    public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, BigInteger price)
+    {
+        if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
+
+        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, 0);
+        try {
+            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, 0);
+        } catch (SalesOrderMalformed e) {
+            //TODO: Display appropriate error to user
+        }
+
+        //sign this link
+        disposable = createTransactionInteract
+                .sign(defaultWallet().getValue(), tradeBytes)
+                .subscribe(this::gotSignature, this::onError);
+    }
+
+    private void gotSignature(byte[] signature)
+    {
+        try {
+            String universalLink = SalesOrder.completeUniversalLink(linkMessage, signature);
+            //Now open the share icon
+            universalLinkReady.postValue(universalLink);
+        }
+        catch (SalesOrderMalformed sm)
+        {
+            //TODO: Display appropriate error to user
+            sm.printStackTrace();
+        }
     }
 }

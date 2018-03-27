@@ -16,7 +16,10 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -45,6 +48,7 @@ import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import org.ethereum.geth.Address;
+import org.web3j.abi.datatypes.Int;
 import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;
 
@@ -115,6 +119,7 @@ public class TransferTicketDetailActivity extends BaseActivity {
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
+        viewModel.universalLinkReady().observe(this, this::linkReady);
 
         TextView textQuantity = findViewById(R.id.text_quantity);
         toInputLayout = findViewById(R.id.to_input_layout);
@@ -143,8 +148,6 @@ public class TransferTicketDetailActivity extends BaseActivity {
             if (Integer.parseInt(textQuantity.getText().toString()) > 0) {
                 AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
                 dialog.setTitle(R.string.confirm_transfer_title);
-//                dialog.setSmallText(R.string.confirm_sale_small_text);
-//                dialog.setBigText(totalCostText.getText().toString());
                 dialog.setPrimaryButtonText(R.string.action_transfer);
                 dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
                 dialog.setPrimaryButtonListener(v1 -> transferTicketFinal());
@@ -158,6 +161,24 @@ public class TransferTicketDetailActivity extends BaseActivity {
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_share, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share: {
+                viewModel.generateUniversalLink(getTicketSendIndexList(), ticket.getAddress());
+            }
+            break;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void onTransaction(String hash) {
@@ -209,10 +230,7 @@ public class TransferTicketDetailActivity extends BaseActivity {
         dialog.show();
     }
 
-    private void transferTicketFinal()
-    {
-        //complete the transfer
-        //1. get the acual IDs
+    private int[] getTicketSendIndexList() {
         try
         {
             //convert ticketId list to ticket index array
@@ -227,46 +245,50 @@ public class TransferTicketDetailActivity extends BaseActivity {
             }
 
             ///chop them to the required amount
-            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
-
-            //produce ticket ID list from this array
-            List<Integer> selectedIDs = ticket.indexToIDList(prunedIndices);
-
-            //check send address
-            final String to = toAddressText.getText().toString();
-            if (!isAddressValid(to)) {
-                toInputLayout.setError(getString(R.string.error_invalid_address));
-                return;
-            }
-
-            //finally do the transfer
-            String indexList = ticket.populateIDs(prunedIndices);
-            String idList = ticket.populateIDs(selectedIDs, false);
-            toInputLayout.setErrorEnabled(false);
-
-            //viewModel.openConfirmation(this, ticket, to, indexList, idList);
-
-            onProgress(true);
-
-            viewModel.createTicketTransfer(
-                    to,
-                    ticket.getAddress(),
-                    indexList,
-                    Contract.GAS_PRICE,
-                    Contract.GAS_LIMIT);
-
+            return Arrays.copyOfRange(indices, 0, quantity);
         }
         catch (NumberFormatException n)
         {
             // should never happen, we don't allow user to choose invalid number
+            return null;
+        }
+    }
+
+    private String getTicketSendIndexListStr() {
+        int[] prunedIndices = getTicketSendIndexList();
+        return ticket.populateIDs(prunedIndices);
+    }
+
+    private void transferTicketFinal() {
+        //complete the transfer
+        //1. get the acual IDs
+        String indexList = getTicketSendIndexListStr();
+
+        //check send address
+        final String to = toAddressText.getText().toString();
+        if (!isAddressValid(to)) {
+            toInputLayout.setError(getString(R.string.error_invalid_address));
+            return;
         }
 
+        toInputLayout.setErrorEnabled(false);
+
+        onProgress(true);
+
+        viewModel.createTicketTransfer(
+                to,
+                ticket.getAddress(),
+                indexList,
+                Contract.GAS_PRICE,
+                Contract.GAS_LIMIT);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         viewModel.prepare(ticket);
+        KeyboardUtils.hideKeyboard(toAddressText);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     private void onTicketIdClick(View view, TicketRange range) {
@@ -297,6 +319,32 @@ public class TransferTicketDetailActivity extends BaseActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void linkReady(String universalLink) {
+        //how many tickets are we selling?
+        TextView textQuantity = findViewById(R.id.text_quantity);
+        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
+        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName);
+
+        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+        dialog.setTitle(R.string.confirm_transfer_title);
+        dialog.setSmallText(R.string.generate_free_transfer_link);
+        dialog.setBigText(qty);
+        dialog.setPrimaryButtonText(R.string.send_universal_link);
+        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
+        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void transferLinkFinal(String universalLink) {
+    //create share intent
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
     }
 
     boolean isAddressValid(String address) {

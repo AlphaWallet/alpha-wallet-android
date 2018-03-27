@@ -37,8 +37,8 @@
                     <!--android:scheme="http"/>-->
 
                 <data
-                    android:host="www.awallet.io"
-                    android:path="/import"
+                    android:host="app.awallet.io"
+                    android:pathPrefix="/"
                     android:scheme="https"/>
             </intent-filter>
         </activity>

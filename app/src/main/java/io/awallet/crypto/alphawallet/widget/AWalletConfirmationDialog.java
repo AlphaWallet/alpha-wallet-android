@@ -62,7 +62,7 @@ public class AWalletConfirmationDialog extends Dialog {
         btnSecondary.setOnClickListener(listener);
     }
 
-    public void setBigText(String text) {
+    public void setBigText(CharSequence text) {
         bigText.setText(text);
     }
 
@@ -72,6 +72,10 @@ public class AWalletConfirmationDialog extends Dialog {
 
     public void setSmallText(int resId) {
         smallText.setText(context.getResources().getString(resId));
+    }
+
+    public void setSmallText(CharSequence text) {
+        smallText.setText(text);
     }
 
     public void setExtraText(int resId) {

@@ -11,10 +11,13 @@ import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.ServiceErrorException;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
+import io.awallet.crypto.alphawallet.entity.TokenFactory;
+import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import org.web3j.crypto.Keys;
@@ -29,8 +32,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -43,6 +49,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final SetupTokensInteract setupTokensInteract;
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -52,22 +59,22 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private SalesOrder importOrder;
     private String univeralImportLink;
-    private String ownerAddress;
     private Ticket importToken;
     private List<Integer> availableBalance = new ArrayList<>();
-    private Map<String, Token> tokenMap = new HashMap<>();
     private double priceUsd;
-    private double ethToUsd;
+    private double ethToUsd = 0;
 
     @Nullable
     private Disposable getBalanceDisposable;
 
     ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
-                         FetchTokensInteract fetchTokensInteract) {
+                         FetchTokensInteract fetchTokensInteract,
+                         SetupTokensInteract setupTokensInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     public LiveData<TicketRange> importRange() {
@@ -99,17 +106,14 @@ public class ImportTokenViewModel extends BaseViewModel  {
     public Ticket getImportToken() { return importToken; }
     public SalesOrder getSalesOrder() { return importOrder; }
 
+    //1. Receive the default wallet (if any), then decode the import order
     private void onWallet(Wallet wallet) {
         this.wallet.setValue(wallet);
         try {
             importOrder = SalesOrder.parseUniversalLink(univeralImportLink);
             //ecrecover the owner
-            byte[] message = importOrder.message;
-            Sign.SignatureData sigData;
-            sigData = sigFromByteArray(importOrder.signature);
-            BigInteger recoveredKey = Sign.signedMessageToKey(message, sigData);
-            ownerAddress = "0x" + Keys.getAddress(recoveredKey);
-            //start looking at the ticket details
+            importOrder.getOwnerKey();
+            //got to step 2. - get cached tokens
             fetchTokens();
         }
         catch (SalesOrderMalformed e)
@@ -122,26 +126,96 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
+    //2. Fetch all cached tokens and get eth price
     private void fetchTokens() {
-        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .fetchList(new Wallet(ownerAddress))
-                        .subscribe(this::onTokens)).subscribe();
+        importToken = null;
+        disposable = fetchTokensInteract
+                .fetchList(new Wallet(importOrder.ownerAddress))
+                .subscribe(this::onTokens, this::onError, this::fetchTokensComplete);
     }
 
-    private void onTokens(Map<String, Token> tokenMap)
-    {
-        //check the required balance
-        if (tokenMap.get(wallet().getValue().address).ticker != null) {
-            ethToUsd = Double.valueOf(tokenMap.get(wallet().getValue().address).ticker.price);
+    //2a. receive a stream of tokens.
+    //- store eth price from ticker
+    //- get the token corresponding to the import order if we already cached it
+    //TODO: Optimise, feed one token at a time, and only use cached tokens. Seperatately fetch the ticker after the token has been checked
+    private void onTokens(Token[] tokens) {
+        for (Token token : tokens)
+        {
+            if (token.ticker != null && token.tokenInfo.symbol.equals(ETH_SYMBOL))
+            {
+                ethToUsd = Double.valueOf(token.ticker.price);
+            }
+            else if (token.addressMatches(importOrder.contractAddress) && token instanceof Ticket)
+            {
+                importToken = (Ticket) token;
+            }
         }
-        Token contractToken = tokenMap.get(importOrder.contractAddress);
-        if (contractToken != null) {
-            importToken = (Ticket) contractToken;
+    }
+
+    //2b. on completion of receiving tokens check if we found the matching token
+    private void fetchTokensComplete()
+    {
+        if (importToken == null)
+        {
+            //Didn't have the token cached, so retrieve it from
+            setupTokenAddr(importOrder.contractAddress);
+        }
+        else
+        {
             updateToken();
         }
     }
 
+    //3. If token not already cached we need to fetch details from the ethereum contract itself
+    private void setupTokenAddr(String contractAddress)
+    {
+        disposable = setupTokensInteract
+                .update(contractAddress)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::onTokensSetup, this::onError);
+    }
+
+    //4. Receive token information from blockchain query
+    private void onTokensSetup(TokenInfo tokenInfo)
+    {
+        if (tokenInfo != null && tokenInfo.name != null) {
+            TokenFactory tf = new TokenFactory();
+            Token tempToken = tf.createToken(tokenInfo);
+
+            fetchTokensInteract.updateBalance(importOrder.ownerAddress, tempToken)
+                    .subscribeOn(Schedulers.io()) //observeOn
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onBalance, this::onError, this::gotBalance);
+        }
+        else
+        {
+            invalidLink.postValue(true);
+        }
+    }
+
+    //4a. Receive balance
+    private void onBalance(Token token)
+    {
+        if (token != null && token instanceof Ticket) {
+            importToken = (Ticket) token;
+        }
+    }
+
+    //4b. update token information with balance
+    private void gotBalance()
+    {
+        if (importToken != null)
+        {
+            updateToken();
+        }
+        else
+        {
+            invalidLink.postValue(true);
+        }
+    }
+
+    //5. We have token information and balance. Check if the import order is still valid.
     private void updateToken()
     {
         List<Integer> newBalance = new ArrayList<>();
@@ -165,6 +239,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
                 range.tokenIds.add(availableBalance.get(i));
             }
             importRange.setValue(range);
+            regularBalanceCheck();
         }
         else if (newBalance.size() == 0)
         {
@@ -173,10 +248,34 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
-    private boolean balanceChange(List<Integer> newBalance)
+    //perform a balance check cycle every CHECK_BALANCE_INTERVAL seconds
+    private void regularBalanceCheck()
     {
-        return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
+        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchTokensInteract
+                        .updateBalance(importOrder.ownerAddress, importToken)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onBalance, this::onError, this::gotBalance)).subscribe();
     }
+
+//    //Store contract details if the contract is live,
+//    //otherwise remove from the contract watch list
+//    private void onTokensSetup(TokenInfo tokenInfo) {
+//        //check this contract is good to add
+//        if ((tokenInfo.name == null || tokenInfo.name.length() < 3)
+//                || tokenInfo.isEnabled == false
+//                || (tokenInfo.symbol == null || tokenInfo.symbol.length() < 2))
+//        {
+//            setupTokensInteract.putDeadContract(tokenInfo.address);
+//        }
+//        else {
+//            disposable = addTokenInteract
+//                    .add(tokenInfo)
+//                    .subscribeOn(Schedulers.io())
+//                    .subscribe(this::onSaved, this::onError);
+//        }
+//    }
 
     public void onError(Throwable throwable) {
         if (throwable.getCause() instanceof ServiceErrorException) {
@@ -188,7 +287,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
-    //TODO: Confirm purchase if required
     public void performImport() {
         try {
             SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
@@ -210,5 +308,10 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void onCreateTransaction(String transaction)
     {
         newTransaction.postValue(transaction);
+    }
+
+    private boolean balanceChange(List<Integer> newBalance)
+    {
+        return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }
 }

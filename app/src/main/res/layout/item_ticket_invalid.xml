@@ -37,7 +37,8 @@
             android:id="@+id/text_ticket_range"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="21sp"
+            android:fontFamily="@font/font_light"
             android:layout_marginBottom="5dp"
             android:textColor="@color/black"
             android:text="" />
@@ -47,8 +48,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/red"
-            android:text="Invalid Ticket" />
+            android:fontFamily="@font/font_light"
+            android:textColor="@color/cancel_red"
+            android:text="@string/invalid_ticket" />
     </LinearLayout>
 
 </LinearLayout>

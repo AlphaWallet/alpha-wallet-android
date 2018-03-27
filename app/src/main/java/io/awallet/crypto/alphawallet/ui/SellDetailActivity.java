@@ -2,12 +2,15 @@ package io.awallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -112,6 +115,7 @@ public class SellDetailActivity extends BaseActivity
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
+        viewModel.universalLinkReady().observe(this, this::linkReady);
 
         totalCostText = findViewById(R.id.eth_price);
         textQuantity = findViewById(R.id.text_quantity);
@@ -177,6 +181,24 @@ public class SellDetailActivity extends BaseActivity
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_share, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share: {
+                sellTicketLink();
+            }
+            break;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void onEthereumPrice(Double aDouble)
     {
         ethToUsd = aDouble;
@@ -217,6 +239,31 @@ public class SellDetailActivity extends BaseActivity
                 //silent fail, just don't update
             }
         }
+    }
+
+    private void sellTicketLink()
+    {
+        if (!isValidAmount(sellPrice.getText().toString())) {
+            return;
+        }
+
+        //1. validate price
+        BigInteger price = getPriceInWei();
+        //2. get indicies
+        int[] indices = ticket.getTicketIndicies(ticketIds);
+        int quantity = Integer.parseInt(textQuantity.getText().toString());
+
+        if (price.doubleValue() > 0.0 && indices != null && quantity > 0)
+        {
+            //get the specific ID's, pick from the start of the run
+            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
+            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
+            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
+            viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), price);
+        }
+
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        //go back to previous screen
     }
 
     private void sellTicketFinal()
@@ -276,6 +323,33 @@ public class SellDetailActivity extends BaseActivity
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private void linkReady(String universalLink) {
+        //how many tickets are we selling?
+        String textPrice = sellPrice.getText().toString();
+        TextView textQuantity = findViewById(R.id.text_quantity);
+        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
+        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName) + " @" + textPrice + " Eth/Ticket";
+
+        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+        dialog.setTitle(R.string.confirm_sale_title);
+        dialog.setSmallText(R.string.generate_sale_transfer_link);
+        dialog.setBigText(qty);
+        dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
+        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        dialog.setPrimaryButtonListener(v1 -> sellLinkFinal(universalLink));
+        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void sellLinkFinal(String universalLink) {
+        //create share intent
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
     }
 
     @Override

@@ -71,6 +71,7 @@
 
         <activity
             android:name="io.awallet.crypto.alphawallet.ui.SendActivity"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/title_activity_send" />
 
         <activity

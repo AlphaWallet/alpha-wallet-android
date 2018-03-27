@@ -3,118 +3,178 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
     <include layout="@layout/layout_app_bar" />
 
-    <ScrollView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="@dimen/big_padding">
+            android:layout_marginBottom="?actionBarSize"
+            android:background="@drawable/background_card">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:text="@string/label_gas_price"
-                    android:textAppearance="?android:textAppearanceListItem" />
-
-                <TextView
-                    android:id="@+id/gas_price_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:text="--"
-                    tools:text="30 (Gwei)" />
-
-            </RelativeLayout>
-
-            <SeekBar
-                android:id="@+id/gas_price_slider"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:layout_marginTop="@dimen/big_margin" />
-
-            <TextView
-                android:id="@+id/gas_price_info_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/info_gas_price"
-                android:textAppearance="?android:textAppearanceSmall" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/big_margin"
-                >
+                android:orientation="vertical"
+                android:padding="@dimen/big_padding">
 
                 <TextView
+                    android:id="@+id/title_set_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:text="@string/label_gas_limit"
-                    android:textAppearance="?android:textAppearanceListItem" />
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/font_light"
+                    android:gravity="center"
+                    android:text="@string/advanced_settings"
+                    android:textColor="@color/text_black"
+                    android:textSize="25sp" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:fontFamily="@font/font_light"
+                        android:text="@string/label_gas_price"
+                        android:textColor="@color/text_black"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/gas_price_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="--"
+                        android:textColor="@color/text_black"
+                        tools:text="30 (Gwei)" />
+
+                </RelativeLayout>
+
+                <android.support.v7.widget.AppCompatSeekBar
+                    android:id="@+id/gas_price_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/normal_margin"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:progressTint="@color/colorPrimaryDark"
+                    android:thumbTint="@color/colorPrimaryDark"
+                    android:tickMarkTint="@color/colorPrimaryDark" />
 
                 <TextView
-                    android:id="@+id/gas_limit_text"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/gas_price_info_text"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:text="--"
-                    tools:text="90000" />
-            </RelativeLayout>
+                    android:fontFamily="@font/font_light"
+                    android:text="@string/info_gas_price"
+                    android:textColor="@color/text_black"
+                    android:textSize="16sp" />
 
-            <SeekBar
-                android:id="@+id/gas_limit_slider"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:layout_marginTop="@dimen/big_margin" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/big_margin">
 
-            <TextView
-                android:id="@+id/gas_limit_info_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/info_gas_limit"
-                android:textAppearance="?android:textAppearanceSmall" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:fontFamily="@font/font_light"
+                        android:text="@string/label_gas_limit"
+                        android:textColor="@color/text_black"
+                        android:textSize="20sp" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/big_margin">
+                    <TextView
+                        android:id="@+id/gas_limit_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="--"
+                        android:textColor="@color/text_black"
+                        tools:text="90000" />
+                </RelativeLayout>
+
+                <android.support.v7.widget.AppCompatSeekBar
+                    android:id="@+id/gas_limit_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/normal_margin"
+                    android:layout_marginTop="@dimen/big_margin"
+                    android:progressTint="@color/colorPrimaryDark"
+                    android:thumbTint="@color/colorPrimaryDark"
+                    android:tickMarkTint="@color/colorPrimaryDark" />
 
                 <TextView
-                    android:id="@+id/label_network_fee"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/gas_limit_info_text"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:text="@string/label_network_fee"
-                    android:textAppearance="?android:textAppearanceListItem" />
+                    android:fontFamily="@font/font_light"
+                    android:text="@string/info_gas_limit"
+                    android:textColor="@color/text_black"
+                    android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/text_network_fee"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:text="--"
-                    tools:text="0.0027 ETH" />
-            </RelativeLayout>
-        </LinearLayout>
-    </ScrollView>
+                    android:paddingTop="@dimen/big_margin">
+
+                    <TextView
+                        android:id="@+id/label_network_fee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+
+                        android:layout_alignParentStart="true"
+                        android:fontFamily="@font/font_light"
+                        android:text="@string/label_network_fee"
+                        android:textColor="@color/text_black"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/text_network_fee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="--"
+                        android:textColor="@color/text_black"
+                        tools:text="0.0027 ETH" />
+                </RelativeLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <Button
+            android:id="@+id/button_save"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_alignParentBottom="true"
+            android:background="@color/button_green"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:text="@string/action_save"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </RelativeLayout>
 </LinearLayout>

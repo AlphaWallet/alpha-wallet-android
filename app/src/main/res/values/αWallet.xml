@@ -183,4 +183,14 @@
     <string name="generate_sale_transfer_link">Generate Sale Link</string>
     <string name="send_universal_sale_link">Send Sale Link</string>
     <string name="invalid_ticket">Invalid Ticket</string>
+    <string name="send_email">Send Email</string>
+    <string name="send_sms_whatsapp">Send SMS / WhatsApp</string>
+    <string name="input_wallet_address">Input Wallet Address</string>
+    <string name="use_qr_code_scanner">Use QR Code Scanner</string>
+    <string name="title_send">Send %s</string>
+    <string name="amount">Amount</string>
+    <string name="show_my_address">Show My Address</string>
+    <string name="confirm_transfer_details">Confirm Transfer Details</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="action_confirm">Confirm</string>
 </resources>

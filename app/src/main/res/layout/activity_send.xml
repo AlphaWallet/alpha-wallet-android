@@ -1,69 +1,495 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
     <include layout="@layout/layout_simple_toolbar" />
-    <LinearLayout
-        android:padding="16dp"
-        android:orientation="vertical"
-        android:layout_marginTop="?actionBarSize"
+
+    <RelativeLayout
+        android:id="@+id/layout_input_amount"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <RelativeLayout
-            android:id="@+id/send_to_address_layout"
-            android:layout_marginTop="@dimen/big_margin"
+        android:background="@drawable/background_card"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:visibility="visible">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/to_input_layout"
-                android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical">
+
+            <include layout="@layout/item_token" />
+
+            <LinearLayout
+                android:id="@+id/layout_amount"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                >
-                <EditText
-                    android:id="@+id/send_to_address"
-                    android:hint="@string/hint_recipient_address"
-                    android:imeActionLabel="@string/prompt_to"
-                    android:imeOptions="actionUnspecified"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingRight="@dimen/half_large_padding"
-                    android:paddingEnd="@dimen/half_large_padding"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/amount"
+                    android:textAllCaps="true"
+                    android:textColor="@color/light_gray"
+                    android:textSize="10sp" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/edit_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="47dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/background_quantity"
+                        android:fontFamily="@font/font_semibold"
+                        android:hint="0.00"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberDecimal"
+                        android:paddingStart="15dp"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textColorHint="@color/light_gray"
+                        android:textSize="21sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="15dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/eth"
+                        android:textColor="@color/semi_dark_grey" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/amount_error"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    />
-            </android.support.design.widget.TextInputLayout>
-            <ImageButton
-                android:id="@+id/scan_barcode_button"
-                android:src="@mipmap/qr_code_icon"
-                android:contentDescription="@string/scan_qr"
-                android:background="?android:selectableItemBackground"
-                android:padding="@dimen/big_padding"
-                android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/font_regular"
+                    android:gravity="center"
+                    android:text="@string/error_invalid_amount"
+                    android:textColor="@color/cancel_red"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/button_show_address"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/background_round_primary"
+                    android:fontFamily="@font/font_regular"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/show_my_address"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                />
-        </RelativeLayout>
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/amount_input_layout"
-            android:layout_marginTop="@dimen/big_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/send_amount"
-                android:hint="@string/hint_amount"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionUnspecified"
-                android:inputType="numberDecimal"
-                android:maxLines="1"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/background_round_grey"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:padding="15dp"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/qr_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_autorenew_black_24dp" />
+
+            <RelativeLayout
+                android:id="@+id/send_to_address_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
-    </LinearLayout>
-</FrameLayout>
+                android:layout_marginTop="@dimen/big_margin"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/to_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/send_to_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_recipient_address"
+                        android:imeActionLabel="@string/prompt_to"
+                        android:imeOptions="actionUnspecified"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:paddingEnd="@dimen/half_large_padding"
+                        android:paddingRight="@dimen/half_large_padding" />
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageButton
+                    android:id="@+id/scan_barcode_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:background="?android:selectableItemBackground"
+                    android:contentDescription="@string/scan_qr"
+                    android:padding="@dimen/big_padding"
+                    android:src="@mipmap/qr_code_icon" />
+            </RelativeLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/amount_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/big_margin"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/send_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_amount"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:imeOptions="actionUnspecified"
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
+            </android.support.design.widget.TextInputLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_next"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_alignParentBottom="true"
+            android:background="@color/button_green"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:text="@string/action_transfer"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_transfer_option"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/title_select_transfer_option"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/font_light"
+                android:gravity="center"
+                android:text="Select Option to Transfer:"
+                android:textColor="@color/text_black"
+                android:textSize="25sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <FrameLayout
+                    android:id="@+id/layout_send_sms"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_card_shadow">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="10dp"
+                            android:src="@drawable/ic_send_sms"
+                            android:tint="@color/disabled_color" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/font_light"
+                            android:gravity="center"
+                            android:text="@string/send_sms_whatsapp"
+                            android:textColor="@color/disabled_color"
+                            android:textSize="20sp" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/layout_send_email"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_card_shadow">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="10dp"
+                            android:src="@drawable/ic_send_email"
+                            android:tint="@color/disabled_color" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/font_light"
+                            android:gravity="center"
+                            android:text="@string/send_email"
+                            android:textSize="20sp"
+                            android:tint="@color/disabled_color" />
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <FrameLayout
+                    android:id="@+id/layout_input_address"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_card_shadow">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:padding="25dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="10dp"
+                            android:src="@drawable/ic_input_wallet_address" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/font_light"
+                            android:gravity="center"
+                            android:text="@string/input_wallet_address"
+                            android:textColor="@color/text_black"
+                            android:textSize="20sp" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/layout_qr_scanner"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_card_shadow">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:padding="25dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="10dp"
+                            android:src="@drawable/ic_qr_code" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/font_light"
+                            android:gravity="center"
+                            android:text="@string/use_qr_code_scanner"
+                            android:textColor="@color/text_black"
+                            android:textSize="20sp" />
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_confirm_transfer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/title_confirm_transfer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/font_light"
+                android:gravity="center"
+                android:text="Input Wallet Address"
+                android:textColor="@color/text_black"
+                android:textSize="25sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/amount"
+                android:textAllCaps="true"
+                android:textColor="@color/light_gray"
+                android:textSize="10sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/text_amount_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="15dp"
+                android:fontFamily="@font/font_bold"
+                android:text="15.0 ETH"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="30sp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/layout_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/address"
+                    android:textAllCaps="true"
+                    android:textColor="@color/light_gray"
+                    android:textSize="10sp" />
+
+                <EditText
+                    android:id="@+id/edit_to_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="47dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/background_quantity"
+                    android:fontFamily="@font/font_semibold"
+                    android:hint=""
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:lines="1"
+                    android:maxLines="1"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHint="@color/light_gray"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/to_address_error"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/error_invalid_address"
+                    android:textColor="@color/cancel_red"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_transfer"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_alignParentBottom="true"
+            android:background="@color/button_green"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:text="@string/action_next"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+</LinearLayout>

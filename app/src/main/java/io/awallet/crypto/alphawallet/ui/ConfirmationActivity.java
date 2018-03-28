@@ -37,9 +37,7 @@ import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 
 public class ConfirmationActivity extends BaseActivity {
-    AlertDialog dialog;
-
-    AWalletAlertDialog aDialog;
+    AWalletAlertDialog dialog;
 
     @Inject
     ConfirmationViewModelFactory confirmationViewModelFactory;
@@ -170,21 +168,17 @@ public class ConfirmationActivity extends BaseActivity {
     private void onProgress(boolean shouldShowProgress) {
         hideDialog();
         if (shouldShowProgress) {
-            aDialog = new AWalletAlertDialog(this);
-            aDialog.setProgressMode();
-            aDialog.setTitle(R.string.title_dialog_sending);
-            aDialog.setCancelable(false);
-            aDialog.show();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setProgressMode();
+            dialog.setTitle(R.string.title_dialog_sending);
+            dialog.setCancelable(false);
+            dialog.show();
         }
     }
 
     private void hideDialog() {
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
-        }
-
-        if (aDialog != null && aDialog.isShowing()) {
-            aDialog.dismiss();
         }
     }
 
@@ -244,24 +238,24 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onTransaction(String hash) {
         hideDialog();
-        aDialog = new AWalletAlertDialog(this);
-        aDialog.setTitle(R.string.transaction_succeeded);
-        aDialog.setMessage(hash);
-        aDialog.setButtonText(R.string.copy);
-        aDialog.setButtonListener(v -> {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(hash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash", hash);
             clipboard.setPrimaryClip(clip);
-            aDialog.dismiss();
+            dialog.dismiss();
             new HomeRouter().open(this, true);
             finish();
         });
-        aDialog.setOnDismissListener(v -> {
-            aDialog.dismiss();
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
             new HomeRouter().open(this, true);
             finish();
         });
-        aDialog.show();
+        dialog.show();
     }
 
     private void onGasSettings(GasSettings gasSettings) {

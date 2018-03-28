@@ -67,7 +67,7 @@ project.ext {
     gsonVersion = "2.8.2"
     rxJavaVersion = "2.1.6"
     rxAndroidVersion = "2.0.2"
-    daggerVersion = "2.11"
+    daggerVersion = "2.15"
 }
 
 dependencies {

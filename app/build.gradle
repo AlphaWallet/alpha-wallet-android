@@ -23,8 +23,8 @@ android {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 71
-        versionName "0.91"
+        versionCode 72
+        versionName "0.92"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -117,7 +117,6 @@ dependencies {
 
     // if you are not using support library, include this instead
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
-    implementation 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
 
     // Tests
     testImplementation 'junit:junit:4.12'

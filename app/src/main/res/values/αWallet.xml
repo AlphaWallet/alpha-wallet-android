@@ -183,4 +183,10 @@
     <string name="generate_sale_transfer_link">Generate Sale Link</string>
     <string name="send_universal_sale_link">Send Sale Link</string>
     <string name="invalid_ticket">Invalid Ticket</string>
+    <string name="hint_time">--:--</string>
+    <string name="link_expiry_time">Link Expiry Time</string>
+    <string name="error_time">Please select expiry time</string>
+    <string name="error_date">Please select expiry date</string>
+    <string name="error_invalid_quantity">Input must be greater than 0</string>
+    <string name="link_expiry_date">Link Expiry Date</string>
 </resources>

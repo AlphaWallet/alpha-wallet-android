@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -50,7 +49,6 @@ import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.TokenTicker;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
-import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.SendViewModel;
@@ -62,19 +60,15 @@ import static io.awallet.crypto.alphawallet.entity.Token.EMPTY_BALANCE;
 
 public class SendActivity extends BaseActivity {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
+    private static final int BARCODE_READER_REQUEST_CODE = 1;
 
     @Inject
     SendViewModelFactory sendViewModelFactory;
     SendViewModel viewModel;
 
-    private static final int BARCODE_READER_REQUEST_CODE = 1;
-
-    private EditText toAddressText;
-    private EditText amountText;
-
     // In case we're sending tokens
     private boolean sendingTokens = false;
-    private String contractAddress;
+    private String myAddress;
     private int decimals;
     private String symbol;
     private Wallet wallet;
@@ -84,10 +78,9 @@ public class SendActivity extends BaseActivity {
     TextView toAddressError;
     TextView amountError;
     TextView amountConfirmText;
+    TextView myAddressText;
 
-    TextInputLayout toInputLayout;
-    TextInputLayout amountInputLayout;
-
+    RelativeLayout ethDetailLayout;
     RelativeLayout inputAmountLayout;
     RelativeLayout transferOptionLayout;
     RelativeLayout confirmTransferLayout;
@@ -97,26 +90,29 @@ public class SendActivity extends BaseActivity {
     FrameLayout inputAddressLayout;
     FrameLayout qrScannerLayout;
 
-    Button nextButton;
+    Button startTransferButton;
+    Button amountNextButton;
     Button showAddressButton;
-    Button transferButton;
+    Button addressNextButton;
 
     EditText amountEditText;
     EditText toAddressEditText;
 
+    ImageView qrImageView;
+
     AWalletAlertDialog dialog;
 
     //Token
-    public TextView balanceEth;
-    public TextView balanceCurrency;
-    public TextView symbolText;
-    public ImageView icon;
-    public TextView arrayBalance;
-    public TextView text24Hours;
-    public TextView textAppreciation;
-    public TextView issuer;
-    public TextView text24HoursSub;
-    public TextView textAppreciationSub;
+    TextView balanceEth;
+    TextView textUsdValue;
+    TextView symbolText;
+    ImageView icon;
+    TextView arrayBalance;
+    TextView text24Hours;
+    TextView textAppreciation;
+    TextView issuer;
+    TextView text24HoursSub;
+    TextView textAppreciationSub;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -131,24 +127,18 @@ public class SendActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
 
-
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        myAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
 
-        setupContent();
+        setupTokenContent();
 
         initViews();
-
-        // Populate to address if it has been passed forward
-        String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-        if (toAddress != null) {
-            toAddressText.setText(toAddress);
-        }
     }
 
     private void initViews() {
@@ -156,22 +146,11 @@ public class SendActivity extends BaseActivity {
         toAddressError = findViewById(R.id.to_address_error);
         amountError = findViewById(R.id.amount_error);
 
-        toInputLayout = findViewById(R.id.to_input_layout);
-        toAddressText = findViewById(R.id.send_to_address);
-        amountInputLayout = findViewById(R.id.amount_input_layout);
-        amountText = findViewById(R.id.send_amount);
-        amountInputLayout.setHint(getString(R.string.hint_amount) + " " + symbol);
-
-//        ImageButton scanBarcodeButton = findViewById(R.id.scan_barcode_button);
-//        scanBarcodeButton.setOnClickListener(view -> {
-//            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
-//            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-//        });
-
-        ImageView qrImageView = findViewById(R.id.qr_image);
-        final Bitmap qrCode = createQRImage(contractAddress);
+        qrImageView = findViewById(R.id.qr_image);
+        final Bitmap qrCode = createQRImage(myAddress);
         qrImageView.setImageBitmap(qrCode);
-        ((TextView) findViewById(R.id.address)).setText(contractAddress);
+        myAddressText = findViewById(R.id.address);
+        myAddressText.setText(myAddress);
 
         inputAmountLayout = findViewById(R.id.layout_input_amount);
         transferOptionLayout = findViewById(R.id.layout_transfer_option);
@@ -185,26 +164,43 @@ public class SendActivity extends BaseActivity {
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+
+        ethDetailLayout = findViewById(R.id.layout_eth_detail);
+
         inputAddressLayout = findViewById(R.id.layout_input_address);
         inputAddressLayout.setOnClickListener(v -> {
-            toAddressEditText.getText().clear();
-            onConfirmTransfer();
+            onSelectInputAddress();
         });
-        nextButton = findViewById(R.id.button_next);
-        nextButton.setOnClickListener(v -> {
-            onNext();
+
+        startTransferButton = findViewById(R.id.button_start_transfer);
+        startTransferButton.setOnClickListener(v -> {
+            onStartTransfer();
         });
+
+        amountNextButton = findViewById(R.id.button_amount_next);
+        amountNextButton.setOnClickListener(v -> {
+            onAmountNext();
+        });
+
         showAddressButton = findViewById(R.id.button_show_address);
         showAddressButton.setOnClickListener(v -> {
             viewModel.showMyAddress(this, wallet);
         });
-        transferButton = findViewById(R.id.button_transfer);
-        transferButton.setOnClickListener(v -> {
-            onTransfer();
+
+        addressNextButton = findViewById(R.id.button_address_next);
+        addressNextButton.setOnClickListener(v -> {
+            onAddressNext();
         });
     }
 
-    private void onNext() {
+    private void onStartTransfer() {
+        ethDetailLayout.setVisibility(View.GONE);
+        confirmTransferLayout.setVisibility(View.GONE);
+        transferOptionLayout.setVisibility(View.GONE);
+        inputAmountLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void onAmountNext() {
         dismissKeyboard();
         amountError.setVisibility(View.GONE);
         final String amount = amountEditText.getText().toString();
@@ -215,27 +211,37 @@ public class SendActivity extends BaseActivity {
         } else {
             String amountText = amountEditText.getText().toString() + " " + symbol;
             amountConfirmText.setText(amountText);
+            ethDetailLayout.setVisibility(View.GONE);
             inputAmountLayout.setVisibility(View.GONE);
-            transferOptionLayout.setVisibility(View.VISIBLE);
             confirmTransferLayout.setVisibility(View.GONE);
+            transferOptionLayout.setVisibility(View.VISIBLE);
         }
     }
 
-    private void onConfirmTransfer() {
+    private void onSelectInputAddress() {
+        toAddressEditText.getText().clear();
         inputAmountLayout.setVisibility(View.GONE);
         transferOptionLayout.setVisibility(View.GONE);
         confirmTransferLayout.setVisibility(View.VISIBLE);
     }
 
     private void onBack() {
-        if (inputAmountLayout.getVisibility() == View.VISIBLE) {
+        if (ethDetailLayout.getVisibility() == View.VISIBLE) {
             finish();
+        } else if (inputAmountLayout.getVisibility() == View.VISIBLE) {
+            amountEditText.getText().clear();
+            ethDetailLayout.setVisibility(View.VISIBLE);
+            inputAmountLayout.setVisibility(View.GONE);
+            transferOptionLayout.setVisibility(View.GONE);
+            confirmTransferLayout.setVisibility(View.GONE);
         } else if (confirmTransferLayout.getVisibility() == View.VISIBLE) {
             toAddressEditText.getText().clear();
             inputAmountLayout.setVisibility(View.GONE);
+            ethDetailLayout.setVisibility(View.GONE);
             transferOptionLayout.setVisibility(View.VISIBLE);
             confirmTransferLayout.setVisibility(View.GONE);
         } else {
+            ethDetailLayout.setVisibility(View.GONE);
             inputAmountLayout.setVisibility(View.VISIBLE);
             transferOptionLayout.setVisibility(View.GONE);
             confirmTransferLayout.setVisibility(View.GONE);
@@ -303,7 +309,7 @@ public class SendActivity extends BaseActivity {
                     }
                     Point[] p = barcode.cornerPoints;
                     toAddressEditText.setText(extracted_address);
-                    onTransfer();
+                    onAddressNext();
                 }
             } else {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
@@ -322,7 +328,7 @@ public class SendActivity extends BaseActivity {
         super.onDestroy();
     }
 
-    private void onTransfer() {
+    private void onAddressNext() {
         toAddressError.setVisibility(View.GONE);
         final String to = toAddressEditText.getText().toString();
         if (!isAddressValid(to)) {
@@ -332,7 +338,7 @@ public class SendActivity extends BaseActivity {
         }
 
         BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amountEditText.getText().toString(), decimals);
-        viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens);
+        viewModel.openConfirmation(this, to, amountInSubunits, myAddress, decimals, symbol, sendingTokens);
     }
 
     boolean isAddressValid(String address) {
@@ -354,14 +360,16 @@ public class SendActivity extends BaseActivity {
     }
 
     private void dismissKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        if (getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
     }
 
-    public void setupContent() {
+    public void setupTokenContent() {
         icon = findViewById(R.id.icon);
         balanceEth = findViewById(R.id.balance_eth);
-        balanceCurrency = findViewById(R.id.balance_currency);
+        textUsdValue = findViewById(R.id.balance_currency);
         arrayBalance = findViewById(R.id.balanceArray);
         text24Hours = findViewById(R.id.text_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
@@ -383,7 +391,7 @@ public class SendActivity extends BaseActivity {
         balanceEth.setText(value);
 
         if (token.ticker == null) {
-            balanceCurrency.setText(EMPTY_BALANCE);
+            textUsdValue.setText(EMPTY_BALANCE);
             text24Hours.setText(EMPTY_BALANCE);
             textAppreciation.setText(EMPTY_BALANCE);
             textAppreciationSub.setText(R.string.appreciation);
@@ -421,7 +429,7 @@ public class SendActivity extends BaseActivity {
         Spannable spannable = new SpannableString(lbl);
         spannable.setSpan(new ForegroundColorSpan(color),
                 converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.balanceCurrency.setText(spannable);
+        this.textUsdValue.setText(spannable);
 
         //calculate the appreciation value
         double dBalance = ethBalance.multiply(new BigDecimal(ticker.price)).doubleValue();

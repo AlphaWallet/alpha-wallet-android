@@ -256,6 +256,11 @@ public class ConfirmationActivity extends BaseActivity {
             new HomeRouter().open(this, true);
             finish();
         });
+        aDialog.setOnDismissListener(v -> {
+            aDialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
         aDialog.show();
     }
 

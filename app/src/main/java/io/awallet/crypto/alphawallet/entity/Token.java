@@ -127,9 +127,9 @@ public class Token implements Parcelable {
         } else {
             holder.fillCurrency(ethBalance, ticker);
             holder.fillIcon(ticker.image, R.mipmap.token_logo);
-            holder.textAppreciationSub.setText(R.string.appreciation);
+            //holder.textAppreciationSub.setText(R.string.appreciation);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
-        }
+    }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
         holder.arrayBalance.setVisibility(View.GONE);

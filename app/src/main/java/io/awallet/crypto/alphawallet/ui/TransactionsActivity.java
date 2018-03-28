@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
@@ -100,8 +99,8 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         initBottomNavigation();
         setBottomMenu(R.menu.menu_main_network);
         selectNavigationItem(1);
-        BottomNavigationViewEx bottomBar = findViewById(R.id.bottom_navigation_ex);
-        bottomBar.setVisibility(View.GONE);
+//        BottomNavigationViewEx bottomBar = findViewById(R.id.bottom_navigation_ex);
+//        bottomBar.setVisibility(View.GONE);
     }
 
     private void onTransactionClick(View view, Transaction transaction) {

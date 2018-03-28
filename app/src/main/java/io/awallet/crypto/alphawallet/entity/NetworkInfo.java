@@ -9,6 +9,7 @@ public class NetworkInfo {
     public final int chainId;
     public final boolean isMainNetwork;
     public final String backupNodeUrl;
+    public final String etherscanTxUrl;
 
     public NetworkInfo(
             String name,
@@ -26,6 +27,7 @@ public class NetworkInfo {
         this.chainId = chainId;
         this.isMainNetwork = isMainNetwork;
         this.backupNodeUrl = null;
+        this.etherscanTxUrl = null;
     }
 
     public NetworkInfo(
@@ -36,7 +38,8 @@ public class NetworkInfo {
             String etherscanUrl,
             int chainId,
             boolean isMainNetwork,
-            String backupNodeUrl) {
+            String backupNodeUrl,
+            String etherscanTxUrl) {
         this.name = name;
         this.symbol = symbol;
         this.rpcServerUrl = rpcServerUrl;
@@ -45,5 +48,6 @@ public class NetworkInfo {
         this.chainId = chainId;
         this.isMainNetwork = isMainNetwork;
         this.backupNodeUrl = backupNodeUrl;
+        this.etherscanTxUrl = etherscanTxUrl;
     }
 }

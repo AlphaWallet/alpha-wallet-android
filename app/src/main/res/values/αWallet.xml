@@ -194,4 +194,5 @@
     <string name="advanced_settings">Advanced Settings</string>
     <string name="action_confirm">Confirm</string>
     <string name="title_input_amount_to_transfer">Input Amount to Transfer:</string>
+    <string name="action_info">Info</string>
 </resources>

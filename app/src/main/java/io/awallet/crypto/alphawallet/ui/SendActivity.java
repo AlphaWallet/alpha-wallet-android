@@ -270,6 +270,7 @@ public class SendActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_info, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -278,6 +279,10 @@ public class SendActivity extends BaseActivity {
         switch (item.getItemId()) {
             case android.R.id.home: {
                 onBack();
+                break;
+            }
+            case R.id.action_info: {
+                // TODO: Show About Ethereum page
                 break;
             }
         }
@@ -464,7 +469,5 @@ public class SendActivity extends BaseActivity {
         spannable.setSpan(new ForegroundColorSpan(color),
                 convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         this.textAppreciation.setText(spannable);
-
-
     }
 }

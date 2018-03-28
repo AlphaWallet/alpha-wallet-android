@@ -1,5 +1,6 @@
 package io.awallet.crypto.alphawallet.interact;
 
+import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
 import io.awallet.crypto.alphawallet.entity.Transaction;
@@ -20,6 +21,13 @@ public class FetchTransactionsInteract {
         this.transactionRepository = transactionRepository;
     }
 
+    public Observable<Transaction[]> fetchCached(Wallet wallet) {
+        return transactionRepository
+                .fetchCachedTransactions(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<Transaction[]> fetch(Wallet wallet) {
         return transactionRepository
                 .fetchTransaction(wallet)
@@ -31,6 +39,18 @@ public class FetchTransactionsInteract {
         return transactionRepository
                 .fetchTokenTransaction(wallet, t)
                 .subscribeOn(Schedulers.io());
+    }
+
+    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet) {
+        return transactionRepository
+                .fetchNetworkTransaction(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public void storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+    {
+        transactionRepository.storeTransactions(networkInfo, wallet, txList);
     }
 
 //    public void fetchTx2(Wallet wallet, TransactionsCallback txCallback) {

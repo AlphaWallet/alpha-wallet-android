@@ -1,6 +1,9 @@
 package io.awallet.crypto.alphawallet.repository;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.Nullable;
+
+import com.getkeepsafe.relinker.elf.Elf;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
@@ -10,6 +13,7 @@ import io.awallet.crypto.alphawallet.entity.TradeInstance;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.entity.RealmTransaction;
 import io.awallet.crypto.alphawallet.service.AccountKeystoreService;
 import io.awallet.crypto.alphawallet.service.TransactionsNetworkClientType;
 
@@ -27,9 +31,8 @@ import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
@@ -49,6 +52,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 		this.inDiskCache = inDiskCache;
 	}
 
+	@Override
+	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet) {
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		return fetchFromCache(networkInfo, wallet)
+				.observeOn(Schedulers.newThread())
+				.toObservable();
+	}
+
     @Override
 	public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
         NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
@@ -60,14 +71,31 @@ public class TransactionRepository implements TransactionRepositoryType {
     }
 
 	@Override
+	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet) {
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		return fetchFromNetwork(networkInfo, wallet)
+				.observeOn(Schedulers.newThread())
+				.toObservable();
+	}
+
+	@Override
 	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromCache(networkInfo, wallet)
-				.mergeWith(fetchAndCacheFromNetwork(networkInfo, wallet))
-					.observeOn(Schedulers.io())
-					.map(txs -> mapToTokenTransactions(txs, token))
-					.toObservable();
+		return fetchAllFromNetwork(networkInfo, wallet)
+				.observeOn(Schedulers.io())
+				.map(txs -> mapToTokenTransactions(txs, token))
+				.toObservable();
 	}
+
+//	@Override
+//	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
+//		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+//		return fetchFromCache(networkInfo, wallet)
+//				.mergeWith(fetchAndCacheFromNetwork(networkInfo, wallet))
+//					.observeOn(Schedulers.io())
+//					.map(txs -> mapToTokenTransactions(txs, token))
+//					.toObservable();
+//	}
 
 //	@Override
 //	public void fetchTransaction2(Wallet wallet, TransactionsCallback txCallback) {
@@ -151,15 +179,35 @@ public class TransactionRepository implements TransactionRepositoryType {
     }
 
 	private Single<Transaction[]> fetchAndCacheFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
-		System.out.println("fetchAndCacheFromNetwork: " + wallet.address);
         return inDiskCache
                 .findLast(networkInfo, wallet)
                 .flatMap(lastTransaction -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(wallet, lastTransaction)))
+                        .fetchLastTransactions(networkInfo, wallet, lastTransaction)))
                 .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(wallet, null)))
+                        .fetchLastTransactions(networkInfo, wallet, null)))
                 .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
                 .andThen(inDiskCache.fetchTransaction(networkInfo, wallet))
 				.observeOn(Schedulers.io());
     }
+
+	private Single<Transaction[]> fetchAllFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, null))
+				.observeOn(Schedulers.io());
+	}
+
+	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
+		return inDiskCache.findLast(networkInfo, wallet)
+				.flatMap(lastTx -> Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastTx)))
+				.onErrorResumeNext(throwable ->
+										   Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, null)))
+				.observeOn(Schedulers.io());
+	}
+
+	@SuppressLint("CheckResult")
+	@Override
+	public void storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+	{
+		inDiskCache.putTransactions(networkInfo, wallet, txList)
+				.observeOn(Schedulers.io()).toObservable();
+	}
 }

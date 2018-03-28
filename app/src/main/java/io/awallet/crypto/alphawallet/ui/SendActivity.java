@@ -4,15 +4,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,8 +41,8 @@ import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
-import io.awallet.crypto.alphawallet.entity.TokenTicker;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.router.EthereumInfoRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
@@ -56,7 +51,6 @@ import io.awallet.crypto.alphawallet.viewmodel.SendViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
-import static io.awallet.crypto.alphawallet.entity.Token.EMPTY_BALANCE;
 
 public class SendActivity extends BaseActivity {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
@@ -282,7 +276,7 @@ public class SendActivity extends BaseActivity {
                 break;
             }
             case R.id.action_info: {
-                // TODO: Show About Ethereum page
+                new EthereumInfoRouter().open(this);
                 break;
             }
         }
@@ -371,7 +365,7 @@ public class SendActivity extends BaseActivity {
         }
     }
 
-    public void setupTokenContent() {
+    public void setupTokenContent() { /* This method is copied from Token.java */
         icon = findViewById(R.id.icon);
         balanceEth = findViewById(R.id.balance_eth);
         textUsdValue = findViewById(R.id.balance_currency);
@@ -396,78 +390,18 @@ public class SendActivity extends BaseActivity {
         balanceEth.setText(value);
 
         if (token.ticker == null) {
-            textUsdValue.setText(EMPTY_BALANCE);
-            text24Hours.setText(EMPTY_BALANCE);
-            textAppreciation.setText(EMPTY_BALANCE);
+            textUsdValue.setText(R.string.NA);
+            text24Hours.setText(R.string.NA);
+            textAppreciation.setText(R.string.NA);
             textAppreciationSub.setText(R.string.appreciation);
             text24HoursSub.setText(R.string.twenty_four_hours);
         } else {
-            fillCurrency(ethBalance, token.ticker);
+            // TODO: Fill token details
             textAppreciationSub.setText(R.string.appreciation);
             text24HoursSub.setText(R.string.twenty_four_hours);
         }
 
         balanceEth.setVisibility(View.VISIBLE);
         arrayBalance.setVisibility(View.GONE);
-    }
-
-    public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
-        String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                ? EMPTY_BALANCE
-                : ethBalance.multiply(new BigDecimal(ticker.price))
-                .setScale(2, RoundingMode.HALF_UP)
-                .stripTrailingZeros()
-                .toPlainString();
-        String formattedPercents = "";
-        int color = Color.RED;
-        double percentage = 0;
-        try {
-            percentage = Double.valueOf(ticker.percentChange24h);
-            color = ContextCompat.getColor(this, percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%";
-            text24Hours.setText(formattedPercents);
-            text24Hours.setTextColor(color);
-        } catch (Exception ex) { /* Quietly */ }
-        String lbl = getString(R.string.token_balance,
-                ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
-                converted);
-        Spannable spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.textUsdValue.setText(spannable);
-
-        //calculate the appreciation value
-        double dBalance = ethBalance.multiply(new BigDecimal(ticker.price)).doubleValue();
-        double nPercentage = (100.0 + percentage) / 100.0;
-        double dAppreciation = dBalance - (dBalance / nPercentage);
-        BigDecimal appreciation = BigDecimal.valueOf(dAppreciation);
-
-        int valColor;
-        if (appreciation.compareTo(BigDecimal.ZERO) == 1) {
-            valColor = ContextCompat.getColor(this, R.color.black);
-            textAppreciationSub.setText(R.string.appreciation);
-            textAppreciationSub.setTextColor(valColor);
-        } else {
-            valColor = ContextCompat.getColor(this, R.color.red);
-            textAppreciationSub.setText(R.string.depreciation);
-            textAppreciationSub.setTextColor(valColor);
-            appreciation = appreciation.multiply(BigDecimal.valueOf(-1));
-        }
-
-        //BigDecimal appreciation = balance.subtract(balance.divide((BigDecimal.valueOf(percentage).add(BigDecimal.ONE))) );
-        String convertedAppreciation =
-                appreciation
-                        .setScale(2, RoundingMode.HALF_UP)
-                        .stripTrailingZeros()
-                        .toPlainString();
-
-        lbl = getString(R.string.token_balance,
-                ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
-                convertedAppreciation);
-
-        spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.textAppreciation.setText(spannable);
     }
 }

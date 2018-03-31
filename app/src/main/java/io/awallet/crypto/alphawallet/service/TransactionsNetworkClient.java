@@ -126,8 +126,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				String response = readTransactions(networkInfo, wallet.address, lastBlock);
 
-				System.out.println(response);
-
 				Gson reader = new Gson();
 				JSONObject stateData = new JSONObject(response);
 				JSONArray orders = stateData.getJSONArray("result");

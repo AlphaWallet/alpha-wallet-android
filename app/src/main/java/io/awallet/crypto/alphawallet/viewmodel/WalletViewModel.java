@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -100,9 +101,18 @@ public class WalletViewModel extends BaseViewModel {
     //1. fetch tokens from cache and display
     //2. update token balance
     public void fetchTokens() {
-        fetchTokensInteract
-                .fetchStoredWithEth(defaultWallet.getValue())
-                .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+        if (defaultWallet.getValue() != null)
+        {
+            disposable = fetchTokensInteract
+                    .fetchStoredWithEth(defaultWallet.getValue())
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+        }
+        else
+        {
+            prepareWallet();
+        }
     }
 
     private void onFetchTokensBalanceCompletable()
@@ -126,9 +136,10 @@ public class WalletViewModel extends BaseViewModel {
 
     private void updateTokenBalances() {
         progress.postValue(true);
-        fetchTokensInteract
+        disposable = fetchTokensInteract
                 .fetch(defaultWallet.getValue())
                 .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensBalanceCompletable);
     }
 
@@ -230,4 +241,20 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     private final Runnable startGetBalanceTask = this::getBalance;
+
+    private void prepareWallet()
+    {
+        disposable = findDefaultNetworkInteract
+                .find()
+                .subscribe(this::onDefaultNetworkPrepare, this::onError);
+    }
+
+    private void onDefaultNetworkPrepare(NetworkInfo networkInfo) {
+        defaultNetwork.postValue(networkInfo);
+        disposable = findDefaultWalletInteract
+                .find()
+                .toObservable()
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(this::onDefaultWallet, this::onError, this::fetchTokens);
+    }
 }

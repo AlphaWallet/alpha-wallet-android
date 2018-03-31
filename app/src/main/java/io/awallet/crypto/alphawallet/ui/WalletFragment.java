@@ -89,6 +89,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.refreshTokens().observe(this, this::refreshTokens);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
@@ -223,5 +224,14 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 //            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
 //            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
 //        }
+    }
+
+    /**
+     * This is triggered by transaction view after we have found new tokens by scanning the transaction history
+     * @param aBoolean - dummy param
+     */
+    private void refreshTokens(Boolean aBoolean)
+    {
+        viewModel.fetchTokens();
     }
 }

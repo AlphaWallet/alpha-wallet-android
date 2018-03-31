@@ -216,7 +216,6 @@ public class MarketQueueService {
 
             okhttp3.Response response = httpClient.newCall(request).execute();
             result = response.body().string();
-            System.out.println("HI: " + result);
         }
         catch(Exception e)
         {
@@ -245,7 +244,7 @@ public class MarketQueueService {
 
             result = response.body().string();
 
-            System.out.println("HI: " + result);
+            //System.out.println("HI: " + result);
         }
         catch(Exception e)
         {

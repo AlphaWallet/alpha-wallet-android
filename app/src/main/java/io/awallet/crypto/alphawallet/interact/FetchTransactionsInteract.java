@@ -8,6 +8,7 @@ import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -48,9 +49,9 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+    public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
     {
-        transactionRepository.storeTransactions(networkInfo, wallet, txList);
+        return transactionRepository.storeTransactions(networkInfo, wallet, txList);
     }
 
 //    public void fetchTx2(Wallet wallet, TransactionsCallback txCallback) {

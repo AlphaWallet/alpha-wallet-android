@@ -275,6 +275,24 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos)
+    {
+        TokenFactory tf = new TokenFactory();
+        Token[] tokenList = new Token[tokenInfos.length];
+
+        for (int i = 0; i < tokenInfos.length; i++)
+        {
+            tokenList[i] = tf.createToken(tokenInfos[i]);
+        }
+
+        return localSource.saveTokensList(
+                    ethereumNetworkRepository.getDefaultNetwork(),
+                    wallet,
+                    tokenList);
+
+    }
+
+    @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         return Completable.fromAction(() -> localSource.setEnable(network, wallet, token, isEnabled));
@@ -289,6 +307,12 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<TokenInfo> update(String contractAddr) {
         return setupTokensFromLocal(contractAddr).toObservable();
+    }
+
+    @Override
+    public Single<TokenInfo[]> update(String[] address)
+    {
+        return setupTokensFromLocal(address);
     }
 
     private Single<Token[]> fetchFromNetworkSource(@NonNull NetworkInfo network, @NonNull Wallet wallet) {
@@ -767,6 +791,41 @@ public class TokenRepository implements TokenRepositoryType {
                         isStormbird);
 
                 return result;
+            }
+            finally {
+
+            }
+        });
+    }
+
+    private Single<TokenInfo[]> setupTokensFromLocal(String[] addresses)
+    {
+        return Single.fromCallable(() -> {
+            try
+            {
+                List<TokenInfo> tokenList = new ArrayList<>();
+                for (String address : addresses)
+                {
+                    long now = System.currentTimeMillis();
+                    String name = getContractData(address, stringParam("name"));
+                    if (name == null)
+                    {
+                        name = getName(address);
+                    }
+                    Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
+                    if (isStormbird == null) isStormbird = false;
+                    TokenInfo result = new TokenInfo(
+                            address,
+                            name,
+                            getContractData(address, stringParam("symbol")),
+                            getDecimals(address),
+                            true,
+                            isStormbird);
+
+                    tokenList.add(result);
+                }
+
+                return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
             finally {
 

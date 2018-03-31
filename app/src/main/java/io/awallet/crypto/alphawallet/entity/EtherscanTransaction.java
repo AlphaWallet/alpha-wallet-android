@@ -32,8 +32,23 @@ public class EtherscanTransaction
 
     public Transaction createTransaction()
     {
+        TransactionOperation[] o;
+        if (contractAddress.length() > 0)
+        {
+            o = new TransactionOperation[1];
+            TransactionOperation op = new TransactionOperation();
+            ERC875ContractTransaction ct = new ERC875ContractTransaction();
+            o[0].contract = ct;
+            ct.address = contractAddress;
+            ct.name = contractAddress;
+        }
+        else
+        {
+            o = new TransactionOperation[0];
+        }
+
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
-            gasUsed, new TransactionOperation[0]);
+            gasUsed, o);
 
         return tx;
     }

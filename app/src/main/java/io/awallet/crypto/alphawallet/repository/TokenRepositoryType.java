@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public interface TokenRepositoryType {
 
@@ -21,7 +22,9 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchAll(String walletAddress);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address);
+    Single<TokenInfo[]> update(String[] address);
     void memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Completable addToken(Wallet wallet, TokenInfo tokenInfo);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
+    Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
 }

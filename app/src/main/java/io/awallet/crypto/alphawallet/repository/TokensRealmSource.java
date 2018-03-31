@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.repository;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -43,6 +44,17 @@ public class TokensRealmSource implements TokenLocalSource {
             for (Token token : items) {
                 saveToken(networkInfo, wallet, token, now);
             }
+        });
+    }
+
+    @Override
+    public Single<Token[]> saveTokensList(NetworkInfo networkInfo, Wallet wallet, Token[] items) {
+        return Single.fromCallable(() -> {
+            Date now = new Date();
+            for (Token token : items) {
+                saveToken(networkInfo, wallet, token, now);
+            }
+            return items;
         });
     }
 
@@ -95,6 +107,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
                         .findAll();
+                Log.d("TRS", "Sz: " + realmItems.size());
                 return convertBalance(realmItems, System.currentTimeMillis());
             } finally {
                 if (realm != null) {

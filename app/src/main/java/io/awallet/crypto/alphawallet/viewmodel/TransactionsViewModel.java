@@ -204,6 +204,7 @@ public class TransactionsViewModel extends BaseViewModel {
         //update the UI, display cached transactions
         this.transactions.postValue(txArray);
 
+        Log.d(TAG, "Fetching network transactions.");
         //now fetch new transactions on main account
         fetchTransactionDisposable =
                 fetchTransactionsInteract.fetchNetworkTransactions(defaultWallet.getValue())
@@ -232,6 +233,7 @@ public class TransactionsViewModel extends BaseViewModel {
      */
     private void enumerateTokens()
     {
+        Log.d(TAG, "Enumerating tokens");
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
         if (needsUpdate && txArray.length > 0) this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
         fetchTransactionDisposable = fetchTokensInteract

@@ -137,6 +137,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			}
 			catch (Exception e)
 			{
+				e.printStackTrace();
 				//if this process fails, also try trust eth wallet API
 				return fetchLastTransactionsTrust(wallet, lastTransaction);
 			}

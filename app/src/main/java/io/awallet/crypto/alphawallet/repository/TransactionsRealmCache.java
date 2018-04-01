@@ -79,18 +79,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         .subscribeOn(Schedulers.io());
 	}
 
-
-	/*
-	updateNewCard(Realm realm, VisitingCardPOJO card) {
-            VisitingCardPOJO toEdit = realm.where(VisitingCardPOJO.class)
-                    .equalTo("no", card.getNo()).findFirst();
-            realm.beginTransaction();
-            toEdit.setName(card.getName());
-            toEdit.setAddress(card.getAddress());
-            realm.commitTransaction();
-        }
-	 */
-
     /**
      * Single thread that also returns the transactions so we can use it in as an invisible member in an obserable stream
      * @param networkInfo
@@ -117,7 +105,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     //replace transaction
                     if (replacement != null)
                     {
-                        Log.d(TAG, "Replacing: " + t.hash);
                         fill(instance, realmTx, replacement);
                         txMap.remove(t.hash);
                     }
@@ -125,17 +112,17 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 instance.commitTransaction();
 
                 for (Transaction transaction : txMap.values()) {
-                    Log.d(TAG, "Attempting to store: " + transaction.hash);
+                    //Log.d(TAG, "Attempting to store: " + transaction.hash);
                     //don't store any transaction that
                     if (isUnknownContract(transaction))
                     {
-                        Log.d(TAG, "No Store");
+                        //Log.d(TAG, "No Store");
                         continue;
                     }
                     try
                     {
                         instance.beginTransaction();
-                        Log.d(TAG, "Storing: " + transaction.hash);
+                        //Log.d(TAG, "Storing: " + transaction.hash);
                         RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
                         fill(instance, item, transaction);
                         instance.commitTransaction();
@@ -143,7 +130,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
                     {
                         //already exists
-                        Log.d(TAG, "Already exists: " + transaction.hash);
+                        //Log.d(TAG, "Already exists: " + transaction.hash);
                         instance.cancelTransaction();
                     }
                 }

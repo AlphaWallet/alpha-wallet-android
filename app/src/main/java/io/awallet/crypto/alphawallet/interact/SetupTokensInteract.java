@@ -46,6 +46,7 @@ public class SetupTokensInteract {
     public static String UNKNOWN_CONTRACT = "[Unknown Contract]";
     public static String EXPIRED_CONTRACT = "[Expired Contract]";
     public static String INVALID_OPERATION = "[Invalid Operation]";
+    public static String CONTRACT_CONSTRUCTOR = "Contract Creation";
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -79,15 +80,8 @@ public class SetupTokensInteract {
         Transaction newTransaction = thisTrans;
         try
         {
-            //now display the transaction in the list
-            String contractAddr = "";
-            if (thisTrans.operations.length > 0)
-            {
-                if (thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
-                {
-                    contractAddr = thisTrans.operations[0].contract.address;
-                }
-            }
+            if (checkIsConstructor(thisTrans)) return thisTrans; //fix up constructor params and early return
+
             TransactionOperation op = new TransactionOperation();
             ERC875ContractTransaction ct = new ERC875ContractTransaction();
             op.contract = ct;
@@ -199,6 +193,36 @@ public class SetupTokensInteract {
         }
 
         return newTransaction;
+    }
+
+    private boolean checkIsConstructor(Transaction thisTrans)
+    {
+        if (thisTrans.operations != null && thisTrans.operations.length > 0)
+        {
+            if (thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
+            {
+                ERC875ContractTransaction ct = (ERC875ContractTransaction)thisTrans.operations[0].contract;
+                if (ct.operation.equals(CONTRACT_CONSTRUCTOR) && ct.address.length() > 0)
+                {
+                    //try to find token
+                    Token token = contractMap.get(ct.address);
+                    if (token != null)
+                    {
+                        ct.name = token.tokenInfo.name + " (" + token.getAddress() + ")";
+                        if (token.tokenInfo.isStormbird)
+                        {
+                            ct.type = -3;
+                        }
+                        else
+                        {
+                            ct.type = -2;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

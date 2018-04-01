@@ -2,6 +2,12 @@ package io.awallet.crypto.alphawallet.repository;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.awallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
@@ -73,6 +79,18 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         .subscribeOn(Schedulers.io());
 	}
 
+
+	/*
+	updateNewCard(Realm realm, VisitingCardPOJO card) {
+            VisitingCardPOJO toEdit = realm.where(VisitingCardPOJO.class)
+                    .equalTo("no", card.getNo()).findFirst();
+            realm.beginTransaction();
+            toEdit.setName(card.getName());
+            toEdit.setAddress(card.getAddress());
+            realm.commitTransaction();
+        }
+	 */
+
     /**
      * Single thread that also returns the transactions so we can use it in as an invisible member in an obserable stream
      * @param networkInfo
@@ -86,7 +104,27 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             Realm instance = null;
             try {
                 instance = realmManager.getRealmInstance(networkInfo, wallet);
-                for (Transaction transaction : transactions) {
+                //1. Update existing transactions
+                Map<String, Transaction> txMap = new HashMap<>();
+                for (Transaction tx : transactions) txMap.put(tx.hash, tx);
+
+                instance.beginTransaction();
+                RealmResults<RealmTransaction> rTx = instance.where(RealmTransaction.class).findAll();
+                for (RealmTransaction realmTx : rTx) {
+                    Transaction t = convert(realmTx);
+                    Transaction replacement = txMap.get(t.hash);
+
+                    //replace transaction
+                    if (replacement != null)
+                    {
+                        Log.d(TAG, "Replacing: " + t.hash);
+                        fill(instance, realmTx, replacement);
+                        txMap.remove(t.hash);
+                    }
+                }
+                instance.commitTransaction();
+
+                for (Transaction transaction : txMap.values()) {
                     Log.d(TAG, "Attempting to store: " + transaction.hash);
                     //don't store any transaction that
                     if (isUnknownContract(transaction))
@@ -111,6 +149,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 }
             } catch (Exception ex) {
                 if (instance != null) {
+                    ex.printStackTrace();
                     instance.cancelTransaction();
                 }
             } finally {

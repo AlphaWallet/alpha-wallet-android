@@ -117,15 +117,18 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     {
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (Integer id : indices)
+        if (indices != null)
         {
-            if (!first)
+            for (Integer id : indices)
             {
-                sb.append(", ");
-            }
-            first = false;
+                if (!first)
+                {
+                    sb.append(", ");
+                }
+                first = false;
 
-            sb.append(id.toString());
+                sb.append(id.toString());
+            }
         }
 
         return sb.toString();

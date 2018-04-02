@@ -43,10 +43,10 @@ public class SetupTokensInteract {
     private List<String> deadContracts = new ArrayList<>();
     private String walletAddr;
 
-    public static String UNKNOWN_CONTRACT = "[Unknown Contract]";
-    public static String EXPIRED_CONTRACT = "[Expired Contract]";
-    public static String INVALID_OPERATION = "[Invalid Operation]";
-    public static String CONTRACT_CONSTRUCTOR = "Contract Creation";
+    public final static String UNKNOWN_CONTRACT = "[Unknown Contract]";
+    public final static String EXPIRED_CONTRACT = "[Expired Contract]";
+    public final static String INVALID_OPERATION = "[Invalid Operation]";
+    public final static String CONTRACT_CONSTRUCTOR = "Contract Creation";
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -80,7 +80,7 @@ public class SetupTokensInteract {
         Transaction newTransaction = thisTrans;
         try
         {
-            if (checkIsConstructor(thisTrans)) return thisTrans; //fix up constructor params and early return
+            //if (checkIsConstructor(thisTrans)) return thisTrans; //fix up constructor params and early return
 
             TransactionOperation op = new TransactionOperation();
             ERC875ContractTransaction ct = new ERC875ContractTransaction();
@@ -142,7 +142,7 @@ public class SetupTokensInteract {
                 case "trade":
                     ct.operation = "Market purchase";
                     //until we can ecrecover from a signauture, we can't show our ticket as sold, but we can conclude it sold elsewhere, so this must be a buy
-                    ct.type = 1; //buy/receive
+                    ct.type = 1; // buy/receive
                     break;
                 case "transferFrom":
                     ct.operation = "Redeem";
@@ -170,18 +170,9 @@ public class SetupTokensInteract {
                         ct.otherParty = data.getFirstAddress();
                     }
                     break;
-                case "Contract Creation":
-                    ct.name = thisTrans.hash;
-                    //NB We can nly determine if this is one of our contracts either by parsing the construction input
-                    //or from querying a database like etherscan
-                    if (token != null && token.tokenInfo.isStormbird)
-                    {
-                        ct.type = -3;
-                    }
-                    else
-                    {
-                        ct.type = -2;
-                    }
+                case CONTRACT_CONSTRUCTOR:
+                    ct.name = thisTrans.to;
+                    fillContractInformation(newTransaction);
                     break;
                 default:
                     break;
@@ -193,6 +184,25 @@ public class SetupTokensInteract {
         }
 
         return newTransaction;
+    }
+
+    private void fillContractInformation(Transaction trans)
+    {
+        ERC875ContractTransaction ct = (ERC875ContractTransaction)trans.operations[0].contract;
+        Token token = contractMap.get(trans.to); //filled in from EtherscanTransaction
+
+        if (token != null)
+        {
+            ct.name = token.tokenInfo.name + " (" + token.getAddress() + ")";
+            if (token.tokenInfo.isStormbird)
+            {
+                ct.type = -3;
+            }
+            else
+            {
+                ct.type = -2;
+            }
+        }
     }
 
     private boolean checkIsConstructor(Transaction thisTrans)

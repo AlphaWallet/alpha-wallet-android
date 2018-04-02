@@ -162,7 +162,7 @@ public class TransactionsViewModel extends BaseViewModel {
      * First check wallet address is still valid (user may have restarted process)
      * @param shouldShowProgress
      */
-    public void fetchTransactions(boolean shouldShowProgress) {
+    private void fetchTransactions(boolean shouldShowProgress) {
         if (defaultWallet().getValue() != null)
         {
             Log.d(TAG, "Fetch start");
@@ -351,14 +351,6 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::showTransactions, this::onError);
     }
 
-    private void testStoreTxCount()
-    {
-        disposable = fetchTransactionsInteract.fetchCached(defaultWallet.getValue())
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(Schedulers.newThread())
-                .subscribe(this::onTxCount, this::onError);
-    }
-
     private void onTxCount(Transaction[] tx)
     {
         Log.d(TAG, "Stored Transactions " + tx.length);
@@ -381,8 +373,6 @@ public class TransactionsViewModel extends BaseViewModel {
             error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
         }
 
-        testStoreTxCount();
-
         if (setupTokensInteract.getRequiredContracts().size() > 0)
         {
             Log.d(TAG, "Fetching " + setupTokensInteract.getRequiredContracts().size() + " Tokens");
@@ -399,35 +389,6 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
-    private void checkIfRegularUpdateNeeded()
-    {
-        if (!isVisible)
-        {
-            //no longer any need to refresh
-            Log.d(TAG, "Finish");
-            if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
-            {
-                fetchTransactionDisposable.dispose();
-            }
-            fetchTransactionDisposable = null; //ready to restart the fetch
-
-            handler.removeCallbacks(startFetchTransactionsTask);
-            handler.removeCallbacks(startGetBalanceTask);
-        }
-        else if (fetchTransactionDisposable == null)
-        {
-            handler.removeCallbacks(startFetchTransactionsTask);
-            Log.d(TAG, "Delayed start in " + FETCH_TRANSACTIONS_INTERVAL);
-            handler.postDelayed(
-                    startFetchTransactionsTask,
-                    FETCH_TRANSACTIONS_INTERVAL);
-        }
-        else
-        {
-            Log.d(TAG, "must already be running, wait until termination");
-        }
-    }
-
     /**
      * 8. Receive all the token data for currently unknown contracts
      * - we only receive valid contract tokens as all the dead ones are filtered out
@@ -435,13 +396,6 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onTokenInfo(TokenInfo[] tokenInfos)
     {
         setupTokensInteract.getRequiredContracts().clear();
-        for (TokenInfo tf : tokenInfos)
-        {
-            if (tf.name == null || tf.name.equals(EXPIRED_CONTRACT))
-            {
-                Log.d(TAG, "Expired Contract: " + tf.address);
-            }
-        }
         if (tokenInfos.length > 0)
         {
             fetchTransactionDisposable = addTokenInteract
@@ -481,13 +435,57 @@ public class TransactionsViewModel extends BaseViewModel {
                 .subscribe(this::refreshDisplay);
     }
 
+    public void forceUpdateTransactionView()
+    {
+        if (fetchTransactionDisposable == null)
+        {
+            handler.removeCallbacks(startFetchTransactionsTask);
+            fetchTransactions(true);
+        }
+        else
+        {
+            //post a waiting dialog to appease the user
+            progress.postValue(true);
+            Log.d(TAG, "must already be running, wait until termination");
+        }
+    }
+
+    private void checkIfRegularUpdateNeeded()
+    {
+        if (!isVisible)
+        {
+            //no longer any need to refresh
+            Log.d(TAG, "Finish");
+            if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+            {
+                fetchTransactionDisposable.dispose();
+            }
+            fetchTransactionDisposable = null; //ready to restart the fetch
+
+            handler.removeCallbacks(startFetchTransactionsTask);
+            handler.removeCallbacks(startGetBalanceTask);
+        }
+        else if (fetchTransactionDisposable == null)
+        {
+            handler.removeCallbacks(startFetchTransactionsTask);
+            Log.d(TAG, "Delayed start in " + FETCH_TRANSACTIONS_INTERVAL);
+            handler.postDelayed(
+                    startFetchTransactionsTask,
+                    FETCH_TRANSACTIONS_INTERVAL);
+        }
+        else
+        {
+            Log.d(TAG, "must already be running, wait until termination");
+        }
+    }
+
+
     private void refreshDisplay(Transaction[] txList)
     {
         txArray = txList;
         this.transactions.postValue(txArray);
         fetchTransactionDisposable = null;
         checkIfRegularUpdateNeeded(); //finally see if we need to start periodic update
-        testStoreTxCount();
     }
 
     //NB: We don't need to update balance in transaction view

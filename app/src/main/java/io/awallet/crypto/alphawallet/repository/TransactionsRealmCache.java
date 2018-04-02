@@ -230,6 +230,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
     private Transaction[] convert(RealmResults<RealmTransaction> items) {
 	    int len = items.size();
+	    System.gc();
 	    Transaction[] result = new Transaction[len];
 	    for (int i = 0; i < len; i++) {
 	        result[i] = convert(items.get(i));

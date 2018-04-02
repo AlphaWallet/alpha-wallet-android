@@ -90,7 +90,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
-        refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
+        refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
 
@@ -101,7 +101,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.try_again: {
-                viewModel.fetchTransactions(true);
+                viewModel.forceUpdateTransactionView();
             }
             break;
             case R.id.action_buy: {

@@ -40,9 +40,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.awallet.crypto.alphawallet.ui.HomeActivity;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -283,6 +286,7 @@ public class TransactionsViewModel extends BaseViewModel {
      private void startCheckingTokenInterations(Transaction[] txList) {
          txArray = txList;
          tokenCheckList = setupTokensInteract.getTokenCheckList();
+
          consumeTokenCheckList();
      }
 
@@ -431,6 +435,13 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onTokenInfo(TokenInfo[] tokenInfos)
     {
         setupTokensInteract.getRequiredContracts().clear();
+        for (TokenInfo tf : tokenInfos)
+        {
+            if (tf.name == null || tf.name.equals(EXPIRED_CONTRACT))
+            {
+                Log.d(TAG, "Expired Contract: " + tf.address);
+            }
+        }
         if (tokenInfos.length > 0)
         {
             fetchTransactionDisposable = addTokenInteract

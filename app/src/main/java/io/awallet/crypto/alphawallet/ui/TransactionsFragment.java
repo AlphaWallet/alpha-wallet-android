@@ -55,6 +55,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private SystemView systemView;
     private TransactionsAdapter adapter;
+    private HomeActivity homeActivity; //TODO: Have a central storage for tokens shared between views. Also need mutables for completion waits
     private Dialog dialog;
 
     private boolean isVisible = false;
@@ -68,6 +69,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
 
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory).get(TransactionsViewModel.class);
+        homeActivity = (HomeActivity) getActivity();
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);

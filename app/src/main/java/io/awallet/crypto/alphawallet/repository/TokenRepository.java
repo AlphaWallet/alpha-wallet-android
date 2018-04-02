@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
@@ -65,6 +66,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 public class TokenRepository implements TokenRepositoryType {
 
+    private static final String TAG = "TRT";
     private static final long BALANCE_UPDATE_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
     private final TokenExplorerClientType tokenNetworkService;
     private final WalletRepositoryType walletRepository;
@@ -106,11 +108,13 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchActive(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-        return Single.merge(
-                fetchCachedEnabledTokens(network, wallet), // Immediately show the cache.
-                updateTokens(network, wallet) // Looking for new tokens
-                        .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
-            .toObservable();
+//        return Single.merge(
+//                fetchCachedEnabledTokens(network, wallet), // Immediately show the cache.
+//                updateTokens(network, wallet) // Looking for new tokens
+//                        .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
+//            .toObservable();
+        //This is now handled in transaction view. If we repeat here then we conflict with processing in transaction view
+        return fetchCachedEnabledTokens(network, wallet).toObservable();
     }
 
     @Override
@@ -268,6 +272,8 @@ public class TokenRepository implements TokenRepositoryType {
     public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
         TokenFactory tf = new TokenFactory();
         Token newToken = tf.createToken(tokenInfo);
+        Log.d(TAG, "Create for store2: " + tokenInfo.name);
+
         return localSource.saveTokens(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
@@ -283,6 +289,7 @@ public class TokenRepository implements TokenRepositoryType {
         for (int i = 0; i < tokenInfos.length; i++)
         {
             tokenList[i] = tf.createToken(tokenInfos[i]);
+            Log.d(TAG, "Create for store: " + tokenInfos[i].name);
         }
 
         return localSource.saveTokensList(
@@ -822,7 +829,14 @@ public class TokenRepository implements TokenRepositoryType {
                             true,
                             isStormbird);
 
-                    tokenList.add(result);
+                    if (result.name != null && result.name.length() > 0)
+                    {
+                        tokenList.add(result);
+                    }
+                    else
+                    {
+                        tokenList.add(result);
+                    }
                 }
 
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);

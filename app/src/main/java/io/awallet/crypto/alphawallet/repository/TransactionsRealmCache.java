@@ -23,6 +23,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 import static io.awallet.crypto.alphawallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
@@ -44,8 +45,9 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             Realm instance = null;
             try {
                 instance = realmManager.getRealmInstance(networkInfo, wallet);
-                //Log.d("TRC", "TX retrieved " + instance.)
-                return convert(instance.where(RealmTransaction.class).findAll());
+                RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class).findAll();
+                Log.d(TAG, "Found " + txs.size() + " TX Results");
+                return convert(txs);
             } finally {
                 if (instance != null) {
                     instance.close();

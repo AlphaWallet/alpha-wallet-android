@@ -364,7 +364,9 @@ public class SetupTokensInteract {
                     }
                 }
                 return txMap.values().toArray(new Transaction[txMap.values().size()]);
-            } finally {
+            }
+            finally
+            {
 
             }
         });
@@ -401,11 +403,6 @@ public class SetupTokensInteract {
         if (t.input != null && t.input.length() > 20)
         {
             try {
-                if (t.hash.contains("66534"))
-                {
-                    System.out.println("Hi");
-                }
-
                 TransactionInput data = transactionDecoder.decodeInput(t.input);
                 if (data != null && data.functionData != null)
                 {
@@ -457,6 +454,21 @@ public class SetupTokensInteract {
         for (Token t : tokens)
         {
             contractMap.put(t.getAddress(), t);
+        }
+    }
+
+    public void checkTokens()
+    {
+        for (Token t : contractMap.values())
+        {
+            if (requiredContracts.contains(t.getAddress()))
+            {
+                System.out.println("Got token: " + t.getFullName());
+            }
+            else
+            {
+                System.out.println("Don't have: " + t.getFullName());
+            }
         }
     }
 

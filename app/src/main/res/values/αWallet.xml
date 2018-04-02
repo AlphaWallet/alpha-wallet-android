@@ -48,6 +48,7 @@
     <string name="toolbar_header_marketplace">Marketplace</string>
     <string name="toolbar_header_settings">Settings</string>
     <string name="toolbar_header_help">Help \u0026 FAQ</string>
+    <string name="toolbar_ethereum_info">Ethereum Info</string>
     <string name="toolbar_header_transactions">Transactions</string>
     <string name="settings_my_wallet_address">My Wallet Address</string>
     <string name="settings_notification">Notification Settings</string>
@@ -189,4 +190,24 @@
     <string name="error_date">Please select expiry date</string>
     <string name="error_invalid_quantity">Input must be greater than 0</string>
     <string name="link_expiry_date">Link Expiry Date</string>
+    <string name="send_email">Send Email</string>
+    <string name="send_sms_whatsapp">Send SMS / WhatsApp</string>
+    <string name="input_wallet_address">Input Wallet Address</string>
+    <string name="use_qr_code_scanner">Use QR Code Scanner</string>
+    <string name="title_send">Send %s</string>
+    <string name="amount">Amount</string>
+    <string name="show_my_address">Show My Address</string>
+    <string name="confirm_transfer_details">Confirm Transfer Details</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="title_input_amount_to_transfer">Input Amount to Transfer:</string>
+    <string name="action_info">Info</string>
+    <string name="eth_detail_q1">What is Ethereum?</string>
+    <string name="eth_detail_a1">ETH is short for Ethereum. Ethereum is a crypto currency (similar to BitCoin) running on blockchain technology.</string>
+    <string name="eth_detail_q2">How do I convert Ethereum into cash?</string>
+    <string name="eth_detail_a2">You can convert Ethereum to USD and transfer it to your bank account with the following exchange platforms:</string>
+    <string name="eth_detail_coinbase"><u>www.coinbase.com</u></string>
+    <string name="eth_detail_gemini"><u>www.gemini.com</u></string>
+    <string name="eth_detail_q3">Why does aWallet use Ethereum?</string>
+    <string name="eth_detail_a3">aWallet uses Ethereum instead of currency (USD) because it is a more secure way to manage transactions. Ethereum is also the second of the world\'s biggest cryptocurrencies next to BitCoin.</string>
 </resources>

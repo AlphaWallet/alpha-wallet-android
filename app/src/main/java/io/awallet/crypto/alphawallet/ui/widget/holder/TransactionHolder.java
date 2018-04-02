@@ -75,10 +75,17 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             // default to ether transaction
             fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
                     ETHER_DECIMALS, transaction.timeStamp);
-        } else if (operation.contract instanceof ERC875ContractTransaction)
+        }
+        else if (operation.contract instanceof ERC875ContractTransaction)
         {
             fillERC875(transaction, (ERC875ContractTransaction)operation.contract);
-        } else {
+        }
+        else if (operation.from == null)
+        {
+            fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
+                 ETHER_DECIMALS, transaction.timeStamp);
+        }
+        else {
             fill(transaction.error, operation.from, operation.to, operation.contract.symbol, operation.value,
                     operation.contract.decimals, transaction.timeStamp);
         }
@@ -136,9 +143,9 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         }
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
-        if (!TextUtils.isEmpty(error)) {
+        if (error == null || error.length() == 0) {
             typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
-        } else if (isSent) {
+        } else if (!isSent) {
             typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
         } else {
             typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);

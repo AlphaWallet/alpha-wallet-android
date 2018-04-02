@@ -225,7 +225,7 @@ public class TransactionDecoder
             "transferFrom(address,address,uint16[])",
             "transfer(address,uint16[])",
             "trade(uint256,uint16[],uint8,bytes32,bytes32)",
-            "transfer(address,uint)",
+            "transfer(address,uint256)",
             "transferFrom(address,address,uint)",
             "approve(address,uint)"
             };

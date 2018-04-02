@@ -9,6 +9,7 @@ import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
 import io.awallet.crypto.alphawallet.entity.Transaction;
+import io.awallet.crypto.alphawallet.entity.TransactionContract;
 import io.awallet.crypto.alphawallet.entity.TransactionDecoder;
 import io.awallet.crypto.alphawallet.entity.TransactionInput;
 import io.awallet.crypto.alphawallet.entity.TransactionOperation;
@@ -80,103 +81,112 @@ public class SetupTokensInteract {
         Transaction newTransaction = thisTrans;
         try
         {
-            //if (checkIsConstructor(thisTrans)) return thisTrans; //fix up constructor params and early return
-
             TransactionOperation op = new TransactionOperation();
-            ERC875ContractTransaction ct = new ERC875ContractTransaction();
-            op.contract = ct;
+            TransactionContract ct;
+            ERC875ContractTransaction ect = null;
+            String functionName = INVALID_OPERATION;
 
-            if (token != null)
+            if (data != null && data.functionData != null)
             {
-                if (token.getFullName() == null)
+                if (data.functionData.isERC875() || data.functionData.isConstructor()
+                        || (token != null && token.tokenInfo.isStormbird))
                 {
-                    ct.name = EXPIRED_CONTRACT; //re-processing a contract that's been killed.
+                    ect = new ERC875ContractTransaction();
+                    ct = ect;
+
+                    if (data.functionData != null)
+                    {
+                        ect.setIndicies(data.paramValues);
+                    }
+                    ect.operation = functionName;
                 }
                 else
                 {
-                    ct.name = token.getFullName();
+                    ct = new TransactionContract();
                 }
-                ct.address = token.getAddress();
-            }
-            else if (deadContracts.contains(thisTrans.to))
-            {
-                ct.name = EXPIRED_CONTRACT;
-                ct.address = thisTrans.to;
+                functionName = data.functionData.functionFullName;
             }
             else
             {
-                ct.name = UNKNOWN_CONTRACT;
-                ct.address = thisTrans.to;
+                ect = new ERC875ContractTransaction();
+                ct = ect;
             }
 
-            String functionName = INVALID_OPERATION;
-            if (data != null && data.functionData != null)
-            {
-                ct.setIndicies(data.paramValues);
-                functionName = data.functionData.functionName;
-            }
-
-            ct.operation = functionName;
+            setupToken(token, ct, thisTrans);
 
             TransactionOperation[] newOps = new TransactionOperation[1];
             newOps[0] = op;
-
-            newTransaction = new Transaction(thisTrans.hash,
-                                                         thisTrans.error,
-                                                         thisTrans.blockNumber,
-                                                         thisTrans.timeStamp,
-                                                         thisTrans.nonce,
-                                                         thisTrans.from,
-                                                         thisTrans.to,
-                                                         thisTrans.value,
-                                                         thisTrans.gas,
-                                                         thisTrans.gasPrice,
-                                                         thisTrans.input,
-                                                         thisTrans.gasUsed,
-                                                         newOps);
-
+            op.contract = ct;
 
             //we could ecrecover the seller here
             switch (functionName)
             {
-                case "trade":
-                    ct.operation = "Market purchase";
+                case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
+                    ect.operation = "Market purchase";
                     //until we can ecrecover from a signauture, we can't show our ticket as sold, but we can conclude it sold elsewhere, so this must be a buy
-                    ct.type = 1; // buy/receive
+                    ect.type = 1; // buy/receive
                     break;
-                case "transferFrom":
-                    ct.operation = "Redeem";
+                case "transferFrom(address,address,uint16[])":
+                    ect.operation = "Redeem";
                     if (!data.containsAddress(walletAddr))
                     {
                         //this must be an admin redeem
-                        ct.operation = "Admin Redeem";
+                        ect.operation = "Admin Redeem";
                     }
                     //one of our tickets was burned
-                    ct.type = -1; //redeem
+                    ect.type = -1; //redeem
                     break;
-                case "transfer":
+                case "transfer(address,uint16[])":
                     //this could be transfer to or from
                     //if addresses contains our address then it must be a recieve
                     if (data.containsAddress(walletAddr))
                     {
-                        ct.operation = "Receive From";
-                        ct.type = 1; //buy/receive
-                        ct.otherParty = thisTrans.from;
+                        ect.operation = "Receive From";
+                        ect.type = 1; //buy/receive
+                        ect.otherParty = thisTrans.from;
                     }
                     else
                     {
-                        ct.operation = "Transfer To";
-                        ct.type = -1; //sell
-                        ct.otherParty = data.getFirstAddress();
+                        ect.operation = "Transfer To";
+                        ect.type = -1; //sell
+                        ect.otherParty = data.getFirstAddress();
                     }
+                    break;
+                case "transfer(address,uint256)":
+                    //ERC20 transfer
+                    op.from = thisTrans.from;
+                    op.to = data.getFirstAddress();
+                    op.transactionId = thisTrans.hash;
+                    //value in what?
+                    op.value = String.valueOf(data.getFirstValue());
                     break;
                 case CONTRACT_CONSTRUCTOR:
                     ct.name = thisTrans.to;
-                    fillContractInformation(newTransaction);
+                    fillContractInformation(thisTrans, ct);
+                    break;
+                case INVALID_OPERATION:
+                    if (ect != null)
+                    {
+                        ect.operation = INVALID_OPERATION;
+                    }
                     break;
                 default:
                     break;
             }
+
+            newTransaction = new Transaction(thisTrans.hash,
+                                             thisTrans.error,
+                                             thisTrans.blockNumber,
+                                             thisTrans.timeStamp,
+                                             thisTrans.nonce,
+                                             thisTrans.from,
+                                             thisTrans.to,
+                                             thisTrans.value,
+                                             thisTrans.gas,
+                                             thisTrans.gasPrice,
+                                             thisTrans.input,
+                                             thisTrans.gasUsed,
+                                             newOps);
         }
         catch (Exception e)
         {
@@ -186,53 +196,58 @@ public class SetupTokensInteract {
         return newTransaction;
     }
 
-    private void fillContractInformation(Transaction trans)
+    private void setupToken(Token token, TransactionContract ct, Transaction t) throws Exception
     {
-        ERC875ContractTransaction ct = (ERC875ContractTransaction)trans.operations[0].contract;
-        Token token = contractMap.get(trans.to); //filled in from EtherscanTransaction
-
         if (token != null)
         {
-            ct.name = token.tokenInfo.name + " (" + token.getAddress() + ")";
-            if (token.tokenInfo.isStormbird)
+            if (token.getFullName() == null)
             {
-                ct.type = -3;
+                ct.name = EXPIRED_CONTRACT; //re-processing a contract that's been killed.
             }
             else
             {
-                ct.type = -2;
+                ct.name = token.getFullName();
             }
+            ct.address = token.getAddress();
+            ct.decimals = token.tokenInfo.decimals;
+            ct.symbol = token.tokenInfo.symbol;
+            ct.totalSupply = "0";
+        }
+        else if (deadContracts.contains(t.to))
+        {
+            ct.name = EXPIRED_CONTRACT;
+            ct.address = t.to;
+        }
+        else
+        {
+            ct.name = UNKNOWN_CONTRACT;
+            ct.address = t.to;
         }
     }
 
-    private boolean checkIsConstructor(Transaction thisTrans)
+    private void fillContractInformation(Transaction trans, TransactionContract tc) throws Exception
     {
-        if (thisTrans.operations != null && thisTrans.operations.length > 0)
+        if (tc instanceof ERC875ContractTransaction)
         {
-            if (thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
+            ERC875ContractTransaction ct = (ERC875ContractTransaction) tc;
+            Token token = contractMap.get(trans.to); //filled in from EtherscanTransaction
+
+            ct.operation = CONTRACT_CONSTRUCTOR;
+
+            if (token != null)
             {
-                ERC875ContractTransaction ct = (ERC875ContractTransaction)thisTrans.operations[0].contract;
-                if (ct.operation.equals(CONTRACT_CONSTRUCTOR) && ct.address.length() > 0)
+                ct.name = token.tokenInfo.name + " (" + token.getAddress() + ")";
+                if (token.tokenInfo.isStormbird)
                 {
-                    //try to find token
-                    Token token = contractMap.get(ct.address);
-                    if (token != null)
-                    {
-                        ct.name = token.tokenInfo.name + " (" + token.getAddress() + ")";
-                        if (token.tokenInfo.isStormbird)
-                        {
-                            ct.type = -3;
-                        }
-                        else
-                        {
-                            ct.type = -2;
-                        }
-                    }
-                    return true;
+                    ct.type = -3;
+
+                }
+                else
+                {
+                    ct.type = -2;
                 }
             }
         }
-        return false;
     }
 
     /**
@@ -359,6 +374,10 @@ public class SetupTokensInteract {
                 //generateTestString(txArray);
 
                 for (Transaction t : txArray) {
+                    if (t.hash.contains("f8f3ef0"))
+                    {
+                        System.out.println("f8f3ef0");
+                    }
                     if (!txMap.containsKey(t.hash)) {
                         if (!newTxList.contains(t.hash)) {
                             newTxList.add(t.hash); //should re-check this transaction
@@ -412,7 +431,8 @@ public class SetupTokensInteract {
     {
         if (t.input != null && t.input.length() > 20)
         {
-            try {
+            try
+            {
                 TransactionInput data = transactionDecoder.decodeInput(t.input);
                 if (data != null && data.functionData != null)
                 {

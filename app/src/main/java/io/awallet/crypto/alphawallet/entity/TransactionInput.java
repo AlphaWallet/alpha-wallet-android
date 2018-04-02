@@ -59,4 +59,16 @@ public class TransactionInput
         }
         return address;
     }
+
+    public String getFirstValue()
+    {
+        String value = "0";
+        if (miscData.size() > 0)
+        {
+            //convert to big integer
+            BigInteger bi = new BigInteger(miscData.get(0), 16);
+            value = bi.toString(10);
+        }
+        return value;
+    }
 }

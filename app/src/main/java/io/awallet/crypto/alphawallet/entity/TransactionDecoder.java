@@ -218,7 +218,6 @@ public class TransactionDecoder
         data.hasSig = false;
         data.contractType = CREATION;
         functionList.put("0x60606040", data);
-
     }
 
     static final String[] KNOWN_FUNCTIONS = {
@@ -226,8 +225,8 @@ public class TransactionDecoder
             "transfer(address,uint16[])",
             "trade(uint256,uint16[],uint8,bytes32,bytes32)",
             "transfer(address,uint256)",
-            "transferFrom(address,address,uint)",
-            "approve(address,uint)"
+            "transferFrom(address,address,uint256)",
+            "approve(address,uint256)"
             };
 
     static final boolean[] HAS_SIG = {

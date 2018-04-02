@@ -1,6 +1,5 @@
 <resources>
     <string name="balance">Balance</string>
-    <string name="title_send">Send</string>
     <string name="title_request">My Address</string>
     <string name="title_import">Import Wallet</string>
     <string name="title_create">Create</string>

@@ -212,7 +212,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(ticketIndicies)
+                        .getMessage(ticketIndicies, this.ticket.getValue().getAddress())
                         .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
     }
@@ -244,10 +244,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         fetchTokenBalance();
         startMemoryPoolListener();
 
-        //Push initial QR
-        disposable = signatureGenerateInteract
-                .getMessage(ticketIndicies)
-                .subscribe(this::onSignMessage, this::onError);
+        onSaved();
     }
 
     private void markUsedIndicies(List<BigInteger> burnList) {
@@ -281,7 +278,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         }
         else {
             disposable = signatureGenerateInteract
-                    .getMessage(ticketIndicies)
+                    .getMessage(ticketIndicies, this.ticket.getValue().getAddress())
                     .subscribe(this::onSignMessage, this::onError);
         }
     }

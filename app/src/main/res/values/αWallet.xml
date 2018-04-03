@@ -59,6 +59,7 @@
     <string name="quantity_to_redeem">Quantity to Redeem</string>
     <string name="waiting_for_blockchain">Waiting for blockchain ...</string>
     <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
+    <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
     <string name="btn_text_apply">Apply</string>
     <string name="filter_by">Filter by:</string>
     <string name="filter_date_label">Date</string>
@@ -68,6 +69,9 @@
     <string name="set_a_price">Set a Price:</string>
     <string name="learn_more_about_ethereum">Learn more about Ethereum</string>
     <string name="price_per_ticket">Price Per Ticket</string>
+    <string name="action_marketplaceSale">Marketplace</string>
+    <string name="action_magiclink">Magic Link</string>
+
     <string-array name="filter_date">
         <item>Most Recent</item>
         <item>Oldest</item>
@@ -182,7 +186,9 @@
     <string name="generate_free_transfer_link">Create free transfer link?</string>
     <string name="send_universal_link">Generate Link</string>
     <string name="generate_sale_transfer_link">Generate Sale Link</string>
+    <string name="place_tickets_marketplace">List on marketplace</string>
     <string name="send_universal_sale_link">Send Sale Link</string>
+    <string name="market_listing"></string>
     <string name="invalid_ticket">Invalid Ticket</string>
     <string name="hint_time">--:--</string>
     <string name="link_expiry_time">Link Expiry Time</string>

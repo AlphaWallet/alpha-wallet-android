@@ -65,7 +65,8 @@ public class SellDetailActivity extends BaseActivity {
     private TicketRange ticketRange;
     private TicketAdapter adapter;
     private TextView usdPrice;
-    private Button sellButton;
+    private Button sellMarketplaceButton;
+    private Button magicLinkButton;
 
     private EditText sellPrice;
     private TextView textQuantity;
@@ -108,7 +109,8 @@ public class SellDetailActivity extends BaseActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        sellButton = findViewById(R.id.button_sell);
+        sellMarketplaceButton = findViewById(R.id.button_marketplace);
+        magicLinkButton = findViewById(R.id.button_magiclink);
         usdPrice = findViewById(R.id.fiat_price);
         sellPrice = findViewById(R.id.asking_price);
         totalCostText = findViewById(R.id.eth_price);
@@ -146,9 +148,21 @@ public class SellDetailActivity extends BaseActivity {
         initDatePicker();
         initTimePicker();
 
-        sellButton.setOnClickListener(v -> {
-            if (isInputValid()) {
+//        sellButton.setOnClickListener(v -> {
+//            if (isInputValid()) {
+//                sellTicketLink();
+//            }
+//        });
+
+        magicLinkButton.setOnClickListener(v -> {
+            if (isInputValid(true)) {
                 sellTicketLink();
+            }
+        });
+
+        sellMarketplaceButton.setOnClickListener(v -> {
+            if (isInputValid(false)) {
+                marketplaceDialog();
             }
         });
 
@@ -156,7 +170,7 @@ public class SellDetailActivity extends BaseActivity {
         expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
     }
 
-    private boolean isInputValid() {
+    private boolean isInputValid(boolean checkDate) {
         boolean result = true;
         hideErrorMessages();
         if (Integer.parseInt(textQuantity.getText().toString()) <= 0) {
@@ -175,17 +189,21 @@ public class SellDetailActivity extends BaseActivity {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
-        if (expiryDateEditText.getText().toString().isEmpty()) {
-            expiryDateErrorText.setVisibility(View.VISIBLE);
-            result = false;
-        }
-        if (expiryTimeEditText.getText().toString().isEmpty()) {
-            expiryTimeErrorText.setVisibility(View.VISIBLE);
-            result = false;
+        if (checkDate)
+        {
+            if (expiryDateEditText.getText().toString().isEmpty())
+            {
+                expiryDateErrorText.setVisibility(View.VISIBLE);
+                result = false;
+            }
+            if (expiryTimeEditText.getText().toString().isEmpty())
+            {
+                expiryTimeErrorText.setVisibility(View.VISIBLE);
+                result = false;
+            }
         }
         return result;
     }
-
 
     private void initQuantitySelector() {
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
@@ -386,6 +404,24 @@ public class SellDetailActivity extends BaseActivity {
         dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellLinkFinal(universalLink));
+        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void marketplaceDialog() {
+        //how many tickets are we selling?
+        String textPrice = sellPrice.getText().toString();
+        TextView textQuantity = findViewById(R.id.text_quantity);
+        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
+        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName) + " @" + textPrice + " Eth/Ticket";
+
+        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+        dialog.setTitle(R.string.confirm_sale_title);
+        dialog.setSmallText(R.string.place_tickets_marketplace);
+        dialog.setBigText(qty);
+        dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
+        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
         dialog.show();
     }

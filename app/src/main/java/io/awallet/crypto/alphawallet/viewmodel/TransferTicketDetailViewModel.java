@@ -6,6 +6,8 @@ import android.content.Context;
 
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
+import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -16,9 +18,18 @@ import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 import io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
 
+import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
+
+import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
  * Created by James on 21/02/2018.
@@ -29,11 +40,14 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
+    private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
+
+    private byte[] linkMessage;
 
     TransferTicketDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
@@ -49,6 +63,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         return defaultWallet;
     }
     public LiveData<String> newTransaction() { return newTransaction; }
+    public LiveData<String> universalLinkReady() { return universalLinkReady; }
 
     public void prepare(Ticket ticket) {
         disposable = findDefaultNetworkInteract
@@ -88,5 +103,37 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private void onCreateTransaction(String transaction)
     {
         newTransaction.postValue(transaction);
+    }
+
+    public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress)
+    {
+        if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
+
+        //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
+        //This is what we must sign.
+        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
+        try {
+            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, 0);
+        } catch (SalesOrderMalformed e) {
+            //TODO: Display appropriate error to user
+        }
+
+        //sign this link
+        disposable = createTransactionInteract
+                .sign(defaultWallet().getValue(), tradeBytes)
+                .subscribe(this::gotSignature, this::onError);
+    }
+
+    private void gotSignature(byte[] signature)
+    {
+        try {
+            String universalLink = SalesOrder.completeUniversalLink(linkMessage, signature);
+            //Now open the share icon
+            universalLinkReady.postValue(universalLink);
+        }
+        catch (SalesOrderMalformed sm) {
+            //TODO: Display appropriate error to user
+            sm.printStackTrace();
+        }
     }
 }

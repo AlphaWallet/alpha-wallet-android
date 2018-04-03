@@ -7,25 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import io.awallet.crypto.alphawallet.C;
-import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.ConfirmationType;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
-import io.awallet.crypto.alphawallet.entity.GasSettings;
-import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import io.awallet.crypto.alphawallet.util.BalanceUtils;
-import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
-import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
-import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
 
 import org.web3j.utils.Convert;
 
@@ -36,9 +22,22 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.C;
+import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.ConfirmationType;
+import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.GasSettings;
+import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.util.BalanceUtils;
+import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
+import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
+import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
+import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 
 public class ConfirmationActivity extends BaseActivity {
-    AlertDialog dialog;
+    AWalletAlertDialog dialog;
 
     @Inject
     ConfirmationViewModelFactory confirmationViewModelFactory;
@@ -74,6 +73,8 @@ public class ConfirmationActivity extends BaseActivity {
         setContentView(R.layout.activity_confirm);
         toolbar();
 
+        setTitle("");
+
         fromAddressText = findViewById(R.id.text_from);
         toAddressText = findViewById(R.id.text_to);
         valueText = findViewById(R.id.text_value);
@@ -98,8 +99,7 @@ public class ConfirmationActivity extends BaseActivity {
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         String amountString;
 
-        switch (confirmationType)
-        {
+        switch (confirmationType) {
             case ETH:
                 amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
                 amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
@@ -127,7 +127,6 @@ public class ConfirmationActivity extends BaseActivity {
         toAddressText.setText(toAddress);
 
         valueText.setText(amountString);
-        valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
 
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
@@ -144,14 +143,15 @@ public class ConfirmationActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.confirmation_menu, menu);
+//        getMenuInflater().inflate(R.menu.confirmation_menu, menu);
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_edit: {
+            case R.id.action_settings: {
                 viewModel.openGasSettings(ConfirmationActivity.this);
             }
             break;
@@ -168,11 +168,10 @@ public class ConfirmationActivity extends BaseActivity {
     private void onProgress(boolean shouldShowProgress) {
         hideDialog();
         if (shouldShowProgress) {
-            dialog = new AlertDialog.Builder(this)
-                    .setTitle(R.string.title_dialog_sending)
-                    .setView(new ProgressBar(this))
-                    .setCancelable(false)
-                    .create();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setProgressMode();
+            dialog.setTitle(R.string.title_dialog_sending);
+            dialog.setCancelable(false);
             dialog.show();
         }
     }
@@ -183,11 +182,16 @@ public class ConfirmationActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        hideDialog();
+        super.onDestroy();
+    }
+
     private void onSend() {
         GasSettings gasSettings = viewModel.gasSettings().getValue();
 
-        switch (confirmationType)
-        {
+        switch (confirmationType) {
             case ETH:
                 viewModel.createTransaction(
                         fromAddressText.getText().toString(),
@@ -234,19 +238,23 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onTransaction(String hash) {
         hideDialog();
-        dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.transaction_succeeded)
-                .setMessage(hash)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    finish();
-                })
-                .setNeutralButton(R.string.copy, (dialog1, id) -> {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("transaction hash", hash);
-                    clipboard.setPrimaryClip(clip);
-                    finish();
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(hash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
         dialog.show();
     }
 

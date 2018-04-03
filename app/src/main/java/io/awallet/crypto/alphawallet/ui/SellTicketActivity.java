@@ -80,6 +80,8 @@ public class SellTicketActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.marketQueueSuccessDialog().observe(this, this::displayMarketQueueSuccessDialog);
+        viewModel.marketQueueErrorDialog().observe(this, this::displayMarketQueueErrorDialog);
 
         Button nextButton = findViewById(R.id.button_next);
         nextButton.setOnClickListener(v -> {

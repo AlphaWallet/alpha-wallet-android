@@ -14,6 +14,7 @@ import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -70,8 +71,8 @@ public class ImportTokenService {
 
         //break signature down
         Sign.SignatureData sigData = sigFromByteArray(signature);
-        String r = bytesToHex(sigData.getR());
-        String s = bytesToHex(sigData.getS());
+        String r = Numeric.cleanHexPrefix(Numeric.toHexString(sigData.getR()));
+        String s = Numeric.cleanHexPrefix(Numeric.toHexString(sigData.getS()));
         String v = Integer.toHexString(sigData.getV());
         String sigStr = r+","+s+","+v;
 
@@ -301,19 +302,5 @@ public class ImportTokenService {
         }
 
         return sb.toString();
-    }
-
-    private static String bytesToHex(byte[] bytes)
-    {
-        final char[] hexArray = "0123456789ABCDEF".toCharArray();
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ )
-        {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        String finalHex = new String(hexChars);
-        return finalHex;
     }
 }

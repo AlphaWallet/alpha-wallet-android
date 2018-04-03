@@ -184,7 +184,8 @@ public class BrowseMarketViewModel extends BaseViewModel
     {
         checkMarketDisposable = Observable.interval(0, CHECK_MARKET_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(this::checkOrderBalances)
-                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe();
     }
 
@@ -208,8 +209,8 @@ public class BrowseMarketViewModel extends BaseViewModel
             //String orderAddress = defaultWallet.getValue().address;
             //get owner balance
             fetchTokensInteract.updateBalancePair(t, pair.order)
-                    .observeOn(Schedulers.io())
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onBalance, this::onError, this::updateUI);
         }
     }

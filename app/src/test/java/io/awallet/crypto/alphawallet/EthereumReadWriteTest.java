@@ -15,9 +15,9 @@ public class EthereumReadWriteTest {
     byte[] binaryData = new byte[] {(byte)0xe0, (byte)0xf4, (byte)0xe0, (byte)0xf5};
     @Test
     public void BufferReadsCorrectly() throws IOException{
-        int[] indices;
+        int[] indices = new int[2];
         EthereumReadBuffer in = new EthereumReadBuffer(new ByteArrayInputStream(binaryData));
-        indices = in.readUint16Indices(2);
+        in.readUnsignedShort(indices);
         Assert.assertEquals(0xE0F4, indices[0]);
     }
 }

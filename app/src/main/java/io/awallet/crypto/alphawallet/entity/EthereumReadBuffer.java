@@ -2,14 +2,13 @@ package io.awallet.crypto.alphawallet.entity;
 
 import android.support.annotation.NonNull;
 
-import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,11 +18,13 @@ import java.util.List;
 public class EthereumReadBuffer extends DataInputStream
 {
     private final byte[] readBuffer;
+    private final byte[] readBuffer4;
 
     public EthereumReadBuffer(@NonNull InputStream in)
     {
         super(in);
         readBuffer = new byte[32];
+        readBuffer4 = new byte[4];
     }
 
     public BigInteger readBI() throws IOException
@@ -37,13 +38,9 @@ public class EthereumReadBuffer extends DataInputStream
     }
 
     public String readAddress() throws IOException {
-        String addr = "0x";
-
         byte[] buffer20 = new byte[20];
         read(buffer20);
-        addr = "0x" + bytesToHex(buffer20);
-
-        return addr;
+        return Numeric.toHexString(buffer20);
     }
 
     @Override
@@ -55,38 +52,94 @@ public class EthereumReadBuffer extends DataInputStream
         return remains;
     }
 
-    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+
+    public void readSignature(byte[] signature) throws IOException
+    {
+        if (signature.length == 65) {
+            read(signature); // would it throw already, if the data is too short? - Weiwu
+        } else {
+            throw new IOException("Data isn't a signature"); // Is this even necessary? - Weiwu
         }
-        return new String(hexChars);
     }
 
-    public int[] readUint16Indices(int count) throws IOException
+    /*
+     * The java 8 recommended way is to read an unsigned Short as Short, and use it as
+     * unsigned Short. Here we still use the old method, reading unsigned shorts into int[].
+     */
+    public void readUnsignedShort(int[] ints) throws IOException
     {
-        int[] intArray = new int[count];
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < ints.length; i++)
         {
-            int value = byteToUint(readByte()) * 0x100;
-            value += byteToUint(readByte());
-            intArray[i] = value;
+            int value = toUnsignedInt(readShort());
+            ints[i] = value;
         }
-        return intArray;
     }
 
-    public byte[] readSignature() throws IOException
-    {
-        byte[] sig = new byte[65];
-        read(sig);
-        return sig;
+    /*
+     * equivalent of Short.toUnsignedInt
+     */
+    private int toUnsignedInt(short s) {
+        return s & 0x0000FFFF;
     }
 
-    private int byteToUint(byte b)
+    /*
+     * equivalent of Byte.toUnsignedInt
+     */
+    private int toUnsignedInt(byte b)
     {
-        return (int) b & 0xFF;
+        return b & 0x000000FF;
+    } // Int is 32 bits
+
+    /*
+     * equivalent of Integer.readUnsignedLong
+     */
+    public long toUnsignedLong(int i) throws IOException
+    {
+        return i & 0x00000000ffffffffL; // long is always 64 bits
+    }
+
+    public int[] readCompressedIndices(int indiciesLength) throws IOException
+    {
+        byte[] readBuffer = new byte[indiciesLength];
+        read(readBuffer);
+        int index = 0;
+        int state = 0;
+
+        List<Integer> indexList = new ArrayList<>();
+        Integer rValue = 0;
+
+        while (index < indiciesLength)
+        {
+            Integer p = toUnsignedInt(readBuffer[index]); // equivalent of Byte.toUnsignedInt()
+            switch (state)
+            {
+                case 0:
+                    //check if we require an extension byte read
+                    rValue = (p & ~(1 << 7)); //remove top bit.
+                    if (((1 << 7) & p) == (1 << 7)) //check if top bit is there
+                    {
+                        state = 1;
+                    }
+                    else
+                    {
+                        indexList.add(rValue);
+                    }
+                    break;
+                case 1:
+                    rValue = (rValue << 8) + (p & 0xFF); //Low byte + High byte without top bit (which is the extension designation bit)
+                    indexList.add(rValue);
+                    state = 0;
+                    break;
+                default:
+                    throw new IOException("Illegal state in readCompressedIndicies");
+            }
+
+            index++;
+        }
+
+        int[] indexArray = new int[indexList.size()];
+        for (int i = 0; i < indexList.size(); i++) indexArray[i] = indexList.get(i);
+
+        return indexArray;
     }
 }

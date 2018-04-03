@@ -52,16 +52,16 @@
                 android:id="@+id/button_use"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/button_green"
+                android:background="@drawable/selector_button"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:text="@string/action_use"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
+                android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
 
             <View
@@ -70,22 +70,22 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:alpha="0.5"
-                android:background="@color/super_light_grey" />
+                android:background="@color/white20" />
 
             <Button
                 android:id="@+id/button_sell"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/button_green"
+                android:background="@drawable/selector_button"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:text="@string/action_sell"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
+                android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
 
             <View
@@ -94,22 +94,22 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:alpha="0.5"
-                android:background="@color/super_light_grey" />
+                android:background="@color/white20" />
 
             <Button
                 android:id="@+id/button_transfer"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/button_green"
+                android:background="@drawable/selector_button"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:text="@string/action_transfer"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
+                android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
         </LinearLayout>
 

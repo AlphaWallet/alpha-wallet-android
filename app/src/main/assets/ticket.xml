@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
-  <contracts>
+  <contract>
     <address type="issuing">0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4</address>
-  </contracts>
-  <actions>
-    <action type="redeem">
-      <!-- the asset can be destroied in exchange for something else -->
-      <method name="SignatureDisplay">
-	<!-- the asset can be destroied by dipslaying a QR signature
-	     to someone-->
-	<!-- TODO: here, refer to the UI definition file -->
-      </method>
-    </action>
-  </actions>
+  </contract>
+  <tokenFeatures>
+    <trade method="market-queue" version="0.1">
+      <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
+    </trade>
+    <trade method="universal-link" version="9">
+      <prefix>https://app.awallet.io/</prefix>
+    </trade>
+    <redeem>
+      <method name="QR"/>
+      <!--
+      <method name="Aztec"/>
+      <method name="Bluetooth"/>
+      -->
+    </redeem>
+  </tokenFeatures>
+  <!-- token UI definition can happen here -->
   <fields>
     <!--
     There are 64 matches (1-64), each has up to 16 ticket classes,

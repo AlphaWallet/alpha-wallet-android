@@ -269,10 +269,11 @@ public class SalesOrder implements Parcelable {
      * @return
      */
     public String getOwnerKey() {
+        ownerAddress = "0x";
         try {
             Sign.SignatureData sigData = MarketQueueService.sigFromByteArray(signature);
             BigInteger recoveredKey = Sign.signedMessageToKey(getTradeBytes(), sigData);
-            ownerAddress = "0x" + Keys.getAddress(recoveredKey);
+            ownerAddress += Keys.getAddress(recoveredKey);
         }
         catch (Exception e)
         {
@@ -391,5 +392,18 @@ public class SalesOrder implements Parcelable {
     {
         byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
         return completeUniversalLink(leading, signature);
+    }
+
+    public boolean isValidOrder()
+    {
+        //check this order is not corrupt
+        //first check the owner address - we should already have called getOwnerKey
+        boolean isValid = true;
+
+        if (this.ownerAddress == null || this.ownerAddress.length() < 20) isValid = false;
+        if (this.contractAddress == null || this.contractAddress.length() < 20) isValid = false;
+        if (this.message == null) isValid = false;
+
+        return isValid;
     }
 }

@@ -419,7 +419,7 @@ public class SellDetailActivity extends BaseActivity {
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.place_tickets_marketplace);
         dialog.setBigText(qty);
-        dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
+        dialog.setPrimaryButtonText(R.string.market_queue_title);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());

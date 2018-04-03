@@ -99,9 +99,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/selector_button"
+                android:enabled="false"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
-                android:enabled="false"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:text="@string/action_use"
@@ -109,13 +109,7 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp"
-                android:background="@color/white20"
-                android:alpha="0.5" />
+            <include layout="@layout/button_divider" />
 
             <Button
                 android:id="@+id/button_sell"
@@ -124,9 +118,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/selector_button"
+                android:enabled="false"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
-                android:enabled="false"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:text="@string/action_sell"
@@ -134,13 +128,7 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/white20"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp"
-                android:alpha="0.5" />
+            <include layout="@layout/button_divider" />
 
             <Button
                 android:id="@+id/button_start_transfer"

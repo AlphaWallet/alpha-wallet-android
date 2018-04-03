@@ -64,13 +64,7 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp"
-                android:alpha="0.5"
-                android:background="@color/white20" />
+            <include layout="@layout/button_divider" />
 
             <Button
                 android:id="@+id/button_sell"
@@ -88,13 +82,7 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp"
-                android:alpha="0.5"
-                android:background="@color/white20" />
+            <include layout="@layout/button_divider" />
 
             <Button
                 android:id="@+id/button_transfer"

@@ -213,4 +213,9 @@
     <string name="scan_qr_label">Scan the QR Code or copy the text below:</string>
     <string name="my_wallet_address">My Wallet Address</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="action_magiclink">MagicLink</string>
+    <string name="action_marketplace">Marketplace</string>
+    <string name="sell_thru_magiclink">Sell through a MagicLink</string>
+    <string name="magiclink_expiry_on">MagicLink expiry on:</string>
+    <string name="confirm_sale_total">Total:</string>
 </resources>

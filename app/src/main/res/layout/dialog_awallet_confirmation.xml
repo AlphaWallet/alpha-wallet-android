@@ -29,6 +29,7 @@
         android:padding="30dp">
 
         <TextView
+            android:visibility="gone"
             android:id="@+id/dialog_small_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,6 +40,18 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/dialog_medium_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/font_bold"
+            android:gravity="center"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="gone"
+            android:textSize="20sp" />
+
+        <TextView
+            android:visibility="gone"
             android:id="@+id/dialog_big_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

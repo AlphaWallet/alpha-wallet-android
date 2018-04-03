@@ -292,6 +292,7 @@ public class SellDetailActivity extends BaseActivity {
             date = simpleDateFormat.parse(tempDateString);
             dateString = simpleDateFormat.format(date);
             Log.d(SellDetailActivity.class.getSimpleName(), "date : " + dateString);
+//            UTCTimeStamp = (date.getTime()) / 1000;
         } catch (ParseException e) {
             Log.e(SellDetailActivity.class.getSimpleName(), e.getMessage(), e);
         }
@@ -375,12 +376,16 @@ public class SellDetailActivity extends BaseActivity {
         String textPrice = sellPrice.getText().toString();
         TextView textQuantity = findViewById(R.id.text_quantity);
         int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
-        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName) + " @" + textPrice + " Eth/Ticket";
+        String qty = textQuantity.getText().toString() + " " +
+                getResources().getString(ticketName) + "\n" +
+                textPrice + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
+                getString(R.string.confirm_sale_total) + totalCostText.getText().toString() + "\n\n" +
+                getString(R.string.magiclink_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.generate_sale_transfer_link);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellLinkFinal(universalLink));

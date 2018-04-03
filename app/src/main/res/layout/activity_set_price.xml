@@ -481,7 +481,7 @@
             android:background="@drawable/selector_button"
             android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:text="@string/action_sell"
+            android:text="@string/sell_thru_magiclink"
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"
             android:textSize="20sp" />

@@ -58,9 +58,11 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
-import rx.Subscription;
+import rx.Scheduler;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -455,39 +457,17 @@ public class TokenRepository implements TokenRepositoryType {
 //    }
 
     @Override
-    public void memPoolListener(final SubscribeWrapper subscriber)
+    public rx.Subscription memPoolListener(SubscribeWrapper subscriber)
     {
-        if (web3jFullNode != null) {
-            new Thread() {
-                final Object waitForUnsubscribe = new Object();
-
-                public void run() {
-                    subscriber.wrapperInteraction = new Handler(Looper.getMainLooper()) {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            super.handleMessage(msg);
-                            //only handle shutdown message
-                            synchronized (waitForUnsubscribe) {
-                                waitForUnsubscribe.notifyAll();
-                            }
-                        }
-                    };
-
-                    final Subscription transactionSubscription = web3jFullNode.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
-
-                    try {
-                        synchronized (waitForUnsubscribe) {
-                            waitForUnsubscribe.wait();
-                        }
-                    } catch (InterruptedException e) {
-
-                    } finally {
-                        //Now terminate the observable and the thread
-                        transactionSubscription.unsubscribe();
-                        subscriber.wrapperInteraction = null;
-                    }
-                }
-            }.start();
+        if (web3jFullNode != null)
+        {
+            return web3jFullNode.pendingTransactionObservable()
+                    .subscribeOn(rx.schedulers.Schedulers.newThread())
+                    .subscribe(subscriber.scanReturn, subscriber.onError);
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -787,8 +767,10 @@ public class TokenRepository implements TokenRepositoryType {
 
                 return result;
             }
-            finally {
-
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return null;
             }
         });
     }

@@ -288,10 +288,12 @@ public class SellDetailActivity extends BaseActivity {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         Date date;
         String dateString = "";
+        long UTCTimeStamp = 0;
         try {
             date = simpleDateFormat.parse(tempDateString);
             dateString = simpleDateFormat.format(date);
             Log.d(SellDetailActivity.class.getSimpleName(), "date : " + dateString);
+            UTCTimeStamp = (date.getTime())/1000;
         } catch (ParseException e) {
             Log.e(SellDetailActivity.class.getSimpleName(), e.getMessage(), e);
         }
@@ -307,7 +309,7 @@ public class SellDetailActivity extends BaseActivity {
             int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
             List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
-            viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), price);
+            viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), price, UTCTimeStamp);
         }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());

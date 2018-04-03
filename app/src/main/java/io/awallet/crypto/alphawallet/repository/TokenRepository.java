@@ -551,31 +551,19 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception {
+    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
+    {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
-        try
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1)
         {
-            List<Type> response = FunctionReturnDecoder.decode(
-                    responseValue, function.getOutputParameters());
-            if (response.size() == 1)
-            {
-                return (T) response.get(0).getValue();
-//            if (response.get(0).getValue() instanceof String) {
-//                return (T)response.get(0).getValue();
-//            }
-//            else {
-//                int retVal = ((Uint8) response.get(0)).getValue().intValue();
-//                return (T)retVal;
-//            }
-            }
-            else
-            {
-                return null;
-            }
+            return (T) response.get(0).getValue();
         }
-        catch(Exception e)
+        else
         {
             return null;
         }
@@ -808,9 +796,9 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<TokenInfo[]> setupTokensFromLocal(String[] addresses)
     {
         return Single.fromCallable(() -> {
+            List<TokenInfo> tokenList = new ArrayList<>();
             try
             {
-                List<TokenInfo> tokenList = new ArrayList<>();
                 for (String address : addresses)
                 {
                     long now = System.currentTimeMillis();
@@ -838,11 +826,12 @@ public class TokenRepository implements TokenRepositoryType {
                         tokenList.add(result);
                     }
                 }
-
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
-            finally {
-
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
         });
     }

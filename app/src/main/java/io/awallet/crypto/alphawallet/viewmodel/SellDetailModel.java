@@ -93,13 +93,13 @@ public class SellDetailModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, BigInteger price)
+    public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, BigInteger price, long expiry)
     {
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
 
-        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, 0);
+        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, expiry);
         try {
-            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, 0);
+            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, expiry);
         } catch (SalesOrderMalformed e) {
             //TODO: Display appropriate error to user
         }

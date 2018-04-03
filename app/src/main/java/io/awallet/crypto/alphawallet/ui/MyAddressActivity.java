@@ -86,6 +86,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }
-        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 }

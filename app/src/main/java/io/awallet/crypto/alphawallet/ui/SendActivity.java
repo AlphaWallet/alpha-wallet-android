@@ -1,6 +1,8 @@
 package io.awallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -54,6 +56,7 @@ import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 
 public class SendActivity extends BaseActivity {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
+    private static final String KEY_ADDRESS = "key_address";
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
     @Inject
@@ -88,6 +91,7 @@ public class SendActivity extends BaseActivity {
     Button amountNextButton;
     Button showAddressButton;
     Button addressNextButton;
+    Button copyAddressButton;
 
     EditText amountEditText;
     EditText toAddressEditText;
@@ -185,6 +189,18 @@ public class SendActivity extends BaseActivity {
         addressNextButton.setOnClickListener(v -> {
             onAddressNext();
         });
+
+        copyAddressButton = findViewById(R.id.copy_action);
+        copyAddressButton.setOnClickListener(v -> copyAddress());
+    }
+
+    private void copyAddress() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, wallet.address);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
+        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 
     private void onStartTransfer() {

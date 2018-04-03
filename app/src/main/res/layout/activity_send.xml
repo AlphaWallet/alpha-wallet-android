@@ -17,54 +17,72 @@
         android:focusableInTouchMode="true"
         android:visibility="visible">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:orientation="vertical">
+            android:layout_marginBottom="?actionBarSize">
 
-            <include layout="@layout/item_token" />
-
-            <Button
-                android:id="@+id/button_show_address"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="200dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/background_round_primary"
-                android:fontFamily="@font/font_regular"
-                android:paddingBottom="10dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="10dp"
-                android:text="@string/show_my_address"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/background_round_grey"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:padding="15dp"
-                android:textSize="14sp"
-                android:visibility="gone" />
+                <include layout="@layout/item_token" />
 
-            <ImageView
-                android:id="@+id/qr_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:visibility="gone"
-                app:srcCompat="@drawable/ic_autorenew_black_24dp" />
+                <Button
+                    android:id="@+id/button_show_address"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/background_round_primary"
+                    android:fontFamily="@font/font_regular"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/show_my_address"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:visibility="gone" />
 
-        </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/background_card"
+                    android:orientation="vertical"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <TextView
+                        android:id="@+id/title_my_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_light"
+                        android:gravity="center"
+                        android:text="@string/my_wallet_address"
+                        android:textColor="@color/text_black"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:gravity="center"
+                        android:text="@string/scan_qr_label"
+                        android:textColor="@color/text_black"
+                        android:textSize="16sp" />
+
+                    <include layout="@layout/layout_address" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
 
         <Button
             android:id="@+id/button_start_transfer"

@@ -133,7 +133,7 @@ public class SalesOrder implements Parcelable {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
 
-            if (priceWei.compareTo(maxPrice) == 1) {
+            if (priceWei.compareTo(maxPrice) > 0) {
                 throw new SalesOrderMalformed("Order's price too high to be used in a link");
             }
             wb.write4ByteMicroEth(priceWei);

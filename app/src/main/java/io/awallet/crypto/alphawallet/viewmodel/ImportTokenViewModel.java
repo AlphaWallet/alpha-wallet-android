@@ -183,7 +183,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
             TokenFactory tf = new TokenFactory();
             Token tempToken = tf.createToken(tokenInfo);
 
-            disposable = fetchTokensInteract.updateBalance(importOrder.ownerAddress, tempToken)
+            fetchTokensInteract.updateBalance(importOrder.ownerAddress, tempToken)
                     .subscribeOn(Schedulers.io()) //observeOn
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onBalance, this::onError, this::gotBalance);

@@ -191,7 +191,6 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private void checkOrderBalances(Long dummy)
     {
-        checkingPairs.clear();
         checkingPairs.addAll(staticPairList);
         checkOrderBalances();
     }
@@ -209,20 +208,10 @@ public class BrowseMarketViewModel extends BaseViewModel
             Token t = tokenMap.get(pair.order.contractAddress);
             //String orderAddress = defaultWallet.getValue().address;
             //get owner balance
-            if (pair.order.isValidOrder())
-            {
-                disposable = fetchTokensInteract.updateBalancePair(t, pair.order)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onBalance, this::onError, this::updateUI);
-            }
-            else
-            {
-                //leave balance blank
-                pair.balance = new ArrayList<>();
-                onBalance(pair);
-                updateUI();
-            }
+            fetchTokensInteract.updateBalancePair(t, pair.order)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onBalance, this::onError, this::updateUI);
         }
     }
 
@@ -239,13 +228,12 @@ public class BrowseMarketViewModel extends BaseViewModel
 
     private void finishOrders()
     {
-
         //System.out.println("Finished displaying orders");
     }
 
     private void onBalance(OrderContractAddressPair pair)
     {
-        refreshUINeeded = true;
+        refreshUINeeded = false;
         //now update the orders
         for (SalesOrder order : orders)
         {

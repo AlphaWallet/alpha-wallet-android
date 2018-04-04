@@ -10,6 +10,7 @@ import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
+import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 
 public class TokensViewModelFactory implements ViewModelProvider.Factory {
 

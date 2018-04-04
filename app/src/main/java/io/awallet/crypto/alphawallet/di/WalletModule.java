@@ -12,6 +12,7 @@ import io.awallet.crypto.alphawallet.router.AddTokenRouter;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
+import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 import io.awallet.crypto.alphawallet.viewmodel.WalletViewModelFactory;
 
 import dagger.Module;
@@ -24,6 +25,7 @@ public class WalletModule {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
+            TransactionsRouter transactionsRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -33,6 +35,7 @@ public class WalletModule {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
+                transactionsRouter,
                 changeTokenCollectionRouter,
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
@@ -58,6 +61,11 @@ public class WalletModule {
     @Provides
     AssetDisplayRouter provideRedeemTokenRouter() {
         return new AssetDisplayRouter();
+    }
+
+    @Provides
+    TransactionsRouter provideTransactionsRouter() {
+        return new TransactionsRouter();
     }
 
     @Provides

@@ -1,7 +1,5 @@
 package io.awallet.crypto.alphawallet.repository;
 
-import org.web3j.protocol.core.methods.response.Transaction;
-
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
@@ -12,8 +10,6 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import rx.functions.Action1;
 
 public interface TokenRepositoryType {
 
@@ -27,7 +23,7 @@ public interface TokenRepositoryType {
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address);
     Single<TokenInfo[]> update(String[] address);
-    rx.Subscription memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
+    void memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Completable addToken(Wallet wallet, TokenInfo tokenInfo);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);

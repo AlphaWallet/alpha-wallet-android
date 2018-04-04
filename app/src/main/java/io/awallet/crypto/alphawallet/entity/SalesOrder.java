@@ -133,7 +133,7 @@ public class SalesOrder implements Parcelable {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
 
-            if (priceWei.compareTo(maxPrice) > 0) {
+            if (priceWei.compareTo(maxPrice) == 1) {
                 throw new SalesOrderMalformed("Order's price too high to be used in a link");
             }
             wb.write4ByteMicroEth(priceWei);
@@ -269,11 +269,10 @@ public class SalesOrder implements Parcelable {
      * @return
      */
     public String getOwnerKey() {
-        ownerAddress = "0x";
         try {
             Sign.SignatureData sigData = MarketQueueService.sigFromByteArray(signature);
             BigInteger recoveredKey = Sign.signedMessageToKey(getTradeBytes(), sigData);
-            ownerAddress += Keys.getAddress(recoveredKey);
+            ownerAddress = "0x" + Keys.getAddress(recoveredKey);
         }
         catch (Exception e)
         {
@@ -392,18 +391,5 @@ public class SalesOrder implements Parcelable {
     {
         byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
         return completeUniversalLink(leading, signature);
-    }
-
-    public boolean isValidOrder()
-    {
-        //check this order is not corrupt
-        //first check the owner address - we should already have called getOwnerKey
-        boolean isValid = true;
-
-        if (this.ownerAddress == null || this.ownerAddress.length() < 20) isValid = false;
-        if (this.contractAddress == null || this.contractAddress.length() < 20) isValid = false;
-        if (this.message == null) isValid = false;
-
-        return isValid;
     }
 }

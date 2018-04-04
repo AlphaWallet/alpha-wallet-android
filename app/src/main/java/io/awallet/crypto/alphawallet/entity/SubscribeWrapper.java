@@ -19,5 +19,8 @@ public class SubscribeWrapper
         scanReturn = s;
     }
 
-    public Action1<Throwable> onError = Throwable::printStackTrace;
+    public Action1<Throwable> onError = (e) -> {
+        e.printStackTrace();
+        System.out.println("TH: " + e.getMessage());
+    };
 }

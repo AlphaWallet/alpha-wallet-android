@@ -6,6 +6,7 @@ import android.view.MenuItem;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
+import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 
 import javax.inject.Inject;
 

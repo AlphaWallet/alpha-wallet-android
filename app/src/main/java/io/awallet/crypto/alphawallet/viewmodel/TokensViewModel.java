@@ -12,6 +12,7 @@ import io.awallet.crypto.alphawallet.router.AddTokenRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
+import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 
 import java.math.BigDecimal;

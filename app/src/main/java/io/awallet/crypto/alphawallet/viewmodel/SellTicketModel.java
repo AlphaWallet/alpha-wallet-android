@@ -19,7 +19,6 @@ import io.awallet.crypto.alphawallet.router.SellTicketRouter;
 
 import java.util.concurrent.TimeUnit;
 
-import io.awallet.crypto.alphawallet.ui.SellTicketActivity;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
@@ -107,32 +106,6 @@ public class SellTicketModel  extends BaseViewModel {
             Token ticket = this.ticket().getValue();
             sellDetailRouter.open(context, ticket, ticketIDs, defaultWallet.getValue());
         } catch (Exception e) {
-
-        }
-    }
-
-    public void openMarketDialog(Context context, String selection)
-    {
-        try
-        {
-            Token ticket = this.ticket().getValue();
-            sellDetailRouter.open(context, ticket, selection, defaultWallet.getValue());
-        }
-        catch (Exception e)
-        {
-
-        }
-    }
-
-    public void openMagicLinkDialog(Context context, String selection)
-    {
-        try
-        {
-            Token ticket = this.ticket().getValue();
-            sellDetailRouter.openMagic(context, ticket, selection, defaultWallet.getValue());
-        }
-        catch (Exception e)
-        {
 
         }
     }

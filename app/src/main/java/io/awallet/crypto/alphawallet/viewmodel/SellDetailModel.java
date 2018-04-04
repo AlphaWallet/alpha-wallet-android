@@ -2,7 +2,6 @@ package io.awallet.crypto.alphawallet.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
 
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
@@ -13,12 +12,10 @@ import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import io.awallet.crypto.alphawallet.router.SellDetailRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
@@ -39,20 +36,17 @@ public class SellDetailModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final SellDetailRouter sellDetailRouter;
 
     private byte[] linkMessage;
 
     SellDetailModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
                           MarketQueueService marketQueueService,
-                    CreateTransactionInteract createTransactionInteract,
-                    SellDetailRouter sellDetailRouter) {
+                    CreateTransactionInteract createTransactionInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
-        this.sellDetailRouter = sellDetailRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {

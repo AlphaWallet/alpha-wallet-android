@@ -1,7 +1,5 @@
 package io.awallet.crypto.alphawallet.interact;
 
-import android.util.Log;
-
 import io.awallet.crypto.alphawallet.entity.MessagePair;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
@@ -24,14 +22,13 @@ public class SignatureGenerateInteract {
     }
 
     //TODO: Sign message here not in the additional field
-    public Single<MessagePair> getMessage(List<Integer> indexList, String contract) {
+    public Single<MessagePair> getMessage(List<Integer> indexList) {
         return Single.fromCallable(() -> {
             String selectionStr = SignaturePair.generateSelection(indexList);
             long currentTime = System.currentTimeMillis();
             long minsT = currentTime / (30 * 1000);
             int minsTime = (int) minsT;
-            String plainMessage = selectionStr + "," + String.valueOf(minsTime) + "," + contract.toLowerCase();  //This is the plain text message that gets signed
-            Log.d("SIG", plainMessage);
+            String plainMessage = selectionStr + "," + String.valueOf(minsTime);
             return new MessagePair(selectionStr, plainMessage);
         });
     }

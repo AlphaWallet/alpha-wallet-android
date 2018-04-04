@@ -33,9 +33,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import rx.functions.Action1;
 
 /**
@@ -64,7 +62,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<String> selection = new MutableLiveData<>();
     private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
 
-    private rx.Subscription memPoolSubscription;
+    private SubscribeWrapper wrapper;
     private TicketRange ticketRange;
     private List<Integer> ticketIndicies;
 
@@ -124,20 +122,10 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             getBalanceDisposable.dispose();
         }
 
-        terminateListener().toObservable().subscribeOn(Schedulers.newThread()).subscribe();
-    }
-
-    private Single<String> terminateListener()
-    {
-        return Single.fromCallable(() -> {
-                                       if (memPoolSubscription != null && !memPoolSubscription.isUnsubscribed())
-                                       {
-                                           memPoolSubscription.unsubscribe();
-                                           memPoolSubscription = null;
-                                       }
-                                       return "Terminated";
-                                   }
-        );
+        if (wrapper != null && wrapper.wrapperInteraction != null) {
+            wrapper.wrapperInteraction.sendEmptyMessage(1);
+            wrapper = null;
+        }
     }
 
     public void fetchTokenBalance() {
@@ -212,14 +200,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(ticketIndicies, this.ticket.getValue().getAddress())
+                        .getMessage(ticketIndicies)
                         .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
     }
 
     private void startMemoryPoolListener() {
-        SubscribeWrapper wrapper = new SubscribeWrapper(scanReturn);
-        memPoolSubscription = memoryPoolInteract.poolListener(wrapper);
+        wrapper = new SubscribeWrapper(scanReturn);
+        memoryPoolInteract.poolListener(wrapper);
     }
 
     private void onSignMessage(MessagePair pair) {
@@ -244,7 +232,10 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         fetchTokenBalance();
         startMemoryPoolListener();
 
-        onSaved();
+        //Push initial QR
+        signatureGenerateInteract
+                .getMessage(ticketIndicies)
+                .subscribe(this::onSignMessage, this::onError);
     }
 
     private void markUsedIndicies(List<BigInteger> burnList) {
@@ -264,7 +255,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
 
     private void updateBurnInfo(List<Integer> burnList)
     {
-        disposable = fetchTokensInteract
+        fetchTokensInteract
                 .updateBalance(defaultWallet().getValue(), ticket().getValue(), burnList)
                 .subscribe(this::onSaved, this::onError);
     }
@@ -277,8 +268,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             ticketsBurned();
         }
         else {
-            disposable = signatureGenerateInteract
-                    .getMessage(ticketIndicies, this.ticket.getValue().getAddress())
+            signatureGenerateInteract
+                    .getMessage(ticketIndicies)
                     .subscribe(this::onSignMessage, this::onError);
         }
     }
@@ -288,17 +279,16 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     {
         try
         {
-            String input = "";//tx.getInput();
-            String from = "";
-            String to = "";
-            if (tx.getFrom() != null) from = Numeric.cleanHexPrefix(tx.getFrom());
-            if (tx.getTo() != null) to = Numeric.cleanHexPrefix(tx.getTo());
+            String input = tx.getInput();
+            String from = Numeric.cleanHexPrefix(tx.getFrom());
+            String to = Numeric.cleanHexPrefix(tx.getTo());
             String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
 
             String methodSignature = "transferFrom(address,address,uint16[])";
             String methodId = buildMethodId(methodSignature);
 
-            if (       (ticket.getValue().tokenInfo.address.contains(to))
+            if (       (from != null)
+                    && (to != null && ticket.getValue().tokenInfo.address.contains(to))
                     && (input != null)
                     && (input.contains(methodId))
                     && (input.contains("dead") && input.contains(userAddr))  )

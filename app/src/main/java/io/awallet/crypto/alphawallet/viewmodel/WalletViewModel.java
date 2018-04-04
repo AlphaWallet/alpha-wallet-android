@@ -21,8 +21,10 @@ import io.awallet.crypto.alphawallet.router.AddTokenRouter;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
+import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -42,6 +44,7 @@ public class WalletViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
+    private final TransactionsRouter transactionsRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -65,6 +68,7 @@ public class WalletViewModel extends BaseViewModel {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
+            TransactionsRouter transactionsRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -74,6 +78,7 @@ public class WalletViewModel extends BaseViewModel {
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
+        this.transactionsRouter = transactionsRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -177,6 +182,10 @@ public class WalletViewModel extends BaseViewModel {
     @Override
     public void showRedeemToken(Context context, Token token) {
         assetDisplayRouter.open(context, token);
+    }
+
+    public void showTransactions(Context context) {
+        transactionsRouter.open(context, true);
     }
 
     public void showEditTokens(Context context) {

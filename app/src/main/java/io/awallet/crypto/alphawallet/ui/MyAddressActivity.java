@@ -3,39 +3,34 @@ package io.awallet.crypto.alphawallet.ui;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.util.QRUtils;
 
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 
 public class MyAddressActivity extends BaseActivity implements View.OnClickListener {
-
-    private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
 
     @Inject
     protected EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private Wallet wallet;
+
+    private ImageView qrImageView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,32 +46,19 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
         wallet = getIntent().getParcelableExtra(WALLET);
         NetworkInfo networkInfo = ethereumNetworkRepository.getDefaultNetwork();
-        String suggestion = getString(R.string.suggestion_this_is_your_address, networkInfo.name);
-        ((TextView) findViewById(R.id.address_suggestion)).setText(suggestion);
         ((TextView) findViewById(R.id.address)).setText(wallet.address);
         findViewById(R.id.copy_action).setOnClickListener(this);
-        final Bitmap qrCode = createQRImage(wallet.address);
-        ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
     }
 
-    private Bitmap createQRImage(String address) {
-        Point size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        int imageSize = (int) (size.x * QR_IMAGE_WIDTH_RATIO);
-        try {
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(
-                    address,
-                    BarcodeFormat.QR_CODE,
-                    imageSize,
-                    imageSize,
-                    null);
-            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-            return barcodeEncoder.createBitmap(bitMatrix);
-        } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.error_fail_generate_qr), Toast.LENGTH_SHORT)
-                .show();
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            wallet = getIntent().getParcelableExtra(WALLET);
+            qrImageView = findViewById(R.id.qr_image);
+            qrImageView.setImageBitmap(QRUtils.createQRImage(this, wallet.address, qrImageView.getWidth()));
+            qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         }
-        return null;
     }
 
     @Override

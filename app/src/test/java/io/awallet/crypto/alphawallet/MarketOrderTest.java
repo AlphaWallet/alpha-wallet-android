@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import io.awallet.crypto.alphawallet.entity.BaseViewCallback;
 import io.awallet.crypto.alphawallet.entity.MessageData;
+import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Token;
@@ -15,7 +16,6 @@ import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
-import com.wallet.pwd.trustapp.PasswordManager;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -115,7 +115,19 @@ public class MarketOrderTest
         transactionRepository = new TransactionRepositoryType() {
 
             @Override
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet)
+            {
+                return null;
+            }
+
+            @Override
             public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
+                return null;
+            }
+
+            @Override
+            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet)
+            {
                 return null;
             }
 
@@ -168,6 +180,12 @@ public class MarketOrderTest
 
             @Override
             public void lockAccount(Wallet signer, String signerPassword) throws Exception {
+
+            }
+
+            @Override
+            public void storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+            {
 
             }
         };

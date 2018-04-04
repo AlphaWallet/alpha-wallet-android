@@ -44,13 +44,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static io.awallet.crypto.alphawallet.C.HARD_CODED_CONTRACT;
-import static io.awallet.crypto.alphawallet.C.HARD_CODED_KEY;
-import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_ADDR;
-import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_NAME;
-import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_SYMBOL;
-import static io.awallet.crypto.alphawallet.C.PRE_LOADED_KEY;
-
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
     private static final int TRANSACTIONS = 0;
     private static final int MARKETPLACE = 1;
@@ -79,7 +72,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewPager = findViewById(R.id.view_pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(2);
+        viewPager.setOffscreenPageLimit(4);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

@@ -33,6 +33,7 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
 
             //check operations
             if (oldTx.operations == null && newTx.operations != null) return false;
+            if (newTx.operations == null && oldTx.operations != null) return false;
             if (oldTx.operations != null && oldTx.operations.length == 0 && newTx.operations != null && newTx.operations.length > 0)
                 return false;
 

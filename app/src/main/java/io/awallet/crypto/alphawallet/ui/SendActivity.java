@@ -5,7 +5,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,10 +25,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import org.ethereum.geth.Address;
 
@@ -48,6 +44,7 @@ import io.awallet.crypto.alphawallet.router.EthereumInfoRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
+import io.awallet.crypto.alphawallet.util.QRUtils;
 import io.awallet.crypto.alphawallet.viewmodel.SendViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.SendViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
@@ -71,25 +68,19 @@ public class SendActivity extends BaseActivity {
     private Wallet wallet;
     private Token token;
 
-    TextView titleConfirmTransfer;
     TextView toAddressError;
     TextView amountError;
     TextView amountConfirmText;
     TextView myAddressText;
 
     RelativeLayout ethDetailLayout;
-    RelativeLayout inputAmountLayout;
     RelativeLayout transferOptionLayout;
     RelativeLayout confirmTransferLayout;
 
-    FrameLayout sendSmsLayout;
-    FrameLayout sendEmailLayout;
     FrameLayout inputAddressLayout;
-    FrameLayout qrScannerLayout;
+    FrameLayout shareLinkLayout;
 
     Button startTransferButton;
-    Button amountNextButton;
-    Button showAddressButton;
     Button addressNextButton;
     Button copyAddressButton;
 
@@ -97,6 +88,7 @@ public class SendActivity extends BaseActivity {
     EditText toAddressEditText;
 
     ImageView qrImageView;
+    ImageView scanQrImageView;
 
     AWalletAlertDialog dialog;
 
@@ -139,29 +131,35 @@ public class SendActivity extends BaseActivity {
         initViews();
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            qrImageView = findViewById(R.id.qr_image);
+            qrImageView.setImageBitmap(QRUtils.createQRImage(this, myAddress, qrImageView.getWidth()));
+            qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+        }
+    }
+
     private void initViews() {
-        titleConfirmTransfer = findViewById(R.id.title_confirm_transfer);
         toAddressError = findViewById(R.id.to_address_error);
         amountError = findViewById(R.id.amount_error);
 
-        qrImageView = findViewById(R.id.qr_image);
-        final Bitmap qrCode = createQRImage(myAddress);
-        qrImageView.setImageBitmap(qrCode);
+
         myAddressText = findViewById(R.id.address);
         myAddressText.setText(myAddress);
 
-        inputAmountLayout = findViewById(R.id.layout_input_amount);
         transferOptionLayout = findViewById(R.id.layout_transfer_option);
         confirmTransferLayout = findViewById(R.id.layout_confirm_transfer);
         toAddressEditText = findViewById(R.id.edit_to_address);
-        amountEditText = findViewById(R.id.edit_amount);
-        amountConfirmText = findViewById(R.id.text_amount_confirm);
-
-        qrScannerLayout = findViewById(R.id.layout_qr_scanner);
-        qrScannerLayout.setOnClickListener(v -> {
+        scanQrImageView = findViewById(R.id.img_scan_qr);
+        scanQrImageView.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+
+        amountEditText = findViewById(R.id.edit_amount);
+        amountConfirmText = findViewById(R.id.text_amount_confirm);
 
         ethDetailLayout = findViewById(R.id.layout_eth_detail);
 
@@ -170,19 +168,14 @@ public class SendActivity extends BaseActivity {
             onSelectInputAddress();
         });
 
+        shareLinkLayout = findViewById(R.id.layout_share_link);
+        shareLinkLayout.setOnClickListener(v -> {
+            // TODO: Fire the send/share intent!
+        });
+
         startTransferButton = findViewById(R.id.button_start_transfer);
         startTransferButton.setOnClickListener(v -> {
             onStartTransfer();
-        });
-
-        amountNextButton = findViewById(R.id.button_amount_next);
-        amountNextButton.setOnClickListener(v -> {
-            onAmountNext();
-        });
-
-        showAddressButton = findViewById(R.id.button_show_address);
-        showAddressButton.setOnClickListener(v -> {
-            viewModel.showMyAddress(this, wallet);
         });
 
         addressNextButton = findViewById(R.id.button_address_next);
@@ -204,25 +197,16 @@ public class SendActivity extends BaseActivity {
     }
 
     private void onStartTransfer() {
-        ethDetailLayout.setVisibility(View.GONE);
-        confirmTransferLayout.setVisibility(View.GONE);
-        transferOptionLayout.setVisibility(View.GONE);
-        inputAmountLayout.setVisibility(View.VISIBLE);
-    }
-
-    private void onAmountNext() {
         dismissKeyboard();
         amountError.setVisibility(View.GONE);
         final String amount = amountEditText.getText().toString();
-        if (!isValidAmount(amount)) {
+        if (!isValidAmount(amount) || !isBalanceEnough(amount)) {
             amountError.setVisibility(View.VISIBLE);
             amountError.setText(R.string.error_invalid_amount);
-            return;
         } else {
             String amountText = amountEditText.getText().toString() + " " + symbol;
             amountConfirmText.setText(amountText);
             ethDetailLayout.setVisibility(View.GONE);
-            inputAmountLayout.setVisibility(View.GONE);
             confirmTransferLayout.setVisibility(View.GONE);
             transferOptionLayout.setVisibility(View.VISIBLE);
         }
@@ -230,7 +214,6 @@ public class SendActivity extends BaseActivity {
 
     private void onSelectInputAddress() {
         toAddressEditText.getText().clear();
-        inputAmountLayout.setVisibility(View.GONE);
         transferOptionLayout.setVisibility(View.GONE);
         confirmTransferLayout.setVisibility(View.VISIBLE);
     }
@@ -238,44 +221,20 @@ public class SendActivity extends BaseActivity {
     private void onBack() {
         if (ethDetailLayout.getVisibility() == View.VISIBLE) {
             finish();
-        } else if (inputAmountLayout.getVisibility() == View.VISIBLE) {
-            amountEditText.getText().clear();
+        } else if (transferOptionLayout.getVisibility() == View.VISIBLE) {
             ethDetailLayout.setVisibility(View.VISIBLE);
-            inputAmountLayout.setVisibility(View.GONE);
             transferOptionLayout.setVisibility(View.GONE);
             confirmTransferLayout.setVisibility(View.GONE);
         } else if (confirmTransferLayout.getVisibility() == View.VISIBLE) {
             toAddressEditText.getText().clear();
-            inputAmountLayout.setVisibility(View.GONE);
             ethDetailLayout.setVisibility(View.GONE);
             transferOptionLayout.setVisibility(View.VISIBLE);
             confirmTransferLayout.setVisibility(View.GONE);
         } else {
             ethDetailLayout.setVisibility(View.GONE);
-            inputAmountLayout.setVisibility(View.VISIBLE);
             transferOptionLayout.setVisibility(View.GONE);
             confirmTransferLayout.setVisibility(View.GONE);
         }
-    }
-
-    private Bitmap createQRImage(String address) {
-        Point size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        int imageSize = (int) (size.x * QR_IMAGE_WIDTH_RATIO);
-        try {
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(
-                    address,
-                    BarcodeFormat.QR_CODE,
-                    imageSize,
-                    imageSize,
-                    null);
-            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-            return barcodeEncoder.createBitmap(bitMatrix);
-        } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.error_fail_generate_qr), Toast.LENGTH_SHORT)
-                    .show();
-        }
-        return null;
     }
 
     @Override
@@ -369,6 +328,19 @@ public class SendActivity extends BaseActivity {
         try {
             String wei = BalanceUtils.EthToWei(eth);
             return wei != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    boolean isBalanceEnough(String eth) {
+        try {
+            BigDecimal amount = new BigDecimal(BalanceUtils.EthToWei(eth));
+            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(balanceEth.getText().toString()));
+//            Log.d("AMT", "amount: " + amount.toPlainString());
+//            Log.d("AMT", "balance: " + balance.toPlainString());
+//            Log.d("AMT", "diff: " + balance.subtract(amount).toPlainString());
+            return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
         } catch (Exception e) {
             return false;
         }

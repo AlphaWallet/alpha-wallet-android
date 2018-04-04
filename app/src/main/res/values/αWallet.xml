@@ -200,7 +200,7 @@
     <string name="confirm_transfer_details">Confirm Transfer Details</string>
     <string name="advanced_settings">Advanced Settings</string>
     <string name="action_confirm">Confirm</string>
-    <string name="title_input_amount_to_transfer">Input Amount to Transfer:</string>
+    <string name="label_amount_to_transfer">Amount to Transfer</string>
     <string name="action_info">Info</string>
     <string name="eth_detail_q1">What is Ethereum?</string>
     <string name="eth_detail_a1">ETH is short for Ethereum. Ethereum is a crypto currency (similar to BitCoin) running on blockchain technology.</string>
@@ -218,4 +218,9 @@
     <string name="sell_thru_magiclink">Sell through a MagicLink</string>
     <string name="magiclink_expiry_on">MagicLink expiry on:</string>
     <string name="confirm_sale_total">Total:</string>
+    <string name="share_magiclink">Share MagicLink</string>
+    <string name="select_option_to_transfer">Select Option to Transfer</string>
+    <string name="hint_input_eth_amount">0.00</string>
+    <string name="label_my_address">My Address</string>
+    <string name="action_copy_alt">Copy</string>
 </resources>

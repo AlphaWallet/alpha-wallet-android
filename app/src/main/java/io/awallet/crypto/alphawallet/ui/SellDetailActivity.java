@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -48,9 +49,12 @@ import io.awallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import io.awallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 
+import static io.awallet.crypto.alphawallet.C.EXTRA_PRICE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
+import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;
+import static io.awallet.crypto.alphawallet.C.MARKET_SALE;
 
 /**
  * Created by James on 21/02/2018.
@@ -65,8 +69,7 @@ public class SellDetailActivity extends BaseActivity {
     private TicketRange ticketRange;
     private TicketAdapter adapter;
     private TextView usdPrice;
-    private Button sellMarketplaceButton;
-    private Button magicLinkButton;
+    private Button sellButton;
 
     private EditText sellPrice;
     private TextView textQuantity;
@@ -84,6 +87,8 @@ public class SellDetailActivity extends BaseActivity {
     private TextView expiryDateErrorText;
     private TextView expiryTimeErrorText;
 
+    private boolean marketSale;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -95,6 +100,7 @@ public class SellDetailActivity extends BaseActivity {
         ticket = getIntent().getParcelableExtra(TICKET);
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
+        marketSale = getIntent().getStringExtra(MARKET_INSTANCE).equals(MARKET_SALE);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailModel.class);
@@ -109,8 +115,7 @@ public class SellDetailActivity extends BaseActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        sellMarketplaceButton = findViewById(R.id.button_marketplace);
-        magicLinkButton = findViewById(R.id.button_magiclink);
+        sellButton = findViewById(R.id.button_sell);
         usdPrice = findViewById(R.id.fiat_price);
         sellPrice = findViewById(R.id.asking_price);
         totalCostText = findViewById(R.id.eth_price);
@@ -121,6 +126,24 @@ public class SellDetailActivity extends BaseActivity {
         quantityErrorText = findViewById(R.id.error_quantity);
         expiryDateErrorText = findViewById(R.id.error_date);
         expiryTimeErrorText = findViewById(R.id.error_time);
+
+        if (marketSale)
+        {
+            sellPrice.setVisibility(View.VISIBLE);
+            textQuantity.setVisibility(View.VISIBLE);
+            expiryDateEditText.setVisibility(View.GONE);
+            expiryTimeEditText.setVisibility(View.GONE);
+        }
+        else
+        {
+            sellPrice.setVisibility(View.VISIBLE);
+            textQuantity.setVisibility(View.VISIBLE);
+            expiryDateEditText.setVisibility(View.VISIBLE);
+            expiryTimeEditText.setVisibility(View.VISIBLE);
+            sellButton.setText(getResources().getString(R.string.generate_sale_transfer_link));
+            TextView subText = findViewById(R.id.text_eth_subtext);
+            subText.setText(R.string.set_price_subtext_abr_magic);
+        }
 
         sellPrice.addTextChangedListener(new TextWatcher() {
             @Override
@@ -148,21 +171,16 @@ public class SellDetailActivity extends BaseActivity {
         initDatePicker();
         initTimePicker();
 
-//        sellButton.setOnClickListener(v -> {
-//            if (isInputValid()) {
-//                sellTicketLink();
-//            }
-//        });
-
-        magicLinkButton.setOnClickListener(v -> {
-            if (isInputValid(true)) {
-                sellTicketLink();
-            }
-        });
-
-        sellMarketplaceButton.setOnClickListener(v -> {
-            if (isInputValid(false)) {
-                marketplaceDialog();
+        sellButton.setOnClickListener(v -> {
+            if (isInputValid()) {
+                if (marketSale)
+                {
+                    confirmPlaceMarketOrderDialog();
+                }
+                else
+                {
+                    sellTicketLink();
+                }
             }
         });
 
@@ -170,9 +188,10 @@ public class SellDetailActivity extends BaseActivity {
         expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
     }
 
-    private boolean isInputValid(boolean checkDate) {
+    private boolean isInputValid() {
         boolean result = true;
         hideErrorMessages();
+
         if (Integer.parseInt(textQuantity.getText().toString()) <= 0) {
             quantityErrorText.setVisibility(View.VISIBLE);
             result = false;
@@ -189,7 +208,8 @@ public class SellDetailActivity extends BaseActivity {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
-        if (checkDate)
+
+        if (!marketSale)
         {
             if (expiryDateEditText.getText().toString().isEmpty())
             {
@@ -225,6 +245,8 @@ public class SellDetailActivity extends BaseActivity {
                 updateSellPrice(quantity);
             }
         });
+
+        textQuantity.setText("1");
     }
 
     private void initDatePicker() {
@@ -237,6 +259,11 @@ public class SellDetailActivity extends BaseActivity {
             newDate.set(year, monthOfYear, dayOfMonth);
             expiryDateEditText.setText(dateFormatter.format(newDate.getTime()));
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+        //set default for tomorrow
+        long tomorrowStamp = System.currentTimeMillis() + 1000*60*60*24;
+        Date tomorrow = new Date(tomorrowStamp);
+        expiryDateEditText.setText(dateFormatter.format(tomorrow.getTime()));
     }
 
     private void initTimePicker() {
@@ -245,6 +272,11 @@ public class SellDetailActivity extends BaseActivity {
             String time = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
             expiryTimeEditText.setText(time);
         }, newCalendar.get(Calendar.HOUR_OF_DAY), newCalendar.get(Calendar.MINUTE), true);
+
+        //set for now
+        String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+                                    Calendar.getInstance().get(Calendar.MINUTE));
+        expiryTimeEditText.setText(time);
     }
 
     @Override
@@ -298,6 +330,22 @@ public class SellDetailActivity extends BaseActivity {
             }
         }
     }
+
+//    private void sellTicketLink()
+//    {
+//        String textPrice = sellPrice.getText().toString();
+//        double pricePerTicket = Double.valueOf(textPrice);
+//        //need currently selected price and quantity
+//        int[] indices = ticket.getTicketIndicies(ticketIds);
+//        int quantity = Integer.parseInt(textQuantity.getText().toString());
+//
+//        if (pricePerTicket > 0.0 && indices != null && quantity > 0)
+//        {
+//            //get the specific ID's, pick from the start of the run
+//            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
+//            String prunedIndicesStr = ticket.arrayToString(prunedIndices);
+//        }
+//    }
 
     private void sellTicketLink() {
         String expiryDate = expiryDateEditText.getText().toString();
@@ -408,7 +456,7 @@ public class SellDetailActivity extends BaseActivity {
         dialog.show();
     }
 
-    private void marketplaceDialog() {
+    private void confirmPlaceMarketOrderDialog() {
         //how many tickets are we selling?
         String textPrice = sellPrice.getText().toString();
         TextView textQuantity = findViewById(R.id.text_quantity);

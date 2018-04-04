@@ -41,7 +41,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL,
                     "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://kovan.trustwalletapp.com/",
-                    "https://kovan.etherscan.io/tx/", 42, false,
+                    "https://kovan.etherscan.io/tx/", 42, false, 
 							null,
 							"http://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,

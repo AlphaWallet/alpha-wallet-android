@@ -23,13 +23,14 @@ import static io.awallet.crypto.alphawallet.C.SOKOL_NETWORK_NAME;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
+
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
                     "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://api.trustwalletapp.com/",
                     "https://etherscan.io/tx/",1, true,
-							"http://stormbird2.duckdns.org:8545/",
-							"http://api.etherscan.io/"),
+							"http://stormbird.duckdns.org:8540/",
+							"https://api.etherscan.io/"),
             new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
                     "https://mewapi.epool.io/",
                     "https://classic.trustwalletapp.com",
@@ -43,14 +44,14 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
                     "https://kovan.trustwalletapp.com/",
                     "https://kovan.etherscan.io/tx/", 42, false,
 							null,
-							"http://api-kovan.etherscan.io/"),
+							"https://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
                     "https://ropsten.infura.io/LY55hqqffzZcQ0b513JJ",
 					//"http://stormbird.duckdns.org:8545/",
                     "https://ropsten.trustwalletapp.com/",
                     "https://ropsten.etherscan.io/tx/",3, false,
 					"http://stormbird.duckdns.org:8545/",
-					"http://api-ropsten.etherscan.io/"),
+					"https://api-ropsten.etherscan.io/"),
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
                     "https://sokol.poa.network",
                     "https://trust-sokol.herokuapp.com/",

@@ -7,13 +7,11 @@ import android.os.Bundle;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
-import io.awallet.crypto.alphawallet.BuildConfig;
-import io.awallet.crypto.alphawallet.entity.NetworkInfo;
+
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.ImportTokenRouter;
 import io.awallet.crypto.alphawallet.router.ManageWalletsRouter;
-import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 import io.awallet.crypto.alphawallet.viewmodel.SplashViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.SplashViewModelFactory;
 
@@ -22,8 +20,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 
-import static io.awallet.crypto.alphawallet.C.DEFAULT_NETWORK;
-import static io.awallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.awallet.crypto.alphawallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
 public class SplashActivity extends BaseActivity {

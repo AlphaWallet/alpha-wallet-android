@@ -26,7 +26,6 @@ import io.awallet.crypto.alphawallet.ui.TicketTransferActivity;
 import io.awallet.crypto.alphawallet.ui.TokenChangeCollectionActivity;
 import io.awallet.crypto.alphawallet.ui.TokensActivity;
 import io.awallet.crypto.alphawallet.ui.TransactionDetailActivity;
-import io.awallet.crypto.alphawallet.ui.TransactionsActivity;
 import io.awallet.crypto.alphawallet.ui.TransactionsFragment;
 import io.awallet.crypto.alphawallet.ui.TransferTicketActivity;
 import io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
@@ -49,10 +48,6 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = ImportModule.class)
 	abstract ImportWalletActivity bindImportWalletModule();
-
-	@ActivityScope
-	@ContributesAndroidInjector(modules = TransactionsModule.class)
-	abstract TransactionsActivity bindTransactionsModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TransactionDetailModule.class)

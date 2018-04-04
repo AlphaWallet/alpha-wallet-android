@@ -23,6 +23,9 @@ public abstract class C {
 
     public static final String GWEI_UNIT = "Gwei";
 
+    public static final String MARKET_SALE = "market";
+    public static final String MAGIC_LINK = "magic";
+
     public static final String EXTRA_ADDRESS = "ADDRESS";
     public static final String EXTRA_CONTRACT_ADDRESS = "CONTRACT_ADDRESS";
     public static final String EXTRA_DECIMALS = "DECIMALS";
@@ -41,6 +44,7 @@ public abstract class C {
     public static final String TOKEN_TYPE = "TOKEN_TYPE";
     public static final String MARKET_INSTANCE = "MARKET_INSTANCE";
     public static final String IMPORT_STRING = "TOKEN_IMPORT";
+    public static final String EXTRA_PRICE = "TOKEN_PRICE";
 
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";

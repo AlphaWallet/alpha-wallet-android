@@ -96,6 +96,18 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <include layout="@layout/item_input_address" />
+                </LinearLayout>
+
+
+                <LinearLayout
                     android:id="@+id/container_my_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -170,86 +182,5 @@
                 android:textSize="20sp" />
 
         </LinearLayout>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/layout_transfer_option"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card"
-        android:visibility="gone">
-
-        <include layout="@layout/layout_transfer_options" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/layout_confirm_transfer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:id="@+id/layout_to_address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
-
-            <TextView
-                android:id="@+id/title_input_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/input_wallet_address"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
-            <include layout="@layout/item_input_address" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="15dp"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/amount"
-                android:textAllCaps="true"
-                android:textColor="@color/light_gray"
-                android:textSize="10sp"
-                android:visibility="visible" />
-
-            <TextView
-                android:id="@+id/text_amount_confirm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:fontFamily="@font/font_bold"
-                android:textAllCaps="true"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="30sp"
-                android:visibility="visible" />
-
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/button_address_next"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:layout_alignParentBottom="true"
-            android:background="@color/button_green"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
     </RelativeLayout>
 </LinearLayout>

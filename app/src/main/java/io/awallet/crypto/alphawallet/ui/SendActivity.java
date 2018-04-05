@@ -5,10 +5,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +18,6 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -68,28 +68,16 @@ public class SendActivity extends BaseActivity {
     private Wallet wallet;
     private Token token;
 
-    TextView toAddressError;
-    TextView amountError;
-    TextView amountConfirmText;
-    TextView myAddressText;
-
     RelativeLayout ethDetailLayout;
-    RelativeLayout transferOptionLayout;
-    RelativeLayout confirmTransferLayout;
-
-    FrameLayout inputAddressLayout;
-    FrameLayout shareLinkLayout;
-
     Button startTransferButton;
-    Button addressNextButton;
     Button copyAddressButton;
-
     EditText amountEditText;
     EditText toAddressEditText;
-
     ImageView qrImageView;
     ImageView scanQrImageView;
-
+    TextView toAddressError;
+    TextView amountError;
+    TextView myAddressText;
     AWalletAlertDialog dialog;
 
     //Token
@@ -144,14 +132,16 @@ public class SendActivity extends BaseActivity {
     private void initViews() {
         toAddressError = findViewById(R.id.to_address_error);
         amountError = findViewById(R.id.amount_error);
-
-
         myAddressText = findViewById(R.id.address);
         myAddressText.setText(myAddress);
+        ethDetailLayout = findViewById(R.id.layout_eth_detail);
 
-        transferOptionLayout = findViewById(R.id.layout_transfer_option);
-        confirmTransferLayout = findViewById(R.id.layout_confirm_transfer);
-        toAddressEditText = findViewById(R.id.edit_to_address);
+        startTransferButton = findViewById(R.id.button_start_transfer);
+        startTransferButton.setOnClickListener(v -> onStartTransfer());
+
+        copyAddressButton = findViewById(R.id.copy_action);
+        copyAddressButton.setOnClickListener(v -> copyAddress());
+
         scanQrImageView = findViewById(R.id.img_scan_qr);
         scanQrImageView.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
@@ -159,32 +149,40 @@ public class SendActivity extends BaseActivity {
         });
 
         amountEditText = findViewById(R.id.edit_amount);
-        amountConfirmText = findViewById(R.id.text_amount_confirm);
+        amountEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        ethDetailLayout = findViewById(R.id.layout_eth_detail);
+            }
 
-        inputAddressLayout = findViewById(R.id.layout_input_address);
-        inputAddressLayout.setOnClickListener(v -> {
-            onSelectInputAddress();
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                amountError.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
         });
 
-        shareLinkLayout = findViewById(R.id.layout_share_link);
-        shareLinkLayout.setOnClickListener(v -> {
-            // TODO: Fire the send/share intent!
-        });
+        toAddressEditText = findViewById(R.id.edit_to_address);
+        toAddressEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        startTransferButton = findViewById(R.id.button_start_transfer);
-        startTransferButton.setOnClickListener(v -> {
-            onStartTransfer();
-        });
+            }
 
-        addressNextButton = findViewById(R.id.button_address_next);
-        addressNextButton.setOnClickListener(v -> {
-            onAddressNext();
-        });
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                toAddressError.setVisibility(View.GONE);
+            }
 
-        copyAddressButton = findViewById(R.id.copy_action);
-        copyAddressButton.setOnClickListener(v -> copyAddress());
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     private void copyAddress() {
@@ -197,43 +195,34 @@ public class SendActivity extends BaseActivity {
     }
 
     private void onStartTransfer() {
+        boolean isValid = true;
+
         dismissKeyboard();
         amountError.setVisibility(View.GONE);
         final String amount = amountEditText.getText().toString();
         if (!isValidAmount(amount) || !isBalanceEnough(amount)) {
             amountError.setVisibility(View.VISIBLE);
             amountError.setText(R.string.error_invalid_amount);
-        } else {
-            String amountText = amountEditText.getText().toString() + " " + symbol;
-            amountConfirmText.setText(amountText);
-            ethDetailLayout.setVisibility(View.GONE);
-            confirmTransferLayout.setVisibility(View.GONE);
-            transferOptionLayout.setVisibility(View.VISIBLE);
+            isValid = false;
         }
-    }
 
-    private void onSelectInputAddress() {
-        toAddressEditText.getText().clear();
-        transferOptionLayout.setVisibility(View.GONE);
-        confirmTransferLayout.setVisibility(View.VISIBLE);
+        toAddressError.setVisibility(View.GONE);
+        final String to = toAddressEditText.getText().toString();
+        if (!isAddressValid(to)) {
+            toAddressError.setVisibility(View.VISIBLE);
+            toAddressError.setText(getString(R.string.error_invalid_address));
+            isValid = false;
+        }
+
+        if (isValid) {
+            BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amountEditText.getText().toString(), decimals);
+            viewModel.openConfirmation(this, to, amountInSubunits, myAddress, decimals, symbol, sendingTokens);
+        }
     }
 
     private void onBack() {
         if (ethDetailLayout.getVisibility() == View.VISIBLE) {
             finish();
-        } else if (transferOptionLayout.getVisibility() == View.VISIBLE) {
-            ethDetailLayout.setVisibility(View.VISIBLE);
-            transferOptionLayout.setVisibility(View.GONE);
-            confirmTransferLayout.setVisibility(View.GONE);
-        } else if (confirmTransferLayout.getVisibility() == View.VISIBLE) {
-            toAddressEditText.getText().clear();
-            ethDetailLayout.setVisibility(View.GONE);
-            transferOptionLayout.setVisibility(View.VISIBLE);
-            confirmTransferLayout.setVisibility(View.GONE);
-        } else {
-            ethDetailLayout.setVisibility(View.GONE);
-            transferOptionLayout.setVisibility(View.GONE);
-            confirmTransferLayout.setVisibility(View.GONE);
         }
     }
 
@@ -281,9 +270,7 @@ public class SendActivity extends BaseActivity {
                         dialog.show();
                         return;
                     }
-                    Point[] p = barcode.cornerPoints;
                     toAddressEditText.setText(extracted_address);
-                    onAddressNext();
                 }
             } else {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
@@ -300,19 +287,6 @@ public class SendActivity extends BaseActivity {
             dialog.dismiss();
         }
         super.onDestroy();
-    }
-
-    private void onAddressNext() {
-        toAddressError.setVisibility(View.GONE);
-        final String to = toAddressEditText.getText().toString();
-        if (!isAddressValid(to)) {
-            toAddressError.setVisibility(View.VISIBLE);
-            toAddressError.setText(getString(R.string.error_invalid_address));
-            return;
-        }
-
-        BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amountEditText.getText().toString(), decimals);
-        viewModel.openConfirmation(this, to, amountInSubunits, myAddress, decimals, symbol, sendingTokens);
     }
 
     boolean isAddressValid(String address) {
@@ -337,9 +311,6 @@ public class SendActivity extends BaseActivity {
         try {
             BigDecimal amount = new BigDecimal(BalanceUtils.EthToWei(eth));
             BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(balanceEth.getText().toString()));
-//            Log.d("AMT", "amount: " + amount.toPlainString());
-//            Log.d("AMT", "balance: " + balance.toPlainString());
-//            Log.d("AMT", "diff: " + balance.subtract(amount).toPlainString());
             return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
         } catch (Exception e) {
             return false;

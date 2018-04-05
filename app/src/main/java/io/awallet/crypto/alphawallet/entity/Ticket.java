@@ -22,12 +22,13 @@ import java.util.List;
 import jnr.ffi.annotations.In;
 
 /**
- * Created by James on 27/01/2018.
- * It might seem counter intuitive but here Ticket refers to a container of an asset class here,
- * not the right to seat somewhere in the venue. Therefore, there shouldn't be List<Ticket>
- * To understand this, imagine that one says "I have two cryptocurrencies: Ether and Bitcoin,
- * each amounts to a hundred", and he pauses and said, "I also have two tickets: FIFA and
- * Formuler-one, which, too, amounts to a hundred each".
+ * Created by James on 27/01/2018.  It might seem counter intuitive
+ * but here Ticket refers to a container of an asset class here, not
+ * the right to seat somewhere in the venue. Therefore, there
+ * shouldn't be List<Ticket> To understand this, imagine that one says
+ * "I have two cryptocurrencies: Ether and Bitcoin, each amounts to a
+ * hundred", and he pauses and said, "I also have two tickets: FIFA
+ * and Formuler-one, which, too, amounts to a hundred each".
  */
 
 public class Ticket extends Token implements Parcelable
@@ -35,6 +36,8 @@ public class Ticket extends Token implements Parcelable
     public final List<Integer> balanceArray;
     private List<Integer> burnArray;
 
+    /* these constructors are never used as intended - they are always
+     * used to create empty Ticket objects by passing lots of nulls */
     public Ticket(TokenInfo tokenInfo, List<Integer> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;

@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -47,7 +48,6 @@ import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
-import org.ethereum.geth.Address;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;

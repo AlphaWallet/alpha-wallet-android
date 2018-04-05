@@ -13,14 +13,12 @@ import io.awallet.crypto.alphawallet.router.AddTokenRouter;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
-import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final TransactionsRouter transactionsRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -30,7 +28,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
-                                  TransactionsRouter transactionsRouter,
                                   ChangeTokenCollectionRouter changeTokenCollectionRouter,
                                   AssetDisplayRouter assetDisplayRouter,
                                   FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -41,7 +38,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.transactionsRouter = transactionsRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -56,7 +52,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
-                transactionsRouter,
                 changeTokenCollectionRouter,
                 assetDisplayRouter,
                 findDefaultNetworkInteract,

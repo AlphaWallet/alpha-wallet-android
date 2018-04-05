@@ -87,7 +87,8 @@ public class Token implements Parcelable {
         return tokenInfo.address;
     }
     public String getFullName() {
-        return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
+        if (tokenInfo.name == null || tokenInfo.symbol == null) return null;
+        else return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
     }
 
     public BigInteger getIntAddress() { return Numeric.toBigInt(tokenInfo.address); }

@@ -1,19 +1,12 @@
 package io.awallet.crypto.alphawallet.repository;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.Nullable;
-
-import com.getkeepsafe.relinker.elf.Elf;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
-import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
-import io.awallet.crypto.alphawallet.entity.TradeInstance;
 import io.awallet.crypto.alphawallet.entity.Transaction;
-import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
 import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.repository.entity.RealmTransaction;
 import io.awallet.crypto.alphawallet.service.AccountKeystoreService;
 import io.awallet.crypto.alphawallet.service.TransactionsNetworkClientType;
 
@@ -27,12 +20,11 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
+import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
@@ -203,11 +195,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.observeOn(Schedulers.io());
 	}
 
-	@SuppressLint("CheckResult")
 	@Override
-	public void storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+	public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
 	{
-		inDiskCache.putTransactions(networkInfo, wallet, txList)
-				.observeOn(Schedulers.io()).toObservable();
+		return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
 	}
 }

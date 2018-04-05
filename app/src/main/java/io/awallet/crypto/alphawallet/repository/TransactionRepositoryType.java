@@ -4,15 +4,14 @@ import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
 import io.awallet.crypto.alphawallet.entity.Transaction;
-import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 
 import java.math.BigInteger;
 
+import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 
 public interface TransactionRepositoryType {
 	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet);
@@ -25,5 +24,5 @@ public interface TransactionRepositoryType {
 	Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password);
 	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
-	void storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList);
+	Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList);
 }

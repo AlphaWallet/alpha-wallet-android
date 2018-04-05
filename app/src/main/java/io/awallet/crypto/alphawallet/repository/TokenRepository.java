@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
@@ -57,14 +58,17 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
-import rx.Subscription;
+import rx.Scheduler;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
 
+    private static final String TAG = "TRT";
     private static final long BALANCE_UPDATE_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
     private final TokenExplorerClientType tokenNetworkService;
     private final WalletRepositoryType walletRepository;
@@ -106,11 +110,13 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchActive(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-        return Single.merge(
-                fetchCachedEnabledTokens(network, wallet), // Immediately show the cache.
-                updateTokens(network, wallet) // Looking for new tokens
-                        .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
-            .toObservable();
+//        return Single.merge(
+//                fetchCachedEnabledTokens(network, wallet), // Immediately show the cache.
+//                updateTokens(network, wallet) // Looking for new tokens
+//                        .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
+//            .toObservable();
+        //This is now handled in transaction view. If we repeat here then we conflict with processing in transaction view
+        return fetchCachedEnabledTokens(network, wallet).toObservable();
     }
 
     @Override
@@ -268,10 +274,31 @@ public class TokenRepository implements TokenRepositoryType {
     public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
         TokenFactory tf = new TokenFactory();
         Token newToken = tf.createToken(tokenInfo);
+        Log.d(TAG, "Create for store2: " + tokenInfo.name);
+
         return localSource.saveTokens(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
                 new Token[] { newToken });
+    }
+
+    @Override
+    public Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos)
+    {
+        TokenFactory tf = new TokenFactory();
+        Token[] tokenList = new Token[tokenInfos.length];
+
+        for (int i = 0; i < tokenInfos.length; i++)
+        {
+            tokenList[i] = tf.createToken(tokenInfos[i]);
+            Log.d(TAG, "Create for store: " + tokenInfos[i].name);
+        }
+
+        return localSource.saveTokensList(
+                    ethereumNetworkRepository.getDefaultNetwork(),
+                    wallet,
+                    tokenList);
+
     }
 
     @Override
@@ -289,6 +316,12 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<TokenInfo> update(String contractAddr) {
         return setupTokensFromLocal(contractAddr).toObservable();
+    }
+
+    @Override
+    public Single<TokenInfo[]> update(String[] address)
+    {
+        return setupTokensFromLocal(address);
     }
 
     private Single<Token[]> fetchFromNetworkSource(@NonNull NetworkInfo network, @NonNull Wallet wallet) {
@@ -424,39 +457,17 @@ public class TokenRepository implements TokenRepositoryType {
 //    }
 
     @Override
-    public void memPoolListener(final SubscribeWrapper subscriber)
+    public rx.Subscription memPoolListener(SubscribeWrapper subscriber)
     {
-        if (web3jFullNode != null) {
-            new Thread() {
-                final Object waitForUnsubscribe = new Object();
-
-                public void run() {
-                    subscriber.wrapperInteraction = new Handler(Looper.getMainLooper()) {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            super.handleMessage(msg);
-                            //only handle shutdown message
-                            synchronized (waitForUnsubscribe) {
-                                waitForUnsubscribe.notifyAll();
-                            }
-                        }
-                    };
-
-                    final Subscription transactionSubscription = web3jFullNode.pendingTransactionObservable().subscribe(subscriber.scanReturn, subscriber.onError);
-
-                    try {
-                        synchronized (waitForUnsubscribe) {
-                            waitForUnsubscribe.wait();
-                        }
-                    } catch (InterruptedException e) {
-
-                    } finally {
-                        //Now terminate the observable and the thread
-                        transactionSubscription.unsubscribe();
-                        subscriber.wrapperInteraction = null;
-                    }
-                }
-            }.start();
+        if (web3jFullNode != null)
+        {
+            return web3jFullNode.pendingTransactionObservable()
+                    .subscribeOn(rx.schedulers.Schedulers.newThread())
+                    .subscribe(subscriber.scanReturn, subscriber.onError);
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -520,31 +531,19 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception {
+    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
+    {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
-        try
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1)
         {
-            List<Type> response = FunctionReturnDecoder.decode(
-                    responseValue, function.getOutputParameters());
-            if (response.size() == 1)
-            {
-                return (T) response.get(0).getValue();
-//            if (response.get(0).getValue() instanceof String) {
-//                return (T)response.get(0).getValue();
-//            }
-//            else {
-//                int retVal = ((Uint8) response.get(0)).getValue().intValue();
-//                return (T)retVal;
-//            }
-            }
-            else
-            {
-                return null;
-            }
+            return (T) response.get(0).getValue();
         }
-        catch(Exception e)
+        else
         {
             return null;
         }
@@ -768,8 +767,53 @@ public class TokenRepository implements TokenRepositoryType {
 
                 return result;
             }
-            finally {
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        });
+    }
 
+    private Single<TokenInfo[]> setupTokensFromLocal(String[] addresses)
+    {
+        return Single.fromCallable(() -> {
+            List<TokenInfo> tokenList = new ArrayList<>();
+            try
+            {
+                for (String address : addresses)
+                {
+                    long now = System.currentTimeMillis();
+                    String name = getContractData(address, stringParam("name"));
+                    if (name == null)
+                    {
+                        name = getName(address);
+                    }
+                    Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
+                    if (isStormbird == null) isStormbird = false;
+                    TokenInfo result = new TokenInfo(
+                            address,
+                            name,
+                            getContractData(address, stringParam("symbol")),
+                            getDecimals(address),
+                            true,
+                            isStormbird);
+
+                    if (result.name != null && result.name.length() > 0)
+                    {
+                        tokenList.add(result);
+                    }
+                    else
+                    {
+                        tokenList.add(result);
+                    }
+                }
+                return tokenList.toArray(new TokenInfo[tokenList.size()]);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
         });
     }

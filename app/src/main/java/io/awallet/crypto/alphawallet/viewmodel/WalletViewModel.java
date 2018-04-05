@@ -21,12 +21,11 @@ import io.awallet.crypto.alphawallet.router.AddTokenRouter;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
-import io.awallet.crypto.alphawallet.router.TransactionsRouter;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -43,7 +42,6 @@ public class WalletViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final TransactionsRouter transactionsRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -67,7 +65,6 @@ public class WalletViewModel extends BaseViewModel {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            TransactionsRouter transactionsRouter,
             ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -77,7 +74,6 @@ public class WalletViewModel extends BaseViewModel {
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.transactionsRouter = transactionsRouter;
         this.changeTokenCollectionRouter = changeTokenCollectionRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -100,9 +96,18 @@ public class WalletViewModel extends BaseViewModel {
     //1. fetch tokens from cache and display
     //2. update token balance
     public void fetchTokens() {
-        fetchTokensInteract
-                .fetchStoredWithEth(defaultWallet.getValue())
-                .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+        if (defaultWallet.getValue() != null)
+        {
+            disposable = fetchTokensInteract
+                    .fetchStoredWithEth(defaultWallet.getValue())
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+        }
+        else
+        {
+            prepareWallet();
+        }
     }
 
     private void onFetchTokensBalanceCompletable()
@@ -126,9 +131,10 @@ public class WalletViewModel extends BaseViewModel {
 
     private void updateTokenBalances() {
         progress.postValue(true);
-        fetchTokensInteract
+        disposable = fetchTokensInteract
                 .fetch(defaultWallet.getValue())
                 .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensBalanceCompletable);
     }
 
@@ -171,10 +177,6 @@ public class WalletViewModel extends BaseViewModel {
     @Override
     public void showRedeemToken(Context context, Token token) {
         assetDisplayRouter.open(context, token);
-    }
-
-    public void showTransactions(Context context) {
-        transactionsRouter.open(context, true);
     }
 
     public void showEditTokens(Context context) {
@@ -230,4 +232,20 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     private final Runnable startGetBalanceTask = this::getBalance;
+
+    private void prepareWallet()
+    {
+        disposable = findDefaultNetworkInteract
+                .find()
+                .subscribe(this::onDefaultNetworkPrepare, this::onError);
+    }
+
+    private void onDefaultNetworkPrepare(NetworkInfo networkInfo) {
+        defaultNetwork.postValue(networkInfo);
+        disposable = findDefaultWalletInteract
+                .find()
+                .toObservable()
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(this::onDefaultWallet, this::onError, this::fetchTokens);
+    }
 }

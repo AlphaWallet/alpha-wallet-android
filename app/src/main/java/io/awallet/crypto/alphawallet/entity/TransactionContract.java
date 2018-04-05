@@ -3,6 +3,8 @@ package io.awallet.crypto.alphawallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import static io.awallet.crypto.alphawallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
+
 public class TransactionContract implements Parcelable {
     public String address;
     public String name;
@@ -12,6 +14,11 @@ public class TransactionContract implements Parcelable {
 
     public TransactionContract() {
 
+    }
+
+    public int contractType()
+    {
+        return NORMAL_CONTRACT_TYPE;
     }
 
     private TransactionContract(Parcel in) {

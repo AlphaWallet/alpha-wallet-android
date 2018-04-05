@@ -53,7 +53,17 @@ public class TransactionMemoryCache implements TransactionLocalSource {
         });
     }
 
-    private static class CacheUnit {
+	@Override
+	public Single<Transaction[]> putAndReturnTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+	{
+		return Single.fromCallable(() -> {
+								   	cache.put(createKey(networkInfo, wallet),
+												 new CacheUnit(wallet.address, System.currentTimeMillis(), txList));
+									   return txList;
+								   });
+	}
+
+	private static class CacheUnit {
 		final String accountAddress;
 		final long create;
 		final Transaction[] transactions;

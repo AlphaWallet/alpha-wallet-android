@@ -1,6 +1,8 @@
 package io.awallet.crypto.alphawallet.entity;
 
 
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
+
 /**
  * Created by James on 26/03/2018.
  */
@@ -32,8 +34,14 @@ public class EtherscanTransaction
 
     public Transaction createTransaction()
     {
+        TransactionOperation[] o = new TransactionOperation[0];
+        if (contractAddress.length() > 0)
+        {
+            to = contractAddress;
+        }
+
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
-            gasUsed, new TransactionOperation[0]);
+            gasUsed, o);
 
         return tx;
     }

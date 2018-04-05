@@ -83,9 +83,19 @@ public class SellTicketActivity extends BaseActivity
         viewModel.marketQueueSuccessDialog().observe(this, this::displayMarketQueueSuccessDialog);
         viewModel.marketQueueErrorDialog().observe(this, this::displayMarketQueueErrorDialog);
 
-        Button nextButton = findViewById(R.id.button_next);
-        nextButton.setOnClickListener(v -> {
-            onNext();
+//        Button nextButton = findViewById(R.id.button_next);
+//        nextButton.setOnClickListener(v -> {
+//            onNext();
+//        });
+
+        Button marketPlace = findViewById(R.id.button_marketplace);
+        marketPlace.setOnClickListener(v -> {
+            onMarketPlace();
+        });
+
+        Button magicLink = findViewById(R.id.button_magiclink);
+        magicLink.setOnClickListener(v -> {
+            onMagicLink();
         });
 
     }
@@ -125,29 +135,33 @@ public class SellTicketActivity extends BaseActivity
         viewModel.prepare(ticket);
     }
 
-    private void onNext() {
-        // Validate input fields
-        boolean inputValid = true;
-        //look up all checked fields
+    private String getIDSelection()
+    {
         List<TicketRange> sellRange = adapter.getCheckedItems();
+        List<Integer> idList = new ArrayList<>();
+        for (TicketRange tr : sellRange)
+        {
+            idList.addAll(tr.tokenIds);
+        }
 
-        if (!sellRange.isEmpty()) {
-            //add this range to the sell order confirmation
-            //Generate list of indicies and actual ids
-            List<Integer> idList = new ArrayList<>();
-            for (TicketRange tr : sellRange)
-            {
-                idList.addAll(tr.tokenIds);
-            }
+        return viewModel.ticket().getValue().populateIDs(idList, false);
+    }
 
-            String idListStr = viewModel.ticket().getValue().populateIDs(idList, false);
-            List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(idListStr);
-            String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
+    private void onMarketPlace()
+    {
+        String selection = getIDSelection();
 
-            //confirm other address
-            //confirmation screen
-            //(Context context, String to, String ids, String ticketIDs)
-            viewModel.openSellDialog(this, idListStr);
+        if (selection != null && selection.length() > 0) {
+            viewModel.openMarketDialog(this, selection);
+        }
+    }
+
+    private void onMagicLink()
+    {
+        String selection = getIDSelection();
+
+        if (selection != null && selection.length() > 0) {
+            viewModel.openMagicLinkDialog(this, selection);
         }
     }
 

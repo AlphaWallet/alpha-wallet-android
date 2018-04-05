@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.awallet.crypto.alphawallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
+
 /**
  * Created by James on 4/03/2018.
  */
@@ -17,8 +19,14 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     public String symbol;
     public String operation;
     public String otherParty;
-    public List<Integer> indicies;
+    public List<Integer> indices;
     public int type;
+
+    @Override
+    public int contractType()
+    {
+        return ERC875_CONTRACT_TYPE;
+    }
 
     public ERC875ContractTransaction() {
         address = "";
@@ -27,15 +35,35 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         symbol = "";
         operation = "";
         otherParty = "";
-        indicies = null;
+        indices = null;
     }
 
-    public void setIndicies(List<BigInteger> indicies)
+    public void setIndicies(List<BigInteger> indices)
     {
-        this.indicies = new ArrayList<>();
-        for (BigInteger index : indicies)
+        this.indices = new ArrayList<>();
+        for (BigInteger index : indices)
         {
-            this.indicies.add(index.intValue());
+            this.indices.add(index.intValue());
+        }
+    }
+
+    public void setIndicesFromString(String indicesStr)
+    {
+        this.indices = new ArrayList<>();
+        try
+        {
+            String[] indicesArray = indicesStr.split(",");
+
+            for (String index : indicesArray)
+            {
+                //remove whitespace
+                String trim = index.trim();
+                indices.add(Integer.parseInt(trim));
+            }
+        }
+        catch (Exception e)
+        {
+
         }
     }
 
@@ -47,11 +75,11 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         operation = in.readString();
         type = in.readInt();
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-        indicies = new ArrayList<>();
+        indices = new ArrayList<>();
         for (Object o : readObjArray)
         {
             Integer val = (Integer)o;
-            indicies.add(val);
+            indices.add(val);
         }
     }
 
@@ -80,8 +108,29 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         parcel.writeString(symbol);
         parcel.writeString(operation);
         parcel.writeInt(type);
-        if (indicies != null) {
-            parcel.writeArray(indicies.toArray());
+        if (indices != null) {
+            parcel.writeArray(indices.toArray());
         }
+    }
+
+    public String getIndicesString()
+    {
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        if (indices != null)
+        {
+            for (Integer id : indices)
+            {
+                if (!first)
+                {
+                    sb.append(", ");
+                }
+                first = false;
+
+                sb.append(id.toString());
+            }
+        }
+
+        return sb.toString();
     }
 }

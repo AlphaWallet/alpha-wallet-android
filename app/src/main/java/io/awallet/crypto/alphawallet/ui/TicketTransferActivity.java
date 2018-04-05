@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -25,8 +26,6 @@ import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.TicketTransferViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.TicketTransferViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.SystemView;
-
-import org.ethereum.geth.Address;
 
 import java.util.List;
 

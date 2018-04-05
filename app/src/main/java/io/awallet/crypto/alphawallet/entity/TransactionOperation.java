@@ -11,6 +11,9 @@ public class TransactionOperation implements Parcelable {
     public String value;
     public TransactionContract contract;
 
+    public static final int NORMAL_CONTRACT_TYPE = 20;
+    public static final int ERC875_CONTRACT_TYPE = 875;
+
     public TransactionOperation() {
 
     }
@@ -21,7 +24,16 @@ public class TransactionOperation implements Parcelable {
         from = in.readString();
         to = in.readString();
         value = in.readString();
-        contract = in.readParcelable(TransactionContract.class.getClassLoader());
+        int type = in.readInt();
+        switch (type)
+        {
+            case NORMAL_CONTRACT_TYPE:
+                contract = in.readParcelable(TransactionContract.class.getClassLoader());
+                break;
+            case ERC875_CONTRACT_TYPE:
+                contract = in.readParcelable(ERC875ContractTransaction.class.getClassLoader());
+                break;
+        }
     }
 
     public static final Creator<TransactionOperation> CREATOR = new Creator<TransactionOperation>() {
@@ -48,6 +60,7 @@ public class TransactionOperation implements Parcelable {
         parcel.writeString(from);
         parcel.writeString(to);
         parcel.writeString(value);
+        parcel.writeInt(contract.contractType());
         parcel.writeParcelable(contract, flags);
     }
 }

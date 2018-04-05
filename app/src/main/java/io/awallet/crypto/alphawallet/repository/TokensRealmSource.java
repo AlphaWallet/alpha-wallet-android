@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.repository;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -24,8 +25,11 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
+
 public class TokensRealmSource implements TokenLocalSource {
 
+    public static final String TAG = "TLS";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final String COINMARKETCAP_IMAGE_URL = "https://files.coinmarketcap.com/static/img/coins/128x128/%s.png";
@@ -41,8 +45,33 @@ public class TokensRealmSource implements TokenLocalSource {
         return Completable.fromAction(() -> {
             Date now = new Date();
             for (Token token : items) {
-                saveToken(networkInfo, wallet, token, now);
+                if (token.tokenInfo.name == null || token.tokenInfo.name.equals(EXPIRED_CONTRACT) || token.tokenInfo.symbol == null)
+                {
+                    Log.d(TAG, "Attempting to store invalid contract: " + token.getAddress());
+                }
+                else
+                {
+                    saveToken(networkInfo, wallet, token, now);
+                }
             }
+        });
+    }
+
+    @Override
+    public Single<Token[]> saveTokensList(NetworkInfo networkInfo, Wallet wallet, Token[] items) {
+        return Single.fromCallable(() -> {
+            Date now = new Date();
+            for (Token token : items) {
+                if (token.tokenInfo.name == null || token.tokenInfo.name.equals(EXPIRED_CONTRACT))
+                {
+                    Log.d(TAG, "Attempting to store invalid contract: " + token.getAddress());
+                }
+                else
+                {
+                    saveToken(networkInfo, wallet, token, now);
+                }
+            }
+            return items;
         });
     }
 
@@ -95,6 +124,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
                         .findAll();
+                Log.d("TRS", "Sz: " + realmItems.size());
                 return convertBalance(realmItems, System.currentTimeMillis());
             } finally {
                 if (realm != null) {
@@ -280,6 +310,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     .findFirst();
             realm.beginTransaction();
             if (realmToken == null) {
+                Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);
                 realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
                 realmToken.setName(token.tokenInfo.name);
                 realmToken.setSymbol(token.tokenInfo.symbol);
@@ -290,6 +321,10 @@ public class TokensRealmSource implements TokenLocalSource {
                 if (token instanceof Ticket) {
                     realmToken.setStormbird(true);
                 }
+            }
+            else
+            {
+                Log.d(TAG, "Update Token: " + token.getFullName());
             }
             realmToken.setBalance(token.getFullBalance());
             realm.commitTransaction();

@@ -23,6 +23,11 @@ import jnr.ffi.annotations.In;
 
 /**
  * Created by James on 27/01/2018.
+ * It might seem counter intuitive but here Ticket refers to a container of an asset class here,
+ * not the right to seat somewhere in the venue. Therefore, there shouldn't be List<Ticket>
+ * To understand this, imagine that one says "I have two cryptocurrencies: Ether and Bitcoin,
+ * each amounts to a hundred", and he pauses and said, "I also have two tickets: FIFA and
+ * Formuler-one, which, too, amounts to a hundred each".
  */
 
 public class Ticket extends Token implements Parcelable
@@ -41,12 +46,6 @@ public class Ticket extends Token implements Parcelable
         this.balanceArray = parseIDListInteger(balances);
         burnArray = parseIDListInteger(burnList, true);
     }
-//
-//    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
-//        super(tokenInfo, BigDecimal.ZERO, blancaTime);
-//        this.balanceArray   = parseIDListInteger(balances);
-//        this.burnArray      = parseIDListInteger(burnList);
-//    }
 
     private Ticket(Parcel in) {
         super(in);

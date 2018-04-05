@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
   <contract>
-    <address type="issuing">0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4</address>
+    <address type="issuing">0xa3347C8ED134444C25169872c90a6360D42b3691</address>
   </contract>
   <tokenFeatures>
     <trade method="market-queue" version="0.1">

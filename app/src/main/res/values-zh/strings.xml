@@ -157,11 +157,11 @@
     <string name="label_transfer_ticket">转让门票</string>
     <string name="select_tickets_transfer">选择要转让的门票:</string>
     <string name="confirm_transfer_title">确认转让?</string>
-    <string name="label_order_details">Order Details</string>
-    <string name="dialog_go_to_listings">Go to My Listings</string>
-    <string name="backup_key_title">Congratulations!</string>
-    <string name="backup_key_message">You are the only one in the whole universe who knows your key. Be aware that anyone who has your key has your assets, so please keep it safe. Do not share it with anyone and do not lose it.</string>
-    <string name="backup_key_button_text">View your Currency</string>
+    <string name="label_order_details">订单信息</string>
+    <string name="dialog_go_to_listings">查看我的销售列表</string>
+    <string name="backup_key_title">恭喜!</string>
+    <string name="backup_key_message">你是宇宙中唯一知道你秘钥的人。 请注意，任何拥有您的秘钥的人都有您的资产，请保持安全。 不要与任何人分享，也不要失去它。</string>
+    <string name="backup_key_button_text">查看你的加密货币</string>
     <string name="dialog_marketplace_success">Your tickets have been put up for sale in the Marketplace</string>
     <string name="dialog_process_error">Trade not processed</string>
     <string name="dialog_ok">OK</string>

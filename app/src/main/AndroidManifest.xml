@@ -53,10 +53,6 @@
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TransactionsActivity"
-            android:label="@string/title_import" />
-
-        <activity
             android:name="io.awallet.crypto.alphawallet.ui.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity

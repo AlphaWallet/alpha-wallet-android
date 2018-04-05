@@ -13,4 +13,5 @@ public interface TransactionLocalSource {
 	Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions);
 
     Single<Transaction> findLast(NetworkInfo networkInfo, Wallet wallet);
+	Single<Transaction[]> putAndReturnTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList);
 }

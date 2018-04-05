@@ -24,7 +24,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="?actionBarSize"
+            android:layout_marginBottom="?android:attr/actionBarSize"
             android:paddingLeft="15dp"
             android:paddingRight="15dp">
 
@@ -40,23 +40,23 @@
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_alignParentBottom="true"
             android:layout_gravity="center"
             android:background="@color/button_disabled"
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button_use"
+                android:id="@+id/button_marketplace"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/selector_button"
-                android:enabled="false"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
                 android:paddingBottom="15dp"
+                android:enabled="false"
                 android:paddingTop="15dp"
                 android:text="@string/action_marketplace"
                 android:textAllCaps="false"
@@ -66,7 +66,7 @@
             <include layout="@layout/button_divider" />
 
             <Button
-                android:id="@+id/button_next"
+                android:id="@+id/button_magiclink"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -88,7 +88,7 @@
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
+        android:layout_marginTop="?android:attr/actionBarSize"
         android:background="@color/white"
         tools:visibility="gone" />
 

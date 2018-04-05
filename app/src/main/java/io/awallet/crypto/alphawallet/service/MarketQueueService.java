@@ -91,7 +91,7 @@ import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class MarketQueueService {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
-    private static final int TRADE_AMOUNT = 2016;
+    private static final int TRADE_AMOUNT = 1008;
     private static final String MARKET_QUEUE_URL = "https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/";
     private static final String MARKET_QUEUE_FETCH = MARKET_QUEUE_URL + "contract/";
 
@@ -216,7 +216,6 @@ public class MarketQueueService {
 
             okhttp3.Response response = httpClient.newCall(request).execute();
             result = response.body().string();
-            System.out.println("HI: " + result);
         }
         catch(Exception e)
         {
@@ -245,7 +244,7 @@ public class MarketQueueService {
 
             result = response.body().string();
 
-            System.out.println("HI: " + result);
+            //System.out.println("HI: " + result);
         }
         catch(Exception e)
         {

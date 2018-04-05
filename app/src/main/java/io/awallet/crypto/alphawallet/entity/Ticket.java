@@ -237,6 +237,11 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
+    public String arrayToString(int[] prunedIndices)
+    {
+        return populateIDs(prunedIndices);
+    }
+
     public List<Integer> ticketIdToTicketIndex(List<Integer> ticketIds)
     {
         //read given indicies and convert into internal format, error checking to ensure

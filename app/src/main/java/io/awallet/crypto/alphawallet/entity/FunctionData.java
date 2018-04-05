@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.entity;
 
 import java.util.List;
 
+import static io.awallet.crypto.alphawallet.entity.TransactionDecoder.CREATION;
 import static io.awallet.crypto.alphawallet.entity.TransactionDecoder.ERC20;
 import static io.awallet.crypto.alphawallet.entity.TransactionDecoder.ERC875;
 
@@ -25,5 +26,10 @@ public class FunctionData
     public boolean isERC875()
     {
         return (contractType == ERC875);
+    }
+
+    public boolean isConstructor()
+    {
+        return (contractType == CREATION);
     }
 }

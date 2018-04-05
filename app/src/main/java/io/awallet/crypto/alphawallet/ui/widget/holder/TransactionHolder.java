@@ -75,10 +75,17 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             // default to ether transaction
             fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
                     ETHER_DECIMALS, transaction.timeStamp);
-        } else if (operation.contract instanceof ERC875ContractTransaction)
+        }
+        else if (operation.contract instanceof ERC875ContractTransaction)
         {
             fillERC875(transaction, (ERC875ContractTransaction)operation.contract);
-        } else {
+        }
+        else if (operation.from == null)
+        {
+            fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
+                 ETHER_DECIMALS, transaction.timeStamp);
+        }
+        else {
             fill(transaction.error, operation.from, operation.to, operation.contract.symbol, operation.value,
                     operation.contract.decimals, transaction.timeStamp);
         }
@@ -111,8 +118,8 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         type.setText(ct.operation);
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
-        if (ct.indicies != null && ct.indicies.size() > 0) {
-            String valueStr = "x" + ct.indicies.size() + " Tickets";
+        if (ct.indices != null && ct.indices.size() > 0) {
+            String valueStr = "x" + ct.indices.size() + " Tickets";
             value.setText(valueStr);
         }
         else
@@ -130,11 +137,15 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             String valueStr,
             long decimals,
             long timestamp) {
+        if (defaultAddress == null || from == null)
+        {
+             System.out.println("yo");
+        }
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
-        if (!TextUtils.isEmpty(error)) {
+        if (error == null || error.length() == 0) {
             typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
-        } else if (isSent) {
+        } else if (!isSent) {
             typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
         } else {
             typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);

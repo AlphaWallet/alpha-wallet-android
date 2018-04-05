@@ -78,19 +78,13 @@ public class SendActivity extends BaseActivity {
     TextView toAddressError;
     TextView amountError;
     TextView myAddressText;
+    TextView amountSymbolText;
     AWalletAlertDialog dialog;
 
     //Token
     TextView balanceEth;
-    TextView textUsdValue;
     TextView symbolText;
-    ImageView icon;
     TextView arrayBalance;
-    TextView text24Hours;
-    TextView textAppreciation;
-    TextView issuer;
-    TextView text24HoursSub;
-    TextView textAppreciationSub;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,6 +124,8 @@ public class SendActivity extends BaseActivity {
     }
 
     private void initViews() {
+        amountSymbolText = findViewById(R.id.edit_amount_symbol);
+        amountSymbolText.setText(token.tokenInfo.symbol);
         toAddressError = findViewById(R.id.to_address_error);
         amountError = findViewById(R.id.amount_error);
         myAddressText = findViewById(R.id.address);
@@ -325,15 +321,8 @@ public class SendActivity extends BaseActivity {
     }
 
     public void setupTokenContent() { /* This method is copied from Token.java */
-        icon = findViewById(R.id.icon);
         balanceEth = findViewById(R.id.balance_eth);
-        textUsdValue = findViewById(R.id.balance_currency);
         arrayBalance = findViewById(R.id.balanceArray);
-        text24Hours = findViewById(R.id.text_24_hrs);
-        textAppreciation = findViewById(R.id.text_appreciation);
-        issuer = findViewById(R.id.issuer);
-        text24HoursSub = findViewById(R.id.text_24_hrs_sub);
-        textAppreciationSub = findViewById(R.id.text_appreciation_sub);
         symbolText = findViewById(R.id.symbol);
 
         symbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
@@ -348,17 +337,17 @@ public class SendActivity extends BaseActivity {
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         balanceEth.setText(value);
 
-        if (token.ticker == null) {
-            textUsdValue.setText(R.string.NA);
-            text24Hours.setText(R.string.NA);
-            textAppreciation.setText(R.string.NA);
-            textAppreciationSub.setText(R.string.appreciation);
-            text24HoursSub.setText(R.string.twenty_four_hours);
-        } else {
-            // TODO: Fill token details
-            textAppreciationSub.setText(R.string.appreciation);
-            text24HoursSub.setText(R.string.twenty_four_hours);
-        }
+//        if (token.ticker == null) {
+//            textUsdValue.setText(R.string.NA);
+//            text24Hours.setText(R.string.NA);
+//            textAppreciation.setText(R.string.NA);
+//            textAppreciationSub.setText(R.string.appreciation);
+//            text24HoursSub.setText(R.string.twenty_four_hours);
+//        } else {
+//            // TODO: Fill token details
+//            textAppreciationSub.setText(R.string.appreciation);
+//            text24HoursSub.setText(R.string.twenty_four_hours);
+//        }
 
         balanceEth.setVisibility(View.VISIBLE);
         arrayBalance.setVisibility(View.GONE);

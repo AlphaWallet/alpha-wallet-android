@@ -27,7 +27,51 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <include layout="@layout/item_token" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="20dp">
+
+                    <TextView
+                        android:id="@+id/balance_eth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/font_light"
+                        android:text="8888888"
+                        android:textColor="@color/text_black"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/balanceArray"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/font_light"
+                        android:textColor="@color/text_black"
+                        android:textSize="25sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/symbol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:text="@string/ethereum"
+                        android:textColor="@color/text_black"
+                        android:textSize="25sp" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_margin="15dp"
+                    android:background="@color/super_light_grey" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -83,6 +127,7 @@
                             android:textSize="21sp" />
 
                         <TextView
+                            android:id="@+id/edit_amount_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
@@ -90,6 +135,7 @@
                             android:layout_marginRight="15dp"
                             android:fontFamily="@font/font_regular"
                             android:text="@string/eth"
+                            android:textAllCaps="true"
                             android:textColor="@color/semi_dark_grey" />
                     </RelativeLayout>
 

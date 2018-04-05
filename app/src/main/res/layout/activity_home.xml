@@ -46,13 +46,23 @@
         tools:visibility="gone" />
 
     <!--android:background="?android:attr/windowBackground"-->
-    <com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx
-        android:id="@+id/bottom_navigation_ex"
+    <!--<com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx-->
+        <!--android:id="@+id/bottom_navigation_ex"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_gravity="bottom"-->
+        <!--app:itemIconTint="@drawable/selector_menu_item_color"-->
+        <!--app:itemTextColor="@color/colorPrimaryDark"-->
+        <!--app:menu="@menu/menu_main_network" />-->
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:background="?android:attr/windowBackground"
+        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom"
         app:itemIconTint="@drawable/selector_menu_item_color"
-        app:itemTextColor="@color/colorPrimaryDark"
-        app:menu="@menu/menu_main_network" />
+        app:menu="@menu/menu_main_network"
+        />
 </android.support.design.widget.CoordinatorLayout>

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import io.awallet.crypto.alphawallet.ui.HomeActivity;
-import io.awallet.crypto.alphawallet.ui.TransactionsActivity;
 
 public class HomeRouter {
     public void open(Context context, boolean isClearStack) {

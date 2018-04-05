@@ -2,32 +2,24 @@ package io.awallet.crypto.alphawallet.viewmodel;
 
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.view.MenuItem;
 
-import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.ui.BaseActivity;
 
-public abstract class BaseNavigationActivity extends BaseActivity implements BottomNavigationViewEx.OnNavigationItemSelectedListener {
+public class BaseNavigationActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private BottomNavigationViewEx navigation;
+    private BottomNavigationView navigation;
 
-    protected void initBottomNavigation()
-    {
-        navigation = findViewById(R.id.bottom_navigation_ex);
+    protected void initBottomNavigation() {
+        navigation = findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(this);
-        navigation.setTextVisibility(false);
-        navigation.setIconsMarginTop(10);
     }
 
-    protected void setBottomMenu(@MenuRes int menuRes)
-    {
+    protected void setBottomMenu(@MenuRes int menuRes) {
         navigation.getMenu().clear();
         navigation.inflateMenu(menuRes);
-
-        navigation.enableAnimation(false);
-        navigation.enableShiftingMode(false);
-        navigation.enableItemShiftingMode(false);
     }
 
     protected void selectNavigationItem(int position) {
@@ -35,11 +27,12 @@ public abstract class BaseNavigationActivity extends BaseActivity implements Bot
     }
 
     protected int getSelectedNavigationItem() {
-        return navigation.getCurrentItem();
+        return navigation.getSelectedItemId();
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        navigation.setSelectedItemId(item.getItemId());
         return false;
     }
 }

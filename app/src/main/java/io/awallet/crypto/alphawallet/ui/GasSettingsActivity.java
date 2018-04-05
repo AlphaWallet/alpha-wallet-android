@@ -5,17 +5,12 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatSeekBar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import io.awallet.crypto.alphawallet.C;
-import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.util.BalanceUtils;
-import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
-import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModelFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,6 +18,12 @@ import java.math.BigInteger;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.C;
+import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.NetworkInfo;
+import io.awallet.crypto.alphawallet.util.BalanceUtils;
+import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
+import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModelFactory;
 
 public class GasSettingsActivity extends BaseActivity {
 
@@ -35,6 +36,7 @@ public class GasSettingsActivity extends BaseActivity {
     private TextView networkFeeText;
     private TextView gasPriceInfoText;
     private TextView gasLimitInfoText;
+    private Button saveButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,17 +46,24 @@ public class GasSettingsActivity extends BaseActivity {
 
         setContentView(R.layout.activity_gas_settings);
         toolbar();
+        setTitle("");
 
-        SeekBar gasPriceSlider = findViewById(R.id.gas_price_slider);
-        SeekBar gasLimitSlider = findViewById(R.id.gas_limit_slider);
+        AppCompatSeekBar gasPriceSlider = findViewById(R.id.gas_price_slider);
+        AppCompatSeekBar gasLimitSlider = findViewById(R.id.gas_limit_slider);
         gasPriceText = findViewById(R.id.gas_price_text);
         gasLimitText = findViewById(R.id.gas_limit_text);
         networkFeeText = findViewById(R.id.text_network_fee);
         gasPriceInfoText = findViewById(R.id.gas_price_info_text);
         gasLimitInfoText = findViewById(R.id.gas_limit_info_text);
+        saveButton = findViewById(R.id.button_save);
 
-        gasPriceSlider.setPadding(0, 0, 0, 0);
-        gasLimitSlider.setPadding(0, 0, 0, 0);
+        saveButton.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.putExtra(C.EXTRA_GAS_PRICE, viewModel.gasPrice().getValue().toString());
+            intent.putExtra(C.EXTRA_GAS_LIMIT, viewModel.gasLimit().getValue().toString());
+            setResult(RESULT_OK, intent);
+            finish();
+        });
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(GasSettingsViewModel.class);
@@ -155,23 +164,11 @@ public class GasSettingsActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_settings_menu, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_save: {
-                Intent intent = new Intent();
-                intent.putExtra(C.EXTRA_GAS_PRICE, viewModel.gasPrice().getValue().toString());
-                intent.putExtra(C.EXTRA_GAS_LIMIT, viewModel.gasLimit().getValue().toString());
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-            break;
-        }
         return super.onOptionsItemSelected(item);
     }
 }

@@ -14,7 +14,6 @@ import io.awallet.crypto.alphawallet.ui.MarketplaceFragment;
 import io.awallet.crypto.alphawallet.ui.NewSettingsFragment;
 import io.awallet.crypto.alphawallet.ui.RedeemAssetSelectActivity;
 import io.awallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity;
-import io.awallet.crypto.alphawallet.ui.SalesOrderActivity;
 import io.awallet.crypto.alphawallet.ui.MyAddressActivity;
 import io.awallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
 import io.awallet.crypto.alphawallet.ui.SellDetailActivity;
@@ -94,10 +93,6 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TicketTransferModule.class)
 	abstract TicketTransferActivity bindTicketTransferActivity();
-
-	@ActivityScope
-	@ContributesAndroidInjector(modules = SalesOrderModule.class)
-	abstract SalesOrderActivity bindSalesOrderActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = SellTicketModule.class)

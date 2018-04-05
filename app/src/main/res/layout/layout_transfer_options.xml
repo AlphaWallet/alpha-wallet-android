@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title_select_transfer_option"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/font_light"
+        android:gravity="center"
+        android:text="@string/select_option_to_transfer"
+        android:textColor="@color/text_black"
+        android:textSize="25sp" />
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:baselineAligned="false"-->
+    <!--android:orientation="horizontal"-->
+    <!--android:padding="5dp">-->
+
+    <!--<FrameLayout-->
+    <!--android:id="@+id/layout_send_sms"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_marginLeft="5dp"-->
+    <!--android:layout_marginRight="5dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:background="@drawable/background_card_shadow">-->
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:orientation="vertical"-->
+    <!--android:padding="15dp">-->
+
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center_horizontal"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:src="@drawable/ic_send_sms"-->
+    <!--android:tint="@color/disabled_color" />-->
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_light"-->
+    <!--android:gravity="center"-->
+    <!--android:text="@string/send_sms_whatsapp"-->
+    <!--android:textColor="@color/disabled_color"-->
+    <!--android:textSize="20sp" />-->
+    <!--</LinearLayout>-->
+    <!--</FrameLayout>-->
+
+    <!--<FrameLayout-->
+    <!--android:id="@+id/layout_send_email"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_marginLeft="5dp"-->
+    <!--android:layout_marginRight="5dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:background="@drawable/background_card_shadow">-->
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:orientation="vertical"-->
+    <!--android:padding="15dp">-->
+
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center_horizontal"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:src="@drawable/ic_send_email"-->
+    <!--android:tint="@color/disabled_color" />-->
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_light"-->
+    <!--android:gravity="center"-->
+    <!--android:text="@string/send_email"-->
+    <!--android:textSize="20sp"-->
+    <!--android:tint="@color/disabled_color" />-->
+    <!--</LinearLayout>-->
+    <!--</FrameLayout>-->
+    <!--</LinearLayout>-->
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:baselineAligned="false"-->
+    <!--android:orientation="horizontal"-->
+    <!--android:padding="5dp">-->
+
+    <!--<FrameLayout-->
+    <!--android:id="@+id/layout_input_address"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_marginLeft="5dp"-->
+    <!--android:layout_marginRight="5dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:background="@drawable/background_card_shadow">-->
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:orientation="vertical"-->
+    <!--android:padding="25dp">-->
+
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center_horizontal"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:src="@drawable/ic_input_wallet_address" />-->
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_light"-->
+    <!--android:gravity="center"-->
+    <!--android:text="@string/input_wallet_address"-->
+    <!--android:textColor="@color/text_black"-->
+    <!--android:textSize="20sp" />-->
+    <!--</LinearLayout>-->
+    <!--</FrameLayout>-->
+
+    <!--<FrameLayout-->
+    <!--android:id="@+id/layout_qr_scanner"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_marginLeft="5dp"-->
+    <!--android:layout_marginRight="5dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:background="@drawable/background_card_shadow">-->
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:orientation="vertical"-->
+    <!--android:padding="25dp">-->
+
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="center_horizontal"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:src="@drawable/ic_qr_code" />-->
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:fontFamily="@font/font_light"-->
+    <!--android:gravity="center"-->
+    <!--android:text="@string/use_qr_code_scanner"-->
+    <!--android:textColor="@color/text_black"-->
+    <!--android:textSize="20sp" />-->
+    <!--</LinearLayout>-->
+    <!--</FrameLayout>-->
+    <!--</LinearLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <FrameLayout
+            android:id="@+id/layout_input_address"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_card_shadow">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:padding="25dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/ic_input_wallet_address" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_light"
+                    android:gravity="center"
+                    android:text="@string/input_wallet_address"
+                    android:textColor="@color/text_black"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/layout_share_link"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_card_shadow">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:padding="25dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="10dp"
+                    app:srcCompat="@drawable/ic_share" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_light"
+                    android:gravity="center"
+                    android:text="@string/share_magiclink"
+                    android:textColor="@color/text_black"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

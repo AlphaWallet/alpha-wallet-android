@@ -1,6 +1,16 @@
 package io.awallet.crypto.alphawallet.service;
 
+import android.net.Uri;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import io.awallet.crypto.alphawallet.entity.EtherscanTransaction;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
@@ -8,6 +18,7 @@ import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +29,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,12 +47,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	private final Gson gson;
 
     private ApiClient apiClient;
-    private TxResponse txResponse;
-
-    private int page = 0;
-    private int pages = 0;
-	List<Transaction> result = new ArrayList<>();
-	private String lastTransactionHash;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
@@ -73,111 +79,110 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				.subscribeOn(Schedulers.io());
 	}
 
-	@Override
-	public Observable<Transaction[]> fetchLastTransactions(Wallet wallet, Transaction lastTransaction) {
-		return Observable.fromCallable(() -> {
-			@NonNull String lastTransactionHash = lastTransaction == null
-					? "" : lastTransaction.hash;
-			List<Transaction> result = new ArrayList<>();
-			int pages = 0;
-			int page = 0;
-			boolean hasMore = true;
-			do {
-				page++;
-				try {
-					Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
-					Response<ApiClientResponse> response = call.execute();
-					if (response.isSuccessful()) {
-						ApiClientResponse body = response.body();
-						if (body != null) {
-							pages = body.pages;
-							for (Transaction transaction : body.docs) {
-								if (lastTransactionHash.equals(transaction.hash)) {
-									hasMore = false;
-									break;
-								}
-								result.add(transaction);
+	private Transaction[] fetchLastTransactionsTrust(Wallet wallet, Transaction lastTransaction)
+	{
+		@NonNull String lastTransactionHash = lastTransaction == null
+				? "" : lastTransaction.hash;
+		List<Transaction> result = new ArrayList<>();
+		int pages = 0;
+		int page = 0;
+		boolean hasMore = true;
+		do {
+			page++;
+			try {
+				Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
+				Response<ApiClientResponse> response = call.execute();
+				if (response.isSuccessful()) {
+					ApiClientResponse body = response.body();
+					if (body != null) {
+						pages = body.pages;
+						for (Transaction transaction : body.docs) {
+							if (lastTransactionHash.equals(transaction.hash)) {
+								hasMore = false;
+								break;
 							}
+							result.add(transaction);
 						}
 					}
 				}
-				catch (IOException e) //Connection gets severed if the owning fragment is cleared by Android OS
-						              //The best we can do is catch the exception thrown by OKHTTP
+			}
+			catch (IOException e) //Connection gets severed if the owning fragment is cleared by Android OS
+			//The best we can do is catch the exception thrown by OKHTTP
+			{
+				return result.toArray(new Transaction[result.size()]);
+			}
+		} while (page < pages && hasMore);
+		return result.toArray(new Transaction[result.size()]);
+	}
+
+	@Override
+	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction lastTransaction)
+	{
+		final String lastBlock = (lastTransaction != null) ? lastTransaction.blockNumber : "0";
+
+		return Observable.fromCallable(() -> {
+			List<Transaction> result = new ArrayList<>();
+			try
+			{
+				String response = readTransactions(networkInfo, wallet.address, lastBlock);
+
+				System.out.println(response);
+
+				Gson reader = new Gson();
+				JSONObject stateData = new JSONObject(response);
+				JSONArray orders = stateData.getJSONArray("result");
+				EtherscanTransaction[] myTxs = reader.fromJson(orders.toString(), EtherscanTransaction[].class);
+				for (EtherscanTransaction etx : myTxs)
 				{
-					return result.toArray(new Transaction[result.size()]);
+					result.add(etx.createTransaction());
 				}
-			} while (page < pages && hasMore);
+			}
+			catch (Exception e)
+			{
+				//if this process fails, also try trust eth wallet API
+				return fetchLastTransactionsTrust(wallet, lastTransaction);
+			}
+
 			return result.toArray(new Transaction[result.size()]);
 		}).subscribeOn(Schedulers.io());
 	}
 
-	@Override
-	public void fetchTransactions2(Wallet wallet, Transaction lastTransaction, TransactionsCallback txCallback)
-	{
-		txResponse = new TxResponse(wallet, txCallback);
-		makeTxCall(wallet, lastTransaction);
-	}
+    private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock)
+    {
+        okhttp3.Response response = null;
+        String result = null;
+        String fullUrl = null;
 
-	private void makeTxCall(Wallet wallet, Transaction lastTx)
-	{
-		lastTransactionHash = lastTx == null
-				? "" : lastTx.hash;
-		txResponse.lastTx = lastTx;
-		Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
-		call.enqueue(txResponse);
-	}
-
-    private void consumeResult(Response response, Wallet wallet)
-	{
-		boolean hasMore = true;
-		ApiClientResponse body = (ApiClientResponse) response.body();
-		if (body != null) {
-			pages = body.pages;
-			for (Transaction transaction : body.docs) {
-				if (lastTransactionHash.equals(transaction.hash)) {
-					hasMore = false;
-					break;
-				}
-				result.add(transaction);
-			}
-
-			if (!hasMore)
-			{
-				//use callback
-				txResponse.txCallback.recieveTransactions(result.toArray(new Transaction[result.size()]));
-			}
-			else
-			{
-				//call again
-				makeTxCall(wallet, txResponse.lastTx);
-			}
-		}
-	}
-
-    private class TxResponse implements retrofit2.Callback<ApiClientResponse>
-	{
-		private final Wallet wallet;
-		public Transaction lastTx;
-		public final TransactionsCallback txCallback;
-
-		public TxResponse(Wallet wallet, TransactionsCallback cb)
+		if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanTxUrl))
 		{
-			this.wallet = wallet;
-			this.txCallback = cb;
-		}
+			StringBuilder sb = new StringBuilder();
+			sb.append(networkInfo.etherscanTxUrl);
+			sb.append("api?module=account&action=txlist&address=");
+			sb.append(address);
+			sb.append("&startblock=");
+			sb.append(firstBlock);
+			sb.append("&endblock=99999999&sort=asc&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+			fullUrl = sb.toString();
 
-		@Override
-		public void onResponse(Call call, Response response) {
-			if (response.isSuccessful()) {
-				consumeResult(response, wallet);
+			try
+			{
+				Request request = new Request.Builder()
+						.url(fullUrl)
+						.get()
+						.build();
+
+				response = httpClient.newCall(request).execute();
+
+				result = response.body().string();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
 
-		@Override
-		public void onFailure(Call call, Throwable t) {
-
-		}
-	}
+        return result;
+    }
 
     private void onNetworkChanged(NetworkInfo networkInfo) {
 		buildApiClient(networkInfo.backendUrl);

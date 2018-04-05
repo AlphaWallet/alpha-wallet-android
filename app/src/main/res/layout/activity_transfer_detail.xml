@@ -43,9 +43,16 @@
                     android:layout_marginTop="20dp"
                     android:fontFamily="@font/font_light"
                     android:gravity="center"
-                    android:text="Transfer Tickets"
+                    android:text="@string/transfer_tickets"
                     android:textColor="@color/text_black"
                     android:textSize="25sp" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/listTickets"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@android:color/transparent"
+                    android:dividerHeight="10.0sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -122,50 +129,6 @@
 
                     </RelativeLayout>
                 </LinearLayout>
-
-                <RelativeLayout
-                    android:id="@+id/send_to_address_layout"
-                    android:layout_marginTop="@dimen/big_margin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    >
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/to_input_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        >
-                        <EditText
-                            android:id="@+id/send_to_address"
-                            android:hint="@string/hint_recipient_address"
-                            android:imeActionLabel="@string/prompt_to"
-                            android:imeOptions="actionUnspecified"
-                            android:inputType="text"
-                            android:maxLines="1"
-                            android:paddingRight="@dimen/half_large_padding"
-                            android:paddingEnd="@dimen/half_large_padding"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            />
-                    </android.support.design.widget.TextInputLayout>
-                    <ImageButton
-                        android:id="@+id/scan_barcode_button"
-                        android:src="@mipmap/qr_code_icon"
-                        android:contentDescription="@string/scan_qr"
-                        android:background="?android:selectableItemBackground"
-                        android:padding="@dimen/big_padding"
-                        android:layout_alignParentEnd="true"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        />
-                </RelativeLayout>
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/listTickets"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:divider="@android:color/transparent"
-                    android:dividerHeight="10.0sp" />
             </LinearLayout>
 
         </ScrollView>
@@ -179,7 +142,7 @@
             android:background="@drawable/selector_button"
             android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:text="@string/action_transfer"
+            android:text="@string/action_next"
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"
             android:textSize="20sp" />

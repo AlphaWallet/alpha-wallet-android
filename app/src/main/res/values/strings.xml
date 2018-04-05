@@ -232,4 +232,5 @@
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
+    <string name="transfer_tickets">Transfer Tickets</string>
 </resources>

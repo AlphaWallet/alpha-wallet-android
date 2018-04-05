@@ -144,17 +144,17 @@ public class TransferTicketDetailActivity extends BaseActivity {
         });
 
         Button btnTransfer = findViewById(R.id.button_transfer);
-        btnTransfer.setOnClickListener((View v) -> {
-            if (Integer.parseInt(textQuantity.getText().toString()) > 0) {
-                AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
-                dialog.setTitle(R.string.confirm_transfer_title);
-                dialog.setPrimaryButtonText(R.string.action_transfer);
-                dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-                dialog.setPrimaryButtonListener(v1 -> transferTicketFinal());
-                dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
-                dialog.show();
-            }
-        });
+//        btnTransfer.setOnClickListener((View v) -> {
+//            if (Integer.parseInt(textQuantity.getText().toString()) > 0) {
+//                AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+//                dialog.setTitle(R.string.confirm_transfer_title);
+//                dialog.setPrimaryButtonText(R.string.action_transfer);
+//                dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+//                dialog.setPrimaryButtonListener(v1 -> transferTicketFinal());
+//                dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+//                dialog.show();
+//            }
+//        });
 
         ImageButton scanBarcodeButton = findViewById(R.id.scan_barcode_button);
         scanBarcodeButton.setOnClickListener(view -> {

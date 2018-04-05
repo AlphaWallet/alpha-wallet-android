@@ -56,7 +56,7 @@
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
                 android:paddingBottom="15dp"
-                android:enabled="false"
+                android:enabled="true"
                 android:paddingTop="15dp"
                 android:text="@string/action_marketplace"
                 android:textAllCaps="false"

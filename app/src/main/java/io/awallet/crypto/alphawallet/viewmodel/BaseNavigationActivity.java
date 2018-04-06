@@ -1,38 +1,24 @@
 package io.awallet.crypto.alphawallet.viewmodel;
 
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.view.MenuItem;
-
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.ui.BaseActivity;
+import io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView;
 
-public class BaseNavigationActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
-
-    private BottomNavigationView navigation;
+public class BaseNavigationActivity extends BaseActivity implements AWalletBottomNavigationView.OnBottomNavigationItemSelectedListener {
+    private AWalletBottomNavigationView nav;
 
     protected void initBottomNavigation() {
-        navigation = findViewById(R.id.bottom_navigation);
-        navigation.setOnNavigationItemSelectedListener(this);
-    }
-
-    protected void setBottomMenu(@MenuRes int menuRes) {
-        navigation.getMenu().clear();
-        navigation.inflateMenu(menuRes);
+        nav = findViewById(R.id.nav);
+        nav.setListener(this);
     }
 
     protected void selectNavigationItem(int position) {
-        navigation.getMenu().getItem(position).setChecked(true);
-    }
-
-    protected int getSelectedNavigationItem() {
-        return navigation.getSelectedItemId();
+        nav.setSelectedItem(position);
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        navigation.setSelectedItemId(item.getItemId());
+    public boolean onBottomNavigationItemSelected(int index) {
+        nav.setSelectedItem(index);
         return false;
     }
 }

@@ -18,10 +18,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.io.IOException;
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.AssetDisplayViewModel;
@@ -61,12 +65,24 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     {
         AndroidInjection.inject(this);
 
+        ticket = getIntent().getParcelableExtra(TICKET);
+        try {
+           /* this is perhaps the least invasive way to carry XML
+            * asset-definition 3 levels down to where it is used,
+            * without breaking the existing design by incorporating
+            * callback which writes a huge arrays of List for
+            * different fields of each tokenID - weiwu */
+            ticket.piggybackedXMLDefinition = new AssetDefinition("ticket.xml", getResources());
+        } catch (IOException|SAXException e){
+            // TODO: how to gracefully bail out from creating a new activity?
+            throw new RuntimeException("Error in parsing XML asset Definition");
+        }
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_asset_display);
         toolbar();
 
-        ticket = getIntent().getParcelableExtra(TICKET);
         setTitle(getString(R.string.title_show_tickets));
         TokenInfo info = ticket.tokenInfo;
 

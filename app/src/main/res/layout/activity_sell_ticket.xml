@@ -46,24 +46,24 @@
             android:background="@color/button_disabled"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/button_marketplace"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/selector_button"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:enabled="false"
-                android:paddingTop="15dp"
-                android:text="@string/action_marketplace"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="20sp" />
+            <!--<Button-->
+                <!--android:id="@+id/button_marketplace"-->
+                <!--style="@style/Widget.AppCompat.Button.Borderless.Colored"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="1"-->
+                <!--android:background="@drawable/selector_button"-->
+                <!--android:fontFamily="@font/font_regular"-->
+                <!--android:gravity="center"-->
+                <!--android:paddingBottom="15dp"-->
+                <!--android:enabled="false"-->
+                <!--android:paddingTop="15dp"-->
+                <!--android:text="@string/action_marketplace"-->
+                <!--android:textAllCaps="false"-->
+                <!--android:textColor="@color/button_text_color"-->
+                <!--android:textSize="20sp" />-->
 
-            <include layout="@layout/button_divider" />
+            <!--<include layout="@layout/button_divider" />-->
 
             <Button
                 android:id="@+id/button_magiclink"
@@ -76,7 +76,7 @@
                 android:gravity="center"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
-                android:text="@string/action_magiclink"
+                android:text="@string/action_next"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />

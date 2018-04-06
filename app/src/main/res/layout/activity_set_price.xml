@@ -15,7 +15,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="?actionBarSize">
+            android:layout_marginBottom="?android:attr/actionBarSize">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -51,18 +51,20 @@
                         android:gravity="center"
                         android:text="@string/set_price_subtext_abr"
                         android:textColor="@color/text_black"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:visibility="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="30dp"
+                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center"
                         android:text="@string/learn_more_about_ethereum"
                         android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        android:visibility="gone" />
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/listTickets"
@@ -72,419 +74,490 @@
                         android:dividerHeight="10.0sp" />
 
                     <LinearLayout
+                        android:id="@+id/layout_set_quantity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:visibility="visible">
 
                         <LinearLayout
-                            android:id="@+id/layout_price_per_ticket"
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginBottom="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/price_per_ticket"
-                                android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
-                                android:textSize="10sp" />
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-
-                                <EditText
-                                    android:id="@+id/asking_price"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="47dp"
-                                    android:layout_alignParentLeft="true"
-                                    android:layout_centerVertical="true"
-                                    android:background="@drawable/background_quantity"
-                                    android:fontFamily="@font/font_semibold"
-                                    android:hint="0.00"
-                                    android:imeOptions="actionDone"
-                                    android:inputType="numberDecimal"
-                                    android:paddingStart="15dp"
-                                    android:textColor="@color/colorPrimaryDark"
-                                    android:textColorHint="@color/light_gray"
-                                    android:textSize="21sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentRight="true"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginRight="15dp"
-                                    android:fontFamily="@font/font_regular"
-                                    android:text="@string/eth"
-                                    android:textColor="@color/semi_dark_grey" />
-                            </RelativeLayout>
-
-                            <TextView
-                                android:id="@+id/error_price"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:gravity="center"
-                                android:text="@string/error_invalid_amount"
-                                android:textColor="@color/cancel_red"
-                                android:textSize="12sp"
-                                android:visibility="gone" />
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="15dp"
-                            android:layout_height="match_parent"
-                            android:background="@color/white" />
-
-                        <LinearLayout
-                            android:id="@+id/layout_ticket_count"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginBottom="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/quantity_of_tickets"
-                                android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
-                                android:textSize="10sp" />
+                            android:layout_marginTop="20dp"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:id="@+id/layout_ticket_quantity"
-                                android:layout_width="match_parent"
-                                android:layout_height="47dp"
-                                android:layout_gravity="center_horizontal"
-                                android:background="@drawable/background_quantity"
-                                android:orientation="horizontal">
+                                android:id="@+id/layout_price_per_ticket"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_marginBottom="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:text="@string/price_per_ticket"
+                                    android:textAllCaps="true"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="10sp" />
 
                                 <RelativeLayout
-                                    android:id="@+id/layout_quantity_add"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:layout_alignParentLeft="true"
-                                    android:layout_centerVertical="true"
-                                    android:layout_weight="1">
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
 
-                                    <ImageView
-                                        android:id="@+id/img_quantity_add"
+                                    <EditText
+                                        android:id="@+id/asking_price"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="47dp"
+                                        android:layout_alignParentLeft="true"
+                                        android:layout_centerVertical="true"
+                                        android:background="@drawable/background_quantity"
+                                        android:fontFamily="@font/font_semibold"
+                                        android:hint="0.00"
+                                        android:imeOptions="actionDone"
+                                        android:inputType="numberDecimal"
+                                        android:paddingStart="15dp"
+                                        android:textColor="@color/colorPrimaryDark"
+                                        android:textColorHint="@color/light_gray"
+                                        android:textSize="21sp" />
+
+                                    <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:layout_centerInParent="true"
-                                        android:contentDescription="@string/empty"
-                                        android:src="@drawable/ic_plus" />
+                                        android:layout_alignParentRight="true"
+                                        android:layout_centerVertical="true"
+                                        android:layout_marginRight="15dp"
+                                        android:fontFamily="@font/font_regular"
+                                        android:text="@string/eth"
+                                        android:textColor="@color/semi_dark_grey" />
                                 </RelativeLayout>
 
                                 <TextView
-                                    android:id="@+id/text_quantity"
-                                    android:layout_width="wrap_content"
+                                    android:id="@+id/error_price"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_gravity="center"
-                                    android:layout_weight="1"
-                                    android:fontFamily="@font/font_semibold"
+                                    android:layout_marginTop="5dp"
+                                    android:fontFamily="@font/font_regular"
                                     android:gravity="center"
-                                    android:padding="10dp"
-                                    android:text="0"
-                                    android:textColor="@color/colorPrimaryDark"
-                                    android:textSize="21sp" />
+                                    android:text="@string/error_invalid_amount"
+                                    android:textColor="@color/cancel_red"
+                                    android:textSize="12sp"
+                                    android:visibility="gone" />
 
-                                <RelativeLayout
-                                    android:id="@+id/layout_quantity_minus"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1">
-
-                                    <ImageView
-                                        android:id="@+id/img_quantity_minus"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_centerInParent="true"
-                                        android:contentDescription="@string/empty"
-                                        android:src="@drawable/ic_minus" />
-
-                                </RelativeLayout>
                             </LinearLayout>
 
+                            <View
+                                android:layout_width="15dp"
+                                android:layout_height="match_parent"
+                                android:background="@color/white" />
+
+                            <LinearLayout
+                                android:id="@+id/layout_ticket_count"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_marginBottom="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:text="@string/quantity_of_tickets"
+                                    android:textAllCaps="true"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="10sp" />
+
+                                <LinearLayout
+                                    android:id="@+id/layout_ticket_quantity"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="47dp"
+                                    android:layout_gravity="center_horizontal"
+                                    android:background="@drawable/background_quantity"
+                                    android:orientation="horizontal">
+
+                                    <RelativeLayout
+                                        android:id="@+id/layout_quantity_add"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_alignParentLeft="true"
+                                        android:layout_centerVertical="true"
+                                        android:layout_weight="1">
+
+                                        <ImageView
+                                            android:id="@+id/img_quantity_add"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_centerInParent="true"
+                                            android:contentDescription="@string/empty"
+                                            android:src="@drawable/ic_plus" />
+                                    </RelativeLayout>
+
+                                    <TextView
+                                        android:id="@+id/text_quantity"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center"
+                                        android:layout_weight="1"
+                                        android:fontFamily="@font/font_semibold"
+                                        android:gravity="center"
+                                        android:padding="10dp"
+                                        android:text="1"
+                                        android:textColor="@color/colorPrimaryDark"
+                                        android:textSize="21sp" />
+
+                                    <RelativeLayout
+                                        android:id="@+id/layout_quantity_minus"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="1">
+
+                                        <ImageView
+                                            android:id="@+id/img_quantity_minus"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_centerInParent="true"
+                                            android:contentDescription="@string/empty"
+                                            android:src="@drawable/ic_minus" />
+
+                                    </RelativeLayout>
+                                </LinearLayout>
+
+                                <TextView
+                                    android:id="@+id/error_quantity"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:gravity="center"
+                                    android:text="@string/error_invalid_quantity"
+                                    android:textColor="@color/cancel_red"
+                                    android:textSize="12sp"
+                                    android:visibility="gone" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/fiat_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="20dp"
+                            android:background="@color/white"
+                            android:orientation="vertical"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp">
+
                             <TextView
-                                android:id="@+id/error_quantity"
+                                android:id="@+id/fiat_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
+                                android:fontFamily="@font/font_light"
+                                android:gravity="center"
+                                android:text="@string/total_cost_label"
+                                android:textColor="@color/text_black"
+                                android:textSize="21sp" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_marginTop="10dp"
+                                android:background="@color/grey" />
+
+                            <TextView
+                                android:id="@+id/eth_price"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/font_bold"
+                                android:gravity="center"
+                                android:text="@string/eth_00"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textSize="21sp" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_marginTop="10dp"
+                                android:background="@color/grey" />
+
+                            <TextView
+                                android:id="@+id/fiat_price_txt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
                                 android:fontFamily="@font/font_regular"
                                 android:gravity="center"
-                                android:text="@string/error_invalid_quantity"
-                                android:textColor="@color/cancel_red"
-                                android:textSize="12sp"
-                                android:visibility="gone" />
+                                android:text="@string/equivalent_in_usd"
+                                android:textAllCaps="true"
+                                android:textColor="@color/light_gray"
+                                android:textSize="10sp" />
+
+
+                            <TextView
+                                android:id="@+id/fiat_price"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp"
+                                android:background="@drawable/background_round_grey"
+                                android:paddingBottom="10dp"
+                                android:paddingLeft="20dp"
+                                android:paddingRight="20dp"
+                                android:paddingTop="10dp"
+                                android:text="$0"
+                                android:textColor="@color/light_gray"
+                                android:textSize="21sp" />
+
                         </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/layout_magiclink_details"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:id="@+id/layout_expiry_date"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginBottom="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/link_expiry_date"
-                                android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
-                                android:textSize="10sp" />
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-
-                                <EditText
-                                    android:id="@+id/edit_expiry_date"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="47dp"
-                                    android:layout_alignParentLeft="true"
-                                    android:layout_centerVertical="true"
-                                    android:background="@drawable/background_quantity"
-                                    android:digits="1234567890a"
-                                    android:focusable="false"
-                                    android:fontFamily="@font/font_semibold"
-                                    android:hint="DD/MM/YYYY"
-                                    android:imeOptions="actionDone"
-                                    android:inputType="datetime"
-                                    android:paddingStart="15dp"
-                                    android:textColor="@color/colorPrimaryDark"
-                                    android:textColorHint="@color/light_gray"
-                                    android:textSize="18sp" />
-
-                                <ImageView
-                                    android:id="@+id/icon_expiry_date"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentRight="true"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginRight="15dp"
-                                    android:src="@drawable/ic_calendar" />
-                            </RelativeLayout>
-
-                            <TextView
-                                android:id="@+id/error_date"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:gravity="center"
-                                android:text="@string/error_date"
-                                android:textColor="@color/cancel_red"
-                                android:textSize="12sp"
-                                android:visibility="gone" />
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="15dp"
-                            android:layout_height="match_parent"
-                            android:background="@color/white" />
-
-                        <LinearLayout
-                            android:id="@+id/layout_expiry_time"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginBottom="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/link_expiry_time"
-                                android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
-                                android:textSize="10sp" />
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-
-                                <EditText
-                                    android:id="@+id/edit_expiry_time"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="47dp"
-                                    android:layout_alignParentLeft="true"
-                                    android:layout_centerHorizontal="true"
-                                    android:layout_centerVertical="true"
-                                    android:background="@drawable/background_quantity"
-                                    android:focusable="false"
-                                    android:fontFamily="@font/font_semibold"
-                                    android:hint="@string/hint_time"
-                                    android:imeOptions="actionDone"
-                                    android:inputType="time"
-                                    android:paddingStart="15dp"
-                                    android:textColor="@color/colorPrimaryDark"
-                                    android:textColorHint="@color/light_gray"
-                                    android:textSize="18sp" />
-
-                                <ImageView
-                                    android:id="@+id/icon_expiry_time"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentRight="true"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginRight="15dp"
-                                    android:src="@drawable/ic_clock" />
-                            </RelativeLayout>
-
-                            <TextView
-                                android:id="@+id/error_time"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:fontFamily="@font/font_regular"
-                                android:gravity="center"
-                                android:text="@string/error_time"
-                                android:textColor="@color/cancel_red"
-                                android:textSize="12sp"
-                                android:visibility="gone" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/fiat_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        android:background="@color/white"
                         android:orientation="vertical"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp">
+                        android:visibility="gone">
 
                         <TextView
-                            android:id="@+id/fiat_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/font_light"
-                            android:gravity="center"
-                            android:text="@string/total_cost_label"
-                            android:textColor="@color/text_black"
-                            android:textSize="21sp" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:background="@color/grey" />
-
-                        <TextView
-                            android:id="@+id/eth_price"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/font_bold"
-                            android:gravity="center"
-                            android:text="0.00 ETH"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textSize="21sp" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="10dp"
-                            android:background="@color/grey" />
-
-                        <TextView
-                            android:id="@+id/fiat_price_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/font_regular"
-                            android:gravity="center"
-                            android:text="@string/equivalent_in_usd"
-                            android:textAllCaps="true"
-                            android:textColor="@color/light_gray"
-                            android:textSize="10sp" />
-
-
-                        <TextView
-                            android:id="@+id/fiat_price"
+                            android:id="@+id/text_confirm_quantity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_marginTop="5dp"
-                            android:background="@drawable/background_round_grey"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="20dp"
-                            android:paddingRight="20dp"
-                            android:paddingTop="10dp"
-                            android:text="$0"
-                            android:textColor="@color/light_gray"
-                            android:textSize="21sp" />
+                            android:fontFamily="@font/font_bold"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="20sp" />
 
-                    </LinearLayout>
+                        <TextView
+                            android:id="@+id/text_confirm_price_per_ticket"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_bold"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="20sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/text_confirm_total_cost"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginBottom="10dp"
+                            android:fontFamily="@font/font_bold"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="20sp" />
 
-                        <RelativeLayout
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_light"
+                            android:gravity="center"
+                            android:text="@string/magiclink_info"
+                            android:textSize="16sp" />
+
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginLeft="@dimen/big_padding"
-                            android:layout_marginRight="@dimen/big_padding"
-                            android:orientation="vertical">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="15dp"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:id="@+id/contract_address_layout"
-                                android:layout_width="match_parent"
+                                android:id="@+id/layout_expiry_date"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentTop="true"
-                                android:layout_gravity="center"
-                                android:gravity="bottom"
-                                android:orientation="horizontal">
+                                android:layout_weight="1"
+                                android:orientation="vertical">
 
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_marginBottom="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:text="@string/link_expiry_date"
+                                    android:textAllCaps="true"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="10sp" />
+
+                                <RelativeLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
+
+                                    <EditText
+                                        android:id="@+id/edit_expiry_date"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="47dp"
+                                        android:layout_alignParentLeft="true"
+                                        android:layout_centerVertical="true"
+                                        android:background="@drawable/background_quantity"
+                                        android:digits="1234567890a"
+                                        android:focusable="false"
+                                        android:fontFamily="@font/font_semibold"
+                                        android:hint="@string/date_hint"
+                                        android:imeOptions="actionDone"
+                                        android:inputType="datetime"
+                                        android:paddingStart="15dp"
+                                        android:textColor="@color/colorPrimaryDark"
+                                        android:textColorHint="@color/light_gray"
+                                        android:textSize="18sp" />
+
+                                    <ImageView
+                                        android:id="@+id/icon_expiry_date"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_alignParentRight="true"
+                                        android:layout_centerVertical="true"
+                                        android:layout_marginRight="15dp"
+                                        android:src="@drawable/ic_calendar" />
+                                </RelativeLayout>
+
+                                <TextView
+                                    android:id="@+id/error_date"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:gravity="center"
+                                    android:text="@string/error_date"
+                                    android:textColor="@color/cancel_red"
+                                    android:textSize="12sp"
+                                    android:visibility="gone" />
                             </LinearLayout>
-                        </RelativeLayout>
+
+                            <View
+                                android:layout_width="15dp"
+                                android:layout_height="match_parent"
+                                android:background="@color/white" />
+
+                            <LinearLayout
+                                android:id="@+id/layout_expiry_time"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_marginBottom="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:text="@string/link_expiry_time"
+                                    android:textAllCaps="true"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="10sp" />
+
+                                <RelativeLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
+
+                                    <EditText
+                                        android:id="@+id/edit_expiry_time"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="47dp"
+                                        android:layout_alignParentLeft="true"
+                                        android:layout_centerHorizontal="true"
+                                        android:layout_centerVertical="true"
+                                        android:background="@drawable/background_quantity"
+                                        android:focusable="false"
+                                        android:fontFamily="@font/font_semibold"
+                                        android:hint="@string/hint_time"
+                                        android:imeOptions="actionDone"
+                                        android:inputType="time"
+                                        android:paddingStart="15dp"
+                                        android:textColor="@color/colorPrimaryDark"
+                                        android:textColorHint="@color/light_gray"
+                                        android:textSize="18sp" />
+
+                                    <ImageView
+                                        android:id="@+id/icon_expiry_time"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_alignParentRight="true"
+                                        android:layout_centerVertical="true"
+                                        android:layout_marginRight="15dp"
+                                        android:src="@drawable/ic_clock" />
+                                </RelativeLayout>
+
+                                <TextView
+                                    android:id="@+id/error_time"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="5dp"
+                                    android:fontFamily="@font/font_regular"
+                                    android:gravity="center"
+                                    android:text="@string/error_time"
+                                    android:textColor="@color/cancel_red"
+                                    android:textSize="12sp"
+                                    android:visibility="gone" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="15dp"
+                            android:background="@drawable/background_round_red"
+                            android:orientation="vertical"
+                            android:padding="15dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:fontFamily="@font/font_bold"
+                                android:text="@string/label_important"
+                                android:textAllCaps="true"
+                                android:textColor="@color/cancel_red"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:fontFamily="@font/font_regular"
+                                android:gravity="center"
+                                android:text="@string/magiclink_notice"
+                                android:textColor="@color/cancel_red" />
+
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-
             </LinearLayout>
         </ScrollView>
+
+        <Button
+            android:id="@+id/button_next"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/selector_button"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:text="@string/action_next"
+            android:textAllCaps="false"
+            android:textColor="@color/button_text_color"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/button_sell"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_alignParentBottom="true"
             android:background="@drawable/selector_button"
             android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:text="@string/sell_thru_magiclink"
+            android:text="@string/action_sell"
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="gone" />
     </RelativeLayout>
 </LinearLayout>

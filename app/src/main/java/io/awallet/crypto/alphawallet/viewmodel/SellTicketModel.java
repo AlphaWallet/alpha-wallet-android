@@ -23,6 +23,8 @@ import io.awallet.crypto.alphawallet.ui.SellTicketActivity;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
+import static io.awallet.crypto.alphawallet.ui.SellDetailActivity.SET_A_PRICE;
+
 /**
  * Created by James on 16/02/2018.
  */
@@ -129,7 +131,7 @@ public class SellTicketModel  extends BaseViewModel {
         try
         {
             Token ticket = this.ticket().getValue();
-            sellDetailRouter.openMagic(context, ticket, selection, defaultWallet.getValue());
+            sellDetailRouter.openMagic(context, ticket, selection, defaultWallet.getValue(), SET_A_PRICE, 0);
         }
         catch (Exception e)
         {

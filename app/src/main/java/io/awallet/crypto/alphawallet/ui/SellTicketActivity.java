@@ -81,10 +81,10 @@ public class SellTicketActivity extends BaseActivity {
         viewModel.marketQueueSuccessDialog().observe(this, this::displayMarketQueueSuccessDialog);
         viewModel.marketQueueErrorDialog().observe(this, this::displayMarketQueueErrorDialog);
 
-//        Button marketPlace = findViewById(R.id.button_marketplace);
-//        marketPlace.setOnClickListener(v -> {
-//            onMarketPlace();
-//        });
+        Button marketPlace = findViewById(R.id.button_marketplace);
+        marketPlace.setOnClickListener(v -> {
+            onMarketPlace();
+        });
 
         Button magicLink = findViewById(R.id.button_magiclink);
         magicLink.setOnClickListener(v -> {

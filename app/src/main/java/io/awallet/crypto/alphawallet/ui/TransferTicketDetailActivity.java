@@ -187,7 +187,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, Integer.valueOf(textQuantity.getText().toString()));
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -198,7 +198,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, Integer.valueOf(textQuantity.getText().toString()));
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -546,7 +546,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         startActivity(sendIntent);
     }
 
-    boolean isAddressValid(String address)
+    private boolean isAddressValid(String address)
     {
         try
         {

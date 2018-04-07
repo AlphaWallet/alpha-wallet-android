@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -36,7 +37,6 @@ import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 /**
  * Created by James on 13/02/2018.
  */
-
 public class TransferTicketActivity extends BaseActivity
 {
     @Inject
@@ -48,9 +48,7 @@ public class TransferTicketActivity extends BaseActivity
     public TextView ids;
     public TextView selected;
 
-    private String address;
     private Ticket ticket;
-    private TicketRange ticketRange;
     private TicketSaleAdapter adapter;
 
     @Override
@@ -61,13 +59,8 @@ public class TransferTicketActivity extends BaseActivity
         ticket = getIntent().getParcelableExtra(TICKET);
         setupSalesOrder();
 
-        address = ticket.getAddress();
-
         toolbar();
 
-        address = ticket.tokenInfo.address;
-
-//        setTitle(getString(R.string.create_sell_order));
         setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);
@@ -91,7 +84,6 @@ public class TransferTicketActivity extends BaseActivity
 
     private void setupSalesOrder()
     {
-        ticketRange = null;
         setContentView(R.layout.activity_transfer_ticket_select);
 
         RecyclerView list = findViewById(R.id.listTickets);
@@ -104,19 +96,7 @@ public class TransferTicketActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.send_menu, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.action_next: {
-//                onNext();
-//            }
-//            break;
-//        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

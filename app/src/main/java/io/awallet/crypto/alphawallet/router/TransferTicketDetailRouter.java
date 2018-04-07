@@ -8,6 +8,7 @@ import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.ui.SellDetailActivity;
 import io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
 
+import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
@@ -24,6 +25,16 @@ public class TransferTicketDetailRouter {
         intent.putExtra(TICKET, token);
         intent.putExtra(EXTRA_TOKENID_LIST, ticketIDs);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        context.startActivity(intent);
+    }
+
+    public void openTransfer(Context context, Token token, String ticketIDs, Wallet wallet, int state) {
+        Intent intent = new Intent(context, TransferTicketDetailActivity.class);
+        intent.putExtra(WALLET, wallet);
+        intent.putExtra(TICKET, token);
+        intent.putExtra(EXTRA_TOKENID_LIST, ticketIDs);
+        intent.putExtra(EXTRA_STATE, state);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
     }
 }

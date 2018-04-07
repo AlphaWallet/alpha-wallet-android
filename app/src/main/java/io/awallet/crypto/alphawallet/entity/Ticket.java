@@ -376,6 +376,22 @@ public class Ticket extends Token implements Parcelable, NonFungibleToken
         return displayIDs;
     }
 
+    /**
+     *
+     * @return
+     */
+    public String pruneIDList(String idList, int quantity)
+    {
+        //convert to list
+        List<Integer> intList = parseIDListInteger(idList);
+        for (int i = (intList.size() - 1); i >= quantity; i--)
+        {
+            intList.remove(i);
+        }
+
+        return populateIDs(intList, true);
+    }
+
     @Override
     public int getTicketCount()
     {
@@ -416,9 +432,6 @@ public class Ticket extends Token implements Parcelable, NonFungibleToken
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnArray.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-
-        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
-//        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
     }
 

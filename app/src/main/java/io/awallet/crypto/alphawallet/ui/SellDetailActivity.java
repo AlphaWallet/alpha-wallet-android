@@ -562,6 +562,3 @@ public class SellDetailActivity extends BaseActivity {
         quantityErrorText.setVisibility(View.GONE);
     }
 }
-
-
-

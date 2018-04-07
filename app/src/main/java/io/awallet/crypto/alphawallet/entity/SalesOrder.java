@@ -282,7 +282,7 @@ public class SalesOrder implements Parcelable {
         return ownerAddress;
     }
 
-    public byte[] getTradeBytes()
+    private byte[] getTradeBytes()
     {
         return getTradeBytes(tickets, contractAddress, priceWei, expiry);
     }

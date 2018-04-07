@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
@@ -25,7 +26,7 @@ import jnr.ffi.annotations.In;
  * Created by James on 27/01/2018.
  */
 
-public class Ticket extends Token implements Parcelable
+public class Ticket extends Token implements Parcelable, NonFungibleToken
 {
     public final List<Integer> balanceArray;
     private List<Integer> burnArray;
@@ -41,12 +42,6 @@ public class Ticket extends Token implements Parcelable
         this.balanceArray = parseIDListInteger(balances);
         burnArray = parseIDListInteger(burnList, true);
     }
-//
-//    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
-//        super(tokenInfo, BigDecimal.ZERO, blancaTime);
-//        this.balanceArray   = parseIDListInteger(balances);
-//        this.burnArray      = parseIDListInteger(burnList);
-//    }
 
     private Ticket(Parcel in) {
         super(in);
@@ -118,24 +113,6 @@ public class Ticket extends Token implements Parcelable
         }
         else {
             sb.append("none");
-        }
-
-        return sb.toString();
-    }
-
-    public String checkBalance(String selection)
-    {
-        StringBuilder sb = new StringBuilder();
-        //convert selection to index list
-        List<org.web3j.abi.datatypes.generated.Int16> selectionIndex = parseIDList(selection);
-        //add correct entries
-        boolean first = true;
-        for (org.web3j.abi.datatypes.generated.Int16 id : selectionIndex) {
-            if (balanceArray.contains(id.getValue().intValue()) && !burnArray.contains(id.getValue().intValue())) {
-                if (!first) sb.append(", ");
-                sb.append(String.valueOf(id.getValue().toString(10)));
-                first = false;
-            }
         }
 
         return sb.toString();
@@ -235,11 +212,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return idList;
-    }
-
-    public String arrayToString(int[] prunedIndices)
-    {
-        return populateIDs(prunedIndices);
     }
 
     public List<Integer> ticketIdToTicketIndex(List<Integer> ticketIds)
@@ -447,18 +419,6 @@ public class Ticket extends Token implements Parcelable
         return populateIDs(range.tokenIds, false);
     }
 
-    private int getIndexOf(int id)
-    {
-        if (balanceArray.contains(id))
-        {
-            return balanceArray.indexOf(id);
-        }
-        else
-        {
-            return -1;
-        }
-    }
-
     @Override
     public int[] getTicketIndicies(String ticketIds)
     {
@@ -479,5 +439,20 @@ public class Ticket extends Token implements Parcelable
     @Override
     public String getBurnListStr() {
         return populateIDs(burnArray, false);
+    }
+
+    @Override
+    public void setField(String id, String name, String value) {
+
+    }
+
+    @Override
+    public String getFieldText(String id) {
+        return null;
+    }
+
+    @Override
+    public String getFieldName(String id) {
+        return null;
     }
 }

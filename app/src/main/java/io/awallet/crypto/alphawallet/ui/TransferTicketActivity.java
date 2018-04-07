@@ -67,7 +67,7 @@ public class TransferTicketActivity extends BaseActivity
 
         address = ticket.tokenInfo.address;
 
-//        setTitle(getString(R.string.market_queue_title));
+//        setTitle(getString(R.string.create_sell_order));
         setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);

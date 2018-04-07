@@ -9,7 +9,6 @@ import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
-import io.awallet.crypto.alphawallet.router.SalesOrderRouter;
 import io.awallet.crypto.alphawallet.router.MyTokensRouter;
 import io.awallet.crypto.alphawallet.router.SellTicketRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketRouter;
@@ -33,11 +32,10 @@ public class AssetDisplayModule {
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter, homeRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter);
     }
 
     @Provides
@@ -60,11 +58,6 @@ public class AssetDisplayModule {
     @Provides
     MyTokensRouter provideMyTokensRouter() {
         return new MyTokensRouter();
-    }
-
-    @Provides
-    SalesOrderRouter provideSalesOrderRouter() {
-        return new SalesOrderRouter();
     }
 
     @Provides

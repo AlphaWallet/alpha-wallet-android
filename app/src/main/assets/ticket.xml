@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
+  <contract>
+    <address type="issuing">0xa3347C8ED134444C25169872c90a6360D42b3691</address>
+  </contract>
+  <tokenFeatures>
+    <trade method="market-queue" version="0.1">
+      <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
+    </trade>
+    <trade method="universal-link" version="9">
+      <prefix>https://app.awallet.io/</prefix>
+    </trade>
+    <redeem>
+      <method name="QR"/>
+      <!--
+      <method name="Aztec"/>
+      <method name="Bluetooth"/>
+      -->
+    </redeem>
+  </tokenFeatures>
+  <!-- token UI definition can happen here -->
   <fields>
     <!--
     There are 64 matches (1-64), each has up to 16 ticket classes,

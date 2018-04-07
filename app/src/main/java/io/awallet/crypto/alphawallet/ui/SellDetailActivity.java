@@ -49,7 +49,6 @@ import io.awallet.crypto.alphawallet.viewmodel.SellDetailModel;
 import io.awallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 
-import static io.awallet.crypto.alphawallet.C.EXTRA_PRICE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
@@ -68,14 +67,13 @@ public class SellDetailActivity extends BaseActivity {
     private Ticket ticket;
     private TicketRange ticketRange;
     private TicketAdapter adapter;
-    private TextView usdPrice;
-    private Button sellButton;
-
-    private EditText sellPrice;
-    private TextView textQuantity;
+    private boolean marketSale;
     private String ticketIds;
     private double ethToUsd;
 
+    private TextView usdPrice;
+    private EditText sellPrice;
+    private TextView textQuantity;
     private RecyclerView list;
     private TextView totalCostText;
     private EditText expiryDateEditText;
@@ -86,8 +84,14 @@ public class SellDetailActivity extends BaseActivity {
     private TextView quantityErrorText;
     private TextView expiryDateErrorText;
     private TextView expiryTimeErrorText;
-
-    private boolean marketSale;
+    private TextView titleSetPrice;
+    private LinearLayout quantityLayout;
+    private LinearLayout magicLinkDetailsLayout;
+    private Button nextButton;
+    private Button sellButton;
+    private TextView confirmQuantityText;
+    private TextView confirmPricePerTicketText;
+    private TextView confirmTotalCostText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -126,6 +130,14 @@ public class SellDetailActivity extends BaseActivity {
         quantityErrorText = findViewById(R.id.error_quantity);
         expiryDateErrorText = findViewById(R.id.error_date);
         expiryTimeErrorText = findViewById(R.id.error_time);
+        quantityLayout = findViewById(R.id.layout_set_quantity);
+        magicLinkDetailsLayout = findViewById(R.id.layout_magiclink_details);
+        nextButton = findViewById(R.id.button_next);
+        nextButton.setOnClickListener(v -> onNext());
+        titleSetPrice = findViewById(R.id.title_set_price);
+        confirmQuantityText = findViewById(R.id.text_confirm_quantity);
+        confirmPricePerTicketText = findViewById(R.id.text_confirm_price_per_ticket);
+        confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
 
         if (marketSale)
         {
@@ -140,9 +152,9 @@ public class SellDetailActivity extends BaseActivity {
             textQuantity.setVisibility(View.VISIBLE);
             expiryDateEditText.setVisibility(View.VISIBLE);
             expiryTimeEditText.setVisibility(View.VISIBLE);
-            sellButton.setText(getResources().getString(R.string.generate_sale_transfer_link));
-            TextView subText = findViewById(R.id.text_eth_subtext);
-            subText.setText(R.string.set_price_subtext_abr_magic);
+//            sellButton.setText(getResources().getString(R.string.generate_sale_transfer_link));
+//            TextView subText = findViewById(R.id.text_eth_subtext);
+//            subText.setText(R.string.set_price_subtext_abr_magic);
         }
 
         sellPrice.addTextChangedListener(new TextWatcher() {
@@ -172,7 +184,7 @@ public class SellDetailActivity extends BaseActivity {
         initTimePicker();
 
         sellButton.setOnClickListener(v -> {
-            if (isInputValid()) {
+            if (isExpiryDateTimeValid()) {
                 if (marketSale)
                 {
                     confirmPlaceMarketOrderDialog();
@@ -188,7 +200,47 @@ public class SellDetailActivity extends BaseActivity {
         expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
     }
 
-    private boolean isInputValid() {
+    void showMagicLinkDetailsLayout() {
+        magicLinkDetailsLayout.setVisibility(View.VISIBLE);
+        quantityLayout.setVisibility(View.GONE);
+        titleSetPrice.setText(R.string.set_magiclink_expiry);
+        nextButton.setVisibility(View.GONE);
+        sellButton.setVisibility(View.VISIBLE);
+
+        String unit = Integer.parseInt(textQuantity.getText().toString()) > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
+        confirmQuantityText.setText(getString(R.string.tickets_selected, textQuantity.getText().toString(), unit));
+        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, sellPrice.getText().toString()));
+        confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostText.getText().toString()));
+    }
+
+    void showQuantityLayout() {
+        quantityLayout.setVisibility(View.VISIBLE);
+        magicLinkDetailsLayout.setVisibility(View.GONE);
+        titleSetPrice.setText(R.string.set_a_price);
+        nextButton.setVisibility(View.VISIBLE);
+        sellButton.setVisibility(View.GONE);
+    }
+
+    private void onNext() {
+        if (isPriceAndQuantityValid()) {
+            showMagicLinkDetailsLayout();
+        }
+    }
+
+    private void onBack() {
+        if (magicLinkDetailsLayout.getVisibility() == View.VISIBLE) {
+            showQuantityLayout();
+        } else {
+            finish();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        onBack();
+    }
+
+    private boolean isPriceAndQuantityValid() {
         boolean result = true;
         hideErrorMessages();
 
@@ -208,6 +260,13 @@ public class SellDetailActivity extends BaseActivity {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
+
+        return result;
+    }
+
+    private boolean isExpiryDateTimeValid() {
+        boolean result = true;
+        hideErrorMessages();
 
         if (!marketSale)
         {
@@ -281,20 +340,18 @@ public class SellDetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_share, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.action_share: {
-//                sellTicketLink();
-//            }
-//            break;
-//
-//        }
-        return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                onBack();
+                break;
+            }
+        }
+        return false;
     }
 
     private void onEthereumPrice(Double aDouble) {
@@ -446,7 +503,7 @@ public class SellDetailActivity extends BaseActivity {
         String qty = textQuantity.getText().toString() + " " +
                 getResources().getString(ticketName) + "\n" +
                 textPrice + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
-                getString(R.string.confirm_sale_total) + totalCostText.getText().toString() + "\n\n" +
+                getString(R.string.confirm_sale_total, totalCostText.getText().toString()) + "\n\n" +
                 getString(R.string.magiclink_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);

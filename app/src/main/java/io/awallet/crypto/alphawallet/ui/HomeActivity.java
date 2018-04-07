@@ -19,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,12 +45,12 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
-    private static final int TRANSACTIONS = 0;
-    private static final int MARKETPLACE = 1;
-    private static final int WALLET = 2;
-    private static final int SETTINGS = 3;
+import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.MARKETPLACE;
+import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.SETTINGS;
+import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
+import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.WALLET;
 
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
@@ -125,7 +126,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
-        setBottomMenu(R.menu.menu_main_network);
         showPage(WALLET);
     }
 
@@ -195,30 +195,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_transactions: {
-                if (getSelectedNavigationItem() != 0) {
-                    showPage(TRANSACTIONS);
-                }
+    public boolean onBottomNavigationItemSelected(int index) {
+        switch (index) {
+            case TRANSACTIONS: {
+                showPage(TRANSACTIONS);
                 return true;
             }
-            case R.id.action_marketplace: {
-                if (getSelectedNavigationItem() != 1) {
-                    showPage(MARKETPLACE);
-                }
+            case MARKETPLACE: {
+                showPage(MARKETPLACE);
                 return true;
             }
-            case R.id.action_wallet: {
-                if (getSelectedNavigationItem() != 2) {
-                    showPage(WALLET);
-                }
+            case WALLET: {
+                showPage(WALLET);
                 return true;
             }
-            case R.id.action_settings: {
-                if (getSelectedNavigationItem() != 3) {
-                    showPage(SETTINGS);
-                }
+            case SETTINGS: {
+                showPage(SETTINGS);
                 return true;
             }
         }

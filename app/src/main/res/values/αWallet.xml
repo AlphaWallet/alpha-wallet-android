@@ -223,10 +223,18 @@
     <string name="action_marketplace">Marketplace</string>
     <string name="sell_thru_magiclink">Sell through a MagicLink</string>
     <string name="magiclink_expiry_on">MagicLink expiry on:</string>
-    <string name="confirm_sale_total">Total:</string>
+    <string name="confirm_sale_total">Total: %s</string>
     <string name="share_magiclink">Share MagicLink</string>
     <string name="select_option_to_transfer">Select Option to Transfer</string>
     <string name="hint_input_eth_amount">0.00</string>
     <string name="label_my_address">My Address</string>
     <string name="action_copy_alt">Copy</string>
+    <string name="set_magiclink_expiry">Set MagicLink Expiry:</string>
+    <string name="tickets_selected">%1s %2s Selected</string>
+    <string name="eth_per_ticket_w_value">%s ETH/Ticket</string>
+    <string name="magiclink_info">A MagicLink will be created to allow buyers to purchase your tickets.</string>
+    <string name="date_hint">DD/MM/YYYY</string>
+    <string name="magiclink_notice">Before the link expires, anyone with the MagicLink can purchase your tickets with one click.</string>
+    <string name="label_important">Important</string>
+    <string name="eth_00">0.00 ETH</string>
 </resources>

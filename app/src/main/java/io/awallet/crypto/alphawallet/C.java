@@ -24,7 +24,6 @@ public abstract class C {
     public static final String GWEI_UNIT = "Gwei";
 
     public static final String MARKET_SALE = "market";
-    public static final String MAGIC_LINK = "magic";
 
     public static final String EXTRA_ADDRESS = "ADDRESS";
     public static final String EXTRA_CONTRACT_ADDRESS = "CONTRACT_ADDRESS";
@@ -39,7 +38,6 @@ public abstract class C {
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
-    public static final String STORMBIRD = "STORMBIRD";
     public static final String ERC875RANGE = "ERC875RANGE";
     public static final String TOKEN_TYPE = "TOKEN_TYPE";
     public static final String MARKET_INSTANCE = "MARKET_INSTANCE";

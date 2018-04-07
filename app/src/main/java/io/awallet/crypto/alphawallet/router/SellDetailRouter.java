@@ -12,9 +12,6 @@ import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
-import static io.awallet.crypto.alphawallet.C.MAGIC_LINK;
-import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;
-import static io.awallet.crypto.alphawallet.C.MARKET_SALE;
 import static io.awallet.crypto.alphawallet.ui.SellDetailActivity.SET_MARKET_SALE;
 
 /**
@@ -23,7 +20,7 @@ import static io.awallet.crypto.alphawallet.ui.SellDetailActivity.SET_MARKET_SAL
 
 public class SellDetailRouter {
 
-    public void open(Context context, Token token, String ticketIDs, Wallet wallet) {
+    public void openMarketPlace(Context context, Token token, String ticketIDs, Wallet wallet) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra(TICKET, token);
@@ -33,7 +30,7 @@ public class SellDetailRouter {
         context.startActivity(intent);
     }
 
-    public void openMagic(Context context, Token token, String ticketIDs, Wallet wallet, int state, double price) {
+    public void openUniversalLink(Context context, Token token, String ticketIDs, Wallet wallet, int state, double price) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra(TICKET, token);

@@ -95,7 +95,7 @@ public class SellDetailActivity extends BaseActivity {
     private TextView expiryTimeErrorText;
     private TextView titleSetPrice;
     private LinearLayout quantityLayout;
-    private LinearLayout magicLinkDetailsLayout;
+    private LinearLayout universalLinkDetailsLayout;
     private Button nextButton;
     private TextView confirmQuantityText;
     private TextView confirmPricePerTicketText;
@@ -140,7 +140,7 @@ public class SellDetailActivity extends BaseActivity {
         expiryDateErrorText = findViewById(R.id.error_date);
         expiryTimeErrorText = findViewById(R.id.error_time);
         quantityLayout = findViewById(R.id.layout_set_quantity);
-        magicLinkDetailsLayout = findViewById(R.id.layout_magiclink_details);
+        universalLinkDetailsLayout = findViewById(R.id.layout_universal_link_details);
         nextButton = findViewById(R.id.button_next);
         nextButton.setOnClickListener(v -> onNext());
         titleSetPrice = findViewById(R.id.title_set_price);
@@ -159,7 +159,7 @@ public class SellDetailActivity extends BaseActivity {
                 showQuantityLayout();
                 break;
             case SET_EXPIRY:
-                showMagicLinkDetailsLayout();
+                showUniversalLinkDetailsLayout();
                 break;
             case SET_MARKET_SALE:
                 showMarketSaleLayout();
@@ -175,12 +175,12 @@ public class SellDetailActivity extends BaseActivity {
         expiryDateEditText.setVisibility(View.GONE);
         expiryTimeEditText.setVisibility(View.GONE);
         quantityLayout.setVisibility(View.VISIBLE);
-        magicLinkDetailsLayout.setVisibility(View.GONE);
+        universalLinkDetailsLayout.setVisibility(View.GONE);
         titleSetPrice.setText(R.string.set_a_price);
         addSellPriceListener();
     }
 
-    void showMagicLinkDetailsLayout()
+    void showUniversalLinkDetailsLayout()
     {
         initDatePicker();
         initTimePicker();
@@ -188,9 +188,9 @@ public class SellDetailActivity extends BaseActivity {
         textQuantity.setVisibility(View.GONE);
         expiryDateEditText.setVisibility(View.VISIBLE);
         expiryTimeEditText.setVisibility(View.VISIBLE);
-        magicLinkDetailsLayout.setVisibility(View.VISIBLE);
+        universalLinkDetailsLayout.setVisibility(View.VISIBLE);
         quantityLayout.setVisibility(View.GONE);
-        titleSetPrice.setText(R.string.set_magiclink_expiry);
+        titleSetPrice.setText(R.string.set_universal_link_expiry);
 
         expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
         expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
@@ -212,7 +212,7 @@ public class SellDetailActivity extends BaseActivity {
         expiryDateEditText.setVisibility(View.GONE);
         expiryTimeEditText.setVisibility(View.GONE);
         quantityLayout.setVisibility(View.VISIBLE);
-        magicLinkDetailsLayout.setVisibility(View.GONE);
+        universalLinkDetailsLayout.setVisibility(View.GONE);
         titleSetPrice.setText(R.string.set_a_price);
         addSellPriceListener();
     }
@@ -249,7 +249,7 @@ public class SellDetailActivity extends BaseActivity {
             case SET_A_PRICE:
                 if (isPriceAndQuantityValid())
                 {
-                    viewModel.openMagicLinkSetExpiry(this, prunedIds, sellPriceValue);
+                    viewModel.openUniversalLinkSetExpiry(this, prunedIds, sellPriceValue);
                 }
                 break;
             case SET_EXPIRY:
@@ -492,7 +492,7 @@ public class SellDetailActivity extends BaseActivity {
         String qty = String.valueOf(quantity) + " " + unit + "\n" +
                 String.valueOf(sellPriceValue) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
                 getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
-                getString(R.string.magiclink_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
+                getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);

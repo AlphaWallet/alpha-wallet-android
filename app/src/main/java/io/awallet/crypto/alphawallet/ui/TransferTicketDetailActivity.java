@@ -492,7 +492,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
         String qty = textQuantity.getText().toString() + " " +
                 getResources().getString(ticketName) + "\n" +
-                getString(R.string.magiclink_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
+                getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.generate_pick_up_link);

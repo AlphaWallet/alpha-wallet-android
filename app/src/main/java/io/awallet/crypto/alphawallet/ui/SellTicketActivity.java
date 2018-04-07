@@ -86,9 +86,9 @@ public class SellTicketActivity extends BaseActivity {
             onMarketPlace();
         });
 
-        Button magicLink = findViewById(R.id.button_magiclink);
-        magicLink.setOnClickListener(v -> {
-            onMagicLink();
+        Button universalLink = findViewById(R.id.button_universal_link);
+        universalLink.setOnClickListener(v -> {
+            onUniversalLink();
         });
 
     }
@@ -145,11 +145,11 @@ public class SellTicketActivity extends BaseActivity {
         }
     }
 
-    private void onMagicLink() {
+    private void onUniversalLink() {
         String selection = getIDSelection();
 
         if (selection != null && selection.length() > 0) {
-            viewModel.openMagicLinkDialog(this, selection);
+            viewModel.openUniversalLinkDialog(this, selection);
         }
     }
 

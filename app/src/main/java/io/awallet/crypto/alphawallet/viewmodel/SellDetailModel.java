@@ -4,16 +4,11 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import org.web3j.crypto.Sign;
-import org.web3j.utils.Convert;
-
-import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -23,8 +18,6 @@ import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
 import java.math.BigInteger;
 
-import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
-import static io.awallet.crypto.alphawallet.ui.SellDetailActivity.SET_A_PRICE;
 import static io.awallet.crypto.alphawallet.ui.SellDetailActivity.SET_EXPIRY;
 
 /**
@@ -121,9 +114,9 @@ public class SellDetailModel extends BaseViewModel {
                 .subscribe(this::gotSignature, this::onError);
     }
 
-    public void openMagicLinkSetExpiry(Context context, String selection, double price)
+    public void openUniversalLinkSetExpiry(Context context, String selection, double price)
     {
-        sellDetailRouter.openMagic(context, ticket, selection, defaultWallet.getValue(), SET_EXPIRY, price);
+        sellDetailRouter.openUniversalLink(context, ticket, selection, defaultWallet.getValue(), SET_EXPIRY, price);
     }
 
     private void gotSignature(byte[] signature)

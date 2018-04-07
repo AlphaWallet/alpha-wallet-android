@@ -67,7 +67,7 @@
             <!--<include layout="@layout/button_divider" />-->
 
             <Button
-                android:id="@+id/button_magiclink"
+                android:id="@+id/button_universal_link"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

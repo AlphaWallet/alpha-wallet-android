@@ -58,6 +58,7 @@
                 android:paddingBottom="15dp"
                 android:enabled="true"
                 android:paddingTop="15dp"
+                android:visibility="gone"
                 android:text="@string/action_marketplace"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"

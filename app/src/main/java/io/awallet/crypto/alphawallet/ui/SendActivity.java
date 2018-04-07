@@ -18,6 +18,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,7 +27,8 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
-import org.ethereum.geth.Address;
+
+import org.web3j.abi.datatypes.Address;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -74,7 +76,7 @@ public class SendActivity extends BaseActivity {
     EditText amountEditText;
     EditText toAddressEditText;
     ImageView qrImageView;
-    ImageView scanQrImageView;
+    ImageButton scanQrImageView;
     TextView toAddressError;
     TextView amountError;
     TextView myAddressText;

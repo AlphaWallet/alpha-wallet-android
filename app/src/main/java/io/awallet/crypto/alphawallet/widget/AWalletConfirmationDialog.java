@@ -4,12 +4,14 @@ package io.awallet.crypto.alphawallet.widget;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
@@ -97,5 +99,10 @@ public class AWalletConfirmationDialog extends Dialog {
     public void setExtraText(int resId) {
         extraText.setVisibility(View.VISIBLE);
         extraText.setText(context.getResources().getString(resId));
+    }
+
+    public void showShareLink() {
+        ImageView shareIcon = findViewById(R.id.image_share);
+        shareIcon.setVisibility(View.VISIBLE);
     }
 }

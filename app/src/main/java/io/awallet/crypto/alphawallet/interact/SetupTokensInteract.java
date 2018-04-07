@@ -16,6 +16,7 @@ import io.awallet.crypto.alphawallet.entity.TransactionOperation;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
 
+import org.web3j.abi.datatypes.Address;
 import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
@@ -473,10 +474,15 @@ public class SetupTokensInteract {
         }
     }
 
-    boolean isAddressValid(String address) {
+    private boolean isAddressValid(String address) {
         if (address == null) return false;
         else if (address.length() < 20) return false;
-        else return true;
+        try {
+            new Address(address);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void setTokens(Token[] tokens) {

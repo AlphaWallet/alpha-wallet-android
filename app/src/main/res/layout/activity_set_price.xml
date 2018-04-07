@@ -317,7 +317,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/layout_magiclink_details"
+                        android:id="@+id/layout_universal_link_details"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -357,7 +357,7 @@
                             android:layout_gravity="center"
                             android:fontFamily="@font/font_light"
                             android:gravity="center"
-                            android:text="@string/magiclink_info"
+                            android:text="@string/universal_link_info"
                             android:textSize="16sp" />
 
                         <LinearLayout
@@ -522,7 +522,7 @@
                                 android:layout_gravity="center"
                                 android:fontFamily="@font/font_regular"
                                 android:gravity="center"
-                                android:text="@string/magiclink_notice"
+                                android:text="@string/universal_link_notice"
                                 android:textColor="@color/cancel_red" />
 
                         </LinearLayout>

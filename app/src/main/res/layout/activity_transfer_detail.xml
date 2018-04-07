@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,8 +18,8 @@
             android:id="@+id/progress_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
             tools:visibility="gone" />
 
         <ScrollView
@@ -54,87 +55,393 @@
                     android:divider="@android:color/transparent"
                     android:dividerHeight="10.0sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/quantity_of_tickets"
-                    android:textAllCaps="true"
-                    android:textColor="@color/light_gray"
-                    android:textSize="10sp" />
 
                 <LinearLayout
                     android:id="@+id/layout_ticket_quantity"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/background_quantity"
-                    android:orientation="horizontal">
-
-                    <RelativeLayout
-                        android:id="@+id/layout_quantity_add"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"
-                        android:paddingBottom="10dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:paddingTop="10dp">
-
-                        <ImageView
-                            android:id="@+id/img_quantity_add"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:contentDescription="@string/empty"
-                            android:src="@drawable/ic_plus" />
-                    </RelativeLayout>
-
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/text_quantity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
-                        android:fontFamily="@font/font_semibold"
-                        android:gravity="center"
-                        android:padding="10dp"
-                        android:text="1"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="21sp" />
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/quantity_of_tickets"
+                        android:textAllCaps="true"
+                        android:textColor="@color/light_gray"
+                        android:textSize="10sp" />
 
-                    <RelativeLayout
-                        android:id="@+id/layout_quantity_minus"
+                    <LinearLayout
+                        android:id="@+id/layout_ticket_quantity_inner"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="2"
-                        android:paddingBottom="10dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:paddingTop="10dp">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="20dp"
+                        android:background="@drawable/background_quantity"
+                        android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/img_quantity_minus"
+                        <RelativeLayout
+                            android:id="@+id/layout_quantity_add"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:paddingBottom="10dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:paddingTop="10dp">
+
+                            <ImageView
+                                android:id="@+id/img_quantity_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:contentDescription="@string/empty"
+                                android:src="@drawable/ic_plus" />
+                        </RelativeLayout>
+
+
+                        <TextView
+                            android:id="@+id/text_quantity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:contentDescription="@string/empty"
-                            android:src="@drawable/ic_minus" />
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="20dp"
+                            android:layout_marginRight="20dp"
+                            android:fontFamily="@font/font_semibold"
+                            android:gravity="center"
+                            android:padding="10dp"
+                            android:text="1"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="21sp" />
 
-                    </RelativeLayout>
+                        <RelativeLayout
+                            android:id="@+id/layout_quantity_minus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginRight="10dp"
+                            android:layout_weight="2"
+                            android:paddingBottom="10dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:paddingTop="10dp">
+
+                            <ImageView
+                                android:id="@+id/img_quantity_minus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:contentDescription="@string/empty"
+                                android:src="@drawable/ic_minus" />
+
+                        </RelativeLayout>
+                    </LinearLayout>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_addressbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <include layout="@layout/item_input_address" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_choose_method"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:gravity="center"
+                        android:text="@string/transfer_method"
+                        android:textColor="@color/text_black"
+                        android:textSize="16sp" />
+
+                    <!--<RadioGroup-->
+                        <!--android:id="@+id/radiogroup_method"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:layout_marginStart="20dp">-->
+
+                        <!--<android.support.v7.widget.AppCompatRadioButton-->
+                            <!--android:id="@+id/radioBox12"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:button="@drawable/selector_radio_check"-->
+                            <!--android:background="@drawable/selector_radio_check"-->
+                            <!--android:checked="false"-->
+                            <!--android:text="hello"-->
+                            <!--app:buttonTint="@color/transparent" />-->
+
+                        <!--<RadioButton-->
+                            <!--android:id="@+id/radio_pickup_link"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:button="@drawable/selector_radio_check"-->
+                            <!--android:layout_weight="1"-->
+                            <!--android:fontFamily="@font/font_bold"-->
+                            <!--android:layout_marginBottom="10dp"-->
+                            <!--android:text="@string/generate_pick_up_link" />-->
+
+                        <!--<RadioButton-->
+                            <!--android:id="@+id/radio_transfer_now"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:fontFamily="@font/font_bold"-->
+                            <!--android:button="@drawable/selector_radio_check"-->
+                            <!--android:layout_weight="1"-->
+                            <!--android:text="@string/transfer_now" />-->
+
+                    <!--</RadioGroup>-->
+
+                    <RadioGroup
+                        android:id="@+id/radiogroup_method"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="20dp">
+
+                        <LinearLayout
+                            android:id="@+id/layout_link_pick"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp"
+                            android:gravity="center_vertical">
+
+                            <android.support.v7.widget.AppCompatRadioButton
+                                android:id="@+id/radio_pickup_link"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginEnd="15dp"
+                                android:background="@drawable/selector_radio_check"
+                                android:checked="true"
+                                android:text=""
+                                app:buttonTint="@color/transparent" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/font_bold"
+                                android:gravity="center"
+                                android:text="@string/generate_pick_up_link"
+                                android:textColor="@color/text_black"
+                                android:textSize="18sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/layout_transfer_now"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp"
+                            android:gravity="center_vertical">
+
+                            <android.support.v7.widget.AppCompatRadioButton
+                                android:id="@+id/radio_transfer_now"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginEnd="15dp"
+                                android:background="@drawable/selector_radio_check"
+                                android:checked="false"
+                                android:text=""
+                                app:buttonTint="@color/transparent" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/font_bold"
+                                android:gravity="center"
+                                android:text="@string/transfer_now"
+                                android:textColor="@color/text_black"
+                                android:textSize="18sp" />
+
+                        </LinearLayout>
+
+                    </RadioGroup>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/layout_date_picker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:gravity="center"
+                        android:text="@string/link_valid_until"
+                        android:textColor="@color/text_black"
+                        android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/layout_expiry_date"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="5dp"
+                                android:fontFamily="@font/font_regular"
+                                android:text="@string/link_expiry_date"
+                                android:textAllCaps="true"
+                                android:textColor="@color/light_gray"
+                                android:textSize="10sp" />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <EditText
+                                    android:id="@+id/edit_expiry_date"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="47dp"
+                                    android:layout_alignParentLeft="true"
+                                    android:layout_centerVertical="true"
+                                    android:background="@drawable/background_quantity"
+                                    android:digits="1234567890a"
+                                    android:focusable="false"
+                                    android:fontFamily="@font/font_semibold"
+                                    android:hint="DD/MM/YYYY"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="datetime"
+                                    android:paddingStart="15dp"
+                                    android:textColor="@color/colorPrimaryDark"
+                                    android:textColorHint="@color/light_gray"
+                                    android:textSize="18sp" />
+
+                                <ImageView
+                                    android:id="@+id/icon_expiry_date"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentRight="true"
+                                    android:layout_centerVertical="true"
+                                    android:layout_marginRight="15dp"
+                                    android:src="@drawable/ic_calendar" />
+                            </RelativeLayout>
+
+                            <TextView
+                                android:id="@+id/error_date"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:fontFamily="@font/font_regular"
+                                android:gravity="center"
+                                android:text="@string/error_date"
+                                android:textColor="@color/cancel_red"
+                                android:textSize="12sp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="15dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/white" />
+
+                        <LinearLayout
+                            android:id="@+id/layout_expiry_time"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="5dp"
+                                android:fontFamily="@font/font_regular"
+                                android:text="@string/link_expiry_time"
+                                android:textAllCaps="true"
+                                android:textColor="@color/light_gray"
+                                android:textSize="10sp" />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <EditText
+                                    android:id="@+id/edit_expiry_time"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="47dp"
+                                    android:layout_alignParentLeft="true"
+                                    android:layout_centerHorizontal="true"
+                                    android:layout_centerVertical="true"
+                                    android:background="@drawable/background_quantity"
+                                    android:focusable="false"
+                                    android:fontFamily="@font/font_semibold"
+                                    android:hint="@string/hint_time"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="time"
+                                    android:paddingStart="15dp"
+                                    android:textColor="@color/colorPrimaryDark"
+                                    android:textColorHint="@color/light_gray"
+                                    android:textSize="18sp" />
+
+                                <ImageView
+                                    android:id="@+id/icon_expiry_time"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentRight="true"
+                                    android:layout_centerVertical="true"
+                                    android:layout_marginRight="15dp"
+                                    android:src="@drawable/ic_clock" />
+                            </RelativeLayout>
+
+                            <TextView
+                                android:id="@+id/error_time"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:fontFamily="@font/font_regular"
+                                android:gravity="center"
+                                android:text="@string/error_time"
+                                android:textColor="@color/cancel_red"
+                                android:textSize="12sp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
             </LinearLayout>
 
         </ScrollView>
 
         <Button
-            android:id="@+id/button_transfer"
+            android:id="@+id/button_next"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"

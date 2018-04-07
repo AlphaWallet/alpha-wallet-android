@@ -167,7 +167,7 @@
     <string name="intro_title_third_page">Ultra reliable</string>
     <string name="intro_message_first_page">Private keys never leave your device.</string>
     <string name="intro_message_second_page">Code is open sourced (GPL-3.0 license) and fully audited.</string>
-    <string name="intro_message_third_page">The fastest Ethereum wallet experience on mobile.</string>
+    <string name="intro_message_third_page">The most excellent Ethereum wallet experience on mobile.</string>
     <!-- Menus -->
     <string name="navigation_settings">Settings</string>
     <!-- Labels -->
@@ -232,5 +232,4 @@
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
-    <string name="transfer_tickets">Transfer Tickets</string>
 </resources>

@@ -18,6 +18,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,7 +27,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
-import org.ethereum.geth.Address;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -74,7 +75,7 @@ public class SendActivity extends BaseActivity {
     EditText amountEditText;
     EditText toAddressEditText;
     ImageView qrImageView;
-    ImageView scanQrImageView;
+    ImageButton scanQrImageView;
     TextView toAddressError;
     TextView amountError;
     TextView myAddressText;

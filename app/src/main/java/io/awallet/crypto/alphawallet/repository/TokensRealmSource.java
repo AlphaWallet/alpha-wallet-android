@@ -18,6 +18,7 @@ import io.awallet.crypto.alphawallet.service.RealmManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Observable;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;

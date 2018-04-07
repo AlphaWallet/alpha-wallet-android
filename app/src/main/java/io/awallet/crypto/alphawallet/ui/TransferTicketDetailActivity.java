@@ -38,7 +38,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -55,6 +54,7 @@ import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;
@@ -100,12 +100,10 @@ public class TransferTicketDetailActivity extends BaseActivity
     private Dialog dialog;
 
     private Ticket ticket;
-    private TicketRange ticketRange;
     private TicketAdapter adapter;
 
     private TextView toAddressError;
     private EditText toAddressEditText;
-    //private ImageView qrImageView;
     private ImageButton qrImageView;
 
     private String ticketIds;
@@ -510,12 +508,17 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void confirmTransfer()
     {
+        final String to = toAddressEditText.getText().toString();
+        //check address
+        if (!isAddressValid(to))
+        {
+            toAddressError.setVisibility(View.VISIBLE);
+            return;
+        }
+
         //how many tickets are we selling?
         int quantity = ticket.parseIndexList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
-
-        final String to = toAddressEditText.getText().toString();
-        //String addressChop = to.substring(0,11) + "\n" + to.substring(11);
 
         String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +

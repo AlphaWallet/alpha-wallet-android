@@ -28,6 +28,8 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
 
+import org.web3j.abi.datatypes.Address;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -37,7 +39,6 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;

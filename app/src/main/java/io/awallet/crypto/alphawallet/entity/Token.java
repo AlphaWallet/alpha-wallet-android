@@ -41,13 +41,17 @@ public class Token implements Parcelable {
     }
 
     public String getStringBalance() {
-        if (balance != null) return String.valueOf(balance.intValue());
+        if (balance != null) return String.valueOf(balance.longValue());
         else return "0";
     }
 
+    public long getBalanceQty() {
+        if (balance != null) return balance.longValue();
+        else return 0;
+    }
+
     public String getFullBalance() {
-        if (balance != null) return balance.toString();
-        else return "0";
+        return getStringBalance();
     }
 
     public String getBurnListStr() {

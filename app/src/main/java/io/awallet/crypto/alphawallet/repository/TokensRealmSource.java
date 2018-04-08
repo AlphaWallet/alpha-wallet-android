@@ -16,10 +16,13 @@ import io.awallet.crypto.alphawallet.repository.entity.RealmTokenTicker;
 import io.awallet.crypto.alphawallet.service.RealmManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -125,13 +128,26 @@ public class TokensRealmSource implements TokenLocalSource {
                         .equalTo("isEnabled", true)
                         .findAll();
                 Log.d("TRS", "Sz: " + realmItems.size());
-                return convertBalance(realmItems, System.currentTimeMillis());
+                return convert(realmItems, System.currentTimeMillis());
+                //return convertBalance(realmItems, System.currentTimeMillis());
             } finally {
                 if (realm != null) {
                     realm.close();
                 }
             }
         });
+    }
+
+    @Override
+    public Observable<List<Token>> fetchEnabledTokensSequentialList(NetworkInfo networkInfo, Wallet wallet)
+    {
+        return fetchEnabledTokens(networkInfo, wallet).toObservable()
+                .flatMap(this::transformList);
+    }
+
+    private Observable<List<Token>> transformList(Token[] tokens)
+    {
+        return Observable.just(Arrays.asList(tokens));
     }
 
     @Override

@@ -25,6 +25,8 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import java.math.BigDecimal;
 
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
+
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_ALL = 0;
     public static final int FILTER_CURRENCY = 1;
@@ -35,43 +37,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
-        @Override
-        public int compare(SortedItem o1, SortedItem o2) {
-            return o1.compare(o2);
-        }
-
-        @Override
-        public void onChanged(int position, int count) {
-            notifyItemRangeChanged(position, count);
-        }
-
-        @Override
-        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
-            return oldItem.areContentsTheSame(newItem);
-        }
-
-        @Override
-        public boolean areItemsTheSame(SortedItem item1, SortedItem item2) {
-            return item1.areItemsTheSame(item2);
-        }
-
-        @Override
-        public void onInserted(int position, int count) {
-            notifyItemRangeInserted(position, count);
-        }
-
-        @Override
-        public void onRemoved(int position, int count) {
-            notifyItemRangeRemoved(position, count);
-        }
-
-        @Override
-        public void onMoved(int fromPosition, int toPosition) {
-            notifyItemMoved(fromPosition, toPosition);
-        }
-    });
-
-    protected final SortedList<SortedItem> newItems = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
         public int compare(SortedItem o1, SortedItem o2) {
             return o1.compare(o2);
@@ -155,7 +120,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public void onBindViewHolder(BinderViewHolder holder, int position) {
-        Object t = items.get(position).value;
+        items.get(position).view = holder;
         holder.bind(items.get(position).value);
     }
 
@@ -171,36 +136,65 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void setTokens(Token[] tokens) {
-        updateTokens(tokens);
-//        //TODO: check tokens for change
-//        items.beginBatchedUpdates();
-//        items.clear();
-//        items.add(total);
-//
-//        for (int i = 0; i < tokens.length; i++) {
-//            if (filterType == FILTER_CURRENCY) {
-//                if (tokens[i].isCurrency()) {
-//                    items.add(new TokenSortedItem(tokens[i], 10 + i));
-//                }
-//            } else if (filterType == FILTER_ASSETS) {
-//                if (!tokens[i].isCurrency()) {
-//                    items.add(new TokenSortedItem(tokens[i], 10 + i));
-//                }
-//            } else {
-//                items.add(new TokenSortedItem(tokens[i], 10 + i));
-//            }
-//        }
-//        items.endBatchedUpdates();
+        populateTokens(items, tokens);
     }
 
-    public void updateTokens(Token[] tokens) {
-        populateTokens(newItems, tokens);
+    public void updateToken(Token token)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                Token thisToken = ((TokenSortedItem)si).value;
+                if (thisToken.getAddress().equals(token.getAddress()))
+                {
+                    //update value
+                    ((TokenSortedItem)si).value = token;
+                    //TODO: see if balance or any other data changed
+                    notifyItemChanged(i);
+                    Log.d("TVM", "ADAPTER: " + token.tokenInfo.name + " : " + token.getFullBalance());
+                    break;
+                }
+            }
+        }
+    }
 
-        final TokenDiffCallback diffCallback = new TokenDiffCallback(items, newItems);
-        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+    public void pruneZeroItems()
+    {
+        Log.d("TVM", "FINISH");
+        boolean needsPrune = false;
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                Token thisToken = ((TokenSortedItem)si).value;
+                if (!thisToken.tokenInfo.symbol.equals(ETH_SYMBOL) && thisToken.getBalanceQty() == 0)
+                {
+                    needsPrune = true;
+                    break;
+                }
+            }
+        }
 
-        populateTokens(items, tokens);
-        diffResult.dispatchUpdatesTo(this);
+        if (needsPrune)
+        {
+            items.beginBatchedUpdates();
+            for (int i = 0; i < items.size(); i++)
+            {
+                Object si = items.get(i);
+                if (si instanceof TokenSortedItem)
+                {
+                    Token thisToken = ((TokenSortedItem) si).value;
+                    if (!thisToken.tokenInfo.symbol.equals(ETH_SYMBOL) && thisToken.getBalanceQty() == 0)
+                    {
+                        items.remove((TokenSortedItem) si);
+                    }
+                }
+            }
+            items.endBatchedUpdates();
+        }
     }
 
     private void populateTokens(SortedList<SortedItem> list, Token[] tokens)
@@ -227,13 +221,20 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setTotal(BigDecimal totalInCurrency) {
         total = new TotalBalanceSortedItem(totalInCurrency);
-        newItems.add(total);
-
-        final TokenDiffCallback diffCallback = new TokenDiffCallback(items, newItems);
-        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
-        items.add(total);
-        diffResult.dispatchUpdatesTo(this);
+        //see if we need an update
+        items.beginBatchedUpdates();
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TotalBalanceSortedItem)
+            {
+                items.remove((TotalBalanceSortedItem)si);
+                items.add(total);
+                notifyItemChanged(i);
+                break;
+            }
+        }
+        items.endBatchedUpdates();
     }
 
     public void setFilterType(int filterType) {

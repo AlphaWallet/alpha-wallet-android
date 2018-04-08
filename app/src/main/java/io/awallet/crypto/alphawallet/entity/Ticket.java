@@ -77,6 +77,12 @@ public class Ticket extends Token implements Parcelable, NonFungibleToken
     }
 
     @Override
+    public long getBalanceQty() {
+        String activeBalance = populateIDs(balanceArray, false);
+        return parseIDListInteger(activeBalance).size();
+    }
+
+    @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
         else return populateIDs(balanceArray, true);

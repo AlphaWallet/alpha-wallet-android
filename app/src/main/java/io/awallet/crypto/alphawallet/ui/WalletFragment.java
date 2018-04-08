@@ -55,7 +55,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
@@ -82,20 +83,29 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
-//        viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-//        viewModel.pushToast().observe(this, this::displayToast);
-
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
+        viewModel.token().observe(this, this::onToken);
+        viewModel.tokenPrune().observe(this, this::pruneZeroItems);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
         initTabLayout(view);
 
         return view;
+    }
+
+    private void pruneZeroItems(Boolean aBoolean)
+    {
+        adapter.pruneZeroItems();
+    }
+
+    private void onToken(Token token)
+    {
+        adapter.updateToken(token);
     }
 
     private void initTabLayout(View view) {
@@ -199,13 +209,15 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
 //        adapter.setDefaultWallet(wallet);
         this.wallet = wallet;
         viewModel.fetchTokens();
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
 //        adapter.setDefaultNetwork(networkInfo);
 //        setBottomMenu(R.menu.menu_main_network);
     }

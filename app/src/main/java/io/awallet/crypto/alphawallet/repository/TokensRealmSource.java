@@ -194,7 +194,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 realm.commitTransaction();
             } catch (Exception ex) {
-                if (realm != null) {
+                if (realm != null && realm.isInTransaction()) {
                     realm.cancelTransaction();
                 }
             } finally {
@@ -258,7 +258,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             realm.commitTransaction();
         } catch (Exception ex) {
-            if (realm != null) {
+            if (realm != null && realm.isInTransaction()) {
                 realm.cancelTransaction();
             }
         } finally {
@@ -282,7 +282,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             realm.commitTransaction();
         } catch (Exception ex) {
-            if (realm != null) {
+            if (realm != null && realm.isInTransaction()) {
                 realm.cancelTransaction();
             }
         } finally {

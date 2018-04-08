@@ -462,7 +462,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
-                localSource.updateTokenBalance(network, wallet, token);
+                localSource.updateTokenBalance(network, wallet, updated);
                 Log.d(TAG, updated.tokenInfo.name + " update: " + updated.getFullBalance());
                 return updated;
             }

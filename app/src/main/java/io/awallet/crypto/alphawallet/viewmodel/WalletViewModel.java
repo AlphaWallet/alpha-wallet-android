@@ -59,10 +59,6 @@ public class WalletViewModel extends BaseViewModel {
 
     private Token[] tokenCache = null;
 
-    @Nullable
-    private Disposable getBalanceDisposable;
-    @Nullable
-    private Disposable fetchTransactionDisposable;
     private Handler handler = new Handler();
 
     WalletViewModel(
@@ -98,6 +94,11 @@ public class WalletViewModel extends BaseViewModel {
     //2. update token balance
     public void fetchTokens()
     {
+        if (disposable != null && !disposable.isDisposed())
+        {
+            disposable.dispose();
+        }
+
         if (defaultWallet.getValue() != null)
         {
             disposable = fetchTokensInteract
@@ -120,7 +121,6 @@ public class WalletViewModel extends BaseViewModel {
     private void onFetchTokensCompletable()
     {
         progress.postValue(false);
-        //showTotalBalance(tokenCache);
         tokens.postValue(tokenCache);
         updateTokenBalances();
     }
@@ -146,8 +146,9 @@ public class WalletViewModel extends BaseViewModel {
         if (tokenCache != null && tokenCache.length > 0) {
             //reorganise tokens - remove empties
             tokenPrune.postValue(true);
-            //tokens.postValue(tokenCache);
-            //showTotalBalance(tokenCache);
+
+            handler.removeCallbacks(startUpdateBalanceTask);
+            handler.postDelayed(startUpdateBalanceTask, GET_BALANCE_INTERVAL);
         }
         else
         {
@@ -156,6 +157,7 @@ public class WalletViewModel extends BaseViewModel {
     }
 
     //NB: This function is used to calculate total value of all tokens plus eth.
+    //TODO: On mainnet, get tickers for all token values and calculate the overall $ value of all tokens + eth
 //    private void showTotalBalance(Token[] tokens) {
 //        BigDecimal total = new BigDecimal("0");
 //        for (Token token : tokens) {
@@ -184,7 +186,6 @@ public class WalletViewModel extends BaseViewModel {
         boolean isToken = true;
         if (address.equalsIgnoreCase(defaultWallet().getValue().address)) isToken = false;
         sendTokenRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token);
-//        showTransactions(context);
     }
 
     @Override
@@ -199,8 +200,7 @@ public class WalletViewModel extends BaseViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-
-        handler.removeCallbacks(startGetBalanceTask);
+        handler.removeCallbacks(startUpdateBalanceTask);
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -222,17 +222,6 @@ public class WalletViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
-    public void getBalance() {
-        getBalanceDisposable = getDefaultWalletBalance
-                .get(defaultWallet.getValue())
-                .subscribe(values -> {
-                    defaultWalletBalance.postValue(values);
-                    handler.removeCallbacks(startGetBalanceTask);
-                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
-                }, t -> {
-                });
-    }
-
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
         disposable = findDefaultWalletInteract
@@ -244,7 +233,7 @@ public class WalletViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    private final Runnable startGetBalanceTask = this::getBalance;
+    private final Runnable startUpdateBalanceTask = this::updateTokenBalances;
 
     private void prepareWallet()
     {

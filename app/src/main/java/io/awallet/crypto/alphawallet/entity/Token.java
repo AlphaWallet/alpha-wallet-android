@@ -182,4 +182,11 @@ public class Token implements Parcelable {
     {
         return null;
     }
+
+    public boolean checkRealmBalanceChange(RealmToken realmToken)
+    {
+        String currentState = realmToken.getBalance();
+        if (currentState == null) return true;
+        return !currentState.equals(balance.toString());
+    }
 }

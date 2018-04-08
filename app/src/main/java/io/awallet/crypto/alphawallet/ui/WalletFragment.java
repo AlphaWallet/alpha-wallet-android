@@ -169,7 +169,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
             }
             break;
             case android.R.id.home: {
-                adapter.clear();
+                //adapter.clear();
                 //viewModel.showTransactions(getContext());
             }
         }

@@ -32,16 +32,8 @@ public class FetchTokensInteract {
 
     public Observable<Token[]> fetchList(Wallet wallet) {
         return tokenRepository.fetchActive(wallet.address)
-                //.map(this::tokensToSingle)
-                //.map(this::tokensToMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    private Token tokensToSingle(Token[] tokens)
-    {
-        if (tokens.length > 0) return tokens[0];
-        else return null;
     }
 
     private Map<String, Token> tokensToMap(Token[] tokenArray) {

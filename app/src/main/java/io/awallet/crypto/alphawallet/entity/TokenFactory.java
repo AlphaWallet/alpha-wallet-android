@@ -64,12 +64,15 @@ public class TokenFactory
         {
             String balances = realmItem.getBalance();
             String burnList = realmItem.getBurnList();
+            if (balances == null) balances = "";
             thisToken = new Ticket(tokenInfo, balances, burnList, updateBlancaTime);
         }
         else
         {
             long now = System.currentTimeMillis();
-            BigDecimal balance = new BigDecimal(realmItem.getBalance());
+            String realmBalance = realmItem.getBalance();
+            if (realmBalance == null) realmBalance = "0";
+            BigDecimal balance = new BigDecimal(realmBalance);
             thisToken = new Token(tokenInfo, balance, updateBlancaTime);
         }
 

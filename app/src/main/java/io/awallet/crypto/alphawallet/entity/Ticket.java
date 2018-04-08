@@ -400,6 +400,14 @@ public class Ticket extends Token implements Parcelable, NonFungibleToken
     }
 
     @Override
+    public boolean checkRealmBalanceChange(RealmToken realmToken)
+    {
+        String currentState = realmToken.getBalance();
+        if (currentState == null) return true;
+        else return !currentState.equals(populateIDs(balanceArray, true));
+    }
+
+    @Override
     public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
     {
         realmToken.setBurnList(populateIDs(burnList, false));
@@ -423,8 +431,6 @@ public class Ticket extends Token implements Parcelable, NonFungibleToken
         tokenHolder.text24Hours.setText(String.valueOf(burnArray.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
 
-        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
-//        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
     }
 

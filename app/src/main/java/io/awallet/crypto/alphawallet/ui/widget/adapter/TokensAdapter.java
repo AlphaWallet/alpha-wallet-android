@@ -23,7 +23,11 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 
@@ -136,27 +140,80 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void setTokens(Token[] tokens) {
-        populateTokens(items, tokens);
+        if (items.size() > 0)
+        {
+            refreshTokens(tokens);
+        }
+        else
+        {
+            populateTokens(items, tokens);
+        }
     }
 
-    public void updateToken(Token token)
+    private void refreshTokens(Token[] tokens)
     {
+        //check if any update is needed - because we previously have items displayed, we only need to check if there are new items, or if old items have gone
+        List<String> tokenList = new ArrayList<String>();
+        for (Token t : tokens)
+        {
+            if (t.getBalanceQty() > 0) tokenList.add(t.getAddress());
+        }
+
+        int required = items.size();
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem)
             {
                 Token thisToken = ((TokenSortedItem)si).value;
+                if (tokenList.contains(thisToken.getAddress()))
+                {
+                    required--;
+                    tokenList.remove(thisToken.getAddress());
+                }
+            }
+            else
+            {
+                required--;
+            }
+        }
+
+        if (!(required == 0 && tokenList.size() == 0))
+        {
+            //need an update
+            //TODO: More graceful way to update tokens between refresh cycles, but this doesn't happen often
+            populateTokens(items, tokens);
+        }
+    }
+
+    public void updateToken(Token token)
+    {
+        boolean found = false;
+        int weight = 10;
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                Token thisToken = ((TokenSortedItem)si).value;
+                weight = ((TokenSortedItem) si).weight;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
                     //update value
                     ((TokenSortedItem)si).value = token;
                     //TODO: see if balance or any other data changed
                     notifyItemChanged(i);
-                    Log.d("TVM", "ADAPTER: " + token.tokenInfo.name + " : " + token.getFullBalance());
+                    found = true;
                     break;
                 }
             }
+        }
+
+        if (!found && token.getBalanceQty() > 0)
+        {
+            //need to add this token in
+            items.add(new TokenSortedItem(token, weight + 1));
+            notifyDataSetChanged();
         }
     }
 
@@ -194,6 +251,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
             }
             items.endBatchedUpdates();
+            notifyDataSetChanged();
         }
     }
 
@@ -204,16 +262,27 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         list.add(total);
 
         for (int i = 0; i < tokens.length; i++) {
-            if (filterType == FILTER_CURRENCY) {
-                if (tokens[i].isCurrency()) {
-                    list.add(new TokenSortedItem(tokens[i], 10 + i));
+            Token token = tokens[i];
+            if (token.tokenInfo.symbol.equals(ETH_SYMBOL) || token.getBalanceQty() > 0)
+            {
+                if (filterType == FILTER_CURRENCY)
+                {
+                    if (token.isCurrency())
+                    {
+                        list.add(new TokenSortedItem(token, 10 + i));
+                    }
                 }
-            } else if (filterType == FILTER_ASSETS) {
-                if (!tokens[i].isCurrency()) {
-                    list.add(new TokenSortedItem(tokens[i], 10 + i));
+                else if (filterType == FILTER_ASSETS)
+                {
+                    if (!token.isCurrency())
+                    {
+                        list.add(new TokenSortedItem(token, 10 + i));
+                    }
                 }
-            } else {
-                list.add(new TokenSortedItem(tokens[i], 10 + i));
+                else
+                {
+                    list.add(new TokenSortedItem(token, 10 + i));
+                }
             }
         }
         list.endBatchedUpdates();

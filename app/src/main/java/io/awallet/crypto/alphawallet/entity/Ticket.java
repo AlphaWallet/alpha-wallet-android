@@ -30,9 +30,11 @@ public class Ticket extends Token implements Parcelable
 {
     public final List<Integer> balanceArray;
     private List<Integer> burnArray;
-    /* this is perhaps the least invasive way to carry XML asset-definition 3 levels down
-     * to where it is used, without breaking the existing design by incorporating callback
-     * which writes a huge arrays of List for different fields of each tokenID - weiwu
+    /* this is perhaps the least invasive way to carry XML
+     * asset-definition 3 levels down to where it is used, without
+     * breaking the existing design by incorporating callback which
+     * writes a huge arrays of List for different fields of each
+     * tokenID - weiwu
      */
     public AssetDefinition piggybackedXMLDefinition;
 

@@ -151,12 +151,11 @@ public class AssetDefinition {
      * temporarily for the need to retrofit the class with J.B.'s design */
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
-        for(String key: fields.keySet()) {
+        for (String key : fields.keySet()) {
             FieldDefinition f = fields.get(key);
-            BigInteger value = tokenId.and(f.bitmask).shiftRight(f.bitshift);
-            token.setField(f.id, f.name, f.applyToFieldValue(value));
-            //System.out.println("name :" + f.name + "\n");
-            //System.out.println("value :" + value + "\n");
+            BigInteger val = tokenId.and(f.bitmask).shiftRight(f.bitshift);
+            token.setAttribute(f.id,
+                    new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
         }
     }
 

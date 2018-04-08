@@ -248,27 +248,6 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
-//    @Override
-//    public Observable<Token> fetchActiveToken(String walletAddress, String address)
-//    {
-//        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-//        Wallet wallet = new Wallet(walletAddress);
-//        return localSource
-//                .fetchEnabledToken(network, wallet, address)
-//                .flatMap(token -> updateBalance(network, wallet, token))
-//                .observeOn(Schedulers.newThread())
-//                .toObservable();
-//        //return
-////                setupTokensFromLocal(address)
-////                .flatMap(token -> updateBalance(network, wallet, token))
-////                .observeOn(Schedulers.newThread())
-////                .toObservable();
-//
-////        return fetchCachedToken(network, wallet, address)
-////                .map(token -> updateBalance(network, wallet, token))
-////                .subscribeOn(Schedulers.io());
-//    }
-
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -353,7 +332,6 @@ public class TokenRepository implements TokenRepositoryType {
                     ethereumNetworkRepository.getDefaultNetwork(),
                     wallet,
                     tokenList);
-
     }
 
     @Override
@@ -463,7 +441,7 @@ public class TokenRepository implements TokenRepositoryType {
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
-                Log.d(TAG, updated.tokenInfo.name + " update: " + updated.getFullBalance());
+                //Log.d(TAG, updated.tokenInfo.name + " update: " + updated.getFullBalance());
                 return updated;
             }
             catch (Exception e)
@@ -513,11 +491,6 @@ public class TokenRepository implements TokenRepositoryType {
                     return result.toArray(new Token[result.size()]);
                 });
     }
-
-//    @Override
-//    public Observable<TokenInfo> update(String contractAddr) {
-//        return setupTokensFromLocal(contractAddr).toObservable();
-//    }
 
     @Override
     public rx.Subscription memPoolListener(SubscribeWrapper subscriber)

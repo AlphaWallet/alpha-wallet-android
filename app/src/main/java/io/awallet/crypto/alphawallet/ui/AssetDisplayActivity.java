@@ -80,15 +80,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         adapter = new TicketAdapter(this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
-
-//        DividerItemDecoration itemDecorator = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-//        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider));
         list.setHapticFeedbackEnabled(true);
-//        list.setClipToPadding(false);
-//        list.addItemDecoration(itemDecorator);
-
-        String useName = String.valueOf(ticket.balanceArray.size()) + " " + info.name;
-
 
         viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
                 .get(AssetDisplayViewModel.class);
@@ -143,35 +135,12 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
                 viewModel.showTransferToken(this, ticket);
             }
             break;
-//            case R.id.copy_address:
-//            {
-//                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-//                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.copy_addr_to_clipboard), ticket.getAddress());
-//                clipboard.setPrimaryClip(clip);
-//                Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
-//            }
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                viewModel.showHome(this, true);
-                break;
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        viewModel.showHome(this, true);
     }
 
     private void onTicketIdClick(View view, TicketRange range) {
         Context context = view.getContext();
-        //viewModel.showSalesOrder(this, ticket, range);
-//        viewModel.showTransferToken(this, ticket, range);
+
+        //TODO: Perform some action when token is clicked
     }
 }

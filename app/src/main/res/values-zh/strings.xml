@@ -68,6 +68,16 @@
     <string name="set_a_price">设置一个价格:</string>
     <string name="learn_more_about_ethereum">更多关于以太坊的知识</string>
     <string name="price_per_ticket">门票单价</string>
+    <string name="action_marketplaceSale">Marketplace</string>
+    <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
+    <string name="set_price_subtext_abr_magic">Set Ethereum price for magic link:</string>
+    <string name="transfer_tickets">Transfer Tickets</string>
+    <string name="link_valid_until">The link will be valid until:</string>
+    <string name="transfer_method">Transfer Method:</string>
+    <string name="generate_pick_up_link">Generate a pick-up link</string>
+    <string name="transfer_now">Transfer Now</string>
+    <string name="to">to</string>
+
     <string-array name="filter_date">
         <item>Most Recent</item>
         <item>Oldest</item>
@@ -175,17 +185,19 @@
     <string name="confirm_purchase">确认购买</string>
     <string name="bad_import_link">链接无效</string>
     <string name="bad_import_link_body">抱歉，此链接无效，请再尝试</string>
-    <string name="burned">出售</string>
+    <string name="burned">已经兑换</string>
     <string name="marketplace">市场</string>
     <string name="depreciation">降价</string>
     <string name="ticket_unavailable">无效</string>
-    <string name="generate_free_transfer_link">免费创建转账链接?</string>
+    <string name="generate_free_transfer_link">免费创建转让链接?</string>
     <string name="send_universal_link">创建链接</string>
     <string name="generate_sale_transfer_link">创建销售链接</string>
-    <string name="send_universal_sale_link">转发销售链接</string>
+    <string name="place_tickets_marketplace">放上市场待售</string>
+    <string name="send_universal_sale_link">转发魔法链接</string>
+    <string name="market_listing"></string>
     <string name="invalid_ticket">无效门票</string>
     <string name="hint_time">--:--</string>
-    <string name="link_expiry_time">链接逾期时间</string>
+    <string name="link_expiry_time">链接过期时间</string>
     <string name="error_time">请输入有效时间</string>
     <string name="error_date">请输入有效日期</string>
     <string name="error_invalid_quantity">输入必须大于>0</string>
@@ -210,4 +222,25 @@
     <string name="eth_detail_gemini"><u>www.gemini.com</u></string>
     <string name="eth_detail_q3">为什么 aWallet 使用以太坊?</string>
     <string name="eth_detail_a3">aWallet 使用以太坊取代美元，因为它是一种更安全的管理交易的方式。以太坊也是在Bitcoin 后全世界第二大的加密货</string>
+    <string name="scan_qr_label">扫描QR码或者复制下面的文字:</string>
+    <string name="my_wallet_address">我的钱包地址</string>
+    <string name="copied_to_clipboard">复制到剪切板</string>
+    <string name="action_universal_link">魔法链接</string>
+    <string name="action_marketplace">市场</string>
+    <string name="sell_thru_universal_link">通过魔法链接销售</string>
+    <string name="universal_link_expiry_on">魔法链接过期时间:</string>
+    <string name="confirm_sale_total">总共: %s</string>
+    <string name="share_universal_link">分享魔法链接</string>
+    <string name="select_option_to_transfer">选择转让方式</string>
+    <string name="hint_input_eth_amount">0.00</string>
+    <string name="label_my_address">我的地址s</string>
+    <string name="action_copy_alt">复制</string>
+    <string name="set_universal_link_expiry">设置魔法链接过期时间:</string>
+    <string name="tickets_selected">%1s %2s 选中</string>
+    <string name="eth_per_ticket_w_value">%s ETH/门票</string>
+    <string name="universal_link_info">创建一个魔法链接让卖家来购买你的门票.</string>
+    <string name="date_hint">DD/MM/YYYY</string>
+    <string name="universal_link_notice">在魔法链接过期之前，任何人都可以通过点击此链接来买到你的门票.</string>
+    <string name="label_important">倒入</string>
+    <string name="eth_00">0.00 ETH</string>
 </resources>

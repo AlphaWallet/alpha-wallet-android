@@ -225,12 +225,12 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:layout_alignParentBottom="true"
-            android:background="@color/button_green"
+            android:background="@drawable/selector_button"
             android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:text="@string/action_confirm"
             android:textAllCaps="false"
-            android:textColor="@color/white"
+            android:textColor="@color/button_text_color"
             android:textSize="20sp" />
     </RelativeLayout>
 

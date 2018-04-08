@@ -7,6 +7,7 @@ import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
@@ -23,10 +24,16 @@ import java.util.List;
 import jnr.ffi.annotations.In;
 
 /**
- * Created by James on 27/01/2018.
+ * Created by James on 27/01/2018.  It might seem counter intuitive
+ * but here Ticket refers to a container of an asset class here, not
+ * the right to seat somewhere in the venue. Therefore, there
+ * shouldn't be List<Ticket> To understand this, imagine that one says
+ * "I have two cryptocurrencies: Ether and Bitcoin, each amounts to a
+ * hundred", and he pauses and said, "I also have two tickets: FIFA
+ * and Formuler-one, which, too, amounts to a hundred each".
  */
 
-public class Ticket extends Token implements Parcelable
+public class Ticket extends Token implements Parcelable, NonFungibleToken
 {
     public final List<Integer> balanceArray;
     private List<Integer> burnArray;
@@ -38,6 +45,8 @@ public class Ticket extends Token implements Parcelable
      */
     public AssetDefinition piggybackedXMLDefinition;
 
+    /* these constructors are never used as intended - they are always
+     * used to create empty Ticket objects by passing lots of nulls */
     public Ticket(TokenInfo tokenInfo, List<Integer> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
@@ -49,12 +58,6 @@ public class Ticket extends Token implements Parcelable
         this.balanceArray = parseIDListInteger(balances);
         burnArray = parseIDListInteger(burnList, true);
     }
-//
-//    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
-//        super(tokenInfo, BigDecimal.ZERO, blancaTime);
-//        this.balanceArray   = parseIDListInteger(balances);
-//        this.burnArray      = parseIDListInteger(burnList);
-//    }
 
     private Ticket(Parcel in) {
         super(in);
@@ -126,24 +129,6 @@ public class Ticket extends Token implements Parcelable
         }
         else {
             sb.append("none");
-        }
-
-        return sb.toString();
-    }
-
-    public String checkBalance(String selection)
-    {
-        StringBuilder sb = new StringBuilder();
-        //convert selection to index list
-        List<org.web3j.abi.datatypes.generated.Int16> selectionIndex = parseIDList(selection);
-        //add correct entries
-        boolean first = true;
-        for (org.web3j.abi.datatypes.generated.Int16 id : selectionIndex) {
-            if (balanceArray.contains(id.getValue().intValue()) && !burnArray.contains(id.getValue().intValue())) {
-                if (!first) sb.append(", ");
-                sb.append(String.valueOf(id.getValue().toString(10)));
-                first = false;
-            }
         }
 
         return sb.toString();
@@ -243,11 +228,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return idList;
-    }
-
-    public String arrayToString(int[] prunedIndices)
-    {
-        return populateIDs(prunedIndices);
     }
 
     public List<Integer> ticketIdToTicketIndex(List<Integer> ticketIds)
@@ -404,6 +384,22 @@ public class Ticket extends Token implements Parcelable
         return displayIDs;
     }
 
+    /**
+     *
+     * @return
+     */
+    public String pruneIDList(String idList, int quantity)
+    {
+        //convert to list
+        List<Integer> intList = parseIDListInteger(idList);
+        for (int i = (intList.size() - 1); i >= quantity; i--)
+        {
+            intList.remove(i);
+        }
+
+        return populateIDs(intList, true);
+    }
+
     @Override
     public int getTicketCount()
     {
@@ -444,27 +440,12 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnArray.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-
-        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
-//        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
     }
 
     public String populateRange(TicketRange range)
     {
         return populateIDs(range.tokenIds, false);
-    }
-
-    private int getIndexOf(int id)
-    {
-        if (balanceArray.contains(id))
-        {
-            return balanceArray.indexOf(id);
-        }
-        else
-        {
-            return -1;
-        }
     }
 
     @Override
@@ -487,5 +468,20 @@ public class Ticket extends Token implements Parcelable
     @Override
     public String getBurnListStr() {
         return populateIDs(burnArray, false);
+    }
+
+    @Override
+    public void setField(String id, String name, String value) {
+
+    }
+
+    @Override
+    public String getFieldText(String id) {
+        return null;
+    }
+
+    @Override
+    public String getFieldName(String id) {
+        return null;
     }
 }

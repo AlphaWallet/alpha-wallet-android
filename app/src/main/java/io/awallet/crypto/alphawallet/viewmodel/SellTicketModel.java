@@ -6,22 +6,19 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
-import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import io.awallet.crypto.alphawallet.router.ConfirmationRouter;
 import io.awallet.crypto.alphawallet.router.SellDetailRouter;
-import io.awallet.crypto.alphawallet.router.SellTicketRouter;
 
 import java.util.concurrent.TimeUnit;
 
-import io.awallet.crypto.alphawallet.ui.SellTicketActivity;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+
+import static io.awallet.crypto.alphawallet.ui.SellDetailActivity.SET_A_PRICE;
 
 /**
  * Created by James on 16/02/2018.
@@ -102,34 +99,21 @@ public class SellTicketModel  extends BaseViewModel {
         fetchCurrentTicketBalance();
     }
 
-    public void openSellDialog(Context context, String ticketIDs) {
+    public void openMarketDialog(Context context, String ticketIDs) {
         try {
             Token ticket = this.ticket().getValue();
-            sellDetailRouter.open(context, ticket, ticketIDs, defaultWallet.getValue());
+            sellDetailRouter.openMarketPlace(context, ticket, ticketIDs, defaultWallet.getValue());
         } catch (Exception e) {
 
         }
     }
 
-    public void openMarketDialog(Context context, String selection)
+    public void openUniversalLinkDialog(Context context, String selection)
     {
         try
         {
             Token ticket = this.ticket().getValue();
-            sellDetailRouter.open(context, ticket, selection, defaultWallet.getValue());
-        }
-        catch (Exception e)
-        {
-
-        }
-    }
-
-    public void openMagicLinkDialog(Context context, String selection)
-    {
-        try
-        {
-            Token ticket = this.ticket().getValue();
-            sellDetailRouter.openMagic(context, ticket, selection, defaultWallet.getValue());
+            sellDetailRouter.openUniversalLink(context, ticket, selection, defaultWallet.getValue(), SET_A_PRICE, 0);
         }
         catch (Exception e)
         {

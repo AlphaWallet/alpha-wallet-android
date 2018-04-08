@@ -50,17 +50,23 @@ import io.awallet.crypto.alphawallet.viewmodel.SellDetailModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 
 import static io.awallet.crypto.alphawallet.C.EXTRA_PRICE;
+import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;
 import static io.awallet.crypto.alphawallet.C.MARKET_SALE;
+import static io.awallet.crypto.alphawallet.C.POA_NETWORK_NAME;
 
 /**
  * Created by James on 21/02/2018.
  */
 
 public class SellDetailActivity extends BaseActivity {
+    public static final int SET_A_PRICE = 1;
+    public static final int SET_EXPIRY = 2;
+    public static final int SET_MARKET_SALE = 3;
+
     @Inject
     protected SellDetailModelFactory viewModelFactory;
     protected SellDetailModel viewModel;
@@ -68,14 +74,15 @@ public class SellDetailActivity extends BaseActivity {
     private Ticket ticket;
     private TicketRange ticketRange;
     private TicketAdapter adapter;
-    private TextView usdPrice;
-    private Button sellButton;
+    private String ticketIds;
+    private String prunedIds;
+    private double ethToUsd;
+    private int saleStatus;
+    private double sellPriceValue;
 
+    private TextView usdPrice;
     private EditText sellPrice;
     private TextView textQuantity;
-    private String ticketIds;
-    private double ethToUsd;
-
     private RecyclerView list;
     private TextView totalCostText;
     private EditText expiryDateEditText;
@@ -86,8 +93,13 @@ public class SellDetailActivity extends BaseActivity {
     private TextView quantityErrorText;
     private TextView expiryDateErrorText;
     private TextView expiryTimeErrorText;
-
-    private boolean marketSale;
+    private TextView titleSetPrice;
+    private LinearLayout quantityLayout;
+    private LinearLayout universalLinkDetailsLayout;
+    private Button nextButton;
+    private TextView confirmQuantityText;
+    private TextView confirmPricePerTicketText;
+    private TextView confirmTotalCostText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,7 +112,9 @@ public class SellDetailActivity extends BaseActivity {
         ticket = getIntent().getParcelableExtra(TICKET);
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
-        marketSale = getIntent().getStringExtra(MARKET_INSTANCE).equals(MARKET_SALE);
+        saleStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
+        sellPriceValue = getIntent().getDoubleExtra(EXTRA_PRICE, 0.0);
+        prunedIds = ticketIds;
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailModel.class);
@@ -115,7 +129,6 @@ public class SellDetailActivity extends BaseActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-        sellButton = findViewById(R.id.button_sell);
         usdPrice = findViewById(R.id.fiat_price);
         sellPrice = findViewById(R.id.asking_price);
         totalCostText = findViewById(R.id.eth_price);
@@ -126,25 +139,86 @@ public class SellDetailActivity extends BaseActivity {
         quantityErrorText = findViewById(R.id.error_quantity);
         expiryDateErrorText = findViewById(R.id.error_date);
         expiryTimeErrorText = findViewById(R.id.error_time);
+        quantityLayout = findViewById(R.id.layout_set_quantity);
+        universalLinkDetailsLayout = findViewById(R.id.layout_universal_link_details);
+        nextButton = findViewById(R.id.button_next);
+        nextButton.setOnClickListener(v -> onNext());
+        titleSetPrice = findViewById(R.id.title_set_price);
+        confirmQuantityText = findViewById(R.id.text_confirm_quantity);
+        confirmPricePerTicketText = findViewById(R.id.text_confirm_price_per_ticket);
+        confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
 
-        if (marketSale)
-        {
-            sellPrice.setVisibility(View.VISIBLE);
-            textQuantity.setVisibility(View.VISIBLE);
-            expiryDateEditText.setVisibility(View.GONE);
-            expiryTimeEditText.setVisibility(View.GONE);
-        }
-        else
-        {
-            sellPrice.setVisibility(View.VISIBLE);
-            textQuantity.setVisibility(View.VISIBLE);
-            expiryDateEditText.setVisibility(View.VISIBLE);
-            expiryTimeEditText.setVisibility(View.VISIBLE);
-            sellButton.setText(getResources().getString(R.string.generate_sale_transfer_link));
-            TextView subText = findViewById(R.id.text_eth_subtext);
-            subText.setText(R.string.set_price_subtext_abr_magic);
-        }
+        setupPage();
+    }
 
+    private void setupPage()
+    {
+        switch (saleStatus)
+        {
+            case SET_A_PRICE:
+                showQuantityLayout();
+                break;
+            case SET_EXPIRY:
+                showUniversalLinkDetailsLayout();
+                break;
+            case SET_MARKET_SALE:
+                showMarketSaleLayout();
+                break;
+        }
+    }
+
+    private void showMarketSaleLayout()
+    {
+        initQuantitySelector();
+        sellPrice.setVisibility(View.VISIBLE);
+        textQuantity.setVisibility(View.VISIBLE);
+        expiryDateEditText.setVisibility(View.GONE);
+        expiryTimeEditText.setVisibility(View.GONE);
+        quantityLayout.setVisibility(View.VISIBLE);
+        universalLinkDetailsLayout.setVisibility(View.GONE);
+        titleSetPrice.setText(R.string.set_a_price);
+        addSellPriceListener();
+    }
+
+    void showUniversalLinkDetailsLayout()
+    {
+        initDatePicker();
+        initTimePicker();
+        sellPrice.setVisibility(View.GONE);
+        textQuantity.setVisibility(View.GONE);
+        expiryDateEditText.setVisibility(View.VISIBLE);
+        expiryTimeEditText.setVisibility(View.VISIBLE);
+        universalLinkDetailsLayout.setVisibility(View.VISIBLE);
+        quantityLayout.setVisibility(View.GONE);
+        titleSetPrice.setText(R.string.set_universal_link_expiry);
+
+        expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
+        expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
+
+        List<Integer> ticketIndices = ticket.parseIDListInteger(prunedIds);
+        int quantity = ticketIndices.size();
+        String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
+        String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
+        confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
+        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, String.valueOf(sellPriceValue)));
+        confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr));
+    }
+
+    void showQuantityLayout()
+    {
+        initQuantitySelector();
+        sellPrice.setVisibility(View.VISIBLE);
+        textQuantity.setVisibility(View.VISIBLE);
+        expiryDateEditText.setVisibility(View.GONE);
+        expiryTimeEditText.setVisibility(View.GONE);
+        quantityLayout.setVisibility(View.VISIBLE);
+        universalLinkDetailsLayout.setVisibility(View.GONE);
+        titleSetPrice.setText(R.string.set_a_price);
+        addSellPriceListener();
+    }
+
+    private void addSellPriceListener()
+    {
         sellPrice.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -166,29 +240,34 @@ public class SellDetailActivity extends BaseActivity {
 
             }
         });
+    }
 
-        initQuantitySelector();
-        initDatePicker();
-        initTimePicker();
-
-        sellButton.setOnClickListener(v -> {
-            if (isInputValid()) {
-                if (marketSale)
+    private void onNext()
+    {
+        switch (saleStatus)
+        {
+            case SET_A_PRICE:
+                if (isPriceAndQuantityValid())
                 {
-                    confirmPlaceMarketOrderDialog();
+                    viewModel.openUniversalLinkSetExpiry(this, prunedIds, sellPriceValue);
                 }
-                else
+                break;
+            case SET_EXPIRY:
+                if (isExpiryDateTimeValid())
                 {
                     sellTicketLink();
                 }
-            }
-        });
-
-        expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
-        expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
+                break;
+            case SET_MARKET_SALE:
+                if (isPriceAndQuantityValid())
+                {
+                    confirmPlaceMarketOrderDialog();
+                }
+                break;
+        }
     }
 
-    private boolean isInputValid() {
+    private boolean isPriceAndQuantityValid() {
         boolean result = true;
         hideErrorMessages();
 
@@ -204,24 +283,34 @@ public class SellDetailActivity extends BaseActivity {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
+        else
+        {
+            sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
+        }
         if (!isValidAmount(sellPrice.getText().toString())) {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
 
-        if (!marketSale)
+        return result;
+    }
+
+    private boolean isExpiryDateTimeValid()
+    {
+        boolean result = true;
+        hideErrorMessages();
+
+        if (expiryDateEditText.getText().toString().isEmpty())
         {
-            if (expiryDateEditText.getText().toString().isEmpty())
-            {
-                expiryDateErrorText.setVisibility(View.VISIBLE);
-                result = false;
-            }
-            if (expiryTimeEditText.getText().toString().isEmpty())
-            {
-                expiryTimeErrorText.setVisibility(View.VISIBLE);
-                result = false;
-            }
+            expiryDateErrorText.setVisibility(View.VISIBLE);
+            result = false;
         }
+        if (expiryTimeEditText.getText().toString().isEmpty())
+        {
+            expiryTimeErrorText.setVisibility(View.VISIBLE);
+            result = false;
+        }
+
         return result;
     }
 
@@ -233,6 +322,7 @@ public class SellDetailActivity extends BaseActivity {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -243,6 +333,7 @@ public class SellDetailActivity extends BaseActivity {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -279,24 +370,6 @@ public class SellDetailActivity extends BaseActivity {
         expiryTimeEditText.setText(time);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_share, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.action_share: {
-//                sellTicketLink();
-//            }
-//            break;
-//
-//        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void onEthereumPrice(Double aDouble) {
         ethToUsd = aDouble;
         //see if there's a non-zero value in the eth field
@@ -319,33 +392,24 @@ public class SellDetailActivity extends BaseActivity {
         }
     }
 
+    private String getCleanValue(double value)
+    {
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.UP);
+        return df.format(value);
+    }
+
     private void updateSellPrice(int quantity) {
         if (!sellPrice.getText().toString().isEmpty()) {
             try {
-                double totalCost = quantity * Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, String.valueOf(totalCost)));
+                sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
+                totalCostText.setText(getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue)));
                 updateUSDBalance();
             } catch (NumberFormatException e) {
                 //silent fail, just don't update
             }
         }
     }
-
-//    private void sellTicketLink()
-//    {
-//        String textPrice = sellPrice.getText().toString();
-//        double pricePerTicket = Double.valueOf(textPrice);
-//        //need currently selected price and quantity
-//        int[] indices = ticket.getTicketIndicies(ticketIds);
-//        int quantity = Integer.parseInt(textQuantity.getText().toString());
-//
-//        if (pricePerTicket > 0.0 && indices != null && quantity > 0)
-//        {
-//            //get the specific ID's, pick from the start of the run
-//            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
-//            String prunedIndicesStr = ticket.arrayToString(prunedIndices);
-//        }
-//    }
 
     private void sellTicketLink() {
         String expiryDate = expiryDateEditText.getText().toString();
@@ -367,14 +431,11 @@ public class SellDetailActivity extends BaseActivity {
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        int[] indices = ticket.getTicketIndicies(ticketIds);
         int quantity = Integer.parseInt(textQuantity.getText().toString());
 
-        if (price.doubleValue() > 0.0 && indices != null && quantity > 0) {
+        if (price.doubleValue() > 0.0 && prunedIds != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
-            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
-            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
+            int[] prunedIndices = ticket.getTicketIndicies(prunedIds);
             viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), price, UTCTimeStamp);
         }
 
@@ -383,19 +444,15 @@ public class SellDetailActivity extends BaseActivity {
     }
 
     private void sellTicketFinal() {
-        if (!isValidAmount(sellPrice.getText().toString())) {
-            return;
-        }
-
+        if (sellPriceValue <= 0) return;
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        int[] indices = ticket.getTicketIndicies(ticketIds);
+        int[] prunedIndices = ticket.getTicketIndicies(prunedIds);
         int quantity = Integer.parseInt(textQuantity.getText().toString());
 
-        if (price.doubleValue() > 0.0 && indices != null && quantity > 0) {
+        if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
             List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
             viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
@@ -407,26 +464,13 @@ public class SellDetailActivity extends BaseActivity {
     }
 
     private BigInteger getPriceInWei() {
-        String textPrice = sellPrice.getText().toString();
-
-        //convert to a double value
-        double value = Double.valueOf(textPrice);
-
         //now convert to milliWei
-        int milliEth = (int) (value * 1000.0f);
+        int milliEth = (int) (sellPriceValue * 1000.0f);
 
         //now convert to ETH
         BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
 
         return weiValue;
-    }
-
-    private double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
     }
 
     boolean isValidAmount(String eth) {
@@ -440,34 +484,41 @@ public class SellDetailActivity extends BaseActivity {
 
     private void linkReady(String universalLink) {
         //how many tickets are we selling?
-        String textPrice = sellPrice.getText().toString();
-        TextView textQuantity = findViewById(R.id.text_quantity);
-        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
-        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName) + " @" + textPrice + " Eth/Ticket";
+        List<Integer> ticketIndices = ticket.parseIDListInteger(prunedIds);
+        int quantity = ticketIndices.size();
+        String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
+        String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
+
+        String qty = String.valueOf(quantity) + " " + unit + "\n" +
+                String.valueOf(sellPriceValue) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
+                getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
+                getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.generate_sale_transfer_link);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellLinkFinal(universalLink));
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+        dialog.showShareLink();
         dialog.show();
     }
 
-    private void confirmPlaceMarketOrderDialog() {
+    private void confirmPlaceMarketOrderDialog()
+    {
         //how many tickets are we selling?
-        String textPrice = sellPrice.getText().toString();
-        TextView textQuantity = findViewById(R.id.text_quantity);
-        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
-        String qty = textQuantity.getText().toString() + " " + getResources().getString(ticketName) + " @" + textPrice + " Eth/Ticket";
+        List<Integer> ticketIndices = ticket.parseIDListInteger(prunedIds);
+        int quantity = ticketIndices.size();
+        String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
+        String qty = String.valueOf(quantity) + " " + unit + " @" + getCleanValue(sellPriceValue) + " Eth/Ticket";
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.place_tickets_marketplace);
         dialog.setBigText(qty);
-        dialog.setPrimaryButtonText(R.string.market_queue_title);
+        dialog.setPrimaryButtonText(R.string.create_sell_order);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
@@ -501,6 +552,3 @@ public class SellDetailActivity extends BaseActivity {
         quantityErrorText.setVisibility(View.GONE);
     }
 }
-
-
-

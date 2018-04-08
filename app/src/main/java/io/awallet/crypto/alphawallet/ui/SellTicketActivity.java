@@ -35,8 +35,7 @@ import static io.awallet.crypto.alphawallet.C.Key.TICKET;
  * Created by James on 13/02/2018.
  */
 
-public class SellTicketActivity extends BaseActivity
-{
+public class SellTicketActivity extends BaseActivity {
     @Inject
     protected SellTicketModelFactory viewModelFactory;
     protected SellTicketModel viewModel;
@@ -65,7 +64,6 @@ public class SellTicketActivity extends BaseActivity
 
         address = ticket.tokenInfo.address;
 
-//        setTitle(getString(R.string.market_queue_title));
         setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);
@@ -83,25 +81,19 @@ public class SellTicketActivity extends BaseActivity
         viewModel.marketQueueSuccessDialog().observe(this, this::displayMarketQueueSuccessDialog);
         viewModel.marketQueueErrorDialog().observe(this, this::displayMarketQueueErrorDialog);
 
-//        Button nextButton = findViewById(R.id.button_next);
-//        nextButton.setOnClickListener(v -> {
-//            onNext();
-//        });
-
         Button marketPlace = findViewById(R.id.button_marketplace);
         marketPlace.setOnClickListener(v -> {
             onMarketPlace();
         });
 
-        Button magicLink = findViewById(R.id.button_magiclink);
-        magicLink.setOnClickListener(v -> {
-            onMagicLink();
+        Button universalLink = findViewById(R.id.button_universal_link);
+        universalLink.setOnClickListener(v -> {
+            onUniversalLink();
         });
 
     }
 
-    private void setupSalesOrder()
-    {
+    private void setupSalesOrder() {
         ticketRange = null;
         setContentView(R.layout.activity_sell_ticket);
 
@@ -135,20 +127,17 @@ public class SellTicketActivity extends BaseActivity
         viewModel.prepare(ticket);
     }
 
-    private String getIDSelection()
-    {
+    private String getIDSelection() {
         List<TicketRange> sellRange = adapter.getCheckedItems();
         List<Integer> idList = new ArrayList<>();
-        for (TicketRange tr : sellRange)
-        {
+        for (TicketRange tr : sellRange) {
             idList.addAll(tr.tokenIds);
         }
 
         return viewModel.ticket().getValue().populateIDs(idList, false);
     }
 
-    private void onMarketPlace()
-    {
+    private void onMarketPlace() {
         String selection = getIDSelection();
 
         if (selection != null && selection.length() > 0) {
@@ -156,12 +145,11 @@ public class SellTicketActivity extends BaseActivity
         }
     }
 
-    private void onMagicLink()
-    {
+    private void onUniversalLink() {
         String selection = getIDSelection();
 
         if (selection != null && selection.length() > 0) {
-            viewModel.openMagicLinkDialog(this, selection);
+            viewModel.openUniversalLinkDialog(this, selection);
         }
     }
 
@@ -174,8 +162,7 @@ public class SellTicketActivity extends BaseActivity
         }
     }
 
-    private void onSelected(String selectionStr)
-    {
+    private void onSelected(String selectionStr) {
         selected.setText(selectionStr);
     }
 

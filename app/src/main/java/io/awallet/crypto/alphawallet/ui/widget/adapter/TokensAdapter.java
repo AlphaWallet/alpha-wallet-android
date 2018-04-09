@@ -38,6 +38,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private int filterType;
     private Context context;
+    private int tokenCount;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -139,153 +140,98 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return items.size();
     }
 
-    public void setTokens(Token[] tokens) {
-        if (items.size() > 0)
+    public boolean checkTokens()
+    {
+        if (items.size() != 0 && tokenCount != (items.size() - 1))
         {
-            refreshTokens(tokens);
+            tokenCount = 0;
+            return true;
         }
         else
         {
-            populateTokens(items, tokens);
+            tokenCount = 0;
+            return false;
         }
     }
 
-    private void refreshTokens(Token[] tokens)
+    public void setTokens(Token[] tokens)
     {
-        //check if any update is needed - because we previously have items displayed, we only need to check if there are new items, or if old items have gone
-        List<String> tokenList = new ArrayList<String>();
-        for (Token t : tokens)
+        if (items.size() == 0 || tokenCount != (items.size() - 1))
         {
-            if (t.getBalanceQty() > 0) tokenList.add(t.getAddress());
+            //only need a full update if there's been a change in token count
+            populateTokens(tokens);
         }
 
-        int required = items.size();
-        for (int i = 0; i < items.size(); i++)
+        tokenCount = 0;
+    }
+
+    public void updateTokenCheck(Token token)
+    {
+        switch (filterType)
         {
-            Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
-            {
-                Token thisToken = ((TokenSortedItem)si).value;
-                if (tokenList.contains(thisToken.getAddress()))
+            case FILTER_ASSETS:
+            case FILTER_CURRENCY:
+                if (token.isCurrency())
                 {
-                    required--;
-                    tokenList.remove(thisToken.getAddress());
+                    updateToken(token);
+                    tokenCount++; //can't put this in updateToken, we are checking for size mismatch
                 }
-            }
-            else
-            {
-                required--;
-            }
-        }
+                break;
 
-        if (!(required == 0 && tokenList.size() == 0))
-        {
-            //need an update
-            //TODO: More graceful way to update tokens between refresh cycles, but this doesn't happen often
-            populateTokens(items, tokens);
+            default:
+                updateToken(token);
+                tokenCount++;
+                break;
         }
     }
 
-    public void updateToken(Token token)
+    private void updateToken(Token token)
     {
-        boolean found = false;
-        int weight = 10;
+        //update the token in place if required
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem)
             {
                 Token thisToken = ((TokenSortedItem)si).value;
-                weight = ((TokenSortedItem) si).weight;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    //update value
+                    //TODO: see if balance or any other data changed, only update if different
                     ((TokenSortedItem)si).value = token;
-                    //TODO: see if balance or any other data changed
                     notifyItemChanged(i);
-                    found = true;
                     break;
                 }
             }
         }
-
-        if (!found && token.getBalanceQty() > 0)
-        {
-            //need to add this token in
-            items.add(new TokenSortedItem(token, weight + 1));
-            notifyDataSetChanged();
-        }
     }
 
-    public void pruneZeroItems()
+    private void populateTokens(Token[] tokens)
     {
-        Log.d("TVM", "FINISH");
-        boolean needsPrune = false;
-        for (int i = 0; i < items.size(); i++)
-        {
-            Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
-            {
-                Token thisToken = ((TokenSortedItem)si).value;
-                if (!thisToken.tokenInfo.symbol.equals(ETH_SYMBOL) && thisToken.getBalanceQty() == 0)
-                {
-                    needsPrune = true;
-                    break;
-                }
-            }
-        }
-
-        if (needsPrune)
-        {
-            items.beginBatchedUpdates();
-            for (int i = 0; i < items.size(); i++)
-            {
-                Object si = items.get(i);
-                if (si instanceof TokenSortedItem)
-                {
-                    Token thisToken = ((TokenSortedItem) si).value;
-                    if (!thisToken.tokenInfo.symbol.equals(ETH_SYMBOL) && thisToken.getBalanceQty() == 0)
-                    {
-                        items.remove((TokenSortedItem) si);
-                    }
-                }
-            }
-            items.endBatchedUpdates();
-            notifyDataSetChanged();
-        }
-    }
-
-    private void populateTokens(SortedList<SortedItem> list, Token[] tokens)
-    {
-        list.beginBatchedUpdates();
-        list.clear();
-        list.add(total);
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(total);
 
         for (int i = 0; i < tokens.length; i++) {
             Token token = tokens[i];
             if (token.tokenInfo.symbol.equals(ETH_SYMBOL) || token.getBalanceQty() > 0)
             {
-                if (filterType == FILTER_CURRENCY)
+                switch (filterType)
                 {
-                    if (token.isCurrency())
-                    {
-                        list.add(new TokenSortedItem(token, 10 + i));
-                    }
-                }
-                else if (filterType == FILTER_ASSETS)
-                {
-                    if (!token.isCurrency())
-                    {
-                        list.add(new TokenSortedItem(token, 10 + i));
-                    }
-                }
-                else
-                {
-                    list.add(new TokenSortedItem(token, 10 + i));
+                    case FILTER_ASSETS:
+                    case FILTER_CURRENCY:
+                        if (token.isCurrency())
+                        {
+                            items.add(new TokenSortedItem(token, 10 + i));
+                        }
+                        break;
+
+                    default:
+                        items.add(new TokenSortedItem(token, 10 + i));
+                        break;
                 }
             }
         }
-        list.endBatchedUpdates();
+        items.endBatchedUpdates();
     }
 
     public void setTotal(BigDecimal totalInCurrency) {

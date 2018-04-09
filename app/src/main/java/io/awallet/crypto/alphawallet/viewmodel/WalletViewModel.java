@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import org.web3j.abi.datatypes.Bool;
 
@@ -39,8 +40,8 @@ public class WalletViewModel extends BaseViewModel {
 //    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
-    private final MutableLiveData<Token> token = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> tokenPrune = new MutableLiveData<>();
+    private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> checkTokens = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -86,8 +87,8 @@ public class WalletViewModel extends BaseViewModel {
     public LiveData<BigDecimal> total() {
         return total;
     }
-    public LiveData<Token> token() { return token; }
-    public LiveData<Boolean> tokenPrune() { return tokenPrune; }
+    public LiveData<Token> tokenUpdate() { return tokenUpdate; }
+    public LiveData<Boolean> endUpdate() { return checkTokens; }
 
     //double cycle.
     //1. fetch tokens from cache and display
@@ -130,12 +131,15 @@ public class WalletViewModel extends BaseViewModel {
                 .fetchSequential(defaultWallet.getValue())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onToken, this::onError, this::onFetchTokensBalanceCompletable);
+                .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable);
     }
 
-    private void onToken(Token token)
+    private void onTokenBalanceUpdate(Token token)
     {
-        this.token.postValue(token);
+        if (token.getBalanceQty() > 0)
+        {
+            tokenUpdate.postValue(token);
+        }
         //TODO: Calculate total value including token value received from token tickers
         //TODO: Then display the total value of everything at the top of the list in a special holder
     }
@@ -144,11 +148,9 @@ public class WalletViewModel extends BaseViewModel {
     {
         progress.postValue(false);
         if (tokenCache != null && tokenCache.length > 0) {
-            //reorganise tokens - remove empties
-            tokenPrune.postValue(true);
-
             handler.removeCallbacks(startUpdateBalanceTask);
             handler.postDelayed(startUpdateBalanceTask, GET_BALANCE_INTERVAL);
+            checkTokens.postValue(true);
         }
         else
         {

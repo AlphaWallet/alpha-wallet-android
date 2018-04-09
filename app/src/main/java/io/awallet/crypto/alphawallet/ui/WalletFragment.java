@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -88,8 +89,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
-        viewModel.token().observe(this, this::onToken);
-        viewModel.tokenPrune().observe(this, this::pruneZeroItems);
+        viewModel.tokenUpdate().observe(this, this::onToken);
+        viewModel.endUpdate().observe(this, this::checkTokens);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
@@ -98,14 +99,17 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    private void pruneZeroItems(Boolean aBoolean)
+    private void checkTokens(Boolean dummy)
     {
-        adapter.pruneZeroItems();
+        if (adapter.checkTokens())
+        {
+            viewModel.fetchTokens(); //require a full token refresh; number of tokens has changed
+        }
     }
 
     private void onToken(Token token)
     {
-        adapter.updateToken(token);
+        adapter.updateTokenCheck(token);
     }
 
     private void initTabLayout(View view) {

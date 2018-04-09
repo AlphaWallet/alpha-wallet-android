@@ -1,5 +1,6 @@
 package io.awallet.crypto.alphawallet.ui.widget.adapter;
 
+import android.content.Context;
 import android.media.session.MediaSession;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.Token;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.SortedItem;
@@ -23,7 +25,9 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import org.web3j.abi.datatypes.Int;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,21 +39,45 @@ import java.util.List;
 
 public class TicketAdapter extends TokensAdapter {
     TicketRange currentRange = null;
+    final Ticket ticket;
+    protected AssetDefinition assetDefinition;
 
     protected OnTicketIdClickListener onTicketIdClickListener;
 
-    public TicketAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
+    public TicketAdapter(Context ctx, OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
         super();
+        assetDefinition = initAssetDefinition(ctx);
         this.onTicketIdClickListener = onTicketIdClickListener;
+        ticket = t;
         setTicket(t);
     }
 
-    public TicketAdapter(OnTicketIdClickListener onTicketIdClick, Ticket ticket, String ticketIds)
+    public TicketAdapter(Context ctx, OnTicketIdClickListener onTicketIdClick, Ticket ticket, String ticketIds)
     {
         super();
         this.onTicketIdClickListener = onTicketIdClick;
+        initAssetDefinition(ctx);
         //setTicket(ticket);
         setTicketRange(ticket, ticketIds);
+        this.ticket = ticket;
+    }
+
+    private AssetDefinition initAssetDefinition(Context ctx)
+    {
+        AssetDefinition definition = null;
+        try
+        {
+            definition = new AssetDefinition("ticket.xml", ctx.getResources());
+        }
+        catch (IOException |SAXException e)
+        {
+            // TODO: how to gracefully bail out from creating a new activity?
+            // Answer - TODO: fall back to static class which provides only the ticket name
+            e.printStackTrace();
+            //throw new RuntimeException("Error in parsing XML asset Definition");
+        }
+
+        return definition;
     }
 
     @Override
@@ -57,7 +85,7 @@ public class TicketAdapter extends TokensAdapter {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
-                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent);
+                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, assetDefinition, ticket);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 holder = tokenHolder;
             } break;

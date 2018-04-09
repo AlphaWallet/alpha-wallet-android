@@ -1,5 +1,6 @@
 package io.awallet.crypto.alphawallet.ui.widget.adapter;
 
+import android.content.Context;
 import android.view.ViewGroup;
 
 import io.awallet.crypto.alphawallet.R;
@@ -38,8 +39,8 @@ public class TicketSaleAdapter extends TicketAdapter {
     private TicketRange selectedTicketRange;
     private QuantitySelectorHolder quantitySelector;
 
-    public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
-        super(onTicketIdClickListener, t);
+    public TicketSaleAdapter(Context ctx, OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
+        super(ctx, onTicketIdClickListener, t);
         onTokenCheckListener = this::onTokenCheck;
         selectedTicketRange = null;
     }
@@ -49,7 +50,7 @@ public class TicketSaleAdapter extends TicketAdapter {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
-                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent);
+                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, assetDefinition, ticket);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 holder = tokenHolder;
             } break;

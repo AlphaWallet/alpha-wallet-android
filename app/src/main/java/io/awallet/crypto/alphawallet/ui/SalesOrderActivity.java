@@ -18,8 +18,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
@@ -29,6 +32,7 @@ import io.awallet.crypto.alphawallet.viewmodel.SalesOrderViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -125,7 +129,7 @@ public class SalesOrderActivity extends BaseActivity
         RelativeLayout rLL = findViewById(R.id.contract_address_layout);
         rLL.setVisibility(View.GONE);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }

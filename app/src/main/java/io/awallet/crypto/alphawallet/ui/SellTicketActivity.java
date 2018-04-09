@@ -107,7 +107,7 @@ public class SellTicketActivity extends BaseActivity
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }

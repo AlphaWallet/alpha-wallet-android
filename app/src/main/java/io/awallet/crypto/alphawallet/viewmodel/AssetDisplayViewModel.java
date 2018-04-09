@@ -40,6 +40,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
+    
     private final HomeRouter homeRouter;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();

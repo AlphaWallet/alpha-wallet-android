@@ -127,7 +127,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
                         .findAll();
-                Log.d("TRS", "Sz: " + realmItems.size());
+                //Log.d("TRS", "Sz: " + realmItems.size());
                 return convertBalance(realmItems, System.currentTimeMillis());
             } finally {
                 if (realm != null) {

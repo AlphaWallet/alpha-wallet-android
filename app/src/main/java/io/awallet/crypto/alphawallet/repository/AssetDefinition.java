@@ -15,13 +15,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AssetDefinition {
     protected Document xml;
-    public Map<String, FieldDefinition> fields = new HashMap<>();
+    public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
     public String locale;
 
     class FieldDefinition {
@@ -67,7 +67,7 @@ public class AssetDefinition {
     }
 
     class Enumeration extends FieldDefinition {
-        private Map<BigInteger, String> members = new HashMap<>();
+        private Map<BigInteger, String> members = new ConcurrentHashMap<>();
         public Enumeration(Element field) {
             super(field);
             for(Node child=field.getFirstChild(); child!=null; child=child.getNextSibling()){

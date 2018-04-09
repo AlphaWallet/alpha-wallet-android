@@ -237,4 +237,6 @@
     <string name="magiclink_notice">Before the link expires, anyone with the MagicLink can purchase your tickets with one click.</string>
     <string name="label_important">Important</string>
     <string name="eth_00">0.00 ETH</string>
+    <string name="erc20">ERC 20</string>
+    <string name="erc875">ERC 875</string>
 </resources>

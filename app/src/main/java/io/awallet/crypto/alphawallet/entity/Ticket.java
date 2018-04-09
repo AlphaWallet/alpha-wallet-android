@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
@@ -420,18 +421,21 @@ public class Ticket extends Token implements Parcelable, NonFungibleToken
     }
 
     @Override
-    public void setupContent(TokenHolder tokenHolder)
+    public void setupContent(Context ctx, TokenHolder holder)
     {
-        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
-        tokenHolder.balanceEth.setVisibility(View.GONE);
-        tokenHolder.balanceCurrency.setText("--");
-        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
-        tokenHolder.issuer.setText(TicketDecode.getIssuer());
-        tokenHolder.text24HoursSub.setText(R.string.burned);
-        tokenHolder.text24Hours.setText(String.valueOf(burnArray.size()));
-        tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-
-        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
+        holder.fillIcon(null, R.mipmap.ic_alpha);
+        holder.balanceEth.setVisibility(View.GONE);
+        holder.balanceCurrency.setText("--");
+        holder.arrayBalance.setVisibility(View.VISIBLE);
+        holder.issuer.setText(TicketDecode.getIssuer());
+        holder.text24HoursSub.setText(R.string.burned);
+        holder.text24Hours.setText(String.valueOf(burnArray.size()));
+        holder.textAppreciationSub.setText(R.string.marketplace);
+        holder.arrayBalance.setText(String.valueOf(getTicketCount()));
+        holder.textAppreciation.setText(EMPTY_BALANCE);
+        holder.contractType.setVisibility(View.VISIBLE);
+        holder.contractSeparator.setVisibility(View.VISIBLE);
+        holder.contractType.setText(R.string.erc875);
     }
 
     public String populateRange(TicketRange range)

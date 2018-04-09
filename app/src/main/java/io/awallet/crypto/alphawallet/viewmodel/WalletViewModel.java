@@ -62,6 +62,9 @@ public class WalletViewModel extends BaseViewModel {
 
     private Handler handler = new Handler();
 
+    @Nullable
+    private Disposable fetchTokenBalanceDisposable;
+
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
@@ -90,11 +93,23 @@ public class WalletViewModel extends BaseViewModel {
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> endUpdate() { return checkTokens; }
 
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        handler.removeCallbacks(startUpdateBalanceTask);
+        if (fetchTokenBalanceDisposable != null && !fetchTokenBalanceDisposable.isDisposed())
+        {
+            fetchTokenBalanceDisposable.dispose();
+        }
+    }
+
     //double cycle.
     //1. fetch tokens from cache and display
     //2. update token balance
     public void fetchTokens()
     {
+        handler.removeCallbacks(startUpdateBalanceTask);
         if (disposable != null && !disposable.isDisposed())
         {
             disposable.dispose();
@@ -126,12 +141,16 @@ public class WalletViewModel extends BaseViewModel {
         updateTokenBalances();
     }
 
-    private void updateTokenBalances() {
-        disposable = fetchTokensInteract
-                .fetchSequential(defaultWallet.getValue())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable);
+    private void updateTokenBalances()
+    {
+        if (fetchTokenBalanceDisposable == null)
+        {
+            fetchTokenBalanceDisposable = fetchTokensInteract
+                    .fetchSequential(defaultWallet.getValue())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable);
+        }
     }
 
     private void onTokenBalanceUpdate(Token token)
@@ -146,6 +165,7 @@ public class WalletViewModel extends BaseViewModel {
 
     private void onFetchTokensBalanceCompletable()
     {
+        fetchTokenBalanceDisposable = null;
         progress.postValue(false);
         if (tokenCache != null && tokenCache.length > 0) {
             handler.removeCallbacks(startUpdateBalanceTask);
@@ -197,12 +217,6 @@ public class WalletViewModel extends BaseViewModel {
 
     public void showEditTokens(Context context) {
         changeTokenCollectionRouter.open(context, defaultWallet.getValue());
-    }
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        handler.removeCallbacks(startUpdateBalanceTask);
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {

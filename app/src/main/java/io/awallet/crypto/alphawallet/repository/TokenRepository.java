@@ -415,6 +415,14 @@ public class TokenRepository implements TokenRepositoryType {
                 .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens));
     }
 
+    /**
+     * Obtain live balance of token from Ethereum blockchain and cache into Realm
+     *
+     * @param network
+     * @param wallet
+     * @param token
+     * @return
+     */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
         return Single.fromCallable(() -> {
             try
@@ -440,6 +448,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
+                updated.balanceIsLive = true;
                 localSource.updateTokenBalance(network, wallet, updated);
                 //Log.d(TAG, updated.tokenInfo.name + " update: " + updated.getFullBalance());
                 return updated;

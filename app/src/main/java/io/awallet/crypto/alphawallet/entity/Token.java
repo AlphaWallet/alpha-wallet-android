@@ -3,6 +3,8 @@ package io.awallet.crypto.alphawallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
@@ -19,12 +21,15 @@ import java.math.RoundingMode;
 import java.util.Iterator;
 import java.util.List;
 
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;
     public final BigDecimal balance;
     public final long updateBlancaTime;
+    public boolean balanceIsLive = false;
+    public boolean isERC20 = false; //TODO: when we see ERC20 functions in transaction decoder switch this on
 
     public TokenTicker ticker;
 
@@ -106,35 +111,97 @@ public class Token implements Parcelable {
     {
         return "";
     }
-
     public String populateIDs(int[] idArray)
     {
         return "";
     }
-
     public static final String EMPTY_BALANCE = "\u2014\u2014";
 
-    public void setupContent(TokenHolder holder) {
+    public boolean needsUpdate()
+    {
+        long now = System.currentTimeMillis();
+        long diff = (now - updateBlancaTime) / 1000; //seconds
+
+        if (diff > 50) // value is stale
+        {
+            Log.d("TOKEN", tokenInfo.name + " DIFF: " + diff);
+            return balanceIsLive;
+        }
+        else
+        {
+            return !balanceIsLive;
+        }
+    }
+
+    /**
+     * This function should check if the balance of the token is stale or not
+     * However the recycler view is subject to its own rules and laws, which I haven't decoded.
+     * This is a TODO.
+     * @param ctx
+     * @param holder
+     */
+    public void checkUpdateTimeValid(Context ctx, TokenHolder holder)
+    {
+        long now = System.currentTimeMillis();
+        long diff = (now - updateBlancaTime) / 1000; //seconds
+
+        if (diff > 50) // value is stale
+        {
+            Log.d("TOKEN", tokenInfo.name + " DIFF: " + diff);
+            holder.balanceEth.setTextColor(ContextCompat.getColor(ctx, R.color.holo_blue));
+            holder.symbol.setTextColor(ContextCompat.getColor(ctx, R.color.holo_blue));
+            balanceIsLive = false;
+        }
+        else
+        {
+            holder.balanceEth.setTextColor(ContextCompat.getColor(ctx, R.color.black));
+            holder.symbol.setTextColor(ContextCompat.getColor(ctx, R.color.black));
+            balanceIsLive = true;
+        }
+    }
+
+    public void setupContent(Context ctx, TokenHolder holder)
+    {
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;
         ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         holder.balanceEth.setText(value);
+        holder.issuer.setText(R.string.ethereum);
 
-        if (ticker == null) {
+        if (ticker == null && tokenInfo.symbol.equals(ETH_SYMBOL))
+        {
+            holder.textAppreciationSub.setText(R.string.appreciation);
+            holder.icon.setVisibility(View.GONE);
+            holder.text24HoursSub.setText(R.string.twenty_four_hours);
+            holder.contractType.setVisibility(View.GONE);
+            holder.contractSeparator.setVisibility(View.GONE);
+        }
+        else if (ticker == null)
+        {
             holder.balanceCurrency.setText(EMPTY_BALANCE);
             holder.fillIcon(null, R.mipmap.token_logo);
             holder.text24Hours.setText(EMPTY_BALANCE);
             holder.textAppreciation.setText(EMPTY_BALANCE);
             holder.textAppreciationSub.setText(R.string.appreciation);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
-        } else {
+            if (isERC20)
+            {
+                holder.contractType.setVisibility(View.VISIBLE);
+                holder.contractSeparator.setVisibility(View.VISIBLE);
+                holder.contractType.setText(R.string.erc20);
+            }
+        }
+        else
+        {
             holder.textAppreciationSub.setText(R.string.appreciation);
             holder.fillCurrency(ethBalance, ticker);
             holder.fillIcon(ticker.image, R.mipmap.token_logo);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
-    }
+            holder.contractType.setVisibility(View.GONE);
+            holder.contractSeparator.setVisibility(View.GONE);
+        }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
         holder.arrayBalance.setVisibility(View.GONE);

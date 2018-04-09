@@ -18,6 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -29,10 +32,6 @@ import io.awallet.crypto.alphawallet.widget.AddWalletView;
 import io.awallet.crypto.alphawallet.widget.BackupView;
 import io.awallet.crypto.alphawallet.widget.BackupWarningView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 
 import static io.awallet.crypto.alphawallet.C.IMPORT_REQUEST_CODE;
 import static io.awallet.crypto.alphawallet.C.SHARE_REQUEST_CODE;
@@ -62,6 +61,7 @@ public class WalletsActivity extends BaseActivity implements
 		setContentView(R.layout.activity_wallets);
 		// Init toolbar
 		toolbar();
+		setTitle(getString(R.string.toolbar_title_my_wallets));
 
 		adapter = new WalletsAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
 		SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);

@@ -11,6 +11,7 @@ import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -98,12 +99,12 @@ public class Token implements Parcelable {
         viewModel.showSendToken(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
-    public String populateIDs(List<Integer> d, boolean keepZeros)
+    public String ticketIdToString(List<Bytes32> idArray, boolean keepZeros)
     {
         return "";
     }
 
-    public String populateIDs(int[] idArray)
+    public String ticketIdToString(int[] idArray)
     {
         return "";
     }
@@ -141,9 +142,31 @@ public class Token implements Parcelable {
 
     }
 
-    public List<Integer> parseIndexList(String userList)
+    public List<Integer> ticketIdStringToIndexList(String userList)
     {
         return null;
+    }
+
+    public String integerListToString(List<Integer> intList, boolean keepZeros)
+    {
+        if (intList == null) return "";
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Integer id : intList)
+        {
+            if (!keepZeros && id == 0) continue;
+            if (!first)
+            {
+                sb.append(", ");
+            }
+            first = false;
+
+            sb.append(String.valueOf(id));
+        }
+
+        displayIDs = sb.toString();
+        return displayIDs;
     }
 
     public int getTicketCount()
@@ -174,7 +197,7 @@ public class Token implements Parcelable {
         return !tokenInfo.isStormbird;
     }
 
-    public List<Integer> indexToIDList(int[] prunedIndices)
+    public List<Bytes32> indexToIDList(int[] prunedIndices)
     {
         return null;
     }

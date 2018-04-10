@@ -163,7 +163,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 //See if our tickets got burned
                 for (Integer index : this.ticketIndicies)
                 {
-                    if (((Ticket) t).balanceArray.get(index) > 0)
+                    if (!((Ticket) t).balanceArray.get(index).equals(0))
                     {
                         allBurned = false;
                         break;

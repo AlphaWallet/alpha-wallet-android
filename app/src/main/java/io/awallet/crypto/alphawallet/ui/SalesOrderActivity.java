@@ -18,11 +18,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.xml.sax.SAXException;
+import org.web3j.abi.datatypes.Int;
+import org.web3j.abi.datatypes.generated.Bytes32;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
@@ -32,7 +32,6 @@ import io.awallet.crypto.alphawallet.viewmodel.SalesOrderViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -216,7 +215,7 @@ public class SalesOrderActivity extends BaseActivity
         boolean inputValid = true;
 
         final String amount = idsText.getText().toString();
-        List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(amount);
+        List<Integer> idSendList = viewModel.ticket().getValue().ticketIdStringToIndexList(amount);
 
         if (idSendList == null || idSendList.isEmpty()) {
             amountInputLayout.setError(getString(R.string.error_invalid_amount));
@@ -227,8 +226,8 @@ public class SalesOrderActivity extends BaseActivity
             return;
         }
 
-        List<Integer> actualIds = viewModel.ticket().getValue().parseIDListInteger(amount);
-        String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
+        List<Bytes32> actualIds = viewModel.ticket().getValue().stringToTicketIDList(amount);
+        List<Integer> indexList = viewModel.ticket().getValue().ticketIdToTicketIndex(actualIds);
         amountInputLayout.setErrorEnabled(false);
 
         if (actualIds != null && actualIds.size() > 0)

@@ -2,6 +2,8 @@ package io.awallet.crypto.alphawallet.entity;
 
 import android.text.TextUtils;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
+
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 
 import java.math.BigDecimal;
@@ -15,7 +17,7 @@ import static io.awallet.crypto.alphawallet.repository.TokensRealmSource.ACTUAL_
 
 public class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, List<Integer> burned, long updateBlancaTime)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Bytes32> balances, List<Integer> burned, long updateBlancaTime)
     {
         Token thisToken;
         if (tokenInfo.isStormbird)
@@ -81,7 +83,7 @@ public class TokenFactory
         Token thisToken;
         if (tokenInfo.isStormbird)
         {
-            thisToken = new Ticket(tokenInfo, (List<Integer>)null, (List<Integer>)null, 0);
+            thisToken = new Ticket(tokenInfo, (List<Bytes32>)null, (List<Integer>)null, 0);
         }
         else
         {

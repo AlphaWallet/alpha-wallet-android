@@ -9,12 +9,15 @@ import android.view.ViewGroup;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
+import io.awallet.crypto.alphawallet.entity.TicketRangeElement;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
@@ -25,12 +28,16 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import org.web3j.abi.datatypes.Int;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -57,9 +64,9 @@ public class TicketAdapter extends TokensAdapter {
         super();
         this.onTicketIdClickListener = onTicketIdClick;
         initAssetDefinition(ctx);
+        this.ticket = ticket;
         //setTicket(ticket);
         setTicketRange(ticket, ticketIds);
-        this.ticket = ticket;
     }
 
     private AssetDefinition initAssetDefinition(Context ctx)
@@ -108,42 +115,48 @@ public class TicketAdapter extends TokensAdapter {
         return count;
     }
 
-    private void setTicketRange(Ticket ticket, String ticketIds)
+    private void setTicketRange(Ticket t, String ticketIds)
     {
         items.beginBatchedUpdates();
         items.clear();
-        //items.add(new TokenBalanceSortedItem(ticket));
 
-        //first convert to integer array
-        List<Integer> sortedList = ticket.parseIDListInteger(ticketIds);
-        Collections.sort(sortedList);
+        List<Bytes32> idList = t.stringToTicketIDList(ticketIds);
+        List<TicketRangeElement> sortedList = new ArrayList<>();
+        for (Bytes32 v : idList)
+        {
+            if (Numeric.toBigInt(v.getValue()).compareTo(BigInteger.ZERO) == 0) continue;
+            TicketRangeElement e = new TicketRangeElement();
+            e.id = v;
+            NonFungibleToken nft = new NonFungibleToken(Numeric.toBigInt(v.getValue()), assetDefinition);
+            e.ticketNumber = nft.getAttribute("number").value.intValue();
+            e.category = (short)nft.getAttribute("category").value.intValue();
+            e.match = (short)nft.getAttribute("match").value.intValue();
+            e.venue = (short)nft.getAttribute("venue").value.intValue();
+            sortedList.add(e);
+        }
+        TicketRangeElement.sortElements(sortedList);
 
-        int currentSeat = -1;
-        char currentZone = '-';
-//        TicketRange currentRange = null;
-        //now generate the ticket display
+        int currentCat = 0;
+        int currentNumber = -1;
+
         for (int i = 0; i < sortedList.size(); i++)
         {
-            int tokenId = sortedList.get(i);
-            if (tokenId != 0)
+            TicketRangeElement e = sortedList.get(i);
+            if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
             {
-                char zone = TicketDecode.getZoneChar(tokenId);
-                int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                if (seatNumber != currentSeat + 1 || zone != currentZone) //check consecutive seats and zone is still the same, and push final ticket
-                {
-                    currentRange = new TicketRange(tokenId, ticket.getAddress());
-                    items.add(new TokenIdSortedItem(currentRange, 10 + i));
-                    currentZone = zone;
-                }
-                else
-                {
-                    //update
-                    currentRange.tokenIds.add(tokenId);
-                }
-
-                currentSeat = seatNumber;
+                currentRange = new TicketRange(e.id, t.getAddress());
+                items.add(new TokenIdSortedItem(currentRange, 10 + i));
+                currentCat = e.category;
             }
+            else
+            {
+                //update
+                currentRange.tokenIds.add(e.id);
+            }
+            currentNumber = e.ticketNumber;
         }
+
+
         items.endBatchedUpdates();
     }
 
@@ -152,43 +165,54 @@ public class TicketAdapter extends TokensAdapter {
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
 
+        addRanges(t);
+        //icketRange currentRange = new TicketRange(t.balanceArray.get(0), t.getAddress());
+        //items.add(new TicketSaleSortedItem(currentRange, 10));
+
+        items.endBatchedUpdates();
+    }
+
+    private void addRanges(Ticket t)
+    {
         TicketRange currentRange = null;
-        int currentSeat = -1;
-        char currentZone = '-';
-        boolean currentBurn = false;
+        int currentNumber = -1;
+
         //first sort the balance array
-        List<Integer> sortedList = new ArrayList<>();
-        sortedList.addAll(t.balanceArray);
-        sortedList.addAll(t.getBurnList());
-        Collections.sort(sortedList);
+        List<TicketRangeElement> sortedList = new ArrayList<>();
+        for (Bytes32 v : t.balanceArray)
+        {
+            String hex = Numeric.toHexString(v.getValue()); //Numeric.toBigInt(v.getValue())
+            System.out.println(hex);
+            if (Numeric.toBigInt(v.getValue()).compareTo(BigInteger.ZERO) == 0) continue;
+            TicketRangeElement e = new TicketRangeElement();
+            e.id = v;
+            NonFungibleToken nft = new NonFungibleToken(Numeric.toBigInt(v.getValue()), assetDefinition);
+            e.ticketNumber = nft.getAttribute("number").value.intValue();
+            e.category = (short)nft.getAttribute("category").value.intValue();
+            e.match = (short)nft.getAttribute("match").value.intValue();
+            e.venue = (short)nft.getAttribute("venue").value.intValue();
+            sortedList.add(e);
+        }
+        TicketRangeElement.sortElements(sortedList);
+
+        int currentCat = 0;
+
         for (int i = 0; i < sortedList.size(); i++)
         {
-            int tokenId = sortedList.get(i);
-            if (tokenId != 0)
+            TicketRangeElement e = sortedList.get(i);
+            if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
             {
-                char zone = TicketDecode.getZoneChar(tokenId);
-                int seatNumber = TicketDecode.getSeatIdInt(tokenId);
-                boolean isBurned = false;
-                if (t.getBurnList().contains((Integer)tokenId)) {
-                    isBurned = true;
-                }
-                if (seatNumber != currentSeat + 1 || zone != currentZone || isBurned != currentBurn) //check consecutive seats and zone is still the same, and push final ticket
-                {
-                    currentRange = new TicketRange(tokenId, t.getAddress(), isBurned);
-                    items.add(new TokenIdSortedItem(currentRange, 10 + i));
-                    currentZone = zone;
-                    currentBurn = isBurned;
-                }
-                else
-                {
-                    //update
-                    currentRange.tokenIds.add(tokenId);
-                }
-
-                currentSeat = seatNumber;
+                currentRange = new TicketRange(e.id, t.getAddress());
+                items.add(new TokenIdSortedItem(currentRange, 10 + i));
+                currentCat = e.category;
             }
+            else
+            {
+                //update
+                currentRange.tokenIds.add(e.id);
+            }
+            currentNumber = e.ticketNumber;
         }
-        items.endBatchedUpdates();
     }
 }
 

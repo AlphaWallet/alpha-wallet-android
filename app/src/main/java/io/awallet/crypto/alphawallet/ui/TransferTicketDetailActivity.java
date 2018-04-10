@@ -13,8 +13,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,11 +33,9 @@ import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.util.KeyboardUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
@@ -48,15 +44,9 @@ import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
-import org.web3j.abi.datatypes.Int;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Convert;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -256,7 +246,7 @@ public class TransferTicketDetailActivity extends BaseActivity {
 
     private String getTicketSendIndexListStr() {
         int[] prunedIndices = getTicketSendIndexList();
-        return ticket.populateIDs(prunedIndices);
+        return ticket.ticketIdToString(prunedIndices);
     }
 
     private void transferTicketFinal() {

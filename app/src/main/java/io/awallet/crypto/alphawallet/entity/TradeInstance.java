@@ -1,5 +1,6 @@
 package io.awallet.crypto.alphawallet.entity;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
@@ -23,11 +24,11 @@ public class TradeInstance
     public final BigInteger price;
     public final int[] tickets;
     public final BigInteger contractAddress;
-    public final int ticketStart;
+    public final Bytes32 ticketStart;
     public final String publicKey;
     List<byte[]> signatures = new ArrayList<byte[]>();
 
-    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, int ticketStartId) {
+    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, Bytes32 ticketStartId) {
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;

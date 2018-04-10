@@ -6,13 +6,13 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
-import org.web3j.abi.datatypes.Int;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -20,65 +20,63 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import jnr.ffi.annotations.In;
-
 /**
  * Created by James on 27/01/2018.
  */
 
 public class Ticket extends Token implements Parcelable
 {
-    public final List<Integer> balanceArray;
-    private List<Integer> burnArray;
+    public final List<Bytes32> balanceArray;
+    public final List<BigInteger> balanceArrayI;
+    private List<Integer> burnIndices;
 
-    public Ticket(TokenInfo tokenInfo, List<Integer> balances, List<Integer> burned, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, List<Bytes32> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
-        burnArray = burned;
+        balanceArrayI = new ArrayList<>();
+        for (Bytes32 cv : balanceArray) balanceArrayI.add(Numeric.toBigInt(cv.getValue()));
+        burnIndices = burned;
     }
 
     public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
-        this.balanceArray = parseIDListInteger(balances);
-        burnArray = parseIDListInteger(burnList, true);
+        this.balanceArray = stringToTicketIDList(balances);
+        balanceArrayI = new ArrayList<>();
+        for (Bytes32 cv : balanceArray) balanceArrayI.add(Numeric.toBigInt(cv.getValue()));
+        burnIndices = parseIDListInteger(burnList, true);
     }
-
-//
-//    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
-//        super(tokenInfo, BigDecimal.ZERO, blancaTime);
-//        this.balanceArray   = parseIDListInteger(balances);
-//        this.burnArray      = parseIDListInteger(burnList);
-//    }
 
     private Ticket(Parcel in) {
         super(in);
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
-        balanceArray = new ArrayList<Integer>();
-        burnArray = new ArrayList<Integer>();
+        balanceArray = new ArrayList<Bytes32>();
+        balanceArrayI = new ArrayList<>();
+        burnIndices = new ArrayList<Integer>();
         for (Object o : readObjArray)
         {
-            Integer val = (Integer)o;
-            balanceArray.add(val);
+            BigInteger val = (BigInteger)o;
+            balanceArrayI.add(val);
+            balanceArray.add(new Bytes32(Numeric.toBytesPadded(val, 32)));
         }
 
         //check to see if burn notice is needed
         for (Object o : readBurnArray)
         {
             Integer val = (Integer)o;
-            burnArray.add(val);
+            burnIndices.add(val);
         }
     }
 
     @Override
     public String getStringBalance() {
-        return populateIDs(balanceArray, false);
+        return ticketIdToString(balanceArray, false);
     }
 
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return populateIDs(balanceArray, true);
+        else return ticketIdToString(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -96,10 +94,13 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeArray(balanceArray.toArray());
-        dest.writeArray(burnArray.toArray());
+        //List<BigInteger> vals = new ArrayList<>();
+        //for (Bytes32 cv : balanceArray) vals.add(Numeric.toBigInt(cv.getValue()));
+        dest.writeArray(balanceArrayI.toArray());
+        dest.writeArray(burnIndices.toArray());
     }
 
+    //produce a String containing all the BYTES32 entries from a list of indices
     public String parseList(List<Integer> checkedIndexList) {
         StringBuilder sb = new StringBuilder();
 
@@ -112,8 +113,8 @@ public class Ticket extends Token implements Parcelable
                 if (i < balanceArray.size())
                 {
                     if (!first) sb.append(", ");
-                    int thisTicketId = balanceArray.get(i);
-                    sb.append(String.valueOf(thisTicketId));
+                    Bytes32 ticketID = balanceArray.get(i);
+                    sb.append(Numeric.toHexString(ticketID.getValue()));
                     first = false;
                 }
             }
@@ -125,48 +126,11 @@ public class Ticket extends Token implements Parcelable
         return sb.toString();
     }
 
-    public String checkBalance(String selection)
-    {
-        StringBuilder sb = new StringBuilder();
-        //convert selection to index list
-        List<org.web3j.abi.datatypes.generated.Int16> selectionIndex = parseIDList(selection);
-        //add correct entries
-        boolean first = true;
-        for (org.web3j.abi.datatypes.generated.Int16 id : selectionIndex) {
-            if (balanceArray.contains(id.getValue().intValue()) && !burnArray.contains(id.getValue().intValue())) {
-                if (!first) sb.append(", ");
-                sb.append(String.valueOf(id.getValue().toString(10)));
-                first = false;
-            }
-        }
-
-        return sb.toString();
-    }
-
-    private List<org.web3j.abi.datatypes.generated.Int16> parseIDList(String userList)
-    {
-        List<org.web3j.abi.datatypes.generated.Int16> idList = new ArrayList<>();
-
-        try
-        {
-            String[] ids = userList.split(",");
-
-            for (String id : ids)
-            {
-                //remove whitespace
-                String trim = id.trim();
-                org.web3j.abi.datatypes.generated.Int16 thisId = new org.web3j.abi.datatypes.generated.Int16(Integer.parseInt(trim));
-                idList.add(thisId);
-            }
-        }
-        catch (Exception e)
-        {
-            idList = null;
-        }
-
-        return idList;
-    }
-
+    /**
+     * Given a string list of Integer Indices generate the BigInteger list required for interaction with Ethereum contract
+     * @param userList
+     * @return
+     */
     public List<BigInteger> parseIDListBI(String userList)
     {
         List<BigInteger> idList = new ArrayList<>();
@@ -186,6 +150,30 @@ public class Ticket extends Token implements Parcelable
         catch (Exception e)
         {
             idList = null;
+        }
+
+        return idList;
+    }
+
+    public List<Bytes32> stringToTicketIDList(String ticketStringList)
+    {
+        List<Bytes32> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = ticketStringList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                Bytes32 val = new Bytes32(trim.getBytes());
+                idList.add(val);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = new ArrayList<>();
         }
 
         return idList;
@@ -225,13 +213,19 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
-    public List<Integer> indexToIDList(int[] prunedIndices)
+    /**
+     * Given a set of indices generate a list of Bytes32 ID's
+     * @param prunedIndices
+     * @return
+     */
+    @Override
+    public List<Bytes32> indexToIDList(int[] prunedIndices)
     {
-        List<Integer> idList = new ArrayList<>();
+        List<Bytes32> idList = new ArrayList<>();
         for (int i : prunedIndices)
         {
             if (i < balanceArray.size()) {
-                Integer ticketID = balanceArray.get(i);
+                Bytes32 ticketID = balanceArray.get(i);
                 idList.add(ticketID);
             }
         }
@@ -241,18 +235,18 @@ public class Ticket extends Token implements Parcelable
 
     public String arrayToString(int[] prunedIndices)
     {
-        return populateIDs(prunedIndices);
+        return ticketIdToString(prunedIndices);
     }
 
-    public List<Integer> ticketIdToTicketIndex(List<Integer> ticketIds)
+    public List<Integer> ticketIdToTicketIndex(List<Bytes32> ticketIds)
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();
 
         try
         {
-            for (Integer id : ticketIds) {
-                if (id > 0) {
+            for (Bytes32 id : ticketIds) {
+                if (Numeric.toBigInt(id.getValue()).compareTo(BigInteger.ZERO) != 0) {
                     int index = balanceArray.indexOf(id);
                     if (index > -1) {
                         if (!idList.contains(index)) {  //just make sure they didn't already add this one
@@ -273,12 +267,12 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Function to convert a list of ticket IDs into ticket indices for the account address given
+     * Function to convert a String list of ticket IDs into ticket indices for the account address given
      * @param userList
      * @return
      */
     @Override
-    public List<Integer> parseIndexList(String userList)
+    public List<Integer> ticketIdStringToIndexList(String userList) //ticketIdStringToIndexList
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();
@@ -290,15 +284,20 @@ public class Ticket extends Token implements Parcelable
             for (String id : ids) {
                 //remove whitespace
                 String trim = id.trim();
-                Integer thisId = Integer.parseInt(trim);
+                Bytes32 thisId = new Bytes32(trim.getBytes());// Integer.parseInt(trim);
 
-                if (thisId > 0) {
+                if (Numeric.toBigInt(thisId.getValue()).compareTo(BigInteger.ZERO) != 0)
+                {
                     int index = balanceArray.indexOf(thisId);
-                    if (index > -1) {
-                        if (!idList.contains(index)) {  //just make sure they didn't already add this one
+                    if (index > -1)
+                    {
+                        if (!idList.contains(index))
+                        {  //just make sure they didn't already add this one
                             idList.add(index);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         idList = null;
                         break;
                     }
@@ -313,57 +312,45 @@ public class Ticket extends Token implements Parcelable
     }
 
     //Burn handling
-    public void addToBurnList(List<BigInteger> burnIndicies)
+    public void addToBurnList(List<BigInteger> burnUpdate)
     {
-        for (BigInteger b : burnIndicies) {
+        for (BigInteger b : burnUpdate) {
             Integer index = b.intValue();
 
             //lookup index
             if (balanceArray.size() > index)
             {
-                Integer value = balanceArray.get(index);
-                if (value > 0 && !burnArray.contains(value)) {
-                    burnArray.add(value);
+                Bytes32 value = balanceArray.get(index);
+                if (Numeric.toBigInt(value.getValue()).compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
+                    burnIndices.add(index);
                 }
             }
         }
     }
 
-    public List<Integer> getValidIndicies() {
-        List<Integer> validIndicies = new ArrayList<>();
-        for (Integer ticketIndex : balanceArray)
-        {
-            if (!burnArray.contains(ticketIndex)) {
-                validIndicies.add(ticketIndex);
-            }
-        }
-
-        return validIndicies;
-    }
-
     /**
-     * Produce a string CSV of integer IDs given an input list of
+     * Produce a string CSV of integer IDs given an input list of values
      * @param idArray
      * @param keepZeros
      * @return
      */
     @Override
-    public String populateIDs(List<Integer> idArray, boolean keepZeros)
+    public String ticketIdToString(List<Bytes32> idArray, boolean keepZeros)
     {
         if (idArray == null) return "";
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (Integer id : idArray)
+        for (Bytes32 id : idArray)
         {
-            if (!keepZeros && id == 0) continue;
+            if (!keepZeros && Numeric.toBigInt(id.getValue()).compareTo(BigInteger.ZERO) == 0) continue;
             if (!first)
             {
                 sb.append(", ");
             }
             first = false;
 
-            sb.append(id.toString());
+            sb.append(Numeric.toHexString(id.getValue(), 0, id.getValue().length, false));
             displayIDs = sb.toString();
         }
 
@@ -376,7 +363,7 @@ public class Ticket extends Token implements Parcelable
      * @return
      */
     @Override
-    public String populateIDs(int[] idArray)
+    public String ticketIdToString(int[] idArray)
     {
         if (idArray == null) return "";
         String displayIDs = "";
@@ -402,9 +389,9 @@ public class Ticket extends Token implements Parcelable
     public int getTicketCount()
     {
         int count = 0;
-        for (Integer id : balanceArray)
+        for (Bytes32 id : balanceArray)
         {
-            if (id > 0) count++;
+            if (Numeric.toBigInt(id.getValue()).compareTo(BigInteger.ZERO) != 0) count++;
         }
         return count;
     }
@@ -412,13 +399,13 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(populateIDs(balanceArray, true));
+        realmToken.setBalance(ticketIdToString(balanceArray, true));
     }
 
     @Override
     public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
     {
-        realmToken.setBurnList(populateIDs(burnList, false));
+        realmToken.setBurnList(integerListToString(burnList, false));
     }
 
     @Override
@@ -436,17 +423,17 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.issuer.setText(TicketDecode.getIssuer());
         tokenHolder.text24HoursSub.setText(R.string.burned);
-        tokenHolder.text24Hours.setText(String.valueOf(burnArray.size()));
+        tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
 
-        //String ids = populateIDs(((Ticket)(tokenHolder.token)).balanceArray, false);
+        //String ids = ticketIdToString(((Ticket)(tokenHolder.token)).balanceArray, false);
 //        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
     }
 
     public String populateRange(TicketRange range)
     {
-        return populateIDs(range.tokenIds, false);
+        return ticketIdToString(range.tokenIds, false);
     }
 
     private int getIndexOf(int id)
@@ -464,7 +451,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public int[] getTicketIndicies(String ticketIds)
     {
-        List<Integer> indexList = parseIndexList(ticketIds);
+        List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
         int[] indicies = new int[indexList.size()];
         int i = 0;
         for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
@@ -475,11 +462,11 @@ public class Ticket extends Token implements Parcelable
 
     public List<Integer> getBurnList()
     {
-        return burnArray;
+        return burnIndices;
     }
 
     @Override
     public String getBurnListStr() {
-        return populateIDs(burnArray, false);
+        return integerListToString(burnIndices, false);
     }
 }

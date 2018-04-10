@@ -17,11 +17,18 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
@@ -29,6 +36,7 @@ import io.awallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactor
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -99,24 +107,28 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         int numberOfTickets = ticketRange.tokenIds.size();
         if (numberOfTickets > 0) {
-            Integer firstTicket = ticketRange.tokenIds.get(0);
-            Integer lastTicket = ticketRange.tokenIds.get(numberOfTickets-1);
+            AssetDefinition assetDefinition = null;
+            try
+            {
+                Bytes32 firstTicket = ticketRange.tokenIds.get(0);
+                assetDefinition = new AssetDefinition("ticket.xml", this.getResources());
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(Numeric.toBigInt(firstTicket.getValue()), assetDefinition);
+                String venue = nonFungibleToken.getAttribute("venue").text;
+                String date = nonFungibleToken.getDate("dd - MM");
+                String seatCount = String.format(Locale.getDefault(), "x%d", ticketRange.tokenIds.size());
 
-            String ticketTitle = ticket.getFullName();
-            String venue = TicketDecode.getVenue(firstTicket);
-            String date = TicketDecode.getDate(firstTicket);
-            int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
-            int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
-            String range = (numberOfTickets == 1) ? String.valueOf(rangeFirst) : getString(R.string.range_formatter, rangeFirst, rangeLast);
-            String cat = TicketDecode.getZone(firstTicket);
-            String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
-
-            textAmount.setText(seatCount);
-            textTicketName.setText(ticketTitle);
-            textVenue.setText(venue);
-            textDate.setText(date);
-            textRange.setText(range);
-            textCat.setText(cat);
+                textAmount.setText(seatCount);
+                textTicketName.setText(ticket.getFullName());
+                textVenue.setText(venue);
+                textDate.setText(date);
+                textRange.setText(nonFungibleToken.getRangeStr(ticketRange));
+                textCat.setText(nonFungibleToken.getAttribute("category").text);
+            }
+            catch (IOException |SAXException e)
+            {
+                e.printStackTrace();
+                //TODO: Handle error
+            }
         }
     }
 
@@ -208,7 +220,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private void onTicket(Ticket ticket)
     {
-        String idStr = ticket.populateIDs(ticket.getValidIndicies(), false);
+        //TODO: Decode ticket
 //        ids.setText(idStr);
     }
 

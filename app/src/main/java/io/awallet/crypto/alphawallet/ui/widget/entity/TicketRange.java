@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 
 import org.web3j.abi.datatypes.Int;
+import org.web3j.abi.datatypes.generated.Bytes32;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,10 @@ import java.util.List;
  * Created by James on 10/02/2018.
  */
 
+/**
+ * This should purely be a container class of NonFungibleToken
+ *
+ */
 public class TicketRange implements Parcelable
 {
     //public final int seatStart;
@@ -22,9 +27,9 @@ public class TicketRange implements Parcelable
     public String contractAddress; // Should this be address or actual token?
     public final boolean isBurned;
 
-    public List<Integer> tokenIds;
+    public List<Bytes32> tokenIds;
 
-    public TicketRange(int tokenId, String contractAddress)
+    public TicketRange(Bytes32 tokenId, String contractAddress)
     {
         this.contractAddress = contractAddress;
         tokenIds = new ArrayList<>();
@@ -33,7 +38,7 @@ public class TicketRange implements Parcelable
         this.isBurned = false;
     }
 
-    public TicketRange(int tokenId, String contractAddress, boolean isBurned)
+    public TicketRange(Bytes32 tokenId, String contractAddress, boolean isBurned)
     {
         this.contractAddress = contractAddress;
         tokenIds = new ArrayList<>();
@@ -56,11 +61,9 @@ public class TicketRange implements Parcelable
         this.tokenIds = new ArrayList<>();
         for (Object o : readObjArray)
         {
-            this.tokenIds.add((Integer)o);
+            this.tokenIds.add((Bytes32)o);
         }
-//        this.tokenId = in.readInt();
-//        this.seatStart = in.readInt();
-//        this.seatCount = in.readInt();
+
         this.isChecked = (in.readInt() == 1) ? true : false;
         this.isBurned = (in.readInt() == 1) ? true : false;
         this.contractAddress = in.readString();
@@ -76,9 +79,6 @@ public class TicketRange implements Parcelable
     public void writeToParcel(Parcel dest, int flags)
     {
         dest.writeArray(tokenIds.toArray());
-//        dest.writeInt(this.tokenId);
-//        dest.writeInt(this.seatStart);
-//        dest.writeInt(this.seatCount);
         dest.writeInt(this.isChecked ? 1:0);
         dest.writeInt(this.isBurned ? 1:0);
         dest.writeString(this.contractAddress);

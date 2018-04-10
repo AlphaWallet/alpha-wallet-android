@@ -30,6 +30,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes16;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Int16;
 import org.web3j.abi.datatypes.generated.Uint16;
@@ -387,7 +388,7 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 TokenFactory tFactory = new TokenFactory();
-                List<Integer> balanceArray = null;
+                List<Bytes32> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 if (token.tokenInfo.isStormbird)
@@ -402,7 +403,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
-                localSource.updateTokenBalance(network, wallet, token);
+                localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }
             finally {
@@ -417,7 +418,7 @@ public class TokenRepository implements TokenRepositoryType {
             long now = System.currentTimeMillis();
             long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
             BigDecimal balance = null;
-            List<Integer> balanceArray = null;
+            List<Bytes32> balanceArray = null;
             List<Integer> burnArray = null;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
@@ -517,15 +518,16 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private List<Integer> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
-        List<Integer> result = new ArrayList<>();
+    private List<Bytes32> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        List<Bytes32> result = new ArrayList<>();
         if (tokenInfo.isStormbird) //safety check
         {
-            org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            List<Uint16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            for (Uint16 val : indicies)
+            org.web3j.abi.datatypes.Function function = balanceOfArray2(wallet.address);
+            List<Bytes16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            for (Bytes16 val : indicies)
             {
-                result.add(val.getValue().intValue());
+                //perform some massage on the value
+                result.add(new Bytes32 (Numeric.toBytesPadded(Numeric.toBigInt(val.getValue()), 32)));
             }
         }
         return result;
@@ -617,6 +619,13 @@ public class TokenRepository implements TokenRepositoryType {
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function balanceOfArray2(String owner) {
+        return new org.web3j.abi.datatypes.Function(
+                "balanceOf",
+                Collections.singletonList(new Address(owner)),
+                Collections.singletonList(new TypeReference<DynamicArray<Bytes16>>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function nameOf() {

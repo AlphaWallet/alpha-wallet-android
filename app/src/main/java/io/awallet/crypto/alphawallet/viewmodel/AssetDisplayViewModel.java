@@ -42,6 +42,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final SellTicketRouter sellTicketRouter;
     
     private final HomeRouter homeRouter;
+    private Token refreshToken;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -98,8 +99,14 @@ public class AssetDisplayViewModel extends BaseViewModel {
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
                         .fetchSingle(defaultWallet.getValue(), ticket().getValue())
-                        .subscribe(this::onToken, t -> {}))
+                        .subscribe(this::onToken, this::onError, this::finishTokenFetch))
                 .subscribe(l -> {}, t -> {});
+    }
+
+    private void finishTokenFetch()
+    {
+        System.out.println("yowzer");
+        ticket.postValue(refreshToken);
     }
 
     public void prepare(Token t) {
@@ -111,8 +118,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
 
     private void onToken(Token t)
     {
-        ticket.setValue(t);
-        ticket.postValue(t);
+        refreshToken = t;
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

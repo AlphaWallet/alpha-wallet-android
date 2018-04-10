@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
 
@@ -89,7 +90,7 @@ public class SellDetailModel extends BaseViewModel {
         ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
     }
 
-    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, int firstTicketId)
+    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, Bytes32 firstTicketId)
     {
         marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
     }

@@ -11,8 +11,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -23,6 +30,8 @@ import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModel;
@@ -198,24 +207,28 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         int numberOfTickets = ticketRange.tokenIds.size();
         if (numberOfTickets > 0) {
-            Integer firstTicket = ticketRange.tokenIds.get(0);
-            Integer lastTicket = ticketRange.tokenIds.get(numberOfTickets-1);
+            AssetDefinition assetDefinition = null;
+            try
+            {
+                Bytes32 firstTicket = ticketRange.tokenIds.get(0);
+                assetDefinition = new AssetDefinition("ticket.xml", this.getResources());
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(Numeric.toBigInt(firstTicket.getValue()), assetDefinition);
+                String venue = nonFungibleToken.getAttribute("venue").text;
+                String date = nonFungibleToken.getDate("dd - MM");
+                String seatCount = String.format(Locale.getDefault(), "x%d", ticketRange.tokenIds.size());
 
-            String ticketTitle = ticket.getFullName();
-            String venue = TicketDecode.getVenue(firstTicket);
-            String date = TicketDecode.getDate(firstTicket);
-            int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
-            int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
-            String cat = TicketDecode.getZone(firstTicket);
-            String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
-            String range = (numberOfTickets == 1) ? String.valueOf(rangeFirst) : getString(R.string.range_formatter, rangeFirst, rangeLast);
-
-            textAmount.setText(seatCount);
-            textTicketName.setText(ticketTitle);
-            textVenue.setText(venue);
-            textDate.setText(date);
-            textRange.setText(range);
-            textCat.setText(cat);
+                textAmount.setText(seatCount);
+                textTicketName.setText(ticket.getFullName());
+                textVenue.setText(venue);
+                textDate.setText(date);
+                textRange.setText(nonFungibleToken.getRangeStr(ticketRange));
+                textCat.setText(nonFungibleToken.getAttribute("category").text);
+            }
+            catch (IOException|SAXException e)
+            {
+                e.printStackTrace();
+                //TODO: Handle error
+            }
         }
     }
 

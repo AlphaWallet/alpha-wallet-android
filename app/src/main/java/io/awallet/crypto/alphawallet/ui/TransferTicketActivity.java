@@ -12,13 +12,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
-import io.awallet.crypto.alphawallet.viewmodel.SellTicketModel;
-import io.awallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
@@ -134,15 +134,15 @@ public class TransferTicketActivity extends BaseActivity
         if (!sellRange.isEmpty()) {
             //add this range to the sell order confirmation
             //Generate list of indicies and actual ids
-            List<Integer> idList = new ArrayList<>();
+            List<Bytes32> idList = new ArrayList<>();
             for (TicketRange tr : sellRange)
             {
                 idList.addAll(tr.tokenIds);
             }
 
-            String idListStr = viewModel.ticket().getValue().populateIDs(idList, false);
-            List<Integer> idSendList = viewModel.ticket().getValue().parseIndexList(idListStr);
-            String indexList = viewModel.ticket().getValue().populateIDs(idSendList, true);
+            String idListStr = viewModel.ticket().getValue().ticketIdToString(idList, false); //list of B32 ID's
+            List<Integer> idSendList = viewModel.ticket().getValue().ticketIdStringToIndexList(idListStr); //convert string list of b32 to Indexes
+            String indexList = viewModel.ticket().getValue().integerListToString(idSendList, true);
 
             //confirm other address
             //confirmation screen

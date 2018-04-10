@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.Token;
@@ -34,7 +37,7 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
     private TicketRange thisData;
     private Token ticket;
     private OnTicketIdClickListener onTicketClickListener;
-    private AssetDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
+    private final AssetDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final TextView name;
     private final TextView amount;
@@ -68,30 +71,26 @@ public class TicketHolder extends BinderViewHolder<TicketRange> implements View.
         try {
             if (data.tokenIds.size() > 0)
             {
-                int firstTokenId = data.tokenIds.get(0);
-                int seatStart = TicketDecode.getSeatIdInt(firstTokenId);
-                String seatRange = String.valueOf(seatStart);
-                if (data.tokenIds.size() > 1)
-                    seatRange = seatStart + "-" + (seatStart + (data.tokenIds.size() - 1));
-                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+                Bytes32 firstTokenId = data.tokenIds.get(0);
+//                int seatStart = TicketDecode.getSeatIdInt(firstTokenId);
+//                String seatRange = String.valueOf(seatStart);
+//                if (data.tokenIds.size() > 1)
+//                    seatRange = seatStart + "-" + (seatStart + (data.tokenIds.size() - 1));
+//
                 //first retrieve name from ticket
                 name.setText(ticket.tokenInfo.name);
+                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
 
                 //Test data.
                 //03 04 5AF6D740 474252 415247 01 01 04d2
                 //03045AF6D740474252415247010104d2
-                BigInteger bi = new BigInteger("03045AF6D740474252415247010104d2", 16);
+                //BigInteger bi = new BigInteger("03045AF6D740474252415247010104d2", 16);
 
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(bi, assetDefinition);
-
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(Numeric.toBigInt(firstTokenId.getValue()), assetDefinition);
                 amount.setText(seatCount);
-
                 venue.setText(nonFungibleToken.getAttribute("venue").text);
-                long dateUTC = nonFungibleToken.getAttribute("time").value.longValue();
-                Date dateFormat = new java.util.Date(dateUTC*1000L);
-                SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
-                date.setText(dateFormatter.format(dateFormat.getTime()));
-                ticketIds.setText(seatRange);
+                date.setText(nonFungibleToken.getDate("dd - MMM"));
+                ticketIds.setText(nonFungibleToken.getRangeStr(data));
                 ticketCat.setText(nonFungibleToken.getAttribute("category").text);
 
                 if (data.isBurned)

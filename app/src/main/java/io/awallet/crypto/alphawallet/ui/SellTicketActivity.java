@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
@@ -138,13 +140,13 @@ public class SellTicketActivity extends BaseActivity
     private String getIDSelection()
     {
         List<TicketRange> sellRange = adapter.getCheckedItems();
-        List<Integer> idList = new ArrayList<>();
+        List<Bytes32> idList = new ArrayList<>();
         for (TicketRange tr : sellRange)
         {
             idList.addAll(tr.tokenIds);
         }
 
-        return viewModel.ticket().getValue().populateIDs(idList, false);
+        return viewModel.ticket().getValue().ticketIdToString(idList, false);
     }
 
     private void onMarketPlace()

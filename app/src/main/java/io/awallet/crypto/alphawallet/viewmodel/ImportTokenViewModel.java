@@ -20,9 +20,11 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private SalesOrder importOrder;
     private String univeralImportLink;
     private Ticket importToken;
-    private List<Integer> availableBalance = new ArrayList<>();
+    private List<Bytes32> availableBalance = new ArrayList<>();
     private double priceUsd;
     private double ethToUsd = 0;
 
@@ -218,14 +220,14 @@ public class ImportTokenViewModel extends BaseViewModel  {
     //5. We have token information and balance. Check if the import order is still valid.
     private void updateToken()
     {
-        List<Integer> newBalance = new ArrayList<>();
+        List<Bytes32> newBalance = new ArrayList<>();
         //calculate USD price of tickets
         priceUsd = importOrder.price * ethToUsd;
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {
-                Integer ticketId = importToken.balanceArray.get(index);
-                if (ticketId > 0) {
+                Bytes32 ticketId = importToken.balanceArray.get(index);
+                if (Numeric.toBigInt(ticketId.getValue()).compareTo(BigInteger.ZERO) != 0) {
                     newBalance.add(ticketId);
                 }
             }
@@ -310,7 +312,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         newTransaction.postValue(transaction);
     }
 
-    private boolean balanceChange(List<Integer> newBalance)
+    private boolean balanceChange(List<Bytes32> newBalance)
     {
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }

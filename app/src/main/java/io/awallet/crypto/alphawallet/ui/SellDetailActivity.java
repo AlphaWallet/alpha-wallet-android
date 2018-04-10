@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -396,7 +397,7 @@ public class SellDetailActivity extends BaseActivity {
         if (price.doubleValue() > 0.0 && indices != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
             int[] prunedIndices = Arrays.copyOfRange(indices, 0, quantity);
-            List<Integer> ticketIdList = ticket.parseIDListInteger(ticketIds);
+            List<Bytes32> ticketIdList = ticket.stringToTicketIDList(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
             viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
             finish();

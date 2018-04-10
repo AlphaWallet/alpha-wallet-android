@@ -4,12 +4,14 @@ package io.awallet.crypto.alphawallet.widget;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
@@ -17,6 +19,7 @@ import io.awallet.crypto.alphawallet.R;
 public class AWalletConfirmationDialog extends Dialog {
     private TextView title;
     private TextView smallText;
+    private TextView mediumText;
     private TextView bigText;
     private TextView extraText;
     private Button btnPrimary;
@@ -34,6 +37,7 @@ public class AWalletConfirmationDialog extends Dialog {
 
         title = findViewById(R.id.dialog_main_text);
         smallText = findViewById(R.id.dialog_small_text);
+        mediumText = findViewById(R.id.dialog_medium_text);
         bigText = findViewById(R.id.dialog_big_text);
         extraText = findViewById(R.id.dialog_extra_text);
         btnPrimary = findViewById(R.id.dialog_button1);
@@ -63,23 +67,42 @@ public class AWalletConfirmationDialog extends Dialog {
     }
 
     public void setBigText(CharSequence text) {
+        bigText.setVisibility(View.VISIBLE);
         bigText.setText(text);
     }
 
     public void setBigText(int resId) {
+        bigText.setVisibility(View.VISIBLE);
         bigText.setText(context.getResources().getString(resId));
     }
 
     public void setSmallText(int resId) {
+        smallText.setVisibility(View.VISIBLE);
         smallText.setText(context.getResources().getString(resId));
     }
 
     public void setSmallText(CharSequence text) {
+        smallText.setVisibility(View.VISIBLE);
         smallText.setText(text);
+    }
+
+    public void setMediumText(int resId) {
+        mediumText.setVisibility(View.VISIBLE);
+        mediumText.setText(context.getResources().getString(resId));
+    }
+
+    public void setMediumText(CharSequence text) {
+        mediumText.setVisibility(View.VISIBLE);
+        mediumText.setText(text);
     }
 
     public void setExtraText(int resId) {
         extraText.setVisibility(View.VISIBLE);
         extraText.setText(context.getResources().getString(resId));
+    }
+
+    public void showShareLink() {
+        ImageView shareIcon = findViewById(R.id.image_share);
+        shareIcon.setVisibility(View.VISIBLE);
     }
 }

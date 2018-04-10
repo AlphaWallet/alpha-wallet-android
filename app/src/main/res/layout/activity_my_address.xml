@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
@@ -18,7 +17,7 @@
         android:paddingRight="15dp">
 
         <TextView
-            android:id="@+id/title_purchase_ticket"
+            android:id="@+id/title_my_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -26,7 +25,7 @@
             android:layout_marginTop="20dp"
             android:fontFamily="@font/font_light"
             android:gravity="center"
-            android:text="My Wallet Address"
+            android:text="@string/my_wallet_address"
             android:textColor="@color/text_black"
             android:textSize="25sp" />
 
@@ -35,7 +34,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_light"
             android:gravity="center"
-            android:text="Scan the QR Code or copy the text below:"
+            android:text="@string/scan_qr_label"
             android:textColor="@color/text_black"
             android:textSize="16sp" />
 
@@ -50,7 +49,7 @@
             android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:padding="15dp"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/copy_action"
@@ -69,21 +68,13 @@
             android:textColor="@color/white"
             android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/address_suggestion"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:visibility="gone"
-            tools:text="@string/message_this_is_your_address" />
-
         <ImageView
             android:id="@+id/qr_image"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/big_margin"
             app:srcCompat="@drawable/ic_autorenew_black_24dp" />
+
     </LinearLayout>
 </LinearLayout>

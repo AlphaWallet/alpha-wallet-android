@@ -103,12 +103,8 @@
             android:label="@string/ticket_transfer_title" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.SalesOrderActivity"
-            android:label="@string/market_queue_title" />
-
-        <activity
             android:name="io.awallet.crypto.alphawallet.ui.SellTicketActivity"
-            android:label="@string/market_queue_title" />
+            android:label="@string/create_sell_order" />
 
         <activity
             android:name="io.awallet.crypto.alphawallet.ui.BrowseMarketActivity"

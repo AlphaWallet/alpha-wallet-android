@@ -63,7 +63,7 @@ public class TicketAdapter extends TokensAdapter {
     {
         super();
         this.onTicketIdClickListener = onTicketIdClick;
-        initAssetDefinition(ctx);
+        assetDefinition = initAssetDefinition(ctx);
         this.ticket = ticket;
         //setTicket(ticket);
         setTicketRange(ticket, ticketIds);

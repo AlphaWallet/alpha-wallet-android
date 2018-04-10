@@ -10,10 +10,8 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
-import io.awallet.crypto.alphawallet.router.SalesOrderRouter;
 import io.awallet.crypto.alphawallet.router.MyTokensRouter;
 import io.awallet.crypto.alphawallet.router.SellTicketRouter;
-import io.awallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketRouter;
 
 /**
@@ -29,7 +27,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
-    private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
     private final HomeRouter homeRouter;
 
@@ -41,7 +38,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
@@ -51,7 +47,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.transferTicketRouter = transferTicketRouter;
-        this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
         this.homeRouter = homeRouter;
     }
@@ -59,6 +54,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, salesOrderRouter, sellTicketRouter, homeRouter);
+        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter);
     }
 }

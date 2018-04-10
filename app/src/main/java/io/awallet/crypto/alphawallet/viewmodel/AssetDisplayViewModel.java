@@ -15,7 +15,6 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
-import io.awallet.crypto.alphawallet.router.SalesOrderRouter;
 import io.awallet.crypto.alphawallet.router.MyTokensRouter;
 import io.awallet.crypto.alphawallet.router.SellTicketRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketRouter;
@@ -38,7 +37,6 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final MyTokensRouter myTokensRouter;
     private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
-    private final SalesOrderRouter salesOrderRouter;
     private final SellTicketRouter sellTicketRouter;
     
     private final HomeRouter homeRouter;
@@ -59,7 +57,6 @@ public class AssetDisplayViewModel extends BaseViewModel {
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SalesOrderRouter salesOrderRouter,
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
@@ -68,7 +65,6 @@ public class AssetDisplayViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.transferTicketRouter = transferTicketRouter;
-        this.salesOrderRouter = salesOrderRouter;
         this.sellTicketRouter = sellTicketRouter;
         this.homeRouter = homeRouter;
     }
@@ -148,14 +144,6 @@ public class AssetDisplayViewModel extends BaseViewModel {
         progress.postValue(false);
         defaultWallet.setValue(wallet);
         fetchCurrentTicketBalance();
-    }
-
-    public void showSalesOrder(Context context, Ticket ticket) {
-        salesOrderRouter.open(context, ticket);
-    }
-
-    public void showSalesOrder(Context context, Ticket ticket, TicketRange range) {
-        salesOrderRouter.openRange(context, ticket, range);
     }
 
     public void showHome(Context context, boolean isClearStack) {

@@ -30,7 +30,7 @@
     <string name="token_name">%1$s (%2$s)</string>
     <string name="copy_addr_to_clipboard">copy address to clipboard</string>
     <string name="hint_ids_to_sell">Enter Ticket IDs to place on market</string>
-    <string name="market_queue_title">Create Market Order</string>
+    <string name="create_sell_order">Create Sales Order</string>
     <string name="selection">selection:</string>
     <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
     <string name="select_tickets">Select Tickets to Sell:</string>
@@ -57,7 +57,7 @@
     <string name="title_redeem">Redeem Ticket</string>
     <string name="title_show_tickets">Ticket Operations</string>
     <string name="quantity_to_redeem">Quantity to Redeem</string>
-    <string name="waiting_for_blockchain">Waiting for blockchain ...</string>
+    <string name="waiting_for_blockchain">Waiting for blockchain …</string>
     <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
     <string name="btn_text_apply">Apply</string>
     <string name="filter_by">Filter by:</string>
@@ -69,9 +69,14 @@
     <string name="learn_more_about_ethereum">Learn more about Ethereum</string>
     <string name="price_per_ticket">Price Per Ticket</string>
     <string name="action_marketplaceSale">Marketplace</string>
-    <string name="action_magiclink">Magic Link</string>
     <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
     <string name="set_price_subtext_abr_magic">Set Ethereum price for magic link:</string>
+    <string name="transfer_tickets">Transfer Tickets</string>
+    <string name="link_valid_until">The link will be valid until:</string>
+    <string name="transfer_method">Transfer Method:</string>
+    <string name="generate_pick_up_link">Generate a pick-up link</string>
+    <string name="transfer_now">Transfer Now</string>
+    <string name="to">to</string>
 
     <string-array name="filter_date">
         <item>Most Recent</item>
@@ -207,7 +212,7 @@
     <string name="confirm_transfer_details">Confirm Transfer Details</string>
     <string name="advanced_settings">Advanced Settings</string>
     <string name="action_confirm">Confirm</string>
-    <string name="title_input_amount_to_transfer">Input Amount to Transfer:</string>
+    <string name="label_amount_to_transfer">Amount to Transfer</string>
     <string name="action_info">Info</string>
     <string name="eth_detail_q1">What is Ethereum?</string>
     <string name="eth_detail_a1">ETH is short for Ethereum. Ethereum is a crypto currency (similar to BitCoin) running on blockchain technology.</string>
@@ -217,4 +222,25 @@
     <string name="eth_detail_gemini"><u>www.gemini.com</u></string>
     <string name="eth_detail_q3">Why does aWallet use Ethereum?</string>
     <string name="eth_detail_a3">aWallet uses Ethereum instead of currency (USD) because it is a more secure way to manage transactions. Ethereum is also the second of the world\'s biggest cryptocurrencies next to BitCoin.</string>
+    <string name="scan_qr_label">Scan the QR Code or copy the text below:</string>
+    <string name="my_wallet_address">My Wallet Address</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="action_universal_link">UniversalLink</string>
+    <string name="action_marketplace">Marketplace</string>
+    <string name="sell_thru_universal_link">Sell through a UniversalLink</string>
+    <string name="universal_link_expiry_on">UniversalLink expiry on:</string>
+    <string name="confirm_sale_total">Total: %s</string>
+    <string name="share_universal_link">Share UniversalLink</string>
+    <string name="select_option_to_transfer">Select Option to Transfer</string>
+    <string name="hint_input_eth_amount">0.00</string>
+    <string name="label_my_address">My Address</string>
+    <string name="action_copy_alt">Copy</string>
+    <string name="set_universal_link_expiry">Set UniversalLink Expiry:</string>
+    <string name="tickets_selected">%1s %2s Selected</string>
+    <string name="eth_per_ticket_w_value">%s ETH/Ticket</string>
+    <string name="universal_link_info">A UniversalLink will be created to allow buyers to purchase your tickets.</string>
+    <string name="date_hint">DD/MM/YYYY</string>
+    <string name="universal_link_notice">Before the link expires, anyone with the UniversalLink can purchase your tickets with one click.</string>
+    <string name="label_important">Important</string>
+    <string name="eth_00">0.00 ETH</string>
 </resources>

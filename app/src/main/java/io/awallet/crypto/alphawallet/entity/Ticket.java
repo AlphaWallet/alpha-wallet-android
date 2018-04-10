@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
@@ -21,7 +22,13 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by James on 27/01/2018.
+ * Created by James on 27/01/2018.  It might seem counter intuitive
+ * but here Ticket refers to a container of an asset class here, not
+ * the right to seat somewhere in the venue. Therefore, there
+ * shouldn't be List<Ticket> To understand this, imagine that one says
+ * "I have two cryptocurrencies: Ether and Bitcoin, each amounts to a
+ * hundred", and he pauses and said, "I also have two tickets: FIFA
+ * and Formuler-one, which, too, amounts to a hundred each".
  */
 
 public class Ticket extends Token implements Parcelable
@@ -167,7 +174,7 @@ public class Ticket extends Token implements Parcelable
             {
                 //remove whitespace
                 String trim = id.trim();
-                Bytes32 val = new Bytes32(trim.getBytes());
+                Bytes32 val = new Bytes32(Numeric.toBytesPadded(Numeric.toBigInt(trim), 32));
                 idList.add(val);
             }
         }
@@ -284,7 +291,7 @@ public class Ticket extends Token implements Parcelable
             for (String id : ids) {
                 //remove whitespace
                 String trim = id.trim();
-                Bytes32 thisId = new Bytes32(trim.getBytes());// Integer.parseInt(trim);
+                Bytes32 thisId = new Bytes32(Numeric.toBytesPadded(Numeric.toBigInt(trim), 32));
 
                 if (Numeric.toBigInt(thisId.getValue()).compareTo(BigInteger.ZERO) != 0)
                 {
@@ -385,6 +392,22 @@ public class Ticket extends Token implements Parcelable
         return displayIDs;
     }
 
+    /**
+     *
+     * @return
+     */
+    public String pruneIDList(String idListStr, int quantity)
+    {
+        //convert to list
+        List<Bytes32> idList = stringToTicketIDList(idListStr);
+        for (int i = (idList.size() - 1); i >= quantity; i--)
+        {
+            idList.remove(i);
+        }
+
+        return ticketIdToString(idList, true);
+    }
+
     @Override
     public int getTicketCount()
     {
@@ -425,27 +448,12 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-
-        //String ids = ticketIdToString(((Ticket)(tokenHolder.token)).balanceArray, false);
-//        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()) + " Tickets");
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
     }
 
     public String populateRange(TicketRange range)
     {
         return ticketIdToString(range.tokenIds, false);
-    }
-
-    private int getIndexOf(int id)
-    {
-        if (balanceArray.contains(id))
-        {
-            return balanceArray.indexOf(id);
-        }
-        else
-        {
-            return -1;
-        }
     }
 
     @Override

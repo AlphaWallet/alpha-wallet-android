@@ -29,6 +29,7 @@
         android:padding="30dp">
 
         <TextView
+            android:visibility="gone"
             android:id="@+id/dialog_small_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,6 +40,18 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/dialog_medium_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/font_bold"
+            android:gravity="center"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="gone"
+            android:textSize="20sp" />
+
+        <TextView
+            android:visibility="gone"
             android:id="@+id/dialog_big_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,13 +82,17 @@
             android:textColor="@color/text_black"
             android:textSize="25sp" />
 
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
         <Button
             android:id="@+id/dialog_button1"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="10dp"
             android:background="@drawable/background_round_primary"
             android:fontFamily="@font/font_regular"
             android:paddingBottom="10dp"
@@ -85,6 +102,18 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="20sp" />
+
+            <ImageView
+                android:id="@+id/image_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:visibility="gone"
+                android:background="@drawable/ic_share_white_24dp"/>
+
+        </RelativeLayout>
 
         <Button
             android:id="@+id/dialog_button2"

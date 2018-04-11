@@ -4,16 +4,12 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.web3j.abi.datatypes.generated.Bytes32;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -121,7 +117,7 @@ public class TransferTicketActivity extends BaseActivity
                 idList.addAll(tr.tokenIds);
             }
 
-            String idListStr = ticket.ticketIdToString(idList, false); //list of B32 ID's
+            String idListStr = ticket.intArrayToString(idList, false); //list of B32 ID's
             List<Integer> idSendList = ticket.ticketIdStringToIndexList(idListStr); //convert string list of b32 to Indexes
             String indexList = ticket.integerListToString(idSendList, true);
 

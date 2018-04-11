@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
@@ -43,8 +42,8 @@ public class Ticket extends Token implements Parcelable
 
     public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
-        this.balanceArray = stringToTicketIDList(balances);
-        burnIndices = parseIDListInteger(burnList, true);
+        this.balanceArray = stringHexToBigIntegerList(balances);
+        burnIndices = stringIntsToIntegerList(burnList);
     }
 
     private Ticket(Parcel in) {
@@ -69,13 +68,13 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getStringBalance() {
-        return ticketIdToString(balanceArray, false);
+        return intArrayToString(balanceArray, false);
     }
 
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return ticketIdToString(balanceArray, true);
+        else return intArrayToString(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -97,7 +96,124 @@ public class Ticket extends Token implements Parcelable
         dest.writeArray(burnIndices.toArray());
     }
 
-    //produce a String containing all the BYTES32 entries from a list of indices
+    /**
+     * Given a string of hex ticket ID's, reduce the length of the string to 'quantity' items
+     *
+     * @return
+     */
+    public String pruneIDList(String idListStr, int quantity)
+    {
+        //convert to list
+        List<BigInteger> idList = stringHexToBigIntegerList(idListStr);
+        for (int i = (idList.size() - 1); i >= quantity; i--)
+        {
+            idList.remove(i);
+        }
+
+        return intArrayToString(idList, true);
+    }
+
+    //Burn handling
+    public void addToBurnList(List<BigInteger> burnUpdate)
+    {
+        for (BigInteger b : burnUpdate) {
+            Integer index = b.intValue();
+
+            //lookup index
+            if (balanceArray.size() > index)
+            {
+                BigInteger value = balanceArray.get(index);
+                if (value.compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
+                    burnIndices.add(index);
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getTicketCount()
+    {
+        int count = 0;
+        for (BigInteger id : balanceArray)
+        {
+            if (id.compareTo(BigInteger.ZERO) != 0) count++;
+        }
+        return count;
+    }
+
+    @Override
+    public void setRealmBalance(RealmToken realmToken)
+    {
+        realmToken.setBalance(intArrayToString(balanceArray, true));
+    }
+
+    @Override
+    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
+    {
+        realmToken.setBurnList(integerListToString(burnList, false));
+    }
+
+    @Override
+    public void clickReact(BaseViewModel viewModel, Context context)
+    {
+        viewModel.showRedeemToken(context, this);
+    }
+
+    @Override
+    public void setupContent(TokenHolder tokenHolder)
+    {
+        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
+        tokenHolder.balanceEth.setVisibility(View.GONE);
+        tokenHolder.balanceCurrency.setText("--");
+        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
+        tokenHolder.issuer.setText(TicketDecode.getIssuer());
+        tokenHolder.text24HoursSub.setText(R.string.burned);
+        tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
+        tokenHolder.textAppreciationSub.setText(R.string.marketplace);
+        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
+    }
+
+    public String populateRange(TicketRange range)
+    {
+        return intArrayToString(range.tokenIds, false);
+    }
+
+    @Override
+    public int[] getTicketIndicies(String ticketIds)
+    {
+        List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
+        int[] indicies = new int[indexList.size()];
+        int i = 0;
+        for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
+            indicies[i] = (int)iterator.next();
+        }
+        return indicies;
+    }
+
+    public List<Integer> getBurnList()
+    {
+        return burnIndices;
+    }
+
+    @Override
+    public String getBurnListStr() {
+        return integerListToString(burnIndices, false);
+    }
+
+
+
+    /*************************************
+     *
+     * Conversion functions used for manipulating tickets
+     *
+     */
+
+    /**
+     * Convert a list of ticket indices into a CSV string of the corresponding TicketIDs
+     * @param checkedIndexList
+     * @return
+     */
+    //produce a String containing all the TicketID (BigInteger) entries from a list of indices
     public String parseList(List<Integer> checkedIndexList) {
         StringBuilder sb = new StringBuilder();
 
@@ -124,41 +240,46 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Given a string list of Integer Indices generate the BigInteger list required for interaction with Ethereum contract
-     * @param userList
+     * Convert a CSV string of Decimal values into a BigInteger List
+     * @param integerString CSV string of decimal ticket id's
      * @return
      */
-    public List<BigInteger> parseIDListBI(String userList)
+    public List<BigInteger> stringDecimalToBigIntegerList(String integerString)
     {
         List<BigInteger> idList = new ArrayList<>();
 
         try
         {
-            String[] ids = userList.split(",");
+            String[] ids = integerString.split(",");
 
             for (String id : ids)
             {
                 //remove whitespace
                 String trim = id.trim();
-                BigInteger thisId = BigInteger.valueOf(Integer.parseInt(trim));
-                idList.add(thisId);
+                BigInteger val = new BigInteger(trim);
+                idList.add(val);
             }
         }
         catch (Exception e)
         {
-            idList = null;
+            idList = new ArrayList<>();
         }
 
         return idList;
     }
 
-    public List<BigInteger> stringToTicketIDList(String ticketStringList)
+    /**
+     * Convert a CSV string of Hex values into a BigInteger List
+     * @param integerString CSV string of hex ticket id's
+     * @return
+     */
+    public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         List<BigInteger> idList = new ArrayList<>();
 
         try
         {
-            String[] ids = ticketStringList.split(",");
+            String[] ids = integerString.split(",");
 
             for (String id : ids)
             {
@@ -176,47 +297,13 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
-    public List<Integer> parseIDListInteger(String userList)
-    {
-        return parseIDListInteger(userList, false);
-    }
-
-    public List<Integer> parseIDListInteger(String userList, boolean removeDuplicates)
-    {
-        List<Integer> idList = new ArrayList<>();
-
-        try
-        {
-            String[] ids = userList.split(",");
-
-            for (String id : ids)
-            {
-                //remove whitespace
-                String trim = id.trim();
-                Integer intId = Integer.parseInt(trim);
-                if (removeDuplicates) {
-                    if (!idList.contains(intId)) idList.add(intId);
-                }
-                else {
-                    idList.add(intId);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            idList = new ArrayList<>();
-        }
-
-        return idList;
-    }
-
     /**
-     * Given a set of indices generate a list of Bytes32 ID's
+     * Given a set of indices generate a list of BigInteger Ticket ID's
      * @param prunedIndices
      * @return
      */
     @Override
-    public List<BigInteger> indexToIDList(int[] prunedIndices)
+    public List<BigInteger> indexArrayToTicketId(int[] prunedIndices)
     {
         List<BigInteger> idList = new ArrayList<>();
         for (int i : prunedIndices)
@@ -230,12 +317,12 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
-    public String arrayToString(int[] prunedIndices)
-    {
-        return ticketIdToString(prunedIndices);
-    }
-
-    public List<Integer> ticketIdToTicketIndex(List<BigInteger> ticketIds)
+    /**
+     * Convert a list of TicketID's into an Index list corresponding to those tickets
+     * @param ticketIds
+     * @return
+     */
+    public List<Integer> ticketIdListToIndexList(List<BigInteger> ticketIds)
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();
@@ -271,7 +358,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Function to convert a String list of ticket IDs into ticket indices for the account address given
+     * Convert a String list of ticket IDs into a list of ticket indices
      * @param userList
      * @return
      */
@@ -315,37 +402,20 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
-    //Burn handling
-    public void addToBurnList(List<BigInteger> burnUpdate)
-    {
-        for (BigInteger b : burnUpdate) {
-            Integer index = b.intValue();
-
-            //lookup index
-            if (balanceArray.size() > index)
-            {
-                BigInteger value = balanceArray.get(index);
-                if (value.compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
-                    burnIndices.add(index);
-                }
-            }
-        }
-    }
-
     /**
      * Produce a string CSV of integer IDs given an input list of values
-     * @param idArray
+     * @param idList
      * @param keepZeros
      * @return
      */
     @Override
-    public String ticketIdToString(List<BigInteger> idArray, boolean keepZeros)
+    public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
     {
-        if (idArray == null) return "";
+        if (idList == null) return "";
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (BigInteger id : idArray)
+        for (BigInteger id : idList)
         {
             if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
             if (!first)
@@ -359,119 +429,5 @@ public class Ticket extends Token implements Parcelable
         }
 
         return displayIDs;
-    }
-
-    /**
-     * Produce a string CSV of integer IDs given an input list of
-     * @param idArray int[] array of indices
-     * @return
-     */
-    @Override
-    public String ticketIdToString(int[] idArray)
-    {
-        if (idArray == null) return "";
-        String displayIDs = "";
-        boolean first = true;
-        StringBuilder sb = new StringBuilder();
-        for (Integer id : idArray)
-        {
-            if (id == 0) continue;
-            if (!first)
-            {
-                sb.append(", ");
-            }
-            first = false;
-
-            sb.append(id.toString());
-            displayIDs = sb.toString();
-        }
-
-        return displayIDs;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public String pruneIDList(String idListStr, int quantity)
-    {
-        //convert to list
-        List<BigInteger> idList = stringToTicketIDList(idListStr);
-        for (int i = (idList.size() - 1); i >= quantity; i--)
-        {
-            idList.remove(i);
-        }
-
-        return ticketIdToString(idList, true);
-    }
-
-    @Override
-    public int getTicketCount()
-    {
-        int count = 0;
-        for (BigInteger id : balanceArray)
-        {
-            if (id.compareTo(BigInteger.ZERO) != 0) count++;
-        }
-        return count;
-    }
-
-    @Override
-    public void setRealmBalance(RealmToken realmToken)
-    {
-        realmToken.setBalance(ticketIdToString(balanceArray, true));
-    }
-
-    @Override
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
-    {
-        realmToken.setBurnList(integerListToString(burnList, false));
-    }
-
-    @Override
-    public void clickReact(BaseViewModel viewModel, Context context)
-    {
-        viewModel.showRedeemToken(context, this);
-    }
-
-    @Override
-    public void setupContent(TokenHolder tokenHolder)
-    {
-        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
-        tokenHolder.balanceEth.setVisibility(View.GONE);
-        tokenHolder.balanceCurrency.setText("--");
-        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
-        tokenHolder.issuer.setText(TicketDecode.getIssuer());
-        tokenHolder.text24HoursSub.setText(R.string.burned);
-        tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
-        tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
-    }
-
-    public String populateRange(TicketRange range)
-    {
-        return ticketIdToString(range.tokenIds, false);
-    }
-
-    @Override
-    public int[] getTicketIndicies(String ticketIds)
-    {
-        List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
-        int[] indicies = new int[indexList.size()];
-        int i = 0;
-        for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
-            indicies[i] = (int)iterator.next();
-        }
-        return indicies;
-    }
-
-    public List<Integer> getBurnList()
-    {
-        return burnIndices;
-    }
-
-    @Override
-    public String getBurnListStr() {
-        return integerListToString(burnIndices, false);
     }
 }

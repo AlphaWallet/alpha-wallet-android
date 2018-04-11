@@ -1,43 +1,28 @@
 package io.awallet.crypto.alphawallet.ui.widget.adapter;
 
 import android.content.Context;
-import android.media.session.MediaSession;
-import android.support.v7.util.SortedList;
-import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.TicketRangeElement;
-import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
-import io.awallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
-import io.awallet.crypto.alphawallet.ui.widget.entity.SortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
-import org.web3j.abi.datatypes.Int;
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -120,7 +105,7 @@ public class TicketAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
 
-        List<BigInteger> idList = t.stringToTicketIDList(ticketIds);
+        List<BigInteger> idList = t.stringHexToBigIntegerList(ticketIds);
         List<TicketRangeElement> sortedList = new ArrayList<>();
         for (BigInteger v : idList)
         {

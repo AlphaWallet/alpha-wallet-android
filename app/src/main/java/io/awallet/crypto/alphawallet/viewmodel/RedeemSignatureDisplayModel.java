@@ -199,7 +199,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 .subscribe(this::onDefaultNetwork, this::onError);
         this.ticketRange = ticketRange;
         this.ticket.setValue(ticket);
-        this.ticketIndicies = ticket.ticketIdToTicketIndex(ticketRange.tokenIds);
+        this.ticketIndicies = ticket.ticketIdListToIndexList(ticketRange.tokenIds);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

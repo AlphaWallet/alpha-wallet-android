@@ -119,7 +119,7 @@ public class TicketTransferActivity extends BaseActivity
         }
         else
         {
-            idStr = ticket.ticketIdToString(ticket.balanceArray, false);
+            idStr = ticket.intArrayToString(ticket.balanceArray, false);
         }
         name.setText(ticket.tokenInfo.name);
         ids.setText(idStr);
@@ -202,7 +202,7 @@ public class TicketTransferActivity extends BaseActivity
             return;
         }
 
-        String indexList = "hello";//viewModel.ticket().getValue().ticketIdToString(idSendList, true);
+        String indexList = "hello";//viewModel.ticket().getValue().intArrayToString(idSendList, true);
         toInputLayout.setErrorEnabled(false);
         viewModel.openConfirmation(this, to, indexList, amount);
     }

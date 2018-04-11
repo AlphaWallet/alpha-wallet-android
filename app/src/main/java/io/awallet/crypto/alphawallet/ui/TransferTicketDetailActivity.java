@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,18 +18,13 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,11 +35,9 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.util.KeyboardUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
@@ -55,19 +47,12 @@ import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Int;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Convert;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -517,7 +502,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
 
         //how many tickets are we selling?
-        int quantity = ticket.stringToTicketIDList(prunedIds).size();
+        int quantity = ticket.stringHexToBigIntegerList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
 
         String qty = String.valueOf(quantity) + " " +

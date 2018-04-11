@@ -121,7 +121,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet)
+            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, String lastBlock)
             {
                 return null;
             }

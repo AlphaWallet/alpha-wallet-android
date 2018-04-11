@@ -745,10 +745,10 @@ public class TokenRepository implements TokenRepositoryType {
         return function;
     }
 
-    public static byte[] createTicketTransferData(String to, String ids) {
+    public static byte[] createTicketTransferData(String to, String indexListStr) {
         //params are: Address, List<Uint16> of ticket indicies
         Ticket t = new Ticket(null, "0", "0", 0);
-        List ticketIndicies = t.parseIDListBI(ids);
+        List ticketIndicies = t.stringDecimalToBigIntegerList(indexListStr);
         Function function = getTransferFunction(to, ticketIndicies);
 
         String encodedFunction = FunctionEncoder.encode(function);

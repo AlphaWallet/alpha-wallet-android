@@ -33,7 +33,9 @@ public class AssetDefinitionTest {
         assertEquals("Number", ticket.getAttribute("number").name);
         assertEquals(BigInteger.valueOf(0xCB53), ticket.getAttribute("number").value);
         /* Epoch, the following test only works from Singapore */
-        assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getAttribute("time").text);
+        /* Travis isn't in Singapore ... */
+        //assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getAttribute("time").text);
+        assertEquals(BigInteger.ZERO, ticket.getAttribute("time").value);
     }
 
 }

@@ -120,7 +120,7 @@ public class WalletsActivity extends BaseActivity implements
 	public void onBackPressed() {
 		// User can't start work without wallet.
 		if (adapter.getItemCount() > 0) {
-			viewModel.showTransactions(this);
+            finish();
 		} else {
 			finish();
 			System.exit(0);
@@ -160,7 +160,7 @@ public class WalletsActivity extends BaseActivity implements
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
                 if (adapter.getItemCount() <= 1) {
-                    viewModel.showTransactions(this);
+                    viewModel.showHome(this);
                 }
             }
 		} else if (requestCode == SHARE_REQUEST_CODE) {
@@ -231,7 +231,7 @@ public class WalletsActivity extends BaseActivity implements
 
 	private void onChangeDefaultWallet(Wallet wallet) {
         if (isSetDefault) {
-            viewModel.showTransactions(this);
+            viewModel.showHome(this);
         } else {
             adapter.setDefaultWallet(wallet);
         }

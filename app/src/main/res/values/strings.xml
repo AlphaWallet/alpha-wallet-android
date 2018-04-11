@@ -61,7 +61,6 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_delete_account">Are you sure you want to delete wallet?</string>
     <string name="no_transactions">No Transactions.\nSwipe down to refresh.</string>
-    <string name="twitter">Twitter</string>
     <string name="telegram">Telegram Group</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -227,7 +226,6 @@
     <string name="title_send_settings">Advanced</string>
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
-    <string name="facebook">Facebook</string>
     <string name="error_already_added">Already added</string>
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>

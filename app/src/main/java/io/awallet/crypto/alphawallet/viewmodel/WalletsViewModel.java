@@ -162,7 +162,7 @@ public class WalletsViewModel extends BaseViewModel
 		importWalletRouter.openForResult(activity, IMPORT_REQUEST_CODE);
 	}
 
-    public void showTransactions(Context context) {
+    public void showHome(Context context) {
         homeRouter.open(context, true);
     }
 }

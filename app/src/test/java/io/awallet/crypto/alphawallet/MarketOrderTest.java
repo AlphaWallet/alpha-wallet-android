@@ -195,7 +195,7 @@ public class MarketOrderTest
         BigInteger price = BigInteger.valueOf(1234567);
         int[] tickets = { 12, 13, 14 };
         String contractAddress = "0x007bee82bdd9e866b2bd114780a47f2261c684e3";
-        int firstTicketId = 1024;
+        BigInteger firstTicketId = BigInteger.valueOf(1024);
 
         //1. generate the tradeInstance block and signature array
         marketService.setCallback(testCallback);

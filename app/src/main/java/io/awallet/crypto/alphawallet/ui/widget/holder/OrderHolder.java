@@ -106,14 +106,14 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
         if (data.balanceInfo != null)
         {
             //check if the required tickets are actually here
-            List<Bytes32> newBalance = new ArrayList<>();
+            List<BigInteger> newBalance = new ArrayList<>();
             boolean allIndicesUnsold = true;
             for (Integer index : data.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing?
             {
                 if (data.balanceInfo.size() > index)
                 {
-                    Bytes32 ticketId = data.balanceInfo.get(index);
-                    if (!Numeric.toBigInt(ticketId.getValue()).equals(BigInteger.ZERO) )
+                    BigInteger ticketId = data.balanceInfo.get(index);
+                    if (!ticketId.equals(BigInteger.ZERO))
                     {
                         newBalance.add(ticketId);
                     }

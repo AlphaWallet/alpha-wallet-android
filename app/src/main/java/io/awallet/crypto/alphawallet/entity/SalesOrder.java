@@ -42,7 +42,7 @@ public class SalesOrder implements Parcelable {
     public final byte[] message;
     public TokenInfo tokenInfo; //convenience pointer to token information
     public String ownerAddress; //convenience ecrecovered owner address;
-    public List<Bytes32> balanceInfo = null; // received balance from blockchain check
+    public List<BigInteger> balanceInfo = null; // received balance from blockchain check
 
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
             throws SalesOrderMalformed
@@ -288,7 +288,7 @@ public class SalesOrder implements Parcelable {
         return getTradeBytes(tickets, contractAddress, priceWei, expiry);
     }
 
-    public boolean balanceChange(List<Bytes32> balance)
+    public boolean balanceChange(List<BigInteger> balance)
     {
         //compare two balances
         //quick return, if sizes are different there's a change
@@ -299,8 +299,8 @@ public class SalesOrder implements Parcelable {
         }
         if (balance.size() != balanceInfo.size()) return true;
 
-        List<Bytes32> oldBalance = new ArrayList<>(balanceInfo);
-        List<Bytes32> newBalance = new ArrayList<>(balance);
+        List<BigInteger> oldBalance = new ArrayList<>(balanceInfo);
+        List<BigInteger> newBalance = new ArrayList<>(balance);
 
         oldBalance.removeAll(balanceInfo);
         newBalance.removeAll(balance);

@@ -454,7 +454,7 @@ public class SellDetailActivity extends BaseActivity {
 
         if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            List<Bytes32> ticketIdList = ticket.stringToTicketIDList(ticketIds);
+            List<BigInteger> ticketIdList = ticket.stringToTicketIDList(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
             viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
             finish();

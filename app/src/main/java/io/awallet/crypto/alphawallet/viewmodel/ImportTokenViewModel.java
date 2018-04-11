@@ -62,7 +62,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private SalesOrder importOrder;
     private String univeralImportLink;
     private Ticket importToken;
-    private List<Bytes32> availableBalance = new ArrayList<>();
+    private List<BigInteger> availableBalance = new ArrayList<>();
     private double priceUsd;
     private double ethToUsd = 0;
 
@@ -220,14 +220,14 @@ public class ImportTokenViewModel extends BaseViewModel  {
     //5. We have token information and balance. Check if the import order is still valid.
     private void updateToken()
     {
-        List<Bytes32> newBalance = new ArrayList<>();
+        List<BigInteger> newBalance = new ArrayList<>();
         //calculate USD price of tickets
         priceUsd = importOrder.price * ethToUsd;
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {
-                Bytes32 ticketId = importToken.balanceArray.get(index);
-                if (Numeric.toBigInt(ticketId.getValue()).compareTo(BigInteger.ZERO) != 0) {
+                BigInteger ticketId = importToken.balanceArray.get(index);
+                if (ticketId.compareTo(BigInteger.ZERO) != 0) {
                     newBalance.add(ticketId);
                 }
             }
@@ -312,7 +312,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         newTransaction.postValue(transaction);
     }
 
-    private boolean balanceChange(List<Bytes32> newBalance)
+    private boolean balanceChange(List<BigInteger> newBalance)
     {
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }

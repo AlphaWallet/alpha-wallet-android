@@ -24,11 +24,11 @@ public class TradeInstance
     public final BigInteger price;
     public final int[] tickets;
     public final BigInteger contractAddress;
-    public final Bytes32 ticketStart;
+    public final BigInteger ticketStart;
     public final String publicKey;
     List<byte[]> signatures = new ArrayList<byte[]>();
 
-    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, Bytes32 ticketStartId) {
+    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, BigInteger ticketStartId) {
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;

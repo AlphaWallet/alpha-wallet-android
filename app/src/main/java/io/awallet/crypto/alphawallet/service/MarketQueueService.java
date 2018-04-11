@@ -292,7 +292,7 @@ public class MarketQueueService {
         return transactionRepository.getSignature(wallet, data, password);
     }
 
-    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, Bytes32 firstTicketId) {
+    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = (System.currentTimeMillis() / 1000L) + MARKET_INTERVAL;
@@ -321,7 +321,7 @@ public class MarketQueueService {
         });
     }
 
-    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, Bytes32 firstTicketId) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
     }
@@ -335,7 +335,7 @@ public class MarketQueueService {
         return Single.fromCallable(trade::getTradeBytes);
     }
 
-    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, Bytes32 firstTicketId) {
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
         return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -348,7 +348,7 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, Bytes32 firstTicketId, BaseViewCallback callback) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback) {
         messageCallback = callback;
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);

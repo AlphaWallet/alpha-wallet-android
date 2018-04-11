@@ -37,6 +37,7 @@ import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -110,9 +111,9 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             AssetDefinition assetDefinition = null;
             try
             {
-                Bytes32 firstTicket = ticketRange.tokenIds.get(0);
+                BigInteger firstTicket = ticketRange.tokenIds.get(0);
                 assetDefinition = new AssetDefinition("ticket.xml", this.getResources());
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(Numeric.toBigInt(firstTicket.getValue()), assetDefinition);
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
                 String venue = nonFungibleToken.getAttribute("venue").text;
                 String date = nonFungibleToken.getDate("dd - MM");
                 String seatCount = String.format(Locale.getDefault(), "x%d", ticketRange.tokenIds.size());

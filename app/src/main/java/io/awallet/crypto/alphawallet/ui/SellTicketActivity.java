@@ -24,6 +24,7 @@ import io.awallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,7 +132,7 @@ public class SellTicketActivity extends BaseActivity {
 
     private String getIDSelection() {
         List<TicketRange> sellRange = adapter.getCheckedItems();
-        List<Bytes32> idList = new ArrayList<>();
+        List<BigInteger> idList = new ArrayList<>();
         for (TicketRange tr : sellRange)
         {
             idList.addAll(tr.tokenIds);

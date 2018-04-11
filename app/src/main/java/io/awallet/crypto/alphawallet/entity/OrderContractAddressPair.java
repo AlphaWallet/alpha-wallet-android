@@ -6,6 +6,7 @@ package io.awallet.crypto.alphawallet.entity;
 
 import org.web3j.abi.datatypes.generated.Bytes32;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
 public class OrderContractAddressPair
 {
     public SalesOrder order;
-    public List<Bytes32> balance;
+    public List<BigInteger> balance;
 
     public boolean equals(String tokenAddr, String address)
     {

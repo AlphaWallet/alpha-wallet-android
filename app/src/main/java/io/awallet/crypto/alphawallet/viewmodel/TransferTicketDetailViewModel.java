@@ -88,7 +88,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, Bytes32 firstTicketId)
+    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
     {
         marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
     }

@@ -16,6 +16,7 @@ import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -210,9 +211,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             AssetDefinition assetDefinition = null;
             try
             {
-                Bytes32 firstTicket = ticketRange.tokenIds.get(0);
+                BigInteger firstTicket = ticketRange.tokenIds.get(0);
                 assetDefinition = new AssetDefinition("ticket.xml", this.getResources());
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(Numeric.toBigInt(firstTicket.getValue()), assetDefinition);
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
                 String venue = nonFungibleToken.getAttribute("venue").text;
                 String date = nonFungibleToken.getDate("dd - MM");
                 String seatCount = String.format(Locale.getDefault(), "x%d", ticketRange.tokenIds.size());

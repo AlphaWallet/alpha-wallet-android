@@ -37,6 +37,7 @@ import io.awallet.crypto.alphawallet.ui.widget.OnTokenClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Locale;
 
@@ -87,10 +88,10 @@ public class TicketSaleHolder extends BinderViewHolder<TicketRange> implements V
         {
             if (data.tokenIds.size() > 0)
             {
-                Bytes32 firstTokenId = data.tokenIds.get(0);
+                BigInteger firstTokenId = data.tokenIds.get(0);
                 name.setText(tokenName);
                 String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(Numeric.toBigInt(firstTokenId.getValue()), assetDefinition);
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTokenId, assetDefinition);
                 amount.setText(seatCount);
                 venue.setText(nonFungibleToken.getAttribute("venue").text);
                 date.setText(nonFungibleToken.getDate("dd - MMM"));

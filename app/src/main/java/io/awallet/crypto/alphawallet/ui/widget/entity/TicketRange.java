@@ -8,6 +8,7 @@ import io.awallet.crypto.alphawallet.entity.Ticket;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.generated.Bytes32;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +28,9 @@ public class TicketRange implements Parcelable
     public String contractAddress; // Should this be address or actual token?
     public final boolean isBurned;
 
-    public List<Bytes32> tokenIds;
+    public List<BigInteger> tokenIds;
 
-    public TicketRange(Bytes32 tokenId, String contractAddress)
+    public TicketRange(BigInteger tokenId, String contractAddress)
     {
         this.contractAddress = contractAddress;
         tokenIds = new ArrayList<>();
@@ -38,7 +39,7 @@ public class TicketRange implements Parcelable
         this.isBurned = false;
     }
 
-    public TicketRange(Bytes32 tokenId, String contractAddress, boolean isBurned)
+    public TicketRange(BigInteger tokenId, String contractAddress, boolean isBurned)
     {
         this.contractAddress = contractAddress;
         tokenIds = new ArrayList<>();
@@ -61,7 +62,7 @@ public class TicketRange implements Parcelable
         this.tokenIds = new ArrayList<>();
         for (Object o : readObjArray)
         {
-            this.tokenIds.add((Bytes32)o);
+            this.tokenIds.add((BigInteger)o);
         }
 
         this.isChecked = (in.readInt() == 1) ? true : false;

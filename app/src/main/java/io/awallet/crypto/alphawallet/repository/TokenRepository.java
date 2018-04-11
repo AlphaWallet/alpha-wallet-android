@@ -388,7 +388,7 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 TokenFactory tFactory = new TokenFactory();
-                List<Bytes32> balanceArray = null;
+                List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 if (token.tokenInfo.isStormbird)
@@ -418,7 +418,7 @@ public class TokenRepository implements TokenRepositoryType {
             long now = System.currentTimeMillis();
             long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
             BigDecimal balance = null;
-            List<Bytes32> balanceArray = null;
+            List<BigInteger> balanceArray = null;
             List<Integer> burnArray = null;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
@@ -518,19 +518,51 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private List<Bytes32> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
-        List<Bytes32> result = new ArrayList<>();
+    private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        List<BigInteger> result = new ArrayList<>();
         if (tokenInfo.isStormbird) //safety check
         {
+            boolean newIDFormat = false;
             org.web3j.abi.datatypes.Function function = balanceOfArray2(wallet.address);
-            List<Bytes16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            for (Bytes16 val : indicies)
+            List<Bytes32> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            for (Bytes32 val : indicies)
             {
+                BigInteger convert;
+                if (newIDFormat || testForNewTokenID(val))
+                {
+                    newIDFormat = true;
+                    byte[] temp = new byte[16];
+                    System.arraycopy(val.getValue(), 0, temp, 0, 16);
+                    convert = Numeric.toBigInt(temp);
+                }
+                else
+                {
+                    convert = Numeric.toBigInt(val.getValue());
+                }
+
                 //perform some massage on the value
-                result.add(new Bytes32 (Numeric.toBytesPadded(Numeric.toBigInt(val.getValue()), 32)));
+                //result.add(new Bytes32 (Numeric.toBytesPadded(Numeric.toBigInt(val.getValue()), 32)));
+                result.add(convert);
             }
         }
         return result;
+    }
+
+    private boolean testForNewTokenID(Bytes32 val)
+    {
+        boolean topBytes = false;
+        //are the top 4 bytes set? If so it's Vitalik's strange front-first initialisation format
+        for (int i = 0; i < 4; i++)
+        {
+            byte test = val.getValue()[i];
+            if (test > 0)
+            {
+                topBytes = true;
+                break;
+            }
+        }
+
+        return topBytes;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
@@ -625,7 +657,7 @@ public class TokenRepository implements TokenRepositoryType {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
-                Collections.singletonList(new TypeReference<DynamicArray<Bytes16>>() {}));
+                Collections.singletonList(new TypeReference<DynamicArray<Bytes32>>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function nameOf() {

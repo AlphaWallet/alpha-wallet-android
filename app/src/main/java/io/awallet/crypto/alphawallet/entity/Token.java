@@ -99,7 +99,7 @@ public class Token implements Parcelable {
         viewModel.showSendToken(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
-    public String ticketIdToString(List<Bytes32> idArray, boolean keepZeros)
+    public String ticketIdToString(List<BigInteger> idArray, boolean keepZeros)
     {
         return "";
     }
@@ -197,7 +197,7 @@ public class Token implements Parcelable {
         return !tokenInfo.isStormbird;
     }
 
-    public List<Bytes32> indexToIDList(int[] prunedIndices)
+    public List<BigInteger> indexToIDList(int[] prunedIndices)
     {
         return null;
     }

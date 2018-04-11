@@ -25,6 +25,7 @@ import io.awallet.crypto.alphawallet.viewmodel.TransferTicketViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +115,7 @@ public class TransferTicketActivity extends BaseActivity
         if (!sellRange.isEmpty()) {
             //add this range to the sell order confirmation
             //Generate list of indicies and actual ids
-            List<Bytes32> idList = new ArrayList<>();
+            List<BigInteger> idList = new ArrayList<>();
             for (TicketRange tr : sellRange)
             {
                 idList.addAll(tr.tokenIds);

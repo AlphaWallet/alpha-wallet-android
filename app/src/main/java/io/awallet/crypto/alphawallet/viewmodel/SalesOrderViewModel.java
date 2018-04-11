@@ -196,7 +196,7 @@ public class SalesOrderViewModel extends BaseViewModel
         changeSelection();
     }
 
-    public void generateSalesOrders(List<Integer> idSendList, Bytes32 firstTicket) {
+    public void generateSalesOrders(List<Integer> idSendList, BigInteger firstTicket) {
         int[] ticketIDs = new int[idSendList.size()];
         int index = 0;
         for (Integer i : idSendList) {

@@ -108,12 +108,12 @@ public class TicketSaleAdapter extends TicketAdapter {
 
         //first sort the balance array
         List<TicketRangeElement> sortedList = new ArrayList<>();
-        for (Bytes32 v : t.balanceArray)
+        for (BigInteger v : t.balanceArray)
         {
-            if (Numeric.toBigInt(v.getValue()).compareTo(BigInteger.ZERO) == 0) continue;
+            if (v.compareTo(BigInteger.ZERO) == 0) continue;
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
-            NonFungibleToken nft = new NonFungibleToken(Numeric.toBigInt(v.getValue()), assetDefinition);
+            NonFungibleToken nft = new NonFungibleToken(v, assetDefinition);
             e.ticketNumber = nft.getAttribute("number").value.intValue();
             e.category = (short)nft.getAttribute("category").value.intValue();
             e.match = (short)nft.getAttribute("match").value.intValue();

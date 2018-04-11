@@ -12,7 +12,6 @@ import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -33,23 +32,18 @@ import java.util.List;
 
 public class Ticket extends Token implements Parcelable
 {
-    public final List<Bytes32> balanceArray;
-    public final List<BigInteger> balanceArrayI;
+    public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
 
-    public Ticket(TokenInfo tokenInfo, List<Bytes32> balances, List<Integer> burned, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
-        balanceArrayI = new ArrayList<>();
-        for (Bytes32 cv : balanceArray) balanceArrayI.add(Numeric.toBigInt(cv.getValue()));
         burnIndices = burned;
     }
 
     public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = stringToTicketIDList(balances);
-        balanceArrayI = new ArrayList<>();
-        for (Bytes32 cv : balanceArray) balanceArrayI.add(Numeric.toBigInt(cv.getValue()));
         burnIndices = parseIDListInteger(burnList, true);
     }
 
@@ -57,14 +51,12 @@ public class Ticket extends Token implements Parcelable
         super(in);
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
-        balanceArray = new ArrayList<Bytes32>();
-        balanceArrayI = new ArrayList<>();
+        balanceArray = new ArrayList<>();
         burnIndices = new ArrayList<Integer>();
         for (Object o : readObjArray)
         {
             BigInteger val = (BigInteger)o;
-            balanceArrayI.add(val);
-            balanceArray.add(new Bytes32(Numeric.toBytesPadded(val, 32)));
+            balanceArray.add(val);
         }
 
         //check to see if burn notice is needed
@@ -101,9 +93,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        //List<BigInteger> vals = new ArrayList<>();
-        //for (Bytes32 cv : balanceArray) vals.add(Numeric.toBigInt(cv.getValue()));
-        dest.writeArray(balanceArrayI.toArray());
+        dest.writeArray(balanceArray.toArray());
         dest.writeArray(burnIndices.toArray());
     }
 
@@ -120,8 +110,8 @@ public class Ticket extends Token implements Parcelable
                 if (i < balanceArray.size())
                 {
                     if (!first) sb.append(", ");
-                    Bytes32 ticketID = balanceArray.get(i);
-                    sb.append(Numeric.toHexString(ticketID.getValue()));
+                    BigInteger ticketID = balanceArray.get(i);
+                    sb.append(Numeric.toHexStringNoPrefix(ticketID));
                     first = false;
                 }
             }
@@ -162,9 +152,9 @@ public class Ticket extends Token implements Parcelable
         return idList;
     }
 
-    public List<Bytes32> stringToTicketIDList(String ticketStringList)
+    public List<BigInteger> stringToTicketIDList(String ticketStringList)
     {
-        List<Bytes32> idList = new ArrayList<>();
+        List<BigInteger> idList = new ArrayList<>();
 
         try
         {
@@ -174,7 +164,7 @@ public class Ticket extends Token implements Parcelable
             {
                 //remove whitespace
                 String trim = id.trim();
-                Bytes32 val = new Bytes32(Numeric.toBytesPadded(Numeric.toBigInt(trim), 32));
+                BigInteger val = Numeric.toBigInt(trim);
                 idList.add(val);
             }
         }
@@ -226,13 +216,13 @@ public class Ticket extends Token implements Parcelable
      * @return
      */
     @Override
-    public List<Bytes32> indexToIDList(int[] prunedIndices)
+    public List<BigInteger> indexToIDList(int[] prunedIndices)
     {
-        List<Bytes32> idList = new ArrayList<>();
+        List<BigInteger> idList = new ArrayList<>();
         for (int i : prunedIndices)
         {
             if (i < balanceArray.size()) {
-                Bytes32 ticketID = balanceArray.get(i);
+                BigInteger ticketID = balanceArray.get(i);
                 idList.add(ticketID);
             }
         }
@@ -245,15 +235,15 @@ public class Ticket extends Token implements Parcelable
         return ticketIdToString(prunedIndices);
     }
 
-    public List<Integer> ticketIdToTicketIndex(List<Bytes32> ticketIds)
+    public List<Integer> ticketIdToTicketIndex(List<BigInteger> ticketIds)
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();
 
         try
         {
-            for (Bytes32 id : ticketIds) {
-                if (Numeric.toBigInt(id.getValue()).compareTo(BigInteger.ZERO) != 0) {
+            for (BigInteger id : ticketIds) {
+                if (id.compareTo(BigInteger.ZERO) != 0) {
                     int index = balanceArray.indexOf(id);
                     if (index > -1) {
                         if (!idList.contains(index)) {  //just make sure they didn't already add this one
@@ -291,9 +281,9 @@ public class Ticket extends Token implements Parcelable
             for (String id : ids) {
                 //remove whitespace
                 String trim = id.trim();
-                Bytes32 thisId = new Bytes32(Numeric.toBytesPadded(Numeric.toBigInt(trim), 32));
+                BigInteger thisId = Numeric.toBigInt(trim);
 
-                if (Numeric.toBigInt(thisId.getValue()).compareTo(BigInteger.ZERO) != 0)
+                if (thisId.compareTo(BigInteger.ZERO) != 0)
                 {
                     int index = balanceArray.indexOf(thisId);
                     if (index > -1)
@@ -327,8 +317,8 @@ public class Ticket extends Token implements Parcelable
             //lookup index
             if (balanceArray.size() > index)
             {
-                Bytes32 value = balanceArray.get(index);
-                if (Numeric.toBigInt(value.getValue()).compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
+                BigInteger value = balanceArray.get(index);
+                if (value.compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
                     burnIndices.add(index);
                 }
             }
@@ -342,22 +332,22 @@ public class Ticket extends Token implements Parcelable
      * @return
      */
     @Override
-    public String ticketIdToString(List<Bytes32> idArray, boolean keepZeros)
+    public String ticketIdToString(List<BigInteger> idArray, boolean keepZeros)
     {
         if (idArray == null) return "";
         String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (Bytes32 id : idArray)
+        for (BigInteger id : idArray)
         {
-            if (!keepZeros && Numeric.toBigInt(id.getValue()).compareTo(BigInteger.ZERO) == 0) continue;
+            if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
             if (!first)
             {
                 sb.append(", ");
             }
             first = false;
 
-            sb.append(Numeric.toHexString(id.getValue(), 0, id.getValue().length, false));
+            sb.append(Numeric.toHexStringNoPrefix(id));
             displayIDs = sb.toString();
         }
 
@@ -399,7 +389,7 @@ public class Ticket extends Token implements Parcelable
     public String pruneIDList(String idListStr, int quantity)
     {
         //convert to list
-        List<Bytes32> idList = stringToTicketIDList(idListStr);
+        List<BigInteger> idList = stringToTicketIDList(idListStr);
         for (int i = (idList.size() - 1); i >= quantity; i--)
         {
             idList.remove(i);
@@ -412,9 +402,9 @@ public class Ticket extends Token implements Parcelable
     public int getTicketCount()
     {
         int count = 0;
-        for (Bytes32 id : balanceArray)
+        for (BigInteger id : balanceArray)
         {
-            if (Numeric.toBigInt(id.getValue()).compareTo(BigInteger.ZERO) != 0) count++;
+            if (id.compareTo(BigInteger.ZERO) != 0) count++;
         }
         return count;
     }

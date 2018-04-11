@@ -196,8 +196,7 @@ public class SellDetailActivity extends BaseActivity {
         expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
         expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
 
-        List<Integer> ticketIndices = ticket.parseIDListInteger(prunedIds);
-        int quantity = ticketIndices.size();
+        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
@@ -485,8 +484,7 @@ public class SellDetailActivity extends BaseActivity {
 
     private void linkReady(String universalLink) {
         //how many tickets are we selling?
-        List<Integer> ticketIndices = ticket.parseIDListInteger(prunedIds);
-        int quantity = ticketIndices.size();
+        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
 
@@ -510,8 +508,7 @@ public class SellDetailActivity extends BaseActivity {
     private void confirmPlaceMarketOrderDialog()
     {
         //how many tickets are we selling?
-        List<Integer> ticketIndices = ticket.parseIDListInteger(prunedIds);
-        int quantity = ticketIndices.size();
+        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String qty = String.valueOf(quantity) + " " + unit + " @" + getCleanValue(sellPriceValue) + " Eth/Ticket";
 

@@ -242,21 +242,28 @@ public class Ticket extends Token implements Parcelable
 
         try
         {
-            for (BigInteger id : ticketIds) {
-                if (id.compareTo(BigInteger.ZERO) != 0) {
+            for (BigInteger id : ticketIds)
+            {
+                if (id.compareTo(BigInteger.ZERO) != 0)
+                {
                     int index = balanceArray.indexOf(id);
-                    if (index > -1) {
-                        if (!idList.contains(index)) {  //just make sure they didn't already add this one
+                    if (index > -1)
+                    {
+                        if (!idList.contains(index)) //just make sure they didn't already add this one
+                        {
                             idList.add(index);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         idList = null;
                         break;
                     }
                 }
             }
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             idList = null;
         }
 
@@ -269,7 +276,7 @@ public class Ticket extends Token implements Parcelable
      * @return
      */
     @Override
-    public List<Integer> ticketIdStringToIndexList(String userList) //ticketIdStringToIndexList
+    public List<Integer> ticketIdStringToIndexList(String userList)
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();

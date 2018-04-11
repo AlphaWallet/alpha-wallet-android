@@ -62,7 +62,7 @@ public class TicketSaleAdapter extends TicketAdapter {
                 holder = tokenHolder;
             } break;
             case TicketSaleHolder.VIEW_TYPE: {
-                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, assetDefinition, ticket.tokenInfo.name);
+                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, assetDefinition, ticket);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 tokenHolder.setOnTokenCheckListener(onTokenCheckListener);
                 holder = tokenHolder;

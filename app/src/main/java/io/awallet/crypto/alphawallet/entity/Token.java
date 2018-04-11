@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
@@ -247,5 +248,10 @@ public class Token implements Parcelable {
     public List<BigInteger> indexArrayToTicketId(int[] prunedIndices)
     {
         return null;
+    }
+
+    public String getTicketInfo(NonFungibleToken nonFungibleToken)
+    {
+        return "";
     }
 }

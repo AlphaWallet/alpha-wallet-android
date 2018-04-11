@@ -4,20 +4,31 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
+import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
+import io.awallet.crypto.alphawallet.ui.BaseActivity;
+import io.awallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.ui.widget.holder.BaseTicketHolder;
+import io.awallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
+import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
 import org.web3j.utils.Numeric;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -200,6 +211,15 @@ public class Ticket extends Token implements Parcelable
         return integerListToString(burnIndices, false);
     }
 
+    @Override
+    public String getTicketInfo(NonFungibleToken nonFungibleToken)
+    {
+        String teamA = nonFungibleToken.getAttribute("countryA").text;
+        String teamB = nonFungibleToken.getAttribute("countryB").text;
+        String time = nonFungibleToken.getDate("hh:mm");
+        String locality = nonFungibleToken.getAttribute("locality").text;
+        return time + "  " + locality + "\n\n" + teamA + " vs " + teamB;
+    }
 
 
     /*************************************
@@ -429,5 +449,48 @@ public class Ticket extends Token implements Parcelable
         }
 
         return displayIDs;
+    }
+
+    /**
+     * Setup the single view of a ticket. Since this is repeatedly used and is exclusive info to a ticket it should go in here
+     * @param range TicketRange
+     * @param activity BaseActivity of Holder of ticket
+     */
+    public void displayTicketHolder(TicketRange range, BaseActivity activity)
+    {
+        TextView textAmount = activity.findViewById(R.id.amount);
+        TextView textTicketName = activity.findViewById(R.id.name);
+        TextView textVenue = activity.findViewById(R.id.venue);
+        TextView textDate = activity.findViewById(R.id.date);
+        TextView textRange = activity.findViewById(R.id.tickettext);
+        TextView textCat = activity.findViewById(R.id.cattext);
+        TextView ticketDetails = activity.findViewById(R.id.ticket_details);
+
+        int numberOfTickets = range.tokenIds.size();
+        if (numberOfTickets > 0)
+        {
+            try
+            {
+                BigInteger firstTicket = range.tokenIds.get(0);
+                AssetDefinition assetDefinition = new AssetDefinition("ticket.xml", activity.getResources());
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
+                String venue = nonFungibleToken.getAttribute("venue").text;
+                String date = nonFungibleToken.getDate("dd MMM");
+                String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
+
+                textAmount.setText(seatCount);
+                textTicketName.setText(getFullName());
+                textVenue.setText(venue);
+                textDate.setText(date);
+                textRange.setText(nonFungibleToken.getRangeStr(range));
+                textCat.setText(nonFungibleToken.getAttribute("category").text);
+                ticketDetails.setText(getTicketInfo(nonFungibleToken));
+            }
+            catch (IOException | SAXException e)
+            {
+                e.printStackTrace();
+                //TODO: Handle error
+            }
+        }
     }
 }

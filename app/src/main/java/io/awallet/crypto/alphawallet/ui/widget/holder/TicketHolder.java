@@ -29,98 +29,38 @@ import java.util.Locale;
 /**
  * Created by James on 9/02/2018.
  */
-
-public class TicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener {
-
+public class TicketHolder extends BaseTicketHolder
+{
     public static final int VIEW_TYPE = 1066;
 
-    private TicketRange thisData;
-    private Token ticket;
-    private OnTicketIdClickListener onTicketClickListener;
-    private final AssetDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
-
-    private final TextView name;
-    private final TextView amount;
-    private final TextView date;
-    private final TextView venue;
-    private final TextView ticketIds;
-    private final TextView ticketCat;
-    private final TextView ticketRedeemed;
-    private final LinearLayout ticketDetailsLayout;
-    private final LinearLayout ticketLayout;
-
-    public TicketHolder(int resId, ViewGroup parent, AssetDefinition definition, Token ticket) {
-        super(resId, parent);
-        name = findViewById(R.id.name);
-        amount = findViewById(R.id.amount);
-        venue = findViewById(R.id.venue);
-        date = findViewById(R.id.date);
-        ticketIds = findViewById(R.id.tickettext);
-        ticketCat = findViewById(R.id.cattext);
-        itemView.setOnClickListener(this);
-        ticketRedeemed = findViewById(R.id.redeemed);
-        ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
-        ticketLayout = findViewById(R.id.layout_select);
-        assetDefinition = definition;
-        this.ticket = ticket;
+    public TicketHolder(int resId, ViewGroup parent, AssetDefinition definition, Token ticket)
+    {
+        super(resId, parent, definition, ticket);
     }
 
     @Override
-    public void bind(@Nullable TicketRange data, @NonNull Bundle addition) {
-        this.thisData = data;
-        try {
-            if (data.tokenIds.size() > 0)
+    public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
+    {
+        super.bind(data, addition);
+
+        if (data.isBurned)
+        {
+            ticketRedeemed.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            ticketRedeemed.setVisibility(View.GONE);
+        }
+
+        ticketLayout.setOnClickListener(v -> {
+            if (ticketDetailsLayout.getVisibility() == View.VISIBLE)
             {
-                BigInteger firstTokenId = data.tokenIds.get(0);
-                name.setText(ticket.tokenInfo.name);
-                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTokenId, assetDefinition);
-                amount.setText(seatCount);
-                venue.setText(nonFungibleToken.getAttribute("venue").text);
-                date.setText(nonFungibleToken.getDate("dd - MMM"));
-                ticketIds.setText(nonFungibleToken.getRangeStr(data));
-                ticketCat.setText(nonFungibleToken.getAttribute("category").text);
-
-                if (data.isBurned)
-                {
-                    ticketRedeemed.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    ticketRedeemed.setVisibility(View.GONE);
-                }
-
-//                ticketLayout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
-                ticketLayout.setOnClickListener(v -> {
-                    if (ticketDetailsLayout.getVisibility() == View.VISIBLE) {
-                        ticketDetailsLayout.setVisibility(View.GONE);
-                    } else {
-                        ticketDetailsLayout.setVisibility(View.VISIBLE);
-                    }
-                });
+                ticketDetailsLayout.setVisibility(View.GONE);
             }
             else
             {
-                fillEmpty();
+                ticketDetailsLayout.setVisibility(View.VISIBLE);
             }
-        } catch (Exception ex) {
-            fillEmpty();
-        }
-    }
-
-    private void fillEmpty() {
-        name.setText(R.string.NA);
-        venue.setText(R.string.NA);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (onTicketClickListener != null) {
-            onTicketClickListener.onTicketIdClick(v, thisData);
-        }
-    }
-
-    public void setOnTokenClickListener(OnTicketIdClickListener onTokenClickListener) {
-        this.onTicketClickListener = onTokenClickListener;
+        });
     }
 }

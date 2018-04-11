@@ -135,7 +135,6 @@ public class MarketQueueService {
     //This is running on the main UI thread, so it's safe to push messages etc here
     private void handleResponse(String response)
     {
-        System.out.println("handle response");
         messageCallback.queueUpdate(100);
         //TODO: Handle response correctly
         //"{\"orders\": {\"received\": 200, \"accepted\": 200}, \"1st_order\": \"00000000000000000000000000000000000000000000000003ff2e795f500000000000000000000000000000000000000000000000000000000000005ab1b21c0b6732baecc0793e38a98934799abd3c7dc3cf3100d300d4\"}"
@@ -182,12 +181,12 @@ public class MarketQueueService {
                 String url = MARKET_QUEUE_URL + urlProlog + args;
                 response = writeToQueue(url, buffer.toByteArray(), true);
 
-                String ownerAddress = "";
-                //see if we can extract the user address
-                Sign.SignatureData sigData = sigFromByteArray(trades.getSignatureBytes(0));
-                BigInteger recoveredKey = Sign.signedMessageToKey(trade, sigData);
-                ownerAddress = "0x" + Keys.getAddress(recoveredKey);
-                System.out.println(ownerAddress);
+//                String ownerAddress = "";
+//                //see if we can extract the user address
+//                Sign.SignatureData sigData = sigFromByteArray(trades.getSignatureBytes(0));
+//                BigInteger recoveredKey = Sign.signedMessageToKey(trade, sigData);
+//                ownerAddress = "0x" + Keys.getAddress(recoveredKey);
+//                System.out.println(ownerAddress);
             }
             catch (Exception e)
             {
@@ -232,8 +231,6 @@ public class MarketQueueService {
         try
         {
             String fullUrl = MARKET_QUEUE_FETCH + contractAddr;
-
-            System.out.println(fullUrl);
 
             Request request = new Request.Builder()
                     .url(fullUrl)

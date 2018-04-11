@@ -429,7 +429,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onSaved()
     {
         setupTokensInteract.regenerateTransactionList();
-        System.out.println("saved contracts.");
+        Log.d(TAG,"saved contracts.");
         refreshTokens.postValue(true); //send directive to refresh token list
         //now re-process the tokens
         reProcessTransactions();

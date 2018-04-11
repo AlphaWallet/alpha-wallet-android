@@ -236,9 +236,6 @@ public class SalesOrder implements Parcelable {
             Sign.SignatureData sellerSig = sigFromByteArray(order.signature);
 
             data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
-
-            //Can we recreate the seller address?
-            System.out.println(order.getOwnerKey());
         }
         catch (Exception e)
         {

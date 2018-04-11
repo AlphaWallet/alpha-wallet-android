@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import rx.functions.Action1;
@@ -142,11 +143,12 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
 
     public void fetchTokenBalance() {
         progress.postValue(true);
-        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+        getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
                         .fetch(defaultWallet.getValue())
-                        .subscribe(this::onTokens, t -> {}))
-                .subscribe(l -> {}, t -> {});
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokens)).subscribe();
     }
 
     /**

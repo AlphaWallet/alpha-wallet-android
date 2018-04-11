@@ -151,9 +151,6 @@ public class TicketAdapter extends TokensAdapter {
         items.add(new TokenBalanceSortedItem(t));
 
         addRanges(t);
-        //icketRange currentRange = new TicketRange(t.balanceArray.get(0), t.getAddress());
-        //items.add(new TicketSaleSortedItem(currentRange, 10));
-
         items.endBatchedUpdates();
     }
 
@@ -166,8 +163,6 @@ public class TicketAdapter extends TokensAdapter {
         List<TicketRangeElement> sortedList = new ArrayList<>();
         for (BigInteger v : t.balanceArray)
         {
-            String hex = Numeric.toHexStringNoPrefix(v); //Numeric.toBigInt(v.getValue())
-            System.out.println(hex);
             if (v.compareTo(BigInteger.ZERO) == 0) continue;
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;

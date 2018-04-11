@@ -301,9 +301,6 @@ public class SetupTokensInteract {
     {
         return Single.fromCallable(() -> {
             try {
-                //System.out.println(String.valueOf(txMap.size()));
-                //System.out.println(String.valueOf(newTxList.size()));
-
                 for (TokenTransaction thisTokenTrans : ttxMap.values()) {
                     Transaction thisTrans = thisTokenTrans.transaction;
                     TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
@@ -375,10 +372,6 @@ public class SetupTokensInteract {
                 //generateTestString(txArray);
 
                 for (Transaction t : txArray) {
-                    if (t.hash.contains("f8f3ef0"))
-                    {
-                        System.out.println("f8f3ef0");
-                    }
                     if (!txMap.containsKey(t.hash)) {
                         if (!newTxList.contains(t.hash)) {
                             newTxList.add(t.hash); //should re-check this transaction
@@ -420,8 +413,6 @@ public class SetupTokensInteract {
         }
 
         sb.append("};");
-
-        System.out.println(sb.toString());
     }
 
     /**

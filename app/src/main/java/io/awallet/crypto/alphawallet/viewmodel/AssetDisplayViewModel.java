@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -23,7 +24,9 @@ import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by James on 22/01/2018.
@@ -31,6 +34,7 @@ import io.reactivex.disposables.Disposable;
 
 public class AssetDisplayViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
+    private static final String TAG = "ADVM";
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -92,16 +96,18 @@ public class AssetDisplayViewModel extends BaseViewModel {
     }
 
     public void fetchCurrentTicketBalance() {
+        if (getBalanceDisposable != null) getBalanceDisposable.dispose();
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
                         .fetchSingle(defaultWallet.getValue(), ticket().getValue())
-                        .subscribe(this::onToken, this::onError, this::finishTokenFetch))
-                .subscribe(l -> {}, t -> {});
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onToken, this::onError, this::finishTokenFetch)).subscribe();
     }
 
     private void finishTokenFetch()
     {
-        System.out.println("yowzer");
+        Log.d(TAG, "refreshToken: " + refreshToken.tokenInfo.name );
         ticket.postValue(refreshToken);
     }
 

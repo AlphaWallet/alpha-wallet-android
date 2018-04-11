@@ -12,8 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,16 +19,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Convert;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -55,9 +50,6 @@ import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
-import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;
-import static io.awallet.crypto.alphawallet.C.MARKET_SALE;
-import static io.awallet.crypto.alphawallet.C.POA_NETWORK_NAME;
 
 /**
  * Created by James on 21/02/2018.
@@ -275,11 +267,7 @@ public class SellDetailActivity extends BaseActivity {
             quantityErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
-        if (sellPrice.getText().toString().isEmpty()) {
-            priceErrorText.setVisibility(View.VISIBLE);
-            result = false;
-        }
-        if (!sellPrice.getText().toString().isEmpty() && Double.parseDouble(sellPrice.getText().toString()) <= 0) {
+        if (sellPrice.getText().toString().isEmpty() || Double.parseDouble(sellPrice.getText().toString()) <= 0) {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
@@ -453,7 +441,7 @@ public class SellDetailActivity extends BaseActivity {
 
         if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            List<BigInteger> ticketIdList = ticket.stringToTicketIDList(ticketIds);
+            List<BigInteger> ticketIdList = ticket.stringHexToBigIntegerList(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
             viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
             finish();

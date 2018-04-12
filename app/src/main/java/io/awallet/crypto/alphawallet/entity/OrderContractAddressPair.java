@@ -4,8 +4,6 @@ package io.awallet.crypto.alphawallet.entity;
  * Created by James on 18/03/2018.
  */
 
-import org.web3j.abi.datatypes.generated.Bytes32;
-
 import java.math.BigInteger;
 import java.util.List;
 

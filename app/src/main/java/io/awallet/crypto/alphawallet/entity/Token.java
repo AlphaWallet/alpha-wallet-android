@@ -12,7 +12,6 @@ import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;

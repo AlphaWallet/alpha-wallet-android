@@ -15,7 +15,6 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Convert;
 
 import java.math.BigInteger;

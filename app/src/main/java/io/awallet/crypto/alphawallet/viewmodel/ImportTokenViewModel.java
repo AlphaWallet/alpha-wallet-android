@@ -20,17 +20,11 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -39,7 +33,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
-import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
  * Created by James on 9/03/2018.

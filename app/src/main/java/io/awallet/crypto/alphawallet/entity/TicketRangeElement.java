@@ -1,13 +1,8 @@
 package io.awallet.crypto.alphawallet.entity;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
-
 import java.math.BigInteger;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 
 public class TicketRangeElement
 {

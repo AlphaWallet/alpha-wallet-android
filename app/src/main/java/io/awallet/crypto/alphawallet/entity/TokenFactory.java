@@ -2,8 +2,6 @@ package io.awallet.crypto.alphawallet.entity;
 
 import android.text.TextUtils;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
-
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 
 import java.math.BigDecimal;

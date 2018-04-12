@@ -3,12 +3,8 @@ package io.awallet.crypto.alphawallet.ui.widget.adapter;
 import android.content.Context;
 import android.view.ViewGroup;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.utils.Numeric;
-
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.TicketRangeElement;
 import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
@@ -32,8 +28,6 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TransferHeaderHolder;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**

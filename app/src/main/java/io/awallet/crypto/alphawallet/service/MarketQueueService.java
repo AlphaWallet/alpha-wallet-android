@@ -1,69 +1,31 @@
 package io.awallet.crypto.alphawallet.service;
 
 import android.content.Context;
-import android.os.Looper;
 
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
-import io.awallet.crypto.alphawallet.C;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.BaseViewCallback;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
-import io.awallet.crypto.alphawallet.entity.EthereumReadBuffer;
-import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.Ticker;
-import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TokenTicker;
 import io.awallet.crypto.alphawallet.entity.TradeInstance;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.spongycastle.jce.interfaces.ECKey;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.abi.datatypes.generated.Uint16;
-import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.abi.datatypes.generated.Uint8;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
-
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -74,16 +36,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Query;
-
-import static android.content.Context.MODE_PRIVATE;
-import static android.content.Context.SYSTEM_HEALTH_SERVICE;
-import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 /**
  * Created by James on 7/02/2018.

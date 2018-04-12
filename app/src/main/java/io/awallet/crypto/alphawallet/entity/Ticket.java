@@ -211,7 +211,6 @@ public class Ticket extends Token implements Parcelable
         return integerListToString(burnIndices, false);
     }
 
-    @Override
     public String getTicketInfo(NonFungibleToken nonFungibleToken)
     {
         String teamA = nonFungibleToken.getAttribute("countryA").text;
@@ -260,35 +259,6 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Convert a CSV string of Decimal values into a BigInteger List
-     * @param integerString CSV string of decimal ticket id's
-     * @return
-     */
-    public List<BigInteger> stringDecimalToBigIntegerList(String integerString)
-    {
-        List<BigInteger> idList = new ArrayList<>();
-
-        try
-        {
-            String[] ids = integerString.split(",");
-
-            for (String id : ids)
-            {
-                //remove whitespace
-                String trim = id.trim();
-                BigInteger val = new BigInteger(trim);
-                idList.add(val);
-            }
-        }
-        catch (Exception e)
-        {
-            idList = new ArrayList<>();
-        }
-
-        return idList;
-    }
-
-    /**
      * Convert a CSV string of Hex values into a BigInteger List
      * @param integerString CSV string of hex ticket id's
      * @return
@@ -322,7 +292,6 @@ public class Ticket extends Token implements Parcelable
      * @param prunedIndices
      * @return
      */
-    @Override
     public List<BigInteger> indexArrayToTicketId(int[] prunedIndices)
     {
         List<BigInteger> idList = new ArrayList<>();

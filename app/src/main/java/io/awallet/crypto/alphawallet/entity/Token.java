@@ -20,6 +20,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
@@ -212,13 +214,8 @@ public class Token implements Parcelable {
         return !tokenInfo.isStormbird;
     }
 
-    public List<BigInteger> indexArrayToTicketId(int[] prunedIndices)
-    {
-        return null;
-    }
-
-    public String getTicketInfo(NonFungibleToken nonFungibleToken)
-    {
-        return "";
-    }
+//    //public String getTicketInfo(NonFungibleToken nonFungibleToken)
+//    {
+//        return "";
+//    }
 }

@@ -181,27 +181,6 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
-//    @Override
-//    public Observable<Token> fetchActiveToken(String walletAddress, String address)
-//    {
-//        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-//        Wallet wallet = new Wallet(walletAddress);
-//        return localSource
-//                .fetchEnabledToken(network, wallet, address)
-//                .flatMap(token -> updateBalance(network, wallet, token))
-//                .observeOn(Schedulers.newThread())
-//                .toObservable();
-//        //return
-////                setupTokensFromLocal(address)
-////                .flatMap(token -> updateBalance(network, wallet, token))
-////                .observeOn(Schedulers.newThread())
-////                .toObservable();
-//
-////        return fetchCachedToken(network, wallet, address)
-////                .map(token -> updateBalance(network, wallet, token))
-////                .subscribeOn(Schedulers.io());
-//    }
-
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -509,47 +488,15 @@ public class TokenRepository implements TokenRepositoryType {
         List<BigInteger> result = new ArrayList<>();
         if (tokenInfo.isStormbird) //safety check
         {
-            boolean newIDFormat = false;
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Bytes32> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
             for (Bytes32 val : indicies)
             {
-                BigInteger convert;
-                if (newIDFormat || testForNewTokenID(val))
-                {
-                    newIDFormat = true;
-                    byte[] temp = new byte[16];
-                    System.arraycopy(val.getValue(), 0, temp, 0, 16);
-                    convert = Numeric.toBigInt(temp);
-                }
-                else
-                {
-                    convert = Numeric.toBigInt(val.getValue());
-                }
-
-                //perform some massage on the value
-                //result.add(new Bytes32 (Numeric.toBytesPadded(Numeric.toBigInt(val.getValue()), 32)));
+                BigInteger convert = Numeric.toBigInt(val.getValue());
                 result.add(convert);
             }
         }
         return result;
-    }
-
-    private boolean testForNewTokenID(Bytes32 val)
-    {
-        boolean topBytes = false;
-        //are the top 4 bytes set? If so it's Vitalik's strange front-first initialisation format
-        for (int i = 0; i < 4; i++)
-        {
-            byte test = val.getValue()[i];
-            if (test > 0)
-            {
-                topBytes = true;
-                break;
-            }
-        }
-
-        return topBytes;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
@@ -730,7 +677,7 @@ public class TokenRepository implements TokenRepositoryType {
         Ticket t = new Ticket(null, "0", "0", 0);
         //List ticketIndicies = t.stringDecimalToBigIntegerList(indexListStr);
         List ticketIndicies = Observable.fromArray(indexListStr.split(","))
-                .map(s -> new BigInteger(s)).toList().blockingGet();
+                .map(s -> new BigInteger(s.trim())).toList().blockingGet();
         Function function = getTransferFunction(to, ticketIndicies);
 
         String encodedFunction = FunctionEncoder.encode(function);

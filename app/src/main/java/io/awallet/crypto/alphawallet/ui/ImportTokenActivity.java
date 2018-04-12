@@ -188,39 +188,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTxt.setText("Ticket Valid to Import");
 
         ticket.displayTicketHolder(ticketRange, this);
-
-//        TextView textAmount = findViewById(R.id.amount);
-//        TextView textTicketName = findViewById(R.id.name);
-//        TextView textVenue = findViewById(R.id.venue);
-//        TextView textDate = findViewById(R.id.date);
-//        TextView textRange = findViewById(R.id.tickettext);
-//        TextView textCat = findViewById(R.id.cattext);
-//
-//        int numberOfTickets = ticketRange.tokenIds.size();
-//        if (numberOfTickets > 0) {
-//            AssetDefinition assetDefinition = null;
-//            try
-//            {
-//                BigInteger firstTicket = ticketRange.tokenIds.get(0);
-//                assetDefinition = new AssetDefinition("ticket.xml", this.getResources());
-//                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
-//                String venue = nonFungibleToken.getAttribute("venue").text;
-//                String date = nonFungibleToken.getDate("dd - MM");
-//                String seatCount = String.format(Locale.getDefault(), "x%d", ticketRange.tokenIds.size());
-//
-//                textAmount.setText(seatCount);
-//                textTicketName.setText(ticket.getFullName());
-//                textVenue.setText(venue);
-//                textDate.setText(date);
-//                textRange.setText(nonFungibleToken.getRangeStr(ticketRange));
-//                textCat.setText(nonFungibleToken.getAttribute("category").text);
-//            }
-//            catch (IOException|SAXException e)
-//            {
-//                e.printStackTrace();
-//                //TODO: Handle error
-//            }
-//        }
     }
 
     private void invalidTicket(int count)

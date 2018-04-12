@@ -142,7 +142,8 @@ public class SellTicketActivity extends BaseActivity {
     private void onMarketPlace() {
         String selection = getIDSelection();
 
-        if (selection != null && selection.length() > 0) {
+        if (selection != null && selection.length() > 0)
+        {
             viewModel.openMarketDialog(this, selection);
         }
     }

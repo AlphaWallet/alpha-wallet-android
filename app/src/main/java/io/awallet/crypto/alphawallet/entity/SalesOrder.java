@@ -7,7 +7,6 @@ import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
 import org.spongycastle.util.encoders.Base64;
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;

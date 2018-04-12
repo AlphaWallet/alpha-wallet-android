@@ -100,11 +100,6 @@ public class Token implements Parcelable {
         viewModel.showSendToken(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
-    public String intArrayToString(List<BigInteger> idArray, boolean keepZeros)
-    {
-        return "";
-    }
-
     public static final String EMPTY_BALANCE = "\u2014\u2014";
 
     public void setupContent(TokenHolder holder) {
@@ -165,33 +160,6 @@ public class Token implements Parcelable {
         }
 
         return idList;
-    }
-
-    /**
-     * Produce a string CSV of integer IDs given an input list of
-     * @param idArray int[] array of indices
-     * @return
-     */
-    public String intArrayToString(int[] idArray)
-    {
-        if (idArray == null) return "";
-        String displayIDs = "";
-        boolean first = true;
-        StringBuilder sb = new StringBuilder();
-        for (Integer id : idArray)
-        {
-            if (id == 0) continue;
-            if (!first)
-            {
-                sb.append(", ");
-            }
-            first = false;
-
-            sb.append(id.toString());
-            displayIDs = sb.toString();
-        }
-
-        return displayIDs;
     }
 
     public String integerListToString(List<Integer> intList, boolean keepZeros)

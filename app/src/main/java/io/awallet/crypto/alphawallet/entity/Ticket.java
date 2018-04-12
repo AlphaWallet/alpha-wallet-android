@@ -428,7 +428,6 @@ public class Ticket extends Token implements Parcelable
      * @param keepZeros
      * @return
      */
-    @Override
     public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
     {
         if (idList == null) return "";

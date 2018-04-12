@@ -135,8 +135,8 @@ public class SellTicketActivity extends BaseActivity {
         {
             idList.addAll(tr.tokenIds);
         }
-
-        return viewModel.ticket().getValue().intArrayToString(idList, false);
+        Ticket ticket = (Ticket) viewModel.ticket().getValue();
+        return ticket.intArrayToString(idList, false);
     }
 
     private void onMarketPlace() {

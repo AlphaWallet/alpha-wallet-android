@@ -728,7 +728,9 @@ public class TokenRepository implements TokenRepositoryType {
     public static byte[] createTicketTransferData(String to, String indexListStr) {
         //params are: Address, List<Uint16> of ticket indicies
         Ticket t = new Ticket(null, "0", "0", 0);
-        List ticketIndicies = t.stringDecimalToBigIntegerList(indexListStr);
+        //List ticketIndicies = t.stringDecimalToBigIntegerList(indexListStr);
+        List ticketIndicies = Observable.fromArray(indexListStr.split(","))
+                .map(s -> new BigInteger(s)).toList().blockingGet();
         Function function = getTransferFunction(to, ticketIndicies);
 
         String encodedFunction = FunctionEncoder.encode(function);

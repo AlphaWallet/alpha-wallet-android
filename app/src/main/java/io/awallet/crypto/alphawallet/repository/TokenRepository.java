@@ -48,6 +48,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +56,7 @@ import java.util.Set;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
@@ -64,6 +66,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import rx.Scheduler;
 
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -136,6 +139,49 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    /**
+     * Gives an observable that allows us to process each token as the balance is fetched
+     *
+     * @param walletAddress
+     * @return
+     */
+    @Override
+    public Observable<Token> fetchActiveStoredSequential(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredEnabledTokensList(network, wallet)
+                .compose(attachEthereumActive(network, wallet))
+                .flatMapIterable(tokens -> tokens)
+                .flatMap(token -> processBalance(network, wallet, token));
+    }
+
+    //Add in the fetched current ethereum balance
+    private ObservableTransformer<List<Token>, List<Token>> attachEthereumActive(NetworkInfo network, Wallet wallet)
+    {
+        return upstream -> Observable.zip(
+                upstream, attachEth(network, wallet).toObservable(),
+                (tokens, ethToken) ->
+                {
+                    List<Token> result = new ArrayList<>();
+                    result.add(ethToken);
+                    result.addAll(tokens);
+                    return result;
+                });
+    }
+
+    private Observable<Token> processBalance(NetworkInfo network, Wallet wallet, Token token)
+    {
+        //now fetch the balance
+        return updateBalance(network, wallet, token)
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
+
+    private Observable<List<Token>> fetchStoredEnabledTokensList(NetworkInfo network, Wallet wallet) {
+        return localSource
+                .fetchEnabledTokensSequentialList(network, wallet);
+    }
+
     @Override
     public Observable<Token[]> fetchActiveStored(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -193,26 +239,14 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
-//    @Override
-//    public Observable<Token> fetchActiveToken(String walletAddress, String address)
-//    {
-//        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-//        Wallet wallet = new Wallet(walletAddress);
-//        return localSource
-//                .fetchEnabledToken(network, wallet, address)
-//                .flatMap(token -> updateBalance(network, wallet, token))
-//                .observeOn(Schedulers.newThread())
-//                .toObservable();
-//        //return
-////                setupTokensFromLocal(address)
-////                .flatMap(token -> updateBalance(network, wallet, token))
-////                .observeOn(Schedulers.newThread())
-////                .toObservable();
-//
-////        return fetchCachedToken(network, wallet, address)
-////                .map(token -> updateBalance(network, wallet, token))
-////                .subscribeOn(Schedulers.io());
-//    }
+    private Observable<Token> fetchBalance(String walletAddress, Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return updateBalance(network, wallet, token)
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
 
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
@@ -298,7 +332,6 @@ public class TokenRepository implements TokenRepositoryType {
                     ethereumNetworkRepository.getDefaultNetwork(),
                     wallet,
                     tokenList);
-
     }
 
     @Override
@@ -382,10 +415,23 @@ public class TokenRepository implements TokenRepositoryType {
                 .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens));
     }
 
+    /**
+     * Obtain live balance of token from Ethereum blockchain and cache into Realm
+     *
+     * @param network
+     * @param wallet
+     * @param token
+     * @return
+     */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
         return Single.fromCallable(() -> {
             try
             {
+                if (token.ticker != null && token.tokenInfo.symbol.equals(ETH_SYMBOL))
+                {
+                    return token; //already have the balance for ETH
+                }
+
                 TokenFactory tFactory = new TokenFactory();
                 List<Integer> balanceArray = null;
                 List<Integer> burnArray = null;
@@ -402,11 +448,15 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
-                localSource.updateTokenBalance(network, wallet, token);
+                updated.balanceIsLive = true;
+                localSource.updateTokenBalance(network, wallet, updated);
+                //Log.d(TAG, updated.tokenInfo.name + " update: " + updated.getFullBalance());
                 return updated;
             }
-            finally {
-
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return token;
             }
         });
     }
@@ -450,11 +500,6 @@ public class TokenRepository implements TokenRepositoryType {
                     return result.toArray(new Token[result.size()]);
                 });
     }
-
-//    @Override
-//    public Observable<TokenInfo> update(String contractAddr) {
-//        return setupTokensFromLocal(contractAddr).toObservable();
-//    }
 
     @Override
     public rx.Subscription memPoolListener(SubscribeWrapper subscriber)

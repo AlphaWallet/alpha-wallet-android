@@ -213,25 +213,25 @@ public class HomeViewModel extends BaseViewModel {
         transactionDetailRouter.open(context, transaction);
     }
 
-    public void showMyAddress(Context context) {
-        myAddressRouter.open(context, defaultWallet.getValue());
-    }
-
-    public void showMarketplace(Context context) {
-        marketBrowseRouter.open(context);
-    }
-
-    public void showTokens(Context context) {
-        myTokensRouter.open(context, defaultWallet.getValue());
-    }
-
-    public void showWalletFragment(Context context, int resId) {
-        walletRouter.open(context, resId);
-    }
-
-    public void showMarketplaceFragment(Context context, int resId) {
-        marketplaceRouter.open(context, resId);
-    }
+//    public void showMyAddress(Context context) {
+//        myAddressRouter.open(context, defaultWallet.getValue());
+//    }
+//
+//    public void showMarketplace(Context context) {
+//        marketBrowseRouter.open(context);
+//    }
+//
+//    public void showTokens(Context context) {
+//        myTokensRouter.open(context, defaultWallet.getValue());
+//    }
+//
+//    public void showWalletFragment(Context context, int resId) {
+//        walletRouter.open(context, resId);
+//    }
+//
+//    public void showMarketplaceFragment(Context context, int resId) {
+//        marketplaceRouter.open(context, resId);
+//    }
 
     public void openDeposit(Context context, Uri uri) {
         externalBrowserRouter.open(context, uri);

@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
-
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.ImportTokenRouter;
@@ -18,7 +15,6 @@ import io.awallet.crypto.alphawallet.viewmodel.SplashViewModelFactory;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.fabric.sdk.android.Fabric;
 
 import static io.awallet.crypto.alphawallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 

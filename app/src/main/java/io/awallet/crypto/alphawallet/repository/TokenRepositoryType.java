@@ -11,6 +11,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import rx.functions.Action1;
@@ -21,6 +22,7 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchActiveCache(String walletAddress);
     Observable<Token[]> fetchActiveStored(String walletAddress);
     Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
+    Observable<Token> fetchActiveStoredSequential(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
     Observable<Token[]> fetchAll(String walletAddress);

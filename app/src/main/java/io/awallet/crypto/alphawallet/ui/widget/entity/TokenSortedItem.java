@@ -16,12 +16,39 @@ public class TokenSortedItem extends SortedItem<Token> {
 
     @Override
     public boolean areContentsTheSame(SortedItem newItem) {
-        return false;
+        if (viewType == newItem.viewType)
+        {
+            Token oldToken = (Token) value;
+            Token newToken = (Token) newItem.value;
+
+            if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
+            else if (!oldToken.getFullBalance().equals(newToken.getFullBalance())) return false;
+            else if (!oldToken.getFullName().equals(newToken.getFullName())) return false;
+            else return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override
-    public boolean areItemsTheSame(SortedItem other) {
-        return other.viewType == TokenHolder.VIEW_TYPE
-                && ((TokenSortedItem) other).value.tokenInfo.address.equalsIgnoreCase(value.tokenInfo.address);
+    public boolean areItemsTheSame(SortedItem other)
+    {
+        if (viewType == other.viewType)
+        {
+            Token oldToken = (Token) value;
+            Token newToken = (Token) other.value;
+
+            if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
+            else return true;
+        }
+        else
+        {
+            return false;
+        }
+
+//        return other.viewType == TokenHolder.VIEW_TYPE
+//                && ((TokenSortedItem) other).value.tokenInfo.address.equalsIgnoreCase(value.tokenInfo.address);
     }
 }

@@ -8,6 +8,7 @@ import io.awallet.crypto.alphawallet.entity.Wallet;
 import java.util.List;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 public interface TokenLocalSource {
@@ -21,7 +22,8 @@ public interface TokenLocalSource {
     Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet);
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
     Single<Token[]> fetchEnabledTokensWithBalance(NetworkInfo networkInfo, Wallet wallet);
-
+    //Observable<Token> fetchEnabledTokensSequential(NetworkInfo networkInfo, Wallet wallet);
+    Observable<List<Token>> fetchEnabledTokensSequentialList(NetworkInfo networkInfo, Wallet wallet);
     Completable saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers);
     Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens);
 }

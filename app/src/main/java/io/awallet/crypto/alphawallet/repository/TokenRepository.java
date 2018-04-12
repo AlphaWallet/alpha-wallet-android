@@ -1,8 +1,5 @@
 package io.awallet.crypto.alphawallet.repository;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -30,19 +27,13 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes16;
 import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.abi.datatypes.generated.Int16;
-import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -59,11 +50,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.OkHttpClient;
-import rx.Scheduler;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -523,7 +510,7 @@ public class TokenRepository implements TokenRepositoryType {
         if (tokenInfo.isStormbird) //safety check
         {
             boolean newIDFormat = false;
-            org.web3j.abi.datatypes.Function function = balanceOfArray2(wallet.address);
+            org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Bytes32> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
             for (Bytes32 val : indicies)
             {
@@ -647,13 +634,6 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private static org.web3j.abi.datatypes.Function balanceOfArray(String owner) {
-        return new org.web3j.abi.datatypes.Function(
-                "balanceOf",
-                Collections.singletonList(new Address(owner)),
-                Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {}));
-    }
-
-    private static org.web3j.abi.datatypes.Function balanceOfArray2(String owner) {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),

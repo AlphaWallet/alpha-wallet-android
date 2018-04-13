@@ -116,10 +116,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction lastTransaction)
+	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, final Transaction lastTrans)
 	{
-		final String lastBlock = (lastTransaction != null) ? lastTransaction.blockNumber : "0";
-
+		final String lastBlock = (lastTrans != null) ? lastTrans.blockNumber : "0";
 		return Observable.fromCallable(() -> {
 			List<Transaction> result = new ArrayList<>();
 			try
@@ -139,7 +138,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				e.printStackTrace();
 				//if this process fails, also try trust eth wallet API
-				return fetchLastTransactionsTrust(wallet, lastTransaction);
+				return fetchLastTransactionsTrust(wallet, lastTrans);
 			}
 
 			return result.toArray(new Transaction[result.size()]);

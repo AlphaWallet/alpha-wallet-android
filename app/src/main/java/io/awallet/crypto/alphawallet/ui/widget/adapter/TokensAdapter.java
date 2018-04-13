@@ -32,6 +32,7 @@ import java.util.List;
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+    private static final String TAG = "TKNADAPTER";
     public static final int FILTER_ALL = 0;
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
@@ -156,12 +157,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setTokens(Token[] tokens)
     {
-        if (items.size() == 0 || tokenCount != (items.size() - 1))
-        {
-            //only need a full update if there's been a change in token count
-            populateTokens(tokens);
-        }
-
+        populateTokens(tokens);
         tokenCount = 0;
     }
 
@@ -185,9 +181,19 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
+    /**
+     * Leveraging the power of Recycler view:
+     * How I learned to love recycler view not to fight it.
+     * Why assume that Google developers who only look at updating views
+     * don't get exactly what's needed. A simple means to update only when something changes
+     * based on the rules you provide in the 'SortedList' class.
+     *
+     * It works exactly as intended when you simply let it do its job.
+     *
+     * @param token
+     */
     private void updateToken(Token token)
     {
-        //update the token in place if required
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
@@ -196,9 +202,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token thisToken = ((TokenSortedItem)si).value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    //TODO: see if balance or any other data changed, only update if different
-                    ((TokenSortedItem)si).value = token;
-                    notifyItemChanged(i);
+                    int weight = ((TokenSortedItem)si).weight;
+                    items.add(new TokenSortedItem(token, weight));
                     break;
                 }
             }
@@ -208,7 +213,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void populateTokens(Token[] tokens)
     {
         items.beginBatchedUpdates();
-        items.clear();
         items.add(total);
 
         for (int i = 0; i < tokens.length; i++) {

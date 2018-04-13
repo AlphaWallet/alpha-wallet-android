@@ -1,69 +1,31 @@
 package io.awallet.crypto.alphawallet.service;
 
 import android.content.Context;
-import android.os.Looper;
 
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
-import io.awallet.crypto.alphawallet.C;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.BaseViewCallback;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
-import io.awallet.crypto.alphawallet.entity.EthereumReadBuffer;
-import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.Ticker;
-import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TokenTicker;
 import io.awallet.crypto.alphawallet.entity.TradeInstance;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.spongycastle.jce.interfaces.ECKey;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.abi.datatypes.generated.Uint16;
-import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.abi.datatypes.generated.Uint8;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
-
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -74,16 +36,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Query;
-
-import static android.content.Context.MODE_PRIVATE;
-import static android.content.Context.SYSTEM_HEALTH_SERVICE;
-import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 /**
  * Created by James on 7/02/2018.
@@ -135,7 +89,6 @@ public class MarketQueueService {
     //This is running on the main UI thread, so it's safe to push messages etc here
     private void handleResponse(String response)
     {
-        System.out.println("handle response");
         messageCallback.queueUpdate(100);
         //TODO: Handle response correctly
         //"{\"orders\": {\"received\": 200, \"accepted\": 200}, \"1st_order\": \"00000000000000000000000000000000000000000000000003ff2e795f500000000000000000000000000000000000000000000000000000000000005ab1b21c0b6732baecc0793e38a98934799abd3c7dc3cf3100d300d4\"}"
@@ -182,12 +135,12 @@ public class MarketQueueService {
                 String url = MARKET_QUEUE_URL + urlProlog + args;
                 response = writeToQueue(url, buffer.toByteArray(), true);
 
-                String ownerAddress = "";
-                //see if we can extract the user address
-                Sign.SignatureData sigData = sigFromByteArray(trades.getSignatureBytes(0));
-                BigInteger recoveredKey = Sign.signedMessageToKey(trade, sigData);
-                ownerAddress = "0x" + Keys.getAddress(recoveredKey);
-                System.out.println(ownerAddress);
+//                String ownerAddress = "";
+//                //see if we can extract the user address
+//                Sign.SignatureData sigData = sigFromByteArray(trades.getSignatureBytes(0));
+//                BigInteger recoveredKey = Sign.signedMessageToKey(trade, sigData);
+//                ownerAddress = "0x" + Keys.getAddress(recoveredKey);
+//                System.out.println(ownerAddress);
             }
             catch (Exception e)
             {
@@ -232,8 +185,6 @@ public class MarketQueueService {
         try
         {
             String fullUrl = MARKET_QUEUE_FETCH + contractAddr;
-
-            System.out.println(fullUrl);
 
             Request request = new Request.Builder()
                     .url(fullUrl)
@@ -292,7 +243,7 @@ public class MarketQueueService {
         return transactionRepository.getSignature(wallet, data, password);
     }
 
-    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
+    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = (System.currentTimeMillis() / 1000L) + MARKET_INTERVAL;
@@ -321,7 +272,7 @@ public class MarketQueueService {
         });
     }
 
-    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
     }
@@ -335,7 +286,7 @@ public class MarketQueueService {
         return Single.fromCallable(trade::getTradeBytes);
     }
 
-    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, int firstTicketId) {
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
         return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -348,7 +299,7 @@ public class MarketQueueService {
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, int firstTicketId, BaseViewCallback callback) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback) {
         messageCallback = callback;
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);

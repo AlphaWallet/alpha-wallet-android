@@ -3,21 +3,36 @@
   <contract>
     <address type="issuing">0xa3347C8ED134444C25169872c90a6360D42b3691</address>
   </contract>
-  <tokenFeatures>
-    <trade method="market-queue" version="0.1">
-      <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
-    </trade>
-    <trade method="universal-link" version="9">
-      <prefix>https://app.awallet.io/</prefix>
-    </trade>
-    <redeem>
-      <method name="QR"/>
-      <!--
-      <method name="Aztec"/>
-      <method name="Bluetooth"/>
-      -->
-    </redeem>
-  </tokenFeatures>
+  <features>
+    <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
+      <trade method="market-queue" version="0.1">
+        <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
+      </trade>
+      <trade method="universal-link" version="9">
+        <prefix>https://app.awallet.io/</prefix>
+      </trade>
+      <redeem>
+        <method name="QR"/>
+        <!--
+        <method name="Aztec"/>
+        <method name="Bluetooth"/>
+        -->
+      </redeem>
+    </feature>
+  </features>
+  <ordering>
+    <order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
+      <byName field="locality"/>
+      <byValue field="match" />
+      <byValue field="number" />
+    </order>
+    <order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="concise">
+      <byValue field="match"/>
+      <byValue field="category"/>
+      <byValue field="number"/>
+    </order>
+  </ordering>
+
   <!-- token UI definition can happen here -->
   <fields>
     <!--
@@ -63,7 +78,7 @@
     Weiwu thought that it helps the developers if we use byte-fields
     instead of bit-fields.
   -->
-    <field bitmask="FF000000000000000000000000000000" id="locality"
+    <field bitmask="00000000000000000000000000000000FF000000000000000000000000000000" id="locality"
 	   type="Enumeration">
       <name lang="ru">город</name>
       <name lang="en">City</name>
@@ -138,7 +153,7 @@
         </entity>
       </mapping>
     </field>
-    <field bitmask="00FF0000000000000000000000000000" id="venue"
+    <field bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" id="venue"
 	   type="Enumeration">
       <name lang="ru">место встречи</name>
       <name lang="en">Venue</name>
@@ -163,7 +178,7 @@
           <name lang="zh">加里宁格勒体育场</name>
           <name lang="es">Ekaterimburgo Arena</name>
         </entity>
-        <entity key="2">
+        <entity key="4">
           <name lang="ru">Мордовия Арена</name>
           <name lang="en">Fisht Stadium</name>
           <name lang="zh">菲什特奧林匹克體育場</name>
@@ -219,38 +234,38 @@
         </entity>
       </mapping>
     </field>
-    <field bitmask="0000FFFFFFFF00000000000000000000" id="time"
+    <field bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000" id="time"
 	   type="BinaryTime">
       <name lang="es">время</name>
       <name lang="en">Time</name>
       <name lang="zh">时间</name>
       <name lang="es">Tiempo</name>
     </field>
-    <field bitmask="000000000000FFFFFF00000000000000" id="countryA"
+    <field bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000" id="countryA"
 	   type="IA5String">
       <name lang="en">Team A</name>
       <name lang="zh">甲队</name>
       <name lang="es">Equipo A</name>
     </field>
-    <field bitmask="000000000000000000FFFFFF00000000" id="countryB"
+    <field bitmask="00000000000000000000000000000000000000000000000000FFFFFF00000000" id="countryB"
 	   type="IA5String">
       <name lang="en">Team B</name>
       <name lang="zh">乙队</name>
       <name lang="es">Equipo B</name>
     </field>
-    <field bitmask="000000000000000000000000FF000000" id="match"
+    <field bitmask="00000000000000000000000000000000000000000000000000000000FF000000" id="match"
 	   type="Integer">
       <name lang="en">Match</name>
       <name lang="zh">场次</name>
       <name lang="es">Evento</name>
     </field>
-    <field bitmask="00000000000000000000000000FF0000" id="category"
+    <field bitmask="0000000000000000000000000000000000000000000000000000000000FF0000" id="category"
 	   type="Integer">
       <name lang="en">Cat</name>
       <name lang="zh">等级</name>
       <name lang="es">Cat</name>
     </field>
-    <field bitmask="0000000000000000000000000000FFFF" id="number"
+    <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="number"
 	   type="Integer">
       <name lang="en">Number</name>
       <name lang="zh">票号</name>

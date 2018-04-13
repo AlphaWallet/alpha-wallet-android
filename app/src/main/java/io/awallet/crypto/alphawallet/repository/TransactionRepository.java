@@ -1,7 +1,5 @@
 package io.awallet.crypto.alphawallet.repository;
 
-import android.annotation.SuppressLint;
-
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
@@ -20,7 +18,6 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -63,9 +60,9 @@ public class TransactionRepository implements TransactionRepositoryType {
     }
 
 	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet) {
+	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, Transaction lastTrans) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromNetwork(networkInfo, wallet)
+		return fetchFromNetwork(networkInfo, wallet, lastTrans)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
@@ -187,12 +184,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.observeOn(Schedulers.io());
 	}
 
-	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
-		return inDiskCache.findLast(networkInfo, wallet)
-				.flatMap(lastTx -> Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastTx)))
-				.onErrorResumeNext(throwable ->
-										   Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, null)))
-				.observeOn(Schedulers.io());
+	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, Transaction lastTrans) {
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastTrans));
 	}
 
 	@Override

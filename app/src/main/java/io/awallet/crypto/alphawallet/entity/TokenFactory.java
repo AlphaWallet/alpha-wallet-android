@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 import static io.awallet.crypto.alphawallet.repository.TokensRealmSource.ACTUAL_BALANCE_INTERVAL;
@@ -15,7 +16,7 @@ import static io.awallet.crypto.alphawallet.repository.TokensRealmSource.ACTUAL_
 
 public class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<Integer> balances, List<Integer> burned, long updateBlancaTime)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, List<Integer> burned, long updateBlancaTime)
     {
         Token thisToken;
         if (tokenInfo.isStormbird)
@@ -84,7 +85,7 @@ public class TokenFactory
         Token thisToken;
         if (tokenInfo.isStormbird)
         {
-            thisToken = new Ticket(tokenInfo, (List<Integer>)null, (List<Integer>)null, 0);
+            thisToken = new Ticket(tokenInfo, (List<BigInteger>)null, (List<Integer>)null, 0);
         }
         else
         {

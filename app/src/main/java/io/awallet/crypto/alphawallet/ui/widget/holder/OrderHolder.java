@@ -12,11 +12,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,14 +106,14 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
         if (data.balanceInfo != null)
         {
             //check if the required tickets are actually here
-            List<Integer> newBalance = new ArrayList<>();
+            List<BigInteger> newBalance = new ArrayList<>();
             boolean allIndicesUnsold = true;
             for (Integer index : data.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing?
             {
                 if (data.balanceInfo.size() > index)
                 {
-                    Integer ticketId = data.balanceInfo.get(index);
-                    if (ticketId > 0)
+                    BigInteger ticketId = data.balanceInfo.get(index);
+                    if (!ticketId.equals(BigInteger.ZERO))
                     {
                         newBalance.add(ticketId);
                     }

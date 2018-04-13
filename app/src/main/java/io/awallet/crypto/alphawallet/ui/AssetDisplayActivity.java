@@ -18,10 +18,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.io.IOException;
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.AssetDisplayViewModel;
@@ -61,12 +65,13 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     {
         AndroidInjection.inject(this);
 
+        ticket = getIntent().getParcelableExtra(TICKET);
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_asset_display);
         toolbar();
 
-        ticket = getIntent().getParcelableExtra(TICKET);
         setTitle(getString(R.string.title_show_tickets));
         TokenInfo info = ticket.tokenInfo;
 
@@ -77,7 +82,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
         list = findViewById(R.id.listTickets);
 
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket);
+        adapter = new TicketAdapter(this, this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);

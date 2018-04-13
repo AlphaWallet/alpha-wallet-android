@@ -73,7 +73,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                         ? token.tokenInfo.symbol.toUpperCase()
                         : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
-            token.setupContent(getContext(), this);
+            token.setupContent(this);
         } catch (Exception ex) {
             fillEmpty();
         }

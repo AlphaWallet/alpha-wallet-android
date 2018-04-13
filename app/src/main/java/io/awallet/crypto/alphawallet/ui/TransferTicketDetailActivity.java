@@ -202,11 +202,11 @@ public class TransferTicketDetailActivity extends BaseActivity
         });
 
         setupScreen();
-        initQuantitySelector();
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
     private void initQuantitySelector() {
+        pickTicketQuantity.setVisibility(View.VISIBLE);
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
@@ -324,7 +324,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                pickTicketQuantity.setVisibility(View.VISIBLE);
+                initQuantitySelector();
                 break;
             case PICK_TRANSFER_METHOD:
                 setupRadioButtons();

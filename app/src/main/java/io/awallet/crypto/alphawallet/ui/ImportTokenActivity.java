@@ -230,7 +230,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         cDialog.setTitle(R.string.confirm_purchase);
         String ticketLabel = order.ticketCount > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         cDialog.setSmallText(getString(R.string.total_cost_for_x_tickets, order.ticketCount, ticketLabel));
-        cDialog.setBigText(getString(R.string.total_cost, getEthString(order.price)));
+        cDialog.setMediumText(getString(R.string.total_cost, getEthString(order.price)));
         cDialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setPrimaryButtonListener(v -> {

@@ -76,7 +76,6 @@ public class TransferTicketDetailActivity extends BaseActivity
     private static final int TRANSFER_USING_LINK = 2;
     private static final int TRANSFER_TO_ADDRESS = 3;
 
-
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
     protected TransferTicketDetailViewModel viewModel;
@@ -90,6 +89,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     private TextView toAddressError;
     private EditText toAddressEditText;
     private ImageButton qrImageView;
+    private TextView textQuantity;
 
     private String ticketIds;
     private String prunedIds;
@@ -148,7 +148,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
 
-        TextView textQuantity = findViewById(R.id.text_quantity);
+        textQuantity = findViewById(R.id.text_quantity);
         toAddressError = findViewById(R.id.to_address_error);
 
         pickTransferAddress = findViewById(R.id.layout_addressbar);
@@ -164,28 +164,6 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         buttonLinkPick = findViewById(R.id.layout_link_pick);
         buttonTransferPick = findViewById(R.id.layout_transfer_now);
-
-        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
-        plusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity + 1) <= adapter.getTicketRangeCount())
-            {
-                quantity++;
-                textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
-            }
-        });
-
-        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
-        minusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity - 1) >= 0)
-            {
-                quantity--;
-                textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
-            }
-        });
 
         Button nextAction = findViewById(R.id.button_next);
         nextAction.setOnClickListener((View v) -> {
@@ -224,6 +202,33 @@ public class TransferTicketDetailActivity extends BaseActivity
         });
 
         setupScreen();
+        initQuantitySelector();
+    }
+
+    //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
+    private void initQuantitySelector() {
+        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
+        plusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            if ((quantity + 1) <= adapter.getTicketRangeCount()) {
+                quantity++;
+                textQuantity.setText(String.valueOf(quantity));
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+            }
+        });
+
+        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
+        minusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            if ((quantity - 1) >= 0) {
+                quantity--;
+                textQuantity.setText(String.valueOf(quantity));
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+            }
+        });
+
+        textQuantity.setText("1");
+        prunedIds = ticket.pruneIDList(ticketIds, 1);
     }
 
     private void setupRadioButtons()
@@ -482,7 +487,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.generate_pick_up_link);
         dialog.setSmallText(R.string.generate_free_transfer_link);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.send_universal_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));

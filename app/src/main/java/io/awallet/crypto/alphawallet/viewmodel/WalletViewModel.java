@@ -155,7 +155,7 @@ public class WalletViewModel extends BaseViewModel {
 
     private void onTokenBalanceUpdate(Token token)
     {
-        if (token.getBalanceQty() > 0)
+        if (token.hasPositiveBalance())
         {
             tokenUpdate.postValue(token);
         }

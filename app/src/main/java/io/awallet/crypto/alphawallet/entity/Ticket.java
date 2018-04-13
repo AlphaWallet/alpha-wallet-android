@@ -83,8 +83,8 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public long getBalanceQty() {
-        return getTicketCount();
+    public boolean hasPositiveBalance() {
+        return (getTicketCount() > 0);
     }
 
     @Override
@@ -182,6 +182,7 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
+        tokenHolder.textAppreciation.setText("--");
         tokenHolder.issuer.setText(TicketDecode.getIssuer());
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));

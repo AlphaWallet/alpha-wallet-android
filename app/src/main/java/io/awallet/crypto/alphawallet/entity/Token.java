@@ -50,13 +50,14 @@ public class Token implements Parcelable {
     }
 
     public String getStringBalance() {
-        if (balance != null) return String.valueOf(balance.longValue());
+        //should apply BigDecimal conversion here
+        if (balance != null) return balance.toString();
         else return "0";
     }
 
-    public long getBalanceQty() {
-        if (balance != null) return balance.longValue();
-        else return 0;
+    public boolean hasPositiveBalance() {
+        if (balance != null) return !balance.equals(BigDecimal.ZERO);
+        else return false;
     }
 
     public String getFullBalance() {

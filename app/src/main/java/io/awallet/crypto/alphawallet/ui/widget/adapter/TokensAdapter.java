@@ -217,7 +217,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         for (int i = 0; i < tokens.length; i++) {
             Token token = tokens[i];
-            if (token.tokenInfo.symbol.equals(ETH_SYMBOL) || token.getBalanceQty() > 0)
+            if (token.tokenInfo.symbol.equals(ETH_SYMBOL) || token.hasPositiveBalance())
             {
                 switch (filterType)
                 {

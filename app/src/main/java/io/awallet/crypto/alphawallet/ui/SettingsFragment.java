@@ -137,10 +137,10 @@ public class SettingsFragment extends PreferenceFragment
 
             Intent mailto = new Intent(Intent.ACTION_SENDTO);
             mailto.setType("message/rfc822"); // use from live device
-            mailto.setData(Uri.parse("mailto:support@trustwalletapp.com")
+            mailto.setData(Uri.parse("mailto:support@awallet.io")
                     .buildUpon()
                     .appendQueryParameter("subject", "Android support question")
-                    .appendQueryParameter("body", "Dear Trust support,")
+                    .appendQueryParameter("body", "Dear AlphaWallet support,")
                     .build());
             startActivity(Intent.createChooser(mailto, "Select email application."));
             return true;

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +17,9 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/background_marketplace_event"
+            android:clickable="true"
+            android:focusable="true">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -37,6 +40,7 @@
                 android:layout_gravity="center_vertical"
                 android:fontFamily="@font/font_light"
                 android:text="@string/settings_my_wallet_address"
+                android:background="?attr/selectableItemBackground"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
         </LinearLayout>
@@ -164,14 +168,33 @@
                     android:src="@drawable/ic_settings_notification" />
             </RelativeLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
                 android:fontFamily="@font/font_light"
                 android:text="@string/settings_notification"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
+
+                <android.support.v7.widget.AppCompatRadioButton
+                    android:id="@+id/enabledBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="15dp"
+                    android:background="@drawable/selector_radio_check"
+                    android:checked="false"
+                    android:clickable="false"
+                    android:text=""
+                    app:buttonTint="@color/transparent" />
+
+            </RelativeLayout>
         </LinearLayout>
 
         <LinearLayout

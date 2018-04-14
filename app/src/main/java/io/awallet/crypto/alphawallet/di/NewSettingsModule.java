@@ -6,6 +6,7 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
@@ -24,7 +25,8 @@ class NewSettingsModule {
             HelpRouter helpRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
-            HomeRouter homeRouter
+            HomeRouter homeRouter,
+            PreferenceRepositoryType preferenceRepository
     ) {
         return new NewSettingsViewModelFactory(
                 findDefaultNetworkInteract,
@@ -34,7 +36,8 @@ class NewSettingsModule {
                 helpRouter,
                 ethereumNetworkRepository,
                 manageWalletsRouter,
-                homeRouter);
+                homeRouter,
+                preferenceRepository);
     }
 
     @Provides

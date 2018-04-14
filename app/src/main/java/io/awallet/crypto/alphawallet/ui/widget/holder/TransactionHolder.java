@@ -126,7 +126,21 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         {
             value.setText("");
         }
-        supplimental.setText(""); //looks bad
+
+        if (!trans.error.equals("0"))
+        {
+            supplimental.setText("Failed ☹");
+            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+            typeIcon.setImageResource(R.drawable.ic_error);
+            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
+                                    PorterDuff.Mode.SRC_ATOP);
+        }
+        else
+        {
+            supplimental.setText(""); //looks bad
+            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
+                                    PorterDuff.Mode.SRC_ATOP);
+        }
     }
 
     private void fill(

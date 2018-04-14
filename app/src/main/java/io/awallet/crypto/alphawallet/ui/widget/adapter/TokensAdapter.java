@@ -202,8 +202,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token thisToken = ((TokenSortedItem)si).value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    int weight = ((TokenSortedItem)si).weight;
-                    items.add(new TokenSortedItem(token, weight));
+                    if (token.hasPositiveBalance())
+                    {
+                        int weight = ((TokenSortedItem) si).weight;
+                        items.add(new TokenSortedItem(token, weight));
+                    }
+                    else
+                    {
+                        items.remove((TokenSortedItem)si);
+                    }
                     break;
                 }
             }

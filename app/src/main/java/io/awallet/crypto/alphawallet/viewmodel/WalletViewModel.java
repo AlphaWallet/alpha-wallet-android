@@ -155,10 +155,7 @@ public class WalletViewModel extends BaseViewModel {
 
     private void onTokenBalanceUpdate(Token token)
     {
-        if (token.hasPositiveBalance())
-        {
-            tokenUpdate.postValue(token);
-        }
+        tokenUpdate.postValue(token);
         //TODO: Calculate total value including token value received from token tickers
         //TODO: Then display the total value of everything at the top of the list in a special holder
     }

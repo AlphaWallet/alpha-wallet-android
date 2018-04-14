@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import io.awallet.crypto.alphawallet.entity.BadContract;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -413,14 +414,13 @@ public class TokenRepository implements TokenRepositoryType {
      */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
         return Single.fromCallable(() -> {
+            TokenFactory tFactory = new TokenFactory();
             try
             {
                 if (token.ticker != null && token.tokenInfo.symbol.equals(ETH_SYMBOL))
                 {
                     return token; //already have the balance for ETH
                 }
-
-                TokenFactory tFactory = new TokenFactory();
                 List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
@@ -436,6 +436,12 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
+                localSource.updateTokenBalance(network, wallet, updated);
+                return updated;
+            }
+            catch (BadContract e)
+            {
+                Token updated = tFactory.createToken(token.tokenInfo, null, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }
@@ -554,8 +560,9 @@ public class TokenRepository implements TokenRepositoryType {
         if (tokenInfo.isStormbird) //safety check
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            List<Bytes32> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            for (Bytes32 val : indicies)
+            List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            if (indices == null) throw new BadContract();
+            for (Bytes32 val : indices)
             {
                 result.add(correctValue(val, temp));
             }

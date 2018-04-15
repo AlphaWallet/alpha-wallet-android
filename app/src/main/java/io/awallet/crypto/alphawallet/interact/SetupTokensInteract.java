@@ -82,12 +82,23 @@ public class SetupTokensInteract {
         Transaction newTransaction = thisTrans;
         try
         {
-            TransactionOperation op = new TransactionOperation();
+            TransactionOperation op;
+            TransactionOperation[] newOps;
             TransactionContract ct;
             ERC875ContractTransaction ect = null;
             String functionName = INVALID_OPERATION;
 
-            if (data != null && data.functionData != null)
+            //already has constructor info
+            if (thisTrans.operations.length > 0 &&
+                    thisTrans.operations[0].contract instanceof ERC875ContractTransaction &&
+                    ((ERC875ContractTransaction) thisTrans.operations[0].contract).operation.equals(CONTRACT_CONSTRUCTOR))
+            {
+                op = thisTrans.operations[0];
+                ct = thisTrans.operations[0].contract;
+                functionName = CONTRACT_CONSTRUCTOR;
+                newOps = thisTrans.operations;
+            }
+            else if (data != null && data.functionData != null)
             {
                 if (data.functionData.isERC875() || data.functionData.isConstructor()
                         || (token != null && token.tokenInfo.isStormbird))
@@ -105,19 +116,24 @@ public class SetupTokensInteract {
                 {
                     ct = new TransactionContract();
                 }
+
                 functionName = data.functionData.functionFullName;
+                op = new TransactionOperation();
+                newOps = new TransactionOperation[1];
+                newOps[0] = op;
+                op.contract = ct;
             }
             else
             {
+                op = new TransactionOperation();
                 ect = new ERC875ContractTransaction();
+                newOps = new TransactionOperation[1];
+                newOps[0] = op;
                 ct = ect;
+                op.contract = ct;
             }
 
             setupToken(token, ct, thisTrans);
-
-            TransactionOperation[] newOps = new TransactionOperation[1];
-            newOps[0] = op;
-            op.contract = ct;
 
             //we could ecrecover the seller here
             switch (functionName)

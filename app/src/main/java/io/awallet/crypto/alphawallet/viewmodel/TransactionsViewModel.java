@@ -36,6 +36,7 @@ import io.awallet.crypto.alphawallet.router.TransactionDetailRouter;
 import io.awallet.crypto.alphawallet.router.WalletRouter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -165,15 +166,18 @@ public class TransactionsViewModel extends BaseViewModel {
     private void fetchTransactions(boolean shouldShowProgress) {
         if (defaultWallet().getValue() != null)
         {
-            Log.d(TAG, "Fetch start");
-            setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
-            progress.postValue(shouldShowProgress);
-            needsUpdate = true;
-            fetchTransactionDisposable =
-                    fetchTransactionsInteract.fetchCached(defaultWallet.getValue())
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::onTransactions, this::onError, this::fetchNetworkTransactions);
+            if (fetchTransactionDisposable == null)
+            {
+                Log.d(TAG, "Fetch start");
+                setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
+                progress.postValue(shouldShowProgress);
+                needsUpdate = true;
+                fetchTransactionDisposable =
+                        fetchTransactionsInteract.fetchCached(defaultWallet.getValue())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::onTransactions, this::onError, this::fetchNetworkTransactions);
+            }
         }
         else
         {
@@ -207,10 +211,18 @@ public class TransactionsViewModel extends BaseViewModel {
         //update the UI, display cached transactions
         this.transactions.postValue(txArray);
 
+        Transaction lastTx = null;
+        //simple sort on txArray
+        if (txArray != null && txArray.length > 1)
+        {
+            lastTx = txArray[txArray.length - 1];
+        }
+
         Log.d(TAG, "Fetching network transactions.");
         //now fetch new transactions on main account
+        //find block number of last transaction
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchNetworkTransactions(defaultWallet.getValue())
+                fetchTransactionsInteract.fetchNetworkTransactions(defaultWallet.getValue(), lastTx)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError, this::enumerateTokens);
@@ -417,7 +429,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onSaved()
     {
         setupTokensInteract.regenerateTransactionList();
-        System.out.println("saved contracts.");
+        Log.d(TAG,"saved contracts.");
         refreshTokens.postValue(true); //send directive to refresh token list
         //now re-process the tokens
         reProcessTransactions();

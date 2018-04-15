@@ -17,11 +17,18 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.utils.Numeric;
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
@@ -29,6 +36,8 @@ import io.awallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactor
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -86,38 +95,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setText(getString(R.string.waiting_for_blockchain));
         tv.setVisibility(View.VISIBLE);
 
-        setupTicket();
-    }
-
-    private void setupTicket() {
-        TextView textAmount = findViewById(R.id.amount);
-        TextView textTicketName = findViewById(R.id.name);
-        TextView textVenue = findViewById(R.id.venue);
-        TextView textDate = findViewById(R.id.date);
-        TextView textRange = findViewById(R.id.tickettext);
-        TextView textCat = findViewById(R.id.cattext);
-
-        int numberOfTickets = ticketRange.tokenIds.size();
-        if (numberOfTickets > 0) {
-            Integer firstTicket = ticketRange.tokenIds.get(0);
-            Integer lastTicket = ticketRange.tokenIds.get(numberOfTickets-1);
-
-            String ticketTitle = ticket.getFullName();
-            String venue = TicketDecode.getVenue(firstTicket);
-            String date = TicketDecode.getDate(firstTicket);
-            int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
-            int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
-            String range = (numberOfTickets == 1) ? String.valueOf(rangeFirst) : getString(R.string.range_formatter, rangeFirst, rangeLast);
-            String cat = TicketDecode.getZone(firstTicket);
-            String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
-
-            textAmount.setText(seatCount);
-            textTicketName.setText(ticketTitle);
-            textVenue.setText(venue);
-            textDate.setText(date);
-            textRange.setText(range);
-            textCat.setText(cat);
-        }
+        ticket.displayTicketHolder(ticketRange, this);
     }
 
     private Bitmap createQRImage(String address) {
@@ -162,17 +140,17 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
         findViewById(R.id.qr_image).setAlpha(0.1f);
 
-        TextView tv = findViewById(R.id.textAddIDs);
-        tv.setVisibility(View.VISIBLE);
+//        TextView tv = findViewById(R.id.textAddIDs);
+//        tv.setVisibility(View.VISIBLE);
     }
 
     private void onBurned(Boolean burn)
     {
-        //TODO: This method is called once the ticket has been redeemed. Variable 'burn' will only ever be 'true'.
-        System.out.println("Redeemed: " + (burn ? "Yes" : "No"));
-        ticketBurnNotice();
-        TextView tv = findViewById(R.id.textAddIDs);
-        tv.setText("Tickets Redeemed");
+//        //TODO: This method is called once the ticket has been redeemed. Variable 'burn' will only ever be 'true'.
+//        System.out.println("Redeemed: " + (burn ? "Yes" : "No"));
+//        ticketBurnNotice();
+//        TextView tv = findViewById(R.id.textAddIDs);
+//        tv.setText("Tickets Redeemed");
 
         AWalletAlertDialog dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.ticket_redeemed);
@@ -208,7 +186,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private void onTicket(Ticket ticket)
     {
-        String idStr = ticket.populateIDs(ticket.getValidIndicies(), false);
+        //TODO: Decode ticket
 //        ids.setText(idStr);
     }
 

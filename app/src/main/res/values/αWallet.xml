@@ -243,4 +243,7 @@
     <string name="universal_link_notice">Before the link expires, anyone with the UniversalLink can purchase your tickets with one click.</string>
     <string name="label_important">Important</string>
     <string name="eth_00">0.00 ETH</string>
+    <string name="toolbar_title_my_wallets">My Wallets</string>
+    <string name="facebook">Facebook</string>
+    <string name="twitter">Twitter</string>
 </resources>

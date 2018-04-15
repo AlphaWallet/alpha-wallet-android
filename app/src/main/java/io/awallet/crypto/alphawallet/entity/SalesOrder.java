@@ -41,7 +41,7 @@ public class SalesOrder implements Parcelable {
     public final byte[] message;
     public TokenInfo tokenInfo; //convenience pointer to token information
     public String ownerAddress; //convenience ecrecovered owner address;
-    public List<Integer> balanceInfo = null; // received balance from blockchain check
+    public List<BigInteger> balanceInfo = null; // received balance from blockchain check
 
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
             throws SalesOrderMalformed
@@ -235,9 +235,6 @@ public class SalesOrder implements Parcelable {
             Sign.SignatureData sellerSig = sigFromByteArray(order.signature);
 
             data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
-
-            //Can we recreate the seller address?
-            System.out.println(order.getOwnerKey());
         }
         catch (Exception e)
         {
@@ -287,7 +284,7 @@ public class SalesOrder implements Parcelable {
         return getTradeBytes(tickets, contractAddress, priceWei, expiry);
     }
 
-    public boolean balanceChange(List<Integer> balance)
+    public boolean balanceChange(List<BigInteger> balance)
     {
         //compare two balances
         //quick return, if sizes are different there's a change
@@ -298,8 +295,8 @@ public class SalesOrder implements Parcelable {
         }
         if (balance.size() != balanceInfo.size()) return true;
 
-        List<Integer> oldBalance = new ArrayList<>(balanceInfo);
-        List<Integer> newBalance = new ArrayList<>(balance);
+        List<BigInteger> oldBalance = new ArrayList<>(balanceInfo);
+        List<BigInteger> newBalance = new ArrayList<>(balance);
 
         oldBalance.removeAll(balanceInfo);
         newBalance.removeAll(balance);

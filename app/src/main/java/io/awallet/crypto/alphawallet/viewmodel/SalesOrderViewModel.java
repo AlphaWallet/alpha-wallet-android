@@ -172,7 +172,7 @@ public class SalesOrderViewModel extends BaseViewModel
     private void changeSelection() {
         //convert to array of indicies
         try {
-            List<Integer> indexList = ticket.getValue().parseIndexList(newSelection);
+            List<Integer> indexList = ticket.getValue().ticketIdStringToIndexList(newSelection);
             //convert this to a bitfield
             if (indexList != null && indexList.size() > 0) {
                 String neatSelection = ticket.getValue().parseList(indexList);
@@ -195,7 +195,7 @@ public class SalesOrderViewModel extends BaseViewModel
         changeSelection();
     }
 
-    public void generateSalesOrders(List<Integer> idSendList, int firstTicket) {
+    public void generateSalesOrders(List<Integer> idSendList, BigInteger firstTicket) {
         int[] ticketIDs = new int[idSendList.size()];
         int index = 0;
         for (Integer i : idSendList) {

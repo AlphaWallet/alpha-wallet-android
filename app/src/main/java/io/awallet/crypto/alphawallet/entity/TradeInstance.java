@@ -5,13 +5,11 @@ import org.web3j.utils.Numeric;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.security.Signature;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Created by James on 5/02/2018.
@@ -23,11 +21,11 @@ public class TradeInstance
     public final BigInteger price;
     public final int[] tickets;
     public final BigInteger contractAddress;
-    public final int ticketStart;
+    public final BigInteger ticketStart;
     public final String publicKey;
     List<byte[]> signatures = new ArrayList<byte[]>();
 
-    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, int ticketStartId) {
+    public TradeInstance(BigInteger price, BigInteger expiry, int[] tickets, String contractAddress, BigInteger publicKey, BigInteger ticketStartId) {
         this.price = price;
         this.expiry = expiry;
         this.tickets = tickets;

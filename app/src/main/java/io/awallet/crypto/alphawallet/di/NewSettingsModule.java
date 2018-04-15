@@ -1,16 +1,17 @@
 package io.awallet.crypto.alphawallet.di;
 
+import dagger.Module;
+import dagger.Provides;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
+import io.awallet.crypto.alphawallet.router.ManageWalletsRouter;
 import io.awallet.crypto.alphawallet.router.MyAddressRouter;
 import io.awallet.crypto.alphawallet.viewmodel.NewSettingsViewModelFactory;
-
-import dagger.Module;
-import dagger.Provides;
 
 @Module
 class NewSettingsModule {
@@ -20,13 +21,20 @@ class NewSettingsModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            ManageWalletsRouter manageWalletsRouter,
+            HomeRouter homeRouter
+    ) {
         return new NewSettingsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,
-                helpRouter);
+                helpRouter,
+                ethereumNetworkRepository,
+                manageWalletsRouter,
+                homeRouter);
     }
 
     @Provides
@@ -54,5 +62,15 @@ class NewSettingsModule {
     @Provides
     HelpRouter provideHelpRouter() {
         return new HelpRouter();
+    }
+
+    @Provides
+    ManageWalletsRouter provideManageWalletsRouter() {
+        return new ManageWalletsRouter();
+    }
+
+    @Provides
+    HomeRouter provideHomeRouter() {
+        return new HomeRouter();
     }
 }

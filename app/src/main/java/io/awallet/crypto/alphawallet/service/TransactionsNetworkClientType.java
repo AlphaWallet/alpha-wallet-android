@@ -9,5 +9,5 @@ import io.reactivex.Observable;
 
 public interface TransactionsNetworkClientType {
 	Observable<Transaction[]> fetchTransactions(String forAddress);
-    Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction lastTransaction);
+    Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction lastTrans);
 }

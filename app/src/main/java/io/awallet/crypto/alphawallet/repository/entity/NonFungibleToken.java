@@ -1,9 +1,13 @@
 package io.awallet.crypto.alphawallet.repository.entity;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 /**
  * Created by weiwu on 1/3/18.  Each NonFungibleToken is a
@@ -47,4 +51,27 @@ public class NonFungibleToken {
         attributes = new HashMap();
     }
 
+    public String getDate(String format)
+    {
+        long dateUTC = getAttribute("time").value.longValue();
+        Date dateFormat = new java.util.Date(dateUTC * 1000L);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(format, Locale.ENGLISH); //TODO: Get locale
+        return dateFormatter.format(dateFormat.getTime());
+    }
+
+    public String getRangeStr(TicketRange data)
+    {
+        int ticketStart = getAttribute("category").value.intValue();
+        String ticketRange = String.valueOf(ticketStart);
+        if (data.tokenIds != null)
+        {
+            int lastValue = ticketStart + (data.tokenIds.size() - 1);
+            if (data.tokenIds.size() > 1)
+            {
+                ticketRange = ticketRange + "-" + lastValue;
+            }
+        }
+
+        return ticketRange;
+    }
 }

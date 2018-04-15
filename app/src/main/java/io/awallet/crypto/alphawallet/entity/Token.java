@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
@@ -16,8 +17,11 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
@@ -98,16 +102,6 @@ public class Token implements Parcelable {
         viewModel.showSendToken(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
-    public String populateIDs(List<Integer> d, boolean keepZeros)
-    {
-        return "";
-    }
-
-    public String populateIDs(int[] idArray)
-    {
-        return "";
-    }
-
     public static final String EMPTY_BALANCE = "\u2014\u2014";
 
     public void setupContent(TokenHolder holder) {
@@ -141,9 +135,55 @@ public class Token implements Parcelable {
 
     }
 
-    public List<Integer> parseIndexList(String userList)
+    public List<Integer> ticketIdStringToIndexList(String userList)
     {
         return null;
+    }
+
+    public List<Integer> stringIntsToIntegerList(String userList)
+    {
+        List<Integer> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = userList.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                Integer intId = Integer.parseInt(trim);
+                idList.add(intId);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = new ArrayList<>();
+        }
+
+        return idList;
+    }
+
+    public String integerListToString(List<Integer> intList, boolean keepZeros)
+    {
+        if (intList == null) return "";
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (Integer id : intList)
+        {
+            if (!keepZeros && id == 0) continue;
+            if (!first)
+            {
+                sb.append(", ");
+            }
+            first = false;
+
+            sb.append(String.valueOf(id));
+        }
+
+        displayIDs = sb.toString();
+        return displayIDs;
     }
 
     public int getTicketCount()
@@ -174,8 +214,8 @@ public class Token implements Parcelable {
         return !tokenInfo.isStormbird;
     }
 
-    public List<Integer> indexToIDList(int[] prunedIndices)
-    {
-        return null;
-    }
+//    //public String getTicketInfo(NonFungibleToken nonFungibleToken)
+//    {
+//        return "";
+//    }
 }

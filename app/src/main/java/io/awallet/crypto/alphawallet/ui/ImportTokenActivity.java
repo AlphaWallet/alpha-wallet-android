@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -22,7 +21,6 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModel;
@@ -189,34 +187,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         importTxt.setText("Ticket Valid to Import");
 
-        TextView textAmount = findViewById(R.id.amount);
-        TextView textTicketName = findViewById(R.id.name);
-        TextView textVenue = findViewById(R.id.venue);
-        TextView textDate = findViewById(R.id.date);
-        TextView textRange = findViewById(R.id.tickettext);
-        TextView textCat = findViewById(R.id.cattext);
-
-        int numberOfTickets = ticketRange.tokenIds.size();
-        if (numberOfTickets > 0) {
-            Integer firstTicket = ticketRange.tokenIds.get(0);
-            Integer lastTicket = ticketRange.tokenIds.get(numberOfTickets-1);
-
-            String ticketTitle = ticket.getFullName();
-            String venue = TicketDecode.getVenue(firstTicket);
-            String date = TicketDecode.getDate(firstTicket);
-            int rangeFirst = TicketDecode.getSeatIdInt(firstTicket);
-            int rangeLast = TicketDecode.getSeatIdInt(lastTicket);
-            String cat = TicketDecode.getZone(firstTicket);
-            String seatCount = String.format(Locale.getDefault(), "x%d", numberOfTickets);
-            String range = (numberOfTickets == 1) ? String.valueOf(rangeFirst) : getString(R.string.range_formatter, rangeFirst, rangeLast);
-
-            textAmount.setText(seatCount);
-            textTicketName.setText(ticketTitle);
-            textVenue.setText(venue);
-            textDate.setText(date);
-            textRange.setText(range);
-            textCat.setText(cat);
-        }
+        ticket.displayTicketHolder(ticketRange, this);
     }
 
     private void invalidTicket(int count)

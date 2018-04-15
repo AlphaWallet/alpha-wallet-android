@@ -1,8 +1,5 @@
 package io.awallet.crypto.alphawallet.repository;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -31,17 +28,12 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.abi.datatypes.generated.Int16;
-import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -58,11 +50,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.OkHttpClient;
-import rx.Scheduler;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -192,27 +180,6 @@ public class TokenRepository implements TokenRepositoryType {
                 .observeOn(Schedulers.newThread())
                 .toObservable();
     }
-
-//    @Override
-//    public Observable<Token> fetchActiveToken(String walletAddress, String address)
-//    {
-//        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-//        Wallet wallet = new Wallet(walletAddress);
-//        return localSource
-//                .fetchEnabledToken(network, wallet, address)
-//                .flatMap(token -> updateBalance(network, wallet, token))
-//                .observeOn(Schedulers.newThread())
-//                .toObservable();
-//        //return
-////                setupTokensFromLocal(address)
-////                .flatMap(token -> updateBalance(network, wallet, token))
-////                .observeOn(Schedulers.newThread())
-////                .toObservable();
-//
-////        return fetchCachedToken(network, wallet, address)
-////                .map(token -> updateBalance(network, wallet, token))
-////                .subscribeOn(Schedulers.io());
-//    }
 
     @Override
     public Observable<Token[]> fetchAll(String walletAddress) {
@@ -387,7 +354,7 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 TokenFactory tFactory = new TokenFactory();
-                List<Integer> balanceArray = null;
+                List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 if (token.tokenInfo.isStormbird)
@@ -402,7 +369,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
-                localSource.updateTokenBalance(network, wallet, token);
+                localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }
             finally {
@@ -417,7 +384,7 @@ public class TokenRepository implements TokenRepositoryType {
             long now = System.currentTimeMillis();
             long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
             BigDecimal balance = null;
-            List<Integer> balanceArray = null;
+            List<BigInteger> balanceArray = null;
             List<Integer> burnArray = null;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
@@ -517,18 +484,47 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private List<Integer> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
-        List<Integer> result = new ArrayList<>();
+    private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        List<BigInteger> result = new ArrayList<>();
+        byte[] temp = new byte[16];
         if (tokenInfo.isStormbird) //safety check
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            List<Uint16> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            for (Uint16 val : indicies)
+            List<Bytes32> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            for (Bytes32 val : indicies)
             {
-                result.add(val.getValue().intValue());
+                result.add(getCorrectedValue(val, temp));
             }
         }
         return result;
+    }
+
+    /**
+     * checking if we need to read a top 16 byte value specifically
+     * We should keep this function in here because when we start to use 32 byte values there is
+     * potentially a problem with the 'always move 16 bytes to low 16' force solution.
+     *
+     * A better solution is not to fight this ethereum feature - we simply start interpreting the XML from
+     * the top byte.
+     */
+    private BigInteger getCorrectedValue(Bytes32 val, byte[] temp)
+    {
+        BigInteger retVal;
+        //does the top second byte have a value and the lower 16 bytes are zero?
+        long lowCheck = 0;
+        long highCheck = val.getValue()[0] + val.getValue()[1];
+        for (int i = 16; i < 32; i++) lowCheck += val.getValue()[i];
+        if (highCheck != 0 && lowCheck == 0)
+        {
+            System.arraycopy(val.getValue(), 0, temp, 0, 16);
+            retVal = Numeric.toBigInt(temp);
+        }
+        else
+        {
+            retVal = Numeric.toBigInt(val.getValue());
+        }
+
+        return retVal;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
@@ -616,7 +612,7 @@ public class TokenRepository implements TokenRepositoryType {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
-                Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {}));
+                Collections.singletonList(new TypeReference<DynamicArray<Bytes32>>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function nameOf() {
@@ -704,10 +700,12 @@ public class TokenRepository implements TokenRepositoryType {
         return function;
     }
 
-    public static byte[] createTicketTransferData(String to, String ids) {
+    public static byte[] createTicketTransferData(String to, String indexListStr) {
         //params are: Address, List<Uint16> of ticket indicies
         Ticket t = new Ticket(null, "0", "0", 0);
-        List ticketIndicies = t.parseIDListBI(ids);
+        //List ticketIndicies = t.stringDecimalToBigIntegerList(indexListStr);
+        List ticketIndicies = Observable.fromArray(indexListStr.split(","))
+                .map(s -> new BigInteger(s.trim())).toList().blockingGet();
         Function function = getTransferFunction(to, ticketIndicies);
 
         String encodedFunction = FunctionEncoder.encode(function);

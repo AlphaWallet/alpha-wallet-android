@@ -20,15 +20,11 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -37,7 +33,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
-import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
  * Created by James on 9/03/2018.
@@ -60,7 +55,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private SalesOrder importOrder;
     private String univeralImportLink;
     private Ticket importToken;
-    private List<Integer> availableBalance = new ArrayList<>();
+    private List<BigInteger> availableBalance = new ArrayList<>();
     private double priceUsd;
     private double ethToUsd = 0;
 
@@ -218,14 +213,14 @@ public class ImportTokenViewModel extends BaseViewModel  {
     //5. We have token information and balance. Check if the import order is still valid.
     private void updateToken()
     {
-        List<Integer> newBalance = new ArrayList<>();
+        List<BigInteger> newBalance = new ArrayList<>();
         //calculate USD price of tickets
         priceUsd = importOrder.price * ethToUsd;
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {
-                Integer ticketId = importToken.balanceArray.get(index);
-                if (ticketId > 0) {
+                BigInteger ticketId = importToken.balanceArray.get(index);
+                if (ticketId.compareTo(BigInteger.ZERO) != 0) {
                     newBalance.add(ticketId);
                 }
             }
@@ -310,7 +305,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         newTransaction.postValue(transaction);
     }
 
-    private boolean balanceChange(List<Integer> newBalance)
+    private boolean balanceChange(List<BigInteger> newBalance)
     {
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }

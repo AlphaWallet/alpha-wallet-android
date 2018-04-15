@@ -22,6 +22,7 @@ import io.awallet.crypto.alphawallet.viewmodel.SellTicketModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,7 +100,7 @@ public class SellTicketActivity extends BaseActivity {
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -129,18 +130,20 @@ public class SellTicketActivity extends BaseActivity {
 
     private String getIDSelection() {
         List<TicketRange> sellRange = adapter.getCheckedItems();
-        List<Integer> idList = new ArrayList<>();
-        for (TicketRange tr : sellRange) {
+        List<BigInteger> idList = new ArrayList<>();
+        for (TicketRange tr : sellRange)
+        {
             idList.addAll(tr.tokenIds);
         }
-
-        return viewModel.ticket().getValue().populateIDs(idList, false);
+        Ticket ticket = (Ticket) viewModel.ticket().getValue();
+        return ticket.intArrayToString(idList, false);
     }
 
     private void onMarketPlace() {
         String selection = getIDSelection();
 
-        if (selection != null && selection.length() > 0) {
+        if (selection != null && selection.length() > 0)
+        {
             viewModel.openMarketDialog(this, selection);
         }
     }

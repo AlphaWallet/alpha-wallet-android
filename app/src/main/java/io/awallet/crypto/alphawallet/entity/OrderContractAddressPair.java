@@ -4,6 +4,7 @@ package io.awallet.crypto.alphawallet.entity;
  * Created by James on 18/03/2018.
  */
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
 public class OrderContractAddressPair
 {
     public SalesOrder order;
-    public List<Integer> balance;
+    public List<BigInteger> balance;
 
     public boolean equals(String tokenAddr, String address)
     {

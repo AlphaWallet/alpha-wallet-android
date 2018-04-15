@@ -66,17 +66,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         AndroidInjection.inject(this);
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        try {
-           /* this is perhaps the least invasive way to carry XML
-            * asset-definition 3 levels down to where it is used,
-            * without breaking the existing design by incorporating
-            * callback which writes a huge arrays of List for
-            * different fields of each tokenID - weiwu */
-            ticket.piggybackedXMLDefinition = new AssetDefinition("ticket.xml", getResources());
-        } catch (IOException|SAXException e){
-            // TODO: how to gracefully bail out from creating a new activity?
-            throw new RuntimeException("Error in parsing XML asset Definition");
-        }
 
         super.onCreate(savedInstanceState);
 
@@ -93,7 +82,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
         list = findViewById(R.id.listTickets);
 
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket);
+        adapter = new TicketAdapter(this, this::onTicketIdClick, ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -167,22 +156,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 //                Toast.makeText(this, R.string.copy_addr_to_clipboard, Toast.LENGTH_SHORT).show();
 //            }
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                viewModel.showHome(this, true);
-                break;
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        viewModel.showHome(this, true);
     }
 
     private void onTicketIdClick(View view, TicketRange range) {

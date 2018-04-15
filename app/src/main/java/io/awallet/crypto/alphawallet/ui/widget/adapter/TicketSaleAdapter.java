@@ -40,6 +40,7 @@ public class TicketSaleAdapter extends TicketAdapter {
     private TicketRange selectedTicketRange;
     private QuantitySelectorHolder quantitySelector;
 
+    /* Context ctx is used to initialise assetDefinition in the super class */
     public TicketSaleAdapter(Context ctx, OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
         super(ctx, onTicketIdClickListener, t);
         onTokenCheckListener = this::onTokenCheck;

@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
@@ -21,7 +22,7 @@ import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener
 {
     private TicketRange thisData;
-    private Token ticket;
+    private Ticket ticket;
     private OnTicketIdClickListener onTicketClickListener;
     private final AssetDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
@@ -50,7 +51,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
         ticketLayout = findViewById(R.id.layout_select);
         assetDefinition = definition;
-        this.ticket = ticket;
+        this.ticket = (Ticket)ticket;
     }
 
     @Override

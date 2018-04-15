@@ -1,5 +1,7 @@
 package io.awallet.crypto.alphawallet.entity;
 
+import android.util.Log;
+
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayInputStream;
@@ -23,9 +25,14 @@ import java.util.List;
  * Pairing is actually not done in this class, because other data not
  * in the pair (like timestamp) are to be bound together outside of
  * the class.
- y */
+ */
 
-public class SignaturePair {
+public class SignaturePair
+{
+    private static final int SELECTION_DESIGNATOR_SIZE = 2; //gives the fixed length of the selection length encoding
+    private static final int TRAILING_ZEROES_SIZE = 3; //gives the fixed length of the trailing zeroes after selection
+
+    public byte[] selection;
     public byte[] signature;
     public final String message;
 
@@ -73,7 +80,8 @@ public class SignaturePair {
         // now reduce the index to base of this value
         int correctionFactor = zeroCount * NIBBLE;
         // TODO: Check for highest value out of range of bitfield. Like this:
-        // Integer highestValue = indexList.get(indexList.size() - 1);
+        Integer highestValue = indexList.get(indexList.size() - 1);
+
 
         /* the method here is easier to express with matrix programming like this:
         indexList = indexList - correctionFactor # reduce every element of the list by an int
@@ -87,8 +95,10 @@ public class SignaturePair {
 
         // to create string
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%1$02d", truncatedValueDecimal.length()));
-        sb.append(String.format("%1$03d", zeroCount));
+        String formatDecimals = "%1$0" + SELECTION_DESIGNATOR_SIZE + "d";
+        String formatZeros = "%1$0" + TRAILING_ZEROES_SIZE + "d";
+        sb.append(String.format(formatDecimals, truncatedValueDecimal.length()));
+        sb.append(String.format(formatZeros, zeroCount));
         sb.append(String.valueOf(truncatedValueDecimal));
 
         return sb.toString();
@@ -97,45 +107,61 @@ public class SignaturePair {
     /**
      * The reverse of generateSelection - used in scanning the QR code.
      */
-    public static List<Integer> buildIndexList(String selection) {
+    public static List<Integer> buildIndexList(String selection) throws Exception
+    {
         List<Integer> intList = new ArrayList<>();
         final int NIBBLE = 4;
         //one: convert to bigint
-        String lengthStr = selection.substring(0, 2);
+        String lengthStr = selection.substring(0, SELECTION_DESIGNATOR_SIZE);
         int selectionLength = Integer.parseInt(lengthStr);
-        String trailingZerosStr = selection.substring(2, 4);
+        String trailingZerosStr = selection.substring(SELECTION_DESIGNATOR_SIZE, SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE);
         int trailingZeros = Integer.parseInt(trailingZerosStr);
-        int correctionFactor = trailingZeros*NIBBLE;
+        int correctionFactor = trailingZeros * NIBBLE;
 
-        String selectionStr = selection.substring(4, 4 + selectionLength);
+        String selectionStr = selection.substring(SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE,
+                                                  SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
         BigInteger bitField = new BigInteger(selectionStr, 10);
 
         int radix = bitField.getLowestSetBit();
-        while (!bitField.equals(BigInteger.ZERO)) {
-            if (bitField.testBit(radix)) {
+        while (!bitField.equals(BigInteger.ZERO))
+        {
+            if (bitField.testBit(radix))
+            {
                 intList.add(radix + correctionFactor); //because we need to encode index zero as the first bit
                 bitField = bitField.clearBit(radix);
             }
             radix++;
         }
+
         return intList;
     }
 
     //got from a received byte[] message to produce selection and signature inputs
-    public SignaturePair(String qrMessage, String timeMessage) {
+    public SignaturePair(String qrMessage, String timeMessage, String contractAddr)
+    {
         //convert selection from optimised string
-
-        String lengthStr = qrMessage.substring(0, 2);
+        String lengthStr = qrMessage.substring(0, SELECTION_DESIGNATOR_SIZE);
         int selectionLength = Integer.parseInt(lengthStr);
-        selectionStr = qrMessage.substring(0, 4 + selectionLength);
-        signatureStr = qrMessage.substring(4 + selectionLength);
-        message = selectionStr + "," + timeMessage;
+        String trailingZerosStr = qrMessage.substring(SELECTION_DESIGNATOR_SIZE, SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE);
+        int trailingZeros = Integer.parseInt(trailingZerosStr);
+        selectionStr = qrMessage.substring(0, SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
+        signatureStr = qrMessage.substring(SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
+        message = selectionStr + "," + timeMessage + "," + contractAddr.toLowerCase();
+        selection = selectionStr.getBytes();
 
         BigInteger sigBi = new BigInteger(signatureStr, 10);
         //Now convert sig back to Byte
         signature = sigBi.toByteArray();
 
-        if (signature.length > 65) {
+        if (signature.length == 64)
+        {
+            byte[] sigCopy = new byte[65];
+            System.arraycopy(signature, 0, sigCopy, 1, 64);
+            sigCopy[0] = 0;
+            signature = sigCopy;
+        }
+        else if (signature.length > 65)
+        {
             byte[] sigCopy = new byte[65];
             //prune the first digit
             System.arraycopy(signature, 1, sigCopy, 0, 65);

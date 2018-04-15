@@ -194,12 +194,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem)
             {
-                Token thisToken = ((TokenSortedItem)si).value;
+                TokenSortedItem tsi = (TokenSortedItem)si;
+                Token thisToken = tsi.value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
                     if (token.hasPositiveBalance())
                     {
-                        items.add(new TokenSortedItem(token, calculateWeight(token)));
+                        items.add(new TokenSortedItem(token, tsi.weight));
                     }
                     else
                     {
@@ -256,11 +257,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private int calculateWeight(Token token)
     {
-        //calculate the weight from the name. Add the contract address too
         int weight = 0;
-        //use first 5 letters + first 4 address to arbitrate
         String tokenName = token.getFullName();
-
         if(token.tokenInfo.symbol.equals(ETH_SYMBOL)) return 5;
 
         int i = 4;
@@ -272,17 +270,18 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             int w = Character.toLowerCase(c) - 'a' + 1;
             if (w > 0)
             {
-                weight += ((i+4)*26)*w;
+                int component = (int)Math.pow(26, i)*w;
+                weight += component;
                 i--;
             }
         }
 
         String address = Numeric.cleanHexPrefix(token.getAddress());
-        for (i = 0; i < address.length() && i < 3; i++)
+        for (i = 0; i < address.length() && i < 2; i++)
         {
             char c = address.charAt(i);
             int w = c - '0';
-            weight += ((3-i)*10)*w;
+            weight += w;
         }
 
         return weight;

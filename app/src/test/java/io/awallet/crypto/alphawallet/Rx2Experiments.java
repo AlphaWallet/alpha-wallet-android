@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
  * Created by weiwu on 7/4/18.
  */
 
-public class RxExperiment {
+public class Rx2Experiments {
 
      class Animal {
         protected HashMap<String, String> attributes = new HashMap();

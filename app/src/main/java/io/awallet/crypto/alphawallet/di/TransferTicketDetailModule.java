@@ -9,6 +9,7 @@ import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.router.TransferTicketDetailRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketRouter;
+import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModelFactory;
 
@@ -28,9 +29,10 @@ public class TransferTicketDetailModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
-            TransferTicketDetailRouter transferTicketDetailRouter) {
+            TransferTicketDetailRouter transferTicketDetailRouter,
+            FeeMasterService feeMasterService) {
         return new TransferTicketDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter);
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService);
     }
 
     @Provides

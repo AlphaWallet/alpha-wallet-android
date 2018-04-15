@@ -418,13 +418,21 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         if (isValid)
         {
-            viewModel.createTicketTransfer(
+            viewModel.feeMasterCall(
                     to,
-                    ticket.getAddress(),
-                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), false),
-                    Contract.GAS_PRICE,
-                    Contract.GAS_LIMIT);
+                    ticket,
+                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
         }
+
+//        if (isValid)
+//        {
+//            viewModel.createTicketTransfer(
+//                    to,
+//                    ticket.getAddress(),
+//                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), false),
+//                    Contract.GAS_PRICE,
+//                    Contract.GAS_LIMIT);
+//        }
     }
 
     @Override

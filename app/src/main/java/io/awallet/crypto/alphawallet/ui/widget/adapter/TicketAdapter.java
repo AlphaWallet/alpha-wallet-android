@@ -105,6 +105,13 @@ public class TicketAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
 
+	/* as why there are 2 for loops immediately following: the
+	 * sort that's required to get groupings. Splitting it in two
+	 * makes the algorithm n*2 complexity (plus a log n for sort),
+	 * rather than a n^2 complexity which you'd need to do it in
+	 * one go. The code produced is simple enough for anyone
+	 * looking at it in future. - James Brown
+         */
         List<BigInteger> idList = t.stringHexToBigIntegerList(ticketIds);
         List<TicketRangeElement> sortedList = new ArrayList<>();
         for (BigInteger v : idList)
@@ -154,6 +161,9 @@ public class TicketAdapter extends TokensAdapter {
         items.endBatchedUpdates();
     }
 
+    /* This one look similar to the one in TicketAdapter, it needs a
+     * bit more abstraction to merge - the types produced are
+     * different.*/
     private void addRanges(Ticket t)
     {
         TicketRange currentRange = null;

@@ -116,6 +116,10 @@ public class Ticket extends Token implements Parcelable
     {
         //convert to list
         List<BigInteger> idList = stringHexToBigIntegerList(idListStr);
+        /* weiwu: potentially we can do this but I am not sure if
+	 * order is important*/
+        //List<BigInteger> idList = Observable.fromArray(idListStr.split(","))
+        //       .map(s -> Numeric.toBigInt(s)).toList().blockingGet();
         for (int i = (idList.size() - 1); i >= quantity; i--)
         {
             idList.remove(i);

@@ -2,7 +2,11 @@
 <asset>
   <contract>
     <address type="issuing">0xa3347C8ED134444C25169872c90a6360D42b3691</address>
+    <name lang="en">FIFA 2018 Tickets</name>
+    <name lang="zh">世界杯2018承兑票</name>
+    <name lang="es">Entradas de FIFA 2018</name>
   </contract>
+  <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>
     <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
       <trade method="market-queue" version="0.1">

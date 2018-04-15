@@ -19,11 +19,6 @@ import io.awallet.crypto.alphawallet.router.TransferTicketDetailRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 import io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
 
-import org.web3j.crypto.Sign;
-import org.web3j.tx.Contract;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -87,7 +82,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, int firstTicketId)
+    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
     {
         marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
     }

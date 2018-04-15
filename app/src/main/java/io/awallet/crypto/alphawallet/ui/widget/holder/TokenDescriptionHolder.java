@@ -16,8 +16,8 @@ import java.math.RoundingMode;
  * Created by James on 12/02/2018.
  */
 
-public class TokenDescriptionHolder extends BinderViewHolder<Token> {
-
+public class TokenDescriptionHolder extends BinderViewHolder<Token>
+{
     public static final int VIEW_TYPE = 1067;
 
     private final TextView count;

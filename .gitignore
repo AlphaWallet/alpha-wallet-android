@@ -43,6 +43,6 @@ proguard/
 
 ### Android Patch ###
 gen-external-apklibs
-
+*.*#
 
 tn/trustnative.aar

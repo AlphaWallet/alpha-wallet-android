@@ -49,6 +49,7 @@ import io.awallet.crypto.alphawallet.widget.SystemView;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
 
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

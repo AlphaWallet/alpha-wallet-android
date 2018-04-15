@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import org.web3j.utils.Numeric;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenDiffCallback;
@@ -25,9 +27,11 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 
@@ -39,7 +43,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private int filterType;
     private Context context;
-    private int tokenCount;
+    private boolean needsRefresh;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -84,10 +88,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener) {
         this.context = context;
         this.onTokenClickListener = onTokenClickListener;
+        needsRefresh = true;
     }
 
     public TokensAdapter(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
+        needsRefresh = true;
     }
 
     public TokensAdapter() {
@@ -120,7 +126,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     private void setAnimation(View viewToAnimate) {
-            Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_from_bottom);
+            Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
             viewToAnimate.startAnimation(animation);
     }
 
@@ -143,22 +149,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public boolean checkTokens()
     {
-        if (items.size() != 0 && tokenCount != (items.size() - 1))
-        {
-            tokenCount = 0;
-            return true;
-        }
-        else
-        {
-            tokenCount = 0;
-            return false;
-        }
+        return needsRefresh;
     }
 
     public void setTokens(Token[] tokens)
     {
         populateTokens(tokens);
-        tokenCount = 0;
     }
 
     public void updateTokenCheck(Token token)
@@ -170,13 +166,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 if (token.isCurrency())
                 {
                     updateToken(token);
-                    tokenCount++; //can't put this in updateToken, we are checking for size mismatch
                 }
                 break;
 
             default:
                 updateToken(token);
-                tokenCount++;
                 break;
         }
     }
@@ -194,6 +188,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      */
     private void updateToken(Token token)
     {
+        boolean updated = false;
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
@@ -204,22 +199,35 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 {
                     if (token.hasPositiveBalance())
                     {
-                        int weight = ((TokenSortedItem) si).weight;
-                        items.add(new TokenSortedItem(token, weight));
+                        items.add(new TokenSortedItem(token, calculateWeight(token)));
                     }
                     else
                     {
-                        items.remove((TokenSortedItem)si);
+                        items.removeItemAt(i);
+                        notifyItemRemoved(i);
+                        notifyDataSetChanged();
                     }
+                    updated = true;
                     break;
                 }
             }
+        }
+
+        //New token added
+        //after extensive testing it's better not to take any risks - emptying items and rebuilding the list never fails.
+        //However all other methods (notify range changed, notify dataset etc GPF under heavy stress.
+        //If you want to switch on the view stress test search for 'throw new BadContract' in TokenRepository and uncomment the random throw
+        //this causes tokens to pop in and out of this view very frequently.
+        if (!updated && token.hasPositiveBalance())
+        {
+            needsRefresh = true;
         }
     }
 
     private void populateTokens(Token[] tokens)
     {
         items.beginBatchedUpdates();
+        if (needsRefresh) items.clear();
         items.add(total);
 
         for (int i = 0; i < tokens.length; i++) {
@@ -232,17 +240,52 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     case FILTER_CURRENCY:
                         if (token.isCurrency())
                         {
-                            items.add(new TokenSortedItem(token, 10 + i));
+                            items.add(new TokenSortedItem(token, calculateWeight(token)));
                         }
                         break;
 
                     default:
-                        items.add(new TokenSortedItem(token, 10 + i));
+                        items.add(new TokenSortedItem(token, calculateWeight(token)));
                         break;
                 }
             }
         }
         items.endBatchedUpdates();
+        needsRefresh = false;
+    }
+
+    private int calculateWeight(Token token)
+    {
+        //calculate the weight from the name. Add the contract address too
+        int weight = 0;
+        //use first 5 letters + first 4 address to arbitrate
+        String tokenName = token.getFullName();
+
+        if(token.tokenInfo.symbol.equals(ETH_SYMBOL)) return 5;
+
+        int i = 4;
+        int pos = 0;
+
+        while (i >= 0)
+        {
+            char c = tokenName.charAt(pos++);
+            int w = Character.toLowerCase(c) - 'a' + 1;
+            if (w > 0)
+            {
+                weight += ((i+4)*26)*w;
+                i--;
+            }
+        }
+
+        String address = Numeric.cleanHexPrefix(token.getAddress());
+        for (i = 0; i < address.length() && i < 3; i++)
+        {
+            char c = address.charAt(i);
+            int w = c - '0';
+            weight += ((3-i)*10)*w;
+        }
+
+        return weight;
     }
 
     public void setTotal(BigDecimal totalInCurrency) {

@@ -435,13 +435,19 @@ public class TokenRepository implements TokenRepositoryType {
                     balance = getBalance(wallet, token.tokenInfo);
                 }
 
+                  //This code, together with an account with many tokens on it thrashes the Token view update
+//                if (Math.random() > 0.5)
+//                {
+//                    throw new BadContract();
+//                }
+
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }
             catch (BadContract e)
             {
-                Token updated = tFactory.createToken(token.tokenInfo, null, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
+                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }

@@ -36,6 +36,10 @@ public class EtherscanTransaction
     {
         TransactionOperation[] o;
 
+        //TODO: Do full interpretation here, to avoid needing to reallocate.
+        //Then in the transaction parsing we only need to fill in token information.
+        //Further work would make a master Token list in 'HomeViewModel' and the transaction holder just populates the name
+        //from there. That way we don't need to hold much information and we don't need to re-parse after this
         if (contractAddress.length() > 0)
         {
             to = contractAddress;

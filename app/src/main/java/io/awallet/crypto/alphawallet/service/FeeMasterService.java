@@ -42,7 +42,7 @@ public class FeeMasterService
     }
 
     //first generate and then sign the message
-    public Observable<String> generateAndSendFeemasterTransaction(Wallet wallet, String toAddress, Ticket ticket, long expiry, String indices)
+    public Observable<Integer> generateAndSendFeemasterTransaction(Wallet wallet, String toAddress, Ticket ticket, long expiry, String indices)
     {
         return generateTicketArray(indices, ticket)
                 .flatMap(indicesArray -> getTradeSig(wallet, indicesArray, ticket.getAddress(), BigInteger.ZERO, expiry))
@@ -67,17 +67,18 @@ public class FeeMasterService
         });
     }
 
-    private Single<String> sendFeemasterTransaction(String toAddress, long expiry, String indices, byte[] tradeSig) {
+    private Single<Integer> sendFeemasterTransaction(String toAddress, long expiry, String indices, byte[] tradeSig) {
         return Single.fromCallable(() -> {
             Sign.SignatureData sigData = sigFromByteArray(tradeSig);
             okhttp3.Response response = null;
-            String result = null;
+            Integer result = 500;
             MediaType mediaType = MediaType.parse("application/octet-stream");
 
             String v = Integer.toHexString(sigData.getV());
 
             StringBuilder sb = new StringBuilder();
             sb.append("http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken");
+            //sb.append("http://stormbird.duckdns.org:8080/api/claimToken");
             Map<String, String> args = new HashMap<>();
             args.put("address", toAddress);
             args.put("indices", indices);
@@ -96,7 +97,8 @@ public class FeeMasterService
 
                 response = httpClient.newCall(request).execute();
 
-                result = response.body().string();
+                result = response.code();
+                Log.d("RESP", response.body().string());
             }
             catch (Exception e)
             {

@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.util.Log;
 
+import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
@@ -27,6 +28,7 @@ import io.reactivex.schedulers.Schedulers;
 import java.math.BigInteger;
 import java.util.List;
 
+import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -153,11 +155,28 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         disposable = feeMasterService.generateAndSendFeemasterTransaction(defaultWallet.getValue(), to, t, 0, indices)
             .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::processResult);
+                .subscribe(this::processResult, this::txError);
     }
 
-    private void processResult(String result)
+    private void txError(Throwable throwable)
     {
-        Log.d("YOLESS", result);
+        error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Network error."));
+    }
+
+    private void processResult(Integer result)
+    {
+        if ((result/100) == 2) newTransaction.postValue("Transaction accepted by server.");
+        else
+        {
+            switch (result)
+            {
+                case 401:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
+                    break;
+                default:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Transfer failed."));
+                    break;
+            }
+        }
     }
 }

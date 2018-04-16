@@ -17,6 +17,7 @@ import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -50,6 +51,13 @@ public class FeeMasterService
                 .toObservable();
     }
 
+    public Observable<Integer> handleFeemasterImport(Wallet wallet, SalesOrder order)
+    {
+        return generateTicketString(order.tickets)
+                .flatMap(ticketStr -> sendFeemasterTransaction(wallet.address, order.expiry, ticketStr, order.signature))
+                .toObservable();
+    }
+
     private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry)
     {
         final byte[] tradeBytes = SalesOrder.getTradeBytes(indicesArray, contractAddress, price, expiry);
@@ -67,35 +75,50 @@ public class FeeMasterService
         });
     }
 
+    private Single<String> generateTicketString(int[] tickets)
+    {
+        return Single.fromCallable(() -> {
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (int index : tickets)
+            {
+                if (!first) sb.append(",");
+                sb.append(index);
+                first = false;
+            }
+            return sb.toString();
+        });
+    }
+
     private Single<Integer> sendFeemasterTransaction(String toAddress, long expiry, String indices, byte[] tradeSig) {
         return Single.fromCallable(() -> {
             Sign.SignatureData sigData = sigFromByteArray(tradeSig);
-            okhttp3.Response response = null;
             Integer result = 500;
-            MediaType mediaType = MediaType.parse("application/octet-stream");
-
-            String v = Integer.toHexString(sigData.getV());
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken");
-            //sb.append("http://stormbird.duckdns.org:8080/api/claimToken");
-            Map<String, String> args = new HashMap<>();
-            args.put("address", toAddress);
-            args.put("indices", indices);
-            args.put("expiry", String.valueOf(expiry));
-            args.put("r", Numeric.toHexString(sigData.getR()));
-            args.put("s", Numeric.toHexString(sigData.getS()));
-            args.put("v", v);
-            sb.append(formPrologData(args));
-
             try
             {
+                MediaType mediaType = MediaType.parse("application/octet-stream");
+
+                String v = Integer.toHexString(sigData.getV());
+
+                StringBuilder sb = new StringBuilder();
+                //sb.append("http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken");
+                sb.append("http://stormbird.duckdns.org:8080/api/claimToken");
+                Map<String, String> args = new HashMap<>();
+                args.put("address", toAddress);
+                args.put("indices", indices);
+                args.put("expiry", String.valueOf(expiry));
+                args.put("r", Numeric.toHexString(sigData.getR()));
+                args.put("s", Numeric.toHexString(sigData.getS()));
+                args.put("v", v);
+                sb.append(formPrologData(args));
+
+
                 Request request = new Request.Builder()
                         .url(sb.toString())
                         .post(RequestBody.create(mediaType, ""))
                         .build();
 
-                response = httpClient.newCall(request).execute();
+                okhttp3.Response response = httpClient.newCall(request).execute();
 
                 result = response.code();
                 Log.d("RESP", response.body().string());

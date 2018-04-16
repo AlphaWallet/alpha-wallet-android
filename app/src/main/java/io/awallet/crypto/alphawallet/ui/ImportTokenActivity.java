@@ -282,7 +282,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     }
                     else {
                         onProgress(true);
-                        viewModel.performImport();
+                        viewModel.importThroughFeemaster();
+                        //viewModel.performImport();
                     }
                 }
                 break;

@@ -55,6 +55,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> showEmpty = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -144,6 +145,7 @@ public class TransactionsViewModel extends BaseViewModel {
     public LiveData<Transaction[]> transactions() {
         return transactions;
     }
+    public LiveData<Boolean> showEmpty() { return showEmpty; }
 
     public void prepare() {
         progress.postValue(true);
@@ -158,6 +160,7 @@ public class TransactionsViewModel extends BaseViewModel {
      * @param shouldShowProgress
      */
     private void fetchTransactions(boolean shouldShowProgress) {
+        showEmpty.postValue(false);
         if (wallet.getValue() != null)
         {
             if (fetchTransactionDisposable == null)
@@ -180,6 +183,18 @@ public class TransactionsViewModel extends BaseViewModel {
                     .find()
                     .subscribe(this::onDefaultWallet, this::onError);
         }
+    }
+
+    @Override
+    public void onError(Throwable throwable)
+    {
+        super.onError(throwable);
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+        {
+            fetchTransactionDisposable.dispose();
+        }
+        fetchTransactionDisposable = null;
+        showEmpty.postValue(false);
     }
 
     /**
@@ -244,7 +259,8 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         Log.d(TAG, "Enumerating tokens");
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
-        if (needsUpdate && txArray.length > 0) this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
+        if (needsUpdate && txArray.length > 0)
+            this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
         fetchTransactionDisposable = fetchTokensInteract
                 .fetchStored(wallet.getValue())
                 .subscribeOn(Schedulers.io())
@@ -265,8 +281,7 @@ public class TransactionsViewModel extends BaseViewModel {
      */
     private void categoriseAccountTransactions()
     {
-        Boolean last = progress.getValue();
-        if (txArray != null && txArray.length > 0 && last != null && last) {
+        if (txArray != null && txArray.length > 0) {
             progress.postValue(true);
         }
         else
@@ -274,6 +289,8 @@ public class TransactionsViewModel extends BaseViewModel {
             if (setupTokensInteract.getLocalTokensCount() == 0) {
                 Log.d(TAG, "No transactions");
                 progress.postValue(false);
+                showEmpty.postValue(true);
+                fetchTransactionDisposable = null;
                 return; // no local transactions, no ERC875 tokens, no need to check any further
             }
         }

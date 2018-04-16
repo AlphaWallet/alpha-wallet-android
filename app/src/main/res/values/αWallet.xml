@@ -246,4 +246,5 @@
     <string name="toolbar_title_my_wallets">My Wallets</string>
     <string name="facebook">Facebook</string>
     <string name="twitter">Twitter</string>
+    <string name="select_network">Select Network</string>
 </resources>

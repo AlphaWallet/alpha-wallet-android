@@ -298,4 +298,9 @@ public class Token implements Parcelable {
         if (currentState == null) return true;
         return !currentState.equals(balance.toString());
     }
+
+    public boolean isEthereum()
+    {
+        return (tokenInfo != null && tokenInfo.symbol.equals(ETH_SYMBOL));
+    }
 }

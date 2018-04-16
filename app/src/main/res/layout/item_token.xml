@@ -150,10 +150,10 @@
                 android:id="@+id/text_24_hrs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_gravity="center_horizontal"
-                android:textSize="15sp"
-                android:text="+10%" />
+                android:fontFamily="@font/font_semibold"
+                android:text="+0%"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/text_24_hrs_sub"
@@ -178,10 +178,10 @@
                 android:id="@+id/text_appreciation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_gravity="center_horizontal"
-                android:textSize="15sp"
-                android:text="$1,514" />
+                android:fontFamily="@font/font_semibold"
+                android:text="$0.00"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/text_appreciation_sub"
@@ -206,10 +206,10 @@
                 android:id="@+id/balance_currency"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_gravity="center_horizontal"
-                android:textSize="15sp"
-                android:text="$16,662" />
+                android:fontFamily="@font/font_semibold"
+                android:text="$0.00"
+                android:textSize="15sp" />
 
             <TextView
                 android:layout_width="wrap_content"

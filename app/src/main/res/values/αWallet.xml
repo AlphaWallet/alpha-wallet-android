@@ -51,7 +51,7 @@
     <string name="toolbar_ethereum_info">Ethereum Info</string>
     <string name="toolbar_header_transactions">Transactions</string>
     <string name="settings_my_wallet_address">My Wallet Address</string>
-    <string name="settings_notification">Notification Settings</string>
+    <string name="settings_notification">Notifications</string>
     <string name="settings_logout">Log Out</string>
     <string name="title_redeem_token">Redeem Asset</string>
     <string name="title_redeem">Redeem Ticket</string>

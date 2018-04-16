@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -34,7 +35,7 @@ public class NewSettingsFragment extends Fragment {
     private Wallet wallet;
     private TextView networksSubtext;
     private TextView walletsSubtext;
-    private android.support.v7.widget.AppCompatRadioButton notificationState;
+    private Switch notificationState;
     private Handler handler = new Handler();
 
     @Nullable
@@ -49,7 +50,7 @@ public class NewSettingsFragment extends Fragment {
 
         networksSubtext = view.findViewById(R.id.networks_subtext);
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
-        notificationState = view.findViewById(R.id.enabledBox);
+        notificationState = view.findViewById(R.id.switch_notifications);
 
         updateNotificationState();
 

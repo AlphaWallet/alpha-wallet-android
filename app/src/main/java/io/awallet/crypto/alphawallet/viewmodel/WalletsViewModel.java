@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.crashlytics.android.Crashlytics;
 import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -139,21 +138,21 @@ public class WalletsViewModel extends BaseViewModel
     }
 
     private void onExportWalletError(Throwable throwable) {
-        Crashlytics.logException(throwable);
+        //Crashlytics.logException(throwable);
         exportWalletError.postValue(
                 new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
                                 ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
     private void onDeleteWalletError(Throwable throwable) {
-        Crashlytics.logException(throwable);
+        //Crashlytics.logException(throwable);
         deleteWalletError.postValue(
                 new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
                                 ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
     private void onCreateWalletError(Throwable throwable) {
-        Crashlytics.logException(throwable);
+        //Crashlytics.logException(throwable);
         progress.postValue(false);
         createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
 	}

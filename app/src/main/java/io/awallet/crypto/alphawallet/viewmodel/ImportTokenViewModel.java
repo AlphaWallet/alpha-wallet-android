@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
@@ -18,6 +19,7 @@ import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
+import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import org.web3j.tx.Contract;
@@ -33,6 +35,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
+import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 /**
  * Created by James on 9/03/2018.
@@ -40,11 +43,13 @@ import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 
 public class ImportTokenViewModel extends BaseViewModel  {
     private static final long CHECK_BALANCE_INTERVAL = 10;
+    private static final String TAG = "ITVM";
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
+    private final FeeMasterService feeMasterService;
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -65,11 +70,13 @@ public class ImportTokenViewModel extends BaseViewModel  {
     ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
-                         SetupTokensInteract setupTokensInteract) {
+                         SetupTokensInteract setupTokensInteract,
+                         FeeMasterService feeMasterService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
+        this.feeMasterService = feeMasterService;
     }
 
     public LiveData<TicketRange> importRange() {
@@ -125,7 +132,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void fetchTokens() {
         importToken = null;
         disposable = fetchTokensInteract
-                .fetchList(new Wallet(importOrder.ownerAddress))
+                .fetchStored(new Wallet(importOrder.ownerAddress))
                 .subscribe(this::onTokens, this::onError, this::fetchTokensComplete);
     }
 
@@ -282,12 +289,14 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
-    public void performImport() {
-        try {
+    public void performImport()
+    {
+        try
+        {
             SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = SalesOrder.generateReverseTradeData(order);
-            System.out.println("Approx value of trade: " + order.price);
+            Log.d(TAG, "Approx value of trade: " + order.price);
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
@@ -297,6 +306,41 @@ public class ImportTokenViewModel extends BaseViewModel  {
         catch (SalesOrderMalformed e)
         {
             e.printStackTrace(); // TODO: add user interface handling of the exception.
+            error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Import Error."));
+        }
+    }
+
+    public void importThroughFeemaster(String url)
+    {
+        try
+        {
+            SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
+            disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), order)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::processFeemasterResult, this::onError);
+        }
+        catch (SalesOrderMalformed e)
+        {
+            e.printStackTrace(); // TODO: add user interface handling of the exception.
+            error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Import Error."));
+        }
+    }
+
+    private void processFeemasterResult(Integer result)
+    {
+        if ((result/100) == 2) newTransaction.postValue("Transaction accepted by server.");
+        else
+        {
+            switch (result)
+            {
+                case 401:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
+                    break;
+                default:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Transfer failed."));
+                    break;
+            }
         }
     }
 

@@ -35,6 +35,7 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -42,6 +43,7 @@ import io.awallet.crypto.alphawallet.util.KeyboardUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModelFactory;
+import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
@@ -82,7 +84,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     protected TransferTicketDetailViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
-    private Dialog dialog;
+    private AWalletAlertDialog dialog;
 
     private Ticket ticket;
     private TicketAdapter adapter;
@@ -148,6 +150,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
+        viewModel.userTransaction().observe(this, this::onUserTransaction);
 
         textQuantity = findViewById(R.id.text_quantity);
         toAddressError = findViewById(R.id.to_address_error);
@@ -344,23 +347,39 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
     }
 
-    private void onTransaction(String hash)
+    private void onTransaction(String success)
     {
         hideDialog();
-        dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.transaction_succeeded)
-                .setMessage(hash)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    //TODO: go back to ticket asset view page
-                    finish();
-                })
-                .setNeutralButton(R.string.copy, (dialog1, id) -> {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("transaction hash", hash);
-                    clipboard.setPrimaryClip(clip);
-                    finish();
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(success);
+        dialog.setIcon(AWalletAlertDialog.SUCCESS);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> finish());
+
+        dialog.show();
+    }
+
+    private void onUserTransaction(String hash)
+    {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(hash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
         dialog.show();
     }
 
@@ -377,11 +396,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         hideDialog();
         if (shouldShowProgress)
         {
-            dialog = new AlertDialog.Builder(this)
-                    .setTitle(R.string.title_dialog_sending)
-                    .setView(new ProgressBar(this))
-                    .setCancelable(false)
-                    .create();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setIcon(AWalletAlertDialog.NONE);
+            dialog.setTitle(R.string.title_dialog_sending);
+            dialog.setMessage(R.string.transfer);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
             dialog.show();
         }
     }
@@ -389,13 +409,13 @@ public class TransferTicketDetailActivity extends BaseActivity
     private void onError(ErrorEnvelope error)
     {
         hideDialog();
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.error_transaction_failed)
-                .setMessage(error.message)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    // Do nothing
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(error.message);
+        dialog.setCancelable(true);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 
@@ -421,9 +441,31 @@ public class TransferTicketDetailActivity extends BaseActivity
             viewModel.createTicketTransfer(
                     to,
                     ticket.getAddress(),
-                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), false),
+                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
                     Contract.GAS_PRICE,
                     Contract.GAS_LIMIT);
+
+            //select between feemaster or user-pays-gas
+            //Not sure if we will ever implement this
+//            String XMLContractAddress = ticket.getXMLProperty("address", this);
+//            if (XMLContractAddress.equalsIgnoreCase(ticket.getAddress()))
+//            {
+//                String feeMasterUrl = ticket.getXMLProperty("feemaster", this);
+//                viewModel.feeMasterCall(
+//                        feeMasterUrl,
+//                        to,
+//                        ticket,
+//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
+//            }
+//            else
+//            {
+//                viewModel.createTicketTransfer(
+//                        to,
+//                        ticket.getAddress(),
+//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+//                        Contract.GAS_PRICE,
+//                        Contract.GAS_LIMIT);
+//            }
         }
     }
 

@@ -82,6 +82,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
+        systemView.showProgress(false);
+
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
@@ -89,6 +91,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
+        viewModel.showEmpty().observe(this, this::showEmptyTx);
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
@@ -157,12 +160,23 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onError(ErrorEnvelope errorEnvelope) {
         if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
-            EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
-            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
-            systemView.showEmpty(emptyView);
+            showEmptyTx(true);
         }/* else {
             systemView.showError(getString(R.string.error_fail_load_transaction), this);
         }*/
+    }
+
+    private void showEmptyTx(boolean show) {
+        if (show)
+        {
+            EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
+            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
+            systemView.showEmpty(emptyView);
+        }
+        else
+        {
+            systemView.hide();
+        }
     }
 
     private void openExchangeDialog() {

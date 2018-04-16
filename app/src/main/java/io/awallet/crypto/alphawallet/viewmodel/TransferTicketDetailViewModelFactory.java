@@ -8,6 +8,7 @@ import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.router.TransferTicketDetailRouter;
+import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
 /**
@@ -21,23 +22,26 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     private MarketQueueService marketQueueService;
     private CreateTransactionInteract createTransactionInteract;
     private TransferTicketDetailRouter transferTicketDetailRouter;
+    private FeeMasterService feeMasterService;
 
     public TransferTicketDetailViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                                 FindDefaultWalletInteract findDefaultWalletInteract,
                                                 MarketQueueService marketQueueService,
                                                 CreateTransactionInteract createTransactionInteract,
-                                                TransferTicketDetailRouter transferTicketDetailRouter) {
+                                                TransferTicketDetailRouter transferTicketDetailRouter,
+                                                FeeMasterService feeMasterService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
+        this.feeMasterService = feeMasterService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter);
+        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService);
     }
 }
 

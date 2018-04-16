@@ -23,8 +23,8 @@ android {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 72
-        versionName "0.92"
+        versionCode 75
+        versionName "0.93"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -40,6 +40,7 @@ android {
         }
         release {
             minifyEnabled false
+            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

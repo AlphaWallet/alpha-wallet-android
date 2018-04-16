@@ -198,7 +198,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token thisToken = tsi.value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    if (token.hasPositiveBalance())
+                    if (token.hasPositiveBalance() || token.isEthereum())
                     {
                         items.add(new TokenSortedItem(token, tsi.weight));
                     }
@@ -233,7 +233,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         for (int i = 0; i < tokens.length; i++) {
             Token token = tokens[i];
-            if (token.tokenInfo.symbol.equals(ETH_SYMBOL) || token.hasPositiveBalance())
+            if (token.isEthereum() || token.hasPositiveBalance())
             {
                 switch (filterType)
                 {
@@ -259,7 +259,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         int weight = 0;
         String tokenName = token.getFullName();
-        if(token.tokenInfo.symbol.equals(ETH_SYMBOL)) return 5;
+        if(token.isEthereum()) return 5;
 
         int i = 4;
         int pos = 0;

@@ -438,26 +438,34 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         if (isValid)
         {
+            viewModel.createTicketTransfer(
+                    to,
+                    ticket.getAddress(),
+                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+                    Contract.GAS_PRICE,
+                    Contract.GAS_LIMIT);
+
             //select between feemaster or user-pays-gas
-            String XMLContractAddress = ticket.getXMLProperty("address", this);
-            if (XMLContractAddress.equalsIgnoreCase(ticket.getAddress()))
-            {
-                String feeMasterUrl = ticket.getXMLProperty("feemaster", this);
-                viewModel.feeMasterCall(
-                        feeMasterUrl,
-                        to,
-                        ticket,
-                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
-            }
-            else
-            {
-                viewModel.createTicketTransfer(
-                        to,
-                        ticket.getAddress(),
-                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
-                        Contract.GAS_PRICE,
-                        Contract.GAS_LIMIT);
-            }
+            //Not sure if we will ever implement this
+//            String XMLContractAddress = ticket.getXMLProperty("address", this);
+//            if (XMLContractAddress.equalsIgnoreCase(ticket.getAddress()))
+//            {
+//                String feeMasterUrl = ticket.getXMLProperty("feemaster", this);
+//                viewModel.feeMasterCall(
+//                        feeMasterUrl,
+//                        to,
+//                        ticket,
+//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
+//            }
+//            else
+//            {
+//                viewModel.createTicketTransfer(
+//                        to,
+//                        ticket.getAddress(),
+//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+//                        Contract.GAS_PRICE,
+//                        Contract.GAS_LIMIT);
+//            }
         }
     }
 

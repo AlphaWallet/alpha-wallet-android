@@ -97,6 +97,12 @@ public class SetupTokensInteract {
                 ct = thisTrans.operations[0].contract;
                 functionName = CONTRACT_CONSTRUCTOR;
                 newOps = thisTrans.operations;
+                ect = (ERC875ContractTransaction)ct;
+                if (ect.type == -5)
+                {
+                    ect.type = -2;
+                    requiredContracts.add(ect.address);
+                }
             }
             else if (data != null && data.functionData != null)
             {
@@ -176,6 +182,34 @@ public class SetupTokensInteract {
                     op.transactionId = thisTrans.hash;
                     //value in what?
                     op.value = String.valueOf(data.getFirstValue());
+                    break;
+                case "loadNewTickets(bytes32[])":
+                    ect.operation = data.functionData.functionName;
+                    op.from = thisTrans.from;
+                    op.to = token != null ? token.getAddress() : UNKNOWN_CONTRACT;
+                    op.transactionId = thisTrans.hash;
+                    op.value = String.valueOf(data.paramValues.size());
+                    break;
+                case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
+                    if (data.containsAddress(walletAddr))
+                    {
+                        ect.type = 1;
+                    }
+                    else
+                    {
+                        ect.type = -1;
+                    }
+                    ect.operation = data.functionData.functionName;
+                    op.from = thisTrans.from;
+                    op.to = data.getFirstAddress();
+                    op.transactionId = thisTrans.hash;
+                    //value in what?
+                    op.value = String.valueOf(data.getFirstValue());
+                    break;
+                case "endContract()":
+                    ect.operation = "Terminate";
+                    ct.name = thisTrans.to;
+                    ect.type = -2;
                     break;
                 case CONTRACT_CONSTRUCTOR:
                     ct.name = thisTrans.to;

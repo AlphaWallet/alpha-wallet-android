@@ -46,6 +46,8 @@ public class EtherscanTransaction
             o[0] = op;
             op.contract = ct;
             ct.operation = CONTRACT_CONSTRUCTOR;
+            ct.address = contractAddress;
+            ct.type = -5; // indicate that we need to load the contract
         }
         else
         {

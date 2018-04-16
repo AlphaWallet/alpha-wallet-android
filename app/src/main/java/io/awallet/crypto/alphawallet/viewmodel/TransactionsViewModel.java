@@ -158,7 +158,7 @@ public class TransactionsViewModel extends BaseViewModel {
      * @param shouldShowProgress
      */
     private void fetchTransactions(boolean shouldShowProgress) {
-        if (wallet != null)
+        if (wallet.getValue() != null)
         {
             if (fetchTransactionDisposable == null)
             {

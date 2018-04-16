@@ -82,6 +82,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
+        systemView.showProgress(false);
+
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);

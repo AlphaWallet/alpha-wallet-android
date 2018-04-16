@@ -878,10 +878,6 @@ public class TokenRepository implements TokenRepositoryType {
                     {
                         tokenList.add(result);
                     }
-                    else
-                    {
-                        tokenList.add(result);
-                    }
                 }
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }

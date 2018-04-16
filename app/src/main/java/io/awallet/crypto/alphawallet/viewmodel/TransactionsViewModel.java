@@ -281,6 +281,7 @@ public class TransactionsViewModel extends BaseViewModel {
      */
     private void categoriseAccountTransactions()
     {
+        Log.d(TAG, "Categorise: " + txArray.length);
         if (txArray != null && txArray.length > 0) {
             progress.postValue(true);
         }
@@ -307,6 +308,7 @@ public class TransactionsViewModel extends BaseViewModel {
      * @param txList - dummy param: not used here
      */
      private void startCheckingTokenInterations(Transaction[] txList) {
+         Log.d(TAG, "Check Token Interactions: " + txList.length);
          txArray = txList;
          tokenCheckList = setupTokensInteract.getTokenCheckList();
 
@@ -385,6 +387,7 @@ public class TransactionsViewModel extends BaseViewModel {
      */
     private void showTransactions(Transaction[] processedTransactions)
     {
+        Log.d(TAG, "Show Transactions: " + processedTransactions.length);
         progress.postValue(false);
         txArray = processedTransactions;
         if (processedTransactions.length > 0)

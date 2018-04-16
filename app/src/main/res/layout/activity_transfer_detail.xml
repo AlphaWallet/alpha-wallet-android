@@ -439,6 +439,35 @@
                         android:textColor="@color/text_black"
                         android:layout_marginTop="15dp"
                         android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/background_round_red"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_bold"
+                            android:text="@string/label_important"
+                            android:textAllCaps="true"
+                            android:textColor="@color/cancel_red"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_regular"
+                            android:gravity="center"
+                            android:text="@string/universal_link_notice"
+                            android:textColor="@color/cancel_red" />
+
+                    </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>

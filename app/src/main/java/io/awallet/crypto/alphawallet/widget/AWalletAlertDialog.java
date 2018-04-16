@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
@@ -21,14 +22,17 @@ public class AWalletAlertDialog extends Dialog {
     public static final int SUCCESS = R.drawable.ic_redeemed;
     public static final int ERROR = R.drawable.ic_error;
     public static final int NO_SCREENSHOT = R.drawable.ic_no_screenshot;
+    public static final int WARNING = R.drawable.ic_warning;
 
     private static AWalletAlertDialog dialog = null;
     private ImageView icon;
     private TextView titleText;
     private TextView messageText;
     private Button button;
+    private Button secondaryButton;
     private Context context;
     private ProgressBar progressBar;
+    private RelativeLayout viewContainer;
 
     public AWalletAlertDialog(@NonNull Activity activity) {
         super(activity);
@@ -43,11 +47,11 @@ public class AWalletAlertDialog extends Dialog {
         titleText = findViewById(R.id.dialog_main_text);
         messageText = findViewById(R.id.dialog_sub_text);
         button = findViewById(R.id.dialog_button1);
+        secondaryButton = findViewById(R.id.dialog_button2);
         progressBar = findViewById(R.id.dialog_progress);
+        viewContainer = findViewById(R.id.dialog_view);
 
-        titleText.setVisibility(View.GONE);
-        messageText.setVisibility(View.GONE);
-        button.setVisibility(View.GONE);
+        secondaryButton.setOnClickListener(v -> dismiss());
     }
 
     public void setProgressMode() {
@@ -77,6 +81,15 @@ public class AWalletAlertDialog extends Dialog {
         button.setOnClickListener(listener);
     }
 
+    public void setSecondaryButtonText(int resId) {
+        secondaryButton.setVisibility(View.VISIBLE);
+        secondaryButton.setText(context.getResources().getString(resId));
+    }
+
+    public void setSecondaryButtonListener(View.OnClickListener listener) {
+        secondaryButton.setOnClickListener(listener);
+    }
+
     public void setMessage(int resId) {
         messageText.setVisibility(View.VISIBLE);
         messageText.setText(context.getResources().getString(resId));
@@ -93,5 +106,9 @@ public class AWalletAlertDialog extends Dialog {
         } else {
             this.icon.setImageResource(resId);
         }
+    }
+
+    public void setView(View view) {
+        viewContainer.addView(view);
     }
 }

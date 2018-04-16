@@ -249,7 +249,7 @@ public class Ticket extends Token implements Parcelable
                 //reverse lookup the selected IDs
                 if (i < balanceArray.size())
                 {
-                    if (!first) sb.append(", ");
+                    if (!first) sb.append(",");
                     BigInteger ticketID = balanceArray.get(i);
                     sb.append(Numeric.toHexStringNoPrefix(ticketID));
                     first = false;
@@ -413,7 +413,7 @@ public class Ticket extends Token implements Parcelable
             if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
             if (!first)
             {
-                sb.append(", ");
+                sb.append(",");
             }
             first = false;
 

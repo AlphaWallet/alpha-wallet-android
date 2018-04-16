@@ -282,8 +282,15 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     }
                     else {
                         onProgress(true);
-                        viewModel.importThroughFeemaster();
-                        //viewModel.performImport();
+                        Ticket t = viewModel.getImportToken();
+                        if (t.getXMLProperty("address", this).equalsIgnoreCase(t.getAddress()))
+                        {
+                            viewModel.importThroughFeemaster(t.getXMLProperty("feemaster", this));
+                        }
+                        else
+                        {
+                            viewModel.performImport();
+                        }
                     }
                 }
                 break;

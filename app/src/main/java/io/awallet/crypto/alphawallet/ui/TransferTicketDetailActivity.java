@@ -35,6 +35,7 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -149,6 +150,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
+        viewModel.userTransaction().observe(this, this::onUserTransaction);
 
         textQuantity = findViewById(R.id.text_quantity);
         toAddressError = findViewById(R.id.to_address_error);
@@ -358,6 +360,29 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.show();
     }
 
+    private void onUserTransaction(String hash)
+    {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(hash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
+        dialog.show();
+    }
+
     private void hideDialog()
     {
         if (dialog != null && dialog.isShowing())
@@ -413,21 +438,27 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         if (isValid)
         {
-            viewModel.feeMasterCall(
-                    to,
-                    ticket,
-                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
+            //select between feemaster or user-pays-gas
+            String XMLContractAddress = ticket.getXMLProperty("address", this);
+            if (XMLContractAddress.equalsIgnoreCase(ticket.getAddress()))
+            {
+                String feeMasterUrl = ticket.getXMLProperty("feemaster", this);
+                viewModel.feeMasterCall(
+                        feeMasterUrl,
+                        to,
+                        ticket,
+                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
+            }
+            else
+            {
+                viewModel.createTicketTransfer(
+                        to,
+                        ticket.getAddress(),
+                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+                        Contract.GAS_PRICE,
+                        Contract.GAS_LIMIT);
+            }
         }
-
-//        if (isValid)
-//        {
-//            viewModel.createTicketTransfer(
-//                    to,
-//                    ticket.getAddress(),
-//                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), false),
-//                    Contract.GAS_PRICE,
-//                    Contract.GAS_LIMIT);
-//        }
     }
 
     @Override

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
   <contract>
-    <address type="issuing">0xa3347C8ED134444C25169872c90a6360D42b3691</address>
+    <address type="issuing">0xB032532c03ce9212749193e12E03bA8062808faD</address>
+    <network>3</network> //ROPSTEN
   </contract>
   <features>
     <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
@@ -11,6 +12,7 @@
       <trade method="universal-link" version="9">
         <prefix>https://app.awallet.io/</prefix>
       </trade>
+      <feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster>
       <redeem>
         <method name="QR"/>
         <!--

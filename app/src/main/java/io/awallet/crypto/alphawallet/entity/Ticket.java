@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -465,5 +466,23 @@ public class Ticket extends Token implements Parcelable
                 //TODO: Handle error
             }
         }
+    }
+
+    public String getXMLProperty(String property, BaseActivity activity)
+    {
+        String value;
+        try
+        {
+            AssetDefinition ad = new AssetDefinition("ticket.xml", activity.getResources());
+            value = ad.networkInfo.get(property);
+        }
+        catch (IOException | SAXException e)
+        {
+            e.printStackTrace();
+            //TODO: Handle error
+            value = "";
+        }
+
+        return value;
     }
 }

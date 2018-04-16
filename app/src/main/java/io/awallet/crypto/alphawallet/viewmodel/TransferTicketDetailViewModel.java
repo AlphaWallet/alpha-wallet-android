@@ -40,6 +40,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
+    private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -69,6 +70,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     }
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
+    public LiveData<String> userTransaction() { return userTransaction; }
 
     public void prepare(Ticket ticket)
     {
@@ -101,7 +103,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private void onCreateTransaction(String transaction)
     {
-        newTransaction.postValue(transaction);
+        userTransaction.postValue(transaction);
     }
 
     public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, long expiry)
@@ -150,9 +152,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void feeMasterCall(String to, Ticket t, String indices)
+    public void feeMasterCall(String url, String to, Ticket t, String indices)
     {
-        disposable = feeMasterService.generateAndSendFeemasterTransaction(defaultWallet.getValue(), to, t, 0, indices)
+        disposable = feeMasterService.generateAndSendFeemasterTransaction(url, defaultWallet.getValue(), to, t, 0, indices)
             .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::processResult, this::txError);

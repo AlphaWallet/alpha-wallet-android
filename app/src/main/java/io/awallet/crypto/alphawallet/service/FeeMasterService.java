@@ -43,18 +43,18 @@ public class FeeMasterService
     }
 
     //first generate and then sign the message
-    public Observable<Integer> generateAndSendFeemasterTransaction(Wallet wallet, String toAddress, Ticket ticket, long expiry, String indices)
+    public Observable<Integer> generateAndSendFeemasterTransaction(String url, Wallet wallet, String toAddress, Ticket ticket, long expiry, String indices)
     {
         return generateTicketArray(indices, ticket)
                 .flatMap(indicesArray -> getTradeSig(wallet, indicesArray, ticket.getAddress(), BigInteger.ZERO, expiry))
-                .flatMap(tradeSig -> sendFeemasterTransaction(toAddress, expiry, indices, tradeSig))
+                .flatMap(tradeSig -> sendFeemasterTransaction(url, toAddress, expiry, indices, tradeSig))
                 .toObservable();
     }
 
-    public Observable<Integer> handleFeemasterImport(Wallet wallet, SalesOrder order)
+    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, SalesOrder order)
     {
         return generateTicketString(order.tickets)
-                .flatMap(ticketStr -> sendFeemasterTransaction(wallet.address, order.expiry, ticketStr, order.signature))
+                .flatMap(ticketStr -> sendFeemasterTransaction(url, wallet.address, order.expiry, ticketStr, order.signature))
                 .toObservable();
     }
 
@@ -90,28 +90,23 @@ public class FeeMasterService
         });
     }
 
-    private Single<Integer> sendFeemasterTransaction(String toAddress, long expiry, String indices, byte[] tradeSig) {
+    private Single<Integer> sendFeemasterTransaction(String url, String toAddress, long expiry, String indices, byte[] tradeSig) {
         return Single.fromCallable(() -> {
             Sign.SignatureData sigData = sigFromByteArray(tradeSig);
-            Integer result = 500;
+            Integer result = 500; //fail by default
             try
             {
                 MediaType mediaType = MediaType.parse("application/octet-stream");
-
-                String v = Integer.toHexString(sigData.getV());
-
                 StringBuilder sb = new StringBuilder();
-                //sb.append("http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken");
-                sb.append("http://stormbird.duckdns.org:8080/api/claimToken");
+                sb.append(url);
                 Map<String, String> args = new HashMap<>();
                 args.put("address", toAddress);
                 args.put("indices", indices);
                 args.put("expiry", String.valueOf(expiry));
                 args.put("r", Numeric.toHexString(sigData.getR()));
                 args.put("s", Numeric.toHexString(sigData.getS()));
-                args.put("v", v);
+                args.put("v", Integer.toHexString(sigData.getV()));
                 sb.append(formPrologData(args));
-
 
                 Request request = new Request.Builder()
                         .url(sb.toString())

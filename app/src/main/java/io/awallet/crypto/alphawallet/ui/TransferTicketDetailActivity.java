@@ -520,10 +520,9 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void linkReady(String universalLink)
     {
-        //how many tickets are we selling?
-        TextView textQuantity = findViewById(R.id.text_quantity);
-        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
-        String qty = textQuantity.getText().toString() + " " +
+        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
+        String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 

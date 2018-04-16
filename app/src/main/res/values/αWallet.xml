@@ -72,9 +72,9 @@
     <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
     <string name="set_price_subtext_abr_magic">Set Ethereum price for magic link:</string>
     <string name="transfer_tickets">Transfer Tickets</string>
-    <string name="link_valid_until">The link will be valid until:</string>
+    <string name="link_valid_until">The link will be valid until %1s %2s</string>
     <string name="transfer_method">Transfer Method:</string>
-    <string name="generate_pick_up_link">Generate a pick-up link</string>
+    <string name="generate_pick_up_link">Generate a MagicLink</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
 
@@ -190,10 +190,10 @@
     <string name="depreciation">DEPRECIATION</string>
     <string name="ticket_unavailable">Unavailable</string>
     <string name="generate_free_transfer_link">Create free transfer link?</string>
-    <string name="send_universal_link">Generate Link</string>
+    <string name="send_universal_link">Share MagicLink</string>
     <string name="generate_sale_transfer_link">Generate Sale Link</string>
     <string name="place_tickets_marketplace">List on marketplace</string>
-    <string name="send_universal_sale_link">Share Magic Link</string>
+    <string name="send_universal_sale_link">Share MagicLink</string>
     <string name="market_listing"></string>
     <string name="invalid_ticket">Invalid Ticket</string>
     <string name="hint_time">--:--</string>
@@ -228,7 +228,7 @@
     <string name="action_universal_link">UniversalLink</string>
     <string name="action_marketplace">Marketplace</string>
     <string name="sell_thru_universal_link">Sell through a UniversalLink</string>
-    <string name="universal_link_expiry_on">UniversalLink expiry on:</string>
+    <string name="universal_link_expiry_on">MagicLink expiry on:</string>
     <string name="confirm_sale_total">Total: %s</string>
     <string name="share_universal_link">Share UniversalLink</string>
     <string name="select_option_to_transfer">Select Option to Transfer</string>
@@ -246,5 +246,9 @@
     <string name="toolbar_title_my_wallets">My Wallets</string>
     <string name="facebook">Facebook</string>
     <string name="twitter">Twitter</string>
-    <string name="select_network">Select Network</string>
+    <string name="select_network">Select Network:</string>
+    <string name="title_select_ticket_quantity">Select Ticket Quantity:</string>
+    <string name="title_select_transfer_method">Select Transfer Method:</string>
+    <string name="title_set_magiclink_expiry">Set MagicLink Expiry:</string>
+    <string name="title_input_wallet_address">Input Wallet Address:</string>
 </resources>

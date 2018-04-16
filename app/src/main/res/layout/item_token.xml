@@ -104,6 +104,27 @@
             android:text="@string/ethereum"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />
+
+        <View
+            android:id="@+id/contract_seperator"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"
+            android:layout_marginTop="2dp"
+            android:background="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/contract_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_semibold"
+            android:text="@string/erc20"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="gone"
+            android:textSize="11sp" />
     </LinearLayout>
 
     <View

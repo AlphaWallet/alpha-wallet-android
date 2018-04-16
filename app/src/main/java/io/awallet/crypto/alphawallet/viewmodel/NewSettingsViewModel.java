@@ -17,6 +17,7 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.ManageWalletsRouter;
@@ -38,6 +39,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ManageWalletsRouter manageWalletsRouter;
     private final HomeRouter homeRouter;
+    private final PreferenceRepositoryType preferenceRepository;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -53,7 +55,8 @@ public class NewSettingsViewModel extends BaseViewModel {
             HelpRouter helpRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            PreferenceRepositoryType preferenceRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -62,6 +65,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.manageWalletsRouter = manageWalletsRouter;
         this.homeRouter = homeRouter;
+        this.preferenceRepository = preferenceRepository;
     }
 
     public void showHome(Context context, boolean clearStack, boolean fromSettings) {
@@ -84,6 +88,15 @@ public class NewSettingsViewModel extends BaseViewModel {
                 return;
             }
         }
+    }
+
+    public boolean getNotificationState()
+    {
+        return preferenceRepository.getNotificationsState();
+    }
+    public void setNotificationState(boolean notificationState)
+    {
+        preferenceRepository.setNotificationState(notificationState);
     }
 
     public String[] getNetworkList() {

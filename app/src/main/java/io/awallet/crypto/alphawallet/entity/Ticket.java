@@ -83,6 +83,11 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
+    public boolean hasPositiveBalance() {
+        return (getTicketCount() > 0);
+    }
+
+    @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
         else return intArrayToString(balanceArray, true);
@@ -181,6 +186,7 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
+        tokenHolder.textAppreciation.setText("--");
         tokenHolder.issuer.setText(TicketDecode.getIssuer());
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
@@ -193,7 +199,6 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(range.tokenIds, false);
     }
 
-    @Override
     public int[] getTicketIndicies(String ticketIds)
     {
         List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
@@ -248,7 +253,7 @@ public class Ticket extends Token implements Parcelable
                 //reverse lookup the selected IDs
                 if (i < balanceArray.size())
                 {
-                    if (!first) sb.append(", ");
+                    if (!first) sb.append(",");
                     BigInteger ticketID = balanceArray.get(i);
                     sb.append(Numeric.toHexStringNoPrefix(ticketID));
                     first = false;
@@ -412,7 +417,7 @@ public class Ticket extends Token implements Parcelable
             if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
             if (!first)
             {
-                sb.append(", ");
+                sb.append(",");
             }
             first = false;
 

@@ -326,6 +326,7 @@ public class SellDetailActivity extends BaseActivity {
         });
 
         textQuantity.setText("1");
+        prunedIds = ticket.pruneIDList(ticketIds, 1);
     }
 
     private void initDatePicker() {
@@ -503,7 +504,7 @@ public class SellDetailActivity extends BaseActivity {
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.place_tickets_marketplace);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.create_sell_order);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());

@@ -7,4 +7,7 @@ public interface PreferenceRepositoryType {
 	String getDefaultNetwork();
 	void setDefaultNetwork(String netName);
 
+	boolean getNotificationsState();
+	void setNotificationState(boolean state);
+
 }

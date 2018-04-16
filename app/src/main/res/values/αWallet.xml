@@ -246,4 +246,8 @@
     <string name="toolbar_title_my_wallets">My Wallets</string>
     <string name="facebook">Facebook</string>
     <string name="twitter">Twitter</string>
+    <string name="erc20">ERC 20</string>
+    <string name="erc875">ERC 875</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
 </resources>

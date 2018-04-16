@@ -434,6 +434,7 @@
                                 android:visibility="gone" />
                         </LinearLayout>
                     </LinearLayout>
+                    <include layout="@layout/item_universal_link_warning" />
                 </LinearLayout>
 
             </LinearLayout>

@@ -102,6 +102,16 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 		}
 	}
 
+	public void showSwipe()
+	{
+		swipeRefreshLayout.setRefreshing(true);
+	}
+
+	public void showProgress()
+	{
+		progress.setVisibility(VISIBLE);
+	}
+
 	public void showError(@Nullable String message, @Nullable OnClickListener onTryAgainClickListener) {
 		if (recyclerView != null && recyclerView.getAdapter() != null && recyclerView.getAdapter().getItemCount() > 0) {
 			hide();

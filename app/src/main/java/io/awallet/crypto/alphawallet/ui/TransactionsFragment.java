@@ -87,7 +87,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
@@ -142,22 +141,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
-    }
-
-    private void onBalanceChanged(Map<String, String> balance) {
-//        ActionBar actionBar = getSupportActionBar();
-//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-//        Wallet wallet = viewModel.defaultWallet().getValue();
-//        if (actionBar == null || networkInfo == null || wallet == null) {
-//            return;
-//        }
-//        if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
-//            actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//            actionBar.setSubtitle("");
-//        } else {
-//            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
-//            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//        }
     }
 
     private void onTransactions(Transaction[] transaction) {

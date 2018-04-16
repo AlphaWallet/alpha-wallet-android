@@ -38,6 +38,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView issuer;
     public final TextView text24HoursSub;
     public final TextView textAppreciationSub;
+    public final TextView contractType;
+    public final View contractSeparator;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -55,6 +57,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         issuer = findViewById(R.id.issuer);
         text24HoursSub = findViewById(R.id.text_24_hrs_sub);
         textAppreciationSub = findViewById(R.id.text_appreciation_sub);
+        contractType = findViewById(R.id.contract_type);
+        contractSeparator = findViewById(R.id.contract_seperator);
         itemView.setOnClickListener(this);
     }
 
@@ -62,6 +66,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
         try {
+            contractType.setVisibility(View.GONE);
+            contractSeparator.setVisibility(View.GONE);
             // We handled NPE. Exception handling is expensive, but not impotent here
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
@@ -148,8 +154,19 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         spannable.setSpan(new ForegroundColorSpan(color),
                 convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         this.textAppreciation.setText(spannable);
+    }
 
+    public boolean needsUpdate()
+    {
+        return (token != null && token.needsUpdate());
+    }
 
+    public void updateHeading()
+    {
+        if (token != null)
+        {
+            token.checkUpdateTimeValid(getContext(), this);
+        }
     }
 
     protected void fillEmpty() {

@@ -99,10 +99,6 @@
             android:label="@string/title_tokens" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TicketTransferActivity"
-            android:label="@string/ticket_transfer_title" />
-
-        <activity
             android:name="io.awallet.crypto.alphawallet.ui.SellTicketActivity"
             android:label="@string/create_sell_order" />
 

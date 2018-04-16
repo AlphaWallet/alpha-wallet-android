@@ -310,12 +310,12 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
     }
 
-    public void importThroughFeemaster()
+    public void importThroughFeemaster(String url)
     {
         try
         {
             SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
-            disposable = feeMasterService.handleFeemasterImport(wallet.getValue(), order)
+            disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::processFeemasterResult, this::onError);

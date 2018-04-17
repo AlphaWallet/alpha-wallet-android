@@ -235,7 +235,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
             }
         }
 
-        if (newBalance.size() == 0 || newBalance.size() != importToken.balanceArray.size())
+        if (newBalance.size() == 0 || newBalance.size() != importOrder.tickets.length)
         {
             //tickets already imported
             invalidRange.setValue(newBalance.size());

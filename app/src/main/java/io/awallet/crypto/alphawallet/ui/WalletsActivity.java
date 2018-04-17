@@ -270,7 +270,7 @@ public class WalletsActivity extends BaseActivity implements
         //set new wallet
 		viewModel.setDefaultWallet(wallet);
 		isSetDefault = true;
-        backupWarning.show(wallet);
+		//backupWarning.show(wallet);
     }
 
     private void onLaterBackup(View view, Wallet wallet) {

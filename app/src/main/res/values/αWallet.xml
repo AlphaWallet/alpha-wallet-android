@@ -74,7 +74,7 @@
     <string name="transfer_tickets">Transfer Tickets</string>
     <string name="link_valid_until">The link will be valid until:</string>
     <string name="transfer_method">Transfer Method:</string>
-    <string name="generate_pick_up_link">Generate a pick-up link</string>
+    <string name="generate_pick_up_link">Generate a UniversalLink transfer</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
 

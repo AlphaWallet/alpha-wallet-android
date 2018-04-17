@@ -201,7 +201,6 @@ public class SetupTokensInteract {
                         ect.operation = "Pass To";
                         ect.type = -1;
                     }
-                    ect.operation = data.functionData.functionName;
                     op.from = thisTrans.from;
                     op.to = data.getFirstAddress();
                     op.transactionId = thisTrans.hash;

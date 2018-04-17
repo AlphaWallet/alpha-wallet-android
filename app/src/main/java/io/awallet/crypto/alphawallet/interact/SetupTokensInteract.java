@@ -193,10 +193,12 @@ public class SetupTokensInteract {
                 case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
                     if (data.containsAddress(walletAddr))
                     {
+                        ect.operation = "Pass From";
                         ect.type = 1;
                     }
                     else
                     {
+                        ect.operation = "Pass To";
                         ect.type = -1;
                     }
                     ect.operation = data.functionData.functionName;

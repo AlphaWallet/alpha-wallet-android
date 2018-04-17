@@ -13,8 +13,10 @@ import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.SellDetailRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
+import io.awallet.crypto.alphawallet.ui.SellDetailActivity;
 
 import java.math.BigInteger;
 
@@ -37,6 +39,7 @@ public class SellDetailModel extends BaseViewModel {
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
+    private final AssetDisplayRouter assetDisplayRouter;
 
     private byte[] linkMessage;
 
@@ -44,12 +47,14 @@ public class SellDetailModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
                           MarketQueueService marketQueueService,
                     CreateTransactionInteract createTransactionInteract,
-                    SellDetailRouter sellDetailRouter) {
+                    SellDetailRouter sellDetailRouter,
+                    AssetDisplayRouter assetDisplayRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
+        this.assetDisplayRouter = assetDisplayRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -131,5 +136,10 @@ public class SellDetailModel extends BaseViewModel {
             //TODO: Display appropriate error to user
             sm.printStackTrace();
         }
+    }
+
+    public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)
+    {
+        assetDisplayRouter.open(ctx, ticket, isClearStack);
     }
 }

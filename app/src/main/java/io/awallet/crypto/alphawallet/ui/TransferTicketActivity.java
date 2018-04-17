@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -30,6 +32,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 13/02/2018.
@@ -41,6 +44,8 @@ public class TransferTicketActivity extends BaseActivity
     protected TransferTicketViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
+
+    private FinishReceiver finishReceiver;
 
     public TextView ids;
     public TextView selected;
@@ -77,6 +82,8 @@ public class TransferTicketActivity extends BaseActivity
         nextButton.setOnClickListener(v -> {
             onNext();
         });
+
+        finishReceiver = new FinishReceiver(this);
     }
 
     private void setupSalesOrder()
@@ -100,6 +107,13 @@ public class TransferTicketActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         viewModel.prepare(ticket);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
     }
 
     private void onNext() {

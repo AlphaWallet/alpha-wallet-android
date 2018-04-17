@@ -1,13 +1,17 @@
 package io.awallet.crypto.alphawallet.ui;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.IntentService;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -47,6 +51,7 @@ import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
@@ -66,6 +71,7 @@ import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 21/02/2018.
@@ -74,6 +80,7 @@ import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 public class TransferTicketDetailActivity extends BaseActivity
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
+    private static final int SEND_INTENT_REQUEST_CODE = 2;
     private static final int CHOOSE_QUANTITY = 0;
     private static final int PICK_TRANSFER_METHOD = 1;
     private static final int TRANSFER_USING_LINK = 2;
@@ -85,6 +92,8 @@ public class TransferTicketDetailActivity extends BaseActivity
     private SystemView systemView;
     private ProgressView progressView;
     private AWalletAlertDialog dialog;
+
+    private FinishReceiver finishReceiver;
 
     private Ticket ticket;
     private TicketAdapter adapter;
@@ -206,6 +215,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         });
 
         setupScreen();
+
+        finishReceiver = new FinishReceiver(this);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -372,13 +383,11 @@ public class TransferTicketDetailActivity extends BaseActivity
             ClipData clip = ClipData.newPlainText("transaction hash", hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
-            new HomeRouter().open(this, true);
-            finish();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
-            new HomeRouter().open(this, true);
-            finish();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.show();
     }
@@ -478,6 +487,13 @@ public class TransferTicketDetailActivity extends BaseActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
+    }
+
     private void onTicketIdClick(View view, TicketRange range)
     {
         Context context = view.getContext();
@@ -487,8 +503,9 @@ public class TransferTicketDetailActivity extends BaseActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == BARCODE_READER_REQUEST_CODE)
+        switch (requestCode)
         {
+            case BARCODE_READER_REQUEST_CODE:
             if (resultCode == CommonStatusCodes.SUCCESS)
             {
                 if (data != null)
@@ -511,10 +528,13 @@ public class TransferTicketDetailActivity extends BaseActivity
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
                                             CommonStatusCodes.getStatusCodeString(resultCode)));
             }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
+
+            case SEND_INTENT_REQUEST_CODE:
+                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                break;
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -575,7 +595,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
         sendIntent.setType("text/plain");
-        startActivity(sendIntent);
+        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
 
     private boolean isAddressValid(String address)

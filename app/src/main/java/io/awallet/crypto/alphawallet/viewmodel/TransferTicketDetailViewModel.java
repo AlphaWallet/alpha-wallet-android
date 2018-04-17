@@ -17,6 +17,7 @@ import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.repository.TokenRepository;
+import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketDetailRouter;
 import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
@@ -48,6 +49,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final FeeMasterService feeMasterService;
+    private final AssetDisplayRouter assetDisplayRouter;
 
     private byte[] linkMessage;
 
@@ -56,13 +58,15 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
                                   TransferTicketDetailRouter transferTicketDetailRouter,
-                                  FeeMasterService feeMasterService) {
+                                  FeeMasterService feeMasterService,
+                                  AssetDisplayRouter assetDisplayRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.feeMasterService = feeMasterService;
+        this.assetDisplayRouter = assetDisplayRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -180,5 +184,10 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     break;
             }
         }
+    }
+
+    public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)
+    {
+        assetDisplayRouter.open(ctx, ticket, isClearStack);
     }
 }

@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import org.xml.sax.SAXException;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
@@ -38,6 +40,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 22/01/2018.
@@ -54,6 +57,8 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private SystemView systemView;
     private ProgressView progressView;
     private RecyclerView list;
+
+    private FinishReceiver finishReceiver;
 
     private Ticket ticket;
     private TicketAdapter adapter;
@@ -97,6 +102,8 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);
         findViewById(R.id.button_transfer).setOnClickListener(this);
+
+        finishReceiver = new FinishReceiver(this);
     }
 
     @Override
@@ -104,6 +111,13 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     {
         super.onResume();
         viewModel.prepare(ticket);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
     }
 
     private void onTokenUpdate(Token t)

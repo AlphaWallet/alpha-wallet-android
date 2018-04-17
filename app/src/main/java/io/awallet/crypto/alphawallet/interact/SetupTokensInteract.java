@@ -350,6 +350,7 @@ public class SetupTokensInteract {
     public Single<Transaction[]> processTransactions(Wallet wallet)
     {
         return Single.fromCallable(() -> {
+            Transaction[] processedTransactions = new Transaction[0];
             try {
                 for (TokenTransaction thisTokenTrans : ttxMap.values()) {
                     Transaction thisTrans = thisTokenTrans.transaction;
@@ -364,14 +365,14 @@ public class SetupTokensInteract {
                     }
                 }
 
-                Transaction[] processedTransactions = txMap.values().toArray(new Transaction[txMap.size()]);
+                processedTransactions = txMap.values().toArray(new Transaction[txMap.size()]);
 
                 //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
-                return processedTransactions;
             }
-            finally {
-
+            catch (Exception e) {
+                e.printStackTrace();
             }
+            return processedTransactions;
         });
     }
 

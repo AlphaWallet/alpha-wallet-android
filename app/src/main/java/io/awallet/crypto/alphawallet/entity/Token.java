@@ -245,23 +245,16 @@ public class Token implements Parcelable {
     public String integerListToString(List<Integer> intList, boolean keepZeros)
     {
         if (intList == null) return "";
-        String displayIDs = "";
         boolean first = true;
         StringBuilder sb = new StringBuilder();
         for (Integer id : intList)
         {
             if (!keepZeros && id == 0) continue;
-            if (!first)
-            {
-                sb.append(",");
-            }
-            first = false;
-
+            if (!first)sb.append(",");
             sb.append(String.valueOf(id));
         }
 
-        displayIDs = sb.toString();
-        return displayIDs;
+        return sb.toString();
     }
 
     public int getTicketCount()

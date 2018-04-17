@@ -16,7 +16,8 @@
       <trade method="universal-link" version="9">
         <prefix>https://app.awallet.io/</prefix>
       </trade>
-      <feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster>
+      <!--<feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster> http://stormbird.duckdns.org:8080/api/claimToken-->
+      <feemaster>http://stormbird.duckdns.org:8080/api/claimToken</feemaster>
       <redeem>
         <method name="QR"/>
         <!--

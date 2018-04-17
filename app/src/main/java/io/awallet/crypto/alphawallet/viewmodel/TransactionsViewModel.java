@@ -85,6 +85,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private List<Token> tokenCheckList;
     private boolean needsUpdate = false;
+    private String xmlContractAddress = null;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -167,7 +168,7 @@ public class TransactionsViewModel extends BaseViewModel {
             {
                 Log.d(TAG, "Fetch start");
                 setupTokensInteract.setWalletAddr(wallet.getValue().address);
-                progress.postValue(shouldShowProgress);
+                //progress.postValue(shouldShowProgress);
                 needsUpdate = true;
                 fetchTransactionDisposable =
                         fetchTransactionsInteract.fetchCached(wallet.getValue())
@@ -273,6 +274,16 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onTokens(Token[] tokens) {
         Log.d(TAG, "Found " + tokens.length + " Stored tokens");
         setupTokensInteract.setTokens(tokens);
+        for (Token t : tokens)
+        {
+            if (xmlContractAddress != null && t.getAddress().equalsIgnoreCase(xmlContractAddress))
+                xmlContractAddress = null;
+        }
+
+        if (xmlContractAddress != null && !setupTokensInteract.getRequiredContracts().contains(xmlContractAddress))
+        {
+            setupTokensInteract.getRequiredContracts().add(xmlContractAddress);
+        }
     }
 
     /**
@@ -287,6 +298,13 @@ public class TransactionsViewModel extends BaseViewModel {
         }
         else
         {
+            //load contract at XML address if required
+            if (setupTokensInteract.getRequiredContracts().size() > 0)
+            {
+                //still need to load the contract
+                showTransactions(txArray);
+            }
+
             if (setupTokensInteract.getLocalTokensCount() == 0) {
                 Log.d(TAG, "No transactions");
                 progress.postValue(false);
@@ -311,7 +329,6 @@ public class TransactionsViewModel extends BaseViewModel {
          Log.d(TAG, "Check Token Interactions: " + txList.length);
          txArray = txList;
          tokenCheckList = setupTokensInteract.getTokenCheckList();
-
          consumeTokenCheckList();
      }
 
@@ -368,18 +385,28 @@ public class TransactionsViewModel extends BaseViewModel {
     private void processTokenTransactions()
     {
         Log.d(TAG, "Processing " + setupTokensInteract.getMapSize() + " Map Transactions. " + setupTokensInteract.getLocalTokensCount() + " Tokens known.");
-        fetchTransactionDisposable = setupTokensInteract
-                .processTransactions(wallet.getValue())
-                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showTransactions, this::onError);
+
+        if (setupTokensInteract.getMapSize() == 0)
+        {
+            //go straight to show
+            showTransactions(txArray);
+        }
+        else
+        {
+            fetchTransactionDisposable = setupTokensInteract
+                    .processTransactions(wallet.getValue())
+                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showTransactions, this::onError);
+        }
     }
 
     private void onTxCount(Transaction[] tx)
     {
         Log.d(TAG, "Stored Transactions " + tx.length);
     }
+
 
     /**
      * 7. finally receive the list of parsed transactions and update the list adapter
@@ -471,7 +498,7 @@ public class TransactionsViewModel extends BaseViewModel {
         else
         {
             //post a waiting dialog to appease the user
-            progress.postValue(true);
+            //progress.postValue(true);
             Log.d(TAG, "must already be running, wait until termination");
         }
     }
@@ -575,5 +602,10 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
+    }
+
+    public void setXMLContractAddress(String address)
+    {
+        xmlContractAddress = address;
     }
 }

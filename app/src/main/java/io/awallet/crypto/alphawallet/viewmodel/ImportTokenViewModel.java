@@ -223,17 +223,25 @@ public class ImportTokenViewModel extends BaseViewModel  {
         List<BigInteger> newBalance = new ArrayList<>();
         //calculate USD price of tickets
         priceUsd = importOrder.price * ethToUsd;
+
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {
                 BigInteger ticketId = importToken.balanceArray.get(index);
-                if (ticketId.compareTo(BigInteger.ZERO) != 0) {
-                    newBalance.add(ticketId);
+                if (ticketId.compareTo(BigInteger.ZERO) != 0)
+                {
+                    newBalance.add(ticketId); //ticket is there
                 }
             }
         }
 
-        if (newBalance.size() > 0 && balanceChange(newBalance)) {
+        if (newBalance.size() == 0 || newBalance.size() != importToken.balanceArray.size())
+        {
+            //tickets already imported
+            invalidRange.setValue(newBalance.size());
+        }
+        else if (balanceChange(newBalance))
+        {
             availableBalance = newBalance;
             TicketRange range = new TicketRange(availableBalance.get(0), importToken.getAddress());
             for (int i = 1; i < availableBalance.size(); i++)
@@ -242,11 +250,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
             }
             importRange.setValue(range);
             regularBalanceCheck();
-        }
-        else if (newBalance.size() == 0)
-        {
-            //tickets already imported
-            invalidRange.setValue(importOrder.ticketCount);
         }
     }
 

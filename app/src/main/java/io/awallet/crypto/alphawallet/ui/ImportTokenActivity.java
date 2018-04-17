@@ -29,6 +29,7 @@ import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.IMPORT_STRING;
 
 /**
@@ -163,11 +164,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Ticket ticket = viewModel.getImportToken();
         SalesOrder order = viewModel.getSalesOrder();
 
-        String ethPrice = getEthString(order.price) + " ETH";
+        String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
         String priceUsd = "$" + getUsdString(viewModel.getUSDPrice());
 
         if (order.price == 0) {
-            priceETH.setText("Free import");
+            priceETH.setText(R.string.free_import);
             priceETH.setVisibility(View.VISIBLE);
             priceUSD.setVisibility(View.GONE);
         }
@@ -185,18 +186,27 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
 
-        importTxt.setText("Ticket Valid to Import");
+        importTxt.setText(R.string.ticket_import_valid);
 
         ticket.displayTicketHolder(ticketRange, this);
     }
 
     private void invalidTicket(int count)
     {
-        importTxt.setText("Ticket already imported");
+        SalesOrder order = viewModel.getSalesOrder();
+        if (count == 0)
+        {
+            importTxt.setText(R.string.ticket_already_imported);
+        }
+        else
+        {
+            importTxt.setText(R.string.ticket_range_inavlid);
+        }
+
         setTicket(false, false, true);
         Ticket t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
-        String importText = String.valueOf(count) + "x ";
+        String importText = String.valueOf(order.ticketCount) + "x ";
         importText += t.getFullName();
 
         tv.setText(importText);
@@ -253,6 +263,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             ClipData clip = ClipData.newPlainText("transaction hash", hash);
             clipboard.setPrimaryClip(clip);
             aDialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
+        aDialog.setOnCancelListener(v -> {
             new HomeRouter().open(this, true);
             finish();
         });

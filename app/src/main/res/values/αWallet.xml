@@ -253,4 +253,8 @@
     <string name="why_alphawallet_eth">Currently, Ethereum is the best and largest blockchain for developing smart contract application and services. AlphaWallet starts with supporting Ethereum blockchain and helps improving its technology.</string>
     <string name="how_i_get_money">You can convert Ethereum to fiat money and transfer it to your bank account through any cryptocurrency exchange.</string>
     <string name="how_i_transfer_into_wallet">You can provide your wallet address to the sender. They can transfer ETH to you with your wallet address.</string>
+    <string name="ticket_import_valid">Tickets Valid to Import</string>
+    <string name="ticket_already_imported">Tickets already imported</string>
+    <string name="ticket_range_inavlid">Tickets partially imported</string>
+    <string name="free_import">Free Import</string>
 </resources>

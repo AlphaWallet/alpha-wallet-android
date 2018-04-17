@@ -28,13 +28,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+
+import org.web3j.abi.datatypes.Address;
+import org.web3j.tx.Contract;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -98,7 +110,9 @@ public class TransferTicketDetailActivity extends BaseActivity
     private Ticket ticket;
     private TicketAdapter adapter;
 
+    private TextView titleText;
     private TextView toAddressError;
+    private TextView validUntil;
     private EditText toAddressEditText;
     private ImageButton qrImageView;
     private TextView textQuantity;
@@ -162,6 +176,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.userTransaction().observe(this, this::onUserTransaction);
 
         textQuantity = findViewById(R.id.text_quantity);
+        titleText = findViewById(R.id.title_transfer);
+        validUntil = findViewById(R.id.text_valid_until);
         toAddressError = findViewById(R.id.to_address_error);
 
         pickTransferAddress = findViewById(R.id.layout_addressbar);
@@ -170,7 +186,40 @@ public class TransferTicketDetailActivity extends BaseActivity
         pickExpiryDate = findViewById(R.id.layout_date_picker);
 
         expiryDateEditText = findViewById(R.id.edit_expiry_date);
+        expiryDateEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validUntil.setText(getString(R.string.link_valid_until, s.toString(), expiryTimeEditText.getText().toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         expiryTimeEditText = findViewById(R.id.edit_expiry_time);
+        expiryTimeEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validUntil.setText(getString(R.string.link_valid_until, expiryDateEditText.getText().toString(), s.toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         pickLink = findViewById(R.id.radio_pickup_link);
         pickTransfer = findViewById(R.id.radio_transfer_now);
@@ -248,29 +297,34 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void setupRadioButtons()
     {
+        buttonLinkPick.setSelected(true);
         buttonLinkPick.setOnClickListener((View v) -> {
-                                              pickLink.setChecked(true);
-                                              pickTransfer.setChecked(false);
-                                          }
-        );
+            pickLink.setChecked(true);
+            pickTransfer.setChecked(false);
+            buttonLinkPick.setSelected(true);
+            buttonTransferPick.setSelected(false);
+        });
 
         buttonTransferPick.setOnClickListener((View v) -> {
-                                                  pickLink.setChecked(false);
-                                                  pickTransfer.setChecked(true);
-                                              }
-        );
+            pickLink.setChecked(false);
+            pickTransfer.setChecked(true);
+            buttonLinkPick.setSelected(false);
+            buttonTransferPick.setSelected(true);
+        });
 
         pickLink.setOnClickListener((View v) -> {
-                                        pickLink.setChecked(true);
-                                        pickTransfer.setChecked(false);
-                                    }
-        );
+            pickLink.setChecked(true);
+            pickTransfer.setChecked(false);
+            buttonLinkPick.setSelected(true);
+            buttonTransferPick.setSelected(false);
+        });
 
         pickTransfer.setOnClickListener((View v) -> {
-                                            pickLink.setChecked(false);
-                                            pickTransfer.setChecked(true);
-                                        }
-        );
+            pickLink.setChecked(false);
+            pickTransfer.setChecked(true);
+            buttonLinkPick.setSelected(false);
+            buttonTransferPick.setSelected(true);
+        });
     }
 
     private int getNextState()
@@ -340,10 +394,13 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             case CHOOSE_QUANTITY:
                 initQuantitySelector();
+                pickTicketQuantity.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_select_ticket_quantity);
                 break;
             case PICK_TRANSFER_METHOD:
                 setupRadioButtons();
                 pickTransferMethod.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_select_transfer_method);
                 break;
             case TRANSFER_USING_LINK:
                 initDatePicker();
@@ -351,9 +408,11 @@ public class TransferTicketDetailActivity extends BaseActivity
                 expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
                 expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
                 pickExpiryDate.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_set_magiclink_expiry);
                 break;
             case TRANSFER_TO_ADDRESS:
                 pickTransferAddress.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_input_wallet_address);
                 break;
         }
     }
@@ -388,6 +447,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
             sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            new HomeRouter().open(this, true);
+            finish();
         });
         dialog.show();
     }

@@ -21,12 +21,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.HelpItem;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.HelpAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TransactionsAdapter;
 import io.awallet.crypto.alphawallet.util.RootUtil;
@@ -38,6 +41,7 @@ import io.awallet.crypto.alphawallet.widget.DepositView;
 import io.awallet.crypto.alphawallet.widget.EmptyTransactionsView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +156,16 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onDefaultWallet(Wallet wallet) {
         adapter.setDefaultWallet(wallet);
+        //get the XML address
+        try
+        {
+            AssetDefinition ad = new AssetDefinition("ticket.xml", getResources());
+            viewModel.setXMLContractAddress(ad.networkInfo.get("address").toLowerCase());
+        }
+        catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

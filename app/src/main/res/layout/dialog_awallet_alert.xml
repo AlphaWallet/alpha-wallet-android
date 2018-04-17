@@ -24,10 +24,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/dialog_icon"
         android:layout_centerHorizontal="true"
-
+        android:visibility="gone"
         android:fontFamily="@font/font_light"
         android:gravity="center"
-        android:text="@string/backup_key_title"
         android:textColor="@color/text_black"
         android:textSize="25sp" />
 
@@ -35,21 +34,27 @@
         android:id="@+id/dialog_sub_text"
         android:layout_width="wrap_content"
         android:layout_marginTop="20dp"
+        android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_below="@id/dialog_main_text"
         android:layout_gravity="center_horizontal"
         android:fontFamily="@font/font_light"
         android:gravity="center"
-        android:text="@string/backup_key_message"
         android:textColor="@color/text_black"
         android:textSize="16sp" />
+
+    <RelativeLayout
+        android:layout_below="@id/dialog_sub_text"
+        android:id="@+id/dialog_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/dialog_button1"
         style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/dialog_sub_text"
+        android:layout_below="@id/dialog_view"
         android:layout_gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         android:background="@drawable/background_round_primary"
@@ -59,9 +64,25 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="10dp"
-        android:text="@string/backup_key_button_text"
+        android:visibility="gone"
         android:textAllCaps="false"
         android:textColor="@color/white"
+        android:textSize="20sp" />
+
+    <Button
+        android:layout_below="@id/dialog_button1"
+        android:id="@+id/dialog_button2"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:fontFamily="@font/font_regular"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="10dp"
+        android:textAllCaps="false"
+        android:visibility="gone"
+        android:textColor="@color/cancel_red"
         android:textSize="20sp" />
 
     <ProgressBar

@@ -1,7 +1,6 @@
 package io.awallet.crypto.alphawallet.ui;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
@@ -24,27 +23,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
-import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
-import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import io.awallet.crypto.alphawallet.util.KeyboardUtils;
-import io.awallet.crypto.alphawallet.util.QRURLParser;
-import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
-import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModelFactory;
-import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
-import io.awallet.crypto.alphawallet.widget.ProgressView;
-import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
@@ -58,6 +42,22 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.Ticket;
+import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
+import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.util.KeyboardUtils;
+import io.awallet.crypto.alphawallet.util.QRURLParser;
+import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
+import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModelFactory;
+import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
+import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
+import io.awallet.crypto.alphawallet.widget.ProgressView;
+import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
@@ -82,12 +82,14 @@ public class TransferTicketDetailActivity extends BaseActivity
     protected TransferTicketDetailViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
-    private Dialog dialog;
+    private AWalletAlertDialog dialog;
 
     private Ticket ticket;
     private TicketAdapter adapter;
 
+    private TextView titleText;
     private TextView toAddressError;
+    private TextView validUntil;
     private EditText toAddressEditText;
     private ImageButton qrImageView;
 
@@ -148,6 +150,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
 
+        titleText = findViewById(R.id.title_transfer);
+        validUntil = findViewById(R.id.text_valid_until);
         TextView textQuantity = findViewById(R.id.text_quantity);
         toAddressError = findViewById(R.id.to_address_error);
 
@@ -157,7 +161,40 @@ public class TransferTicketDetailActivity extends BaseActivity
         pickExpiryDate = findViewById(R.id.layout_date_picker);
 
         expiryDateEditText = findViewById(R.id.edit_expiry_date);
+        expiryDateEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validUntil.setText(getString(R.string.link_valid_until, s.toString(), expiryTimeEditText.getText().toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         expiryTimeEditText = findViewById(R.id.edit_expiry_time);
+        expiryTimeEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validUntil.setText(getString(R.string.link_valid_until, expiryDateEditText.getText().toString(), s.toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         pickLink = findViewById(R.id.radio_pickup_link);
         pickTransfer = findViewById(R.id.radio_transfer_now);
@@ -228,29 +265,34 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void setupRadioButtons()
     {
+        buttonLinkPick.setSelected(true);
         buttonLinkPick.setOnClickListener((View v) -> {
-                                              pickLink.setChecked(true);
-                                              pickTransfer.setChecked(false);
-                                          }
-        );
+            pickLink.setChecked(true);
+            pickTransfer.setChecked(false);
+            buttonLinkPick.setSelected(true);
+            buttonTransferPick.setSelected(false);
+        });
 
         buttonTransferPick.setOnClickListener((View v) -> {
-                                                  pickLink.setChecked(false);
-                                                  pickTransfer.setChecked(true);
-                                              }
-        );
+            pickLink.setChecked(false);
+            pickTransfer.setChecked(true);
+            buttonLinkPick.setSelected(false);
+            buttonTransferPick.setSelected(true);
+        });
 
         pickLink.setOnClickListener((View v) -> {
-                                        pickLink.setChecked(true);
-                                        pickTransfer.setChecked(false);
-                                    }
-        );
+            pickLink.setChecked(true);
+            pickTransfer.setChecked(false);
+            buttonLinkPick.setSelected(true);
+            buttonTransferPick.setSelected(false);
+        });
 
         pickTransfer.setOnClickListener((View v) -> {
-                                            pickLink.setChecked(false);
-                                            pickTransfer.setChecked(true);
-                                        }
-        );
+            pickLink.setChecked(false);
+            pickTransfer.setChecked(true);
+            buttonLinkPick.setSelected(false);
+            buttonTransferPick.setSelected(true);
+        });
     }
 
     private int getNextState()
@@ -320,10 +362,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             case CHOOSE_QUANTITY:
                 pickTicketQuantity.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_select_ticket_quantity);
                 break;
             case PICK_TRANSFER_METHOD:
                 setupRadioButtons();
                 pickTransferMethod.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_select_transfer_method);
                 break;
             case TRANSFER_USING_LINK:
                 initDatePicker();
@@ -331,9 +375,11 @@ public class TransferTicketDetailActivity extends BaseActivity
                 expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
                 expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
                 pickExpiryDate.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_set_magiclink_expiry);
                 break;
             case TRANSFER_TO_ADDRESS:
                 pickTransferAddress.setVisibility(View.VISIBLE);
+                titleText.setText(R.string.title_input_wallet_address);
                 break;
         }
     }
@@ -341,20 +387,18 @@ public class TransferTicketDetailActivity extends BaseActivity
     private void onTransaction(String hash)
     {
         hideDialog();
-        dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.transaction_succeeded)
-                .setMessage(hash)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    //TODO: go back to ticket asset view page
-                    finish();
-                })
-                .setNeutralButton(R.string.copy, (dialog1, id) -> {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("transaction hash", hash);
-                    clipboard.setPrimaryClip(clip);
-                    finish();
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(hash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+            new HomeRouter().open(this, true);
+            finish();
+        });
         dialog.show();
     }
 
@@ -371,11 +415,10 @@ public class TransferTicketDetailActivity extends BaseActivity
         hideDialog();
         if (shouldShowProgress)
         {
-            dialog = new AlertDialog.Builder(this)
-                    .setTitle(R.string.title_dialog_sending)
-                    .setView(new ProgressBar(this))
-                    .setCancelable(false)
-                    .create();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setTitle(R.string.title_dialog_sending);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
             dialog.show();
         }
     }
@@ -482,7 +525,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.generate_pick_up_link);
         dialog.setSmallText(R.string.generate_free_transfer_link);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.send_universal_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));

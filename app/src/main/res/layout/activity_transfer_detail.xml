@@ -31,12 +31,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp">
+                android:paddingBottom="15dp">
 
                 <TextView
-                    android:id="@+id/title_set_price"
+                    android:id="@+id/title_transfer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -52,6 +50,8 @@
                     android:id="@+id/listTickets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
                     android:divider="@android:color/transparent"
                     android:dividerHeight="10.0sp" />
 
@@ -144,7 +144,7 @@
                     android:id="@+id/layout_addressbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="20dp"
                     android:orientation="vertical"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -156,22 +156,21 @@
                     android:id="@+id/layout_choose_method"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:layout_marginTop="20dp"
-                        android:layout_marginBottom="20dp"
-                        android:gravity="center"
-                        android:text="@string/transfer_method"
-                        android:textColor="@color/text_black"
-                        android:textSize="16sp" />
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:fontFamily="@font/font_light"-->
+                        <!--android:layout_marginBottom="10dp"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="@string/transfer_method"-->
+                        <!--android:textColor="@color/text_black"-->
+                        <!--android:textAllCaps="true"-->
+                        <!--android:textSize="10sp" />-->
 
                     <!--<RadioGroup-->
                         <!--android:id="@+id/radiogroup_method"-->
@@ -213,15 +212,17 @@
                     <RadioGroup
                         android:id="@+id/radiogroup_method"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="20dp">
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:layout_height="match_parent">
 
                         <LinearLayout
+                            android:background="@drawable/selector_round_green"
                             android:id="@+id/layout_link_pick"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:padding="10dp"
+                            android:padding="15dp"
                             android:gravity="center_vertical">
 
                             <android.support.v7.widget.AppCompatRadioButton
@@ -238,7 +239,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_bold"
+                                android:fontFamily="@font/font_light"
                                 android:gravity="center"
                                 android:text="@string/generate_pick_up_link"
                                 android:textColor="@color/text_black"
@@ -248,10 +249,11 @@
 
                         <LinearLayout
                             android:id="@+id/layout_transfer_now"
+                            android:background="@drawable/selector_round_green"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:padding="10dp"
+                            android:padding="15dp"
                             android:gravity="center_vertical">
 
                             <android.support.v7.widget.AppCompatRadioButton
@@ -268,7 +270,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_bold"
+                                android:fontFamily="@font/font_light"
                                 android:gravity="center"
                                 android:text="@string/transfer_now"
                                 android:textColor="@color/text_black"
@@ -286,21 +288,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:gravity="center"
-                        android:text="@string/link_valid_until"
-                        android:textColor="@color/text_black"
-                        android:textSize="16sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -433,6 +427,46 @@
                                 android:textSize="12sp"
                                 android:visibility="gone" />
                         </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/text_valid_until"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:textColor="@color/text_black"
+                        android:layout_marginTop="15dp"
+                        android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/background_round_red"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_bold"
+                            android:text="@string/label_important"
+                            android:textAllCaps="true"
+                            android:textColor="@color/cancel_red"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_regular"
+                            android:gravity="center"
+                            android:text="@string/universal_link_notice"
+                            android:textColor="@color/cancel_red" />
+
                     </LinearLayout>
                 </LinearLayout>
 

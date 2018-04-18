@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.awallet.crypto.alphawallet.ui.HomeActivity;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -76,9 +78,10 @@ public class TransactionsViewModel extends BaseViewModel {
     private boolean isVisible = false;
     private Transaction[] txArray;
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
-    private List<Token> tokenCheckList;
+    private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private boolean needsUpdate = false;
     private String xmlContractAddress = null;
+    private int transactionCount;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -145,6 +148,7 @@ public class TransactionsViewModel extends BaseViewModel {
         {
             if (fetchTransactionDisposable == null)
             {
+                transactionCount = 0;
                 Log.d(TAG, "Fetch start");
                 setupTokensInteract.setWalletAddr(wallet.getValue().address);
                 //progress.postValue(shouldShowProgress);
@@ -239,12 +243,81 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         Log.d(TAG, "Enumerating tokens");
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
+        transactionCount += txArray.length;
+
         if (needsUpdate && txArray.length > 0)
             this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
+
+        //Fetch all stored tokens, but no eth
+        //TODO: after the map addTokenToChecklist stage we should be using a reduce instead of filtering in the fetch function
         fetchTransactionDisposable = fetchTokensInteract
-                .fetchStored(wallet.getValue())
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::onTokens, this::onError, this::categoriseAccountTransactions);
+                .fetchSequentialNoEth(wallet.getValue())
+                .map(this::addTokenToChecklist)
+                .flatMap(token -> fetchTransactionsInteract.fetch(new Wallet(token.tokenInfo.address), token)) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                .flatMap(tokenTransactions -> setupTokensInteract.processTokenTransactions(defaultWallet().getValue(), tokenTransactions)) //process these into a map
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactionsObservable(network.getValue(), wallet.getValue(), transactions))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(this::onTokenTransactionBatch, this::onError, this::siftUnknownTransactions);
+    }
+
+    private Token addTokenToChecklist(Token token)
+    {
+        tokenMap.put(token.getAddress(), token);
+        return token;
+    }
+
+    //run through what remains in the map, see if there are any unknown tokens
+    //if we find unknown tokens fetch them and add to the token watch list
+    private void siftUnknownTransactions()
+    {
+        //turn into an observable that processes the unprocessed tx's,
+        //then feeds the list of unknown contracts into a fetcher
+        //which loads them and stores them
+        //then kicks off refresh if it's not already done
+        //
+        //TODO: record dead contracts in realm. Only need to store the address.
+        for (Transaction t : txMap.values())
+        {
+            if (t.input != null && t.input.length() > 20)
+            {
+                Log.d(TAG, "Unknown TX: " + t.hash);
+                //need to find new unknown contracts here
+                Transaction tx = setupTokensInteract.checkUnknownTransaction(tokenMap, t);
+                if (tx != null)
+                {
+                    Log.d(TAG, "Weird: " + tx.hash);
+                }
+            }
+        }
+
+        if (transactionCount == 0)
+        {
+            Log.d(TAG, "No transactions");
+            progress.postValue(false);
+            showEmpty.postValue(true);
+        }
+
+        fetchTransactionDisposable = null;
+        checkIfRegularUpdateNeeded();
+    }
+
+    private void onTokenTransactionBatch(Transaction[] transactions)
+    {
+        Log.d(TAG, "GOT: " + transactions.length );
+        //first remove all these transactions from the network + cached list
+        for (Transaction t : transactions)
+        {
+            txMap.remove(t.hash);
+        }
+
+        Log.d(TAG, "Remaining unknown: " + txMap.size() );
+        transactionCount += transactions.length;
+
+        //push these transactions to the view
+        if (transactions.length > 0)
+        {
+            this.transactions.postValue(transactions);
+        }
     }
 
     /**
@@ -307,37 +380,37 @@ public class TransactionsViewModel extends BaseViewModel {
      private void startCheckingTokenInterations(Transaction[] txList) {
          Log.d(TAG, "Check Token Interactions: " + txList.length);
          txArray = txList;
-         tokenCheckList = setupTokensInteract.getTokenCheckList();
-         consumeTokenCheckList();
+         //tokenCheckList = setupTokensInteract.getTokenCheckList();
+         //consumeTokenCheckList();
      }
 
     /**
      * 5. Get all the transactions from all of our cached tokens.
      * This funtion recursively calls itself, consuming each token we loaded in step 2.
      */
-    private void consumeTokenCheckList()
-    {
-        try
-        {
-            if (tokenCheckList.size() == 0)
-            {
-                processTokenTransactions();
-            }
-            else
-            {
-                Token t = tokenCheckList.remove(0);
-                Log.d(TAG, "Consume " + t.getFullName());
-
-                fetchTransactionDisposable = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(this::addTxs, this::onConsumeError, this::consumeTokenCheckList);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
+//    private void consumeTokenCheckList()
+//    {
+//        try
+//        {
+//            if (tokenCheckList.size() == 0)
+//            {
+//                processTokenTransactions();
+//            }
+//            else
+//            {
+//                Token t = tokenCheckList.remove(0);
+//                Log.d(TAG, "Consume " + t.getFullName());
+//
+//                fetchTransactionDisposable = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
+//                        .subscribeOn(Schedulers.io())
+//                        .subscribe(this::addTxs, this::onConsumeError, this::consumeTokenCheckList);
+//            }
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 5a. Receive TokenTransaction pairs for a token and add to the check list
@@ -355,7 +428,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void onConsumeError(Throwable e)
     {
-        consumeTokenCheckList();
+        //consumeTokenCheckList();
     }
 
     /**

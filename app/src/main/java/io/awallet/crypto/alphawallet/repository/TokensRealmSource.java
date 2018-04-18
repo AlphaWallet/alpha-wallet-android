@@ -326,6 +326,38 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
+    @Override
+    public void updateTokenDestroyed(NetworkInfo network, Wallet wallet, Token token)
+    {
+        Realm realm = null;
+        try
+        {
+            realm = realmManager.getRealmInstance(network, wallet);
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", token.tokenInfo.address)
+                    .findFirst();
+
+            realm.beginTransaction();
+            realmToken.setName(null);
+            realmToken.setSymbol(null);
+            realm.commitTransaction();
+        }
+        catch (Exception ex)
+        {
+            if (realm != null && realm.isInTransaction())
+            {
+                realm.cancelTransaction();
+            }
+        }
+        finally
+        {
+            if (realm != null)
+            {
+                realm.close();
+            }
+        }
+    }
+
     private void saveToken(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime) {
         Realm realm = null;
         try {

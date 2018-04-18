@@ -67,13 +67,30 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.toObservable();
 	}
 
+	/**
+	 * Either fetches a list of network transactions for this token address,
+	 * or just a blank list is the token is dead
+	 * TODO: we should be using a map/reduce instead
+	 * @param wallet
+	 * @param token
+	 * @return
+	 */
 	@Override
 	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchAllFromNetwork(networkInfo, wallet)
-				.observeOn(Schedulers.io())
-				.map(txs -> mapToTokenTransactions(txs, token))
-				.toObservable();
+		if (token.tokenInfo.name == null) //dead Token, early return zero fields
+		{
+			return Observable.fromCallable(() -> {
+				return new TokenTransaction[0];
+			});
+		}
+		else
+		{
+			return fetchAllFromNetwork(networkInfo, wallet)
+					.observeOn(Schedulers.io())
+					.map(txs -> mapToTokenTransactions(txs, token))
+					.toObservable();
+		}
 	}
 
 //	@Override

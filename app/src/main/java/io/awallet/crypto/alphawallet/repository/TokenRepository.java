@@ -14,28 +14,36 @@ import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.TokenTicker;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.TransactionOperation;
+import io.awallet.crypto.alphawallet.entity.TransferFromEventResponse;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.service.TickerService;
 import io.awallet.crypto.alphawallet.service.TokenExplorerClientType;
 
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.utils.Numeric;
+import org.web3j.tx.Contract;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -54,6 +62,7 @@ import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.schedulers.Schedulers;
+import rx.functions.Func1;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -576,6 +585,42 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
+    public rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
+    {
+        rx.Subscription sub = null;
+        if (web3jFullNode != null)
+        {
+            final Event event = new Event("TransferFrom",
+                                          Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                                          {
+                                          }, new TypeReference<Address>()
+                                          {
+                                          }),
+                                          Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Uint16>>()
+                                          {
+                                          }));
+            EthFilter filter = new EthFilter(DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING, contractAddr);
+            filter.addSingleTopic(EventEncoder.encode(event));
+            return web3jFullNode.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
+            {
+                @Override
+                public TransferFromEventResponse call(org.web3j.protocol.core.methods.response.Log log)
+                {
+                    EventValues eventValues = extractEventParameters(event, log);
+                    TransferFromEventResponse typedResponse = new TransferFromEventResponse();
+                    typedResponse._from = (String) eventValues.getIndexedValues().get(0).getValue();
+                    typedResponse._to = (String) eventValues.getIndexedValues().get(1).getValue();
+                    typedResponse._indices = (List<Uint16>) eventValues.getNonIndexedValues().get(0).getValue();
+                    return typedResponse;
+                }
+            });
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /**
      * checking if we need to read a top 16 byte value specifically
      * We should keep this function in here because when we start to use 32 byte values there is
@@ -887,5 +932,27 @@ public class TokenRepository implements TokenRepositoryType {
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
         });
+    }
+
+    protected EventValues extractEventParameters(
+            Event event, org.web3j.protocol.core.methods.response.Log log) {
+
+        List<String> topics = log.getTopics();
+        String encodedEventSignature = EventEncoder.encode(event);
+        if (!topics.get(0).equals(encodedEventSignature)) {
+            return null;
+        }
+
+        List<Type> indexedValues = new ArrayList<>();
+        List<Type> nonIndexedValues = FunctionReturnDecoder.decode(
+                log.getData(), event.getNonIndexedParameters());
+
+        List<TypeReference<Type>> indexedParameters = event.getIndexedParameters();
+        for (int i = 0; i < indexedParameters.size(); i++) {
+            Type value = FunctionReturnDecoder.decodeIndexedValue(
+                    topics.get(i + 1), indexedParameters.get(i));
+            indexedValues.add(value);
+        }
+        return new EventValues(indexedValues, nonIndexedValues);
     }
 }

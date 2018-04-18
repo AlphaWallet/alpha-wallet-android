@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
@@ -19,6 +20,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	public final static String IS_DEFAULT_ADDITION = "is_default";
     public static final String IS_LAST_ITEM = "is_last";
 
+    private final RelativeLayout container;
     private final RadioButton defaultAction;
 	private final ImageView deleteAction;
 	private final TextView address;
@@ -31,6 +33,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	public WalletHolder(int resId, ViewGroup parent) {
 		super(resId, parent);
 
+		container = findViewById(R.id.container);
 		defaultAction = findViewById(R.id.default_action);
 		deleteAction = findViewById(R.id.delete_action);
 		exportAction = findViewById(R.id.export_action);
@@ -54,6 +57,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		address.setText(wallet.address);
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
+		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		deleteAction.setVisibility(
 		        addition.getBoolean(IS_DEFAULT_ADDITION, false) && !addition.getBoolean(IS_LAST_ITEM, false)
                     ? View.GONE : View.VISIBLE);

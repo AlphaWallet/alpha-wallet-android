@@ -60,20 +60,13 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
 
-    private final SettingsRouter settingsRouter;
     private final TransactionDetailRouter transactionDetailRouter;
-    private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
-    private final MarketBrowseRouter marketBrowseRouter;
-    private final WalletRouter walletRouter;
-    private final MarketplaceRouter marketplaceRouter;
-    private final NewSettingsRouter newSettingsRouter;
     private final HomeRouter homeRouter;
 
     @Nullable
@@ -92,30 +85,16 @@ public class TransactionsViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             FetchTokensInteract fetchTokensInteract,
-            GetDefaultWalletBalance getDefaultWalletBalance,
             SetupTokensInteract setupTokensInteract,
-            SettingsRouter settingsRouter,
             AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
-            MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            MarketBrowseRouter marketBrowseRouter,
-            WalletRouter walletRouter,
-            MarketplaceRouter marketplaceRouter,
-            NewSettingsRouter newSettingsRouter,
             HomeRouter homeRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.settingsRouter = settingsRouter;
         this.transactionDetailRouter = transactionDetailRouter;
-        this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
-        this.marketBrowseRouter = marketBrowseRouter;
-        this.walletRouter = walletRouter;
-        this.marketplaceRouter = marketplaceRouter;
-        this.newSettingsRouter = newSettingsRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenInteract = addTokenInteract;
@@ -552,28 +531,8 @@ public class TransactionsViewModel extends BaseViewModel {
         fetchTransactions(true);
     }
 
-    public void showSettings(Context context) {
-        settingsRouter.open(context);
-    }
-
-    public void showNewSettings(Context context, int resId) {
-        newSettingsRouter.open(context, resId);
-    }
-
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
-    }
-
-    public void showTokens(Context context) {
-        myTokensRouter.open(context, wallet.getValue());
-    }
-
-    public void showWalletFragment(Context context, int resId) {
-        walletRouter.open(context, resId);
-    }
-
-    public void showMarketplaceFragment(Context context, int resId) {
-        marketplaceRouter.open(context, resId);
     }
 
     public void showHome(Context context) {

@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
@@ -37,6 +39,7 @@ import dagger.android.AndroidInjection;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET_RANGE;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 24/01/2018.
@@ -50,6 +53,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
     private RedeemSignatureDisplayModel viewModel;
     private SystemView systemView;
+
+    private FinishReceiver finishReceiver;
 
     private Wallet wallet;
     private Ticket ticket;
@@ -86,6 +91,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setVisibility(View.VISIBLE);
 
         ticket.displayTicketHolder(ticketRange, this);
+        finishReceiver = new FinishReceiver(this);
     }
 
     private Bitmap createQRImage(String address) {
@@ -115,6 +121,13 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     }
 
     @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
+    }
+
+    @Override
     public void onClick(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(KEY_ADDRESS, wallet.address);
@@ -129,25 +142,15 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         final Bitmap qrCode = createQRImage(wallet.address);
         ((ImageView) findViewById(R.id.qr_image)).setImageBitmap(qrCode);
         findViewById(R.id.qr_image).setAlpha(0.1f);
-
-//        TextView tv = findViewById(R.id.textAddIDs);
-//        tv.setVisibility(View.VISIBLE);
     }
 
     private void onBurned(Boolean burn)
     {
-//        //TODO: This method is called once the ticket has been redeemed. Variable 'burn' will only ever be 'true'.
-//        System.out.println("Redeemed: " + (burn ? "Yes" : "No"));
-//        ticketBurnNotice();
-//        TextView tv = findViewById(R.id.textAddIDs);
-//        tv.setText("Tickets Redeemed");
-
         AWalletAlertDialog dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.ticket_redeemed);
         dialog.setIcon(AWalletAlertDialog.SUCCESS);
         dialog.setOnDismissListener(v -> {
-            viewModel.showAssets(this, ticket, true);
-            this.finish();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.show();
     }
@@ -170,27 +173,17 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
         catch (Exception e)
         {
-
+            e.printStackTrace();
         }
     }
 
     private void onTicket(Ticket ticket)
     {
-        //TODO: Decode ticket
-//        ids.setText(idStr);
+
     }
 
     private void onSelected(String selectionStr)
     {
-//        selection.setText(selectionStr);
-//        try
-//        {
-//            //dismiss soft keyboard
-//            KeyboardUtils.hideKeyboard(idsText);
-//        }
-//        catch (Exception e)
-//        {
-//
-//        }
+
     }
 }

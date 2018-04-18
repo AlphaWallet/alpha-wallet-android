@@ -20,6 +20,7 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
@@ -135,10 +136,10 @@ public class Ticket extends Token implements Parcelable
     }
 
     //Burn handling
-    public void addToBurnList(List<BigInteger> burnUpdate)
+    public void addToBurnList(List<Uint16> burnUpdate)
     {
-        for (BigInteger b : burnUpdate) {
-            Integer index = b.intValue();
+        for (Uint16 b : burnUpdate) {
+            Integer index = b.getValue().intValue();
 
             //lookup index
             if (balanceArray.size() > index)

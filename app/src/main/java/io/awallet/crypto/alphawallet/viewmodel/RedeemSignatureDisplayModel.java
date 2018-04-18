@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.os.NetworkOnMainThreadException;
 import android.support.annotation.Nullable;
 
 import io.awallet.crypto.alphawallet.entity.MessagePair;
@@ -68,7 +69,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
 
     private rx.Subscription memPoolSubscription;
-    private TicketRange ticketRange;
     private List<Integer> ticketIndicies;
 
     @Nullable
@@ -78,10 +78,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private Disposable cycleSignatureDisposable;
 
     private String address;
-    //private BigInteger bitFieldLookup;
-    private String lastSelection;
-    private String newSelection;
-    private int unchangedCount = 10;
 
     RedeemSignatureDisplayModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -126,21 +122,11 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
-
-        terminateListener().toObservable().subscribeOn(Schedulers.newThread()).subscribe();
-    }
-
-    private Single<String> terminateListener()
-    {
-        return Single.fromCallable(() -> {
-                                       if (memPoolSubscription != null && !memPoolSubscription.isUnsubscribed())
-                                       {
-                                           memPoolSubscription.unsubscribe();
-                                           memPoolSubscription = null;
-                                       }
-                                       return "Terminated";
-                                   }
-        );
+        if (!memPoolSubscription.isUnsubscribed()) {
+            closeListener()
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe();
+        }
     }
 
     public void fetchTokenBalance() {
@@ -167,7 +153,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                 //See if our tickets got burned
                 for (Integer index : this.ticketIndicies)
                 {
-                    if (!((Ticket) t).balanceArray.get(index).equals(0))
+                    if (!((Ticket) t).balanceArray.get(index).equals(BigInteger.ZERO))
                     {
                         allBurned = false;
                         break;
@@ -191,9 +177,27 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
+        if (!memPoolSubscription.isUnsubscribed()) {
+            closeListener()
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe();
+        }
 
         ticketIndicies.clear();
         burnNotice.postValue(true);
+    }
+
+    private Single<Boolean> closeListener()
+    {
+        return Single.fromCallable(() -> {
+            try {
+                memPoolSubscription.unsubscribe();
+                return true;
+            } catch (NetworkOnMainThreadException th) {
+                // Ignore all errors, it's not important source.
+                return false;
+            }
+        });
     }
 
     public void prepare(String address, Ticket ticket, TicketRange ticketRange) {
@@ -201,7 +205,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
-        this.ticketRange = ticketRange;
         this.ticket.setValue(ticket);
         this.ticketIndicies = ticket.ticketIdListToIndexList(ticketRange.tokenIds);
     }
@@ -222,7 +225,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     }
 
     private void startMemoryPoolListener() {
-        //SubscribeWrapper wrapper = new SubscribeWrapper(scanReturn, this::txRcvError);
         memPoolSubscription = memoryPoolInteract.burnListener(ticket.getValue().getAddress())
                 .subscribeOn(rx.schedulers.Schedulers.newThread())
                 .subscribe(this::receiveBurnNotification, this::onBurnError);
@@ -230,9 +232,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
 
     private void receiveBurnNotification(TransferFromEventResponse burnTx)
     {
-        System.out.println("From: " + burnTx._from);
-        System.out.println("To: " + burnTx._to);
-
         String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address).toLowerCase();
 
         if (burnTx._from.toLowerCase().contains(userAddr))
@@ -259,10 +258,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
 
     private void onSignedMessage(SignaturePair sigPair) {
         signature.postValue(sigPair);
-    }
-
-    public void newBalanceArray(String balanceArray) {
-        newSelection = balanceArray;
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -309,51 +304,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
                     .subscribe(this::onSignMessage, this::onError);
         }
     }
-
-    //Handle each new transaction on memory pool
-//    private Action1<Transaction> scanReturn = (tx) ->
-//    {
-//        try
-//        {
-//            String input = "";//tx.getInput();
-//            String from = "";
-//            String to = "";
-//            if (tx.getFrom() != null) from = Numeric.cleanHexPrefix(tx.getFrom());
-//            if (tx.getTo() != null) to = Numeric.cleanHexPrefix(tx.getTo());
-//            String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
-//
-//            String methodSignature = "transferFrom(address,address,uint16[])";
-//            String methodId = buildMethodId(methodSignature);
-//
-//            if (       (ticket.getValue().tokenInfo.address.contains(to))
-//                    && (input != null)
-//                    && (input.contains(methodId))
-//                    && (input.contains("dead") && input.contains(userAddr))  )
-//            {
-//                System.out.println("Burn Transaction!");
-//                TransactionDecoder t = new TransactionDecoder();
-//
-//                TransactionInput data = t.decodeInput(input);
-//
-//                if (data.functionData.functionName.equals("transferFrom"))
-//                {
-//                    //pass the list of args back into token listing
-//                    List<BigInteger> transferIndicies = data.paramValues;
-//                    markUsedIndicies(transferIndicies);
-//                }
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            //e.printStackTrace();
-//        }
-//    };
-
-//    private String buildMethodId(String methodSignature) {
-//        byte[] input = methodSignature.getBytes();
-//        byte[] hash = Hash.sha3(input);
-//        return Numeric.toHexString(hash).substring(0, 10);
-//    }
 
     public void showAssets(Context context, Ticket t, boolean isClearStack) {
         assetDisplayRouter.open(context, t, isClearStack);

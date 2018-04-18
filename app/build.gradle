@@ -12,7 +12,9 @@ apply plugin: 'io.fabric'
 apply plugin: 'realm-android'
 
 repositories {
-    maven { url 'https://maven.fabric.io/public' }
+    maven {
+        url 'https://maven.fabric.io/public'
+    }
 }
 
 
@@ -99,14 +101,16 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.2'
 
     // Bar code scanning
-    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+
+    //implementation 'com.google.zxing:core:3.3.0'
     implementation 'com.google.android.gms:play-services-vision:11.8.0'
 
     // Sugar
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
-    implementation 'com.journeyapps:zxing-android-embedded:3.5.0@aar'
+    //implementation 'com.journeyapps:zxing-android-embedded:3.5.0@aar'
 
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"

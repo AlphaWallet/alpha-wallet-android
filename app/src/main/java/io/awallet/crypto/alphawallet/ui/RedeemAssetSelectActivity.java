@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -41,6 +42,8 @@ public class RedeemAssetSelectActivity extends BaseActivity
     private SystemView systemView;
     private ProgressView progressView;
     private int currentMenu = R.menu.send_menu;
+
+    private FinishReceiver finishReceiver;
 
     public TextView ids;
     public TextView selected;
@@ -90,6 +93,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        finishReceiver = new FinishReceiver(this);
     }
 
     private void setupRedeemSelector()
@@ -114,6 +118,13 @@ public class RedeemAssetSelectActivity extends BaseActivity
     public boolean onCreateOptionsMenu(Menu menu) {
 //        getMenuInflater().inflate(currentMenu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
     }
 
     @Override

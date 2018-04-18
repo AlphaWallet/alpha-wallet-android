@@ -5,6 +5,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
+import io.awallet.crypto.alphawallet.entity.TransferFromEventResponse;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public interface TokenRepositoryType {
     Observable<TokenInfo> update(String address);
     Single<TokenInfo[]> update(String[] address);
     rx.Subscription memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
+    rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Completable addToken(Wallet wallet, TokenInfo tokenInfo);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);

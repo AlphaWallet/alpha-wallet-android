@@ -13,6 +13,7 @@ import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TransactionInput;
 import io.awallet.crypto.alphawallet.entity.TransactionDecoder;
+import io.awallet.crypto.alphawallet.entity.TransferFromEventResponse;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -24,6 +25,7 @@ import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.crypto.Hash;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.utils.Numeric;
@@ -220,8 +222,31 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     }
 
     private void startMemoryPoolListener() {
-        SubscribeWrapper wrapper = new SubscribeWrapper(scanReturn);
-        memPoolSubscription = memoryPoolInteract.poolListener(wrapper);
+        //SubscribeWrapper wrapper = new SubscribeWrapper(scanReturn, this::txRcvError);
+        memPoolSubscription = memoryPoolInteract.burnListener(ticket.getValue().getAddress())
+                .subscribeOn(rx.schedulers.Schedulers.newThread())
+                .subscribe(this::receiveBurnNotification, this::onBurnError);
+    }
+
+    private void receiveBurnNotification(TransferFromEventResponse burnTx)
+    {
+        System.out.println("From: " + burnTx._from);
+        System.out.println("To: " + burnTx._to);
+
+        String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address).toLowerCase();
+
+        if (burnTx._from.toLowerCase().contains(userAddr))
+        {
+            List<Uint16> transferIndicies = burnTx._indices;
+            markUsedIndicies(transferIndicies);
+        }
+    }
+
+    //restart the listener - sometimes blockchain throws a wobbly
+    private void onBurnError(Throwable throwable)
+    {
+        if (!memPoolSubscription.isUnsubscribed()) memPoolSubscription.unsubscribe();
+        startMemoryPoolListener();
     }
 
     private void onSignMessage(MessagePair pair) {
@@ -249,13 +274,13 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         onSaved();
     }
 
-    private void markUsedIndicies(List<BigInteger> burnList) {
+    private void markUsedIndicies(List<Uint16> burnList) {
         Ticket t = ticket().getValue();
-        for (BigInteger bi : burnList)
+        for (Uint16 indexVal : burnList)
         {
-            if (ticketIndicies.contains(bi.intValue()))
+            Integer index = indexVal.getValue().intValue();
+            if (ticketIndicies.contains(index))
             {
-                Integer index = bi.intValue();
                 ticketIndicies.remove(index);
             }
         }
@@ -286,49 +311,49 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     }
 
     //Handle each new transaction on memory pool
-    private Action1<Transaction> scanReturn = (tx) ->
-    {
-        try
-        {
-            String input = "";//tx.getInput();
-            String from = "";
-            String to = "";
-            if (tx.getFrom() != null) from = Numeric.cleanHexPrefix(tx.getFrom());
-            if (tx.getTo() != null) to = Numeric.cleanHexPrefix(tx.getTo());
-            String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
+//    private Action1<Transaction> scanReturn = (tx) ->
+//    {
+//        try
+//        {
+//            String input = "";//tx.getInput();
+//            String from = "";
+//            String to = "";
+//            if (tx.getFrom() != null) from = Numeric.cleanHexPrefix(tx.getFrom());
+//            if (tx.getTo() != null) to = Numeric.cleanHexPrefix(tx.getTo());
+//            String userAddr = Numeric.cleanHexPrefix(defaultWallet().getValue().address);
+//
+//            String methodSignature = "transferFrom(address,address,uint16[])";
+//            String methodId = buildMethodId(methodSignature);
+//
+//            if (       (ticket.getValue().tokenInfo.address.contains(to))
+//                    && (input != null)
+//                    && (input.contains(methodId))
+//                    && (input.contains("dead") && input.contains(userAddr))  )
+//            {
+//                System.out.println("Burn Transaction!");
+//                TransactionDecoder t = new TransactionDecoder();
+//
+//                TransactionInput data = t.decodeInput(input);
+//
+//                if (data.functionData.functionName.equals("transferFrom"))
+//                {
+//                    //pass the list of args back into token listing
+//                    List<BigInteger> transferIndicies = data.paramValues;
+//                    markUsedIndicies(transferIndicies);
+//                }
+//            }
+//        }
+//        catch (Exception e)
+//        {
+//            //e.printStackTrace();
+//        }
+//    };
 
-            String methodSignature = "transferFrom(address,address,uint16[])";
-            String methodId = buildMethodId(methodSignature);
-
-            if (       (ticket.getValue().tokenInfo.address.contains(to))
-                    && (input != null)
-                    && (input.contains(methodId))
-                    && (input.contains("dead") && input.contains(userAddr))  )
-            {
-                System.out.println("Burn Transaction!");
-                TransactionDecoder t = new TransactionDecoder();
-
-                TransactionInput data = t.decodeInput(input);
-
-                if (data.functionData.functionName.equals("transferFrom"))
-                {
-                    //pass the list of args back into token listing
-                    List<BigInteger> transferIndicies = data.paramValues;
-                    markUsedIndicies(transferIndicies);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            //e.printStackTrace();
-        }
-    };
-
-    private String buildMethodId(String methodSignature) {
-        byte[] input = methodSignature.getBytes();
-        byte[] hash = Hash.sha3(input);
-        return Numeric.toHexString(hash).substring(0, 10);
-    }
+//    private String buildMethodId(String methodSignature) {
+//        byte[] input = methodSignature.getBytes();
+//        byte[] hash = Hash.sha3(input);
+//        return Numeric.toHexString(hash).substring(0, 10);
+//    }
 
     public void showAssets(Context context, Ticket t, boolean isClearStack) {
         assetDisplayRouter.open(context, t, isClearStack);

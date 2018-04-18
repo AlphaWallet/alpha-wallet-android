@@ -79,10 +79,10 @@ public class TokenInfo implements Parcelable {
     }
 
     public void addTokenSetupPage(AddTokenActivity layout) {
-        layout.address.setText(address);
-        layout.symbol.setText(symbol);
-        layout.decimals.setText(String.valueOf(decimals));
-        layout.name.setText(name);
+        layout.inputAddressView.setAddress(address);
+        layout.symbolInputView.setText(symbol);
+        layout.decimalsInputView.setText(String.valueOf(decimals));
+        layout.nameInputview.setText(name);
         layout.ticketLayout.setVisibility(View.GONE);
         layout.isStormbird = isStormbird;
     }

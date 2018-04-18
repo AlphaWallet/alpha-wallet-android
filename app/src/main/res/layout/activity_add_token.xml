@@ -1,156 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
     <include layout="@layout/layout_simple_toolbar" />
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_marginLeft="@dimen/big_padding"
-        android:layout_marginTop="?actionBarSize"
-        android:layout_marginRight="@dimen/big_padding"
-        android:layout_marginBottom="@dimen/big_padding"
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <RelativeLayout
-            android:id="@+id/contract_address_layout"
-            android:layout_marginTop="@dimen/big_margin"
+        android:layout_marginBottom="?android:attr/actionBarSize"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:background="@drawable/background_card">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/address_input_layout"
-                android:focusable="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-                <EditText
-                    android:id="@+id/address"
-                    android:hint="@string/hint_contract_address"
-                    android:paddingRight="@dimen/half_large_padding"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-            </android.support.design.widget.TextInputLayout>
-            <ImageButton
-                android:id="@+id/scan_contract_address_qr"
-                android:src="@mipmap/qr_code_icon"
-                android:contentDescription="@string/scan_qr"
-                android:background="?android:selectableItemBackground"
-                android:padding="@dimen/big_padding"
-                android:layout_alignParentEnd="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp">
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                />
-        </RelativeLayout>
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/symbol_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/symbol"
-                android:hint="@string/hint_contract_symbol"
-                android:inputType="textNoSuggestions"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/font_light"
+                android:gravity="center"
+                android:text="@string/title_add_token"
+                android:textColor="@color/text_black"
+                android:textSize="25sp" />
+
+            <io.awallet.crypto.alphawallet.widget.InputAddressView
+                android:id="@+id/input_address_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/decimal_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/decimals"
-                android:hint="@string/hint_contract_decimals"
-                android:inputType="number"
+                android:layout_marginBottom="15dp" />
+
+            <io.awallet.crypto.alphawallet.widget.InputView
+                android:id="@+id/input_symbol"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/name_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/textViewName"
-                android:hint="@string/hint_contract_name"
-                android:inputType="textNoSuggestions"
+                android:layout_marginBottom="15dp"
+                custom:label="@string/hint_contract_symbol" />
+
+            <io.awallet.crypto.alphawallet.widget.InputView
+                android:id="@+id/input_decimal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
-        <LinearLayout
-            android:id="@+id/layoutTicket"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/venue_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/textViewVenue"
-                android:hint="@string/hint_contract_venue"
+                android:layout_marginBottom="15dp"
+                custom:label="@string/hint_contract_decimals" />
+
+            <io.awallet.crypto.alphawallet.widget.InputView
+                android:id="@+id/input_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"
-                />
-        </android.support.design.widget.TextInputLayout>
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/date_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/textViewDate"
-                android:hint="@string/hint_contract_date"
-                android:inputType="textNoSuggestions"
+                android:layout_marginBottom="15dp"
+                custom:label="@string/hint_contract_name" />
+
+            <LinearLayout
+                android:id="@+id/layoutTicket"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/price_input_layout"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <EditText
-                android:id="@+id/textViewPrice"
-                android:hint="@string/hint_contract_price"
-                android:inputType="textNoSuggestions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-        </android.support.design.widget.TextInputLayout>
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/venue_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/normal_margin">
+
+                    <EditText
+                        android:id="@+id/textViewVenue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_contract_venue"
+                        android:inputType="textNoSuggestions" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/date_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/normal_margin">
+
+                    <EditText
+                        android:id="@+id/textViewDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_contract_date"
+                        android:inputType="textNoSuggestions" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/price_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/normal_margin">
+
+                    <EditText
+                        android:id="@+id/textViewPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_contract_price"
+                        android:inputType="textNoSuggestions" />
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
         </LinearLayout>
-        <Button
-            android:id="@+id/save"
-            android:text="@string/action_save"
-            android:layout_marginTop="@dimen/big_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.AppCompat.Button.Colored"
-            />
-    </LinearLayout>
-    <io.awallet.crypto.alphawallet.widget.SystemView
-        android:id="@+id/system_view"
-        android:background="@color/white"
-        android:layout_marginTop="?actionBarSize"
+    </ScrollView>
+
+    <Button
+        android:id="@+id/save"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/selector_button"
+        android:fontFamily="@font/font_regular"
+        android:text="@string/action_save"
+        android:textAllCaps="false"
+        android:textColor="@color/button_text_color"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:id="@+id/layout_progress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
-</FrameLayout>
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:background="@color/transparent"
+        android:gravity="top|right"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -82,12 +82,29 @@ public class SetupTokensInteract {
         Transaction newTransaction = thisTrans;
         try
         {
-            TransactionOperation op = new TransactionOperation();
+            TransactionOperation op;
+            TransactionOperation[] newOps;
             TransactionContract ct;
             ERC875ContractTransaction ect = null;
             String functionName = INVALID_OPERATION;
 
-            if (data != null && data.functionData != null)
+            //already has constructor info
+            if (thisTrans.operations.length > 0 &&
+                    thisTrans.operations[0].contract instanceof ERC875ContractTransaction &&
+                    ((ERC875ContractTransaction) thisTrans.operations[0].contract).operation.equals(CONTRACT_CONSTRUCTOR))
+            {
+                op = thisTrans.operations[0];
+                ct = thisTrans.operations[0].contract;
+                functionName = CONTRACT_CONSTRUCTOR;
+                newOps = thisTrans.operations;
+                ect = (ERC875ContractTransaction)ct;
+                if (ect.type == -5)
+                {
+                    ect.type = -2;
+                    requiredContracts.add(ect.address);
+                }
+            }
+            else if (data != null && data.functionData != null)
             {
                 if (data.functionData.isERC875() || data.functionData.isConstructor()
                         || (token != null && token.tokenInfo.isStormbird))
@@ -105,19 +122,24 @@ public class SetupTokensInteract {
                 {
                     ct = new TransactionContract();
                 }
+
                 functionName = data.functionData.functionFullName;
+                op = new TransactionOperation();
+                newOps = new TransactionOperation[1];
+                newOps[0] = op;
+                op.contract = ct;
             }
             else
             {
+                op = new TransactionOperation();
                 ect = new ERC875ContractTransaction();
+                newOps = new TransactionOperation[1];
+                newOps[0] = op;
                 ct = ect;
+                op.contract = ct;
             }
 
             setupToken(token, ct, thisTrans);
-
-            TransactionOperation[] newOps = new TransactionOperation[1];
-            newOps[0] = op;
-            op.contract = ct;
 
             //we could ecrecover the seller here
             switch (functionName)
@@ -160,6 +182,35 @@ public class SetupTokensInteract {
                     op.transactionId = thisTrans.hash;
                     //value in what?
                     op.value = String.valueOf(data.getFirstValue());
+                    break;
+                case "loadNewTickets(bytes32[])":
+                    ect.operation = data.functionData.functionName;
+                    op.from = thisTrans.from;
+                    op.to = token != null ? token.getAddress() : UNKNOWN_CONTRACT;
+                    op.transactionId = thisTrans.hash;
+                    op.value = String.valueOf(data.paramValues.size());
+                    break;
+                case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
+                    if (data.containsAddress(walletAddr))
+                    {
+                        ect.operation = "Pass From";
+                        ect.type = 1;
+                    }
+                    else
+                    {
+                        ect.operation = "Pass To";
+                        ect.type = -1;
+                    }
+                    op.from = thisTrans.from;
+                    op.to = data.getFirstAddress();
+                    op.transactionId = thisTrans.hash;
+                    //value in what?
+                    op.value = String.valueOf(data.getFirstValue());
+                    break;
+                case "endContract()":
+                    ect.operation = "Terminate";
+                    ct.name = thisTrans.to;
+                    ect.type = -2;
                     break;
                 case CONTRACT_CONSTRUCTOR:
                     ct.name = thisTrans.to;
@@ -300,6 +351,7 @@ public class SetupTokensInteract {
     public Single<Transaction[]> processTransactions(Wallet wallet)
     {
         return Single.fromCallable(() -> {
+            Transaction[] processedTransactions = new Transaction[0];
             try {
                 for (TokenTransaction thisTokenTrans : ttxMap.values()) {
                     Transaction thisTrans = thisTokenTrans.transaction;
@@ -314,14 +366,14 @@ public class SetupTokensInteract {
                     }
                 }
 
-                Transaction[] processedTransactions = txMap.values().toArray(new Transaction[txMap.size()]);
+                processedTransactions = txMap.values().toArray(new Transaction[txMap.size()]);
 
                 //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
-                return processedTransactions;
             }
-            finally {
-
+            catch (Exception e) {
+                e.printStackTrace();
             }
+            return processedTransactions;
         });
     }
 

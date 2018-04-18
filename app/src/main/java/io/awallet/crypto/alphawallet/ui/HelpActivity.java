@@ -1,9 +1,14 @@
 package io.awallet.crypto.alphawallet.ui;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.LinearLayout;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.HelpItem;
@@ -22,6 +27,7 @@ public class HelpActivity extends BaseActivity {
     @Inject
     HelpViewModelFactory helpViewModelFactory;
     private HelpViewModel viewModel;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,16 +46,16 @@ public class HelpActivity extends BaseActivity {
                 R.string.help_question1,
                 R.string.help_question2,
                 R.string.help_question3,
-                R.string.help_question4,
+                //R.string.help_question4,
                 R.string.help_question5,
         };
 
         int[] answers = {
-                R.string.help_answer1,
-                R.string.help_answer1,
-                R.string.help_answer1,
-                R.string.help_answer1,
-                R.string.help_answer1,
+                R.string.what_is_eth,
+                R.string.why_alphawallet_eth,
+                R.string.how_i_get_money,
+                //R.string.help_answer1,
+                R.string.how_i_transfer_into_wallet,
         };
 
         List<HelpItem> helpItems = new ArrayList<>();
@@ -59,5 +65,38 @@ public class HelpActivity extends BaseActivity {
         adapter.setHelpItems(helpItems);
 
         list.setAdapter(adapter);
+
+        final LinearLayout contactUs = findViewById(R.id.layout_contact);
+        contactUs.setOnClickListener(v -> {
+            contactUs.setBackgroundColor(ContextCompat.getColor(getApplication(), R.color.dark_yellow));
+            new RemoveEffect(contactUs);
+            helpIntent();
+        });
+    }
+
+    private class RemoveEffect
+    {
+        public LinearLayout layout;
+        public RemoveEffect(LinearLayout layoutEffect)
+        {
+            layout = layoutEffect;
+            handler.postDelayed(returnButton, 10);
+        }
+
+        private final Runnable returnButton = () -> layout.setBackgroundColor(ContextCompat.getColor(getApplication(), R.color.golden_yellow));//  .setBackgroundResource(R.drawable.background_help_dark);
+    }
+
+    private void helpIntent()
+    {
+        String uriText =
+                "mailto:support@awallet.io" +
+                        "?subject=" + Uri.encode("Hi guys") +
+                        "&body=" + Uri.encode("");
+
+        Uri uri = Uri.parse(uriText);
+
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(uri);
+        startActivity(Intent.createChooser(emailIntent, "Send email"));
     }
 }

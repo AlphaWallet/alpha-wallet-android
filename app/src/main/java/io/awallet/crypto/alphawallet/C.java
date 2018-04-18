@@ -45,10 +45,13 @@ public abstract class C {
     public static final String EXTRA_PRICE = "TOKEN_PRICE";
     public static final String EXTRA_STATE = "TRANSFER_STATE";
 
+    public static final String PRUNE_ACTIVITY =
+            "io.awallet.crypto.alphawallet.PRUNE_ACTIVITY";
+
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
     public static final String CHANGELLY_REF_ID = "968d4f0f0bf9";
-    public static final String DONATION_ADDRESS = "0xFE6d4bC2De2D0b0E6FE47f08A28Ed52F9d052A02";
+    public static final String DONATION_ADDRESS = "0xb1aD48527d694D30401D082bcD21a33F41811501";
 
     public static final String DEFAULT_GAS_PRICE = "30000000000";
     public static final String DEFAULT_GAS_LIMIT = "90000";
@@ -61,7 +64,7 @@ public abstract class C {
 
     //FOR DEMOS ETC
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
-    public static final boolean HARD_CODED_KEY = true;           //pre-loads a hard coded key in the app
+    public static final boolean HARD_CODED_KEY = false;           //pre-loads a hard coded key in the app
     public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
     public static final boolean OVERRIDE_DEFAULT_NETWORK = true;  //use the default network given below
 

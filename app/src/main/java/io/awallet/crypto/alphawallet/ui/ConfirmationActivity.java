@@ -26,6 +26,7 @@ import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ConfirmationType;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
@@ -36,12 +37,16 @@ import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
 import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
+
 public class ConfirmationActivity extends BaseActivity {
     AWalletAlertDialog dialog;
 
     @Inject
     ConfirmationViewModelFactory confirmationViewModelFactory;
     ConfirmationViewModel viewModel;
+
+    private FinishReceiver finishReceiver;
 
 //    private SystemView systemView;
 //    private ProgressView progressView;
@@ -136,9 +141,8 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.sendTransaction().observe(this, this::onTransaction);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.error().observe(this, this::onError);
-//        viewModel.progress().observe(this, systemView::showProgress);
-//        viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+        finishReceiver = new FinishReceiver(this);
     }
 
     @Override
@@ -184,8 +188,9 @@ public class ConfirmationActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        hideDialog();
         super.onDestroy();
+        hideDialog();
+        unregisterReceiver(finishReceiver);
     }
 
     private void onSend() {
@@ -247,8 +252,7 @@ public class ConfirmationActivity extends BaseActivity {
             ClipData clip = ClipData.newPlainText("transaction hash", hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
-            new HomeRouter().open(this, true);
-            finish();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();

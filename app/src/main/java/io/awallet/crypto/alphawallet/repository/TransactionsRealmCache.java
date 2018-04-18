@@ -70,7 +70,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 }
                 instance.commitTransaction();
             } catch (Exception ex) {
-                if (instance != null) {
+                if (instance != null && instance.isInTransaction()) {
                     instance.cancelTransaction();
                 }
             } finally {
@@ -153,11 +153,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     {
                         //already exists
                         //Log.d(TAG, "Already exists: " + transaction.hash);
-                        instance.cancelTransaction();
+                        instance.cancelTransaction(); // it can only fail within a transaction, no need to check
                     }
                 }
             } catch (Exception ex) {
-                if (instance != null) {
+                if (instance != null && instance.isInTransaction()) {
                     ex.printStackTrace();
                     instance.cancelTransaction();
                 }

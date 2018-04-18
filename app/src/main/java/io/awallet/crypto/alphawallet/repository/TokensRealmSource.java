@@ -16,11 +16,12 @@ import io.awallet.crypto.alphawallet.repository.entity.RealmTokenTicker;
 import io.awallet.crypto.alphawallet.service.RealmManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Observable;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -125,7 +126,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
                         .findAll();
-                Log.d("TRS", "Sz: " + realmItems.size());
+                //Log.d("TRS", "Sz: " + realmItems.size());
                 return convertBalance(realmItems, System.currentTimeMillis());
             } finally {
                 if (realm != null) {
@@ -133,6 +134,18 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
             }
         });
+    }
+
+    @Override
+    public Observable<List<Token>> fetchEnabledTokensSequentialList(NetworkInfo networkInfo, Wallet wallet)
+    {
+        return fetchEnabledTokens(networkInfo, wallet).toObservable()
+                .flatMap(this::transformList);
+    }
+
+    private Observable<List<Token>> transformList(Token[] tokens)
+    {
+        return Observable.just(Arrays.asList(tokens));
     }
 
     @Override
@@ -180,7 +193,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 realm.commitTransaction();
             } catch (Exception ex) {
-                if (realm != null) {
+                if (realm != null && realm.isInTransaction()) {
                     realm.cancelTransaction();
                 }
             } finally {
@@ -244,7 +257,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             realm.commitTransaction();
         } catch (Exception ex) {
-            if (realm != null) {
+            if (realm != null && realm.isInTransaction()) {
                 realm.cancelTransaction();
             }
         } finally {
@@ -268,7 +281,7 @@ public class TokensRealmSource implements TokenLocalSource {
             }
             realm.commitTransaction();
         } catch (Exception ex) {
-            if (realm != null) {
+            if (realm != null && realm.isInTransaction()) {
                 realm.cancelTransaction();
             }
         } finally {
@@ -279,24 +292,35 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token) {
+    public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token)
+    {
         Realm realm = null;
-        try {
+        try
+        {
             realm = realmManager.getRealmInstance(network, wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
-            realm.beginTransaction();
-            if (realmToken != null) {
+
+            //Don't update realm unless we need to.
+            if (realmToken != null && token.checkRealmBalanceChange(realmToken))
+            {
+                realm.beginTransaction();
                 token.setRealmBalance(realmToken);
+                realm.commitTransaction();
             }
-            realm.commitTransaction();
-        } catch (Exception ex) {
-            if (realm != null) {
+        }
+        catch (Exception ex)
+        {
+            if (realm != null && realm.isInTransaction())
+            {
                 realm.cancelTransaction();
             }
-        } finally {
-            if (realm != null) {
+        }
+        finally
+        {
+            if (realm != null)
+            {
                 realm.close();
             }
         }
@@ -309,8 +333,8 @@ public class TokensRealmSource implements TokenLocalSource {
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
-            realm.beginTransaction();
             if (realmToken == null) {
+                realm.beginTransaction();
                 Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);
                 realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
                 realmToken.setName(token.tokenInfo.name);
@@ -322,15 +346,15 @@ public class TokensRealmSource implements TokenLocalSource {
                 if (token instanceof Ticket) {
                     realmToken.setStormbird(true);
                 }
+                realm.commitTransaction();
             }
             else
             {
                 Log.d(TAG, "Update Token: " + token.getFullName());
+                //realmToken.setBalance(token.getFullBalance());
             }
-            realmToken.setBalance(token.getFullBalance());
-            realm.commitTransaction();
         } catch (Exception ex) {
-            if (realm != null) {
+            if (realm != null && realm.isInTransaction()) {
                 realm.cancelTransaction();
             }
         } finally {

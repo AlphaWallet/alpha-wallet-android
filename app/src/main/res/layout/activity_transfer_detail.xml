@@ -220,9 +220,9 @@
                             android:id="@+id/layout_link_pick"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:gravity="left"
                             android:orientation="horizontal"
-                            android:padding="10dp"
-                            android:gravity="center_vertical">
+                            android:padding="10dp">
 
                             <android.support.v7.widget.AppCompatRadioButton
                                 android:id="@+id/radio_pickup_link"
@@ -232,14 +232,13 @@
                                 android:layout_marginEnd="15dp"
                                 android:background="@drawable/selector_radio_check"
                                 android:checked="true"
-                                android:text=""
                                 app:buttonTint="@color/transparent" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/font_bold"
-                                android:gravity="center"
+                                android:gravity="left"
                                 android:text="@string/generate_pick_up_link"
                                 android:textColor="@color/text_black"
                                 android:textSize="18sp" />
@@ -269,7 +268,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/font_bold"
-                                android:gravity="center"
+                                android:gravity="left"
                                 android:text="@string/transfer_now"
                                 android:textColor="@color/text_black"
                                 android:textSize="18sp" />
@@ -434,6 +433,7 @@
                                 android:visibility="gone" />
                         </LinearLayout>
                     </LinearLayout>
+                    <include layout="@layout/item_universal_link_warning" />
                 </LinearLayout>
 
             </LinearLayout>

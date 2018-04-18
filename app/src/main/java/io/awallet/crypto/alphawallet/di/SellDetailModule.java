@@ -9,6 +9,7 @@ import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
+import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ConfirmationRouter;
 import io.awallet.crypto.alphawallet.router.SellDetailRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
@@ -31,9 +32,10 @@ public class SellDetailModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
-            SellDetailRouter sellDetailRouter) {
+            SellDetailRouter sellDetailRouter,
+            AssetDisplayRouter assetDisplayRouter) {
         return new SellDetailModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter);
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter);
     }
 
     @Provides
@@ -55,5 +57,10 @@ public class SellDetailModule {
     @Provides
     SellDetailRouter provideSellDetailRouter() {
         return new SellDetailRouter();
+    }
+
+    @Provides
+    AssetDisplayRouter provideAssetDisplayRouter() {
+        return new AssetDisplayRouter();
     }
 }

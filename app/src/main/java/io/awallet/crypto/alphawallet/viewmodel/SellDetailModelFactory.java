@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
+import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.SellDetailRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
@@ -21,23 +22,26 @@ public class SellDetailModelFactory implements ViewModelProvider.Factory {
     private MarketQueueService marketQueueService;
     private CreateTransactionInteract createTransactionInteract;
     private SellDetailRouter sellDetailRouter;
+    private AssetDisplayRouter assetDisplayRouter;
 
     public SellDetailModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
                                         MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
-                                  SellDetailRouter sellDetailRouter) {
+                                  SellDetailRouter sellDetailRouter,
+                                  AssetDisplayRouter assetDisplayRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
+        this.assetDisplayRouter = assetDisplayRouter;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SellDetailModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter);
+        return (T) new SellDetailModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter);
     }
 }
 

@@ -1,13 +1,17 @@
 package io.awallet.crypto.alphawallet.ui;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.IntentService;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -35,6 +39,7 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -42,13 +47,16 @@ import io.awallet.crypto.alphawallet.util.KeyboardUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModelFactory;
+import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
 
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -63,6 +71,7 @@ import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 21/02/2018.
@@ -71,18 +80,20 @@ import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 public class TransferTicketDetailActivity extends BaseActivity
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
+    private static final int SEND_INTENT_REQUEST_CODE = 2;
     private static final int CHOOSE_QUANTITY = 0;
     private static final int PICK_TRANSFER_METHOD = 1;
     private static final int TRANSFER_USING_LINK = 2;
     private static final int TRANSFER_TO_ADDRESS = 3;
-
 
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
     protected TransferTicketDetailViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
-    private Dialog dialog;
+    private AWalletAlertDialog dialog;
+
+    private FinishReceiver finishReceiver;
 
     private Ticket ticket;
     private TicketAdapter adapter;
@@ -90,6 +101,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     private TextView toAddressError;
     private EditText toAddressEditText;
     private ImageButton qrImageView;
+    private TextView textQuantity;
 
     private String ticketIds;
     private String prunedIds;
@@ -147,8 +159,9 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
+        viewModel.userTransaction().observe(this, this::onUserTransaction);
 
-        TextView textQuantity = findViewById(R.id.text_quantity);
+        textQuantity = findViewById(R.id.text_quantity);
         toAddressError = findViewById(R.id.to_address_error);
 
         pickTransferAddress = findViewById(R.id.layout_addressbar);
@@ -164,28 +177,6 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         buttonLinkPick = findViewById(R.id.layout_link_pick);
         buttonTransferPick = findViewById(R.id.layout_transfer_now);
-
-        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
-        plusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity + 1) <= adapter.getTicketRangeCount())
-            {
-                quantity++;
-                textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
-            }
-        });
-
-        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
-        minusButton.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity - 1) >= 0)
-            {
-                quantity--;
-                textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
-            }
-        });
 
         Button nextAction = findViewById(R.id.button_next);
         nextAction.setOnClickListener((View v) -> {
@@ -224,6 +215,35 @@ public class TransferTicketDetailActivity extends BaseActivity
         });
 
         setupScreen();
+
+        finishReceiver = new FinishReceiver(this);
+    }
+
+    //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
+    private void initQuantitySelector() {
+        pickTicketQuantity.setVisibility(View.VISIBLE);
+        RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
+        plusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            if ((quantity + 1) <= adapter.getTicketRangeCount()) {
+                quantity++;
+                textQuantity.setText(String.valueOf(quantity));
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+            }
+        });
+
+        RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
+        minusButton.setOnClickListener(v -> {
+            int quantity = Integer.parseInt(textQuantity.getText().toString());
+            if ((quantity - 1) >= 0) {
+                quantity--;
+                textQuantity.setText(String.valueOf(quantity));
+                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+            }
+        });
+
+        textQuantity.setText("1");
+        prunedIds = ticket.pruneIDList(ticketIds, 1);
     }
 
     private void setupRadioButtons()
@@ -319,7 +339,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                pickTicketQuantity.setVisibility(View.VISIBLE);
+                initQuantitySelector();
                 break;
             case PICK_TRANSFER_METHOD:
                 setupRadioButtons();
@@ -338,23 +358,37 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
     }
 
-    private void onTransaction(String hash)
+    private void onTransaction(String success)
     {
         hideDialog();
-        dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.transaction_succeeded)
-                .setMessage(hash)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    //TODO: go back to ticket asset view page
-                    finish();
-                })
-                .setNeutralButton(R.string.copy, (dialog1, id) -> {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("transaction hash", hash);
-                    clipboard.setPrimaryClip(clip);
-                    finish();
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(success);
+        dialog.setIcon(AWalletAlertDialog.SUCCESS);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> finish());
+
+        dialog.show();
+    }
+
+    private void onUserTransaction(String hash)
+    {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(hash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+        });
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+        });
         dialog.show();
     }
 
@@ -371,11 +405,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         hideDialog();
         if (shouldShowProgress)
         {
-            dialog = new AlertDialog.Builder(this)
-                    .setTitle(R.string.title_dialog_sending)
-                    .setView(new ProgressBar(this))
-                    .setCancelable(false)
-                    .create();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setIcon(AWalletAlertDialog.NONE);
+            dialog.setTitle(R.string.title_dialog_sending);
+            dialog.setMessage(R.string.transfer);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
             dialog.show();
         }
     }
@@ -383,13 +418,13 @@ public class TransferTicketDetailActivity extends BaseActivity
     private void onError(ErrorEnvelope error)
     {
         hideDialog();
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.error_transaction_failed)
-                .setMessage(error.message)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    // Do nothing
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(error.message);
+        dialog.setCancelable(true);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 
@@ -415,9 +450,31 @@ public class TransferTicketDetailActivity extends BaseActivity
             viewModel.createTicketTransfer(
                     to,
                     ticket.getAddress(),
-                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), false),
+                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
                     Contract.GAS_PRICE,
                     Contract.GAS_LIMIT);
+
+            //select between feemaster or user-pays-gas
+            //Not sure if we will ever implement this
+//            String XMLContractAddress = ticket.getXMLProperty("address", this);
+//            if (XMLContractAddress.equalsIgnoreCase(ticket.getAddress()))
+//            {
+//                String feeMasterUrl = ticket.getXMLProperty("feemaster", this);
+//                viewModel.feeMasterCall(
+//                        feeMasterUrl,
+//                        to,
+//                        ticket,
+//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
+//            }
+//            else
+//            {
+//                viewModel.createTicketTransfer(
+//                        to,
+//                        ticket.getAddress(),
+//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+//                        Contract.GAS_PRICE,
+//                        Contract.GAS_LIMIT);
+//            }
         }
     }
 
@@ -430,6 +487,13 @@ public class TransferTicketDetailActivity extends BaseActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
+    }
+
     private void onTicketIdClick(View view, TicketRange range)
     {
         Context context = view.getContext();
@@ -439,8 +503,9 @@ public class TransferTicketDetailActivity extends BaseActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == BARCODE_READER_REQUEST_CODE)
+        switch (requestCode)
         {
+            case BARCODE_READER_REQUEST_CODE:
             if (resultCode == CommonStatusCodes.SUCCESS)
             {
                 if (data != null)
@@ -463,26 +528,28 @@ public class TransferTicketDetailActivity extends BaseActivity
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
                                             CommonStatusCodes.getStatusCodeString(resultCode)));
             }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
+
+            case SEND_INTENT_REQUEST_CODE:
+                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                break;
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
     private void linkReady(String universalLink)
     {
-        //how many tickets are we selling?
-        TextView textQuantity = findViewById(R.id.text_quantity);
-        int ticketName = (Integer.valueOf(textQuantity.getText().toString()) > 1) ? R.string.tickets : R.string.ticket;
-        String qty = textQuantity.getText().toString() + " " +
+        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
+        String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.generate_pick_up_link);
         dialog.setSmallText(R.string.generate_free_transfer_link);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.send_universal_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
@@ -528,7 +595,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
         sendIntent.setType("text/plain");
-        startActivity(sendIntent);
+        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
 
     private boolean isAddressValid(String address)

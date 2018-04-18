@@ -21,6 +21,7 @@ import android.view.View;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -159,6 +160,12 @@ public class WalletsActivity extends BaseActivity implements
                 viewModel.fetchWallets();
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
+                //set as isSetDefault
+				Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
+				if (importedWallet != null)
+				{
+					viewModel.setDefaultWallet(importedWallet);
+				}
                 if (adapter.getItemCount() <= 1) {
                     viewModel.showHome(this);
                 }
@@ -255,7 +262,10 @@ public class WalletsActivity extends BaseActivity implements
 
 	private void onCreatedWallet(Wallet wallet) {
         hideToolbar();
-        backupWarning.show(wallet);
+        //set new wallet
+		viewModel.setDefaultWallet(wallet);
+		isSetDefault = true;
+		//backupWarning.show(wallet);
 	}
 
 	private void onLaterBackup(View view, Wallet wallet) {

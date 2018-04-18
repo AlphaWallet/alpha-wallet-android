@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -33,6 +35,8 @@ public class NewSettingsFragment extends Fragment {
     private Wallet wallet;
     private TextView networksSubtext;
     private TextView walletsSubtext;
+    private Switch notificationState;
+    private Handler handler = new Handler();
 
     @Nullable
     @Override
@@ -46,18 +50,25 @@ public class NewSettingsFragment extends Fragment {
 
         networksSubtext = view.findViewById(R.id.networks_subtext);
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
+        notificationState = view.findViewById(R.id.switch_notifications);
 
-        LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
+        updateNotificationState();
+
+        final LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
         layoutWalletAddress.setOnClickListener(v -> {
             viewModel.showMyAddress(getContext());
+            layoutWalletAddress.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutWalletAddress);
         });
 
-        LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
+        final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
         layoutManageWallets.setOnClickListener(v -> {
             viewModel.showManageWallets(getContext(), false);
+            layoutManageWallets.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutManageWallets);
         });
 
-        LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
+        final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
         layoutSwitchnetworks.setOnClickListener(v -> {
             String currentNetwork = viewModel.getDefaultNetworkInfo().name;
             SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), currentNetwork);
@@ -70,14 +81,18 @@ public class NewSettingsFragment extends Fragment {
                 dialog.dismiss();
             });
             dialog.show();
+            layoutSwitchnetworks.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutSwitchnetworks);
         });
 
-        LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
+        final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
         layoutHelp.setOnClickListener(v -> {
             viewModel.showHelp(getContext());
+            layoutHelp.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutHelp);
         });
 
-        LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
+        final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
         layoutTwitter.setOnClickListener(v -> {
             Intent intent;
             try {
@@ -88,6 +103,18 @@ public class NewSettingsFragment extends Fragment {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_TWITTER_URL));
             }
             startActivity(intent);
+            layoutTwitter.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutTwitter);
+        });
+
+        final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
+        layoutNotifications.setOnClickListener(v -> {
+            boolean currentState = viewModel.getNotificationState();
+            currentState = !currentState;
+            viewModel.setNotificationState(currentState);
+            updateNotificationState();
+            layoutNotifications.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutNotifications);
         });
 
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
@@ -100,9 +127,17 @@ public class NewSettingsFragment extends Fragment {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_FACEBOOK_URL));
             }
             startActivity(intent);
+            layoutFacebook.setBackgroundResource(R.drawable.background_marketplace_event_select);
+            new RemoveEffect(layoutFacebook);
         });
 
         return view;
+    }
+
+    private void updateNotificationState()
+    {
+        boolean state = viewModel.getNotificationState();
+        notificationState.setChecked(state);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -118,5 +153,17 @@ public class NewSettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         viewModel.prepare();
+    }
+
+    private class RemoveEffect
+    {
+        public LinearLayout layout;
+        public RemoveEffect(LinearLayout layoutEffect)
+        {
+            layout = layoutEffect;
+            handler.postDelayed(returnButton, 10);
+        }
+
+        private final Runnable returnButton = () -> layout.setBackgroundResource(R.drawable.background_marketplace_event);
     }
 }

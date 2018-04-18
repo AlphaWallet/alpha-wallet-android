@@ -38,6 +38,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView issuer;
     public final TextView text24HoursSub;
     public final TextView textAppreciationSub;
+    public final TextView contractType;
+    public final View contractSeparator;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -55,6 +57,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         issuer = findViewById(R.id.issuer);
         text24HoursSub = findViewById(R.id.text_24_hrs_sub);
         textAppreciationSub = findViewById(R.id.text_appreciation_sub);
+        contractType = findViewById(R.id.contract_type);
+        contractSeparator = findViewById(R.id.contract_seperator);
         itemView.setOnClickListener(this);
     }
 
@@ -62,6 +66,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
         try {
+            contractType.setVisibility(View.GONE);
+            contractSeparator.setVisibility(View.GONE);
             // We handled NPE. Exception handling is expensive, but not impotent here
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
@@ -107,10 +113,19 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         String lbl = getString(R.string.token_balance,
                 ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
                 converted);
-        Spannable spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.balanceCurrency.setText(spannable);
+
+        Spannable spannable;
+        if (ethBalance.compareTo(BigDecimal.ZERO) > 0)
+        {
+            spannable = new SpannableString(lbl);
+            spannable.setSpan(new ForegroundColorSpan(color),
+                              converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            this.balanceCurrency.setText(spannable);
+        }
+        else
+        {
+            this.balanceCurrency.setText(EMPTY_BALANCE);
+        }
 
         //calculate the appreciation value
         double dBalance = ethBalance.multiply(new BigDecimal(ticker.price)).doubleValue();
@@ -119,7 +134,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         BigDecimal appreciation = BigDecimal.valueOf(dAppreciation);
 
         int valColor;
-        if (appreciation.compareTo(BigDecimal.ZERO) == 1)
+        if (appreciation.compareTo(BigDecimal.ZERO) >= 0)
         {
             valColor = ContextCompat.getColor(getContext(), R.color.black);
             textAppreciationSub.setText(R.string.appreciation);
@@ -144,12 +159,30 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                 ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
                 convertedAppreciation);
 
-        spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.textAppreciation.setText(spannable);
+        if (ethBalance.compareTo(BigDecimal.ZERO) > 0)
+        {
+            spannable = new SpannableString(lbl);
+            spannable.setSpan(new ForegroundColorSpan(color),
+                              convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            this.textAppreciation.setText(spannable);
+        }
+        else
+        {
+            this.textAppreciation.setText(EMPTY_BALANCE);
+        }
+    }
 
+    public boolean needsUpdate()
+    {
+        return (token != null && token.needsUpdate());
+    }
 
+    public void updateHeading()
+    {
+        if (token != null)
+        {
+            token.checkUpdateTimeValid(getContext(), this);
+        }
     }
 
     protected void fillEmpty() {

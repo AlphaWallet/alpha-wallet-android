@@ -143,7 +143,8 @@ public class BrowseMarketViewModel extends BaseViewModel
             Token thisToken = tokens.remove(0);
             disposable = marketQueueService
                     .fetchSalesOrders(thisToken.getAddress())
-                    .subscribeOn(Schedulers.newThread())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onSalesOrders, this::onError, this::fetchMarketOrders);
         }
     }

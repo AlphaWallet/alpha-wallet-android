@@ -70,7 +70,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        setTitle("Transaction Details");
+        setTitle(R.string.title_transaction_details);
     }
 
     private void onDefaultWallet(Wallet wallet) {

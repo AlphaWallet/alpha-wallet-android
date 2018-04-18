@@ -53,10 +53,10 @@ public class TransactionsViewModel extends BaseViewModel {
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
     private static final String TAG = "TVM";
 
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> showEmpty = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
-    private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -85,6 +85,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private List<Token> tokenCheckList;
     private boolean needsUpdate = false;
+    private String xmlContractAddress = null;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -126,7 +127,6 @@ public class TransactionsViewModel extends BaseViewModel {
         super.onCleared();
 
         handler.removeCallbacks(startFetchTransactionsTask);
-        handler.removeCallbacks(startGetBalanceTask);
 
         isVisible = false;
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
@@ -136,20 +136,17 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
+        return network;
     }
 
     public LiveData<Wallet> defaultWallet() {
-        return defaultWallet;
+        return wallet;
     }
 
     public LiveData<Transaction[]> transactions() {
         return transactions;
     }
-
-    public LiveData<Map<String, String>> defaultWalletBalance() {
-        return defaultWalletBalance;
-    }
+    public LiveData<Boolean> showEmpty() { return showEmpty; }
 
     public void prepare() {
         progress.postValue(true);
@@ -164,16 +161,17 @@ public class TransactionsViewModel extends BaseViewModel {
      * @param shouldShowProgress
      */
     private void fetchTransactions(boolean shouldShowProgress) {
-        if (defaultWallet().getValue() != null)
+        showEmpty.postValue(false);
+        if (wallet.getValue() != null)
         {
             if (fetchTransactionDisposable == null)
             {
                 Log.d(TAG, "Fetch start");
-                setupTokensInteract.setWalletAddr(defaultWallet().getValue().address);
-                progress.postValue(shouldShowProgress);
+                setupTokensInteract.setWalletAddr(wallet.getValue().address);
+                //progress.postValue(shouldShowProgress);
                 needsUpdate = true;
                 fetchTransactionDisposable =
-                        fetchTransactionsInteract.fetchCached(defaultWallet.getValue())
+                        fetchTransactionsInteract.fetchCached(wallet.getValue())
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(this::onTransactions, this::onError, this::fetchNetworkTransactions);
@@ -186,6 +184,18 @@ public class TransactionsViewModel extends BaseViewModel {
                     .find()
                     .subscribe(this::onDefaultWallet, this::onError);
         }
+    }
+
+    @Override
+    public void onError(Throwable throwable)
+    {
+        super.onError(throwable);
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+        {
+            fetchTransactionDisposable.dispose();
+        }
+        fetchTransactionDisposable = null;
+        showEmpty.postValue(false);
     }
 
     /**
@@ -222,7 +232,7 @@ public class TransactionsViewModel extends BaseViewModel {
         //now fetch new transactions on main account
         //find block number of last transaction
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchNetworkTransactions(defaultWallet.getValue(), lastTx)
+                fetchTransactionsInteract.fetchNetworkTransactions(wallet.getValue(), lastTx)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError, this::enumerateTokens);
@@ -250,9 +260,10 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         Log.d(TAG, "Enumerating tokens");
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
-        if (needsUpdate && txArray.length > 0) this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
+        if (needsUpdate && txArray.length > 0)
+            this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
         fetchTransactionDisposable = fetchTokensInteract
-                .fetchStored(defaultWallet.getValue())
+                .fetchStored(wallet.getValue())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::onTokens, this::onError, this::categoriseAccountTransactions);
     }
@@ -263,6 +274,16 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onTokens(Token[] tokens) {
         Log.d(TAG, "Found " + tokens.length + " Stored tokens");
         setupTokensInteract.setTokens(tokens);
+        for (Token t : tokens)
+        {
+            if (xmlContractAddress != null && t.getAddress().equalsIgnoreCase(xmlContractAddress))
+                xmlContractAddress = null;
+        }
+
+        if (xmlContractAddress != null && !setupTokensInteract.getRequiredContracts().contains(xmlContractAddress))
+        {
+            setupTokensInteract.getRequiredContracts().add(xmlContractAddress);
+        }
     }
 
     /**
@@ -271,15 +292,24 @@ public class TransactionsViewModel extends BaseViewModel {
      */
     private void categoriseAccountTransactions()
     {
-        Boolean last = progress.getValue();
-        if (txArray != null && txArray.length > 0 && last != null && last) {
+        Log.d(TAG, "Categorise: " + txArray.length);
+        if (txArray != null && txArray.length > 0) {
             progress.postValue(true);
         }
         else
         {
+            //load contract at XML address if required
+            if (setupTokensInteract.getRequiredContracts().size() > 0)
+            {
+                //still need to load the contract
+                showTransactions(txArray);
+            }
+
             if (setupTokensInteract.getLocalTokensCount() == 0) {
                 Log.d(TAG, "No transactions");
                 progress.postValue(false);
+                showEmpty.postValue(true);
+                fetchTransactionDisposable = null;
                 return; // no local transactions, no ERC875 tokens, no need to check any further
             }
         }
@@ -296,9 +326,9 @@ public class TransactionsViewModel extends BaseViewModel {
      * @param txList - dummy param: not used here
      */
      private void startCheckingTokenInterations(Transaction[] txList) {
+         Log.d(TAG, "Check Token Interactions: " + txList.length);
          txArray = txList;
          tokenCheckList = setupTokensInteract.getTokenCheckList();
-
          consumeTokenCheckList();
      }
 
@@ -355,12 +385,21 @@ public class TransactionsViewModel extends BaseViewModel {
     private void processTokenTransactions()
     {
         Log.d(TAG, "Processing " + setupTokensInteract.getMapSize() + " Map Transactions. " + setupTokensInteract.getLocalTokensCount() + " Tokens known.");
-        fetchTransactionDisposable = setupTokensInteract
-                .processTransactions(defaultWallet().getValue())
-                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(defaultNetwork.getValue(), defaultWallet().getValue(), transactions))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showTransactions, this::onError);
+
+        if (setupTokensInteract.getMapSize() == 0)
+        {
+            //go straight to show
+            showTransactions(txArray);
+        }
+        else
+        {
+            fetchTransactionDisposable = setupTokensInteract
+                    .processTransactions(wallet.getValue())
+                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showTransactions, this::onError);
+        }
     }
 
     private void onTxCount(Transaction[] tx)
@@ -368,12 +407,14 @@ public class TransactionsViewModel extends BaseViewModel {
         Log.d(TAG, "Stored Transactions " + tx.length);
     }
 
+
     /**
      * 7. finally receive the list of parsed transactions and update the list adapter
      * @param processedTransactions
      */
     private void showTransactions(Transaction[] processedTransactions)
     {
+        Log.d(TAG, "Show Transactions: " + processedTransactions.length);
         progress.postValue(false);
         txArray = processedTransactions;
         if (processedTransactions.length > 0)
@@ -441,7 +482,7 @@ public class TransactionsViewModel extends BaseViewModel {
         //fill in the required info and store
         fetchTransactionDisposable = setupTokensInteract
                 .checkTransactions(txArray)
-                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(defaultNetwork.getValue(), defaultWallet().getValue(), transactions))
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::refreshDisplay);
@@ -457,7 +498,7 @@ public class TransactionsViewModel extends BaseViewModel {
         else
         {
             //post a waiting dialog to appease the user
-            progress.postValue(true);
+            //progress.postValue(true);
             Log.d(TAG, "must already be running, wait until termination");
         }
     }
@@ -475,7 +516,6 @@ public class TransactionsViewModel extends BaseViewModel {
             fetchTransactionDisposable = null; //ready to restart the fetch
 
             handler.removeCallbacks(startFetchTransactionsTask);
-            handler.removeCallbacks(startGetBalanceTask);
         }
         else if (fetchTransactionDisposable == null)
         {
@@ -500,28 +540,15 @@ public class TransactionsViewModel extends BaseViewModel {
         checkIfRegularUpdateNeeded(); //finally see if we need to start periodic update
     }
 
-    //NB: We don't need to update balance in transaction view
-    public void getBalance() {
-//        getBalanceDisposable = getDefaultWalletBalance
-//                .get(defaultWallet.getValue())
-//                .subscribe(values -> {
-//                    defaultWalletBalance.postValue(values);
-//                    handler.removeCallbacks(startGetBalanceTask);
-//                    handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
-//                }, t -> {
-//                });
-    }
-
     private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
+        network.setValue(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        defaultWallet.setValue(wallet);
-        getBalance();
+        this.wallet.setValue(wallet);
         fetchTransactions(true);
     }
 
@@ -538,7 +565,7 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     public void showTokens(Context context) {
-        myTokensRouter.open(context, defaultWallet.getValue());
+        myTokensRouter.open(context, wallet.getValue());
     }
 
     public void showWalletFragment(Context context, int resId) {
@@ -558,7 +585,6 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     private final Runnable startFetchTransactionsTask = () -> this.fetchTransactions(false);
-    private final Runnable startGetBalanceTask = this::getBalance;
 
     //Called from the activity when it comes into view,
     //start updating transactions
@@ -576,5 +602,10 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
+    }
+
+    public void setXMLContractAddress(String address)
+    {
+        xmlContractAddress = address;
     }
 }

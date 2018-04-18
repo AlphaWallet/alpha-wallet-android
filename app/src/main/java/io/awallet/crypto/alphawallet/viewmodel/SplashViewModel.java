@@ -8,6 +8,7 @@ import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
+import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
@@ -26,17 +27,21 @@ public class SplashViewModel extends ViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final ImportWalletInteract importWalletInteract;
     private final AddTokenInteract addTokenInteract;
+    private final CreateWalletInteract createWalletInteract;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
+    private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     EthereumNetworkRepositoryType networkRepository,
                     ImportWalletInteract importWalletInteract,
-                    AddTokenInteract addTokenInteract) {
+                    AddTokenInteract addTokenInteract,
+                    CreateWalletInteract createWalletInteract) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.networkRepository = networkRepository;
         this.importWalletInteract = importWalletInteract;
         this.addTokenInteract = addTokenInteract;
+        this.createWalletInteract = createWalletInteract;
     }
 
     /**
@@ -139,10 +144,24 @@ public class SplashViewModel extends ViewModel {
     public LiveData<Wallet[]> wallets() {
         return wallets;
     }
+    public LiveData<Wallet> createWallet() {
+        return createWallet;
+    }
 
     private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
         TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
         return tokenInfo;
+    }
+
+    public void createNewWallet()
+    {
+        //create a new wallet for the user
+        createWalletInteract
+                .create()
+                .subscribe(account -> {
+                    fetchWallets();
+                    createWallet.postValue(account);
+                }, this::onError);
     }
 }

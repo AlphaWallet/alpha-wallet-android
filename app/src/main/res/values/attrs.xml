@@ -3,5 +3,8 @@
     <declare-styleable name="InputAddressView" />
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
+        <attr name="imeOptions" format="string" />
+        <attr name="lines" format="integer" />
+        <attr name="inputType" format="string" />
     </declare-styleable>
 </resources>

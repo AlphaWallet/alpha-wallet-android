@@ -92,10 +92,12 @@ public class InputView extends LinearLayout {
                             Utils.dp2px(context, 50),
                             Utils.dp2px(context, 5)
                     );
+                    editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     break;
                 }
                 case "number": {
                     editText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+                    break;
                 }
             }
         }
@@ -119,6 +121,12 @@ public class InputView extends LinearLayout {
     private void setLines() {
         if (lines > 1) {
             editText.setGravity(Gravity.TOP);
+            editText.setPadding(
+                    Utils.dp2px(context, 15),
+                    Utils.dp2px(context, 10),
+                    Utils.dp2px(context, 15),
+                    Utils.dp2px(context, 10)
+            );
         }
 
         editText.setLines(lines);
@@ -143,7 +151,9 @@ public class InputView extends LinearLayout {
     }
 
     public void setError(CharSequence message) {
-        if (message.toString().isEmpty()) {
+        if (message == null) {
+            error.setVisibility(View.GONE);
+        } else if (message.toString().isEmpty()) {
             error.setText(message);
             error.setVisibility(View.GONE);
         } else {

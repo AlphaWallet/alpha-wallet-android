@@ -54,6 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
+                custom:inputType="number"
                 custom:label="@string/hint_contract_decimals" />
 
             <io.awallet.crypto.alphawallet.widget.InputView

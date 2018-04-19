@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -36,7 +35,6 @@ public class NewSettingsFragment extends Fragment {
     private TextView networksSubtext;
     private TextView walletsSubtext;
     private Switch notificationState;
-    private Handler handler = new Handler();
 
     @Nullable
     @Override
@@ -57,15 +55,11 @@ public class NewSettingsFragment extends Fragment {
         final LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
         layoutWalletAddress.setOnClickListener(v -> {
             viewModel.showMyAddress(getContext());
-            layoutWalletAddress.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutWalletAddress);
         });
 
         final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
         layoutManageWallets.setOnClickListener(v -> {
             viewModel.showManageWallets(getContext(), false);
-            layoutManageWallets.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutManageWallets);
         });
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
@@ -81,15 +75,11 @@ public class NewSettingsFragment extends Fragment {
                 dialog.dismiss();
             });
             dialog.show();
-            layoutSwitchnetworks.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutSwitchnetworks);
         });
 
         final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
         layoutHelp.setOnClickListener(v -> {
             viewModel.showHelp(getContext());
-            layoutHelp.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutHelp);
         });
 
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
@@ -103,8 +93,6 @@ public class NewSettingsFragment extends Fragment {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_TWITTER_URL));
             }
             startActivity(intent);
-            layoutTwitter.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutTwitter);
         });
 
         final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
@@ -113,8 +101,6 @@ public class NewSettingsFragment extends Fragment {
             currentState = !currentState;
             viewModel.setNotificationState(currentState);
             updateNotificationState();
-            layoutNotifications.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutNotifications);
         });
 
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
@@ -127,8 +113,6 @@ public class NewSettingsFragment extends Fragment {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_FACEBOOK_URL));
             }
             startActivity(intent);
-            layoutFacebook.setBackgroundResource(R.drawable.background_marketplace_event_select);
-            new RemoveEffect(layoutFacebook);
         });
 
         return view;
@@ -153,17 +137,5 @@ public class NewSettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         viewModel.prepare();
-    }
-
-    private class RemoveEffect
-    {
-        public LinearLayout layout;
-        public RemoveEffect(LinearLayout layoutEffect)
-        {
-            layout = layoutEffect;
-            handler.postDelayed(returnButton, 10);
-        }
-
-        private final Runnable returnButton = () -> layout.setBackgroundResource(R.drawable.background_marketplace_event);
     }
 }

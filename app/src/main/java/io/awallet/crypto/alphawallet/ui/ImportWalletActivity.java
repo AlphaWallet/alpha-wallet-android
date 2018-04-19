@@ -1,7 +1,5 @@
 package io.awallet.crypto.alphawallet.ui;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,15 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.widget.ProgressBar;
-
-import io.awallet.crypto.alphawallet.C;
-import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
-import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.ui.widget.adapter.TabPagerAdapter;
-import io.awallet.crypto.alphawallet.viewmodel.ImportWalletViewModel;
-import io.awallet.crypto.alphawallet.viewmodel.ImportWalletViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +16,15 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.C;
+import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.ui.widget.adapter.TabPagerAdapter;
+import io.awallet.crypto.alphawallet.util.TabUtils;
+import io.awallet.crypto.alphawallet.viewmodel.ImportWalletViewModel;
+import io.awallet.crypto.alphawallet.viewmodel.ImportWalletViewModelFactory;
+import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 
 import static io.awallet.crypto.alphawallet.C.ErrorCode.ALREADY_ADDED;
 
@@ -40,7 +38,7 @@ public class ImportWalletActivity extends BaseActivity {
     @Inject
     ImportWalletViewModelFactory importWalletViewModelFactory;
     ImportWalletViewModel importWalletViewModel;
-    private Dialog dialog;
+    private AWalletAlertDialog dialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +48,7 @@ public class ImportWalletActivity extends BaseActivity {
 
         setContentView(R.layout.activity_import_wallet);
         toolbar();
+        setTitle(R.string.empty);
 
         pages.add(KEYSTORE_FORM_INDEX, new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
         pages.add(PRIVATE_KEY_FORM_INDEX, new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
@@ -63,6 +62,8 @@ public class ImportWalletActivity extends BaseActivity {
         importWalletViewModel.progress().observe(this, this::onProgress);
         importWalletViewModel.error().observe(this, this::onError);
         importWalletViewModel.wallet().observe(this, this::onWallet);
+
+        TabUtils.changeTabsFont(this, tabLayout);
     }
 
     @Override
@@ -103,22 +104,22 @@ public class ImportWalletActivity extends BaseActivity {
         if (errorEnvelope.code == ALREADY_ADDED) {
             message = getString(R.string.error_already_added);
         }
-        dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.title_dialog_error)
-                .setMessage(message)
-                .setPositiveButton(R.string.ok, null)
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(message);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 
     private void onProgress(boolean shouldShowProgress) {
         hideDialog();
         if (shouldShowProgress) {
-            dialog = new AlertDialog.Builder(this)
-                    .setTitle(R.string.title_dialog_handling)
-                    .setView(new ProgressBar(this))
-                    .setCancelable(false)
-                    .create();
+            dialog = new AWalletAlertDialog(this);
+            dialog.setTitle(R.string.title_dialog_handling);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         }
     }

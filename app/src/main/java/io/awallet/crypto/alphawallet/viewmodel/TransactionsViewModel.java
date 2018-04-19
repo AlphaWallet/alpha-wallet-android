@@ -42,7 +42,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.awallet.crypto.alphawallet.ui.HomeActivity;
+import io.reactivex.Completable;
 import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -51,7 +54,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
 public class TransactionsViewModel extends BaseViewModel {
-    private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
     private static final String TAG = "TVM";
 
@@ -236,11 +238,25 @@ public class TransactionsViewModel extends BaseViewModel {
 
     /**
      *  3. Once we have fetched all user account related transactions we need to fill in all the contract transactions
-     *   First get a list of tokens, on each token see if it's an ERC875, if it is then scan the contract transactions
-     *   for any that relate to the current user account (given by wallet address)
+     *   This functions performs the following tasks:
+     *   - fetch all cached tokens sequentially
+     *
+     *   --> on each token we fetch do the following:
+     *   - add each token to a local map
+     *   - fetch all transactions on the token contract
+     *   - process those transactions to see if user wallet is involved with any
+     *   - store the updated transactions
+     *   - remove any updated transactions from the map fetched in the previous two steps
+     *   - refresh the display with updated transactions
+     *
+     *
+     *   ---------------------------
+     *   finally go to siftUnknownTransactions
      */
     private void enumerateTokens()
     {
+        //stop the spinner
+        progress.postValue(false);
         Log.d(TAG, "Enumerating tokens");
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
         transactionCount += txArray.length;
@@ -256,13 +272,15 @@ public class TransactionsViewModel extends BaseViewModel {
                 .flatMap(token -> fetchTransactionsInteract.fetch(new Wallet(token.tokenInfo.address), token)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                 .flatMap(tokenTransactions -> setupTokensInteract.processTokenTransactions(defaultWallet().getValue(), tokenTransactions)) //process these into a map
                 .flatMap(transactions -> fetchTransactionsInteract.storeTransactionsObservable(network.getValue(), wallet.getValue(), transactions))
+                .flatMap(this::removeFromMap)
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(this::onTokenTransactionBatch, this::onError, this::siftUnknownTransactions);
+                .subscribe(this::updateDisplay, this::onError, this::siftUnknownTransactions);
     }
 
     private Token addTokenToChecklist(Token token)
     {
         tokenMap.put(token.getAddress(), token);
+        setupTokensInteract.addTokenToMap(token);
         return token;
     }
 
@@ -270,25 +288,20 @@ public class TransactionsViewModel extends BaseViewModel {
     //if we find unknown tokens fetch them and add to the token watch list
     private void siftUnknownTransactions()
     {
-        //turn into an observable that processes the unprocessed tx's,
-        //then feeds the list of unknown contracts into a fetcher
-        //which loads them and stores them
-        //then kicks off refresh if it's not already done
-        //
-        //TODO: record dead contracts in realm. Only need to store the address.
-        for (Transaction t : txMap.values())
-        {
-            if (t.input != null && t.input.length() > 20)
-            {
-                Log.d(TAG, "Unknown TX: " + t.hash);
-                //need to find new unknown contracts here
-                Transaction tx = setupTokensInteract.checkUnknownTransaction(tokenMap, t);
-                if (tx != null)
-                {
-                    Log.d(TAG, "Weird: " + tx.hash);
-                }
-            }
-        }
+        //add in the XML contract address to list of unknowns to fetch if we don't have it already
+        setupTokensInteract.setupUnknownList(tokenMap, xmlContractAddress);
+
+        fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap, tokenMap) //patches tx's and returns unknown contracts
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
+                .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
+                .flatMapIterable(address -> address) //change to a sequential stream
+                .flatMap(setupTokensInteract::addToken) //fetch token info
+                .flatMap(addTokenInteract::add) //add to cached tokens
+                .flatMap(token -> setupTokensInteract.reProcessTokens(token, txMap)) //run through transactions now we have the new token
+                .flatMap(this::removeFromMap) //remove the handled transactions from the map (so we don't need to scan these transactions again)
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store newly fixed up transactions
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::updateDisplay, this::onError, this::completeCycle); //update the screen with any updated transactions
 
         if (transactionCount == 0)
         {
@@ -296,248 +309,37 @@ public class TransactionsViewModel extends BaseViewModel {
             progress.postValue(false);
             showEmpty.postValue(true);
         }
-
-        fetchTransactionDisposable = null;
-        checkIfRegularUpdateNeeded();
     }
 
-    private void onTokenTransactionBatch(Transaction[] transactions)
+    //update the display for newly fetched tokens
+    private void updateDisplay(Transaction[] transactions)
     {
-        Log.d(TAG, "GOT: " + transactions.length );
-        //first remove all these transactions from the network + cached list
-        for (Transaction t : transactions)
-        {
-            txMap.remove(t.hash);
-        }
-
-        Log.d(TAG, "Remaining unknown: " + txMap.size() );
-        transactionCount += transactions.length;
-
-        //push these transactions to the view
         if (transactions.length > 0)
         {
             this.transactions.postValue(transactions);
         }
     }
 
-    /**
-     * 3a. receive cached tokens and store them in the service
-     */
-    private void onTokens(Token[] tokens) {
-        Log.d(TAG, "Found " + tokens.length + " Stored tokens");
-        setupTokensInteract.setTokens(tokens);
-        for (Token t : tokens)
-        {
-            if (xmlContractAddress != null && t.getAddress().equalsIgnoreCase(xmlContractAddress))
-                xmlContractAddress = null;
-        }
-
-        if (xmlContractAddress != null && !setupTokensInteract.getRequiredContracts().contains(xmlContractAddress))
-        {
-            setupTokensInteract.getRequiredContracts().add(xmlContractAddress);
-        }
+    private void completeCycle()
+    {
+        fetchTransactionDisposable = null;
+        checkIfRegularUpdateNeeded();
     }
 
-    /**
-     * 4. once we have a list of user tokens and transactions on the wallet account
-     * we need to build a map of transactions and associate them with local tokens
-     */
-    private void categoriseAccountTransactions()
+    private Observable<Transaction[]> removeFromMap(Transaction[] transactions)
     {
-        Log.d(TAG, "Categorise: " + txArray.length);
-        if (txArray != null && txArray.length > 0) {
-            progress.postValue(true);
-        }
-        else
-        {
-            //load contract at XML address if required
-            if (setupTokensInteract.getRequiredContracts().size() > 0)
+        return Observable.fromCallable(() -> {
+            Log.d(TAG, "GOT: " + transactions.length );
+            //first remove all these transactions from the network + cached list
+            for (Transaction t : transactions)
             {
-                //still need to load the contract
-                showTransactions(txArray);
+                txMap.remove(t.hash);
             }
 
-            if (setupTokensInteract.getLocalTokensCount() == 0) {
-                Log.d(TAG, "No transactions");
-                progress.postValue(false);
-                showEmpty.postValue(true);
-                fetchTransactionDisposable = null;
-                return; // no local transactions, no ERC875 tokens, no need to check any further
-            }
-        }
-
-        //go ahead and build the map associating account transactions with ERC875 tokens
-        fetchTransactionDisposable = setupTokensInteract
-                .checkTransactions(txArray)
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(this::startCheckingTokenInterations);
-    }
-
-    /**
-     * 4a. Finish checking tokens and fetch the token check list before consuming it.
-     * @param txList - dummy param: not used here
-     */
-     private void startCheckingTokenInterations(Transaction[] txList) {
-         Log.d(TAG, "Check Token Interactions: " + txList.length);
-         txArray = txList;
-         //tokenCheckList = setupTokensInteract.getTokenCheckList();
-         //consumeTokenCheckList();
-     }
-
-    /**
-     * 5. Get all the transactions from all of our cached tokens.
-     * This funtion recursively calls itself, consuming each token we loaded in step 2.
-     */
-//    private void consumeTokenCheckList()
-//    {
-//        try
-//        {
-//            if (tokenCheckList.size() == 0)
-//            {
-//                processTokenTransactions();
-//            }
-//            else
-//            {
-//                Token t = tokenCheckList.remove(0);
-//                Log.d(TAG, "Consume " + t.getFullName());
-//
-//                fetchTransactionDisposable = fetchTransactionsInteract.fetch(new Wallet(t.tokenInfo.address), t)
-//                        .subscribeOn(Schedulers.io())
-//                        .subscribe(this::addTxs, this::onConsumeError, this::consumeTokenCheckList);
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
-
-    /**
-     * 5a. Receive TokenTransaction pairs for a token and add to the check list
-     * @param txList
-     */
-    private void addTxs(TokenTransaction[] txList)
-    {
-        if (txList.length > 0)
-        {
-            Log.d(TAG, "Found " + txList.length + " TokenTX for " + txList[0].token.getFullName());
-        }
-
-        setupTokensInteract.addTokenTransactions(txList);
-    }
-
-    private void onConsumeError(Throwable e)
-    {
-        //consumeTokenCheckList();
-    }
-
-    /**
-     * 6. Now parse all the transactions we obtained in steps 1, 2 and step 5
-     */
-    private void processTokenTransactions()
-    {
-        Log.d(TAG, "Processing " + setupTokensInteract.getMapSize() + " Map Transactions. " + setupTokensInteract.getLocalTokensCount() + " Tokens known.");
-
-        if (setupTokensInteract.getMapSize() == 0)
-        {
-            //go straight to show
-            showTransactions(txArray);
-        }
-        else
-        {
-            fetchTransactionDisposable = setupTokensInteract
-                    .processTransactions(wallet.getValue())
-                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::showTransactions, this::onError);
-        }
-    }
-
-    private void onTxCount(Transaction[] tx)
-    {
-        Log.d(TAG, "Stored Transactions " + tx.length);
-    }
-
-
-    /**
-     * 7. finally receive the list of parsed transactions and update the list adapter
-     * @param processedTransactions
-     */
-    private void showTransactions(Transaction[] processedTransactions)
-    {
-        Log.d(TAG, "Show Transactions: " + processedTransactions.length);
-        progress.postValue(false);
-        txArray = processedTransactions;
-        if (processedTransactions.length > 0)
-        {
-            this.transactions.postValue(processedTransactions);
-        }
-        else
-        {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "empty collection"));
-        }
-
-        if (setupTokensInteract.getRequiredContracts().size() > 0)
-        {
-            Log.d(TAG, "Fetching " + setupTokensInteract.getRequiredContracts().size() + " Tokens");
-            //if there are detected contract transactions that we don't already know about add them in here
-            fetchTransactionDisposable = setupTokensInteract.addTokens()
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(Schedulers.newThread())
-                    .subscribe(this::onTokenInfo, this::onError);
-        }
-        else
-        {
-            fetchTransactionDisposable = null;
-            checkIfRegularUpdateNeeded();
-        }
-    }
-
-    /**
-     * 8. Receive all the token data for currently unknown contracts
-     * - we only receive valid contract tokens as all the dead ones are filtered out
-     */
-    private void onTokenInfo(TokenInfo[] tokenInfos)
-    {
-        setupTokensInteract.getRequiredContracts().clear();
-        if (tokenInfos.length > 0)
-        {
-            fetchTransactionDisposable = addTokenInteract
-                    .add(tokenInfos)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()) //we directly affect UI from the callback
-                    .subscribe(this::onTokens, this::onError, this::onSaved);
-        }
-        else
-        {
-            fetchTransactionDisposable = null;
-            checkIfRegularUpdateNeeded();
-        }
-    }
-
-    /**
-     * 8a. Finished storing the received tokens. Since we stored tokens we require a refresh to populate contract names
-     */
-    private void onSaved()
-    {
-        setupTokensInteract.regenerateTransactionList();
-        Log.d(TAG,"saved contracts.");
-        refreshTokens.postValue(true); //send directive to refresh token list
-        //now re-process the tokens
-        reProcessTransactions();
-    }
-
-    private void reProcessTransactions()
-    {
-        Log.d(TAG, "Re-processing " + txArray.length + " Transactions. " + setupTokensInteract.getLocalTokensCount() + " Tokens known.");
-        //fill in the required info and store
-        fetchTransactionDisposable = setupTokensInteract
-                .checkTransactions(txArray)
-                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions))
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::refreshDisplay);
+            Log.d(TAG, "Remaining unknown: " + txMap.size() );
+            transactionCount += transactions.length;
+            return transactions;
+        });
     }
 
     public void forceUpdateTransactionView()
@@ -581,15 +383,6 @@ public class TransactionsViewModel extends BaseViewModel {
         {
             Log.d(TAG, "must already be running, wait until termination");
         }
-    }
-
-
-    private void refreshDisplay(Transaction[] txList)
-    {
-        txArray = txList;
-        this.transactions.postValue(txArray);
-        fetchTransactionDisposable = null;
-        checkIfRegularUpdateNeeded(); //finally see if we need to start periodic update
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

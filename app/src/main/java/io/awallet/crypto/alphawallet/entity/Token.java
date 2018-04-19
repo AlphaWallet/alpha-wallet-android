@@ -11,6 +11,7 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
+import io.awallet.crypto.alphawallet.ui.AddTokenActivity_MembersInjector;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
@@ -295,5 +296,10 @@ public class Token implements Parcelable {
     public boolean isEthereum()
     {
         return (tokenInfo != null && tokenInfo.symbol != null && tokenInfo.symbol.equals(ETH_SYMBOL));
+    }
+
+    public boolean isTerminated()
+    {
+        return ((tokenInfo.name == null || tokenInfo.name.length() < 2));
     }
 }

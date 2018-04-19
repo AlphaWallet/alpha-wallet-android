@@ -78,11 +78,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		if (token.tokenInfo.name == null) //dead Token, early return zero fields
+		if (token.isTerminated()) //dead Token, early return zero fields
 		{
-			return Observable.fromCallable(() -> {
-				return new TokenTransaction[0];
-			});
+			return Observable.fromCallable(() -> new TokenTransaction[0]);
 		}
 		else
 		{

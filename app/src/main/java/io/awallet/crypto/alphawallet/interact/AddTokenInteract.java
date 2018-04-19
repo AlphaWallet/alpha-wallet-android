@@ -20,13 +20,12 @@ public class AddTokenInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Completable add(TokenInfo tokenInfo) {
+    public Observable<Token> add(TokenInfo tokenInfo) {
         return walletRepository
                 .getDefaultWallet()
-                .flatMapCompletable(wallet -> tokenRepository
-                        .addToken(wallet, tokenInfo)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()));
+                .flatMap(wallet -> tokenRepository
+                        .addToken(wallet, tokenInfo))
+                .toObservable();
     }
 
     public Observable<Token[]> add(TokenInfo[] tokenInfos) {

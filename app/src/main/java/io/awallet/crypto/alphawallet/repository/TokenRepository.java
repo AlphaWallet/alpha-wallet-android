@@ -312,15 +312,15 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
+    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo) {
         TokenFactory tf = new TokenFactory();
         Token newToken = tf.createToken(tokenInfo);
-        Log.d(TAG, "Create for store2: " + tokenInfo.name);
+        Log.d(TAG, "Create for store3: " + tokenInfo.name);
 
-        return localSource.saveTokens(
-                ethereumNetworkRepository.getDefaultNetwork(),
-                wallet,
-                new Token[] { newToken });
+        return localSource.saveToken(
+                    ethereumNetworkRepository.getDefaultNetwork(),
+                    wallet,
+                    newToken);
     }
 
     @Override

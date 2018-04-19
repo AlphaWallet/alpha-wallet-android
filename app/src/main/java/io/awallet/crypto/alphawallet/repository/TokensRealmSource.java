@@ -78,6 +78,15 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Single<Token> saveToken(NetworkInfo networkInfo, Wallet wallet, Token token) {
+        return Single.fromCallable(() -> {
+            Date now = new Date();
+            saveToken(networkInfo, wallet, token, now);
+            return token;
+        });
+    }
+
+    @Override
     public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address) {
         return Single.fromCallable(() -> {
             Realm realm = null;

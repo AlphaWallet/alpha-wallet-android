@@ -9,49 +9,26 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import io.awallet.crypto.alphawallet.C;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
-import io.awallet.crypto.alphawallet.entity.TokenInfo;
-import io.awallet.crypto.alphawallet.entity.TokenTransaction;
 import io.awallet.crypto.alphawallet.entity.Transaction;
-import io.awallet.crypto.alphawallet.entity.TransactionsCallback;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTransactionsInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.router.ExternalBrowserRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
-import io.awallet.crypto.alphawallet.router.MarketBrowseRouter;
-import io.awallet.crypto.alphawallet.router.MarketplaceRouter;
-import io.awallet.crypto.alphawallet.router.MyTokensRouter;
-import io.awallet.crypto.alphawallet.router.NewSettingsRouter;
-import io.awallet.crypto.alphawallet.router.SettingsRouter;
 import io.awallet.crypto.alphawallet.router.TransactionDetailRouter;
-import io.awallet.crypto.alphawallet.router.WalletRouter;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import io.awallet.crypto.alphawallet.ui.HomeActivity;
-import io.reactivex.Completable;
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-
-import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
 public class TransactionsViewModel extends BaseViewModel {
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
@@ -81,7 +58,6 @@ public class TransactionsViewModel extends BaseViewModel {
     private Transaction[] txArray;
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
-    private boolean needsUpdate = false;
     private String xmlContractAddress = null;
     private int transactionCount;
 
@@ -153,8 +129,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 transactionCount = 0;
                 Log.d(TAG, "Fetch start");
                 setupTokensInteract.setWalletAddr(wallet.getValue().address);
-                //progress.postValue(shouldShowProgress);
-                needsUpdate = true;
+
                 fetchTransactionDisposable =
                         fetchTransactionsInteract.fetchCached(wallet.getValue())
                                 .subscribeOn(Schedulers.io())
@@ -193,7 +168,6 @@ public class TransactionsViewModel extends BaseViewModel {
         for (Transaction tx : txArray)
         {
             txMap.put(tx.hash, tx);
-            needsUpdate = false;
         }
     }
 
@@ -203,8 +177,7 @@ public class TransactionsViewModel extends BaseViewModel {
      */
     private void fetchNetworkTransactions()
     {
-        //update the UI, display cached transactions
-        this.transactions.postValue(txArray);
+        updateDisplay(txArray);
 
         Transaction lastTx = null;
         //simple sort on txArray
@@ -234,6 +207,8 @@ public class TransactionsViewModel extends BaseViewModel {
         {
             txMap.put(tx.hash, tx);
         }
+
+        updateDisplay(transactions);
     }
 
     /**
@@ -260,9 +235,6 @@ public class TransactionsViewModel extends BaseViewModel {
         Log.d(TAG, "Enumerating tokens");
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
         transactionCount += txArray.length;
-
-        if (needsUpdate && txArray.length > 0)
-            this.transactions.postValue(txArray); //intermediate update transactions on wallet first initialised
 
         //Fetch all stored tokens, but no eth
         //TODO: after the map addTokenToChecklist stage we should be using a reduce instead of filtering in the fetch function
@@ -292,7 +264,6 @@ public class TransactionsViewModel extends BaseViewModel {
         setupTokensInteract.setupUnknownList(tokenMap, xmlContractAddress);
 
         fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap, tokenMap) //patches tx's and returns unknown contracts
-                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
                 .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
                 .flatMapIterable(address -> address) //change to a sequential stream
                 .flatMap(setupTokensInteract::addToken) //fetch token info
@@ -301,7 +272,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 .flatMap(this::removeFromMap) //remove the handled transactions from the map (so we don't need to scan these transactions again)
                 .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store newly fixed up transactions
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::updateDisplay, this::onError, this::completeCycle); //update the screen with any updated transactions
+                .subscribe(this::updateDisplay, this::onError, this::storeUnprocessedTx); //update the screen with any updated transactions
 
         if (transactionCount == 0)
         {
@@ -320,8 +291,18 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
-    private void completeCycle()
+    private void storeUnprocessedTx()
     {
+        //store any remaining transactions
+        Transaction[] transactions = txMap.values().toArray(new Transaction[txMap.size()]);
+        fetchTransactionDisposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::completeCycle, this::onError);
+    }
+
+    private void completeCycle(Transaction[] transactions)
+    {
+        progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
         fetchTransactionDisposable = null;
         checkIfRegularUpdateNeeded();
     }

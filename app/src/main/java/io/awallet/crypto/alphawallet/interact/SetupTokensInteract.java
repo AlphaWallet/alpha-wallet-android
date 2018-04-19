@@ -6,6 +6,13 @@ package io.awallet.crypto.alphawallet.interact;
 
 import android.util.Log;
 
+import org.web3j.utils.Numeric;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.awallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
@@ -17,21 +24,7 @@ import io.awallet.crypto.alphawallet.entity.TransactionInput;
 import io.awallet.crypto.alphawallet.entity.TransactionOperation;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
-
-import org.web3j.abi.datatypes.Address;
-import org.web3j.utils.Numeric;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import io.awallet.crypto.alphawallet.viewmodel.TransactionsViewModel;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 

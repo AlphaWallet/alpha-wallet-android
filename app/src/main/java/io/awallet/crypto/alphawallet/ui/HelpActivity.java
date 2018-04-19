@@ -27,7 +27,6 @@ public class HelpActivity extends BaseActivity {
     @Inject
     HelpViewModelFactory helpViewModelFactory;
     private HelpViewModel viewModel;
-    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,22 +67,8 @@ public class HelpActivity extends BaseActivity {
 
         final LinearLayout contactUs = findViewById(R.id.layout_contact);
         contactUs.setOnClickListener(v -> {
-            contactUs.setBackgroundColor(ContextCompat.getColor(getApplication(), R.color.dark_yellow));
-            new RemoveEffect(contactUs);
             helpIntent();
         });
-    }
-
-    private class RemoveEffect
-    {
-        public LinearLayout layout;
-        public RemoveEffect(LinearLayout layoutEffect)
-        {
-            layout = layoutEffect;
-            handler.postDelayed(returnButton, 10);
-        }
-
-        private final Runnable returnButton = () -> layout.setBackgroundColor(ContextCompat.getColor(getApplication(), R.color.golden_yellow));//  .setBackgroundResource(R.drawable.background_help_dark);
     }
 
     private void helpIntent()

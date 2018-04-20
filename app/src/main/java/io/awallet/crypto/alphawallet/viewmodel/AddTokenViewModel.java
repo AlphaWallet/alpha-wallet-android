@@ -49,20 +49,21 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public void save(String address, String symbol, int decimals, String name, boolean isStormBird) {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
-        addTokenInteract
+        disposable = addTokenInteract
                 .add(tokenInfo)
                 .subscribe(this::onSaved, this::onError);
+    }
+
+    private void onSaved(Token token)
+    {
+        progress.postValue(false);
+        result.postValue(true);
     }
 
     private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
         TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
         return tokenInfo;
-    }
-
-    private void onSaved() {
-        progress.postValue(false);
-        result.postValue(true);
     }
 
     public void setupTokens(String addr) {
@@ -94,7 +95,7 @@ public class AddTokenViewModel extends BaseViewModel {
     }
 
     public void showTokens(Context context) {
-        findDefaultWalletInteract
+        disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(w -> homeRouter.open(context, true), this::onError);
     }

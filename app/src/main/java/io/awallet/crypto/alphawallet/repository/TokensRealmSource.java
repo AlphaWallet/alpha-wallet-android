@@ -78,6 +78,15 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Single<Token> saveToken(NetworkInfo networkInfo, Wallet wallet, Token token) {
+        return Single.fromCallable(() -> {
+            Date now = new Date();
+            saveToken(networkInfo, wallet, token, now);
+            return token;
+        });
+    }
+
+    @Override
     public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address) {
         return Single.fromCallable(() -> {
             Realm realm = null;
@@ -173,6 +182,7 @@ public class TokensRealmSource implements TokenLocalSource {
             Realm realm = null;
             try {
                 realm = realmManager.getRealmInstance(network, wallet);
+                TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 long now = System.currentTimeMillis();
                 for (TokenTicker tokenTicker : tokenTickers) {
@@ -199,6 +209,7 @@ public class TokensRealmSource implements TokenLocalSource {
             } finally {
                 if (realm != null) {
                     realm.close();
+                    TransactionsRealmCache.subRealm();
                 }
             }
         });
@@ -251,6 +262,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
 
+            TransactionsRealmCache.addRealm();
             realm.beginTransaction();
             if (realmToken != null) {
                 realmToken.setEnabled(isEnabled);
@@ -263,6 +275,7 @@ public class TokensRealmSource implements TokenLocalSource {
         } finally {
             if (realm != null) {
                 realm.close();
+                TransactionsRealmCache.subRealm();
             }
         }
     }
@@ -295,6 +308,7 @@ public class TokensRealmSource implements TokenLocalSource {
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token)
     {
         Realm realm = null;
+        if (token.isTerminated()) return; // don't update dead tokens
         try
         {
             realm = realmManager.getRealmInstance(network, wallet);
@@ -305,9 +319,11 @@ public class TokensRealmSource implements TokenLocalSource {
             //Don't update realm unless we need to.
             if (realmToken != null && token.checkRealmBalanceChange(realmToken))
             {
+                TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 token.setRealmBalance(realmToken);
                 realm.commitTransaction();
+                TransactionsRealmCache.subRealm();
             }
         }
         catch (Exception ex)
@@ -326,6 +342,40 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
+    @Override
+    public void updateTokenDestroyed(NetworkInfo network, Wallet wallet, Token token)
+    {
+        Realm realm = null;
+        try
+        {
+            realm = realmManager.getRealmInstance(network, wallet);
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", token.tokenInfo.address)
+                    .findFirst();
+
+            TransactionsRealmCache.addRealm();
+            realm.beginTransaction();
+            realmToken.setName(null);
+            realmToken.setSymbol(null);
+            realm.commitTransaction();
+        }
+        catch (Exception ex)
+        {
+            if (realm != null && realm.isInTransaction())
+            {
+                realm.cancelTransaction();
+            }
+        }
+        finally
+        {
+            if (realm != null)
+            {
+                realm.close();
+                TransactionsRealmCache.subRealm();
+            }
+        }
+    }
+
     private void saveToken(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime) {
         Realm realm = null;
         try {
@@ -334,6 +384,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
             if (realmToken == null) {
+                TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);
                 realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
@@ -347,6 +398,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setStormbird(true);
                 }
                 realm.commitTransaction();
+                TransactionsRealmCache.subRealm();
             }
             else
             {

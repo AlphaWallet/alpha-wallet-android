@@ -4,6 +4,15 @@ package io.awallet.crypto.alphawallet.interact;
  * Created by James on 16/01/2018.
  */
 
+import android.util.Log;
+
+import org.web3j.utils.Numeric;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.awallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
@@ -15,34 +24,17 @@ import io.awallet.crypto.alphawallet.entity.TransactionInput;
 import io.awallet.crypto.alphawallet.entity.TransactionOperation;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
-
-import org.web3j.abi.datatypes.Address;
-import org.web3j.utils.Numeric;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import io.awallet.crypto.alphawallet.viewmodel.TransactionsViewModel;
 import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class SetupTokensInteract {
 
+    private final static String TAG = "STI";
     private final TokenRepositoryType tokenRepository;
     private TransactionDecoder transactionDecoder = new TransactionDecoder();
     private Map<String, Token> contractMap = new ConcurrentHashMap<>();
-    private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
-    private List<String> newTxList = new ArrayList<>();
-    private Map<String, TokenTransaction> ttxMap = new ConcurrentHashMap<>();
-    private List<Token> tokenCheckList = new ArrayList<>();
-    private List<String> requiredContracts = new ArrayList<>();
-    private List<String> deadContracts = new ArrayList<>();
+    private List<String> unknownContracts = new ArrayList<>();
     private String walletAddr;
 
     public final static String UNKNOWN_CONTRACT = "[Unknown Contract]";
@@ -52,7 +44,6 @@ public class SetupTokensInteract {
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
-        deadContracts.clear();
     }
 
     public Observable<TokenInfo> update(String address) {
@@ -61,12 +52,7 @@ public class SetupTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public List<Token> getTokenCheckList() { return tokenCheckList; }
-    public List<String> getRequiredContracts() { return requiredContracts; }
     public void setWalletAddr(String addr) { walletAddr = addr; }
-
-    //If we stored any new contracts we need to re-parse the transaction list
-    public void regenerateTransactionList() { txMap.clear(); }
 
     /**
      * Parse a transaction to fill in contract interaction information.
@@ -88,6 +74,11 @@ public class SetupTokensInteract {
             ERC875ContractTransaction ect = null;
             String functionName = INVALID_OPERATION;
 
+            if (token == null && !unknownContracts.contains(thisTrans.to))
+            {
+                unknownContracts.add(thisTrans.to);
+            }
+
             //already has constructor info
             if (thisTrans.operations.length > 0 &&
                     thisTrans.operations[0].contract instanceof ERC875ContractTransaction &&
@@ -101,7 +92,6 @@ public class SetupTokensInteract {
                 if (ect.type == -5)
                 {
                     ect.type = -2;
-                    requiredContracts.add(ect.address);
                 }
             }
             else if (data != null && data.functionData != null)
@@ -252,7 +242,7 @@ public class SetupTokensInteract {
     {
         if (token != null)
         {
-            if (token.getFullName() == null)
+            if (token.isTerminated())
             {
                 ct.name = EXPIRED_CONTRACT; //re-processing a contract that's been killed.
             }
@@ -264,11 +254,6 @@ public class SetupTokensInteract {
             ct.decimals = token.tokenInfo.decimals;
             ct.symbol = token.tokenInfo.symbol;
             ct.totalSupply = "0";
-        }
-        else if (deadContracts.contains(t.to))
-        {
-            ct.name = EXPIRED_CONTRACT;
-            ct.address = t.to;
         }
         else
         {
@@ -303,81 +288,6 @@ public class SetupTokensInteract {
     }
 
     /**
-     * Fetch info for required tokens and remove dead contracts before returning the stream
-     *
-     * @return Observable stream of token info which has dead contracts removed
-     */
-    public Observable<TokenInfo[]> addTokens()
-    {
-        return tokenRepository.update(requiredContracts.toArray(new String[requiredContracts.size()]))
-                .flatMap(this::removeDeleted)
-                .toObservable();
-    }
-
-    /**
-     * Filter the received TokenInfo array -
-     * Remove any dead contracts
-     *
-     * @param tokenInfos List of received TokenInfo to filter
-     * @return
-     */
-    private Single<TokenInfo[]> removeDeleted(TokenInfo[] tokenInfos)
-    {
-        return Single.fromCallable(() -> {
-            List<TokenInfo> checkList = new ArrayList<>();
-            for (TokenInfo tInfo : tokenInfos)
-            {
-                if ((tInfo.name == null || tInfo.name.length() < 3)
-                        || (tInfo.symbol == null || tInfo.symbol.length() < 2))
-                {
-                    putDeadContract(tInfo.address);
-                }
-                else
-                {
-                    checkList.add(tInfo);
-                }
-            }
-
-            return checkList.toArray(new TokenInfo[checkList.size()]);
-        });
-    }
-
-    /**
-     * Once we have gathered all the transactions together, parse them for known contract interactions
-     * This is done in the background, hence why it's on a single process
-     * @param wallet
-     * @return
-     */
-    public Single<Transaction[]> processTransactions(Wallet wallet)
-    {
-        return Single.fromCallable(() -> {
-            Transaction[] processedTransactions = new Transaction[0];
-            try {
-                for (TokenTransaction thisTokenTrans : ttxMap.values()) {
-                    Transaction thisTrans = thisTokenTrans.transaction;
-                    TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
-
-                    if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
-                        Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data);
-
-                        //TODO: OPTIMISE: work out if we need a list update - not important right now
-                        //TODO: NB need to allow for Transactions being changed during parseTransaction and any new transctions added
-                        txMap.put(newTx.hash, newTx);
-                    }
-                }
-
-                processedTransactions = txMap.values().toArray(new Transaction[txMap.size()]);
-
-                //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-            return processedTransactions;
-        });
-    }
-
-    /**
      * Is the user's wallet involved in this contract's transaction?
      * (we may have obtained the transaction by peeking at the list of transactions associated with a contract)
      *
@@ -397,54 +307,6 @@ public class SetupTokensInteract {
         if (data.containsAddress(wallet.address)) involved = true;
         if (trans.from.contains(walletAddr)) involved = true;
         return involved;
-    }
-
-    /**
-     * Receive an array containing all the transactions retrieved from the user's wallet address
-     * @param txArray array of transaction types
-     * @return Dummy object
-     */
-    public Single<Transaction[]> checkTransactions(Transaction[] txArray) {
-        return Single.fromCallable(() -> {
-            try {
-                tokenCheckList.clear();
-                txMap.clear();
-                newTxList.clear(); //Probably redundant now - maybe refactor this out.
-
-                //see if there's any ERC875 tokens
-                //this is used in the viewModel to fetch all the contract transactions - this list is consumed by consumeTokenCheckList()
-                for (Token t : contractMap.values())
-                {
-                    if (t.tokenInfo.isStormbird)
-                    {
-                        tokenCheckList.add(t);
-                    }
-                }
-
-                //generateTestString(txArray);
-
-                for (Transaction t : txArray) {
-                    if (!txMap.containsKey(t.hash)) {
-                        if (!newTxList.contains(t.hash)) {
-                            newTxList.add(t.hash); //should re-check this transaction
-                        }
-                        txMap.put(t.hash, t);
-                        //see if this transaction involves a contract we don't know about
-                        detectContractTransactions(t);
-                        Token localToken = contractMap.get(t.to);
-                        if (localToken != null)
-                        {
-                            ttxMap.put(t.hash, new TokenTransaction(localToken, t));
-                        }
-                    }
-                }
-                return txMap.values().toArray(new Transaction[txMap.values().size()]);
-            }
-            finally
-            {
-
-            }
-        });
     }
 
     //use this function to generate unit test string
@@ -467,110 +329,118 @@ public class SetupTokensInteract {
         sb.append("};");
     }
 
-    /**
-     * Identify which contract this transaction involves - if we haven't cached it then add to the required fetch list
-     * @param t Transaction to check
-     */
-    private void detectContractTransactions(Transaction t)
+    public void addTokenToMap(Token token)
     {
-        if (t.input != null && t.input.length() > 20)
-        {
-            try
-            {
-                TransactionInput data = transactionDecoder.decodeInput(t.input);
-                if (data != null && data.functionData != null)
-                {
-                    Token localToken = contractMap.get(t.to);
-                    if (localToken == null && !requiredContracts.contains(t.to)
-                            && !deadContracts.contains(t.to)
-                            && isAddressValid(t.to)) // don't add to contract watch list if we know it's a dead contract
-                    {
-                        //contract transaction we haven't cached
-                        requiredContracts.add(t.to); //make a note we interacted with a contract, potentially
-                    }
+        contractMap.put(token.getAddress(), token);
+    }
 
-                    //pre-process the transaction since we identified this relates to a contract
-                    Transaction newTx = parseTransaction(localToken, t, data);
-                    txMap.put(t.hash, newTx);
+    /**
+     * Transforms an array of Token - Transaction pairs into a processed list of transactions
+     * Bascially just processes each set of transactions if they involve the wallet
+     * @param txList
+     * @param wallet
+     * @return
+     */
+    public Observable<Transaction[]> processTokenTransactions(Wallet wallet, TokenTransaction[] txList)
+    {
+        return Observable.fromCallable(() -> {
+            List<Transaction> processedTransactions = new ArrayList<Transaction>();
+            try {
+                for (TokenTransaction thisTokenTrans : txList) {
+                    Transaction thisTrans = thisTokenTrans.transaction;
+                    TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
+
+                    if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
+                        Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data);
+                        processedTransactions.add(newTx);
+                    }
                 }
+                //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
             }
             catch (Exception e) {
-
+                e.printStackTrace();
             }
-        }
-    }
-
-    public int getLocalTokensCount()
-    {
-        return contractMap.size();
-    }
-
-    public void putDeadContract(String address)
-    {
-        if (requiredContracts.contains(address))
-        {
-            requiredContracts.remove(address);
-        }
-        if (!deadContracts.contains(address))
-        {
-            deadContracts.add(address);
-        }
-    }
-
-    private boolean isAddressValid(String address) {
-        if (address == null) return false;
-        else if (address.length() < 20) return false;
-        try {
-            new Address(address);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public void setTokens(Token[] tokens) {
-        contractMap.clear();
-        for (Token t : tokens)
-        {
-            contractMap.put(t.getAddress(), t);
-        }
-    }
-
-    public void checkTokens()
-    {
-        for (Token t : contractMap.values())
-        {
-            if (requiredContracts.contains(t.getAddress()))
-            {
-                System.out.println("Got token: " + t.getFullName());
-            }
-            else
-            {
-                System.out.println("Don't have: " + t.getFullName());
-            }
-        }
+            return processedTransactions.toArray(new Transaction[processedTransactions.size()]);
+        });
     }
 
     /**
-     * Receives an array of transactions from a specific ethereum address (which is one of our cached contract tokens)
-     * @param txList Array of transactions and their associated token
+     * Parse all transactions not associated with known tokens and pick up unknown contracts
+     * @param txMap
+     * @param tokenMap
+     * @return
      */
-    public void addTokenTransactions(TokenTransaction[] txList)
+    public Observable<Transaction[]> processRemainingTransactions(Map<String, Transaction> txMap, Map<String, Token> tokenMap)
     {
-        for (TokenTransaction tt : txList)
-        {
-            if (!ttxMap.containsKey(tt.transaction.hash))
+        return Observable.fromCallable(() -> {
+            List<Transaction> processedTxList = new ArrayList<>();
+            //process the remaining transactions
+            for (Transaction t : txMap.values())
             {
-                ttxMap.put(tt.transaction.hash, tt);
-                if (!newTxList.contains(tt.transaction.hash)) {
-                    newTxList.add(tt.transaction.hash); //should re-check this transaction
+                if (t.input != null && t.input.length() > 20)
+                {
+                    TransactionInput data = transactionDecoder.decodeInput(t.input);
+                    if (data != null && data.functionData != null)
+                    {
+                        Token localToken = tokenMap.get(t.to);
+                        if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);
+                        t = parseTransaction(localToken, t, data);
+                    }
                 }
+                processedTxList.add(t);
             }
+
+            return processedTxList.toArray(new Transaction[processedTxList.size()]);
+        });
+    }
+
+    public Observable<TokenInfo> addToken(String address)
+    {
+        return tokenRepository.update(address);
+    }
+
+    public void setupUnknownList(Map<String, Token> tokenMap, String xmlContractAddress)
+    {
+        unknownContracts.clear();
+        if (!tokenMap.containsKey(xmlContractAddress))
+        {
+            unknownContracts.add(xmlContractAddress);
         }
     }
 
-    public int getMapSize()
+    public List<String> getUnknownContracts(Transaction[] transactionList)
     {
-        return ttxMap.size();
+        Log.d(TAG, "New unknown size: " + unknownContracts.size());
+        return unknownContracts;
+    }
+
+    /**
+     * Go back over the transactions list
+     * @param token
+     * @param txMap
+     * @return
+     */
+    public Observable<Transaction[]> reProcessTokens(Token token, Map<String, Transaction> txMap)
+    {
+        Log.d(TAG, "Re Processing " + token.getFullName());
+        return Observable.fromCallable(() -> {
+            List<Transaction> processedTxList = new ArrayList<>();
+            for (Transaction t : txMap.values())
+            {
+                if (t.to != null && t.to.equals(token.getAddress()) && t.input != null && t.input.length() > 20)
+                {
+                    TransactionInput data = transactionDecoder.decodeInput(t.input);
+                    if (data != null && data.functionData != null)
+                    {
+                        t = parseTransaction(token, t, data);
+                        processedTxList.add(t);
+                        txMap.remove(t.hash);
+                    }
+                }
+            }
+
+            Log.d(TAG, "Re Processing " + processedTxList.size() + " : " + token.getFullName());
+            return processedTxList.toArray(new Transaction[processedTxList.size()]);
+        });
     }
 }

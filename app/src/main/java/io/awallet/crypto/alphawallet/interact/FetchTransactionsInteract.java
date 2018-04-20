@@ -54,6 +54,11 @@ public class FetchTransactionsInteract {
         return transactionRepository.storeTransactions(networkInfo, wallet, txList);
     }
 
+    public Observable<Transaction[]> storeTransactionsObservable(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+    {
+        return transactionRepository.storeTransactions(networkInfo, wallet, txList).toObservable();
+    }
+
 //    public void fetchTx2(Wallet wallet, TransactionsCallback txCallback) {
 //        transactionRepository
 //                .fetchTransaction2(wallet, txCallback);

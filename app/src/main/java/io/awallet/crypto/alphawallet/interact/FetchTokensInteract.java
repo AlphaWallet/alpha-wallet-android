@@ -66,6 +66,12 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<Token> fetchSequentialNoEth(Wallet wallet) {
+        return tokenRepository.fetchActiveStoredSequentialNoEth(wallet.address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<Token> fetchSingle(Wallet wallet, Token token) {
         return tokenRepository.fetchActiveSingle(wallet.address, token)
                 .subscribeOn(Schedulers.io())

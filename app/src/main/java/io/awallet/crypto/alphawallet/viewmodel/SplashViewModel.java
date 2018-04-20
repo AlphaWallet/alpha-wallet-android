@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
+import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
@@ -124,6 +125,11 @@ public class SplashViewModel extends ViewModel {
         addTokenInteract
                 .add(tokenInfo)
                 .subscribe(this::fetchWallets, this::onContractError); //directly call fetch wallets if successful
+    }
+
+    private void fetchWallets(Token token)
+    {
+        fetchWallets();
     }
 
     //on wallet error ensure execution still continues and splash screen terminates

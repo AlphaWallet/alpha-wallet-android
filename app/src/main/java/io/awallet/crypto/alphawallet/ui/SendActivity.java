@@ -43,7 +43,8 @@ import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.EthereumInfoRouter;
-import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import io.awallet.crypto.alphawallet.ui.zxing.FullScannerFragment;
+import io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.util.QRUtils;
@@ -142,8 +143,10 @@ public class SendActivity extends BaseActivity {
 
         scanQrImageView = findViewById(R.id.img_scan_qr);
         scanQrImageView.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+            Intent intent = new Intent(this, QRScanningActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+//            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+//            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
 
         amountEditText = findViewById(R.id.edit_amount);
@@ -255,7 +258,7 @@ public class SendActivity extends BaseActivity {
         if (requestCode == BARCODE_READER_REQUEST_CODE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
-                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    Barcode barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);

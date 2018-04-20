@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:testOnly="false"
         android:theme="@style/AppTheme.NoActionBar"
+        android:hardwareAccelerated="true"
         tools:replace="android:name, android:theme, android:allowBackup">
         <activity
             android:name="io.awallet.crypto.alphawallet.ui.SplashActivity"
@@ -87,10 +88,6 @@
             android:label="@string/title_use_token" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity"
-            android:label="@string/title_activity_barcode" />
-
-        <activity
             android:name="io.awallet.crypto.alphawallet.ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
 
@@ -142,6 +139,10 @@
         <activity
             android:name="io.awallet.crypto.alphawallet.ui.EthereumInfoActivity"
             android:label="@string/toolbar_ethereum_info" />
+
+        <activity
+            android:name="io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity"
+            android:label="@string/qr_scanner"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"

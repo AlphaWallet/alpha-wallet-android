@@ -273,4 +273,15 @@
     <string name="hint_contract_decimals">Decimals</string>
     <string name="title_add_token">Add Custom Token</string>
     <string name="suggestion_private_key">Private key has to be 64 characters long</string>
+    <string name="select_camera">Select a Camera</string>
+    <integer name="viewfinder_border_width">15</integer>
+    <integer name="viewfinder_border_length">160</integer>
+    <string name="toggle_flash">Flash</string>
+    <string name="flash_on">Flash [ON]</string>
+    <string name="flash_off">Flash [OFF]</string>
+    <string name="auto_focus_on">Auto Focus [ON]</string>
+    <string name="auto_focus_off">Auto Focus [OFF]</string>
+    <string name="formats">Formats</string>
+    <string name="choose_formats">Choose Formats</string>
+    <string name="qr_scanner">QR Scanner</string>
 </resources>

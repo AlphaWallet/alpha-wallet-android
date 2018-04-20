@@ -44,6 +44,8 @@ import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
  */
 
 public class WalletFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = "WFRAG";
+
     @Inject
     WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
@@ -191,7 +193,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.prepare();
     }
 
-    private void onTokens(Token[] tokens) {
+    private void onTokens(Token[] tokens)
+    {
+        for (Token t : tokens) if(!t.isTerminated() && t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
         adapter.setTokens(tokens);
     }
 

@@ -383,7 +383,7 @@ public class Ticket extends Token implements Parcelable
                     if (index > -1)
                     {
                         if (!idList.contains(index))
-                        {  //just make sure they didn't already add this one
+                        {   //just make sure they didn't already add this one
                             idList.add(index);
                         }
                     }

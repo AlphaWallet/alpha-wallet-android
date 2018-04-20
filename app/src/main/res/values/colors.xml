@@ -47,4 +47,8 @@
 	<color name="disabled_color">#888888</color>
 	<color name="cancel_red">#db393a</color>
 	<color name="dark_yellow">#e1b706</color>
+
+	<color name="viewfinder_mask">#60000000</color>
+	<color name="viewfinder_laser">#ffcc0000</color>
+	<color name="viewfinder_border">#ffafed44</color>
 </resources>

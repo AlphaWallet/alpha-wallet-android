@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import org.web3j.utils.Numeric;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenDiffCallback;
 import io.awallet.crypto.alphawallet.entity.Transaction;
@@ -44,6 +45,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     private Context context;
     private boolean needsRefresh;
+    private String liveTokenAddress = "";
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -188,6 +190,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      */
     private void updateToken(Token token)
     {
+        checkLiveToken(token);
         boolean updated = false;
         for (int i = 0; i < items.size(); i++)
         {
@@ -235,6 +238,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             Token token = tokens[i];
             if (!token.isTerminated() && (token.isEthereum() || token.hasPositiveBalance()))
             {
+                checkLiveToken(token);
                 switch (filterType)
                 {
                     case FILTER_ASSETS:
@@ -306,11 +310,24 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.endBatchedUpdates();
     }
 
+    public void setLiveTokenAddress(String address)
+    {
+        this.liveTokenAddress = address;
+    }
+
     public void setFilterType(int filterType) {
         this.filterType = filterType;
     }
 
     public void clear() {
         items.clear();
+    }
+
+    private void checkLiveToken(Token t)
+    {
+        if (t instanceof Ticket && t.getAddress().equalsIgnoreCase(liveTokenAddress))
+        {
+            ((Ticket)t).setLiveTicket();
+        }
     }
 }

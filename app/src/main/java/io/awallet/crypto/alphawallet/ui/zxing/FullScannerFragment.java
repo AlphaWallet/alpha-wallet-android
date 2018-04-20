@@ -70,67 +70,6 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     }
 
     @Override
-    public void onCreateOptionsMenu (Menu menu, MenuInflater inflater)
-    {
-        super.onCreateOptionsMenu(menu, inflater);
-
-        MenuItem menuItem;
-
-        if (mFlash)
-        {
-            menuItem = menu.add(Menu.NONE, R.id.menu_flash, 0, R.string.flash_on);
-        }
-        else
-        {
-            menuItem = menu.add(Menu.NONE, R.id.menu_flash, 0, R.string.flash_off);
-        }
-        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-
-        if (mAutoFocus)
-        {
-            menuItem = menu.add(Menu.NONE, R.id.menu_auto_focus, 0, R.string.auto_focus_on);
-        }
-        else
-        {
-            menuItem = menu.add(Menu.NONE, R.id.menu_auto_focus, 0, R.string.auto_focus_off);
-        }
-        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-
-        menuItem = menu.add(Menu.NONE, R.id.menu_formats, 0, R.string.formats);
-        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-
-        menuItem = menu.add(Menu.NONE, R.id.menu_camera_selector, 0, R.string.select_camera);
-        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.menu_flash:
-                mFlash = !mFlash;
-                if(mFlash) {
-                    item.setTitle(R.string.flash_on);
-                } else {
-                    item.setTitle(R.string.flash_off);
-                }
-                mScannerView.setFlash(mFlash);
-                return true;
-            case R.id.menu_auto_focus:
-                mAutoFocus = !mAutoFocus;
-                if(mAutoFocus) {
-                    item.setTitle(R.string.auto_focus_on);
-                } else {
-                    item.setTitle(R.string.auto_focus_off);
-                }
-                mScannerView.setAutoFocus(mAutoFocus);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
     public void onResume()
     {
         super.onResume();

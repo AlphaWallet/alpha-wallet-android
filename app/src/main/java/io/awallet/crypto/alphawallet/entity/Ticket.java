@@ -46,6 +46,7 @@ public class Ticket extends Token implements Parcelable
 {
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
+    private boolean isLiveTicket = false;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -189,7 +190,14 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
-        tokenHolder.issuer.setText(TicketDecode.getIssuer());
+        if (isLiveTicket())
+        {
+            tokenHolder.issuer.setText(R.string.shengkai);
+            tokenHolder.contractType.setVisibility(View.VISIBLE);
+            tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
+            tokenHolder.contractType.setText(R.string.erc875);
+        }
+
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
@@ -489,5 +497,15 @@ public class Ticket extends Token implements Parcelable
         }
 
         return value;
+    }
+
+    public boolean isLiveTicket()
+    {
+        return isLiveTicket;
+    }
+
+    public void setLiveTicket()
+    {
+        isLiveTicket = true;
     }
 }

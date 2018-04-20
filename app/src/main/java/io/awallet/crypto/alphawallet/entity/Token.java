@@ -289,8 +289,9 @@ public class Token implements Parcelable {
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
         String currentState = realmToken.getBalance();
-        if (currentState == null) return true;
-        return !currentState.equals(balance.toString());
+        if (isTerminated()) return false;
+        else if (currentState == null) return true;
+        else return !currentState.equals(balance.toString());
     }
 
     public boolean isEthereum()

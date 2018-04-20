@@ -23,7 +23,7 @@
         android:id="@+id/layout_contact"
         android:layout_height="?actionBarSize"
         android:layout_alignParentBottom="true"
-        android:background="@color/golden_yellow"
+        android:background="@drawable/selector_yellow"
         android:gravity="center">
 
         <ImageView

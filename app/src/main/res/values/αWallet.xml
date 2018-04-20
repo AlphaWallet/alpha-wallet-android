@@ -262,4 +262,15 @@
     <string name="title_select_transfer_method">Select Transfer Method:</string>
     <string name="title_set_magiclink_expiry">Set MagicLink Expiry:</string>
     <string name="title_input_wallet_address">Input Wallet Address:</string>
+    <string name="title_import">Import Wallet</string>
+    <string name="action_import">Import</string>
+    <string name="prompt_password">Password</string>
+    <string name="hint_private_key_field">Private key *</string>
+    <string name="hint_keystore">Keystore *</string>
+    <string name="tab_keystore">Keystore</string>
+    <string name="tab_private_key">Private key</string>
+    <string name="hint_contract_symbol">Symbol</string>
+    <string name="hint_contract_decimals">Decimals</string>
+    <string name="title_add_token">Add Custom Token</string>
+    <string name="suggestion_private_key">Private key has to be 64 characters long</string>
 </resources>

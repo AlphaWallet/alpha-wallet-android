@@ -8,18 +8,18 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.ui.widget.OnImportKeystoreListener;
+import io.awallet.crypto.alphawallet.widget.InputView;
 
 
 public class ImportKeystoreFragment extends Fragment implements View.OnClickListener {
 
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};
 
-    private EditText keystore;
-    private EditText password;
+    private InputView keystore;
+    private InputView password;
     @NonNull
     private OnImportKeystoreListener onImportKeystoreListener = dummyOnImportKeystoreListener;
 
@@ -38,8 +38,8 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        keystore = view.findViewById(R.id.keystore);
-        password = view.findViewById(R.id.password);
+        keystore = view.findViewById(R.id.input_keystore);
+        password = view.findViewById(R.id.input_password);
         view.findViewById(R.id.import_action).setOnClickListener(this);
     }
 

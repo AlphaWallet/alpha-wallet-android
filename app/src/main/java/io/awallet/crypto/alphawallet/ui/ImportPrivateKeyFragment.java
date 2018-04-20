@@ -12,12 +12,13 @@ import android.widget.EditText;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.ui.widget.OnImportPrivateKeyListener;
+import io.awallet.crypto.alphawallet.widget.InputView;
 
 public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener {
 
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
 
-    private EditText privateKey;
+    private InputView privateKey;
     private OnImportPrivateKeyListener onImportPrivateKeyListener = dummyOnImportPrivateKeyListener;
 
     public static ImportPrivateKeyFragment create() {
@@ -35,7 +36,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        privateKey = view.findViewById(R.id.private_key);
+        privateKey = view.findViewById(R.id.input_private_key);
         view.findViewById(R.id.import_action).setOnClickListener(this);
     }
 

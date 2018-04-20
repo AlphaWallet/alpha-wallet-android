@@ -17,7 +17,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event"
+            android:background="@drawable/selector_settings_item"
             android:clickable="true"
             android:focusable="true">
 
@@ -40,7 +40,6 @@
                 android:layout_gravity="center_vertical"
                 android:fontFamily="@font/font_light"
                 android:text="@string/settings_my_wallet_address"
-                android:background="?attr/selectableItemBackground"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
         </LinearLayout>
@@ -52,7 +51,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -105,7 +104,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -153,7 +152,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -201,7 +200,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -233,7 +232,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -265,7 +264,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"
@@ -298,7 +297,7 @@
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
             android:visibility="gone"
-            android:background="@drawable/background_marketplace_event">
+            android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
                 android:layout_width="40dp"

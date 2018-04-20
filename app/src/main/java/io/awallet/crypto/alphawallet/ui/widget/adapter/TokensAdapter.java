@@ -234,8 +234,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (needsRefresh) items.clear();
         items.add(total);
 
-        for (int i = 0; i < tokens.length; i++) {
-            Token token = tokens[i];
+        for (Token token : tokens)
+        {
             if (!token.isTerminated() && (token.isEthereum() || token.hasPositiveBalance()))
             {
                 checkLiveToken(token);

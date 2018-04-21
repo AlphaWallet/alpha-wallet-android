@@ -123,7 +123,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
             {
                 if (!first)
                 {
-                    sb.append(", ");
+                    sb.append(",");
                 }
                 first = false;
 

@@ -202,6 +202,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
         if (token != null && token instanceof Ticket) {
             importToken = (Ticket) token;
         }
+
+        //normBalance(token);
     }
 
     //4b. update token information with balance
@@ -215,7 +217,32 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             invalidLink.postValue(true);
         }
+
+//        getBalanceDisposable = fetchTokensInteract
+//                        .updateBalance("0x93922cdabaa26d50e7c6cb19ee3bcd03462ed334", importToken)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(this::extraBalance);
     }
+
+//    private void normBalance(Token token)
+//    {
+//        Ticket tt = (Ticket) token;
+//        String first5 = importOrder.ownerAddress.substring(0, 5);
+//        for (BigInteger bi : tt.balanceArray)
+//        {
+//            Log.d(TAG, first5 + ": " + bi.toString(16));
+//        }
+//    }
+
+//    private void extraBalance(Token token)
+//    {
+//        Ticket tt = (Ticket) token;
+//        for (BigInteger bi : tt.balanceArray)
+//        {
+//            Log.d(TAG, "0x939: " + bi.toString(16));
+//        }
+//    }
 
     //5. We have token information and balance. Check if the import order is still valid.
     private void updateToken()

@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.web3j.crypto.Hash;
+
 import java.util.Arrays;
 
 /**
@@ -34,6 +36,8 @@ public class Transaction implements Parcelable {
     public final TransactionOperation[] operations;
     public final String error;
 
+    public String contentHash = "";
+
     public Transaction(
             String hash,
             String error,
@@ -61,6 +65,8 @@ public class Transaction implements Parcelable {
 		this.input = input;
 		this.gasUsed = gasUsed;
 		this.operations = operations;
+
+		this.contentHash = calculateContentHash(this);
 	}
 
 	protected Transaction(Parcel in) {
@@ -76,7 +82,9 @@ public class Transaction implements Parcelable {
 		gasPrice = in.readString();
 		input = in.readString();
 		gasUsed = in.readString();
-        Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
+		contentHash = in.readString();
+
+		Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
         TransactionOperation[] operations = null;
         if (parcelableArray != null) {
             operations = Arrays.copyOf(parcelableArray, parcelableArray.length, TransactionOperation[].class);
@@ -115,6 +123,28 @@ public class Transaction implements Parcelable {
 		dest.writeString(gasPrice);
 		dest.writeString(input);
 		dest.writeString(gasUsed);
+		dest.writeString(contentHash);
 		dest.writeParcelableArray(operations, flags);
+	}
+
+
+	public static String calculateContentHash(Transaction t)
+	{
+		String operationContent = "";
+		if (t.operations != null && t.operations.length > 0)
+		{
+			if (t.operations[0].contract instanceof ERC875ContractTransaction)
+			{
+				ERC875ContractTransaction ctx = (ERC875ContractTransaction)t.operations[0].contract;
+				operationContent = Hash.sha3(ctx.address + ctx.operation + ctx.getIndicesString() + ctx.type + ctx.name);
+			}
+			else
+			{
+				TransactionContract ctx = t.operations[0].contract;
+				operationContent = Hash.sha3(ctx.address + ctx.totalSupply + ctx.name);
+			}
+		}
+
+		return Hash.sha3String(t.to + t.hash + t.input + t.timeStamp + t.blockNumber + t.from + t.value + t.nonce + operationContent);
 	}
 }

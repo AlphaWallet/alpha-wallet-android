@@ -64,6 +64,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             Realm instance = null;
             try {
                 instance = realmManager.getRealmInstance(networkInfo, wallet);
+                Log.d(TAG,"PUTTING TX's (OLD): " + transactions.length);
                 addRealm();
                 instance.beginTransaction();
                 for (Transaction transaction : transactions) {
@@ -86,7 +87,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	}
 
     /**
-     * Single thread that also returns the transactions so we can use it in as an invisible member in an obserable stream
+     * Single thread that also returns the transactions so we can use it in as an invisible member in an observable stream
      * @param networkInfo
      * @param wallet
      * @param transactions
@@ -97,69 +98,38 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Single.fromCallable(() -> {
             Realm instance = null;
             try {
+                if (transactions.length == 0) return new Transaction[0]; //no updates
                 instance = realmManager.getRealmInstance(networkInfo, wallet);
-                //1. Update existing transactions
-                Map<String, Transaction> txMap = new HashMap<>();
-                List<String> deleteList = new ArrayList<>();
-                for (Transaction tx : transactions) txMap.put(tx.hash, tx);
+                Log.d(TAG,"putting TX's: " + transactions.length);
 
                 addRealm();
                 instance.beginTransaction();
-                RealmResults<RealmTransaction> rTx = instance.where(RealmTransaction.class).findAll();
-                for (RealmTransaction realmTx : rTx) {
-                    Transaction t = convert(realmTx);
-                    Transaction replacement = txMap.get(t.hash);
-
-                    //replace transaction but don't store invalid operations
-                    if (replacement != null)
+                for (Transaction transaction : transactions)
+                {
+                    try
                     {
-                        if (isInvalidOperation(replacement))
+                        //does this item already exist in realm?
+                        RealmResults<RealmTransaction> rTx = instance.where(RealmTransaction.class)
+                                .equalTo("hash", transaction.hash)
+                                .findAll();
+                        if (rTx.size() > 0)
                         {
-                            deleteList.add(t.hash);
+                            replaceTxIfChanged(instance, rTx, transaction); //yes, already have it. Replace the transaction if it has changed
                         }
                         else
                         {
-                            replace(instance, realmTx, replacement);
+                            RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
+                            fill(instance, item, transaction); //otherwise write the transaction
                         }
-                        txMap.remove(t.hash);
-                    }
-                }
-                instance.commitTransaction();
-
-                if (deleteList.size() > 0)
-                {
-                    instance.beginTransaction();
-                    for (String hash : deleteList)
-                    {
-                        RealmResults<RealmTransaction> result = instance.where(RealmTransaction.class).equalTo("hash", hash).findAll();
-                        result.deleteAllFromRealm();
-                    }
-                    instance.commitTransaction();
-                    deleteList.clear();
-                }
-
-                for (Transaction transaction : txMap.values()) {
-                    //Log.d(TAG, "Attempting to store: " + transaction.hash);
-                    //don't store any transaction that
-                    if (isUnknownContract(transaction) || isInvalidOperation(transaction))
-                    {
-                        //Log.d(TAG, "No Store");
-                        continue;
-                    }
-                    try
-                    {
-                        instance.beginTransaction();
-                        RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
-                        fill(instance, item, transaction);
-                        instance.commitTransaction();
                     }
                     catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
                     {
                         //already exists
-                        //Log.d(TAG, "Already exists: " + transaction.hash);
+                        Log.d(TAG, "Already exists: " + transaction.hash);
                         instance.cancelTransaction(); // it can only fail within a transaction, no need to check
                     }
                 }
+                instance.commitTransaction();
             } catch (Exception ex) {
                 if (instance != null && instance.isInTransaction()) {
                     ex.printStackTrace();
@@ -175,23 +145,25 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
+    private void replaceTxIfChanged(Realm instance, RealmResults<RealmTransaction> rTx, Transaction transaction)
+    {
+        for (RealmTransaction realmTx : rTx)
+        {
+            Transaction loaded = convert(realmTx);
+            if (!loaded.contentHash.equals(transaction.contentHash))
+            {
+                //needs updating
+                Log.d(TAG, "Updated: " + transaction.hash + " : " + transaction.contentHash);
+                replace(instance, realmTx, transaction);
+                break;
+            }
+        }
+    }
+
     private boolean isUnknownContract(Transaction transaction)
     {
         if ((transaction.operations.length > 0 && transaction.operations[0].contract instanceof ERC875ContractTransaction)
             && (transaction.operations[0].contract.name.contains(UNKNOWN_CONTRACT)))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    private boolean isInvalidOperation(Transaction transaction)
-    {
-        if ((transaction.operations.length > 0 && transaction.operations[0].contract instanceof ERC875ContractTransaction)
-                && (((ERC875ContractTransaction) transaction.operations[0].contract).operation.equals(INVALID_OPERATION)))
         {
             return true;
         }
@@ -353,7 +325,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
     private Transaction[] convert(RealmResults<RealmTransaction> items) {
 	    int len = items.size();
-	    System.gc();
 	    Transaction[] result = new Transaction[len];
 	    for (int i = 0; i < len; i++) {
 	        result[i] = convert(items.get(i));

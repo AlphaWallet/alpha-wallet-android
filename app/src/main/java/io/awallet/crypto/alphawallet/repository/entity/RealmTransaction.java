@@ -18,6 +18,7 @@ public class RealmTransaction extends RealmObject {
     private String gasUsed;
     private String input;
     private String error;
+    private String contentHash;
     private RealmList<RealmTransactionOperation> operations;
 
     public String getHash() {
@@ -118,5 +119,14 @@ public class RealmTransaction extends RealmObject {
 
     public RealmList<RealmTransactionOperation> getOperations() {
         return operations;
+    }
+
+    public String getContentHash()
+    {
+        return contentHash;
+    }
+    public void setContentHash(String contentHash)
+    {
+        this.contentHash = contentHash;
     }
 }

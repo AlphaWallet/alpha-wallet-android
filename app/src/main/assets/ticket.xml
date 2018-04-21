@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
   <contract>
-    <address type="issuing">0x6ae0e6d98955ba13dacf654c4819e6a1886e978f</address>
+    <address type="issuing">0xdedbc7cbd3a534cdd1817963b76cd85fe53e8375</address>
     <name lang="en">FIFA 2018 Tickets</name>
     <name lang="zh">世界杯2018承兑票</name>
     <name lang="es">Entradas de FIFA 2018</name>
@@ -16,8 +16,9 @@
       <trade method="universal-link" version="9">
         <prefix>https://app.awallet.io/</prefix>
       </trade>
-      <!--<feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster> http://stormbird.duckdns.org:8080/api/claimToken-->
       <feemaster>http://stormbird.duckdns.org:8080/api/claimToken</feemaster>
+      <!--<feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster> http://stormbird.duckdns.org:8080/api/claimToken-->
+      <!--<feemaster>http://stormbird.duckdns.org:8080/api/claimToken</feemaster>-->
       <redeem>
         <method name="QR"/>
         <!--

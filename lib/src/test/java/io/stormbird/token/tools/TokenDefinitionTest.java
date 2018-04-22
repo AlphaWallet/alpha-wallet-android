@@ -20,7 +20,7 @@ public class TokenDefinitionTest {
 	    BigInteger.valueOf(0x010CCB53), BigInteger.valueOf(0x010CCB54),
 	    BigInteger.valueOf(0x02020075), BigInteger.valueOf(0x02020076)
     };
-    File file = new File("../assets/ticket.xml");
+    File file = new File("../resources/ticket.xml");
 
     @Test
     public void TokenDefinitionShouldParse() throws IOException, SAXException {

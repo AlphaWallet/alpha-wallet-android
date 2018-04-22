@@ -140,7 +140,6 @@
     <string name="help_question3">怎样才能拿到法币?</string>
     <string name="help_question4">助记词是做什么的?</string>
     <string name="help_question5">怎样把以太币转到AlphaWallet内?</string>
-    <string name="help_answer1">以太坊是目前使用最广泛的支持完备应用开发的公有区块链系统，以太坊区块链上的代币称为以太币（Ether），代码为ETH，可在许多加密货币的外汇市场上交易，它也是以太坊上用来支付交易手续费和运算服务的媒介 。</string>
     <string name="twenty_four_hours">24小时</string>
     <string name="appreciation">升值</string>
     <string name="usd_value">USD价值</string>

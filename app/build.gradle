@@ -21,6 +21,11 @@ repositories {
 android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
+    sourceSets {
+        main {
+            assets.srcDirs = ['../xml']
+        }
+    }
     defaultConfig {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18

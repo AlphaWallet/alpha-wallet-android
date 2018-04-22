@@ -24,6 +24,7 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchActiveStored(String walletAddress);
     Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
     Observable<Token> fetchActiveStoredSequential(String walletAddress);
+    Observable<Token> fetchActiveStoredSequentialNoEth(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
     Observable<Token[]> fetchAll(String walletAddress);
@@ -32,7 +33,7 @@ public interface TokenRepositoryType {
     Single<TokenInfo[]> update(String[] address);
     rx.Subscription memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
     rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
-    Completable addToken(Wallet wallet, TokenInfo tokenInfo);
+    Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
 }

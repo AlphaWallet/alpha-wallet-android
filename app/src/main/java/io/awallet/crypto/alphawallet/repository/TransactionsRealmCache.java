@@ -35,6 +35,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
     private final RealmManager realmManager;
     private static final String TAG = "TRC";
+    public static int realmCount = 0;
 
     public TransactionsRealmCache(RealmManager realmManager) {
         this.realmManager = realmManager;
@@ -63,6 +64,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             Realm instance = null;
             try {
                 instance = realmManager.getRealmInstance(networkInfo, wallet);
+                addRealm();
                 instance.beginTransaction();
                 for (Transaction transaction : transactions) {
                     RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
@@ -75,6 +77,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 }
             } finally {
                 if (instance != null) {
+                    subRealm();
                     instance.close();
                 }
             }
@@ -100,6 +103,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 List<String> deleteList = new ArrayList<>();
                 for (Transaction tx : transactions) txMap.put(tx.hash, tx);
 
+                addRealm();
                 instance.beginTransaction();
                 RealmResults<RealmTransaction> rTx = instance.where(RealmTransaction.class).findAll();
                 for (RealmTransaction realmTx : rTx) {
@@ -164,6 +168,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             } finally {
                 if (instance != null) {
                     instance.close();
+                    subRealm();
                 }
             }
             return transactions;
@@ -413,5 +418,22 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getGasUsed(),
                 operations
                 );
+    }
+
+
+
+    /**
+     * This pair of functions can be used for checking we don't have problems with
+     * opening too many realm instances.
+     */
+    public static void addRealm()
+    {
+        realmCount++;
+        //Log.d(TAG, "REALM COUNT: " + realmCount);
+    }
+    public static void subRealm()
+    {
+        realmCount--;
+        //Log.d(TAG, "REALM COUNT: " + realmCount);
     }
 }

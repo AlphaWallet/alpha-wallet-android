@@ -153,6 +153,15 @@ public class TokenRepository implements TokenRepositoryType {
                 .flatMap(token -> processBalance(network, wallet, token));
     }
 
+    @Override
+    public Observable<Token> fetchActiveStoredSequentialNoEth(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredEnabledTokensList(network, wallet)
+                .flatMapIterable(tokens -> tokens)
+                .flatMap(token -> processBalance(network, wallet, token));
+    }
+
     //Add in the fetched current ethereum balance
     private ObservableTransformer<List<Token>, List<Token>> attachEthereumActive(NetworkInfo network, Wallet wallet)
     {
@@ -303,15 +312,15 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
+    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo) {
         TokenFactory tf = new TokenFactory();
         Token newToken = tf.createToken(tokenInfo);
-        Log.d(TAG, "Create for store2: " + tokenInfo.name);
+        Log.d(TAG, "Create for store3: " + tokenInfo.name);
 
-        return localSource.saveTokens(
-                ethereumNetworkRepository.getDefaultNetwork(),
-                wallet,
-                new Token[] { newToken });
+        return localSource.saveToken(
+                    ethereumNetworkRepository.getDefaultNetwork(),
+                    wallet,
+                    newToken);
     }
 
     @Override
@@ -426,7 +435,7 @@ public class TokenRepository implements TokenRepositoryType {
             TokenFactory tFactory = new TokenFactory();
             try
             {
-                if (token.ticker != null && token.tokenInfo.symbol.equals(ETH_SYMBOL))
+                if (token.ticker != null && token.isEthereum())
                 {
                     return token; //already have the balance for ETH
                 }
@@ -457,7 +466,7 @@ public class TokenRepository implements TokenRepositoryType {
             catch (BadContract e)
             {
                 Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
-                localSource.updateTokenBalance(network, wallet, updated);
+                localSource.updateTokenDestroyed(network, wallet, updated);
                 return updated;
             }
             catch (Exception e)

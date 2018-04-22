@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ public class NewSettingsFragment extends Fragment {
     private Wallet wallet;
     private TextView networksSubtext;
     private TextView walletsSubtext;
+    private Switch notificationState;
 
     @Nullable
     @Override
@@ -46,18 +48,21 @@ public class NewSettingsFragment extends Fragment {
 
         networksSubtext = view.findViewById(R.id.networks_subtext);
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
+        notificationState = view.findViewById(R.id.switch_notifications);
 
-        LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
+        updateNotificationState();
+
+        final LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
         layoutWalletAddress.setOnClickListener(v -> {
             viewModel.showMyAddress(getContext());
         });
 
-        LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
+        final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
         layoutManageWallets.setOnClickListener(v -> {
             viewModel.showManageWallets(getContext(), false);
         });
 
-        LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
+        final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
         layoutSwitchnetworks.setOnClickListener(v -> {
             String currentNetwork = viewModel.getDefaultNetworkInfo().name;
             SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), currentNetwork);
@@ -72,12 +77,12 @@ public class NewSettingsFragment extends Fragment {
             dialog.show();
         });
 
-        LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
+        final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
         layoutHelp.setOnClickListener(v -> {
             viewModel.showHelp(getContext());
         });
 
-        LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
+        final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
         layoutTwitter.setOnClickListener(v -> {
             Intent intent;
             try {
@@ -88,6 +93,14 @@ public class NewSettingsFragment extends Fragment {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_TWITTER_URL));
             }
             startActivity(intent);
+        });
+
+        final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
+        layoutNotifications.setOnClickListener(v -> {
+            boolean currentState = viewModel.getNotificationState();
+            currentState = !currentState;
+            viewModel.setNotificationState(currentState);
+            updateNotificationState();
         });
 
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
@@ -103,6 +116,12 @@ public class NewSettingsFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void updateNotificationState()
+    {
+        boolean state = viewModel.getNotificationState();
+        notificationState.setChecked(state);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

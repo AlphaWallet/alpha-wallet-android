@@ -11,17 +11,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
 import io.awallet.crypto.alphawallet.util.TabUtils;
 import io.awallet.crypto.alphawallet.viewmodel.WalletViewModel;
@@ -29,6 +33,7 @@ import io.awallet.crypto.alphawallet.viewmodel.WalletViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -43,6 +48,8 @@ import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
  */
 
 public class WalletFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = "WFRAG";
+
     @Inject
     WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
@@ -55,7 +62,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
@@ -82,20 +90,32 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
-//        viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-//        viewModel.pushToast().observe(this, this::displayToast);
-
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
+        viewModel.tokenUpdate().observe(this, this::onToken);
+        viewModel.endUpdate().observe(this, this::checkTokens);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
         initTabLayout(view);
 
         return view;
+    }
+
+    private void checkTokens(Boolean dummy)
+    {
+        if (adapter.checkTokens())
+        {
+            viewModel.fetchTokens(); //require a full token refresh; number of tokens has changed
+        }
+    }
+
+    private void onToken(Token token)
+    {
+        adapter.updateTokenCheck(token);
     }
 
     private void initTabLayout(View view) {
@@ -159,7 +179,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
             }
             break;
             case android.R.id.home: {
-                adapter.clear();
+                //adapter.clear();
                 //viewModel.showTransactions(getContext());
             }
         }
@@ -177,7 +197,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.prepare();
     }
 
-    private void onTokens(Token[] tokens) {
+    private void onTokens(Token[] tokens)
+    {
+        for (Token t : tokens) if(!t.isTerminated() && t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
         adapter.setTokens(tokens);
     }
 
@@ -199,13 +221,24 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void onDefaultWallet(Wallet wallet) {
-//        adapter.setDefaultWallet(wallet);
+    private void onDefaultWallet(Wallet wallet)
+    {
         this.wallet = wallet;
         viewModel.fetchTokens();
+        //get the XML address
+        try
+        {
+            AssetDefinition ad = new AssetDefinition("ticket.xml", getResources());
+            adapter.setLiveTokenAddress(ad.networkInfo.get("address").toLowerCase());
+        }
+        catch (IOException |SAXException e)
+        {
+            e.printStackTrace();
+        }
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
 //        adapter.setDefaultNetwork(networkInfo);
 //        setBottomMenu(R.menu.menu_main_network);
     }

@@ -20,16 +20,30 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp">
 
+        <TextView
+            android:id="@+id/title_my_wallets"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:fontFamily="@font/font_light"
+            android:gravity="center"
+            android:text="@string/toolbar_title_my_wallets"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
+
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:paddingBottom="15dp"/>
         </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 

@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,6 +20,7 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
@@ -44,6 +46,7 @@ public class Ticket extends Token implements Parcelable
 {
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
+    private boolean isLiveTicket = false;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -80,6 +83,11 @@ public class Ticket extends Token implements Parcelable
     @Override
     public String getStringBalance() {
         return intArrayToString(balanceArray, false);
+    }
+
+    @Override
+    public boolean hasPositiveBalance() {
+        return (getTicketCount() > 0);
     }
 
     @Override
@@ -129,10 +137,10 @@ public class Ticket extends Token implements Parcelable
     }
 
     //Burn handling
-    public void addToBurnList(List<BigInteger> burnUpdate)
+    public void addToBurnList(List<Uint16> burnUpdate)
     {
-        for (BigInteger b : burnUpdate) {
-            Integer index = b.intValue();
+        for (Uint16 b : burnUpdate) {
+            Integer index = b.getValue().intValue();
 
             //lookup index
             if (balanceArray.size() > index)
@@ -181,7 +189,15 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
-        tokenHolder.issuer.setText(TicketDecode.getIssuer());
+        tokenHolder.textAppreciation.setText("--");
+        if (isLiveTicket())
+        {
+            tokenHolder.issuer.setText(R.string.shengkai);
+            tokenHolder.contractType.setVisibility(View.VISIBLE);
+            tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
+            tokenHolder.contractType.setText(R.string.erc875);
+        }
+
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
         tokenHolder.textAppreciationSub.setText(R.string.marketplace);
@@ -193,7 +209,6 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(range.tokenIds, false);
     }
 
-    @Override
     public int[] getTicketIndicies(String ticketIds)
     {
         List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
@@ -248,7 +263,7 @@ public class Ticket extends Token implements Parcelable
                 //reverse lookup the selected IDs
                 if (i < balanceArray.size())
                 {
-                    if (!first) sb.append(", ");
+                    if (!first) sb.append(",");
                     BigInteger ticketID = balanceArray.get(i);
                     sb.append(Numeric.toHexStringNoPrefix(ticketID));
                     first = false;
@@ -376,7 +391,7 @@ public class Ticket extends Token implements Parcelable
                     if (index > -1)
                     {
                         if (!idList.contains(index))
-                        {  //just make sure they didn't already add this one
+                        {   //just make sure they didn't already add this one
                             idList.add(index);
                         }
                     }
@@ -412,7 +427,7 @@ public class Ticket extends Token implements Parcelable
             if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
             if (!first)
             {
-                sb.append(", ");
+                sb.append(",");
             }
             first = false;
 
@@ -464,5 +479,33 @@ public class Ticket extends Token implements Parcelable
                 //TODO: Handle error
             }
         }
+    }
+
+    public String getXMLProperty(String property, BaseActivity activity)
+    {
+        String value;
+        try
+        {
+            AssetDefinition ad = new AssetDefinition("ticket.xml", activity.getResources());
+            value = ad.networkInfo.get(property);
+        }
+        catch (IOException | SAXException e)
+        {
+            e.printStackTrace();
+            //TODO: Handle error
+            value = "";
+        }
+
+        return value;
+    }
+
+    public boolean isLiveTicket()
+    {
+        return isLiveTicket;
+    }
+
+    public void setLiveTicket()
+    {
+        isLiveTicket = true;
     }
 }

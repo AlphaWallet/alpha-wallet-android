@@ -9,6 +9,7 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.router.ManageWalletsRouter;
@@ -23,6 +24,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ManageWalletsRouter manageWalletsRouter;
     private final HomeRouter homeRouter;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public NewSettingsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -32,7 +34,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
             HelpRouter helpRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            PreferenceRepositoryType preferenceRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -41,6 +44,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.manageWalletsRouter = manageWalletsRouter;
         this.homeRouter = homeRouter;
+        this.preferenceRepository = preferenceRepository;
     }
 
     @NonNull
@@ -54,7 +58,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
                 helpRouter,
                 ethereumNetworkRepository,
                 manageWalletsRouter,
-                homeRouter
+                homeRouter,
+                preferenceRepository
         );
     }
 }

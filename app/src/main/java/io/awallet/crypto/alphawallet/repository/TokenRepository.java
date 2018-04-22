@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import io.awallet.crypto.alphawallet.entity.BadContract;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -13,33 +14,42 @@ import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.TokenTicker;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.TransactionOperation;
+import io.awallet.crypto.alphawallet.entity.TransferFromEventResponse;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.service.TickerService;
 import io.awallet.crypto.alphawallet.service.TokenExplorerClientType;
 
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.utils.Numeric;
+import org.web3j.tx.Contract;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,11 +57,14 @@ import java.util.Set;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.schedulers.Schedulers;
+import rx.functions.Func1;
 
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -124,6 +137,58 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    /**
+     * Gives an observable that allows us to process each token as the balance is fetched
+     *
+     * @param walletAddress
+     * @return
+     */
+    @Override
+    public Observable<Token> fetchActiveStoredSequential(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredEnabledTokensList(network, wallet)
+                .compose(attachEthereumActive(network, wallet))
+                .flatMapIterable(tokens -> tokens)
+                .flatMap(token -> processBalance(network, wallet, token));
+    }
+
+    @Override
+    public Observable<Token> fetchActiveStoredSequentialNoEth(String walletAddress) {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredEnabledTokensList(network, wallet)
+                .flatMapIterable(tokens -> tokens)
+                .flatMap(token -> processBalance(network, wallet, token));
+    }
+
+    //Add in the fetched current ethereum balance
+    private ObservableTransformer<List<Token>, List<Token>> attachEthereumActive(NetworkInfo network, Wallet wallet)
+    {
+        return upstream -> Observable.zip(
+                upstream, attachEth(network, wallet).toObservable(),
+                (tokens, ethToken) ->
+                {
+                    List<Token> result = new ArrayList<>();
+                    result.add(ethToken);
+                    result.addAll(tokens);
+                    return result;
+                });
+    }
+
+    private Observable<Token> processBalance(NetworkInfo network, Wallet wallet, Token token)
+    {
+        //now fetch the balance
+        return updateBalance(network, wallet, token)
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
+
+    private Observable<List<Token>> fetchStoredEnabledTokensList(NetworkInfo network, Wallet wallet) {
+        return localSource
+                .fetchEnabledTokensSequentialList(network, wallet);
+    }
+
     @Override
     public Observable<Token[]> fetchActiveStored(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -173,6 +238,15 @@ public class TokenRepository implements TokenRepositoryType {
      */
     @Override
     public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return updateBalance(network, wallet, token)
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
+
+    private Observable<Token> fetchBalance(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
@@ -238,15 +312,15 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable addToken(Wallet wallet, TokenInfo tokenInfo) {
+    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo) {
         TokenFactory tf = new TokenFactory();
         Token newToken = tf.createToken(tokenInfo);
-        Log.d(TAG, "Create for store2: " + tokenInfo.name);
+        Log.d(TAG, "Create for store3: " + tokenInfo.name);
 
-        return localSource.saveTokens(
-                ethereumNetworkRepository.getDefaultNetwork(),
-                wallet,
-                new Token[] { newToken });
+        return localSource.saveToken(
+                    ethereumNetworkRepository.getDefaultNetwork(),
+                    wallet,
+                    newToken);
     }
 
     @Override
@@ -265,7 +339,6 @@ public class TokenRepository implements TokenRepositoryType {
                     ethereumNetworkRepository.getDefaultNetwork(),
                     wallet,
                     tokenList);
-
     }
 
     @Override
@@ -349,11 +422,23 @@ public class TokenRepository implements TokenRepositoryType {
                 .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens));
     }
 
+    /**
+     * Obtain live balance of token from Ethereum blockchain and cache into Realm
+     *
+     * @param network
+     * @param wallet
+     * @param token
+     * @return
+     */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
         return Single.fromCallable(() -> {
+            TokenFactory tFactory = new TokenFactory();
             try
             {
-                TokenFactory tFactory = new TokenFactory();
+                if (token.ticker != null && token.isEthereum())
+                {
+                    return token; //already have the balance for ETH
+                }
                 List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
@@ -368,12 +453,26 @@ public class TokenRepository implements TokenRepositoryType {
                     balance = getBalance(wallet, token.tokenInfo);
                 }
 
+                  //This code, together with an account with many tokens on it thrashes the Token view update
+//                if (Math.random() > 0.5)
+//                {
+//                    throw new BadContract();
+//                }
+
                 Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }
-            finally {
-
+            catch (BadContract e)
+            {
+                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
+                localSource.updateTokenDestroyed(network, wallet, updated);
+                return updated;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return token;
             }
         });
     }
@@ -417,11 +516,6 @@ public class TokenRepository implements TokenRepositoryType {
                     return result.toArray(new Token[result.size()]);
                 });
     }
-
-//    @Override
-//    public Observable<TokenInfo> update(String contractAddr) {
-//        return setupTokensFromLocal(contractAddr).toObservable();
-//    }
 
     @Override
     public rx.Subscription memPoolListener(SubscribeWrapper subscriber)
@@ -490,13 +584,50 @@ public class TokenRepository implements TokenRepositoryType {
         if (tokenInfo.isStormbird) //safety check
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            List<Bytes32> indicies = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            for (Bytes32 val : indicies)
+            List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            if (indices == null) throw new BadContract();
+            for (Bytes32 val : indices)
             {
                 result.add(getCorrectedValue(val, temp));
             }
         }
         return result;
+    }
+
+    public rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
+    {
+        rx.Subscription sub = null;
+        if (web3jFullNode != null)
+        {
+            final Event event = new Event("TransferFrom",
+                                          Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                                          {
+                                          }, new TypeReference<Address>()
+                                          {
+                                          }),
+                                          Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Uint16>>()
+                                          {
+                                          }));
+            EthFilter filter = new EthFilter(DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING, contractAddr);
+            filter.addSingleTopic(EventEncoder.encode(event));
+            return web3jFullNode.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
+            {
+                @Override
+                public TransferFromEventResponse call(org.web3j.protocol.core.methods.response.Log log)
+                {
+                    EventValues eventValues = extractEventParameters(event, log);
+                    TransferFromEventResponse typedResponse = new TransferFromEventResponse();
+                    typedResponse._from = (String) eventValues.getIndexedValues().get(0).getValue();
+                    typedResponse._to = (String) eventValues.getIndexedValues().get(1).getValue();
+                    typedResponse._indices = (List<Uint16>) eventValues.getNonIndexedValues().get(0).getValue();
+                    return typedResponse;
+                }
+            });
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -801,10 +932,6 @@ public class TokenRepository implements TokenRepositoryType {
                     {
                         tokenList.add(result);
                     }
-                    else
-                    {
-                        tokenList.add(result);
-                    }
                 }
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
@@ -814,5 +941,27 @@ public class TokenRepository implements TokenRepositoryType {
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
         });
+    }
+
+    protected EventValues extractEventParameters(
+            Event event, org.web3j.protocol.core.methods.response.Log log) {
+
+        List<String> topics = log.getTopics();
+        String encodedEventSignature = EventEncoder.encode(event);
+        if (!topics.get(0).equals(encodedEventSignature)) {
+            return null;
+        }
+
+        List<Type> indexedValues = new ArrayList<>();
+        List<Type> nonIndexedValues = FunctionReturnDecoder.decode(
+                log.getData(), event.getNonIndexedParameters());
+
+        List<TypeReference<Type>> indexedParameters = event.getIndexedParameters();
+        for (int i = 0; i < indexedParameters.size(); i++) {
+            Type value = FunctionReturnDecoder.decodeIndexedValue(
+                    topics.get(i + 1), indexedParameters.get(i));
+            indexedValues.add(value);
+        }
+        return new EventValues(indexedValues, nonIndexedValues);
     }
 }

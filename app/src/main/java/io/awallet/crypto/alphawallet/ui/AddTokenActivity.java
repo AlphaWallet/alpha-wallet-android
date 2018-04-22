@@ -6,35 +6,33 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
-
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.Address;
-import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
-
-import io.awallet.crypto.alphawallet.entity.TokenInfo;
-import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
-import io.awallet.crypto.alphawallet.util.QRURLParser;
-import io.awallet.crypto.alphawallet.viewmodel.AddTokenViewModel;
-import io.awallet.crypto.alphawallet.viewmodel.AddTokenViewModelFactory;
-import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.Address;
+import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.TokenInfo;
+import io.awallet.crypto.alphawallet.ui.zxing.FullScannerFragment;
+import io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity;
+import io.awallet.crypto.alphawallet.util.QRURLParser;
+import io.awallet.crypto.alphawallet.viewmodel.AddTokenViewModel;
+import io.awallet.crypto.alphawallet.viewmodel.AddTokenViewModelFactory;
+import io.awallet.crypto.alphawallet.widget.InputAddressView;
+import io.awallet.crypto.alphawallet.widget.InputView;
 
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
 
@@ -42,15 +40,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     protected AddTokenViewModelFactory addTokenViewModelFactory;
     private AddTokenViewModel viewModel;
 
-    private static final int BARCODE_READER_REQUEST_CODE = 1;
-
-    private TextInputLayout addressLayout;
-    public TextView address;
-    private TextInputLayout symbolLayout;
-    public TextView symbol;
-    private TextInputLayout decimalsLayout;
-    public TextView decimals;
-    public TextView name;
     public LinearLayout ticketLayout;
 
     //Ticket Info
@@ -58,11 +47,17 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView date;
     public TextView price;
 
-    private SystemView systemView;
     private Dialog dialog;
     private String lastCheck;
 
+    LinearLayout progressLayout;
+
     public boolean isStormbird = false;
+
+    public InputAddressView inputAddressView;
+    public InputView symbolInputView;
+    public InputView decimalsInputView;
+    public InputView nameInputview;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,33 +69,30 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         toolbar();
 
-        addressLayout = findViewById(R.id.address_input_layout);
-        address = findViewById(R.id.address);
-        symbolLayout = findViewById(R.id.symbol_input_layout);
-        symbol = findViewById(R.id.symbol);
-        decimalsLayout = findViewById(R.id.decimal_input_layout);
-        decimals = findViewById(R.id.decimals);
-        systemView = findViewById(R.id.system_view);
-        systemView.hide();
+        symbolInputView = findViewById(R.id.input_symbol);
+        decimalsInputView = findViewById(R.id.input_decimal);
+        nameInputview = findViewById(R.id.input_name);
+
+        progressLayout = findViewById(R.id.layout_progress);
 
         venue = findViewById(R.id.textViewVenue);
         date = findViewById(R.id.textViewDate);
         price = findViewById(R.id.textViewPrice);
-        name = findViewById(R.id.textViewName);
+
         ticketLayout = findViewById(R.id.layoutTicket);
 
         findViewById(R.id.save).setOnClickListener(this);
 
         viewModel = ViewModelProviders.of(this, addTokenViewModelFactory)
                 .get(AddTokenViewModel.class);
-        viewModel.progress().observe(this, systemView::showProgress);
+        viewModel.progress().observe(this, this::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
         viewModel.update().observe(this, this::onChecked);
         lastCheck = "";
 
-        address.addTextChangedListener(new TextWatcher()
-        {
+        inputAddressView = findViewById(R.id.input_address_view);
+        inputAddressView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -109,7 +101,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //wait until we have an ethereum address
-                String check = address.getText().toString().toLowerCase();
+                String check = inputAddressView.getAddress().toLowerCase();
                 //process the address first
                 if (check.length() > 39 && check.length() < 43) {
                     if (!check.equals(lastCheck) && Address.isAddress(check)) {
@@ -126,21 +118,23 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             }
         });
 
-        ImageButton scanBarcodeButton = findViewById(R.id.scan_contract_address_qr);
-        scanBarcodeButton.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
-            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-        });
+        setTitle(R.string.empty);
+    }
 
-        setTitle(getString(R.string.toolbar_add_custom_token));
+    private void showProgress(Boolean shouldShowProgress) {
+        if (shouldShowProgress) {
+            progressLayout.setVisibility(View.VISIBLE);
+        } else {
+            progressLayout.setVisibility(View.GONE);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BARCODE_READER_REQUEST_CODE) {
+        if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
-                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    Barcode barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);
@@ -149,7 +143,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                         return;
                     }
                     Point[] p = barcode.cornerPoints;
-                    address.setText(extracted_address);
+                    inputAddressView.setAddress(extracted_address);
                 }
             } else {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
@@ -198,10 +192,10 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onSave() {
         boolean isValid = true;
-        String address = this.address.getText().toString();
-        String symbol = this.symbol.getText().toString().toLowerCase();
-        String rawDecimals = this.decimals.getText().toString();
-        String name = this.name.getText().toString();
+        String address = inputAddressView.getAddress();
+        String symbol = symbolInputView.getText().toString().toLowerCase();
+        String rawDecimals = decimalsInputView.getText().toString();
+        String name = nameInputview.getText().toString();
 //        String venue = this.venue.getText().toString();
 //        String date = this.date.getText().toString();
 //        String rawPrice = this.price.getText().toString();
@@ -210,24 +204,24 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         int decimals = 0;
 
         if (TextUtils.isEmpty(address)) {
-            addressLayout.setError(getString(R.string.error_field_required));
+            inputAddressView.setError(getString(R.string.error_field_required));
             isValid = false;
         }
 
         if (TextUtils.isEmpty(symbol)) {
-            symbolLayout.setError(getString(R.string.error_field_required));
+            symbolInputView.setError(getString(R.string.error_field_required));
             isValid = false;
         }
 
         if (TextUtils.isEmpty(rawDecimals)) {
-            decimalsLayout.setError(getString(R.string.error_field_required));
+            decimalsInputView.setError(getString(R.string.error_field_required));
             isValid = false;
         }
 
         try {
             decimals = Integer.valueOf(rawDecimals);
         } catch (NumberFormatException ex) {
-            decimalsLayout.setError(getString(R.string.error_must_numeric));
+            decimalsInputView.setError(getString(R.string.error_must_numeric));
             isValid = false;
         }
 
@@ -238,7 +232,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 //        }
 
         if (!Address.isAddress(address)) {
-            addressLayout.setError(getString(R.string.error_invalid_address));
+            inputAddressView.setError(getString(R.string.error_invalid_address));
             isValid = false;
         }
 

@@ -21,12 +21,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.HelpItem;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.HelpAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TransactionsAdapter;
 import io.awallet.crypto.alphawallet.util.RootUtil;
@@ -38,6 +41,7 @@ import io.awallet.crypto.alphawallet.widget.DepositView;
 import io.awallet.crypto.alphawallet.widget.EmptyTransactionsView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,14 +86,16 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
+        systemView.showProgress(false);
+
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
+        viewModel.showEmpty().observe(this, this::showEmptyTx);
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
@@ -144,28 +150,22 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    private void onBalanceChanged(Map<String, String> balance) {
-//        ActionBar actionBar = getSupportActionBar();
-//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-//        Wallet wallet = viewModel.defaultWallet().getValue();
-//        if (actionBar == null || networkInfo == null || wallet == null) {
-//            return;
-//        }
-//        if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
-//            actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//            actionBar.setSubtitle("");
-//        } else {
-//            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
-//            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//        }
-    }
-
     private void onTransactions(Transaction[] transaction) {
         adapter.updateTransactions(transaction);
     }
 
     private void onDefaultWallet(Wallet wallet) {
         adapter.setDefaultWallet(wallet);
+        //get the XML address
+        try
+        {
+            AssetDefinition ad = new AssetDefinition("ticket.xml", getResources());
+            viewModel.setXMLContractAddress(ad.networkInfo.get("address").toLowerCase());
+        }
+        catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -174,12 +174,23 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onError(ErrorEnvelope errorEnvelope) {
         if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
-            EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
-            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
-            systemView.showEmpty(emptyView);
+            showEmptyTx(true);
         }/* else {
             systemView.showError(getString(R.string.error_fail_load_transaction), this);
         }*/
+    }
+
+    private void showEmptyTx(boolean show) {
+        if (show)
+        {
+            EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
+            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
+            systemView.showEmpty(emptyView);
+        }
+        else
+        {
+            systemView.hide();
+        }
     }
 
     private void openExchangeDialog() {

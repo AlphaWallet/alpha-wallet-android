@@ -118,15 +118,17 @@ public class UniversalLinkTest
     }
 
     int[][] tickets = new int[][]{
+            { 0 },
             { 2 },
             { 2, 3 },
-            { 2, 3, 4, 56, 127, 345, 4563 }
+            { 2, 3, 4, 56, 127, 345, 4563 },
+            { 0, 1, 1099, 23 }
     };
 
     //1. Test we can generate and recover a series of universal links
     @Test
     public void UniversalLinkShouldBeGeneratedCorrectly() {
-        final int NUMBER_OF_TESTS = 100;
+        final int NUMBER_OF_TESTS = 500;
 
         List<OrderData> orders = new ArrayList<>();
 
@@ -134,7 +136,7 @@ public class UniversalLinkTest
 
             for (int i = 0; i < NUMBER_OF_TESTS; i++) {
                 OrderData data = new OrderData();
-                data.tickets = tickets[i % 3];
+                data.tickets = tickets[i % tickets.length];
                 data.count = data.tickets.length;
                 double dPrice = 0.5 + (Math.random() * 3.0);
                 data.price = getPriceInWei(dPrice);

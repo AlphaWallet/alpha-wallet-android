@@ -23,6 +23,7 @@ import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.service.AccountKeystoreService;
 import io.awallet.crypto.alphawallet.service.CoinmarketcapTickerService;
 import io.awallet.crypto.alphawallet.service.EthplorerTokenService;
+import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.service.GethKeystoreAccountService;
 import io.awallet.crypto.alphawallet.service.ImportTokenService;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
@@ -151,6 +152,14 @@ public class RepositoriesModule {
 												 TransactionRepositoryType transactionRepository,
 												 PasswordStore passwordStore) {
 		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
+	}
+
+	@Singleton
+	@Provides
+	FeeMasterService provideFeemasterService(OkHttpClient okHttpClient,
+											 TransactionRepositoryType transactionRepository,
+											 PasswordStore passwordStore) {
+		return new FeeMasterService(okHttpClient, transactionRepository, passwordStore);
 	}
 
 	@Singleton

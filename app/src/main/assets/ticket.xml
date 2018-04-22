@@ -250,6 +250,10 @@
     </field>
     <field bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000" id="countryA"
 	   type="IA5String">
+      <!-- Intentionally avoid using countryName
+	   (SYNTAX 1.3.6.1.4.1.1466.115.121.1.11) per RFC 4519
+           CountryName is two-characters long, not 3-characters.
+	   -->
       <name lang="en">Team A</name>
       <name lang="zh">甲队</name>
       <name lang="es">Equipo A</name>

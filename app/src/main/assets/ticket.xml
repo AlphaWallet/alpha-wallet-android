@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
   <contract>
-    <address type="issuing">0xB032532c03ce9212749193e12E03bA8062808faD</address>
+    <address type="issuing">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
     <name lang="en">FIFA 2018 Tickets</name>
     <name lang="zh">世界杯2018承兑票</name>
     <name lang="es">Entradas de FIFA 2018</name>

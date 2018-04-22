@@ -79,8 +79,14 @@ public abstract class C {
 
     public static final String DEFAULT_NETWORK = ROPSTEN_NETWORK_NAME;
 
-    public interface ErrorCode {
+    public static final String TWITTER_PACKAGE_NAME = "com.twitter.android";
+    public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
+    public static final String AWALLET_TWITTER_ID = "twitter://user?user_id=938624096123764736";
+    public static final String AWALLET_FACEBOOK_ID = "fb://page/1958651857482632";
+    public static final String AWALLET_TWITTER_URL = "https://twitter.com/Alpha_wallet";
+    public static final String AWALLET_FACEBOOK_URL = "https://www.facebook.com/AlphaWallet/";
 
+    public interface ErrorCode {
         int UNKNOWN = 1;
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
@@ -94,5 +100,6 @@ public abstract class C {
         String TICKET_RANGE = "ticket_range";
         String MARKETPLACE_EVENT = "marketplace_event";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
+        String FROM_SETTINGS = "from_settings";
     }
 }

@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
@@ -19,12 +18,17 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
@@ -38,12 +42,6 @@ import io.awallet.crypto.alphawallet.viewmodel.HomeViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.DepositView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
-
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 
 import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.MARKETPLACE;
 import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.SETTINGS;
@@ -126,7 +124,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
-        showPage(WALLET);
+        if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
+            showPage(SETTINGS);
+        } else {
+            showPage(WALLET);
+        }
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -153,12 +155,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add, menu);
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-//
-//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-//        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
-//            getMenuInflater().inflate(R.menu.menu_deposit, menu);
-//        }
         return super.onCreateOptionsMenu(menu);
     }
 

@@ -8,17 +8,19 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
+import java.util.Map;
+
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
+import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
+import io.awallet.crypto.alphawallet.router.HomeRouter;
+import io.awallet.crypto.alphawallet.router.ManageWalletsRouter;
 import io.awallet.crypto.alphawallet.router.MyAddressRouter;
-
-import java.util.Map;
-
 import io.reactivex.disposables.Disposable;
 
 public class NewSettingsViewModel extends BaseViewModel {
@@ -28,13 +30,14 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
-
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
-
     private final MyAddressRouter myAddressRouter;
     private final HelpRouter helpRouter;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final ManageWalletsRouter manageWalletsRouter;
+    private final HomeRouter homeRouter;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -47,12 +50,53 @@ public class NewSettingsViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            ManageWalletsRouter manageWalletsRouter,
+            HomeRouter homeRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
         this.helpRouter = helpRouter;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.manageWalletsRouter = manageWalletsRouter;
+        this.homeRouter = homeRouter;
+    }
+
+    public void showHome(Context context, boolean clearStack, boolean fromSettings) {
+        homeRouter.open(context, clearStack, true);
+    }
+
+    public void showHome(Context context, boolean clearStack) {
+        homeRouter.open(context, clearStack);
+    }
+
+    public void showManageWallets(Context context, boolean clearStack) {
+        manageWalletsRouter.open(context, clearStack);
+    }
+
+    public void setNetwork(String selectedRpcServer) {
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+        for (NetworkInfo networkInfo : networks) {
+            if (networkInfo.name.equals(selectedRpcServer)) {
+                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
+                return;
+            }
+        }
+    }
+
+    public String[] getNetworkList() {
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+        String[] networkList = new String[networks.length];
+        for (int ii = 0; ii < networks.length; ii++) {
+            networkList[ii] = networks[ii].name;
+        }
+        return networkList;
+    }
+
+    public NetworkInfo getDefaultNetworkInfo() {
+        return ethereumNetworkRepository.getDefaultNetwork();
     }
 
     @Override

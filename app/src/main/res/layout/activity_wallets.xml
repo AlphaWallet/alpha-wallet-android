@@ -1,38 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/root"
-	android:fitsSystemWindows="true"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	>
-	<include layout="@layout/layout_app_bar" />
-	<android.support.v4.widget.SwipeRefreshLayout
-		android:id="@+id/refresh_layout"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		>
-		<android.support.v7.widget.RecyclerView
-			android:id="@+id/list"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			/>
-	</android.support.v4.widget.SwipeRefreshLayout>
-	<io.awallet.crypto.alphawallet.widget.SystemView
-		android:id="@+id/system_view"
-		android:background="@android:color/white"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		tools:visibility="gone"
-		/>
-    <io.awallet.crypto.alphawallet.widget.BackupWarningView
-        android:id="@+id/backup_warning"
-        android:background="@color/white"
-        android:visibility="gone"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/colorPrimary">
+
+    <include layout="@layout/layout_app_bar" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        android:orientation="vertical"
+        android:background="@drawable/background_card"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:paddingTop="20dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </android.support.v4.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+    <io.awallet.crypto.alphawallet.widget.SystemView
+        android:id="@+id/system_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        tools:visibility="gone" />
+
+    <io.awallet.crypto.alphawallet.widget.BackupWarningView
+        android:id="@+id/backup_warning"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:visibility="gone" />
 </android.support.design.widget.CoordinatorLayout>

@@ -68,6 +68,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         try {
             contractType.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
+            issuer.setText(R.string.ethereum);
             // We handled NPE. Exception handling is expensive, but not impotent here
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()

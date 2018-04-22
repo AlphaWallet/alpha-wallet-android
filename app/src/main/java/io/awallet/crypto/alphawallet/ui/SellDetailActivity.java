@@ -501,7 +501,7 @@ public class SellDetailActivity extends BaseActivity {
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.generate_sale_transfer_link);
         dialog.setMediumText(qty);
-        dialog.setPrimaryButtonText(R.string.send_universal_sale_link);
+        dialog.setPrimaryButtonText(R.string.send_universal_link);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellLinkFinal(universalLink));
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());

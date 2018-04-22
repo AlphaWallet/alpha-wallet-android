@@ -18,11 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.xml.sax.SAXException;
+
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
 import io.awallet.crypto.alphawallet.util.TabUtils;
 import io.awallet.crypto.alphawallet.viewmodel.WalletViewModel;
@@ -30,6 +33,7 @@ import io.awallet.crypto.alphawallet.viewmodel.WalletViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -219,9 +223,18 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 
     private void onDefaultWallet(Wallet wallet)
     {
-//        adapter.setDefaultWallet(wallet);
         this.wallet = wallet;
         viewModel.fetchTokens();
+        //get the XML address
+        try
+        {
+            AssetDefinition ad = new AssetDefinition("ticket.xml", getResources());
+            adapter.setLiveTokenAddress(ad.networkInfo.get("address").toLowerCase());
+        }
+        catch (IOException |SAXException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo)

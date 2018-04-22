@@ -33,7 +33,6 @@ public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 		return getContext().getString(stringResId);
 	}
 
-
 	public String getString(int stringResId, Object... args) {
 		return getContext().getString(stringResId, args);
 	}

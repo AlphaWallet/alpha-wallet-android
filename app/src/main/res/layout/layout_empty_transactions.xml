@@ -6,14 +6,14 @@
     android:layout_height="wrap_content"
     >
     <ImageView
-        android:src="@drawable/no_transactions_mascot"
+        android:src="@mipmap/ic_alpha"
         android:layout_gravity="center_horizontal"
         android:layout_width="120dp"
         android:layout_height="120dp"
         />
     <TextView
         android:text="@string/no_transactions_yet"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/white"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/big_margin"
         android:layout_width="wrap_content"

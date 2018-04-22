@@ -12,11 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
 
 public class AWalletConfirmationDialog extends Dialog {
+    private LinearLayout container;
     private TextView title;
     private TextView smallText;
     private TextView mediumText;
@@ -35,6 +37,7 @@ public class AWalletConfirmationDialog extends Dialog {
         setCanceledOnTouchOutside(true);
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
+        container = findViewById(R.id.dialog_button1_container);
         title = findViewById(R.id.dialog_main_text);
         smallText = findViewById(R.id.dialog_small_text);
         mediumText = findViewById(R.id.dialog_medium_text);
@@ -60,6 +63,7 @@ public class AWalletConfirmationDialog extends Dialog {
 
     public void setPrimaryButtonListener(View.OnClickListener listener) {
         btnPrimary.setOnClickListener(listener);
+        container.setOnClickListener(listener);
     }
 
     public void setSecondaryButtonListener(View.OnClickListener listener) {

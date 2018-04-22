@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
   <contract>
-    <address type="issuing" chainid="3">0xE73b0F78cAfdD4108B6C4Cf0B4ed209FBce8A82B</address>
+    <address type="issuing">0xB032532c03ce9212749193e12E03bA8062808faD</address>
     <name lang="en">FIFA 2018 Tickets</name>
     <name lang="zh">世界杯2018承兑票</name>
     <name lang="es">Entradas de FIFA 2018</name>
+    <network>3</network> <!-- ROPSTEN -->
   </contract>
   <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>
@@ -15,6 +16,8 @@
       <trade method="universal-link" version="9">
         <prefix>https://app.awallet.io/</prefix>
       </trade>
+      <!--<feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster> http://stormbird.duckdns.org:8080/api/claimToken-->
+      <feemaster>http://stormbird.duckdns.org:8080/api/claimToken</feemaster>
       <redeem>
         <method name="QR"/>
         <!--

@@ -12,12 +12,12 @@ import org.web3j.protocol.core.methods.response.Transaction;
 public class SubscribeWrapper
 {
     public Action1<Transaction> scanReturn;
+    public Action1<Throwable> onError;
     public Handler wrapperInteraction;
 
-    public SubscribeWrapper(Action1<Transaction> s)
+    public SubscribeWrapper(Action1<Transaction> s, Action1<Throwable> onError)
     {
         scanReturn = s;
+        this.onError = onError;
     }
-
-    public Action1<Throwable> onError = Throwable::printStackTrace;
 }

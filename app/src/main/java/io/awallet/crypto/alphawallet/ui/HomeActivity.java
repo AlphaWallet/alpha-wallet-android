@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
@@ -19,12 +18,17 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
@@ -39,12 +43,6 @@ import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.DepositView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
-
 import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.MARKETPLACE;
 import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
@@ -56,7 +54,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private HomeViewModel viewModel;
 
     private SystemView systemView;
-    private TransactionsAdapter adapter;
     private Dialog dialog;
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -94,23 +91,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         initBottomNavigation();
         dissableDisplayHomeAsUp();
 
-        adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
 
         RecyclerView list = findViewById(R.id.list);
-
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                int position = list.getChildAdapterPosition(view);
-                if (position == 0) {
-                    outRect.top = (int) getResources().getDimension(R.dimen.big_margin);
-                }
-            }
-        });
-        list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -119,25 +103,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .get(HomeViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.transactions().observe(this, this::onTransactions);
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 
-        showPage(WALLET);
+        if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
+            showPage(SETTINGS);
+        } else {
+            showPage(WALLET);
+        }
     }
 
-    private void onTransactionClick(View view, Transaction transaction) {
-        viewModel.showDetails(view.getContext(), transaction);
+    private void onError(ErrorEnvelope errorEnvelope)
+    {
+
     }
 
     @SuppressLint("RestrictedApi")
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.clear();
         viewModel.prepare();
         checkRoot();
     }
@@ -153,12 +137,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add, menu);
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-//
-//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-//        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
-//            getMenuInflater().inflate(R.menu.menu_deposit, menu);
-//        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -215,49 +193,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         }
         return false;
-    }
-
-    private void onBalanceChanged(Map<String, String> balance) {
-//        ActionBar actionBar = getSupportActionBar();
-//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-//        Wallet wallet = viewModel.defaultWallet().getValue();
-//        if (actionBar == null || networkInfo == null || wallet == null) {
-//            return;
-//        }
-//        if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
-//            actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//            actionBar.setSubtitle("");
-//        } else {
-//            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
-//            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//        }
-    }
-
-    private void onTransactions(Transaction[] transaction) {
-        adapter.addTransactions(transaction);
-        invalidateOptionsMenu();
-    }
-
-    private void onDefaultWallet(Wallet wallet) {
-        adapter.setDefaultWallet(wallet);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        adapter.setDefaultNetwork(networkInfo);
-//        setBottomMenu(R.menu.menu_main_network);
-//        selectNavigationItem(1);
-//        setTitle("Wallet");
-    }
-
-    private void onError(ErrorEnvelope errorEnvelope) {
-//        if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
-//            EmptyTransactionsView emptyView = new EmptyTransactionsView(this, this);
-//            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
-//            systemView.showEmpty(emptyView);
-//        }
-        /* else {
-            systemView.showError(getString(R.string.error_fail_load_transaction), this);
-        }*/
     }
 
     private void checkRoot() {

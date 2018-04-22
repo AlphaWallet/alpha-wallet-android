@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,7 +56,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
@@ -82,20 +84,32 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
-//        viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-//        viewModel.pushToast().observe(this, this::displayToast);
-
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
+        viewModel.tokenUpdate().observe(this, this::onToken);
+        viewModel.endUpdate().observe(this, this::checkTokens);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
         initTabLayout(view);
 
         return view;
+    }
+
+    private void checkTokens(Boolean dummy)
+    {
+        if (adapter.checkTokens())
+        {
+            viewModel.fetchTokens(); //require a full token refresh; number of tokens has changed
+        }
+    }
+
+    private void onToken(Token token)
+    {
+        adapter.updateTokenCheck(token);
     }
 
     private void initTabLayout(View view) {
@@ -159,7 +173,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
             }
             break;
             case android.R.id.home: {
-                adapter.clear();
+                //adapter.clear();
                 //viewModel.showTransactions(getContext());
             }
         }
@@ -199,13 +213,15 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
 //        adapter.setDefaultWallet(wallet);
         this.wallet = wallet;
         viewModel.fetchTokens();
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
 //        adapter.setDefaultNetwork(networkInfo);
 //        setBottomMenu(R.menu.menu_main_network);
     }

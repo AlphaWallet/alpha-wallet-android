@@ -194,8 +194,6 @@ public class MarketQueueService {
             response = httpClient.newCall(request).execute();
 
             result = response.body().string();
-
-            //System.out.println("HI: " + result);
         }
         catch(Exception e)
         {
@@ -309,23 +307,10 @@ public class MarketQueueService {
         return Single.fromCallable(() -> {
             String result = readFromQueue(contractAddress);
 
-//            {
-//                "orders": [
-//                {
-//                    "price": "0.000000000000000003",
-//                        "start": "3",
-//                        "stop": "5",
-//                        "count": "3",
-//                        "expiry": "1519173576",
-//                        "message": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoy/yLyaECakvG8LqLvkhtHQnaVzKznkABcAGAAZ)",
-//                        "signature": "m/LOtWSLBuSNUSM/3jsrEiwddob1AEuUQsXRI/urgmAIxgoXIHa5n8Vu1jfqdc/Smz6M0QDUCHM+R3p0L6ygKgA="
-//                }
-//    ]
-//            }
+            if (result == null) return new SalesOrder[0];
 
             JSONObject stateData = new JSONObject(result);
             JSONArray orders = stateData.getJSONArray("orders");
-
             SalesOrder[] trades = new SalesOrder[orders.length()];
 
             for (int i = 0; i < orders.length(); i++)

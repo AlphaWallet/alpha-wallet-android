@@ -9,7 +9,7 @@
 	<!--<color name="colorPrimaryDark">#1E76CE</color>-->
 	<color name="colorPrimaryDark">#54C1E3</color>
 	<color name="colorAccent">#54C1E3</color>
-
+	<color name="colorPrimaryLight">#AA54C1E3</color>
     <!--<color name="title">#89000000</color>-->
 	<color name="secondary_text">#40000000</color>
 
@@ -46,4 +46,5 @@
 	<color name="golden_yellow">#f9d021</color>
 	<color name="disabled_color">#888888</color>
 	<color name="cancel_red">#db393a</color>
+	<color name="dark_yellow">#e1b706</color>
 </resources>

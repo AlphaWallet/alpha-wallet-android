@@ -54,6 +54,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             return;
         }
         toolbar();
+        setTitle(R.string.empty);
 
         BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
         amount = findViewById(R.id.amount);
@@ -70,7 +71,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        setTitle("Transaction Details");
+
     }
 
     private void onDefaultWallet(Wallet wallet) {

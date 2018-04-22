@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,6 +36,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
@@ -50,12 +52,14 @@ import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
+import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 21/02/2018.
  */
 
 public class SellDetailActivity extends BaseActivity {
+    private static final int SEND_INTENT_REQUEST_CODE = 2;
     public static final int SET_A_PRICE = 1;
     public static final int SET_EXPIRY = 2;
     public static final int SET_MARKET_SALE = 3;
@@ -63,6 +67,8 @@ public class SellDetailActivity extends BaseActivity {
     @Inject
     protected SellDetailModelFactory viewModelFactory;
     protected SellDetailModel viewModel;
+
+    private FinishReceiver finishReceiver;
 
     private Ticket ticket;
     private TicketRange ticketRange;
@@ -142,6 +148,15 @@ public class SellDetailActivity extends BaseActivity {
         confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
 
         setupPage();
+
+        finishReceiver = new FinishReceiver(this);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(finishReceiver);
     }
 
     private void setupPage()
@@ -326,6 +341,7 @@ public class SellDetailActivity extends BaseActivity {
         });
 
         textQuantity.setText("1");
+        prunedIds = ticket.pruneIDList(ticketIds, 1);
     }
 
     private void initDatePicker() {
@@ -503,10 +519,13 @@ public class SellDetailActivity extends BaseActivity {
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);
         dialog.setSmallText(R.string.place_tickets_marketplace);
-        dialog.setBigText(qty);
+        dialog.setMediumText(qty);
         dialog.setPrimaryButtonText(R.string.create_sell_order);
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        dialog.setPrimaryButtonListener(v1 -> sellTicketFinal());
+        dialog.setPrimaryButtonListener(v1 -> {
+            sellTicketFinal();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+        });
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
         dialog.show();
     }
@@ -517,7 +536,7 @@ public class SellDetailActivity extends BaseActivity {
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, universalLink);
         sendIntent.setType("text/plain");
-        startActivity(sendIntent);
+        startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
 
     @Override
@@ -536,5 +555,19 @@ public class SellDetailActivity extends BaseActivity {
         expiryTimeErrorText.setVisibility(View.GONE);
         priceErrorText.setVisibility(View.GONE);
         quantityErrorText.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        switch (requestCode)
+        {
+            case SEND_INTENT_REQUEST_CODE:
+                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                break;
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

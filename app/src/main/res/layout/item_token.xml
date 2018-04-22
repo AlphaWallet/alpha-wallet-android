@@ -104,6 +104,27 @@
             android:text="@string/ethereum"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />
+
+        <View
+            android:id="@+id/contract_seperator"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"
+            android:layout_marginTop="2dp"
+            android:background="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/contract_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_semibold"
+            android:text="@string/erc20"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="gone"
+            android:textSize="11sp" />
     </LinearLayout>
 
     <View
@@ -129,10 +150,10 @@
                 android:id="@+id/text_24_hrs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_gravity="center_horizontal"
-                android:textSize="15sp"
-                android:text="+10%" />
+                android:fontFamily="@font/font_semibold"
+                android:text="+0%"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/text_24_hrs_sub"
@@ -157,10 +178,10 @@
                 android:id="@+id/text_appreciation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_gravity="center_horizontal"
-                android:textSize="15sp"
-                android:text="$1,514" />
+                android:fontFamily="@font/font_semibold"
+                android:text="$0.00"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/text_appreciation_sub"
@@ -185,10 +206,10 @@
                 android:id="@+id/balance_currency"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_gravity="center_horizontal"
-                android:textSize="15sp"
-                android:text="$16,662" />
+                android:fontFamily="@font/font_semibold"
+                android:text="$0.00"
+                android:textSize="15sp" />
 
             <TextView
                 android:layout_width="wrap_content"

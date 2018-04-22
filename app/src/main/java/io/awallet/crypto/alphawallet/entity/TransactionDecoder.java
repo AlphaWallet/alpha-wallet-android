@@ -106,6 +106,7 @@ public class TransactionDecoder
     private int getParams(String input) throws Exception
     {
         state = ARGS;
+        BigInteger count;
         if (thisData.functionData.args != null)
         {
             for (String type : thisData.functionData.args)
@@ -119,8 +120,14 @@ public class TransactionDecoder
                     case "bytes32":
                         addArg(argData);
                         break;
+                    case "bytes32[]":
+                        count = new BigInteger(argData, 16);
+                        for (int i = 0; i < count.intValue(); i++) {
+                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
+                        }
+                        break;
                     case "uint16[]":
-                        BigInteger count = new BigInteger(argData, 16);
+                        count = new BigInteger(argData, 16);
                         for (int i = 0; i < count.intValue(); i++) {
                             thisData.paramValues.add(new BigInteger(read256bits(input), 16));
                         }
@@ -226,7 +233,10 @@ public class TransactionDecoder
             "trade(uint256,uint16[],uint8,bytes32,bytes32)",
             "transfer(address,uint256)",
             "transferFrom(address,address,uint256)",
-            "approve(address,uint256)"
+            "approve(address,uint256)",
+            "loadNewTickets(bytes32[])",
+            "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)",
+            "endContract()"
             };
 
     static final boolean[] HAS_SIG = {
@@ -235,6 +245,9 @@ public class TransactionDecoder
             true,
             false,
             false,
+            false,
+            false,
+            true,
             false
     };
 
@@ -248,7 +261,10 @@ public class TransactionDecoder
             ERC875,
             ERC20,
             ERC20,
-            ERC20
+            ERC20,
+            ERC875,
+            ERC875,
+            CREATION
     };
 
     private FunctionData getArgs(String methodSig)

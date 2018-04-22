@@ -1,7 +1,6 @@
 <resources>
     <string name="balance">Balance</string>
     <string name="title_request">My Address</string>
-    <string name="title_import">Import Wallet</string>
     <string name="title_create">Create</string>
     <string name="title_account">Wallets</string>
     <string name="title_activity_main2">Main2Activity</string>
@@ -9,7 +8,6 @@
 
     <!-- Strings relatedwalletount creation -->
     <string name="prompt_email">Wallet name</string>
-    <string name="prompt_password">Password</string>
     <string name="action_sign_in">Create</string>
     <string name="action_sign_in_short">Create</string>
 
@@ -33,7 +31,6 @@
     <string name="cancel">cancel</string>
     <string name="confirm_delete_account">Make sure that you have a backup of this wallet.</string>
     <string name="title_activity_import_account">ImportAccountActivity</string>
-    <string name="action_import">Import</string>
     <string name="title_activity_export_account">ExportAccountActivity</string>
     <string name="action_export">Backup private key</string>
     <string name="message_save_this">Keep this someplace safe</string>
@@ -61,7 +58,6 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_delete_account">Are you sure you want to delete wallet?</string>
     <string name="no_transactions">No Transactions.\nSwipe down to refresh.</string>
-    <string name="twitter">Twitter</string>
     <string name="telegram">Telegram Group</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -136,19 +132,11 @@
     <string name="title_activity_send">Send</string>
     <string name="title_activity_confirmation">Confirm</string>
     <string name="title_transaction_details">Transaction Details</string>
-    <string name="title_add_token">Add Custom Token</string>
     <!-- Suggestions -->
     <string name="suggestion_field_required">* Field required</string>
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
-    <string name="suggestion_private_key">Private key has to be 64 characters long</string>
     <string name="suggestion_empty_password_available">The password can be left blank.</string>
     <string name="suggestion_this_is_your_address">My public %s wallet address</string>
-    <!-- Hints -->
-    <string name="hint_private_key_field">Private key *</string>
-    <string name="hint_keystore">Keystore *</string>
-    <!-- Tabs labels-->
-    <string name="tab_keystore">Keystore</string>
-    <string name="tab_private_key">Private key</string>
     <!-- Dialog titles -->
     <string name="title_dialog_error">Error</string>
     <string name="title_dialog_handling">Handling…</string>
@@ -180,8 +168,6 @@
     <string name="hint_recipient_address">Recipient address</string>
     <string name="hint_amount">Amount</string>
     <string name="hint_contract_address">Contract address</string>
-    <string name="hint_contract_symbol">Symbol</string>
-    <string name="hint_contract_decimals">Decimals</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
@@ -227,7 +213,6 @@
     <string name="title_send_settings">Advanced</string>
     <string name="title_activity_barcode">Barcode Scan</string>
     <string name="error_add_token">Could not add token.</string>
-    <string name="facebook">Facebook</string>
     <string name="error_already_added">Already added</string>
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>

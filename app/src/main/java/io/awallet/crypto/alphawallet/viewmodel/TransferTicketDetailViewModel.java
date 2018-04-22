@@ -3,7 +3,9 @@ package io.awallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.util.Log;
 
+import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
@@ -15,16 +17,19 @@ import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.repository.TokenRepository;
+import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketDetailRouter;
+import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 import io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
+import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
@@ -36,12 +41,15 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
+    private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
+    private final FeeMasterService feeMasterService;
+    private final AssetDisplayRouter assetDisplayRouter;
 
     private byte[] linkMessage;
 
@@ -49,12 +57,16 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   FindDefaultWalletInteract findDefaultWalletInteract,
                                   MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
-                                  TransferTicketDetailRouter transferTicketDetailRouter) {
+                                  TransferTicketDetailRouter transferTicketDetailRouter,
+                                  FeeMasterService feeMasterService,
+                                  AssetDisplayRouter assetDisplayRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
+        this.feeMasterService = feeMasterService;
+        this.assetDisplayRouter = assetDisplayRouter;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -62,6 +74,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     }
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
+    public LiveData<String> userTransaction() { return userTransaction; }
 
     public void prepare(Ticket ticket)
     {
@@ -92,17 +105,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void createTicketTransfer(String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
-    {
-        final byte[] data = TokenRepository.createTicketTransferData(to, indexList);
-        disposable = createTransactionInteract
-                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
-                .subscribe(this::onCreateTransaction, this::onError);
-    }
-
     private void onCreateTransaction(String transaction)
     {
-        newTransaction.postValue(transaction);
+        userTransaction.postValue(transaction);
     }
 
     public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, long expiry)
@@ -141,5 +146,48 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void openTransferState(Context context, Ticket ticket, String ticketIds, int transferStatus)
     {
         transferTicketDetailRouter.openTransfer(context, ticket, ticketIds, defaultWallet.getValue(), transferStatus);
+    }
+
+    public void createTicketTransfer(String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    {
+        final byte[] data = TokenRepository.createTicketTransferData(to, indexList);
+        disposable = createTransactionInteract
+                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
+
+    public void feeMasterCall(String url, String to, Ticket t, String indices)
+    {
+        disposable = feeMasterService.generateAndSendFeemasterTransaction(url, defaultWallet.getValue(), to, t, 0, indices)
+            .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::processResult, this::txError);
+    }
+
+    private void txError(Throwable throwable)
+    {
+        error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Network error."));
+    }
+
+    private void processResult(Integer result)
+    {
+        if ((result/100) == 2) newTransaction.postValue("Transaction accepted by server.");
+        else
+        {
+            switch (result)
+            {
+                case 401:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
+                    break;
+                default:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Transfer failed."));
+                    break;
+            }
+        }
+    }
+
+    public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)
+    {
+        assetDisplayRouter.open(ctx, ticket, isClearStack);
     }
 }

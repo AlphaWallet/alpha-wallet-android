@@ -241,6 +241,6 @@
     <string name="universal_link_info">创建一个魔法链接让卖家来购买你的门票.</string>
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">在魔法链接过期之前，任何人都可以通过点击此链接来买到你的门票.</string>
-    <string name="label_important">倒入</string>
+    <string name="label_important">重要</string>
     <string name="eth_00">0.00 ETH</string>
 </resources>

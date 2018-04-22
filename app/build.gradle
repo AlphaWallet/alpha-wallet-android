@@ -25,8 +25,8 @@ android {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 77
-        versionName "0.95"
+        versionCode 78
+        versionName "0.96"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -70,7 +70,7 @@ project.ext {
     retrofitVersion = "2.3.0"
     okhttpVersion = "3.9.0"
     picassoVersion = "2.5.2"
-    supportVersion = "27.0.2"
+    supportVersion = "27.1.1"
     web3jVersion = "3.1.1-android"
     gethVersion = "1.7.0"
     gsonVersion = "2.8.2"
@@ -93,22 +93,23 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$project.okhttpVersion"
     implementation "com.google.code.gson:gson:$project.gsonVersion"
     implementation "com.squareup.picasso:picasso:$project.picassoVersion"
-    implementation 'android.arch.lifecycle:runtime:1.1.0'
-    implementation 'android.arch.lifecycle:extensions:1.1.0'
+    implementation 'android.arch.lifecycle:runtime:1.1.1'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation "com.android.support:appcompat-v7:$project.supportVersion"
     implementation "com.android.support:design:$project.supportVersion"
     implementation "com.android.support:support-vector-drawable:$project.supportVersion"
     implementation "com.android.support:recyclerview-v7:$project.supportVersion"
-    implementation 'com.android.support:multidex:1.0.2'
+    implementation 'com.android.support:multidex:1.0.3'
 
     // Bar code scanning
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.google.zxing:core:3.3.2'
 
     //implementation 'com.google.zxing:core:3.3.0'
-    implementation 'com.google.android.gms:play-services-vision:11.8.0'
+    implementation 'com.google.android.gms:play-services-vision:15.0.0'
 
     // Sugar
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
     //implementation 'com.journeyapps:zxing-android-embedded:3.5.0@aar'

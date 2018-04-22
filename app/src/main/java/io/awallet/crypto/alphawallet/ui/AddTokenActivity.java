@@ -26,7 +26,8 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Address;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
-import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import io.awallet.crypto.alphawallet.ui.zxing.FullScannerFragment;
+import io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.AddTokenViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.AddTokenViewModelFactory;
@@ -133,7 +134,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
-                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    Barcode barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);

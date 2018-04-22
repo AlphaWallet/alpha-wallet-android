@@ -1,21 +1,15 @@
 package io.awallet.crypto.alphawallet.ui;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.app.IntentService;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -52,9 +46,10 @@ import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
-import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.ui.zxing.FullScannerFragment;
+import io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity;
 import io.awallet.crypto.alphawallet.util.KeyboardUtils;
 import io.awallet.crypto.alphawallet.util.QRURLParser;
 import io.awallet.crypto.alphawallet.viewmodel.TransferTicketDetailViewModel;
@@ -64,20 +59,6 @@ import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 import io.awallet.crypto.alphawallet.entity.FinishReceiver;
-
-import org.web3j.abi.datatypes.Address;
-import org.web3j.tx.Contract;
-
-import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 
 import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;
@@ -238,8 +219,10 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         qrImageView = findViewById(R.id.img_scan_qr);
         qrImageView.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+            Intent intent = new Intent(this, QRScanningActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+//            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+//            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
 
         toAddressEditText.addTextChangedListener(new TextWatcher()
@@ -515,6 +498,13 @@ public class TransferTicketDetailActivity extends BaseActivity
                     Contract.GAS_PRICE,
                     Contract.GAS_LIMIT);
 
+//            viewModel.createTicketTransfer(
+//                    to,
+//                    ticket.getAddress(),
+//                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+//                    Contract.GAS_PRICE,
+//                    Contract.GAS_LIMIT);
+
             //select between feemaster or user-pays-gas
             //Not sure if we will ever implement this
 //            String XMLContractAddress = ticket.getXMLProperty("address", this);
@@ -571,7 +561,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             {
                 if (data != null)
                 {
-                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    Barcode barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);
@@ -589,6 +579,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
                                             CommonStatusCodes.getStatusCodeString(resultCode)));
             }
+            break;
 
             case SEND_INTENT_REQUEST_CODE:
                 sendBroadcast(new Intent(PRUNE_ACTIVITY));

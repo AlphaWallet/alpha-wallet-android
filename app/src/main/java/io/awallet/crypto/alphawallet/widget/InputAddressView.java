@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.ui.barcode.BarcodeCaptureActivity;
+import io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity;
 
 public class InputAddressView extends LinearLayout {
     public static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -33,8 +33,10 @@ public class InputAddressView extends LinearLayout {
         address = findViewById(R.id.edit_to_address);
 
         scanQrIcon.setOnClickListener(v -> {
-            Intent intent = new Intent(context, BarcodeCaptureActivity.class);
+            Intent intent = new Intent(context, QRScanningActivity.class);
             ((Activity) context).startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+//            Intent intent = new Intent(context, BarcodeCaptureActivity.class);
+//            ((Activity) context).startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
     }
 

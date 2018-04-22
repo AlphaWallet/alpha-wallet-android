@@ -253,6 +253,7 @@ public class Token implements Parcelable {
             if (!keepZeros && id == 0) continue;
             if (!first)sb.append(",");
             sb.append(String.valueOf(id));
+            first = false;
         }
 
         return sb.toString();

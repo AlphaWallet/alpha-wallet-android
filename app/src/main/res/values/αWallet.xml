@@ -70,7 +70,6 @@
     <string name="price_per_ticket">Price Per Ticket</string>
     <string name="action_marketplaceSale">Marketplace</string>
     <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
-    <string name="set_price_subtext_abr_magic">Set Ethereum price for MagicLink:</string>
     <string name="transfer_tickets">Transfer Tickets</string>
     <string name="link_valid_until">The MagicLink will be valid until %1s %2s</string>
     <string name="transfer_method">Transfer Method:</string>
@@ -260,7 +259,7 @@
     <string name="select_network">Select Network:</string>
     <string name="title_select_ticket_quantity">Select Ticket Quantity:</string>
     <string name="title_select_transfer_method">Select Transfer Method:</string>
-    <string name="title_set_magiclink_expiry">Set MagicLink Expiry:</string>
+    <string name="title_set_universal_link_expiry">Set MagicLink Expiry:</string>
     <string name="title_input_wallet_address">Input Wallet Address:</string>
     <string name="title_import">Import Wallet</string>
     <string name="action_import">Import</string>

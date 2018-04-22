@@ -21,7 +21,7 @@ public class AssetDefinitionTest {
 	BigInteger.valueOf(0x010CCB53), BigInteger.valueOf(0x010CCB54),
 	BigInteger.valueOf(0x02020075), BigInteger.valueOf(0x02020076)
     };
-    File file = new File("src/main/assets/ticket.xml");
+    File file = new File("../assets/ticket.xml");
 
     @Test
     public void AssetDefinitionShouldParse() throws IOException, SAXException {

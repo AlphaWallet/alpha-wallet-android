@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/T-API.iml" filepath="$PROJECT_DIR$/.idea/modules/T-API.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/T-API_main.iml" filepath="$PROJECT_DIR$/.idea/modules/T-API_main.iml" group="T-API" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/T-API_test.iml" filepath="$PROJECT_DIR$/.idea/modules/T-API_test.iml" group="T-API" />
+    </modules>
+  </component>
+</project>

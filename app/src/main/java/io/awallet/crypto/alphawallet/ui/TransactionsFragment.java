@@ -159,7 +159,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         //get the XML address
         try
         {
-            AssetDefinition ad = new AssetDefinition("ticket.xml", getResources());
+            AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
             viewModel.setXMLContractAddress(ad.networkInfo.get("address").toLowerCase());
         }
         catch (IOException|SAXException e)

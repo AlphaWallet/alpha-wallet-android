@@ -21,6 +21,12 @@ repositories {
 android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
+    sourceSets {
+        main {
+            // in the case we need to reorg xml repository location - weiwu
+            // assets.srcDirs = ['../xml']
+        }
+    }
     defaultConfig {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18

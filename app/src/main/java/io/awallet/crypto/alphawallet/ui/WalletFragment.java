@@ -228,7 +228,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         //get the XML address
         try
         {
-            AssetDefinition ad = new AssetDefinition("ticket.xml", getResources());
+            AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
             adapter.setLiveTokenAddress(ad.networkInfo.get("address").toLowerCase());
         }
         catch (IOException |SAXException e)

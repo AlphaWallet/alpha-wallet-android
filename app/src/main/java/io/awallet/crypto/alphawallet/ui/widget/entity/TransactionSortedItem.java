@@ -25,32 +25,28 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
 
     @Override
     public boolean areContentsTheSame(SortedItem newItem) {
-        if (viewType == newItem.viewType) {
-            Transaction oldTx = (Transaction) value;
-            Transaction newTx = (Transaction) newItem.value;
+        try
+        {
+            if (viewType == newItem.viewType)
+            {
+                Transaction oldTx = (Transaction) value;
+                Transaction newTx = (Transaction) newItem.value;
 
-            if (!oldTx.hash.equals(newTx.hash) || !(oldTx.timeStamp == newTx.timeStamp)) return false; //hash or timestamp mismatch
-
-            //check operations
-            if (oldTx.operations == null && newTx.operations != null) return false;
-            if (newTx.operations == null && oldTx.operations != null) return false;
-            if (oldTx.operations != null && oldTx.operations.length == 0 && newTx.operations != null && newTx.operations.length > 0)
-                return false;
-
-            if (oldTx.operations.length == 1 && newTx.operations.length == 1) {
-                TransactionContract oldTc = oldTx.operations[0].contract;
-                TransactionContract newTc = newTx.operations[0].contract;
-
-                if (oldTc.getClass() != newTc.getClass()) return false;
-
-                if (oldTc.name == null && newTc.name != null) return false;
-
-                if (oldTc.name != null && newTc.name != null && !oldTc.name.equals(newTc.name)) return false;
+                if (oldTx.contentHash.equals(newTx.contentHash))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-
-            return true;// must be the same
+            else
+            {
+                return false;
+            }
         }
-        else
+        catch (Exception e)
         {
             return false;
         }

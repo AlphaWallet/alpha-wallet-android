@@ -377,16 +377,14 @@ public class SetupTokensInteract {
             //process the remaining transactions
             for (Transaction t : txMap.values())
             {
-                if (t.input != null && t.input.length() > 20)
+                TransactionInput data = transactionDecoder.decodeInput(t.input);
+                if (data != null && data.functionData != null)
                 {
-                    TransactionInput data = transactionDecoder.decodeInput(t.input);
-                    if (data != null && data.functionData != null)
-                    {
-                        Token localToken = tokenMap.get(t.to);
-                        if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);
-                        t = parseTransaction(localToken, t, data);
-                    }
+                    Token localToken = tokenMap.get(t.to);
+                    if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);
+                    t = parseTransaction(localToken, t, data);
                 }
+
                 processedTxList.add(t);
             }
 
@@ -427,7 +425,7 @@ public class SetupTokensInteract {
             List<Transaction> processedTxList = new ArrayList<>();
             for (Transaction t : txMap.values())
             {
-                if (t.to != null && t.to.equals(token.getAddress()) && t.input != null && t.input.length() > 20)
+                if (t.to != null && t.to.equals(token.getAddress()))
                 {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
                     if (data != null && data.functionData != null)

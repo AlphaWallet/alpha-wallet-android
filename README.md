@@ -45,3 +45,14 @@ behavior violating this base foundation of respect.
 
 Help with localization?
 Here is a public link to join localization project: https://lokalise.co/signup/3947163159df13df851b51.98101647/all/
+
+## Cloning the repo notes
+
+Since submodules are in use you will need to use this command sequence to clone:
+
+git clone --recurse-submodules https://github.com/James-Sangalli/alpha-wallet
+
+If you are updating a branch use this:
+
+git checkout <branch you are switching to>
+git submodule update --init --recursive

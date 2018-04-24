@@ -459,7 +459,7 @@ public class Ticket extends Token implements Parcelable
             try
             {
                 BigInteger firstTicket = range.tokenIds.get(0);
-                AssetDefinition assetDefinition = new AssetDefinition("ticket.xml", activity.getResources());
+                AssetDefinition assetDefinition = new AssetDefinition("TicketingContract.xml", activity.getResources());
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
                 String venue = nonFungibleToken.getAttribute("venue").text;
                 String date = nonFungibleToken.getDate("dd MMM");
@@ -486,7 +486,7 @@ public class Ticket extends Token implements Parcelable
         String value;
         try
         {
-            AssetDefinition ad = new AssetDefinition("ticket.xml", activity.getResources());
+            AssetDefinition ad = new AssetDefinition("TicketingContract.xml", activity.getResources());
             value = ad.networkInfo.get(property);
         }
         catch (IOException | SAXException e)

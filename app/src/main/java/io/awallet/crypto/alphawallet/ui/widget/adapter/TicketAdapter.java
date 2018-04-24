@@ -59,7 +59,7 @@ public class TicketAdapter extends TokensAdapter {
         AssetDefinition definition = null;
         try
         {
-            definition = new AssetDefinition("ticket.xml", ctx.getResources());
+            definition = new AssetDefinition("TicketingContract.xml", ctx.getResources());
         }
         catch (IOException |SAXException e)
         {

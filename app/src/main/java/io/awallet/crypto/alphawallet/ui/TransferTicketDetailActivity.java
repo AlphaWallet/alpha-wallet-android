@@ -391,7 +391,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                 expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
                 expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
                 pickExpiryDate.setVisibility(View.VISIBLE);
-                titleText.setText(R.string.title_set_magiclink_expiry);
+                titleText.setText(R.string.title_set_universal_link_expiry);
                 break;
             case TRANSFER_TO_ADDRESS:
                 pickTransferAddress.setVisibility(View.VISIBLE);

@@ -26,6 +26,9 @@ gen/
 /build
 app/release
 
+# Asset Definition
+app/src/main/assets/
+
 # Fastlane
 fastlane/report.xml
 

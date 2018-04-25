@@ -44,6 +44,9 @@ proguard/
 # Android Studio Navigation editor temp files
 .navigation/
 
+# Temp - ignore lib 
+lib/
+
 ### Android Patch ###
 gen-external-apklibs
 *.*#

@@ -18,8 +18,6 @@ import static io.awallet.crypto.alphawallet.C.DEFAULT_NETWORK;
 import static io.awallet.crypto.alphawallet.C.HARD_CODED_CONTRACT;
 import static io.awallet.crypto.alphawallet.C.HARD_CODED_KEY;
 import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_ADDR;
-import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_NAME;
-import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.awallet.crypto.alphawallet.C.PRE_LOADED_KEY;
 
@@ -79,18 +77,6 @@ public class SplashViewModel extends ViewModel {
         }
         else
         {
-            checkHardCodedContract();
-        }
-    }
-
-    //3. check hard coded contract
-    private void checkHardCodedContract()
-    {
-        if (HARD_CODED_CONTRACT) {
-            addContract(HARD_CONTRACT_ADDR, HARD_CONTRACT_SYMBOL, 0, HARD_CONTRACT_NAME);
-        }
-        else
-        {
             fetchWallets();
         }
     }
@@ -116,7 +102,7 @@ public class SplashViewModel extends ViewModel {
         System.out.println("Imported wallet at addr: " + wallet.address);
 
         //continue chain
-        checkHardCodedContract();
+        fetchWallets();
     }
 
     //6. add hard coded contract
@@ -139,7 +125,7 @@ public class SplashViewModel extends ViewModel {
 
     //on key error ensure contract check continues
     private void onKeyError(Throwable throwable) {
-        checkHardCodedContract();
+        fetchWallets();
     }
 
     //on contract error ensure we still call wallet fetch

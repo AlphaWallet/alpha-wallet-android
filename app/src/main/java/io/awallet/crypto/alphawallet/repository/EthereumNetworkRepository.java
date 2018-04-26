@@ -27,36 +27,36 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
-							"https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk",
+                    "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk",
 							//"http://stormbird.duckdns.org:8540/",
-							"https://api.trustwalletapp.com/",
-							"https://etherscan.io/tx/",1, true,
+                    "https://api.trustwalletapp.com/",
+                    "https://etherscan.io/tx/",1, true,
 							"http://stormbird.duckdns.org:8540/",
 							"https://api.etherscan.io/"),
-			new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
-							"https://mewapi.epool.io/",
-							"https://classic.trustwalletapp.com",
-							"https://gastracker.io/tx/",61, true),
-			new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
-							"https://core.poa.network/",
-							"https://poa.trustwalletapp.com",
-							"https://poaexplorer.com/txid/search/", 99, false),
+           new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
+                    "https://mewapi.epool.io/",
+                    "https://classic.trustwalletapp.com",
+                    "https://gastracker.io/tx/",61, true),
+            new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
+                    "https://core.poa.network/",
+                    "https://poa.trustwalletapp.com",
+                    "https://poaexplorer.com/txid/search/", 99, false),
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL,
-							"https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk",
-							"https://kovan.trustwalletapp.com/",
-							"https://kovan.etherscan.io/tx/", 42, false,
+                    "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk",
+                    "https://kovan.trustwalletapp.com/",
+                    "https://kovan.etherscan.io/tx/", 42, false,
 							null,
 							"https://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
-							"http://stormbird.duckdns.org:8545/",
-							"https://ropsten.trustwalletapp.com/",
-							"https://ropsten.etherscan.io/tx/",3, false,
-							"https://ropsten.infura.io/LY55hqqffzZcQ0b513JJ",
-							"https://api-ropsten.etherscan.io/"),
-			new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
-							"https://sokol.poa.network",
-							"https://trust-sokol.herokuapp.com/",
-							"https://sokol-explorer.poa.network/account/",77, false),
+                    "https://ropsten.infura.io/LY55hqqffzZcQ0b513JJ",
+                    "https://ropsten.trustwalletapp.com/",
+                    "https://ropsten.etherscan.io/tx/",3, false,
+					"http://stormbird.duckdns.org:8545/",
+					"https://api-ropsten.etherscan.io/"),
+            new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
+                    "https://sokol.poa.network",
+                    "https://trust-sokol.herokuapp.com/",
+                    "https://sokol-explorer.poa.network/account/",77, false),
 			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL,
 							"http://stormbird.duckdns.org:8541/",
 							"https://ropsten.trustwalletapp.com/",
@@ -66,11 +66,11 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	};
 
 	private final PreferenceRepositoryType preferences;
-	private final TickerService tickerService;
-	private NetworkInfo defaultNetwork;
-	private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
+    private final TickerService tickerService;
+    private NetworkInfo defaultNetwork;
+    private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
 
-	public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService) {
+    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService) {
 		this.preferences = preferenceRepository;
 		this.tickerService = tickerService;
 		defaultNetwork = getByName(preferences.getDefaultNetwork());
@@ -101,8 +101,8 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		preferences.setDefaultNetwork(defaultNetwork.name);
 
 		for (OnNetworkChangeListener listener : onNetworkChangedListeners) {
-			listener.onNetworkChanged(networkInfo);
-		}
+		    listener.onNetworkChanged(networkInfo);
+        }
 	}
 
 	@Override
@@ -112,12 +112,12 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 
 	@Override
 	public void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged) {
-		onNetworkChangedListeners.add(onNetworkChanged);
+        onNetworkChangedListeners.add(onNetworkChanged);
 	}
 
 	@Override
-	public Single<Ticker> getTicker() {
-		return Single.fromObservable(tickerService
-											 .fetchTickerPrice(getByName(ETHEREUM_NETWORK_NAME).name));
-	}
+    public Single<Ticker> getTicker() {
+        return Single.fromObservable(tickerService
+                .fetchTickerPrice(getByName(ETHEREUM_NETWORK_NAME).name));
+    }
 }

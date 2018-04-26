@@ -12,7 +12,7 @@ public abstract class C {
     public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
-    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
+    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)" ;
 
     public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TIKER = "poa";

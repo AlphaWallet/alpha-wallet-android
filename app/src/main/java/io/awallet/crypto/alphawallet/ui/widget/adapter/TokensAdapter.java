@@ -205,7 +205,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     {
                         items.add(new TokenSortedItem(token, tsi.weight));
                     }
-                    else
+                    else if (!thisToken.isEthereum())
                     {
                         items.removeItemAt(i);
                         notifyItemRemoved(i);

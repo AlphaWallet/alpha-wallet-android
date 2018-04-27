@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.entity;
 
 
 import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
 /**
  * Created by James on 26/03/2018.
@@ -31,16 +32,30 @@ public class EtherscanTransaction
     String cumulativeGasUsed;
     String gasUsed;
     int confirmations;
+    public boolean internal = false;
 
     public Transaction createTransaction()
     {
         TransactionOperation[] o;
+        //Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction
+        if (internal)
+        {
+            o = new TransactionOperation[1];
+            TransactionOperation op = new TransactionOperation();
+            ERC875ContractTransaction ct = new ERC875ContractTransaction();
+            o[0] = op;
+            op.contract = ct;
+            ct.address = contractAddress;
+            op.from = contractAddress;
+            ct.type = 2; // indicate that we need to load the contract
+            ct.operation = RECEIVE_FROM_MAGICLINK;
+        }
 
         //TODO: Do full interpretation here, to avoid needing to reallocate.
         //Then in the transaction parsing we only need to fill in token information.
         //Further work would make a master Token list in 'HomeViewModel' and the transaction holder just populates the name
         //from there. That way we don't need to hold much information and we don't need to re-parse after this
-        if (contractAddress.length() > 0)
+        else if (contractAddress.length() > 0)
         {
             to = contractAddress;
             //add a constructor here

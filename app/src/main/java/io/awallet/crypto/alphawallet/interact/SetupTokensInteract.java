@@ -41,6 +41,7 @@ public class SetupTokensInteract {
     public final static String EXPIRED_CONTRACT = "[Expired Contract]";
     public final static String INVALID_OPERATION = "[Invalid Operation]";
     public final static String CONTRACT_CONSTRUCTOR = "Contract Creation";
+    public final static String RECEIVE_FROM_MAGICLINK = "Receive From MagicLink";
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -366,16 +367,16 @@ public class SetupTokensInteract {
 
     /**
      * Parse all transactions not associated with known tokens and pick up unknown contracts
-     * @param txMap
+     * @param transactions
      * @param tokenMap
      * @return
      */
-    public Observable<Transaction[]> processRemainingTransactions(Map<String, Transaction> txMap, Map<String, Token> tokenMap)
+    public Observable<Transaction[]> processRemainingTransactions(Transaction[] transactions, Map<String, Token> tokenMap)
     {
         return Observable.fromCallable(() -> {
             List<Transaction> processedTxList = new ArrayList<>();
             //process the remaining transactions
-            for (Transaction t : txMap.values())
+            for (Transaction t : transactions)
             {
                 if (t.input != null && t.input.length() > 20)
                 {

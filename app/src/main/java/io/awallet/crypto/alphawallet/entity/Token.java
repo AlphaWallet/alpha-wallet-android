@@ -35,6 +35,7 @@ public class Token implements Parcelable {
     public final long updateBlancaTime;
     public boolean balanceIsLive = false;
     public boolean isERC20 = false; //TODO: when we see ERC20 functions in transaction decoder switch this on
+    private boolean isEth = false;
 
     public TokenTicker ticker;
 
@@ -295,9 +296,13 @@ public class Token implements Parcelable {
         else return !currentState.equals(balance.toString());
     }
 
+    public void setIsEthereum()
+    {
+        isEth = true;
+    }
     public boolean isEthereum()
     {
-        return (tokenInfo != null && tokenInfo.symbol != null && tokenInfo.symbol.equals(ETH_SYMBOL));
+        return (tokenInfo != null && tokenInfo.symbol != null && isEth);
     }
 
     public boolean isTerminated()

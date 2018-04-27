@@ -81,6 +81,12 @@ public class QRSelectionTest
             }
 
             @Override
+            public Observable<Transaction[]> fetchInternalTransactionsNetwork(Wallet wallet, String feemaster)
+            {
+                return null;
+            }
+
+            @Override
             public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
                 return null;
             }

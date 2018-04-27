@@ -18,6 +18,7 @@ import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.KOVAN_NETWORK_NAME;
 import static io.awallet.crypto.alphawallet.C.POA_NETWORK_NAME;
 import static io.awallet.crypto.alphawallet.C.POA_SYMBOL;
+import static io.awallet.crypto.alphawallet.C.RINKEBY_NETWORK_NAME;
 import static io.awallet.crypto.alphawallet.C.ROPSTEN_NETWORK_NAME;
 import static io.awallet.crypto.alphawallet.C.SOKOL_NETWORK_NAME;
 
@@ -43,7 +44,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL,
                     "https://kovan.infura.io/llyrtzQ3YhkdESt2Fzrk",
                     "https://kovan.trustwalletapp.com/",
-                    "https://kovan.etherscan.io/tx/", 42, false, 
+                    "https://kovan.etherscan.io/tx/", 42, false,
 							null,
 							"https://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
@@ -56,6 +57,12 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
                     "https://sokol.poa.network",
                     "https://trust-sokol.herokuapp.com/",
                     "https://sokol-explorer.poa.network/account/",77, false),
+			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL,
+							"http://stormbird.duckdns.org:8541/",
+							"https://ropsten.trustwalletapp.com/",
+							"https://rinkeby.etherscan.io/tx/",4, false,
+							"https://rinkeby.infura.io/LY55hqqffzZcQ0b513JJ",
+							"https://api-rinkeby.etherscan.io/"),
 	};
 
 	private final PreferenceRepositoryType preferences;

@@ -12,6 +12,7 @@ public abstract class C {
     public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
+    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)" ;
 
     public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TIKER = "poa";
@@ -76,9 +77,6 @@ public abstract class C {
     //Pick which private key to pre-install
     public static final String PRE_LOADED_KEY = HARD_PRIVATE_KEY3;
     public static final String HARD_CONTRACT_ADDR = "0x0B6732BAECC0793E38A98934799ABD3C7DC3CF31";
-    //TODO: Pick these up from blockchain
-    public static final String HARD_CONTRACT_NAME = "World Series Baseball";
-    public static final String HARD_CONTRACT_SYMBOL = "WSB";
 
     public static final String DEFAULT_NETWORK = ROPSTEN_NETWORK_NAME;
 

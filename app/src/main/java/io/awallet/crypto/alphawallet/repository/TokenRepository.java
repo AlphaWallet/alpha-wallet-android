@@ -214,7 +214,9 @@ public class TokenRepository implements TokenRepositoryType {
         return walletRepository.balanceInWei(wallet)
                 .map(balance -> {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    return new Token(info, balance, System.currentTimeMillis());
+                    Token eth = new Token(info, balance, System.currentTimeMillis());
+                    eth.setIsEthereum();
+                    return eth;
                 });
     }
 
@@ -557,7 +559,9 @@ public class TokenRepository implements TokenRepositoryType {
         return walletRepository.balanceInWei(wallet)
                 .map(balance -> {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    return new Token(info, balance, System.currentTimeMillis());
+                    Token eth = new Token(info, balance, System.currentTimeMillis());
+                    eth.setIsEthereum();
+                    return eth;
                 })
                 .flatMap(token -> ethereumNetworkRepository.getTicker()
                         .map(ticker -> {

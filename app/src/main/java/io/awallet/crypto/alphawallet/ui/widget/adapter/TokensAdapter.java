@@ -205,7 +205,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     {
                         items.add(new TokenSortedItem(token, tsi.weight));
                     }
-                    else
+                    else if (!thisToken.isEthereum())
                     {
                         items.removeItemAt(i);
                         notifyItemRemoved(i);
@@ -222,7 +222,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         //However all other methods (notify range changed, notify dataset etc GPF under heavy stress.
         //If you want to switch on the view stress test search for 'throw new BadContract' in TokenRepository and uncomment the random throw
         //this causes tokens to pop in and out of this view very frequently.
-        if (!updated && token.hasPositiveBalance())
+        if (!updated && !token.isTerminated() && token.hasPositiveBalance())
         {
             needsRefresh = true;
         }

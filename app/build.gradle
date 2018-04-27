@@ -86,7 +86,7 @@ project.ext {
 }
 
 dependencies {
-    compile project(":lib")
+    implementation project(":lib")
 
     // Etherium client
     implementation "org.web3j:core:$project.web3jVersion"

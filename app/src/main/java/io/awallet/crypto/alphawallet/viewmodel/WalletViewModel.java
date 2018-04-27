@@ -27,7 +27,10 @@ import io.awallet.crypto.alphawallet.router.SendTokenRouter;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -35,9 +38,9 @@ import io.reactivex.schedulers.Schedulers;
 import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
 public class WalletViewModel extends BaseViewModel {
-    private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
+    private static final long GET_BALANCE_INTERVAL = 10;
 
-//    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    //    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
@@ -64,6 +67,8 @@ public class WalletViewModel extends BaseViewModel {
 
     @Nullable
     private Disposable fetchTokenBalanceDisposable;
+    @Nullable
+    private Disposable updateTokens;
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
@@ -97,36 +102,29 @@ public class WalletViewModel extends BaseViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        handler.removeCallbacks(startUpdateBalanceTask);
         if (fetchTokenBalanceDisposable != null && !fetchTokenBalanceDisposable.isDisposed())
         {
             fetchTokenBalanceDisposable.dispose();
         }
+        if (updateTokens != null && !updateTokens.isDisposed())
+        {
+            updateTokens.dispose();
+        }
     }
 
-    //double cycle.
-    //1. fetch tokens from cache and display
-    //2. update token balance
     public void fetchTokens()
     {
-        handler.removeCallbacks(startUpdateBalanceTask);
-        if (disposable != null && !disposable.isDisposed())
+        if (updateTokens != null && !updateTokens.isDisposed())
         {
-            disposable.dispose();
+            updateTokens.dispose();
         }
 
-        if (defaultWallet.getValue() != null)
-        {
-            disposable = fetchTokensInteract
-                    .fetchStoredWithEth(defaultWallet.getValue())
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
-        }
-        else
-        {
-            prepareWallet();
-        }
+        updateTokens = Observable.interval(0, GET_BALANCE_INTERVAL*5, TimeUnit.SECONDS)
+                .doOnNext(l -> getWallet()
+                        .flatMap(fetchTokensInteract::fetchStoredWithEth)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable)).subscribe();
     }
 
     private void onTokens(Token[] tokens)
@@ -138,19 +136,20 @@ public class WalletViewModel extends BaseViewModel {
     {
         progress.postValue(false);
         tokens.postValue(tokenCache);
-        updateTokenBalances();
+        if (fetchTokenBalanceDisposable == null || fetchTokenBalanceDisposable.isDisposed())
+        {
+            updateTokenBalances();
+        }
     }
 
     private void updateTokenBalances()
     {
-        if (fetchTokenBalanceDisposable == null)
-        {
-            fetchTokenBalanceDisposable = fetchTokensInteract
-                    .fetchSequential(defaultWallet.getValue())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable);
-        }
+        fetchTokenBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> getWallet()
+                        .flatMap(fetchTokensInteract::fetchSequential)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();
     }
 
     private void onTokenBalanceUpdate(Token token)
@@ -162,11 +161,8 @@ public class WalletViewModel extends BaseViewModel {
 
     private void onFetchTokensBalanceCompletable()
     {
-        fetchTokenBalanceDisposable = null;
         progress.postValue(false);
         if (tokenCache != null && tokenCache.length > 0) {
-            handler.removeCallbacks(startUpdateBalanceTask);
-            handler.postDelayed(startUpdateBalanceTask, GET_BALANCE_INTERVAL);
             checkTokens.postValue(true);
         }
         else
@@ -246,21 +242,15 @@ public class WalletViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    private final Runnable startUpdateBalanceTask = this::updateTokenBalances;
-
-    private void prepareWallet()
+    public Observable<Wallet> getWallet()
     {
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetworkPrepare, this::onError);
-    }
-
-    private void onDefaultNetworkPrepare(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .toObservable()
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(this::onDefaultWallet, this::onError, this::fetchTokens);
+        if (defaultWallet().getValue() != null)
+        {
+            return Observable.fromCallable(() -> defaultWallet().getValue());
+        }
+        else
+            return findDefaultNetworkInteract.find()
+                    .flatMap(networkInfo -> findDefaultWalletInteract
+                            .find()).toObservable();
     }
 }

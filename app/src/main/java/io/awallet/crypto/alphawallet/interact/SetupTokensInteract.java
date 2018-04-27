@@ -402,7 +402,7 @@ public class SetupTokensInteract {
     public void setupUnknownList(Map<String, Token> tokenMap, String xmlContractAddress)
     {
         unknownContracts.clear();
-        if (!tokenMap.containsKey(xmlContractAddress))
+        if (xmlContractAddress != null && !tokenMap.containsKey(xmlContractAddress))
         {
             unknownContracts.add(xmlContractAddress);
         }

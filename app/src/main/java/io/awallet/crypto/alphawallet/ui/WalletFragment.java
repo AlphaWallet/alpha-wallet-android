@@ -57,6 +57,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
+    private int networkId = 0;
 
     private Wallet wallet;
 
@@ -229,7 +230,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         try
         {
             AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
-            adapter.setLiveTokenAddress(ad.networkInfo.get("address").toLowerCase());
+            adapter.setLiveTokenAddress(ad.getNetworkValue(networkId,"address").toLowerCase());
         }
         catch (IOException |SAXException e)
         {
@@ -239,6 +240,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
+        networkId = networkInfo.chainId;
 //        adapter.setDefaultNetwork(networkInfo);
 //        setBottomMenu(R.menu.menu_main_network);
     }

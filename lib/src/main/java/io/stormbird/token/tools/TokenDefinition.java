@@ -21,7 +21,7 @@ public class TokenDefinition {
     protected Document xml;
     public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
     public String locale;
-    public Map<String, String> networkInfo = new ConcurrentHashMap<>();
+    private Map<String, String> networkInfo = new ConcurrentHashMap<>();
 
     protected class FieldDefinition {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
@@ -143,6 +143,21 @@ public class TokenDefinition {
         extract(xml, "address");
         extract(xml, "gateway");
         extract(xml, "feemaster");
+        extract(xml, "network");
+    }
+
+    public String getNetworkValue(int network, String field)
+    {
+        int definitionNetwork = Integer.valueOf(networkInfo.get("network"));
+        if (network == definitionNetwork)
+        {
+            return networkInfo.get(field);
+        }
+        else
+        {
+            //XML doesn't apply to this request
+            return "";
+        }
     }
 
     private void extract(Document xml, String field)

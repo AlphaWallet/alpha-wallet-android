@@ -481,13 +481,13 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
-    public String getXMLProperty(String property, BaseActivity activity)
+    public String getXMLProperty(int network, String property, BaseActivity activity)
     {
         String value;
         try
         {
             AssetDefinition ad = new AssetDefinition("TicketingContract.xml", activity.getResources());
-            value = ad.networkInfo.get(property);
+            value = ad.getNetworkValue(network, property);
         }
         catch (IOException | SAXException e)
         {

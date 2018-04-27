@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
@@ -53,6 +54,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView importTxt;
 
     private LinearLayout costLayout;
+    private int networkId = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,8 +93,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.invalidLink().observe(this, this::onBadLink);
+        viewModel.network().observe(this, this::onNetwork);
 
         ticketRange = null;
+    }
+
+    private void onNetwork(NetworkInfo networkInfo)
+    {
+        networkId = networkInfo.chainId;
     }
 
     private void onBadLink(Boolean aBoolean)
@@ -297,9 +305,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else {
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
-                        if (t.getXMLProperty("address", this).equalsIgnoreCase(t.getAddress()))
+                        if (t.getXMLProperty(networkId,"address", this).equalsIgnoreCase(t.getAddress()))
                         {
-                            viewModel.importThroughFeemaster(t.getXMLProperty("feemaster", this));
+                            viewModel.importThroughFeemaster(t.getXMLProperty(networkId,"feemaster", this));
                         }
                         else
                         {

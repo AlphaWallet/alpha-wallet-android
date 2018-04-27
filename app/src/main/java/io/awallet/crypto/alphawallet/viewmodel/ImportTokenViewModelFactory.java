@@ -17,17 +17,20 @@ import io.awallet.crypto.alphawallet.service.ImportTokenService;
 
 public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
 
+    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final FeeMasterService feeMasterService;
 
-    public ImportTokenViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
+    public ImportTokenViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
+                                       FindDefaultWalletInteract findDefaultWalletInteract,
                                        CreateTransactionInteract createTransactionInteract,
                                        FetchTokensInteract fetchTokensInteract,
                                        SetupTokensInteract setupTokensInteract,
                                        FeeMasterService feeMasterService) {
+        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -38,7 +41,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService);
+        return (T) new ImportTokenViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService);
     }
 }
 

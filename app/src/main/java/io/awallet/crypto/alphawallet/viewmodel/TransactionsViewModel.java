@@ -59,6 +59,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private String xmlContractAddress = null;
+    private String feemasterUrl = null;
     private int transactionCount;
 
     TransactionsViewModel(
@@ -414,4 +415,5 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         xmlContractAddress = address;
     }
+    public void setFeemasterURL(String address) { feemasterUrl = address; };
 }

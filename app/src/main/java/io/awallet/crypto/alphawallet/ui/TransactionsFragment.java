@@ -63,6 +63,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private Dialog dialog;
 
     private boolean isVisible = false;
+    private int networkId = 0;
 
     RecyclerView list;
 
@@ -160,7 +161,16 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         try
         {
             AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
-            viewModel.setXMLContractAddress(ad.networkInfo.get("address").toLowerCase());
+            String contractNetwork = ad.getNetworkValue(networkId,"network");
+            if (contractNetwork != null)
+            {
+                int contractNetworkId = Integer.valueOf(contractNetwork);
+                if (contractNetworkId == this.networkId)
+                {
+                    viewModel.setXMLContractAddress(ad.getNetworkValue(networkId, "address").toLowerCase());
+                    viewModel.setFeemasterURL(ad.getNetworkValue(networkId,"feemaster"));
+                }
+            }
         }
         catch (IOException|SAXException e)
         {
@@ -170,6 +180,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         adapter.setDefaultNetwork(networkInfo);
+        networkId = networkInfo.chainId;
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

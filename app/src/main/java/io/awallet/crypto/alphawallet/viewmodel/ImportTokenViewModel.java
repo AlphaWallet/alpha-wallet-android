@@ -7,6 +7,7 @@ import android.util.Log;
 
 import io.awallet.crypto.alphawallet.C;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
+import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.ServiceErrorException;
@@ -17,6 +18,7 @@ import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
+import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.service.FeeMasterService;
@@ -45,6 +47,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ITVM";
 
+    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -53,6 +56,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<TicketRange> importRange = new MutableLiveData<>();
     private final MutableLiveData<Integer> invalidRange = new MutableLiveData<>();
     private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
@@ -67,11 +71,13 @@ public class ImportTokenViewModel extends BaseViewModel  {
     @Nullable
     private Disposable getBalanceDisposable;
 
-    ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
+    ImportTokenViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
+                         FindDefaultWalletInteract findDefaultWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
                          SetupTokensInteract setupTokensInteract,
                          FeeMasterService feeMasterService) {
+        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -89,9 +95,9 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
-        disposable = findDefaultWalletInteract
+        disposable = findDefaultNetworkInteract
                 .find()
-                .subscribe(this::onWallet, this::onError);
+                .subscribe(this::onNetwork, this::onError);
     }
 
     @Override
@@ -105,8 +111,20 @@ public class ImportTokenViewModel extends BaseViewModel  {
     public LiveData<Wallet> wallet() {
         return wallet;
     }
+    public LiveData<NetworkInfo> network()
+    {
+        return network;
+    }
     public Ticket getImportToken() { return importToken; }
     public SalesOrder getSalesOrder() { return importOrder; }
+
+    private void onNetwork(NetworkInfo networkInfo)
+    {
+        network.postValue(networkInfo);
+        disposable = findDefaultWalletInteract
+                .find()
+                .subscribe(this::onWallet, this::onError);
+    }
 
     //1. Receive the default wallet (if any), then decode the import order
     private void onWallet(Wallet wallet) {

@@ -41,7 +41,10 @@ import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
+import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthGetWork;
 import org.web3j.utils.Numeric;
 import org.web3j.tx.Contract;
 
@@ -61,6 +64,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import rx.functions.Func1;
 
@@ -78,7 +82,8 @@ public class TokenRepository implements TokenRepositoryType {
     private final TransactionLocalSource transactionsLocalCache;
     private final TickerService tickerService;
     private Web3j web3j;
-    private Web3j web3jFullNode = null;
+    private boolean useBackupNode = false;
+    private NetworkInfo network;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -98,13 +103,45 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private void buildWeb3jClient(NetworkInfo defaultNetwork) {
+        network = defaultNetwork;
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
         web3j = Web3jFactory.build(publicNodeService);
-        if (defaultNetwork.backupNodeUrl != null)
+
+        //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
+        Disposable d = getWorkHash()
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::receiveWork, this::checkFail);
+    }
+
+    private void receiveWork(BigInteger s)
+    {
+        //have a valid connection, no need to use infura
+        if (s == null || s.equals(BigInteger.ZERO))
         {
-            org.web3j.protocol.http.HttpService fullNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.backupNodeUrl);
-            web3jFullNode = Web3jFactory.build(fullNodeService);
+            useBackupNode = true;
+            switchToBackupNode();
         }
+    }
+
+    private void checkFail(Throwable failMsg)
+    {
+        useBackupNode = true;
+        switchToBackupNode();
+    }
+
+    private void switchToBackupNode()
+    {
+        org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(network.backupNodeUrl);
+        web3j = Web3jFactory.build(publicNodeService);
+    }
+
+    private Single<BigInteger> getWorkHash()
+    {
+        return Single.fromCallable(() -> {
+            EthBlockNumber work = web3j.ethBlockNumber()
+                    .send();
+            return work.getBlockNumber();
+        });
     }
 
     @Override
@@ -520,9 +557,9 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public rx.Subscription memPoolListener(SubscribeWrapper subscriber)
     {
-        if (web3jFullNode != null)
+        if (!useBackupNode)
         {
-            return web3jFullNode.pendingTransactionObservable()
+            return web3j.pendingTransactionObservable()
                     .subscribeOn(rx.schedulers.Schedulers.newThread())
                     .subscribe(subscriber.scanReturn, subscriber.onError);
         }
@@ -597,7 +634,7 @@ public class TokenRepository implements TokenRepositoryType {
     public rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
     {
         rx.Subscription sub = null;
-        if (web3jFullNode != null)
+        if (!useBackupNode)
         {
             final Event event = new Event("TransferFrom",
                                           Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
@@ -610,7 +647,7 @@ public class TokenRepository implements TokenRepositoryType {
                                           }));
             EthFilter filter = new EthFilter(DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING, contractAddr);
             filter.addSingleTopic(EventEncoder.encode(event));
-            return web3jFullNode.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
+            return web3j.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
             {
                 @Override
                 public TransferFromEventResponse call(org.web3j.protocol.core.methods.response.Log log)

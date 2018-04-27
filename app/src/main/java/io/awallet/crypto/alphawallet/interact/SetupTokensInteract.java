@@ -80,16 +80,15 @@ public class SetupTokensInteract {
                 unknownContracts.add(thisTrans.to);
             }
 
-            //already has constructor info
+            //already has contract info
             if (thisTrans.operations.length > 0 &&
-                    thisTrans.operations[0].contract instanceof ERC875ContractTransaction &&
-                    ((ERC875ContractTransaction) thisTrans.operations[0].contract).operation.equals(CONTRACT_CONSTRUCTOR))
+                    thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
             {
                 op = thisTrans.operations[0];
-                ct = thisTrans.operations[0].contract;
-                functionName = CONTRACT_CONSTRUCTOR;
+                ect = (ERC875ContractTransaction) thisTrans.operations[0].contract;
+                ct = ect;
+                functionName = ect.operation;
                 newOps = thisTrans.operations;
-                ect = (ERC875ContractTransaction)ct;
                 if (ect.type == -5)
                 {
                     ect.type = -2;

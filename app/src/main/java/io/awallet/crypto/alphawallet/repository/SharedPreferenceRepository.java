@@ -12,6 +12,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String GAS_LIMIT_KEY  ="gas_limit";
 	private static final String GAS_LIMIT_FOR_TOKENS_KEY = "gas_limit_for_tokens";
 	private static final String NOTIFICATIONS_KEY = "notifications";
+	private static final String DEFAULT_SET_KEY = "default_net_set";
 
 	private final SharedPreferences pref;
 
@@ -49,5 +50,16 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	public void setNotificationState(boolean state)
 	{
 		pref.edit().putBoolean(NOTIFICATIONS_KEY, state).apply();
+	}
+
+	@Override
+	public boolean getDefaultNetworkSet()
+	{
+		return pref.getBoolean(DEFAULT_SET_KEY, false);
+	}
+	@Override
+	public void setDefaultNetworkSet()
+	{
+		pref.edit().putBoolean(DEFAULT_SET_KEY, true).apply();
 	}
 }

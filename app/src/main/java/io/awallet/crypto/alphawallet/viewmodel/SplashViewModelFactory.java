@@ -9,6 +9,7 @@ import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 
 public class SplashViewModelFactory implements ViewModelProvider.Factory {
 
@@ -17,21 +18,24 @@ public class SplashViewModelFactory implements ViewModelProvider.Factory {
     private final ImportWalletInteract importWalletInteract;
     private final AddTokenInteract addTokenInteract;
     private final CreateWalletInteract createWalletInteract;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public SplashViewModelFactory(FetchWalletsInteract fetchWalletsInteract,
                                   EthereumNetworkRepositoryType networkRepository,
                                   ImportWalletInteract importWalletInteract,
                                   AddTokenInteract addTokenInteract,
-                                  CreateWalletInteract createWalletInteract) {
+                                  CreateWalletInteract createWalletInteract,
+                                  PreferenceRepositoryType preferenceRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.networkRepository = networkRepository;
         this.importWalletInteract = importWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.createWalletInteract = createWalletInteract;
+        this.preferenceRepository = preferenceRepository;
     }
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SplashViewModel(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract);
+        return (T) new SplashViewModel(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository);
     }
 }

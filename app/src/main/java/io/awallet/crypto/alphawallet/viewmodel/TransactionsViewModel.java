@@ -264,7 +264,7 @@ public class TransactionsViewModel extends BaseViewModel {
         //add in the XML contract address to list of unknowns to fetch if we don't have it already
         setupTokensInteract.setupUnknownList(tokenMap, xmlContractAddress);
 
-        fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap, tokenMap) //patches tx's and returns unknown contracts
+        fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[0]), tokenMap) //patches tx's and returns unknown contracts
                 .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
                 .flatMapIterable(address -> address) //change to a sequential stream
                 .flatMap(setupTokensInteract::addToken) //fetch token info
@@ -303,9 +303,23 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void completeCycle(Transaction[] transactions)
     {
+        checkInternalTx();
         progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
         fetchTransactionDisposable = null;
         checkIfRegularUpdateNeeded();
+    }
+
+    private void checkInternalTx()
+    {
+        if (feemasterUrl != null)
+        {
+            disposable = fetchTransactionsInteract.fetchInternalTransactions(wallet.getValue(), feemasterUrl)
+                    .flatMap(transactions -> setupTokensInteract.processRemainingTransactions(transactions, tokenMap))
+                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::updateDisplay, this::onError);
+        }
     }
 
     private Observable<Transaction[]> removeFromMap(Transaction[] transactions)

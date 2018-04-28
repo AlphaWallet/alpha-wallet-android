@@ -145,6 +145,33 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		}).subscribeOn(Schedulers.io());
 	}
 
+	@Override
+	public Observable<Transaction[]> fetchContractTransactions(String address, String feemaster)
+	{
+		return Observable.fromCallable(() -> {
+			List<Transaction> result = new ArrayList<>();
+			try
+			{
+				String response = readContractTransactions(address, feemaster);
+
+				Gson reader = new Gson();
+				JSONArray stateData = new JSONArray(response);
+				EtherscanTransaction[] txs = reader.fromJson(stateData.toString(), EtherscanTransaction[].class);
+				for (EtherscanTransaction etx : txs)
+				{
+					etx.internal = true;
+					result.add(etx.createTransaction());
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+			return result.toArray(new Transaction[result.size()]);
+		}).subscribeOn(Schedulers.io());
+	}
+
     private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock)
     {
         okhttp3.Response response = null;
@@ -181,6 +208,35 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 
         return result;
     }
+
+	private String readContractTransactions(String address, String feemaster)
+	{
+		okhttp3.Response response = null;
+		String result = null;
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(feemaster);
+		sb.append("internalTx?address=");
+		sb.append(address);
+
+		try
+		{
+			Request request = new Request.Builder()
+					.url(sb.toString())
+					.get()
+					.build();
+
+			response = httpClient.newCall(request).execute();
+
+			result = response.body().string();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return result;
+	}
 
     private void onNetworkChanged(NetworkInfo networkInfo) {
 		buildApiClient(networkInfo.backendUrl);

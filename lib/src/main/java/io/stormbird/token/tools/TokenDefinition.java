@@ -164,6 +164,21 @@ public class TokenDefinition {
     {
         NodeList nList = xml.getElementsByTagName(field);
         String value = getNode(nList, field);
+
+        /*
+            Kludge: since feemaster is used to fetch internal transactions, and asset definition is not yet updated
+            remove 'claimToken' from line
+            TODO: remove 'claimToken' from assetdefinition in XML, then remove this patch
+         */
+        if (value.contains("claimToken"))
+        {
+            int index = value.indexOf("claimToken");
+            if (index > 0)
+            {
+                value = value.substring(0, index);
+            }
+        }
+
         networkInfo.put(field, value);
     }
 

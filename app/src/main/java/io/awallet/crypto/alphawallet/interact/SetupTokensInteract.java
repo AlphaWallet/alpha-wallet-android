@@ -206,6 +206,9 @@ public class SetupTokensInteract {
                     ct.name = thisTrans.to;
                     fillContractInformation(thisTrans, ct);
                     break;
+                case RECEIVE_FROM_MAGICLINK:
+                    op.value = String.valueOf(data.paramValues.size());
+                    break;
                 case INVALID_OPERATION:
                     if (ect != null)
                     {
@@ -402,7 +405,7 @@ public class SetupTokensInteract {
     public void setupUnknownList(Map<String, Token> tokenMap, String xmlContractAddress)
     {
         unknownContracts.clear();
-        if (!tokenMap.containsKey(xmlContractAddress))
+        if (xmlContractAddress != null && !tokenMap.containsKey(xmlContractAddress))
         {
             unknownContracts.add(xmlContractAddress);
         }
@@ -427,7 +430,7 @@ public class SetupTokensInteract {
             List<Transaction> processedTxList = new ArrayList<>();
             for (Transaction t : txMap.values())
             {
-                if (t.to != null && t.to.equals(token.getAddress()) && t.input != null && t.input.length() > 20)
+                if (t.to != null && t.to.equals(token.getAddress()))
                 {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
                     if (data != null && data.functionData != null)

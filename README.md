@@ -1,6 +1,6 @@
 # Modules
 
-Each module has its own README. For example, to get started working with aWallet Android app please read app/README.md first (important).
+Each module has its own README. Please click the name of the module to go to the corrisponding README file.
 
 | [app](app/README.md) | lib | [dmz](dmz/README.md) | [desktop](desktop/README.md) |
 | --- | --- | --- | --- |
@@ -10,11 +10,14 @@ Each module has its own README. For example, to get started working with aWallet
 
 Every aWallet application has a connection to 3 types of hosts.
 
-1. Ethereum nodes that belongs to the global Ethereum network. These must be pre-trusted due to the absence of SPV verification. Instead of maintaining these nodes, we use a secure and fast source (infura) so long as we can identify them through a safe source like a TLS fingerprint etc.
+Public
+: Ethereum nodes that belongs to the global Ethereum network. These must be pre-trusted due to the absence of SPV verification. Instead of maintaining these nodes, we use a secure and fast source (infura) so long as we can identify them through a safe source like a TLS fingerprint etc.
 
-2. Stormbid operated servers. Now: A DMZ server for public access plus a secured Market Queue server. αWallet will own and maintain these. Market Queue provides accept-orders when its signer is offline. This one is a single point of failure - if it doesn't work, user's can't purcahse from the market that comes with the wallet (they can still redeem orders posted on Internet forums through Universal Link).
+Stormbird's
+: Stormbid operated servers. Now: A DMZ server for public access plus a secured Market Queue server. αWallet will own and maintain these. Market Queue provides accept-orders when its signer is offline. This one is a single point of failure - if it doesn't work, user's can't purcahse from the market that comes with the wallet (they can still redeem orders posted on Internet forums through Universal Link).
 
-3. One FeeMaster run by each asset issuers,for dealing with Universal Links for each asset type, for sending transactions on behalf of users who don't have ethers. The asset issuers secure these servers themselves and they are trusted to identify spam against their FeeMasters.
+Asset Issuers'
+: One FeeMaster run by each asset issuers,for dealing with Universal Links for each asset type, for sending transactions on behalf of users who don't have ethers. The asset issuers secure these servers themselves and they are trusted to identify spam against their FeeMasters.
 
 ### The servers
 

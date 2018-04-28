@@ -26,6 +26,9 @@ gen/
 /build
 app/release
 
+# Asset Definition
+app/src/main/assets/
+
 # Fastlane
 fastlane/report.xml
 
@@ -40,6 +43,9 @@ proguard/
 
 # Android Studio Navigation editor temp files
 .navigation/
+
+# Temp - ignore lib 
+lib/
 
 ### Android Patch ###
 gen-external-apklibs

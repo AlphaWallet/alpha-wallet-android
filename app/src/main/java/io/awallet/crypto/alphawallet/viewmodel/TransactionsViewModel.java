@@ -9,12 +9,20 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import org.spongycastle.jcajce.provider.digest.SHA256;
+import org.web3j.crypto.Hash;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.awallet.crypto.alphawallet.entity.ERC875ContractTransaction;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Transaction;
+import io.awallet.crypto.alphawallet.entity.TransactionContract;
+import io.awallet.crypto.alphawallet.entity.TransactionOperation;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -202,14 +210,26 @@ public class TransactionsViewModel extends BaseViewModel {
      * @param transactions
      */
     private void onUpdateTransactions(Transaction[] transactions) {
-        Log.d(TAG, "Found " + transactions.length + " Network transactions");
-        //check against existing transactions
+        //check against existing transactions - only update from network if the transactions are new
+        List<Transaction> newTransactions = new ArrayList<>();
         for (Transaction tx : transactions)
         {
-            txMap.put(tx.hash, tx);
+            if (!txMap.containsKey(tx.hash))
+            {
+                txMap.put(tx.hash, tx);
+                newTransactions.add(tx);
+            }
         }
 
-        updateDisplay(transactions);
+        if (newTransactions.size() > 0)
+        {
+            Log.d(TAG, "Found " + newTransactions.size() + " New network transactions");
+            updateDisplay(newTransactions.toArray(new Transaction[newTransactions.size()]));
+        }
+        else
+        {
+            Log.d(TAG, "No new network transactions");
+        }
     }
 
     /**
@@ -315,6 +335,7 @@ public class TransactionsViewModel extends BaseViewModel {
             //first remove all these transactions from the network + cached list
             for (Transaction t : transactions)
             {
+                t.contentHash = Transaction.calculateContentHash(t); //update the content hash
                 txMap.remove(t.hash);
             }
 

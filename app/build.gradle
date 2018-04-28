@@ -17,7 +17,6 @@ repositories {
     }
 }
 
-
 android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
@@ -31,8 +30,8 @@ android {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 78
-        versionName "0.96"
+        versionCode 79
+        versionName "0.97"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -58,10 +57,6 @@ android {
         // as noted by @Vishnuvathsan you may also need to include
         // variations on the file name. It depends on your dependencies.
         // Some other common variations on notice and license file names
-        //exclude 'META-INF/notice'
-        //exclude 'META-INF/notice.txt'
-        //exclude 'META-INF/license'
-        //exclude 'META-INF/license.txt'
     }
     lintOptions {
         abortOnError false
@@ -118,7 +113,6 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
-    //implementation 'com.journeyapps:zxing-android-embedded:3.5.0@aar'
 
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"

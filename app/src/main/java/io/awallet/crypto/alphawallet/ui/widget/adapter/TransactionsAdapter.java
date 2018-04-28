@@ -114,23 +114,18 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     }
 
     public void addTransactions(Transaction[] transactions) {
-        populateTransactions(items, transactions);
-    }
-
-    private void populateTransactions(SortedList<SortedItem> list, Transaction[] transactions)
-    {
-        list.beginBatchedUpdates();
-        for (Transaction transaction : transactions) {
-            TransactionSortedItem sortedItem = new TransactionSortedItem(
-                    TransactionHolder.VIEW_TYPE, transaction, TimestampSortedItem.DESC);
-            list.add(sortedItem);
-            list.add(DateSortedItem.round(transaction.timeStamp));
-        }
-        list.endBatchedUpdates();
+        updateTransactions(transactions);
     }
 
     public void updateTransactions(Transaction[] transactions) {
-        populateTransactions(items, transactions);
+        items.beginBatchedUpdates();
+        for (Transaction transaction : transactions) {
+            TransactionSortedItem sortedItem = new TransactionSortedItem(
+                    TransactionHolder.VIEW_TYPE, transaction, TimestampSortedItem.DESC);
+            items.add(sortedItem);
+            items.add(DateSortedItem.round(transaction.timeStamp));
+        }
+        items.endBatchedUpdates();
     }
 
     public void clear() {

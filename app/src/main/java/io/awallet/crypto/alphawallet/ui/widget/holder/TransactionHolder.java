@@ -18,9 +18,12 @@ import io.awallet.crypto.alphawallet.entity.TransactionOperation;
 import io.awallet.crypto.alphawallet.ui.widget.OnTransactionClickListener;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import static io.awallet.crypto.alphawallet.C.ETHER_DECIMALS;
+import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
 public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
 
@@ -94,9 +97,14 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     private void fillERC875(Transaction trans, ERC875ContractTransaction ct)
     {
         int colourResource;
+        BigInteger valueAmount = new BigInteger(transaction.value);
+        supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+
         switch (ct.type)
         {
             case 1:
+            case 2:
+                supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
                 typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
                 colourResource = R.color.green;
                 break;
@@ -118,9 +126,16 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         type.setText(ct.operation);
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
-        if (ct.indices != null && ct.indices.size() > 0) {
-            String valueStr = "x" + ct.indices.size() + " Tickets";
+
+        if (ct.operation.equals(RECEIVE_FROM_MAGICLINK))
+        {
+            String valueStr = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
             value.setText(valueStr);
+            valueAmount = BigInteger.ZERO;
+        }
+        else if (ct.indices != null && ct.indices.size() > 0) {
+            String ticketMove = "x" + ct.indices.size() + " Tickets";
+            value.setText(ticketMove);
         }
         else
         {
@@ -129,15 +144,26 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
 
         if (!trans.error.equals("0"))
         {
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
+            layoutParams.setMarginStart(10);
             supplimental.setText("Failed ☹");
             supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
             typeIcon.setImageResource(R.drawable.ic_error);
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
                                     PorterDuff.Mode.SRC_ATOP);
         }
+        else if (valueAmount.compareTo(BigInteger.ZERO) > 0)
+        {
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
+            layoutParams.setMarginStart(30);
+            String valueStr = (ct.type == 1 ? "-" : "+") + getScaledValue(transaction.value, 18) + " " + ETH_SYMBOL;
+            supplimental.setText(valueStr);
+            supplimental.setVisibility(View.VISIBLE);
+        }
         else
         {
             supplimental.setText(""); //looks bad
+            supplimental.setVisibility(View.GONE);
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
                                     PorterDuff.Mode.SRC_ATOP);
         }

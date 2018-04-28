@@ -7,6 +7,7 @@ import android.util.Log;
 import io.awallet.crypto.alphawallet.entity.BadContract;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
+import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenFactory;
@@ -605,6 +606,12 @@ public class TokenRepository implements TokenRepositoryType {
                             token.ticker = new TokenTicker("", "", ticker.price_usd, ticker.percentChange24h, null);
                             return token;
                         }).onErrorResumeNext(throwable -> Single.just(token)));
+    }
+
+    @Override
+    public Single<Ticker> getEthTicker()
+    {
+        return ethereumNetworkRepository.getTicker();
     }
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {

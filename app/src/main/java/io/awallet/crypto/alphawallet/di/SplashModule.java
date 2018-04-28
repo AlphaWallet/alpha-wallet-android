@@ -6,6 +6,7 @@ import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.viewmodel.SplashViewModelFactory;
@@ -21,8 +22,9 @@ public class SplashModule {
                                                          EthereumNetworkRepositoryType networkRepository,
                                                          ImportWalletInteract importWalletInteract,
                                                          AddTokenInteract addTokenInteract,
-                                                         CreateWalletInteract createWalletInteract) {
-        return new SplashViewModelFactory(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract);
+                                                         CreateWalletInteract createWalletInteract,
+                                                         PreferenceRepositoryType preferenceRepository) {
+        return new SplashViewModelFactory(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository);
     }
 
     @Provides

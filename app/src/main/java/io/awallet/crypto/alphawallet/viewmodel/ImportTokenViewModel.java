@@ -11,6 +11,7 @@ import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.ServiceErrorException;
+import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenFactory;
@@ -70,6 +71,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     @Nullable
     private Disposable getBalanceDisposable;
+    @Nullable
+    private Disposable getTickerDisposable;
 
     ImportTokenViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                          FindDefaultWalletInteract findDefaultWalletInteract,
@@ -135,6 +138,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
             importOrder.getOwnerKey();
             //got to step 2. - get cached tokens
             fetchTokens();
+            getEthereumTicker(); //simultaneously fetch the current eth price
         }
         catch (SalesOrderMalformed e)
         {
@@ -150,25 +154,16 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void fetchTokens() {
         importToken = null;
         disposable = fetchTokensInteract
-                .fetchStored(new Wallet(importOrder.ownerAddress))
-                .subscribe(this::onTokens, this::onError, this::fetchTokensComplete);
+                .fetchSequentialNoEth(new Wallet(importOrder.ownerAddress))
+                .subscribe(this::onToken, this::onError, this::fetchTokensComplete);
     }
 
-    //2a. receive a stream of tokens.
-    //- store eth price from ticker
-    //- get the token corresponding to the import order if we already cached it
-    //TODO: Optimise, feed one token at a time, and only use cached tokens. Seperatately fetch the ticker after the token has been checked
-    private void onTokens(Token[] tokens) {
-        for (Token token : tokens)
+    private void onToken(Token token)
+    {
+        if (token.addressMatches(importOrder.contractAddress))
         {
-            if (token.ticker != null && token.tokenInfo.symbol.equals(ETH_SYMBOL))
-            {
-                ethToUsd = Double.valueOf(token.ticker.price);
-            }
-            else if (token.addressMatches(importOrder.contractAddress) && token instanceof Ticket)
-            {
-                importToken = (Ticket) token;
-            }
+            importToken = (Ticket) token;
+            regularBalanceCheck(); //fetch balance and display
         }
     }
 
@@ -179,10 +174,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             //Didn't have the token cached, so retrieve it from
             setupTokenAddr(importOrder.contractAddress);
-        }
-        else
-        {
-            updateToken();
         }
     }
 
@@ -201,12 +192,9 @@ public class ImportTokenViewModel extends BaseViewModel  {
     {
         if (tokenInfo != null && tokenInfo.name != null) {
             TokenFactory tf = new TokenFactory();
-            Token tempToken = tf.createToken(tokenInfo);
+            importToken = (Ticket)tf.createToken(tokenInfo);
 
-            disposable = fetchTokensInteract.updateBalance(importOrder.ownerAddress, tempToken)
-                    .subscribeOn(Schedulers.io()) //observeOn
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onBalance, this::onError, this::gotBalance);
+            regularBalanceCheck();
         }
         else
         {
@@ -373,5 +361,21 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private boolean balanceChange(List<BigInteger> newBalance)
     {
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
+    }
+
+    private void getEthereumTicker()
+    {
+        getTickerDisposable = fetchTokensInteract.getEthereumTicker()
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::onTicker, this::onError);
+
+    }
+
+    private void onTicker(Ticker ticker)
+    {
+        if (ticker != null && ticker.price_usd != null)
+        {
+            ethToUsd = Double.valueOf(ticker.price_usd);
+        }
     }
 }

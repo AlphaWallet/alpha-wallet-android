@@ -3,6 +3,7 @@ package io.awallet.crypto.alphawallet.repository;
 import org.web3j.protocol.core.methods.response.Transaction;
 
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
+import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.TransferFromEventResponse;
@@ -36,4 +37,5 @@ public interface TokenRepositoryType {
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
+    Single<Ticker> getEthTicker();
 }

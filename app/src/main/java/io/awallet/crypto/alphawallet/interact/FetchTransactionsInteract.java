@@ -24,27 +24,36 @@ public class FetchTransactionsInteract {
 
     public Observable<Transaction[]> fetchCached(Wallet wallet) {
         return transactionRepository
-                .fetchCachedTransactions(wallet);
+                .fetchCachedTransactions(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Transaction[]> fetch(Wallet wallet) {
         return transactionRepository
-                .fetchTransaction(wallet);
+                .fetchTransaction(wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<TokenTransaction[]> fetch(Wallet wallet, Token t) {
         return transactionRepository
-                .fetchTokenTransaction(wallet, t);
+                .fetchTokenTransaction(wallet, t)
+                .subscribeOn(Schedulers.io());
     }
 
     public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, Transaction lastTx) {
         return transactionRepository
-                .fetchNetworkTransaction(wallet, lastTx);
+                .fetchNetworkTransaction(wallet, lastTx)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Transaction[]> fetchInternalTransactions(Wallet wallet, String feemaster) {
         return transactionRepository
-                .fetchInternalTransactionsNetwork(wallet, feemaster);
+                .fetchInternalTransactionsNetwork(wallet, feemaster)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)

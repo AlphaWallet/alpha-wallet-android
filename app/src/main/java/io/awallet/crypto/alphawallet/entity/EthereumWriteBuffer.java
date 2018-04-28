@@ -89,6 +89,7 @@ public class EthereumWriteBuffer extends DataOutputStream
         {
             microEth = maxValue;    //should we signal an overflow error here, or just silently round?
                                     //possibly irrelevant, this is a huge amount of eth.
+                                    //Update: This is screened out in the UI now
         }
 
         byte[] uValBytes = UnsignedLong.createBytes(microEth.longValue());

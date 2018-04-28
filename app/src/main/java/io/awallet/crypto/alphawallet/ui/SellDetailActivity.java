@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,7 +22,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -434,13 +437,14 @@ public class SellDetailActivity extends BaseActivity {
 
         //1. validate price
         BigInteger price = getPriceInWei();
-        //2. get indicies
-        int quantity = Integer.parseInt(textQuantity.getText().toString());
+        //2. get quantity
+        int quantity = ticket.getTicketIndicies(prunedIds).length;
 
         if (price.doubleValue() > 0.0 && prunedIds != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
             int[] prunedIndices = ticket.getTicketIndicies(prunedIds);
-            viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), price, UTCTimeStamp);
+            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
+            viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), totalValue, UTCTimeStamp);
         }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -458,7 +462,7 @@ public class SellDetailActivity extends BaseActivity {
         if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
             List<BigInteger> ticketIdList = ticket.stringHexToBigIntegerList(ticketIds);
-            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity));
+            BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
             viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
             finish();
         }
@@ -468,19 +472,19 @@ public class SellDetailActivity extends BaseActivity {
     }
 
     private BigInteger getPriceInWei() {
-        //now convert to milliWei
-        int milliEth = (int) (sellPriceValue * 1000.0f);
-
-        //now convert to ETH
-        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
-
+        //now convert to microWei
+        long microEth = (int)(sellPriceValue * 1000000.0);
+        byte[] max = Numeric.hexStringToByteArray("FFFFFFFF");
+        BigInteger maxValue = new BigInteger(1, max);
+        if (microEth > maxValue.longValue()) microEth = 0; //check on UI screen if amount is more than we can handle
+        //now convert to Wei
+        BigInteger weiValue = Convert.toWei(Long.toString(microEth), Convert.Unit.SZABO).toBigInteger();
         return weiValue;
     }
 
     boolean isValidAmount(String eth) {
         try {
-            String wei = BalanceUtils.EthToWei(eth);
-            return wei != null;
+            return !getPriceInWei().equals(BigInteger.ZERO);
         } catch (Exception e) {
             return false;
         }

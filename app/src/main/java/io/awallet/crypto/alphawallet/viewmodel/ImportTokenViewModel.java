@@ -158,7 +158,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void fetchTokens() {
         importToken = null;
         disposable = fetchTokensInteract
-                .fetchSequentialNoEth(new Wallet(importOrder.ownerAddress))
+                .fetchSequentialNoEth(wallet.getValue())
                 .subscribe(this::onToken, this::onError, this::fetchTokensComplete);
     }
 
@@ -176,7 +176,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     {
         if (importToken == null)
         {
-            //Didn't have the token cached, so retrieve it from
+            //Didn't have the token cached, so retrieve it from blockchain
             setupTokenAddr(importOrder.contractAddress);
         }
     }

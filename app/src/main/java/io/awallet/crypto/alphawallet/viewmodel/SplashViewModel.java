@@ -13,6 +13,7 @@ import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 
 import static io.awallet.crypto.alphawallet.C.DEFAULT_NETWORK;
 import static io.awallet.crypto.alphawallet.C.HARD_CODED_CONTRACT;
@@ -27,6 +28,7 @@ public class SplashViewModel extends ViewModel {
     private final ImportWalletInteract importWalletInteract;
     private final AddTokenInteract addTokenInteract;
     private final CreateWalletInteract createWalletInteract;
+    private final PreferenceRepositoryType preferenceRepository;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
@@ -35,12 +37,14 @@ public class SplashViewModel extends ViewModel {
                     EthereumNetworkRepositoryType networkRepository,
                     ImportWalletInteract importWalletInteract,
                     AddTokenInteract addTokenInteract,
-                    CreateWalletInteract createWalletInteract) {
+                    CreateWalletInteract createWalletInteract,
+                    PreferenceRepositoryType preferenceRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.networkRepository = networkRepository;
         this.importWalletInteract = importWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.createWalletInteract = createWalletInteract;
+        this.preferenceRepository = preferenceRepository;
     }
 
     /**
@@ -54,11 +58,12 @@ public class SplashViewModel extends ViewModel {
      * FINISH - push wallet message so SplashAcitivity now continues with execution of ::onWallets
      */
     public void startOverridesChain() {
-        if (OVERRIDE_DEFAULT_NETWORK) {
+        if (OVERRIDE_DEFAULT_NETWORK && !preferenceRepository.getDefaultNetworkSet()) {
             NetworkInfo[] networks = networkRepository.getAvailableNetworkList();
             for (NetworkInfo networkInfo : networks) {
                 if (networkInfo.name.equals(DEFAULT_NETWORK)) {
                     networkRepository.setDefaultNetworkInfo(networkInfo);
+                    preferenceRepository.setDefaultNetworkSet();
                     break;
                 }
             }

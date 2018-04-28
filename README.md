@@ -2,21 +2,9 @@
 
 Each module has its own README. For example, to get started working with aWallet Android app please read app/README.md first (important).
 
-## app
-
-aWallet Android app.
-
-## lib
-
-Library code shared between Android app and other modules. e.g. XML parser and Universal Link code.
-
-## dmz
-
-Code that runs in unprotected DMZ - public facing. Please do not put wallet and key management stuff here. No private keys are used by these code.
-
-## desktop
-
-For generating Universal Link tools or other administrative functions. It uses private key and must not run in DMZ.
+| [app](app/README.md) | lib | [dmz](dmz/README.md) | [desktop](desktop/README.md) |
+| --- | --- | --- | --- |
+| aWallet Android app | Library code shared between Android app and other modules. e.g. XML parser and Universal Link code. | Code that runs in unprotected DMZ - public facing. Currently only used to display Universal Link | Administrative tool. Currently only for generating Universal Link from desktop. |
 
 # Network Architect
 

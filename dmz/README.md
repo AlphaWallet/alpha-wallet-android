@@ -51,43 +51,6 @@ the app to open the link. The app would launch and does the following:
 4. The wallet then calls `trade()` function on the smart contract, attaching required Ethers. The call should result in the token be allocated to user's address. Or, the wallet calls the issuer's server for it to send the transaction on behalf of the user.
 
 
-### The servers
-
-Two types of servers are involved in the Universal Link: DMZ server and FeeMasters. The two are named so to make it crystal clear what are the security implications, that DMZ server is exposed, doesn't have any Ether in it; the FeeMaster servers each have a wallet to replenish and needs to be protected.
-
-						 +------------------+
-    +------------------+                         |                  |
-    |                  |                         | Shengkai's       |
-    | CryptoKitties    |                         | business servers |
-    | business servers |                         |                  |
-    |                  |                         +--------+---------+
-    +--------+---------+                                  |
-	     |                                            |
-	     |                                            |
-    +--------+-------+                           +--------+-------+
-    |                |       +-------------+     |                |
-    | FeeMaster of   <-------+ Wallet App  +-----> FeeMaster of   |
-    | CryptoKitties  |       +------+------+     | Shankai Co Ltd |
-    |                |              ^            |                |
-    +--------+-------+              |            +--------+-------+
-	     |             +--------+--------+            |
-	     |             |                 |            |
-	     |             | DMZ Server      |            |
-	     |             | by Stormbird    |            |
-	     |             |                 |            |
-	     |             +--------+--------+            |
-	     |                      |                     |
-	     |                      |                     |
-    +--------+----------------------+---------------------+---------+
-
-                  The Ethereum Node Network
-
-
-- DMZ server handles the link if the user doesn't have the app, introducing the user to install the app.
-- The app handles the link without any of the servers in the graph, if the user can cover the transaction fee.
-- If the user can't cover the transaction fee, the wallet app forwards the link to FeeMaster of corrisponding asset-issuers, who may or may not send the transaction on behalf of its user.
-- All of these servers are connected to Ethereum. DMZ server needs it to work out if the link has been used.
-
 ### The logic in a fee master, example
 
 First, the wallet reads the feemaster server defined in the Asset Definition File. Say, Shanhai's feemaster is 'feemaster.shankaisports.com'.

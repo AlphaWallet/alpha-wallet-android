@@ -20,17 +20,81 @@ For generating Universal Link tools or other administrative functions. It uses p
 
 # Network Architect
 
-Every aWallet application has a connection to 3 types of hosts, each of which are run by different companies. 
+Every aWallet application has a connection to 3 types of hosts.
 
-1. One or more trusted Ethereum nodes; these must be pre-trusted due to the absence of SPV verification. Instead of maintaining these nodes, we use a secure and fast source (infura) so long as we can identify them through a safe source like a TLS fingerprint etc.
+1. Ethereum nodes that belongs to the global Ethereum network. These must be pre-trusted due to the absence of SPV verification. Instead of maintaining these nodes, we use a secure and fast source (infura) so long as we can identify them through a safe source like a TLS fingerprint etc.
 
-2. A Market Queue server. αWallet will own and maintain this server. It provides accept-orders when its signer is offline. This one is a single point of failure - if it doesn't work, user's can't purcahse from the market that comes with the wallet (they can still redeem orders posted on Internet forums through Universal Link).
+2. Stormbid operated servers. Now: A DMZ server for public access plus a secured Market Queue server. αWallet will own and maintain these. Market Queue provides accept-orders when its signer is offline. This one is a single point of failure - if it doesn't work, user's can't purcahse from the market that comes with the wallet (they can still redeem orders posted on Internet forums through Universal Link).
 
-3. One server for dealing with Universal Links for each asset type. We called by different names: sometimes "UniversalLink Server", somethings "Payment Server", sometimes "feeMaster", for paying transaction fees for customers whom it can identify whether it is a spam source.
+3. One FeeMaster run by each asset issuers,for dealing with Universal Links for each asset type, for sending transactions on behalf of users who don't have ethers. The asset issuers secure these servers themselves and they are trusted to identify spam against their FeeMasters.
 
-There is a future data source: The repository of "Asset Definitions" for each asset type. This is a read-only source of trustless data. Currently, we ship one such file at the beginning. In the future, they may be downloadable or fetchable Ethereum blockchain. It contains, among other things, the smart-contract addresses. 
+### The servers
 
-How each of the servers function: 
+                                                                       +------------------+
+    +------------------+                                               |                  |
+    |                  |                                               | Shengkai's       |
+    | CryptoKitties    |                                               | business servers |
+    | business servers |                                               |                  |
+    |                  |                                               +---------+--------+
+    +----+-------------+                                                         |
+         |                                                                       |
+         |                                                                       |
+    +----+-----------+  +------------------+                             +-------+--------+
+    |                |  |                  +----------------------------->                |
+    | FeeMaster of   <--+   Wallet APP     |       +----------------+    | FeeMaster of   |
+    | CryptoKitties  |  |                  <------->                |    | Shankai Co Ltd |
+    |                |  ++----------^------+       | Market Queue   |    |                |
+    +----+-----------+   |          |              | Server         |    +- -----+--------+
+         |               | +--------+--------+     | by Stormbird   |            |
+         |               | |                 |     |                |            |
+         |               | | DMZ Server      |     +-------+--------+            |
+         |               | | by Stormbird    |             |                     |
+         |               | |                 |             |                     |
+         |               | +--------+--------+             |                     |
+         |               |          |                      |                     |
+         |               |          |                      |                     |
+    +----+---------------+----------+----------------------+---------------------+----------+
+
+                  The Ethereum Node Network
+
+Market Queue server is well explained in its own README. Let's take out the Market Queue and you get this, all of them are related to Universal Link's handling. Two types of servers are involved in the Universal Link: DMZ server and FeeMasters. The two are named so to make it crystal clear what are the security implications, that DMZ server is exposed, doesn't have any Ether in it; the FeeMaster servers each have a wallet to replenish and needs to be protected.
+
+
+                                                 +------------------+
+    +------------------+                         |                  |
+    |                  |                         | Shengkai's       |
+    | CryptoKitties    |                         | business servers |
+    | business servers |                         |                  |
+    |                  |                         +--------+---------+
+    +--------+---------+                                  |
+             |                                            |
+             |                                            |
+    +--------+-------+                           +--------+-------+
+    |                |       +-------------+     |                |
+    | FeeMaster of   <-------+ Wallet App  +-----> FeeMaster of   |
+    | CryptoKitties  |       +------+------+     | Shankai Co Ltd |
+    |                |              ^            |                |
+    +--------+-------+              |            +--------+-------+
+             |             +--------+--------+            |
+             |             |                 |            |
+             |             | DMZ Server      |            |
+             |             | by Stormbird    |            |
+             |             |                 |            |
+             |             +--------+--------+            |
+             |                      |                     |
+             |                      |                     |
+    +--------+----------------------+---------------------+---------+
+
+                  The Ethereum Node Network
+
+Their roles in handling Universal Link is:
+
+- DMZ server handles the link if the user doesn't have the app, introducing the user to install the app.
+- The app handles the link without any of the servers in the graph, if the user can cover the transaction fee.
+- If the user can't cover the transaction fee, the wallet app forwards the link to FeeMaster of corrisponding asset-issuers, who may or may not send the transaction on behalf of its user.
+- All of these servers are connected to Ethereum. DMZ server needs it to work out if the link has been used.
+
+How each of the servers functions: 
 
 - When aWallet launches or redraws its interface, it enquires the Trusted Ethereum Node to obtain the current balance, update the transaction history and find any incoming unconfirmed transactions from its mempool to notify the user. For any Asset Definition downloaded (shipped), the wallet inquires the corresponding smart contract for its current and incoming unconfirmed transactions.
 
@@ -38,10 +102,3 @@ How each of the servers function:
 
 - When a αWallet user uses a Universal Link, she can finalise the transaction herself by providing the amount of Ether required in the link as well as a transaction fee. She can also view the content of a UniversalLink by simply clicking it. In the case the amount required by the Universal Link is zero, she can ask the server to send the transaction to Ethereum on her behalf, paying the fee in the meanwhile. (The case which Universal Link requires zero Ether is documented in UniversalLink server document).
 
-As different parties administrate the three servers, they will probably use different technologies.
-
-- The Ethereum node uses RPC so it doesn't matter which technology it uses as long as the mempool can be enquired for unconfirmed transactions.
-
-- The Market Queue server is in Python, running on AWS.
-
-- The Universal Link Server belongs to the asset issuer since they have the best knowledge if they wish to send transactions to their users by paying the fee. We provide an example where no spam-detection is applied and hope the asset issuer's programmer add spam-protection by utilising their business knowledge.

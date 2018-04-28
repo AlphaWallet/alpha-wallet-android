@@ -162,7 +162,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         {
             AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
             String contractNetwork = ad.getNetworkValue(networkId,"network");
-            if (contractNetwork != null)
+            if (contractNetwork.length() > 0)
             {
                 int contractNetworkId = Integer.valueOf(contractNetwork);
                 if (contractNetworkId == this.networkId)
@@ -173,6 +173,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
             }
         }
         catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
+        }
+        catch (NumberFormatException e)
         {
             e.printStackTrace();
         }

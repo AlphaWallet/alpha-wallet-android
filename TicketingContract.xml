@@ -158,6 +158,18 @@
           <name lang="zh">加里宁格勒</name>
           <name lang="es">Kaliningrad</name>
         </entity>
+        <entity key="255">
+          <name lang="ru">Сидней</name>
+          <name lang="en">Sydney</name>
+          <name lang="zh">悉尼</name>
+          <name lang="es">Sídney</name>
+        </entity>
+        <entity key="254">
+          <name lang="ru">Сингапур</name>
+          <name lang="en">Singapore</name>
+          <name lang="zh">新加坡</name>
+          <name lang="es">Singapur</name>
+        </entity>
       </mapping>
     </field>
     <field bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" id="venue"
@@ -238,6 +250,11 @@
           <name lang="en">Mordovia Arena</name>
           <name lang="zh">莫爾多維亞體育場</name>
           <name lang="es">Mordovia Arena</name>
+        </entity>
+        <entity key="255">
+          <name lang="en">UNSW Michael Crouch Innovation Center</name>
+          <name lang="zh">新南威尔大学Michael Crouch创新中心</name>
+          <name lang="es">Centro de Innovación de Michael Crouch UNSW</name>
         </entity>
       </mapping>
     </field>

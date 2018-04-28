@@ -1,3 +1,5 @@
+The DMZ server currently only displays the content of an Universal Link, as well as showing if it is already used. This README will focus on what is Universal Link and how it is used across the modules.
+
 ## Universal link for Ethers
 
 A universal link is like this:

@@ -1,5 +1,6 @@
 package io.awallet.crypto.alphawallet.di;
 
+import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -30,9 +31,10 @@ public class ImportTokenModule {
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
-            FeeMasterService feeMasterService) {
+            FeeMasterService feeMasterService,
+            AddTokenInteract addTokenInteract) {
         return new ImportTokenViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract);
     }
 
     @Provides
@@ -59,5 +61,12 @@ public class ImportTokenModule {
     @Provides
     SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
         return new SetupTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository,
+            WalletRepositoryType walletRepository) {
+        return new AddTokenInteract(walletRepository, tokenRepository);
     }
 }

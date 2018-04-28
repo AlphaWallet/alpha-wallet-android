@@ -3,7 +3,8 @@ package io.awallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
-;import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
+;import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
+import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -23,25 +24,28 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final FeeMasterService feeMasterService;
+    private final AddTokenInteract addTokenInteract;
 
     public ImportTokenViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                        FindDefaultWalletInteract findDefaultWalletInteract,
                                        CreateTransactionInteract createTransactionInteract,
                                        FetchTokensInteract fetchTokensInteract,
                                        SetupTokensInteract setupTokensInteract,
-                                       FeeMasterService feeMasterService) {
+                                       FeeMasterService feeMasterService,
+                                       AddTokenInteract addTokenInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.feeMasterService = feeMasterService;
+        this.addTokenInteract = addTokenInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService);
+        return (T) new ImportTokenViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract);
     }
 }
 

@@ -17,6 +17,7 @@ import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenFactory;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -54,6 +55,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final FeeMasterService feeMasterService;
+    private final AddTokenInteract addTokenInteract;
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -79,13 +81,15 @@ public class ImportTokenViewModel extends BaseViewModel  {
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
                          SetupTokensInteract setupTokensInteract,
-                         FeeMasterService feeMasterService) {
+                         FeeMasterService feeMasterService,
+                         AddTokenInteract addTokenInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.feeMasterService = feeMasterService;
+        this.addTokenInteract = addTokenInteract;
     }
 
     public LiveData<TicketRange> importRange() {
@@ -311,6 +315,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
                             Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
                     .subscribe(this::onCreateTransaction, this::onError);
+
+            addTokenWatchToWallet();
         }
         catch (SalesOrderMalformed e)
         {
@@ -328,6 +334,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::processFeemasterResult, this::onError);
+
+            addTokenWatchToWallet();
         }
         catch (SalesOrderMalformed e)
         {
@@ -377,5 +385,20 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             ethToUsd = Double.valueOf(ticker.price_usd);
         }
+    }
+
+    private void addTokenWatchToWallet()
+    {
+        if (importToken != null)
+        {
+            addTokenInteract.add(importToken.tokenInfo, wallet().getValue())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::finishedImport, this::onError);
+        }
+    }
+
+    private void finishedImport(Token token)
+    {
+        Log.d(TAG, "Added to Watch list: " + token.getFullName());
     }
 }

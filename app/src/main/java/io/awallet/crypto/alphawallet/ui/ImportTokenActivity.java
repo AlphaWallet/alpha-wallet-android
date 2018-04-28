@@ -284,6 +284,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onError(ErrorEnvelope error) {
         hideDialog();
         aDialog = new AWalletAlertDialog(this);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
         aDialog.setTitle(R.string.error_transaction_failed);
         aDialog.setMessage(error.message);
         aDialog.setButtonText(R.string.button_ok);

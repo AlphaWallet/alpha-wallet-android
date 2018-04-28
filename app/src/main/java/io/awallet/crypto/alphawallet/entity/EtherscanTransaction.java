@@ -49,6 +49,10 @@ public class EtherscanTransaction
             op.from = contractAddress;
             ct.type = 2; // indicate that we need to load the contract
             ct.operation = RECEIVE_FROM_MAGICLINK;
+
+            //fix up the received params to make parsing simple
+            from = to;
+            to = contractAddress;
         }
 
         //TODO: Do full interpretation here, to avoid needing to reallocate.

@@ -50,7 +50,7 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
                 Transaction oldTx = value;
                 Transaction newTx = (Transaction) newItem.value;
 
-                return oldTx.contentHash.equals(newTx.contentHash);
+                return oldTx.hash.equals(newTx.hash);
             }
             else
             {

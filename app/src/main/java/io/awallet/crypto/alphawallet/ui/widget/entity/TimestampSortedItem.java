@@ -11,7 +11,6 @@ public abstract class TimestampSortedItem<T> extends SortedItem<T> {
 
     private final int order;
 
-
     public TimestampSortedItem(int viewType, T value, int weight, int order) {
         super(viewType, value, weight);
         tags.add(IS_TIMESTAMP_TAG);

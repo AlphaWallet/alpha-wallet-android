@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,6 +63,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private String xmlContractAddress = null;
     private String feemasterUrl = null;
     private int transactionCount;
+    private long lastBlock = 0;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -169,6 +172,7 @@ public class TransactionsViewModel extends BaseViewModel {
         for (Transaction tx : txArray)
         {
             txMap.put(tx.hash, tx);
+            if (Long.valueOf(tx.blockNumber) > lastBlock) lastBlock = Long.valueOf(tx.blockNumber);
         }
     }
 
@@ -180,18 +184,11 @@ public class TransactionsViewModel extends BaseViewModel {
     {
         updateDisplay(txArray);
 
-        Transaction lastTx = null;
-        //simple sort on txArray
-        if (txArray != null && txArray.length > 1)
-        {
-            lastTx = txArray[txArray.length - 1];
-        }
-
         Log.d(TAG, "Fetching network transactions.");
         //now fetch new transactions on main account
         //find block number of last transaction
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchNetworkTransactions(wallet.getValue(), lastTx)
+                fetchTransactionsInteract.fetchNetworkTransactions(wallet.getValue(), lastBlock)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError, this::enumerateTokens);
@@ -204,12 +201,20 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onUpdateTransactions(Transaction[] transactions) {
         Log.d(TAG, "Found " + transactions.length + " Network transactions");
         //check against existing transactions
+        List<Transaction> newTxs = new ArrayList<Transaction>();
         for (Transaction tx : transactions)
         {
-            txMap.put(tx.hash, tx);
+            if (!txMap.containsKey(tx.hash))
+            {
+                txMap.put(tx.hash, tx);
+                newTxs.add(tx);
+            }
         }
 
-        updateDisplay(transactions);
+        if (newTxs.size() > 0)
+        {
+            updateDisplay(newTxs.toArray(new Transaction[0]));
+        }
     }
 
     /**
@@ -265,6 +270,7 @@ public class TransactionsViewModel extends BaseViewModel {
         setupTokensInteract.setupUnknownList(tokenMap, xmlContractAddress);
 
         fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[0]), tokenMap) //patches tx's and returns unknown contracts
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store patched TX
                 .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
                 .flatMapIterable(address -> address) //change to a sequential stream
                 .flatMap(setupTokensInteract::addToken) //fetch token info

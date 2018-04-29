@@ -79,10 +79,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				.subscribeOn(Schedulers.io());
 	}
 
-	private Transaction[] fetchLastTransactionsTrust(Wallet wallet, Transaction lastTransaction)
+	private Transaction[] fetchLastTransactionsTrust(Wallet wallet, long lastBlock)
 	{
-		@NonNull String lastTransactionHash = lastTransaction == null
-				? "" : lastTransaction.hash;
+		final long lastBlockPlus = lastBlock + 1;
 		List<Transaction> result = new ArrayList<>();
 		int pages = 0;
 		int page = 0;
@@ -97,7 +96,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					if (body != null) {
 						pages = body.pages;
 						for (Transaction transaction : body.docs) {
-							if (lastTransactionHash.equals(transaction.hash)) {
+							if (Long.valueOf(transaction.blockNumber) <= lastBlockPlus) {
 								hasMore = false;
 								break;
 							}
@@ -116,14 +115,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, final Transaction lastTrans)
+	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock)
 	{
-		final String lastBlock = (lastTrans != null) ? lastTrans.blockNumber : "0";
+		long lastBlockNumber = lastBlock + 1;
 		return Observable.fromCallable(() -> {
 			List<Transaction> result = new ArrayList<>();
 			try
 			{
-				String response = readTransactions(networkInfo, wallet.address, lastBlock);
+				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber));
 
 				Gson reader = new Gson();
 				JSONObject stateData = new JSONObject(response);
@@ -138,7 +137,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				e.printStackTrace();
 				//if this process fails, also try trust eth wallet API
-				return fetchLastTransactionsTrust(wallet, lastTrans);
+				return fetchLastTransactionsTrust(wallet, lastBlock);
 			}
 
 			return result.toArray(new Transaction[result.size()]);

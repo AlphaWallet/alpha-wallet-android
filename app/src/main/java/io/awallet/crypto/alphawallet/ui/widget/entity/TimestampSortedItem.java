@@ -7,10 +7,9 @@ public abstract class TimestampSortedItem<T> extends SortedItem<T> {
     public static final int ADC = 1;
     public static final int DESC = -1;
 
-    private static final int IS_TIMESTAMP_TAG = 1;
+    public static final int IS_TIMESTAMP_TAG = 1;
 
     private final int order;
-
 
     public TimestampSortedItem(int viewType, T value, int weight, int order) {
         super(viewType, value, weight);

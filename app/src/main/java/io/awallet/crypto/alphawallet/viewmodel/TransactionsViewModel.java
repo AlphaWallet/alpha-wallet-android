@@ -265,6 +265,7 @@ public class TransactionsViewModel extends BaseViewModel {
         setupTokensInteract.setupUnknownList(tokenMap, xmlContractAddress);
 
         fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[0]), tokenMap) //patches tx's and returns unknown contracts
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store patched TX
                 .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
                 .flatMapIterable(address -> address) //change to a sequential stream
                 .flatMap(setupTokensInteract::addToken) //fetch token info

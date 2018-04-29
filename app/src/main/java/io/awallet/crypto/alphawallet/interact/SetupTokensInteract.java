@@ -66,6 +66,10 @@ public class SetupTokensInteract {
      */
     private Transaction parseTransaction(Token token, Transaction thisTrans, TransactionInput data)
     {
+        if (thisTrans.hash.contains("0x3eac"))
+        {
+            Log.d(TAG,"YOLESS");
+        }
         Transaction newTransaction = thisTrans;
         try
         {
@@ -383,7 +387,7 @@ public class SetupTokensInteract {
                 if (t.input != null && t.input.length() > 20)
                 {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
-                    if (data != null && data.functionData != null)
+                    if (t.isConstructor || (data != null && data.functionData != null))
                     {
                         Token localToken = tokenMap.get(t.to);
                         if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);

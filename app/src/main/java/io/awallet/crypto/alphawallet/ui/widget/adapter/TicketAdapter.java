@@ -148,7 +148,6 @@ public class TicketAdapter extends TokensAdapter {
             currentNumber = e.ticketNumber;
         }
 
-
         items.endBatchedUpdates();
     }
 

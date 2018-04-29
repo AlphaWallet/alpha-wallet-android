@@ -36,6 +36,7 @@ public class EtherscanTransaction
 
     public Transaction createTransaction()
     {
+        boolean isConstructor = false;
         TransactionOperation[] o;
         //Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction
         if (internal)
@@ -71,6 +72,7 @@ public class EtherscanTransaction
             ct.operation = CONTRACT_CONSTRUCTOR;
             ct.address = contractAddress;
             ct.type = -5; // indicate that we need to load the contract
+            isConstructor = true;
         }
         else
         {
@@ -79,6 +81,8 @@ public class EtherscanTransaction
 
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
             gasUsed, o);
+
+        tx.isConstructor = isConstructor;
 
         return tx;
     }

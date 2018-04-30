@@ -15,7 +15,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import io.stormbird.token.entity.AssetDefinition;
 import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
@@ -30,6 +32,7 @@ public class AppSiteController {
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
+    private static AssetDefinition definitionParser;
 
     @GetMapping(value = "/{magicLink}")
     public String decodeLink(@PathVariable("magicLink") String magicLink, Model model)
@@ -68,6 +71,28 @@ public class AppSiteController {
             }
             sb.append("]");
             model.addAttribute("tickets", sb.toString());
+
+            sb = new StringBuilder();
+
+            //try to parse them
+            for (BigInteger bi : selection)
+            {
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(bi, definitionParser);
+                String venue = nonFungibleToken.getAttribute("venue").text;
+                String date = nonFungibleToken.getDate("dd MMM");
+                String cat =  nonFungibleToken.getAttribute("category").text;
+                String number = nonFungibleToken.getAttribute("number").text;
+
+                sb.append(venue);
+                sb.append(", ");
+                sb.append(date);
+                sb.append(" : ticket # ");
+                sb.append(number);
+                sb.append("  ....          ");
+            }
+
+            model.addAttribute("desc", sb.toString());
+
         }
         catch (SalesOrderMalformed e)
         {
@@ -89,15 +114,7 @@ public class AppSiteController {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(AppSiteController.class, args);
 		parser.setCryptoInterface(cryptoFunctions);
+
+        definitionParser = new AssetDefinition("../app/src/main/assets/TicketingContract.xml");
 	}
-
-
-	//1. get ticket from URL  <---
-    //2. interpret URL extension
-    //  - Move SalesOrder code to library <--
-    //  - get values out of the order <--
-    //  - Update tests
-    //3. Add web3j
-    //4. Init web3j and get balance
-    //5. Display results
 }

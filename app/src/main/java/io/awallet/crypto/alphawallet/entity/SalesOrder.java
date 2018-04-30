@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
-import org.spongycastle.util.encoders.Base64;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
@@ -43,16 +42,18 @@ public class SalesOrder implements Parcelable {
     public String ownerAddress; //convenience ecrecovered owner address;
     public List<BigInteger> balanceInfo = null; // received balance from blockchain check
 
+    private static Base64Encoder encoder = new Base64Encoder();
+
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
             throws SalesOrderMalformed
     {
-        this.message = Base64.decode(msg);
+        this.message = base64Decode(msg);
         this.price = price;
         this.expiry = expiry;
         this.ticketStart = ticketStart;
         this.ticketCount = ticketCount;
         this.contractAddress = contractAddress;
-        MessageData data = readByteMessage(message, Base64.decode(sig), ticketCount);
+        MessageData data = readByteMessage(message, base64Decode(sig), ticketCount);
         this.priceWei = data.priceWei;
         this.tickets = data.tickets;
         System.arraycopy(data.signature, 0, this.signature, 0, 65);
@@ -154,7 +155,7 @@ public class SalesOrder implements Parcelable {
     }
 
     protected SalesOrder(String linkData) throws SalesOrderMalformed {
-        byte[] fullOrder = Base64.decode(linkData);
+        byte[] fullOrder = base64Decode(linkData);
         long szabo;
         //read the order
         try {
@@ -354,7 +355,7 @@ public class SalesOrder implements Parcelable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("https://app.awallet.io/");
-        byte[] b64 = Base64.encode(completeLink);
+        byte[] b64 = base64Encode(completeLink);
         sb.append(new String(b64));
 
         //this trade can be claimed by anyone who pushes the transaction through and has the sig
@@ -402,5 +403,53 @@ public class SalesOrder implements Parcelable {
         if (this.message == null) isValid = false;
 
         return isValid;
+    }
+
+    public static byte[] base64Encode(
+            byte[]    data)
+    {
+        return base64Encode(data, 0, data.length);
+    }
+    /**
+     * encode the input data producing a base 64 encoded byte array.
+     *
+     * @return a byte array containing the base 64 encoded data.
+     */
+    public static byte[] base64Encode(
+            byte[] data,
+            int    off,
+            int    length)
+    {
+        int len = (length + 2) / 3 * 4;
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(len);
+
+        try
+        {
+            encoder.encode(data, off, length, bOut);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return bOut.toByteArray();
+    }
+
+    public static byte[] base64Decode(
+            String    data)
+    {
+        int len = data.length() / 4 * 3;
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(len);
+
+        try
+        {
+            encoder.decode(data, bOut);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return bOut.toByteArray();
     }
 }

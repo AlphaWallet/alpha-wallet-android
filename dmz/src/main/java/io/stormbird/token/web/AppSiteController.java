@@ -21,6 +21,12 @@ import io.stormbird.token.web.Service.CryptoFunctions;
 @RequestMapping("/")
 public class AppSiteController {
 
+    /**
+     *     <p th:text="'Contract Address: ' + ${contractAddress} + " />
+     <p th:text="'Eth Value of order: ' + ${ethValue} + " />
+     <p th:text="'Owner Address: ' + ${ownerAddress} + " />
+     <p th:text="'Number of tickets: ' + ${ticketCount} + " />
+     */
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
 
@@ -31,7 +37,11 @@ public class AppSiteController {
         try
         {
             MagicLinkData data = parser.parseUniversalLink(magicLink);
-            model.addAttribute("base64", data.contractAddress);
+            parser.getOwnerKey(data);
+            model.addAttribute("contractAddress", data.contractAddress);
+            model.addAttribute("ethValue", data.price);
+            model.addAttribute("ownerAddress", data.ownerAddress);
+            model.addAttribute("ticketCount", data.ticketCount);
         }
         catch (SalesOrderMalformed e)
         {
@@ -54,8 +64,8 @@ public class AppSiteController {
 
 	//1. get ticket from URL  <---
     //2. interpret URL extension
-    //  - Move SalesOrder code to library
-    //  - get values out of the order
+    //  - Move SalesOrder code to library <--
+    //  - get values out of the order <--
     //  - Update tests
     //3. Add web3j
     //4. Init web3j and get balance

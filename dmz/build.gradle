@@ -31,6 +31,7 @@ dependencies {
     implementation('org.web3j:core:3.1.1')
 
 
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
     compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.12'
 
     testCompile("junit:junit")

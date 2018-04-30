@@ -73,6 +73,7 @@ public class TransactionHandler
     }
 
     private void convertToBytes32(List gList, String address, String selection)
+
     {
         List<Bytes32> list = (List<Bytes32>) gList;
         receiveBalance(list, address, selection);

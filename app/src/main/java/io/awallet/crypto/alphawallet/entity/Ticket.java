@@ -461,16 +461,20 @@ public class Ticket extends Token implements Parcelable
                 BigInteger firstTicket = range.tokenIds.get(0);
                 AssetDefinition assetDefinition = new AssetDefinition("TicketingContract.xml", activity.getResources());
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
-                String venue = nonFungibleToken.getAttribute("venue").text;
+
+                String nameStr = nonFungibleToken.getAttribute("category").text;
+                String venueStr = nonFungibleToken.getAttribute("venue").text;
+                String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
+
                 String date = nonFungibleToken.getDate("dd MMM");
                 String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
                 textAmount.setText(seatCount);
-                textTicketName.setText(getFullName());
-                textVenue.setText(venue);
+                textTicketName.setText(nameStr);
+                textVenue.setText(venueStr);
                 textDate.setText(date);
                 textRange.setText(nonFungibleToken.getRangeStr(range));
-                textCat.setText(nonFungibleToken.getAttribute("category").text);
+                textCat.setText(catStr);
                 ticketDetails.setText(getTicketInfo(nonFungibleToken));
             }
             catch (IOException | SAXException e)

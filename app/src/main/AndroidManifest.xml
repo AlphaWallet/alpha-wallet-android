@@ -41,6 +41,10 @@
                     android:host="app.awallet.io"
                     android:pathPrefix="/"
                     android:scheme="https" />
+                <data
+                    android:host="app.awallet.io"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
 

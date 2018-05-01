@@ -2,11 +2,11 @@ package io.awallet.crypto.alphawallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Base64;
 
 import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
 
-import org.spongycastle.util.encoders.Base64;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
@@ -31,7 +31,7 @@ public class SalesOrder implements Parcelable {
     public final long expiry;
     public final double price;
     public final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
-            Convert.Unit.SZABO).toBigInteger();
+                                                            Convert.Unit.SZABO).toBigInteger();
     public final BigInteger priceWei;
     public final int[] tickets;
     public int ticketStart;
@@ -46,13 +46,13 @@ public class SalesOrder implements Parcelable {
     public SalesOrder(double price, long expiry, int ticketStart, int ticketCount, String contractAddress, String sig, String msg)
             throws SalesOrderMalformed
     {
-        this.message = Base64.decode(msg);
+        this.message = Base64.decode(msg, Base64.URL_SAFE);
         this.price = price;
         this.expiry = expiry;
         this.ticketStart = ticketStart;
         this.ticketCount = ticketCount;
         this.contractAddress = contractAddress;
-        MessageData data = readByteMessage(message, Base64.decode(sig), ticketCount);
+        MessageData data = readByteMessage(message, Base64.decode(sig, Base64.URL_SAFE), ticketCount);
         this.priceWei = data.priceWei;
         this.tickets = data.tickets;
         System.arraycopy(data.signature, 0, this.signature, 0, 65);
@@ -154,7 +154,7 @@ public class SalesOrder implements Parcelable {
     }
 
     protected SalesOrder(String linkData) throws SalesOrderMalformed {
-        byte[] fullOrder = Base64.decode(linkData);
+        byte[] fullOrder = Base64.decode(linkData, Base64.URL_SAFE);
         long szabo;
         //read the order
         try {
@@ -354,7 +354,7 @@ public class SalesOrder implements Parcelable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("https://app.awallet.io/");
-        byte[] b64 = Base64.encode(completeLink);
+        byte[] b64 = Base64.encode(completeLink, Base64.URL_SAFE);
         sb.append(new String(b64));
 
         //this trade can be claimed by anyone who pushes the transaction through and has the sig

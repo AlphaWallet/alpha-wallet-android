@@ -1,7 +1,5 @@
 package io.awallet.crypto.alphawallet;
 
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 
 import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 import static junit.framework.Assert.assertNotNull;
@@ -22,6 +20,10 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
+
 
 /**
  * Created by weiwu on 9/3/18.
@@ -33,6 +35,8 @@ import java.util.List;
 
 public class UniversalLinkTest
 {
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+
     final String[] links = { "https://app.awallet.io/AAAAAFroO8yg2x-t8XoYKvHWEk8mRcRZuarNIgwNDg9OYA205_-QZURILYlNp6astOo-RkQMSSefIzMWHKdjcGsc3kAaHfHYi7rrLTgmUfAMaQjFB_u8G0EbB8HewJwDAA==",
             "https://app.awallet.io/AB6EgFroX2xm8IymiSAXpF2m-3kqjpRvy-PYZRQVFhcYAlMtOEau6TvoUT-lN5HoxjxlErC2T0LJ-1u4DmORCdoVs-UNTIL33W_OJ6jGJy2ocqEyWBmV-RiYPIzQlHq0mwE=",
             "https://app.awallet.io/ABLEsFsIA6hOusrp6ZAfDlACatAh6lurgkAr9zc4OTo7SZscuiiYYTfr1VhZ2Kv6NhZqf4dHGhZC5bkclppyAXpnk6SL1teCB_DB-6VKoJZGJj5jZ1Axc1RQ5B2uWojAOgA=" };
@@ -95,8 +99,8 @@ public class UniversalLinkTest
     @Test
     public void UniversalLinksSignerAddressShouldBeRecoverable() throws SalesOrderMalformed, SignatureException {
         for (String link : links) {
-            SalesOrder order = SalesOrder.parseUniversalLink(link);
-            order.getOwnerKey();
+            MagicLinkData order = parser.parseUniversalLink(link);
+            parser.getOwnerKey(order);
             assertNotNull(order.contractAddress);
             assertNotNull(order.ownerAddress);
             assertEquals(OWNER_ADDR, order.ownerAddress.toLowerCase()); //created from 0x007
@@ -106,7 +110,7 @@ public class UniversalLinkTest
     @Test(expected = SalesOrderMalformed.class)
     public void BadLinksShouldThrow() throws SalesOrderMalformed {
         String link = "https://www.awallet.io/import?bad";
-        SalesOrder order = SalesOrder.parseUniversalLink(link);
+        MagicLinkData order = parser.parseUniversalLink(link);
     }
 
     private class OrderData
@@ -145,11 +149,11 @@ public class UniversalLinkTest
                 data.expiry = System.currentTimeMillis() / 1000 + 2000 + (int) (Math.random() * 20000);
 
                 //NB: Trade bytes is what we send to ethereum contract
-                byte[] tradeBytes = SalesOrder.getTradeBytes(data.tickets, CONTRACT_ADDR, data.price, data.expiry);
+                byte[] tradeBytes = parser.getTradeBytes(data.tickets, CONTRACT_ADDR, data.price, data.expiry);
                 byte[] signature = getSignature(tradeBytes);
 
                 //finally generate link
-                data.link = SalesOrder.generateUniversalLink(data.tickets, CONTRACT_ADDR, data.price, data.expiry, signature);
+                data.link = parser.generateUniversalLink(data.tickets, CONTRACT_ADDR, data.price, data.expiry, signature);
 
                 orders.add(data);
             }
@@ -158,8 +162,8 @@ public class UniversalLinkTest
 
             //now try to read all the links
             for (OrderData data : orders) {
-                SalesOrder order = SalesOrder.parseUniversalLink(data.link);
-                order.getOwnerKey();
+                MagicLinkData order = parser.parseUniversalLink(data.link);
+                parser.getOwnerKey(order);
                 Sign.SignatureData signature = sigFromByteArray(order.signature);
                 assertEquals(order.priceWei, data.price);
                 assertEquals(order.expiry, data.expiry);

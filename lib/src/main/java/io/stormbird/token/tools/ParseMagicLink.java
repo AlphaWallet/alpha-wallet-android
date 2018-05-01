@@ -12,6 +12,7 @@ import java.util.List;
 
 import io.stormbird.token.entity.CryptoFunctionsInterface;
 import io.stormbird.token.entity.EthereumReadBuffer;
+import io.stormbird.token.entity.EthereumWriteBuffer;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.MessageData;
 import io.stormbird.token.entity.SalesOrderMalformed;
@@ -24,7 +25,20 @@ import io.stormbird.token.entity.UnsignedLong;
 
 public class ParseMagicLink
 {
+    public final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
+                                                            Convert.Unit.SZABO).toBigInteger();
+
     private CryptoFunctionsInterface cryptoInterface;
+
+    public ParseMagicLink()
+    {
+
+    }
+
+    public ParseMagicLink(CryptoFunctionsInterface cryptInf)
+    {
+        cryptoInterface = cryptInf;
+    }
 
     public void setCryptoInterface(CryptoFunctionsInterface cryptInf)
     {
@@ -189,10 +203,56 @@ public class ParseMagicLink
         }
     }
 
+    /**
+     * Generates the first part of a Universal Link transfer message. Contains:
+     * 4 Byte Micro Eth value ("Szabo")
+     * 4 byte Unsigned expiry value
+     * 20 byte address
+     * variable length compressed indices (1 byte for 0-127, 2 bytes for 128-32767)
+     *
+     * @param ticketSendIndexList list of ticket indices
+     * @param contractAddress Contract Address
+     * @param priceWei Price of bundle in Wei
+     * @param expiry Unsigned UNIX timestamp of offer expiry
+     * @return First part of Universal Link (requires signature of trade bytes to be added)
+     */
+    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+    {
+        try
+        {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
+
+            if (priceWei.compareTo(maxPrice) > 0) {
+                throw new SalesOrderMalformed("Order's price too high to be used in a link");
+            }
+            wb.write4ByteMicroEth(priceWei);
+            wb.writeUnsigned4(expiry);
+            wb.writeAddress(contractAddress);
+            wb.writeCompressedIndices(ticketSendIndexList);
+
+            wb.flush();
+            wb.close();
+
+            return buffer.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public byte[] getTradeBytes(int[] ticketSendIndexList, String contractAddress, String ethPrice, long expiry)
     {
         BigInteger wei = Convert.toWei(String.valueOf(ethPrice), Convert.Unit.FINNEY).toBigInteger();
         return getTradeBytes(ticketSendIndexList, contractAddress, wei, expiry);
+    }
+
+    public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature) throws SalesOrderMalformed
+    {
+        byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
+        return completeUniversalLink(leading, signature);
     }
 
     public String completeUniversalLink(byte[] message, byte[] signature) throws SalesOrderMalformed

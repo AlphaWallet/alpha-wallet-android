@@ -1,15 +1,14 @@
-package io.stormbird.token.web.Service;
-
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.security.SignatureException;
-import java.util.Arrays;
-
-import io.stormbird.token.entity.CryptoFunctionsInterface;
-import java.util.Base64;
+package io.awallet.crypto.alphawallet;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
+import java.util.Arrays;
+import java.util.Base64;
+
+import io.stormbird.token.entity.CryptoFunctionsInterface;
 
 public class CryptoFunctions implements CryptoFunctionsInterface
 {

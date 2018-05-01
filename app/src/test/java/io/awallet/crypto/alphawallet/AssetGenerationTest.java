@@ -12,7 +12,7 @@ public class AssetGenerationTest
         final int venues = 4  ;
         final int locales = 11 ; //no idea if venues and locales match up ???
         final String[] countries = { "ALB", "ASM", "AUS", "AZE", "GBR", "USA", "NZL", "FRA", "DEU", "GRL", "ISL", "IMN", "PRK", "BTN", "CHN", "RUS" };
-        long startTime = 1526126400 ;
+        long startTime = 1525341600 ;
         final int matches = 2   ;
         final int categories = 2;
         final int seatCount = 5;
@@ -75,8 +75,8 @@ public class AssetGenerationTest
     @Test
     public void GenerateSydEthTicketData()
     {
-        final int ticketCount = 50;
-        long startTime = 1525370400 ;
+        final int ticketCount = 256;
+        long startTime = 1525341600 ;
 
         String venuePart = String.format("%02x", 255);
         String localePart = String.format("%02x", 255);
@@ -92,7 +92,8 @@ public class AssetGenerationTest
         {
             if (!first) sb.append(",");
             first = false;
-            sb.append("\"0x00000000000000000000000000000000");
+            sb.append("\"");
+            //sb.append("\"0x00000000000000000000000000000000");
             sb.append(localePart);  //2
             sb.append(venuePart);   //2
             sb.append(timeStr);     //8
@@ -104,7 +105,6 @@ public class AssetGenerationTest
             sb.append(match);    //2
             sb.append(seatNumber);  //4
             sb.append("\"");
-
         }
         sb.append("]");
 

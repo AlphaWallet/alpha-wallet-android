@@ -10,7 +10,9 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -74,6 +76,18 @@ public class AppSiteController {
 
             sb = new StringBuilder();
 
+            List<String> ticketList = new ArrayList<>();
+            for (BigInteger bi : selection)
+            {
+                NonFungibleToken nonFungibleToken = new NonFungibleToken(bi, definitionParser);
+                String venue = nonFungibleToken.getAttribute("venue").text;
+                String date = nonFungibleToken.getDate("dd MMM");
+                String cat =  nonFungibleToken.getAttribute("category").text;
+                String number = nonFungibleToken.getAttribute("number").text;
+
+                ticketList.add(venue + " " + date + " Ticket #" + number);
+            }
+
             //try to parse them
             for (BigInteger bi : selection)
             {
@@ -91,7 +105,7 @@ public class AppSiteController {
                 sb.append("  ....          ");
             }
 
-            model.addAttribute("desc", sb.toString());
+            model.addAttribute("descList", ticketList);
 
         }
         catch (SalesOrderMalformed e)

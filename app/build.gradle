@@ -31,8 +31,8 @@ android {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 78
-        versionName "0.96"
+        versionCode 90
+        versionName "0.991"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true

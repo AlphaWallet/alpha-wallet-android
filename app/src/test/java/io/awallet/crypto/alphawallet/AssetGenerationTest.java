@@ -75,14 +75,15 @@ public class AssetGenerationTest
     @Test
     public void GenerateSydEthTicketData()
     {
-        final int ticketCount = 256;
-        long startTime = 1525341600 ;
+        final int ticketCount = 30;
+        long startTime = 1525258800 ;
 
-        String venuePart = String.format("%02x", 255);
-        String localePart = String.format("%02x", 255);
+        String venuePart = String.format("%02x", 254);
+        String localePart = String.format("%02x", 254);
         String timeStr = String.format("%08x", startTime);
         String match = String.format("%02x", 0);
         String country = String.format("%06x", 0);
+        String catStr = String.format("%02x", 1);
 
         StringBuilder sb = new StringBuilder();
         sb.append("[");
@@ -92,8 +93,8 @@ public class AssetGenerationTest
         {
             if (!first) sb.append(",");
             first = false;
-            sb.append("\"");
-            //sb.append("\"0x00000000000000000000000000000000");
+            //sb.append("\"0x");
+            sb.append("\"0x00000000000000000000000000000000");
             sb.append(localePart);  //2
             sb.append(venuePart);   //2
             sb.append(timeStr);     //8
@@ -102,7 +103,7 @@ public class AssetGenerationTest
             sb.append(country);  //6
             sb.append(country);  //6
             sb.append(match);    //2
-            sb.append(match);    //2
+            sb.append(catStr);    //2
             sb.append(seatNumber);  //4
             sb.append("\"");
         }

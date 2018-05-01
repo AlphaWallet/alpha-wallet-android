@@ -37,7 +37,18 @@ public class EtherscanTransaction
     public Transaction createTransaction()
     {
         TransactionOperation[] o;
-        //Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction
+        // Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction.
+        /* 'operations' member is used in a lot of places. However,
+	 * I'd say a good refactor will sort this out, I think Scoff &
+	 * co had to make the unwieldy nested class set there to read
+	 * in data from their server. 'Operations' should really hold
+	 * an object that defines the transaction. You should have an
+	 * object for each type of contract - ERC20/875 etc. The
+	 * places where operations is used then can be moved inside
+	 * these classes. We don't use his transaction server now
+	 * anyway.
+         */
+
         if (internal)
         {
             o = new TransactionOperation[1];

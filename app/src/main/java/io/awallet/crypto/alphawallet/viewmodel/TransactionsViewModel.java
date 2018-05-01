@@ -87,7 +87,8 @@ public class TransactionsViewModel extends BaseViewModel {
     }
 
     @Override
-    protected void onCleared() {
+    protected void onCleared()
+    {
         super.onCleared();
 
         handler.removeCallbacks(startFetchTransactionsTask);
@@ -326,19 +327,20 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void checkInternalTx(Transaction[] dummy)
     {
-        if (feemasterUrl != null)
-        {
-            fetchTransactionDisposable = fetchTransactionsInteract.fetchInternalTransactions(wallet.getValue(), feemasterUrl)
-                    .flatMap(transactions -> setupTokensInteract.processRemainingTransactions(transactions, tokenMap))
-                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::updateDisplay, this::onError, this::completeCycle);
-        }
-        else
-        {
-            completeCycle();
-        }
+        completeCycle();
+//        if (feemasterUrl != null)
+//        {
+//            fetchTransactionDisposable = fetchTransactionsInteract.fetchInternalTransactions(wallet.getValue(), feemasterUrl)
+//                    .flatMap(transactions -> setupTokensInteract.processRemainingTransactions(transactions, tokenMap))
+//                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(this::updateDisplay, this::onError, this::completeCycle);
+//        }
+//        else
+//        {
+//            completeCycle();
+//        }
     }
 
     private Observable<Transaction[]> removeFromMap(Transaction[] transactions)

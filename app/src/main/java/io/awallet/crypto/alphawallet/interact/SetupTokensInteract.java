@@ -66,10 +66,6 @@ public class SetupTokensInteract {
      */
     private Transaction parseTransaction(Token token, Transaction thisTrans, TransactionInput data)
     {
-        if (thisTrans.hash.contains("0x3eac"))
-        {
-            Log.d(TAG,"YOLESS");
-        }
         Transaction newTransaction = thisTrans;
         try
         {
@@ -85,7 +81,7 @@ public class SetupTokensInteract {
             }
 
             //already has contract info
-            if (thisTrans.operations.length > 0 &&
+            if (thisTrans.isConstructor || thisTrans.operations.length > 0 &&
                     thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
             {
                 op = thisTrans.operations[0];

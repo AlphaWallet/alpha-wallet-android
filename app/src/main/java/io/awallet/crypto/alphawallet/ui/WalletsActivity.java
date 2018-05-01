@@ -35,6 +35,7 @@ import io.awallet.crypto.alphawallet.widget.BackupWarningView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import static io.awallet.crypto.alphawallet.C.IMPORT_REQUEST_CODE;
+import static io.awallet.crypto.alphawallet.C.RESET_WALLET;
 import static io.awallet.crypto.alphawallet.C.SHARE_REQUEST_CODE;
 
 public class WalletsActivity extends BaseActivity implements
@@ -54,6 +55,7 @@ public class WalletsActivity extends BaseActivity implements
     private boolean isSetDefault;
     private final Handler handler = new Handler();
     private AWalletAlertDialog aDialog;
+    private boolean walletChange = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -242,6 +244,12 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onChangeDefaultWallet(Wallet wallet) {
+        if (walletChange)
+        {
+            walletChange = false;
+            sendBroadcast(new Intent(RESET_WALLET));
+        }
+
         if (isSetDefault) {
             viewModel.showHome(this);
         } else {
@@ -270,6 +278,7 @@ public class WalletsActivity extends BaseActivity implements
         //set new wallet
 		viewModel.setDefaultWallet(wallet);
 		isSetDefault = true;
+        walletChange = true;
 		//backupWarning.show(wallet);
     }
 
@@ -360,6 +369,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onSetWalletDefault(Wallet wallet) {
         viewModel.setDefaultWallet(wallet);
         isSetDefault = true;
+        walletChange = true;
     }
 
     private void onDeleteWallet(Wallet wallet) {
@@ -369,6 +379,7 @@ public class WalletsActivity extends BaseActivity implements
         aDialog.setMessage(R.string.confirm_delete_account);
         aDialog.setButtonText(R.string.dialog_ok);
         aDialog.setButtonListener(v -> {
+            walletChange = true;
             viewModel.deleteWallet(wallet);
             aDialog.dismiss();
         });

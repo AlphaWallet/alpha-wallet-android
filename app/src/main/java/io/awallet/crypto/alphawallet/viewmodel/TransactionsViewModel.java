@@ -99,6 +99,17 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
+    public void abortAndRestart()
+    {
+        handler.removeCallbacks(startFetchTransactionsTask);
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+        {
+            fetchTransactionDisposable.dispose();
+        }
+
+        prepare();
+    }
+
     public LiveData<NetworkInfo> defaultNetwork() {
         return network;
     }
@@ -304,27 +315,29 @@ public class TransactionsViewModel extends BaseViewModel {
         Transaction[] transactions = txMap.values().toArray(new Transaction[txMap.size()]);
         fetchTransactionDisposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::completeCycle, this::onError);
+                .subscribe(this::checkInternalTx, this::onError);
     }
 
-    private void completeCycle(Transaction[] transactions)
+    private void completeCycle()
     {
-        checkInternalTx();
         progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
         fetchTransactionDisposable = null;
-        checkIfRegularUpdateNeeded();
     }
 
-    private void checkInternalTx()
+    private void checkInternalTx(Transaction[] dummy)
     {
         if (feemasterUrl != null)
         {
-            disposable = fetchTransactionsInteract.fetchInternalTransactions(wallet.getValue(), feemasterUrl)
+            fetchTransactionDisposable = fetchTransactionsInteract.fetchInternalTransactions(wallet.getValue(), feemasterUrl)
                     .flatMap(transactions -> setupTokensInteract.processRemainingTransactions(transactions, tokenMap))
                     .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::updateDisplay, this::onError);
+                    .subscribe(this::updateDisplay, this::onError, this::completeCycle);
+        }
+        else
+        {
+            completeCycle();
         }
     }
 

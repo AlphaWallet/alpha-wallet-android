@@ -100,27 +100,11 @@ public class AppSiteController {
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(bi, definitionParser);
                 String venue = nonFungibleToken.getAttribute("venue").text;
                 String date = nonFungibleToken.getDate("dd MMM");
+                String time = nonFungibleToken.getDate("HH:mm");
                 String cat =  nonFungibleToken.getAttribute("category").text;
                 String number = nonFungibleToken.getAttribute("number").text;
 
-                ticketList.add(venue + " " + date + " Ticket #" + number);
-            }
-
-            //try to parse them
-            for (BigInteger bi : selection)
-            {
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(bi, definitionParser);
-                String venue = nonFungibleToken.getAttribute("venue").text;
-                String date = nonFungibleToken.getDate("dd MMM");
-                String cat =  nonFungibleToken.getAttribute("category").text;
-                String number = nonFungibleToken.getAttribute("number").text;
-
-                sb.append(venue);
-                sb.append(", ");
-                sb.append(date);
-                sb.append(" : ticket # ");
-                sb.append(number);
-                sb.append("  ....          ");
+                ticketList.add(venue + " " + date + " at " +time+ " Ticket #" + number);
             }
 
             model.addAttribute("descList", ticketList);

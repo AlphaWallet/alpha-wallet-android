@@ -31,7 +31,7 @@ public class SalesOrder implements Parcelable {
     public final long expiry;
     public final double price;
     public final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
-            Convert.Unit.SZABO).toBigInteger();
+                                                            Convert.Unit.SZABO).toBigInteger();
     public final BigInteger priceWei;
     public final int[] tickets;
     public int ticketStart;

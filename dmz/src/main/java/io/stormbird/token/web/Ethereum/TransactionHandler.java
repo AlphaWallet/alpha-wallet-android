@@ -45,7 +45,7 @@ public class TransactionHandler
 
     public TransactionHandler()
     {
-        mWeb3 = Web3j.build(new HttpService(RINKEBY_NODEURL));
+        mWeb3 = Web3j.build(new HttpService(MAIN_NODEURL));
 
         try
         {

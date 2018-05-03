@@ -99,7 +99,7 @@ public class SalesOrder implements Parcelable {
      */
     public static SalesOrder parseUniversalLink(String link) throws SalesOrderMalformed
     {
-        final String importTemplate = "https://app.awallet.io/";
+        final String importTemplate = "wallet.io/";
         int offset = link.indexOf(importTemplate);
         if (offset > -1)
         {

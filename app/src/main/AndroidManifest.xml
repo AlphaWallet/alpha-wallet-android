@@ -42,9 +42,9 @@
                     android:pathPrefix="/"
                     android:scheme="https" />
                 <data
-                    android:host="app.awallet.io"
+                    android:host="app.wallet.io"
                     android:pathPrefix="/"
-                    android:scheme="http" />
+                    android:scheme="https" />
             </intent-filter>
         </activity>
 

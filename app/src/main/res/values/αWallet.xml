@@ -76,6 +76,7 @@
     <string name="generate_pick_up_link">Generate a MagicLink</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
+    <string name="stormbird">Stormbird</string>
 
     <string-array name="filter_date">
         <item>Most Recent</item>
@@ -279,4 +280,9 @@
     <string name="choose_formats">Choose Formats</string>
     <string name="qr_scanner">QR Scanner</string>
     <string name="shengkai">Shengkai</string>
+    <string name="action_create">Create</string>
+    <string name="title_create_token">Create new Token</string>
+    <string name="hint_token_text">Token Text</string>
+    <string name="error_token_text">More than 2 characters</string>
+    <string name="error_too_long">String too long</string>
 </resources>

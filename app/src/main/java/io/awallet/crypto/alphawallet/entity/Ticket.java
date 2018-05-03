@@ -192,7 +192,7 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.textAppreciation.setText("--");
         if (isLiveTicket())
         {
-            tokenHolder.issuer.setText(R.string.shengkai);
+            tokenHolder.issuer.setText(R.string.stormbird);
             tokenHolder.contractType.setVisibility(View.VISIBLE);
             tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
             tokenHolder.contractType.setText(R.string.erc875);
@@ -436,6 +436,15 @@ public class Ticket extends Token implements Parcelable
         }
 
         return displayIDs;
+    }
+
+    public String getFullName() {
+        if (tokenInfo.name == null || tokenInfo.symbol == null) return null;
+        else if (tokenInfo.address.equalsIgnoreCase("0x277b1318965030c62e1dac9671a6f8df77f855cf"))
+        {
+            return "Blockchain Event Tickets"; //SORRY about this hack! It only replaces the name for this specific contract
+        }
+        else return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
     }
 
     /**

@@ -17,7 +17,6 @@ repositories {
     }
 }
 
-
 android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
@@ -31,8 +30,8 @@ android {
         applicationId "io.awallet.crypto.alphawallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 91
-        versionName "0.992"
+        versionCode 93
+        versionName "0.993"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true

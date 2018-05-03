@@ -354,11 +354,13 @@ public class SalesOrder implements Parcelable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("https://app.awallet.io/");
-        byte[] b64 = Base64.encode(completeLink, Base64.URL_SAFE);
+        byte[] b64 = Base64.encode(completeLink, Base64.URL_SAFE|Base64.NO_WRAP);
         sb.append(new String(b64));
 
+        String test = sb.toString();
+
         //this trade can be claimed by anyone who pushes the transaction through and has the sig
-        return sb.toString();
+        return test;
     }
 
     public static byte[] signatureToByteArray(Sign.SignatureData signature) throws SalesOrderMalformed

@@ -44,7 +44,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent) {
+    public TokenHolder(int resId, ViewGroup parent)
+    {
         super(resId, parent);
 
         icon = findViewById(R.id.icon);
@@ -72,7 +73,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             // We handled NPE. Exception handling is expensive, but not impotent here
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
-                        : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
+                        : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
             token.setupContent(this);
         } catch (Exception ex) {

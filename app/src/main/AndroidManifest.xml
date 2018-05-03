@@ -129,6 +129,10 @@
             android:label="@string/title_import_token" />
 
         <activity
+            android:name="io.awallet.crypto.alphawallet.ui.CreateTokenActivity"
+            android:label="@string/title_create_token" />
+
+        <activity
             android:name="io.awallet.crypto.alphawallet.ui.TransferTicketActivity"
             android:label="@string/label_transfer_ticket" />
 

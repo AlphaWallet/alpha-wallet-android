@@ -75,7 +75,7 @@ public class AssetGenerationTest
     @Test
     public void GenerateSydEthTicketData()
     {
-        final int ticketCount = 30;
+        final int ticketCount = 200;
         long startTime = 1525258800 ;
 
         String venuePart = String.format("%02x", 254);

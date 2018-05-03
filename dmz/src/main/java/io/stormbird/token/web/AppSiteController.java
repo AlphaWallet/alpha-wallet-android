@@ -3,6 +3,7 @@ package io.stormbird.token.web;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,23 @@ public class AppSiteController {
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
     private static AssetDefinition definitionParser;
+
+    @GetMapping(value = "/apple-app-site-association", produces = "application/json")
+    @ResponseBody
+    public String getAppleDeepLinkConfigure() {
+        //return "apple-app-site-association";
+        return "{\n" +
+                "  \"applinks\": {\n" +
+                "    \"apps\": [],\n" +
+                "    \"details\": [\n" +
+                "      {\n" +
+                "        \"appID\": \"LRAW5PL536.com.stormbird.alphawallet\",\n" +
+                "        \"paths\": [ \"*\" ]\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
+    }
 
     @GetMapping(value = "/{magicLink}")
     public String decodeLink(@PathVariable("magicLink") String magicLink, Model model)

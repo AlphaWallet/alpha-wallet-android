@@ -3,9 +3,7 @@ package io.stormbird.token.management;
 import javax.swing.*;
 
 public class ContractFunctions extends JFrame {
-    private JButton changeButton;
     private JPanel contentPane;
-    private JTextField ethAddress;
     private JComboBox localityCombo;
     private JTextField locality;
     private JTextField countryA;
@@ -22,6 +20,7 @@ public class ContractFunctions extends JFrame {
     private JTextField MatchField;
     private JTextField categoryField;
     private JTextField numeroField;
+    private JTextPane statusBar;
 
     public ContractFunctions() {
         setContentPane(contentPane);
@@ -31,5 +30,9 @@ public class ContractFunctions extends JFrame {
     }
     public static void main(String args[]) {
         (new ContractFunctions()).setVisible(true);
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }

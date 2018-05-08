@@ -27,7 +27,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
-							"http://54.222.132.228:8545",
+							"https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk",
 							//"http://stormbird.duckdns.org:8540/",
                     "https://api.trustwalletapp.com/",
                     "https://etherscan.io/tx/",1, true,

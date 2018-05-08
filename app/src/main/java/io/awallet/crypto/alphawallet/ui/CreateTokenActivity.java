@@ -123,9 +123,8 @@ public class CreateTokenActivity extends BaseActivity implements View.OnClickLis
             isValid = false;
         }
 
-
         if (isValid) {
-            viewModel.save(address, symbol, decimals, name, isStormbird);
+            //viewModel.save(address, symbol, decimals, name, isStormbird);
         }
     }
 }

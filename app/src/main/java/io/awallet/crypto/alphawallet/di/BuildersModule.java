@@ -4,6 +4,7 @@ import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
 import io.awallet.crypto.alphawallet.ui.AssetDisplayActivity;
 import io.awallet.crypto.alphawallet.ui.BrowseMarketActivity;
 import io.awallet.crypto.alphawallet.ui.ConfirmationActivity;
+import io.awallet.crypto.alphawallet.ui.CreateTokenActivity;
 import io.awallet.crypto.alphawallet.ui.GasSettingsActivity;
 import io.awallet.crypto.alphawallet.ui.HelpActivity;
 import io.awallet.crypto.alphawallet.ui.HelpFragment;
@@ -76,6 +77,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AddTokenModule.class)
 	abstract AddTokenActivity bindAddTokenActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = CreateTokenModule.class)
+	abstract CreateTokenActivity bindCreateTokenActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = ChangeTokenModule.class)

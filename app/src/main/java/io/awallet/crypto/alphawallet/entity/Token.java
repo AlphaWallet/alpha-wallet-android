@@ -10,8 +10,6 @@ import android.view.View;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
-import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
-import io.awallet.crypto.alphawallet.ui.AddTokenActivity_MembersInjector;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 

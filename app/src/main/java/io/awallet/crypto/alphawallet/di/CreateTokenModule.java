@@ -1,6 +1,5 @@
 package io.awallet.crypto.alphawallet.di;
 
-import dagger.Provides;
 import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
@@ -15,8 +14,15 @@ import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.viewmodel.CreateTokenViewModelFactory;
 
-public class CreateTokenModule
-{
+import dagger.Module;
+import dagger.Provides;
+
+/**
+ * Created by James on 9/03/2018.
+ */
+
+@Module
+public class CreateTokenModule {
 
     @Provides
     CreateTokenViewModelFactory createTokenViewModelFactory(

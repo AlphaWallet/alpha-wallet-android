@@ -49,7 +49,7 @@
      <string name="toolbar_header_settings">我的设置</string>
      <string name="toolbar_header_help">帮助</string>
      <string name="toolbar_ethereum_info">Ethereum Info</string>
-     <string name="toolbar_header_transactions">Transactions</string>
+     <string name="toolbar_header_transactions">交易记录</string>
      <string name="settings_my_wallet_address">我的钱包地址</string>
      <string name="settings_notification">通知设置</string>
      <string name="settings_logout">登出</string>

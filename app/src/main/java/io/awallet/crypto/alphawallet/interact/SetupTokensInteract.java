@@ -41,7 +41,7 @@ public class SetupTokensInteract {
     public final static String EXPIRED_CONTRACT = "[Expired Contract]";
     public final static String INVALID_OPERATION = "[Invalid Operation]";
     public final static String CONTRACT_CONSTRUCTOR = "Contract Creation";
-    public final static String RECEIVE_FROM_MAGICLINK = "Receive From MagicLink";
+    public final static String RECEIVE_FROM_UNIVERSAL_LINK = "Receive From MagicLink";
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -206,7 +206,7 @@ public class SetupTokensInteract {
                     ct.name = thisTrans.to;
                     fillContractInformation(thisTrans, ct);
                     break;
-                case RECEIVE_FROM_MAGICLINK:
+                case RECEIVE_FROM_UNIVERSAL_LINK:
                     op.value = String.valueOf(data.paramValues.size());
                     break;
                 case INVALID_OPERATION:

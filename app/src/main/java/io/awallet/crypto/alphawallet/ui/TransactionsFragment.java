@@ -176,6 +176,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         {
             e.printStackTrace();
         }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

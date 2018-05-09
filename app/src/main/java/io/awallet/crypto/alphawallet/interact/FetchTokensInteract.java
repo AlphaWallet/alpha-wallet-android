@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.interact;
 
 import io.awallet.crypto.alphawallet.entity.OrderContractAddressPair;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -106,6 +108,11 @@ public class FetchTokensInteract {
                 //.map(updateToken -> mapToPair(updateToken, so))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Single<Ticker> getEthereumTicker()
+    {
+        return tokenRepository.getEthTicker();
     }
 
     private OrderContractAddressPair mapToPair(Token token, SalesOrder so)

@@ -10,4 +10,6 @@ public interface PreferenceRepositoryType {
 	boolean getNotificationsState();
 	void setNotificationState(boolean state);
 
+	boolean getDefaultNetworkSet();
+	void setDefaultNetworkSet();
 }

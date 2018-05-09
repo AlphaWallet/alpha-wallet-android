@@ -2,6 +2,7 @@ package io.awallet.crypto.alphawallet.interact;
 
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
+import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 
@@ -26,6 +27,11 @@ public class AddTokenInteract {
                 .flatMap(wallet -> tokenRepository
                         .addToken(wallet, tokenInfo))
                 .toObservable();
+    }
+
+    public Observable<Token> add(TokenInfo tokenInfo, Wallet wallet) {
+        return tokenRepository
+                        .addToken(wallet, tokenInfo).toObservable();
     }
 
     public Observable<Token[]> add(TokenInfo[] tokenInfos) {

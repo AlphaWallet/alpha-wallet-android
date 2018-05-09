@@ -61,7 +61,7 @@ public class NonFungibleToken {
 
     public String getRangeStr(TicketRange data)
     {
-        int ticketStart = getAttribute("category").value.intValue();
+        int ticketStart = getAttribute("number").value.intValue();
         String ticketRange = String.valueOf(ticketStart);
         if (data.tokenIds != null)
         {

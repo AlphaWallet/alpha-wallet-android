@@ -1,0 +1,15 @@
+.callToAction {
+	display: inline-block;
+	padding: 1ex;
+}
+#body {
+	width: 54%;
+	float: left;
+	border: thin solid grey;
+	border-radius: 10px;
+	margin: 4%;
+	padding: 1em;
+}
+table {
+    margin: auto;
+}

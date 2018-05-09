@@ -1,0 +1,5 @@
+/build
+# We shouldn't even need this, but some sysop just love to include this
+nohup.out
+# Yes. Surprisingly, this was also commited into git before.
+*.p12

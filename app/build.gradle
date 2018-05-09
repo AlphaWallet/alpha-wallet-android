@@ -157,12 +157,4 @@ dependencies {
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':tn')
-
-    // Pincode Lollipin
-
-    //    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
-
-    //        transitive = true
-
-    //    }
 }

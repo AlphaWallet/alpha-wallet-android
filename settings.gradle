@@ -1,1 +1,1 @@
-include ':app', ':tn', ':lib', ':desktop', ':dmz'
+include ':desktop', ':app', ':tn', ':lib', ':dmz'

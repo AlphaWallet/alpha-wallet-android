@@ -1,4 +1,4 @@
-package io.awallet.crypto.alphawallet.repository.entity;
+package io.stormbird.token.entity;
 
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -6,16 +6,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
-import io.awallet.crypto.alphawallet.repository.AssetDefinition;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-
 /**
  * Created by weiwu on 1/3/18.  Each NonFungibleToken is a
  * non-fungible token identified by a byte32 tokenID (other forms of
  * IDs may be added if tests proves that they can be more efficient).
  */
 
-public class NonFungibleToken {
+public class NonFungibleToken
+{
     public BigInteger id;
 
     public static final class Attribute {
@@ -54,14 +52,14 @@ public class NonFungibleToken {
     public String getDate(String format)
     {
         long dateUTC = getAttribute("time").value.longValue();
-        Date dateFormat = new java.util.Date(dateUTC * 1000L);
+        Date dateFormat = new Date(dateUTC * 1000L);
         SimpleDateFormat dateFormatter = new SimpleDateFormat(format, Locale.ENGLISH); //TODO: Get locale
         return dateFormatter.format(dateFormat.getTime());
     }
 
     public String getRangeStr(TicketRange data)
     {
-        int ticketStart = getAttribute("number").value.intValue();
+        int ticketStart = getAttribute("category").value.intValue();
         String ticketRange = String.valueOf(ticketStart);
         if (data.tokenIds != null)
         {

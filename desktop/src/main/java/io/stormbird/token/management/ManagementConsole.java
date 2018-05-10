@@ -170,7 +170,7 @@ public final class ManagementConsole extends javax.swing.JFrame {
 
     private void menuLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLoginActionPerformed
         // TODO add your handling code here:
-        loginPopup loginPopups = new loginPopup(null, true, this);
+        LoginPopup loginPopups = new LoginPopup();
         loginPopups.show();
     }//GEN-LAST:event_menuLoginActionPerformed
 

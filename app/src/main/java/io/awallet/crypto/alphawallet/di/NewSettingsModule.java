@@ -6,8 +6,8 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.LanguageRepository;
-import io.awallet.crypto.alphawallet.repository.LanguageRepositoryType;
+import io.awallet.crypto.alphawallet.repository.LocaleRepository;
+import io.awallet.crypto.alphawallet.repository.LocaleRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
@@ -29,7 +29,7 @@ class NewSettingsModule {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LanguageRepositoryType languageRepository
+            LocaleRepositoryType localeRepository
     ) {
         return new NewSettingsViewModelFactory(
                 findDefaultNetworkInteract,
@@ -41,7 +41,7 @@ class NewSettingsModule {
                 manageWalletsRouter,
                 homeRouter,
                 preferenceRepository,
-                languageRepository);
+                localeRepository);
     }
 
     @Provides
@@ -82,7 +82,7 @@ class NewSettingsModule {
     }
 
     @Provides
-    LanguageRepositoryType provideLanguageRepository(PreferenceRepositoryType preferenceRepository) {
-        return new LanguageRepository(preferenceRepository);
+    LocaleRepositoryType provideLocaleRepository(PreferenceRepositoryType preferenceRepository) {
+        return new LocaleRepository(preferenceRepository);
     }
 }

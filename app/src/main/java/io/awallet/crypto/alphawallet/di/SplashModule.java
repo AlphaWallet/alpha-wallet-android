@@ -5,8 +5,8 @@ import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.LanguageRepository;
-import io.awallet.crypto.alphawallet.repository.LanguageRepositoryType;
+import io.awallet.crypto.alphawallet.repository.LocaleRepository;
+import io.awallet.crypto.alphawallet.repository.LocaleRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
@@ -26,8 +26,8 @@ public class SplashModule {
                                                          AddTokenInteract addTokenInteract,
                                                          CreateWalletInteract createWalletInteract,
                                                          PreferenceRepositoryType preferenceRepository,
-                                                         LanguageRepositoryType languageRepository) {
-        return new SplashViewModelFactory(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository, languageRepository);
+                                                         LocaleRepositoryType localeRepository) {
+        return new SplashViewModelFactory(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository, localeRepository);
     }
 
     @Provides
@@ -55,7 +55,7 @@ public class SplashModule {
     }
 
     @Provides
-    LanguageRepositoryType provideLanguageRepositoryType(PreferenceRepositoryType preferenceRepository) {
-        return new LanguageRepository(preferenceRepository);
+    LocaleRepositoryType provideLocaleRepositoryType(PreferenceRepositoryType preferenceRepository) {
+        return new LocaleRepository(preferenceRepository);
     }
 }

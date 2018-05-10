@@ -1,21 +1,21 @@
 package io.awallet.crypto.alphawallet.entity;
 
-public class Language {
+public class LocaleItem {
     public String name;
     public String code;
     public boolean isSelected;
 
-    public Language(String name, boolean isSelected) {
+    public LocaleItem(String name, boolean isSelected) {
         this.name = name;
         this.isSelected = isSelected;
     }
 
-    public Language(String name, String code) {
+    public LocaleItem(String name, String code) {
         this.name = name;
         this.code = code;
     }
 
-    public Language(String name, String code, boolean isSelected) {
+    public LocaleItem(String name, String code, boolean isSelected) {
         this.name = name;
         this.code = code;
         this.isSelected = isSelected;

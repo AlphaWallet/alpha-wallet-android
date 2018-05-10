@@ -9,7 +9,7 @@ import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.LanguageRepositoryType;
+import io.awallet.crypto.alphawallet.repository.LocaleRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 
 public class SplashViewModelFactory implements ViewModelProvider.Factory {
@@ -20,7 +20,7 @@ public class SplashViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenInteract addTokenInteract;
     private final CreateWalletInteract createWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
-    private final LanguageRepositoryType languageRepository;
+    private final LocaleRepositoryType localeRepository;
 
     public SplashViewModelFactory(FetchWalletsInteract fetchWalletsInteract,
                                   EthereumNetworkRepositoryType networkRepository,
@@ -28,18 +28,18 @@ public class SplashViewModelFactory implements ViewModelProvider.Factory {
                                   AddTokenInteract addTokenInteract,
                                   CreateWalletInteract createWalletInteract,
                                   PreferenceRepositoryType preferenceRepository,
-                                  LanguageRepositoryType languageRepository) {
+                                  LocaleRepositoryType localeRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.networkRepository = networkRepository;
         this.importWalletInteract = importWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.createWalletInteract = createWalletInteract;
         this.preferenceRepository = preferenceRepository;
-        this.languageRepository = languageRepository;
+        this.localeRepository = localeRepository;
     }
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SplashViewModel(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository, languageRepository);
+        return (T) new SplashViewModel(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository, localeRepository);
     }
 }

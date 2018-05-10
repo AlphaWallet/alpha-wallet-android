@@ -20,17 +20,17 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.Language;
+import io.awallet.crypto.alphawallet.entity.LocaleItem;
 
-public class SelectLanguageDialog extends Dialog {
-    private static SelectLanguageDialog dialog = null;
+public class SelectLocaleDialog extends Dialog {
+    private static SelectLocaleDialog dialog = null;
     private TextView titleText;
     private Button button;
     private Context context;
     private ListView listView;
     private CustomAdapter adapter;
 
-    public SelectLanguageDialog(@NonNull Activity activity, ArrayList<Language> list, String selectedItem) {
+    public SelectLocaleDialog(@NonNull Activity activity, ArrayList<LocaleItem> list, String selectedItem) {
         super(activity);
         this.context = activity;
 
@@ -46,7 +46,7 @@ public class SelectLanguageDialog extends Dialog {
         adapter = new CustomAdapter(list, selectedItem);
         listView.setAdapter(adapter);
 
-        setTitle(R.string.dialog_title_select_language);
+        setTitle(R.string.dialog_title_select_locale);
     }
 
     @Override
@@ -77,8 +77,8 @@ public class SelectLanguageDialog extends Dialog {
         titleText.setText(message);
     }
 
-    public class CustomAdapter extends ArrayAdapter<Language> {
-        private ArrayList<Language> dataSet;
+    public class CustomAdapter extends ArrayAdapter<LocaleItem> {
+        private ArrayList<LocaleItem> dataSet;
         private String selectedItem;
         private String selectedItemId;
 
@@ -104,12 +104,12 @@ public class SelectLanguageDialog extends Dialog {
             LinearLayout itemLayout;
         }
 
-        private CustomAdapter(ArrayList<Language> data, String selectedItemId) {
+        private CustomAdapter(ArrayList<LocaleItem> data, String selectedItemId) {
             super(context, R.layout.item_dialog_list, data);
             this.dataSet = data;
             this.selectedItemId = selectedItemId;
 
-            for (Language l : data) {
+            for (LocaleItem l : data) {
                 if (l.getCode().equals(selectedItemId)) {
                     l.setSelected(true);
                 }
@@ -119,7 +119,7 @@ public class SelectLanguageDialog extends Dialog {
         @NonNull
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            Language item = getItem(position);
+            LocaleItem item = getItem(position);
             final ViewHolder viewHolder;
             View view = convertView;
 

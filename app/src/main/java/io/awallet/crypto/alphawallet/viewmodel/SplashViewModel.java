@@ -14,13 +14,11 @@ import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.LanguageRepositoryType;
+import io.awallet.crypto.alphawallet.repository.LocaleRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 
 import static io.awallet.crypto.alphawallet.C.DEFAULT_NETWORK;
-import static io.awallet.crypto.alphawallet.C.HARD_CODED_CONTRACT;
 import static io.awallet.crypto.alphawallet.C.HARD_CODED_KEY;
-import static io.awallet.crypto.alphawallet.C.HARD_CONTRACT_ADDR;
 import static io.awallet.crypto.alphawallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.awallet.crypto.alphawallet.C.PRE_LOADED_KEY;
 
@@ -31,7 +29,7 @@ public class SplashViewModel extends ViewModel {
     private final AddTokenInteract addTokenInteract;
     private final CreateWalletInteract createWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
-    private final LanguageRepositoryType languageRepository;
+    private final LocaleRepositoryType localeRepository;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
@@ -42,18 +40,18 @@ public class SplashViewModel extends ViewModel {
                     AddTokenInteract addTokenInteract,
                     CreateWalletInteract createWalletInteract,
                     PreferenceRepositoryType preferenceRepository,
-                    LanguageRepositoryType languageRepository) {
+                    LocaleRepositoryType localeRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.networkRepository = networkRepository;
         this.importWalletInteract = importWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.createWalletInteract = createWalletInteract;
         this.preferenceRepository = preferenceRepository;
-        this.languageRepository = languageRepository;
+        this.localeRepository = localeRepository;
     }
 
     public void setLocale(Context context) {
-        languageRepository.setDefaultLanguage(context, preferenceRepository.getDefaultLanguage(), preferenceRepository.getDefaultLanguageCode());
+        localeRepository.setDefaultLocale(context, preferenceRepository.getDefaultLocale(), preferenceRepository.getDefaultLocaleCode());
     }
 
     /**

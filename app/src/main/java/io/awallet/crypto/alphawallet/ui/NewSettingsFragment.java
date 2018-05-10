@@ -24,7 +24,7 @@ import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.viewmodel.NewSettingsViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.NewSettingsViewModelFactory;
-import io.awallet.crypto.alphawallet.widget.SelectLanguageDialog;
+import io.awallet.crypto.alphawallet.widget.SelectLocaleDialog;
 import io.awallet.crypto.alphawallet.widget.SelectNetworkDialog;
 
 public class NewSettingsFragment extends Fragment {
@@ -35,7 +35,7 @@ public class NewSettingsFragment extends Fragment {
     private Wallet wallet;
     private TextView networksSubtext;
     private TextView walletsSubtext;
-    private TextView languageSubtext;
+    private TextView localeSubtext;
     private Switch notificationState;
 
     @Nullable
@@ -50,10 +50,10 @@ public class NewSettingsFragment extends Fragment {
 
         networksSubtext = view.findViewById(R.id.networks_subtext);
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
-        languageSubtext = view.findViewById(R.id.language_subtext);
+        localeSubtext = view.findViewById(R.id.locale_lang_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
 
-        languageSubtext.setText(viewModel.getDefaultLanguage());
+        localeSubtext.setText(viewModel.getDefaultLocale());
 
         updateNotificationState();
 
@@ -82,14 +82,14 @@ public class NewSettingsFragment extends Fragment {
             dialog.show();
         });
 
-        final LinearLayout layoutSwitchLanguage = view.findViewById(R.id.layout_language);
-        layoutSwitchLanguage.setOnClickListener(v -> {
-            String currentLanguage = viewModel.getDefaultLanguageCode();
-            SelectLanguageDialog dialog = new SelectLanguageDialog(getActivity(), viewModel.getLanguageList(getContext()), currentLanguage);
+        final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
+        layoutSwitchLocale.setOnClickListener(v -> {
+            String currentLocale = viewModel.getDefaultLocaleCode();
+            SelectLocaleDialog dialog = new SelectLocaleDialog(getActivity(), viewModel.getLocaleList(getContext()), currentLocale);
             dialog.setOnClickListener(v1 -> {
-                if (!currentLanguage.equals(dialog.getSelectedItemId())) {
-                    viewModel.setDefaultLanguage(getContext(), dialog.getSelectedItem(), dialog.getSelectedItemId());
-                    languageSubtext.setText(dialog.getSelectedItem());
+                if (!currentLocale.equals(dialog.getSelectedItemId())) {
+                    viewModel.setDefaultLocale(getContext(), dialog.getSelectedItem(), dialog.getSelectedItemId());
+                    localeSubtext.setText(dialog.getSelectedItem());
                 }
                 dialog.dismiss();
             });

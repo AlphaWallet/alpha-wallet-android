@@ -145,7 +145,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/layout_language"
+            android:id="@+id/layout_locale_lang"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginLeft="10dp"
@@ -163,7 +163,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/ic_language" />
+                    android:src="@drawable/ic_locale_lang" />
             </RelativeLayout>
 
             <LinearLayout
@@ -177,12 +177,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:fontFamily="@font/font_light"
-                    android:text="@string/settings_language"
+                    android:text="@string/settings_locale_lang"
                     android:textColor="@color/black"
                     android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/language_subtext"
+                    android:id="@+id/locale_lang_subtext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_light"

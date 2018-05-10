@@ -11,7 +11,7 @@ import android.text.format.DateUtils;
 import java.util.ArrayList;
 import java.util.Map;
 
-import io.awallet.crypto.alphawallet.entity.Language;
+import io.awallet.crypto.alphawallet.entity.LocaleItem;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -19,7 +19,7 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.LanguageRepositoryType;
+import io.awallet.crypto.alphawallet.repository.LocaleRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
@@ -43,7 +43,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final ManageWalletsRouter manageWalletsRouter;
     private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
-    private final LanguageRepositoryType languageRepository;
+    private final LocaleRepositoryType localeRepository;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -61,7 +61,7 @@ public class NewSettingsViewModel extends BaseViewModel {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LanguageRepositoryType languageRepository) {
+            LocaleRepositoryType localeRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -71,7 +71,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.manageWalletsRouter = manageWalletsRouter;
         this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
-        this.languageRepository = languageRepository;
+        this.localeRepository = localeRepository;
     }
 
     public void showHome(Context context, boolean clearStack, boolean fromSettings) {
@@ -105,17 +105,17 @@ public class NewSettingsViewModel extends BaseViewModel {
         preferenceRepository.setNotificationState(notificationState);
     }
 
-    public String getDefaultLanguage() {
-        return languageRepository.getDefaultLanguage();
+    public String getDefaultLocale() {
+        return localeRepository.getDefaultLocale();
     }
 
-    public void setDefaultLanguage(Context context, String language, String languageCode) {
-        languageRepository.setDefaultLanguage(context, language, languageCode);
+    public void setDefaultLocale(Context context, String locale, String localeCode) {
+        localeRepository.setDefaultLocale(context, locale, localeCode);
         showHome(context, true); //Refresh activity to reflect changes
     }
 
-    public String getDefaultLanguageCode() {
-        return languageRepository.getDefaultLanguageCode();
+    public String getDefaultLocaleCode() {
+        return localeRepository.getDefaultLocaleCode();
     }
 
     public String[] getNetworkList() {
@@ -189,7 +189,7 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     private final Runnable startGetBalanceTask = this::getBalance;
 
-    public ArrayList<Language> getLanguageList(Context context) {
-        return languageRepository.getLanguageList(context);
+    public ArrayList<LocaleItem> getLocaleList(Context context) {
+        return localeRepository.getLocaleList(context);
     }
 }

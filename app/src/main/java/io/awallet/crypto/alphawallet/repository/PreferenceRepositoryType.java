@@ -13,9 +13,9 @@ public interface PreferenceRepositoryType {
 	boolean getDefaultNetworkSet();
 	void setDefaultNetworkSet();
 
-	String getDefaultLanguage();
-	void setDefaultLanguage(String language);
+	String getDefaultLocale();
+	void setDefaultLocale(String locale);
 
-	String getDefaultLanguageCode();
-	void setDefaultLanguageCode(String languageCode);
+	String getDefaultLocaleCode();
+	void setDefaultLocaleCode(String localeCode);
 }

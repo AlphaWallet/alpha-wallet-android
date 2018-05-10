@@ -288,10 +288,32 @@
       <name lang="es">Evento</name>
     </field>
     <field bitmask="0000000000000000000000000000000000000000000000000000000000FF0000" id="category"
-	   type="Integer">
+	   type="Enumeration">
       <name lang="en">Cat</name>
       <name lang="zh">等级</name>
       <name lang="es">Cat</name>
+      <mapping>
+        <entity key="1">
+          <name lang="en">FIFA VIP</name>
+          <name lang="zh">世界杯VIP</name>
+        </entity>
+        <entity key="2">
+          <name lang="en">FIFA Group VIP</name>
+          <name lang="zh">世界杯团票VIP</name>
+        </entity>
+        <entity key="3">
+          <name lang="en">FIFA 2018</name>
+          <name lang="zh">2018世界杯</name>
+        </entity>
+        <entity key="255">
+          <name lang="en">Singapore Unnamed Workshop</name>
+          <name lang="zh">新加坡一个还没取名字的活动</name>
+        </entity>
+	<entity key="254">
+          <name lang="en">Beijing Unnamed Workshop</name>
+          <name lang="zh">北京一个还没取名字的活动</name>
+        </entity>
+      </mapping>
     </field>
     <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="number"
 	   type="Integer">

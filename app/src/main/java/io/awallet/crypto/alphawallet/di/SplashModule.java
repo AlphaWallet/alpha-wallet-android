@@ -5,8 +5,6 @@ import io.awallet.crypto.alphawallet.interact.CreateWalletInteract;
 import io.awallet.crypto.alphawallet.interact.FetchWalletsInteract;
 import io.awallet.crypto.alphawallet.interact.ImportWalletInteract;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.LanguageRepository;
-import io.awallet.crypto.alphawallet.repository.LanguageRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.TokenRepositoryType;
@@ -25,9 +23,8 @@ public class SplashModule {
                                                          ImportWalletInteract importWalletInteract,
                                                          AddTokenInteract addTokenInteract,
                                                          CreateWalletInteract createWalletInteract,
-                                                         PreferenceRepositoryType preferenceRepository,
-                                                         LanguageRepositoryType languageRepository) {
-        return new SplashViewModelFactory(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository, languageRepository);
+                                                         PreferenceRepositoryType preferenceRepository) {
+        return new SplashViewModelFactory(fetchWalletsInteract, networkRepository, importWalletInteract, addTokenInteract, createWalletInteract, preferenceRepository);
     }
 
     @Provides
@@ -52,10 +49,5 @@ public class SplashModule {
     CreateWalletInteract provideCreateAccountInteract(
             WalletRepositoryType accountRepository, PasswordStore passwordStore) {
         return new CreateWalletInteract(accountRepository, passwordStore);
-    }
-
-    @Provides
-    LanguageRepositoryType provideLanguageRepositoryType(PreferenceRepositoryType preferenceRepository) {
-        return new LanguageRepository(preferenceRepository);
     }
 }

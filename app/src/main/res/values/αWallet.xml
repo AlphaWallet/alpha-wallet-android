@@ -279,10 +279,4 @@
     <string name="choose_formats">Choose Formats</string>
     <string name="qr_scanner">QR Scanner</string>
     <string name="shengkai">Shengkai</string>
-    <string name="dialog_title_select_language">Select Language:</string>
-    <string name="settings_language">Language</string>
-    <string name="lang_en">English</string>
-    <string name="lang_es">Spanish</string>
-    <string name="lang_zh">Chinese</string>
-    <string name="settings_network">Network</string>
 </resources>

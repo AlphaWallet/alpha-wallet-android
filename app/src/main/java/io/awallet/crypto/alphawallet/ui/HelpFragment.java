@@ -44,19 +44,13 @@ public class HelpFragment extends Fragment implements View.OnClickListener {
 
         /* Placeholder only */
         int[] questions = {
-                R.string.help_question1,
-                R.string.help_question2,
-                R.string.help_question3,
-                R.string.help_question4,
-                R.string.help_question5,
+        //        R.string.help_question1,
+        //        R.string.help_question2,
         };
 
         int[] answers = {
-                R.string.help_answer1,
-                R.string.help_answer1,
-                R.string.help_answer1,
-                R.string.help_answer1,
-                R.string.help_answer1,
+        //        R.string.help_answer1,
+        //        R.string.help_answer2,
         };
 
         List<HelpItem> helpItems = new ArrayList<>();

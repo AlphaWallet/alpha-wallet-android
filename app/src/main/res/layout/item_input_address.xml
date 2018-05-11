@@ -43,14 +43,13 @@
 
         <ImageButton
             android:id="@+id/img_scan_qr"
-            android:src="@drawable/ic_camera"
+            android:src="@mipmap/qr_code_icon"
             android:contentDescription="@string/scan_qr"
             android:background="?android:selectableItemBackground"
+            android:padding="@dimen/big_padding"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
             />
 
     </RelativeLayout>

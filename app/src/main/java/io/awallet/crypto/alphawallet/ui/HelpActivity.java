@@ -53,7 +53,6 @@ public class HelpActivity extends BaseActivity {
                 R.string.what_is_eth,
                 R.string.why_alphawallet_eth,
                 R.string.how_i_get_money,
-                //R.string.help_answer1,
                 R.string.how_i_transfer_into_wallet,
         };
 

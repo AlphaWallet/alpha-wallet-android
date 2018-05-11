@@ -24,7 +24,6 @@ import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.viewmodel.NewSettingsViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.NewSettingsViewModelFactory;
-import io.awallet.crypto.alphawallet.widget.SelectLanguageDialog;
 import io.awallet.crypto.alphawallet.widget.SelectNetworkDialog;
 
 public class NewSettingsFragment extends Fragment {
@@ -35,7 +34,6 @@ public class NewSettingsFragment extends Fragment {
     private Wallet wallet;
     private TextView networksSubtext;
     private TextView walletsSubtext;
-    private TextView languageSubtext;
     private Switch notificationState;
 
     @Nullable
@@ -50,10 +48,7 @@ public class NewSettingsFragment extends Fragment {
 
         networksSubtext = view.findViewById(R.id.networks_subtext);
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
-        languageSubtext = view.findViewById(R.id.language_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
-
-        languageSubtext.setText(viewModel.getDefaultLanguage());
 
         updateNotificationState();
 
@@ -76,20 +71,6 @@ public class NewSettingsFragment extends Fragment {
                 networksSubtext.setText(dialog.getSelectedItem());
                 if (!currentNetwork.equals(dialog.getSelectedItem())) {
                     viewModel.showHome(getContext(), true, true);
-                }
-                dialog.dismiss();
-            });
-            dialog.show();
-        });
-
-        final LinearLayout layoutSwitchLanguage = view.findViewById(R.id.layout_language);
-        layoutSwitchLanguage.setOnClickListener(v -> {
-            String currentLanguage = viewModel.getDefaultLanguageCode();
-            SelectLanguageDialog dialog = new SelectLanguageDialog(getActivity(), viewModel.getLanguageList(getContext()), currentLanguage);
-            dialog.setOnClickListener(v1 -> {
-                if (!currentLanguage.equals(dialog.getSelectedItemId())) {
-                    viewModel.setDefaultLanguage(getContext(), dialog.getSelectedItem(), dialog.getSelectedItemId());
-                    languageSubtext.setText(dialog.getSelectedItem());
                 }
                 dialog.dismiss();
             });
@@ -137,7 +118,8 @@ public class NewSettingsFragment extends Fragment {
         return view;
     }
 
-    private void updateNotificationState() {
+    private void updateNotificationState()
+    {
         boolean state = viewModel.getNotificationState();
         notificationState.setChecked(state);
     }

@@ -9,7 +9,7 @@
 		<network>3</network> <!-- ROPSTEN -->
 	</contract>
 	<contract>
-	<address type="issuing">0x277b1318965030C62E1dAc9671a6F8dF77F855Cf</address>
+		<address type="issuing">0x277b1318965030C62E1dAc9671a6F8dF77F855Cf</address>
 		<name lang=\"ru\">Билеты</name>	  
 		<name lang="en">Tickets</name>
 		<name lang="zh">票</name>

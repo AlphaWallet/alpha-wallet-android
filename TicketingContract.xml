@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
-  <contract>
-    <address type="issuing">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
-    <name lang="en">Tickets</name>
-    <name lang="zh">票</name>
-    <name lang="es">Entradas</name>
-    <network>3</network> <!-- ROPSTEN -->
-  </contract>
+	<contract>
+		<address type="issuing">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
+		<name lang=\"ru\">Билеты</name>	  
+		<name lang="en">Tickets</name>
+		<name lang="zh">票</name>
+		<name lang="es">Entradas</name>
+		<network>3</network> <!-- ROPSTEN -->
+	</contract>
+	<contract>
+	<address type="issuing">0x277b1318965030C62E1dAc9671a6F8dF77F855Cf</address>
+		<name lang=\"ru\">Билеты</name>	  
+		<name lang="en">Tickets</name>
+		<name lang="zh">票</name>
+		<name lang="es">Entradas</name>
+		<network>1</network> <!-- MAINNET -->
+	</contract>	
   <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>
     <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">

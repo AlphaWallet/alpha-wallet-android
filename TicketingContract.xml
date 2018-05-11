@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset>
-  <contract>
-    <address type="issuing">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
-    <name lang="en">FIFA 2018 Tickets</name>
-    <name lang="zh">世界杯2018承兑票</name>
-    <name lang="es">Entradas de FIFA 2018</name>
-    <network>3</network> <!-- ROPSTEN -->
-  </contract>
+	<contract type="issuing">
+		<address network="1">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
+		<address network="3">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
+		<name lang="ru">Билеты</name>	  
+		<name lang="en">Tickets</name>
+		<name lang="zh">票</name>
+		<name lang="es">Entradas</name>
+	</contract>
   <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>
     <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">

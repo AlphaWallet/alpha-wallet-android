@@ -6,4 +6,4 @@ dependencies {
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
-mainClassName = "io.stormbird.token.management.ManagementConsole"
+mainClassName = "io.stormbird.token.management.LoginPopup"

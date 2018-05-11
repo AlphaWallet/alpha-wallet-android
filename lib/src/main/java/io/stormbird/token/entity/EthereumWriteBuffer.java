@@ -1,9 +1,5 @@
-package io.awallet.crypto.alphawallet.entity;
+package io.stormbird.token.entity;
 
-import android.support.annotation.NonNull;
-
-import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,7 +7,8 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static junit.framework.Assert.assertEquals;
+import io.stormbird.token.tools.Convert;
+import io.stormbird.token.tools.Numeric;
 
 /**
  * Created by James on 26/03/2018.
@@ -19,7 +16,7 @@ import static junit.framework.Assert.assertEquals;
 
 public class EthereumWriteBuffer extends DataOutputStream
 {
-    public EthereumWriteBuffer(@NonNull OutputStream in)
+    public EthereumWriteBuffer(OutputStream in)
     {
         super(in);
     }
@@ -74,7 +71,7 @@ public class EthereumWriteBuffer extends DataOutputStream
 
     public void writeSignature(byte[] sig) throws IOException
     {
-        assertEquals(sig.length, 65);
+        //assertEquals(sig.length, 65);
         write(sig);
     }
 
@@ -89,7 +86,6 @@ public class EthereumWriteBuffer extends DataOutputStream
         {
             microEth = maxValue;    //should we signal an overflow error here, or just silently round?
                                     //possibly irrelevant, this is a huge amount of eth.
-                                    //Update: This is screened out in the UI now
         }
 
         byte[] uValBytes = UnsignedLong.createBytes(microEth.longValue());

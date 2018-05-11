@@ -41,7 +41,7 @@ public class SetupTokensInteract {
     public final static String EXPIRED_CONTRACT = "[Expired Contract]";
     public final static String INVALID_OPERATION = "[Invalid Operation]";
     public final static String CONTRACT_CONSTRUCTOR = "Contract Creation";
-    public final static String RECEIVE_FROM_MAGICLINK = "Receive From MagicLink";
+    public final static String RECEIVE_FROM_UNIVERSAL_LINK = "Receive From MagicLink";
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -205,6 +205,9 @@ public class SetupTokensInteract {
                 case CONTRACT_CONSTRUCTOR:
                     ct.name = thisTrans.to;
                     fillContractInformation(thisTrans, ct);
+                    break;
+                case RECEIVE_FROM_UNIVERSAL_LINK:
+                    op.value = String.valueOf(data.paramValues.size());
                     break;
                 case INVALID_OPERATION:
                     if (ect != null)
@@ -427,7 +430,7 @@ public class SetupTokensInteract {
             List<Transaction> processedTxList = new ArrayList<>();
             for (Transaction t : txMap.values())
             {
-                if (t.to != null && t.to.equals(token.getAddress()) && t.input != null && t.input.length() > 20)
+                if (t.to != null && t.to.equals(token.getAddress()))
                 {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
                     if (data != null && data.functionData != null)

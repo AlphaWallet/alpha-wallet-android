@@ -119,11 +119,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, final Transaction lastTrans)
 	{
 		final String lastBlock = (lastTrans != null) ? lastTrans.blockNumber : "0";
+		long lastBlockNumber = Long.valueOf(lastBlock) + 1;
 		return Observable.fromCallable(() -> {
 			List<Transaction> result = new ArrayList<>();
 			try
 			{
-				String response = readTransactions(networkInfo, wallet.address, lastBlock);
+				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber));
 
 				Gson reader = new Gson();
 				JSONObject stateData = new JSONObject(response);

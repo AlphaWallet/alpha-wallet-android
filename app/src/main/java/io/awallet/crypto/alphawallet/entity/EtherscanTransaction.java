@@ -2,7 +2,7 @@ package io.awallet.crypto.alphawallet.entity;
 
 
 import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
-import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.RECEIVE_FROM_UNIVERSAL_LINK;
 
 /**
  * Created by James on 26/03/2018.
@@ -37,7 +37,18 @@ public class EtherscanTransaction
     public Transaction createTransaction()
     {
         TransactionOperation[] o;
-        //Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction
+        // Parse internal transaction - this is a RECEIVE_FROM_UNIVERSAL_LINK transaction.
+        /* 'operations' member is used in a lot of places. However,
+	 * I'd say a good refactor will sort this out, I think Scoff &
+	 * co had to make the unwieldy nested class set there to read
+	 * in data from their server. 'Operations' should really hold
+	 * an object that defines the transaction. You should have an
+	 * object for each type of contract - ERC20/875 etc. The
+	 * places where operations is used then can be moved inside
+	 * these classes. We don't use his transaction server now
+	 * anyway.
+         */
+
         if (internal)
         {
             o = new TransactionOperation[1];
@@ -48,7 +59,7 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             op.from = contractAddress;
             ct.type = 2; // indicate that we need to load the contract
-            ct.operation = RECEIVE_FROM_MAGICLINK;
+            ct.operation = RECEIVE_FROM_UNIVERSAL_LINK;
 
             //fix up the received params to make parsing simple
             from = to;

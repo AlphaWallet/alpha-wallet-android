@@ -11,8 +11,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -22,6 +24,7 @@ import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticket;
+import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModel;
@@ -29,6 +32,8 @@ import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
+import io.stormbird.token.tools.TokenDefinition;
+import org.xml.sax.SAXException;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.IMPORT_STRING;
@@ -306,13 +311,17 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else {
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
-                        if (t.getXMLProperty(networkId,"address", this).equalsIgnoreCase(t.getAddress()))
-                        {
-                            viewModel.importThroughFeemaster(t.getXMLProperty(networkId,"feemaster", this));
-                        }
-                        else
-                        {
-                            viewModel.performImport();
+                        try {
+                            TokenDefinition ticketToken = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
+                                    Locale.getDefault().getDisplayLanguage());
+                            String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
+                            if (address != null && address.equalsIgnoreCase(t.getAddress())) {
+                                viewModel.importThroughFeemaster(ticketToken.getFeemasterAPI());
+                            } else {
+                                viewModel.performImport();
+                            }
+                        } catch (IOException|SAXException e) {
+                            e.printStackTrace(); // TODO Handle the error!!
                         }
                     }
                 }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,8 +15,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
+import io.stormbird.token.tools.TokenDefinition;
 import org.xml.sax.SAXException;
 
 import io.awallet.crypto.alphawallet.R;
@@ -25,7 +24,6 @@ import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TokensAdapter;
 import io.awallet.crypto.alphawallet.util.TabUtils;
 import io.awallet.crypto.alphawallet.viewmodel.WalletViewModel;
@@ -35,6 +33,7 @@ import io.awallet.crypto.alphawallet.widget.SystemView;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -229,8 +228,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         //get the XML address
         try
         {
-            AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
-            adapter.setLiveTokenAddress(ad.getNetworkValue(networkId,"address").toLowerCase());
+            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
+                    Locale.getDefault().getDisplayLanguage());
+            adapter.setLiveTokenAddress(ad.getContractAddress(networkId).toLowerCase());
         }
         catch (IOException |SAXException e)
         {

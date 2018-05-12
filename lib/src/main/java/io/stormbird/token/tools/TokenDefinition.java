@@ -3,6 +3,8 @@ package io.stormbird.token.tools;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+
+import io.stormbird.token.entity.NonFungibleToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -14,14 +16,18 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenDefinition {
     protected Document xml;
     public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
-    public String locale;
-    private Map<String, String> networkInfo = new ConcurrentHashMap<>();
+    protected String locale;
+    public Map<Integer, String> addresses = new HashMap<>();
+    protected String marketQueueAPI = null;
+    protected String feemasterAPI = null;
+    protected String tokenName = null;
 
     protected class FieldDefinition {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
@@ -139,47 +145,68 @@ public class TokenDefinition {
                 }
             }
         }
-
-        extract(xml, "address");
-        extract(xml, "gateway");
-        extract(xml, "feemaster");
-        extract(xml, "network");
+        extractFeatureTag(xml);
+        extractContractTag(xml);
     }
 
-    public String getNetworkValue(int network, String field)
-    {
-        int definitionNetwork = Integer.valueOf(networkInfo.get("network"));
-        if (network == definitionNetwork)
-        {
-            return networkInfo.get(field);
-        }
-        else
-        {
-            //XML doesn't apply to this request
-            return "";
-        }
+    public String getFeemasterAPI(){
+        return feemasterAPI;
     }
 
-    private void extract(Document xml, String field)
-    {
-        NodeList nList = xml.getElementsByTagName(field);
-        String value = getNode(nList, field);
+    public String getContractAddress(int networkID) {
+        return addresses.get(networkID);
+    }
 
-        /*
-            Kludge: since feemaster is used to fetch internal transactions, and asset definition is not yet updated
-            remove 'claimToken' from line
-            TODO: remove 'claimToken' from assetdefinition in XML, then remove this patch
-         */
-        if (value.contains("claimToken"))
-        {
-            int index = value.indexOf("claimToken");
-            if (index > 0)
-            {
-                value = value.substring(0, index);
+    private void extractFeatureTag(Document xml) {
+        NodeList nList = xml.getElementsByTagName("feature");
+        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = (Element) nNode;
+                switch (eElement.getTagName()) {
+                    case "feemaster":
+                        feemasterAPI = eElement.getTextContent();
+                    case "trade":
+                        if (eElement.getAttribute("method").equals("market-queue")) {
+                            marketQueueAPI = eElement.getTextContent().trim();
+                        }
+                }
             }
         }
+    }
 
-        networkInfo.put(field, value);
+    private void extractContractTag(Document xml) {
+        String nameDefault = null;
+        String nameEnglish = null;
+        NodeList nList = xml.getElementsByTagName("contract");
+
+        /* we allow multiple contracts, e.g. for issuing asset and for
+         * proxy usage. but for now we only deal with the first if
+         * NullPointerException in the next statement, then XML file
+         * missing <contract> elements */
+        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = ((Element) nNode);
+                if (eElement.getTagName().equals("address")) {
+                    Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
+                    addresses.put(networkId, nNode.getTextContent());
+                }
+                if (eElement.getTagName().equals("name"))
+                    switch (eElement.getAttribute("lang")) {
+                        case "":
+                            nameDefault = eElement.getTextContent();
+                            break;
+                        case "en":
+                            nameEnglish = eElement.getTextContent(); // no "break;" for a reason.
+                        default:
+                            if (eElement.getAttribute("lang") == locale)
+                                tokenName = eElement.getTextContent();
+                    }
+            }
+        }
+        if (tokenName == null) {
+            tokenName = nameDefault == null ? nameEnglish : nameDefault;
+        }
+        // at this point, tokenName may still be null, and its acceptable
     }
 
     private String getNode(NodeList nList, String field)
@@ -197,6 +224,19 @@ public class TokenDefinition {
         }
 
         return value;
+    }
+
+    /* take a token ID in byte-32, find all the fields in it and call back
+     * token.setField(fieldID, fieldName, text-value). This is abandoned
+     * temporarily for the need to retrofit the class with J.B.'s design */
+
+    public void parseField(BigInteger tokenId, NonFungibleToken token) {
+        for (String key : fields.keySet()) {
+            FieldDefinition f = fields.get(key);
+            BigInteger val = tokenId.and(f.bitmask).shiftRight(f.bitshift);
+            token.setAttribute(f.id,
+                    new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
+        }
     }
 
 }

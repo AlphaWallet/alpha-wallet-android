@@ -161,24 +161,17 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         try
         {
             AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
-            String contractNetwork = ad.getNetworkValue(networkId,"network");
-            if (contractNetwork.length() > 0)
-            {
-                int contractNetworkId = Integer.valueOf(contractNetwork);
-                if (contractNetworkId == this.networkId)
-                {
-                    viewModel.setXMLContractAddress(ad.getNetworkValue(networkId, "address").toLowerCase());
-                    viewModel.setFeemasterURL(ad.getNetworkValue(networkId,"feemaster"));
-                }
+            String contractAddress = ad.getContractAddress(networkId);
+            if (contractAddress == null) {
+                // TODO: user gets status update and this asset class is marked invalid
+            } else {
+                    viewModel.setXMLContractAddress(contractAddress.toLowerCase());
+                    viewModel.setFeemasterURL(ad.getFeemasterAPI());
             }
         }
         catch (IOException|SAXException e)
         {
-            e.printStackTrace();
-        }
-        catch (NumberFormatException e)
-        {
-            e.printStackTrace();
+            e.printStackTrace(); // TOO BRITTLE!!
         }
     }
 

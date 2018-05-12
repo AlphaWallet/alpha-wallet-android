@@ -1,5 +1,6 @@
-package io.awallet.crypto.alphawallet;
+package io.stormbird.token.tools;
 
+import io.stormbird.token.entity.NonFungibleToken;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -11,22 +12,34 @@ import java.math.BigInteger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
 
-import io.awallet.crypto.alphawallet.repository.AssetDefinition;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 
-public class AssetDefinitionTest {
+public class TokenDefinitionTest {
     BigInteger[] ticketIDs = {
 	BigInteger.valueOf(0x010CCB53), BigInteger.valueOf(0x010CCB54),
 	BigInteger.valueOf(0x02020075), BigInteger.valueOf(0x02020076)
     };
-    File file = new File("src/main/assets/TicketingContract.xml");
+    File file = new File("../contracts/TicketingContract.xml");
 
     @Test
-    public void AssetDefinitionShouldParse() throws IOException, SAXException {
+    public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
-        AssetDefinition ticketAsset = new AssetDefinition(new FileInputStream(file), "en");
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
+        assertFalse(ticketAsset.fields.isEmpty());
+        assertEquals("Tickets", ticketAsset.tokenName);
+
+        // test contract address extraction
+        String contractAddress = ticketAsset.getContractAddress(1);
+        assertEquals("0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa", contractAddress);
+
+        // test feature extraction
+        assertEquals("https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/", ticketAsset.marketQueueAPI);
+    }
+
+    @Test
+    public void FieldDefinitionShouldParse() throws IOException, SAXException {
+        assertTrue(file.exists());
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
         assertFalse(ticketAsset.fields.isEmpty());
 
         NonFungibleToken ticket = new NonFungibleToken(ticketIDs[0], ticketAsset);

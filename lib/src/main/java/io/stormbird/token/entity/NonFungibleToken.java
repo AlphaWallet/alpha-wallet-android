@@ -1,5 +1,7 @@
 package io.stormbird.token.entity;
 
+import io.stormbird.token.tools.TokenDefinition;
+
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,7 +41,7 @@ public class NonFungibleToken
         attributes.put(attributeId, attribute);
     }
 
-    public NonFungibleToken(BigInteger tokenId, AssetDefinition ad){
+    public NonFungibleToken(BigInteger tokenId, TokenDefinition ad){
         this(tokenId);
         ad.parseField(tokenId, this);
     }

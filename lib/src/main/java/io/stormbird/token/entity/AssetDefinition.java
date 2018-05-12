@@ -37,7 +37,7 @@ public class AssetDefinition extends TokenDefinition {
             FieldDefinition f = fields.get(key);
             BigInteger val = tokenId.and(f.bitmask).shiftRight(f.bitshift);
             token.setAttribute(f.id,
-                               new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
+                    new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
         }
     }
 

@@ -8,16 +8,15 @@
 <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-<ds:DigestValue>sr7ul3w2ySiKkaZvcuc3CXlfXmL44c7TmqfD3MWobtw=</ds:DigestValue>
+<ds:DigestValue>1EnORbF1WQITqwF66JaWyEoTIT0tktaGf29hdVd1/fY=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
 <ds:SignatureValue>
-ADVOiI1L4YBSmQr1eee75VaYlUn1Rbufygy18bGNQmOhei1y8nqcubZzCe11AJ8gGD5ow8f0eqBt
-ZZmIs5q8anDnAe+ulWUafZ6aUR2B9Pziketn2EzaXPQb20Tf6d9ZlPpsmh5icXiHJ6vODbcLj5NN
-Ca0vddmCJK6RQjgR4rT+7Ajg
+AdZkI68YQ2gOAFmqyV+HEGQ52qp/T56e00l3vL6Y06xzCRwTMS9sSF2kG0PNqZi7xBusAWxO2Ubf
+vvnKX4lLPWtQAWVZXvZXJOMqH5FPSkT/MJ313DoKh510uvZEMNRbByLMFMOINAQF9s86y+BXHEBW
+v+J+th5FQxMgnTFpcJBdnXx9
 </ds:SignatureValue>
 <ds:KeyInfo>
-<ds:KeyName>Shankai</ds:KeyName>
 <ds:X509Data>
 <ds:X509Certificate>
 MIIFBzCCBK2gAwIBAgIQKCMFmlBLtxz6L27XkUOsHjAKBggqhkjOPQQDAjCBkDELMAkGA1UEBhMC
@@ -89,7 +88,7 @@ EPUQyp2aDrV1aug=
 	<contract type="issuing">
 		<address network="1">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
 		<address network="3">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
-		<name lang="ru">Билеты</name>	  
+		<name lang="ru">Билеты</name>
 		<name lang="en">Tickets</name>
 		<name lang="zh">票</name>
 		<name lang="es">Entradas</name>
@@ -103,8 +102,7 @@ EPUQyp2aDrV1aug=
       <trade method="universal-link" version="9">
         <prefix>https://app.awallet.io/</prefix>
       </trade>
-      <!--<feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster> http://stormbird.duckdns.org:8080/api/claimToken-->
-      <feemaster>http://stormbird.duckdns.org:8080/api/claimToken</feemaster>
+      <feemaster>https://app.awallet.io:80/api/claimToken</feemaster>
       <redeem>
         <method name="QR"/>
         <!--

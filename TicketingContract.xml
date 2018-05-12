@@ -89,7 +89,7 @@ EPUQyp2aDrV1aug=
 	<contract type="issuing">
 		<address network="1">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
 		<address network="3">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
-		<name lang="ru">Билеты</name>	  
+		<name lang="ru">Билеты</name>
 		<name lang="en">Tickets</name>
 		<name lang="zh">票</name>
 		<name lang="es">Entradas</name>
@@ -103,8 +103,7 @@ EPUQyp2aDrV1aug=
       <trade method="universal-link" version="9">
         <prefix>https://app.awallet.io/</prefix>
       </trade>
-      <!--<feemaster>http://feemaster.eastasia.cloudapp.azure.com:8080/api/claimToken</feemaster> http://stormbird.duckdns.org:8080/api/claimToken-->
-      <feemaster>http://stormbird.duckdns.org:8080/api/claimToken</feemaster>
+      <feemaster>https://app.awallet.io:80/api/claimToken</feemaster>
       <redeem>
         <method name="QR"/>
         <!--

@@ -86,8 +86,8 @@ EPUQyp2aDrV1aug=
 </ds:KeyInfo>
 </ds:Signature>
 	<contract type="issuing">
-		<address network="1">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
-		<address network="3">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
+		<address network="1">0x277b1318965030C62E1dAc9671a6F8dF77F855Cf</address>
+		<address network="3">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
 		<name lang="ru">Билеты</name>
 		<name lang="en">Tickets</name>
 		<name lang="zh">票</name>

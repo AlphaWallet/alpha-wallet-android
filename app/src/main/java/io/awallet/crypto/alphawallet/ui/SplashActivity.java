@@ -46,7 +46,7 @@ public class SplashActivity extends BaseActivity {
                 .get(SplashViewModel.class);
         splashViewModel.wallets().observe(this, this::onWallets);
         splashViewModel.createWallet().observe(this, this::onWalletCreate);
-        splashViewModel.setLocale(getApplicationContext());
+
         splashViewModel.startOverridesChain();
     }
 

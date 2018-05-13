@@ -137,7 +137,8 @@ public class NewSettingsFragment extends Fragment {
         return view;
     }
 
-    private void updateNotificationState() {
+    private void updateNotificationState()
+    {
         boolean state = viewModel.getNotificationState();
         notificationState.setChecked(state);
     }

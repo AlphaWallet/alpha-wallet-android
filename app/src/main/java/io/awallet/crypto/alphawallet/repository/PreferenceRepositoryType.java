@@ -12,4 +12,10 @@ public interface PreferenceRepositoryType {
 
 	boolean getDefaultNetworkSet();
 	void setDefaultNetworkSet();
+
+	String getDefaultLocale();
+	void setDefaultLocale(String locale);
+
+	String getDefaultLocaleCode();
+	void setDefaultLocaleCode(String localeCode);
 }

@@ -13,6 +13,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	private static final String GAS_LIMIT_FOR_TOKENS_KEY = "gas_limit_for_tokens";
 	private static final String NOTIFICATIONS_KEY = "notifications";
 	private static final String DEFAULT_SET_KEY = "default_net_set";
+	private static final String LOCALE_KEY = "locale";
+	private static final String LOCALE_CODE_KEY = "locale_code";
 
 	private final SharedPreferences pref;
 
@@ -61,5 +63,25 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	public void setDefaultNetworkSet()
 	{
 		pref.edit().putBoolean(DEFAULT_SET_KEY, true).apply();
+	}
+
+	@Override
+	public String getDefaultLocale() {
+		return pref.getString(LOCALE_KEY, "English");
+	}
+
+	@Override
+	public void setDefaultLocale(String locale) {
+		pref.edit().putString(LOCALE_KEY, locale).apply();
+	}
+
+	@Override
+	public String getDefaultLocaleCode() {
+		return pref.getString(LOCALE_CODE_KEY, "en");
+	}
+
+	@Override
+	public void setDefaultLocaleCode(String localeCode) {
+		pref.edit().putString(LOCALE_CODE_KEY, localeCode).apply();
 	}
 }

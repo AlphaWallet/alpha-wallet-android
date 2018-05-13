@@ -2,7 +2,13 @@ The shared libraries currently handle Asset Definition File as well as Univeral 
 
 ## The Asset Definition file ##
 
-It came a long way for me to create asset definition in an XML format due to the complex metadata needed for a client to access a smart contract in a programmable way. The next question is: what key should be used to sign this asset definition XML?
+The asset definition file (XML) controls how a client interacts with a
+smart-contract. Typically, how the contract name should be localised,
+how to display tokens differently by category, colour and shape, what
+operations the users can do with the token - if exchangable, which
+exchange service to use. It is very important for user experience and
+a lot finer than the contract. Naturally, such important document
+needs to be signed, but, by what key?
 
 There are 2 candidates:
 
@@ -13,7 +19,7 @@ There are a few advantages of using the contract owner's key:
 
 - It doesn't force any dependencies - many smart contracts authors are reasonably anonymous; to force them to leave a trace of their identity by applying a web certificate is not our design goal.
 
-- The admin key of a smart-contract is intended to last longer - for most contracts, being valid as long as the contract is at work. The web certificate, although can be renewed without changing the private key, is regenerated yearly, in many organisations.
+- The admin key of a smart-contract is intended to last longer - for most contracts, being valid as long as the contract is at work. The web certificate, although can be renewed without changing the private key, is in practice regenerated yearly.
 
 - The web certificates have a designated purpose (to secure the website). It may come as a surprise to some administrator users that its use is needed to control the way the world interacts with a smart contract.
 
@@ -22,6 +28,7 @@ There are a few advantages of using the contract owner's key:
 - Only one signature is needed. Many organisations own more than one websites, and it is not clear which site's key should be used.
 
 However, there are also advantages from the second option, of using the website SSL key.
+
 True
 - Most people get to know a smart-contract from a website. There should be a way to certify that "this smart contract is recommended by this website". The trust is passed from website to smart-contracts.
 
@@ -29,7 +36,7 @@ True
 
 - SSL certificates can be used to sign XML file while Ethereum key might be kept by a security device which can only sign strings starting with "Ethereum Signed Message..." which breaks XML Signature standards.
 
-I am more inclined to use a combined way: signing the XML file from the website's key and acknowledge it from the smart-contract.
+This document propose a combined way: signing the XML file from the website's key and 'acknowledge' it from the smart-contract.
 
 First, let's define a new interface:
 

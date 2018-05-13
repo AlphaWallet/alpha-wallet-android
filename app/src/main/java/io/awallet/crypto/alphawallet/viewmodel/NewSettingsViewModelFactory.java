@@ -9,6 +9,7 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.GetDefaultWalletBalance;
 import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
+import io.awallet.crypto.alphawallet.repository.LocaleRepositoryType;
 import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.router.HelpRouter;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
@@ -25,6 +26,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final ManageWalletsRouter manageWalletsRouter;
     private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
+    private final LocaleRepositoryType localeRepository;
 
     public NewSettingsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -35,7 +37,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
-            PreferenceRepositoryType preferenceRepository) {
+            PreferenceRepositoryType preferenceRepository,
+            LocaleRepositoryType localeRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -45,6 +48,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
         this.manageWalletsRouter = manageWalletsRouter;
         this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
+        this.localeRepository = localeRepository;
     }
 
     @NonNull
@@ -59,7 +63,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
                 ethereumNetworkRepository,
                 manageWalletsRouter,
                 homeRouter,
-                preferenceRepository
+                preferenceRepository,
+                localeRepository
         );
     }
 }

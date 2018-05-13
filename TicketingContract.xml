@@ -655,10 +655,8 @@ EPUQyp2aDrV1aug=
       
       </mapping>
     </field>
-    <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="number" type="Integer">
-      <name lang="en">Number</name>
-      <name lang="zh">票号</name>
-      <name lang="es">Número</name>
+    <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="numero" type="Integer">
+      <name>№</name>
     </field>
   </fields>
 </asset>

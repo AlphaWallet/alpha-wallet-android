@@ -96,12 +96,8 @@ EPUQyp2aDrV1aug=
   <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>
     <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
-      <trade method="market-queue" version="0.1">
-        <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
-      </trade>
-      <trade method="universal-link" version="9">
-        <prefix>https://app.awallet.io/</prefix>
-      </trade>
+      <trade method="market-queue" version="0.1"><gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway></trade>
+      <trade method="universal-link" version="9"><prefix>https://app.awallet.io/</prefix></trade>
       <feemaster>https://app.awallet.io:80/api/claimToken</feemaster>
       <redeem>
         <method name="QR"/>
@@ -372,17 +368,20 @@ EPUQyp2aDrV1aug=
       <name lang="es">Cat</name>
       <mapping>
         <entity key="1">
-          <name lang="en">FIFA VIP</name>
-          <name lang="zh">世界杯VIP</name>
+          <name lang="en">Category 1</name>
+          <name lang="zh">一类票</name>
         </entity>
         <entity key="2">
-          <name lang="en">FIFA Group VIP</name>
-          <name lang="zh">世界杯团票VIP</name>
+          <name lang="en">Category 2</name>
+          <name lang="zh">二类票</name>
         </entity>
         <entity key="3">
-          <name lang="en">FIFA 2018</name>
-          <name lang="zh">2018世界杯</name>
+          <name lang="en">Match Club</name>
+          <name lang="zh">俱乐部坐席</name>
         </entity>
+	<entity key="4">
+		<name lang="en">Match House Premier</name>
+	</entity>
         <entity key="255">
           <name lang="en">Singapore Unnamed Workshop</name>
           <name lang="zh">新加坡一个还没取名字的活动</name>

@@ -1,7 +1,5 @@
 package io.awallet.crypto.alphawallet;
 
-import io.awallet.crypto.alphawallet.entity.EthereumReadBuffer;
-
 import org.junit.Test;
 import org.junit.Assert;
 import java.io.ByteArrayInputStream;

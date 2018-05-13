@@ -1,24 +1,21 @@
 package io.awallet.crypto.alphawallet.ui.widget.adapter;
 
-import android.arch.lifecycle.Observer;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.OrderContractAddressPair;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.SalesOrderSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.SortedItem;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TokenSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.OrderHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
+import io.stormbird.token.entity.MagicLinkData;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +65,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     });
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public ERC875MarketAdapter(OnSalesOrderClickListener onTokenClickListener, SalesOrder[] orders) {
+    public ERC875MarketAdapter(OnSalesOrderClickListener onTokenClickListener, MagicLinkData[] orders) {
         this.onSalesOrderClickListener = onTokenClickListener;
         setOrders(orders);
     }
@@ -109,7 +106,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         return items.size();
     }
 
-    public void setOrders(SalesOrder[] orders) {
+    public void setOrders(MagicLinkData[] orders) {
         currentList.clear();
         items.beginBatchedUpdates();
         items.clear();
@@ -146,7 +143,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         //we have sufficient information to update one of the tickets
         for (SalesOrderSortedItem thisItem : currentList)
         {
-            SalesOrder order = thisItem.value;
+            MagicLinkData order = thisItem.value;
 
             //updating this item?
             if (    order.contractAddress.equals(balanceUpdate.order.contractAddress) //order address matches

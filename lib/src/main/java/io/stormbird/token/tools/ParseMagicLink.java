@@ -216,7 +216,7 @@ public class ParseMagicLink
      * @param expiry Unsigned UNIX timestamp of offer expiry
      * @return First part of Universal Link (requires signature of trade bytes to be added)
      */
-    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+    public byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
     {
         try
         {

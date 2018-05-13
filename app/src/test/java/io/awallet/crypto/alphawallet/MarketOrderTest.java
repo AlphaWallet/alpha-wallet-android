@@ -3,10 +3,8 @@ package io.awallet.crypto.alphawallet;
 import android.support.annotation.NonNull;
 
 import io.awallet.crypto.alphawallet.entity.BaseViewCallback;
-import io.awallet.crypto.alphawallet.entity.MessageData;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
 import io.awallet.crypto.alphawallet.entity.TradeInstance;

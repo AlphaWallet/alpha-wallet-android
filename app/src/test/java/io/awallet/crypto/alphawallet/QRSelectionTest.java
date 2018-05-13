@@ -1,34 +1,26 @@
 package io.awallet.crypto.alphawallet;
 
-import android.util.Log;
-
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import io.awallet.crypto.alphawallet.entity.MessagePair;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
-import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;

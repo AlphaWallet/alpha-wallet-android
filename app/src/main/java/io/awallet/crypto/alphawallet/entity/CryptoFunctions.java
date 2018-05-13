@@ -1,27 +1,27 @@
-package io.stormbird.token.web.Service;
+package io.awallet.crypto.alphawallet.entity;
+
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.Arrays;
+import android.util.Base64;
 
 import io.stormbird.token.entity.CryptoFunctionsInterface;
-import java.util.Base64;
-
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 
 public class CryptoFunctions implements CryptoFunctionsInterface
 {
     @Override
     public byte[] Base64Decode(String message)
     {
-        return Base64.getUrlDecoder().decode(message);
+        return Base64.decode(message, Base64.URL_SAFE);
     }
 
     @Override
     public byte[] Base64Encode(byte[] data)
     {
-        return Base64.getUrlEncoder().encode(data);
+        return Base64.encode(data, Base64.URL_SAFE);
     }
 
     @Override
@@ -53,3 +53,4 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         return ecSig;
     }
 }
+

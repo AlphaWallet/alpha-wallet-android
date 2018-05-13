@@ -7,6 +7,8 @@ package io.awallet.crypto.alphawallet.entity;
 import java.math.BigInteger;
 import java.util.List;
 
+import io.stormbird.token.entity.MagicLinkData;
+
 /**
  * This stores a contract address -> owner address pair plus the received balance of the owner
  * Note that the pair is contained within the SalesOrder. For any given contract address there could be many owner addresses in the order map
@@ -16,19 +18,19 @@ import java.util.List;
  */
 public class OrderContractAddressPair
 {
-    public SalesOrder order;
+    public MagicLinkData order;
     public List<BigInteger> balance;
 
     public boolean equals(String tokenAddr, String address)
     {
-        return (this.order.tokenInfo.address.equals(tokenAddr) && this.order.ownerAddress.equals(address));
+        return (this.order.contractAddress.equals(tokenAddr) && this.order.ownerAddress.equals(address));
     }
 
-    public static boolean addPair(List<OrderContractAddressPair> checkList, SalesOrder o) {
+    public static boolean addPair(List<OrderContractAddressPair> checkList, MagicLinkData o) {
         boolean foundPair = false;
         for (OrderContractAddressPair pair : checkList)
         {
-            if (pair.equals(o.tokenInfo.address, o.ownerAddress)) {
+            if (pair.equals(o.contractAddress, o.ownerAddress)) {
                 foundPair = true;
                 break;
             }

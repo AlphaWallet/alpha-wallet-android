@@ -3,15 +3,12 @@ package io.awallet.crypto.alphawallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.util.Log;
 
+import io.awallet.crypto.alphawallet.entity.CryptoFunctions;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
@@ -21,16 +18,14 @@ import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketDetailRouter;
 import io.awallet.crypto.alphawallet.service.FeeMasterService;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
-import io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
-import static io.awallet.crypto.alphawallet.service.MarketQueueService.sigFromByteArray;
 
 /**
  * Created by James on 21/02/2018.
@@ -50,6 +45,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final FeeMasterService feeMasterService;
     private final AssetDisplayRouter assetDisplayRouter;
+
+    private CryptoFunctions cryptoFunctions;
+    private ParseMagicLink parser;
 
     private byte[] linkMessage;
 
@@ -75,6 +73,15 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<String> userTransaction() { return userTransaction; }
+
+    private void initParser()
+    {
+        if (parser == null)
+        {
+            cryptoFunctions = new CryptoFunctions();
+            parser = new ParseMagicLink(cryptoFunctions);
+        }
+    }
 
     public void prepare(Ticket ticket)
     {
@@ -112,13 +119,14 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, long expiry)
     {
+        initParser();
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
 
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
-        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
+        byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
         try {
-            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
+            linkMessage = parser.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
         } catch (SalesOrderMalformed e) {
             //TODO: Display appropriate error to user
         }
@@ -133,7 +141,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         try
         {
-            String universalLink = SalesOrder.completeUniversalLink(linkMessage, signature);
+            String universalLink = parser.completeUniversalLink(linkMessage, signature);
             //Now open the share icon
             universalLinkReady.postValue(universalLink);
         }

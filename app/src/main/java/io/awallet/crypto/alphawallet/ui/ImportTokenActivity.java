@@ -20,7 +20,6 @@ import dagger.android.AndroidInjection;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -29,6 +28,7 @@ import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
+import io.stormbird.token.entity.MagicLinkData;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.IMPORT_STRING;
@@ -170,7 +170,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         //now update the import token
         ticketRange = importTokens;
         Ticket ticket = viewModel.getImportToken();
-        SalesOrder order = viewModel.getSalesOrder();
+        MagicLinkData order = viewModel.getSalesOrder();
 
         String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
         String priceUsd = "$" + getUsdString(viewModel.getUSDPrice());
@@ -201,7 +201,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void invalidTicket(int count)
     {
-        SalesOrder order = viewModel.getSalesOrder();
+        MagicLinkData order = viewModel.getSalesOrder();
         if (count == 0)
         {
             importTxt.setText(R.string.ticket_already_imported);
@@ -243,7 +243,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void confirmPurchaseDialog() {
         hideDialog();
-        SalesOrder order = viewModel.getSalesOrder();
+        MagicLinkData order = viewModel.getSalesOrder();
         cDialog = new AWalletConfirmationDialog(this);
         cDialog.setTitle(R.string.confirm_purchase);
         String ticketLabel = order.ticketCount > 1 ? getString(R.string.tickets) : getString(R.string.ticket);

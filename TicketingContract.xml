@@ -223,7 +223,7 @@ EPUQyp2aDrV1aug=
         <entity key="9">
           <name lang="ru">Самара</name>
           <name lang="en">Samara</name>
-          <name lang="zh">翅果</name>
+          <name lang="zh">萨马拉</name>
           <name lang="es">Samara</name>
         </entity>
         <entity key="10">
@@ -250,6 +250,90 @@ EPUQyp2aDrV1aug=
           <name lang="zh">新加坡</name>
           <name lang="es">Singapur</name>
         </entity>
+        <entity key="253">
+          <name lang="en">Shenzhen</name>
+          <name lang="zh">深圳</name>
+        </entity>
+	<entity key="252">
+          <name lang="en">Beijing</name>
+          <name lang="zh">北京</name>
+        </entity>
+	<entity key="251">
+          <name lang="en">Shanghai</name>
+          <name lang="zh">上海</name>
+        </entity>
+	<entity key="250">
+          <name lang="en">Tokyo</name>
+          <name lang="zh">东京</name>
+        </entity>      
+	<entity key="249">
+          <name lang="en">Seoul</name>
+          <name lang="zh">首尔</name>
+        </entity>      
+	<entity key="248">
+          <name lang="en">Chongqing</name>
+          <name lang="zh">重庆</name>
+        </entity>	      
+	<entity key="247">
+          <name lang="en">New York</name>
+          <name lang="zh">纽约</name>
+        </entity>	      
+	<entity key="246">
+          <name lang="en">Melbourne</name>
+          <name lang="zh">墨尔本</name>
+        </entity>      
+	<entity key="245">
+          <name lang="en">Hong Kong</name>
+          <name lang="zh">香港</name>
+        </entity>     
+	<entity key="244">
+          <name lang="en">Chengdu</name>
+          <name lang="zh">成都</name>
+        </entity>	      
+	<entity key="243">
+          <name lang="en">Kuala Lumpur</name>
+          <name lang="zh">吉隆坡</name>
+        </entity>	      
+	<entity key="242">
+          <name lang="en">Bangkok</name>
+          <name lang="zh">曼谷</name>
+        </entity>	      
+	<entity key="241">
+          <name lang="en">San Francisco</name>
+          <name lang="zh">三藩市</name>
+        </entity>	      
+	<entity key="240">
+          <name lang="en">Las Vegas</name>
+          <name lang="zh">拉斯维加斯</name>
+        </entity>	      
+	<entity key="239">
+          <name lang="en">London</name>
+          <name lang="zh">伦敦</name>
+        </entity>	      
+	<entity key="238">
+          <name lang="en">Barcelona</name>
+          <name lang="zh">巴塞罗那</name>
+        </entity>	      
+	<entity key="237">
+          <name lang="en">Madrid</name>
+          <name lang="zh">马德里</name>
+        </entity>
+	<entity key="236">
+          <name lang="en">Zug</name>
+          <name lang="zh">楚格</name>
+        </entity>	      
+	<entity key="235">
+          <name lang="en">Paris</name>
+          <name lang="zh">巴黎</name>
+        </entity>	      
+	<entity key="234">
+          <name lang="en">Dubai</name>
+          <name lang="zh">迪拜</name>
+        </entity>
+	<entity key="233">
+          <name lang="en">TBC</name>
+          <name lang="zh">待定</name>
+        </entity>      
       </mapping>
     </field>
     <field bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" id="venue" type="Enumeration">
@@ -261,13 +345,13 @@ EPUQyp2aDrV1aug=
         <entity key="1">
           <name lang="ru">Стадион Калининград</name>
           <name lang="en">Kaliningrad Stadium</name>
-          <name lang="zh">加里寧格勒體育場</name>
+          <name lang="zh">加里宁格勒体育场</name>
           <name lang="es">Estadio de Kaliningrado</name>
         </entity>
         <entity key="2">
           <name lang="ru">Екатеринбург Арена</name>
           <name lang="en">Volgograd Arena</name>
-          <name lang="zh">伏爾加格勒體育場</name>
+          <name lang="zh">伏尔加格勒体育场</name>
           <name lang="es">Volgogrado Arena</name>
         </entity>
         <entity key="3">
@@ -279,19 +363,19 @@ EPUQyp2aDrV1aug=
         <entity key="4">
           <name lang="ru">Мордовия Арена</name>
           <name lang="en">Fisht Stadium</name>
-          <name lang="zh">菲什特奧林匹克體育場</name>
+          <name lang="zh">费什体育场</name>
           <name lang="es">Estadio Fisht</name>
         </entity>
         <entity key="5">
           <name lang="ru">Ростов Арена</name>
           <name lang="en">Kazan Arena</name>
-          <name lang="zh">喀山體育場</name>
+          <name lang="zh">喀山体育场</name>
           <name lang="es">Kazan Arena</name>
         </entity>
         <entity key="6">
           <name lang="ru">Самара Арена</name>
           <name lang="en">Nizhny Novgorod Stadium</name>
-          <name lang="zh">下諾夫哥羅德體育場</name>
+          <name lang="zh">下诺夫哥罗德体育场</name>
           <name lang="es">Estadio de Nizhni Novgorod</name>
         </entity>
         <entity key="7">
@@ -303,31 +387,31 @@ EPUQyp2aDrV1aug=
         <entity key="8">
           <name lang="ru">Стадион Лужники</name>
           <name lang="en">Samara Arena</name>
-          <name lang="zh">薩馬拉體育場</name>
+          <name lang="zh">萨马拉体育场</name>
           <name lang="es">Samara Arena</name>
         </entity>
         <entity key="9">
           <name lang="ru">Стадион Нижний Новгород</name>
           <name lang="en">Rostov Arena</name>
-          <name lang="zh">羅斯托夫體育場</name>
+          <name lang="zh">罗斯托夫体育场</name>
           <name lang="es">Rostov Arena</name>
         </entity>
         <entity key="10">
           <name lang="ru">Стадион Спартак</name>
           <name lang="en">Spartak Stadium</name>
-          <name lang="zh">斯巴達克體育場</name>
+          <name lang="zh">斯巴达克体育场</name>
           <name lang="es">Estadio del Spartak</name>
         </entity>
         <entity key="11">
           <name lang="ru">Стадион Санкт-Петербург</name>
           <name lang="en">Saint Petersburg Stadium</name>
-          <name lang="zh">十字架體育場</name>
+          <name lang="zh">圣彼得堡体育场</name>
           <name lang="es">Estadio de San Petersburgo</name>
         </entity>
         <entity key="12">
           <name lang="ru">Стадион Фишт</name>
           <name lang="en">Mordovia Arena</name>
-          <name lang="zh">莫爾多維亞體育場</name>
+          <name lang="zh">莫多维亚体育场</name>
           <name lang="es">Mordovia Arena</name>
         </entity>
         <entity key="255">
@@ -335,6 +419,86 @@ EPUQyp2aDrV1aug=
           <name lang="zh">新南威尔大学Michael Crouch创新中心</name>
           <name lang="es">Centro de Innovación de Michael Crouch UNSW</name>
         </entity>
+	  <entity key="254">
+          <name lang="en">FOUR SEASONS HOTEL SHENZHEN</name>
+          <name lang="zh">深圳四季酒店</name>
+          <name lang="es">FOUR SEASONS HOTEL SHENZHEN</name>
+        </entity>
+	  <entity key="253">
+          <name lang="en">Paypal Innovation Lab</name>
+          <name lang="zh">Paypal Innovation Lab</name>
+          <name lang="es">Paypal Innovation Lab</name>
+        </entity>
+	  <entity key="252">
+          <name lang="en">The Centrepoint</name>
+          <name lang="zh">The Centrepoint</name>
+          <name lang="es">The Centrepoint</name>
+        </entity>      
+	  <entity key="251">
+          <name lang="en">TBC</name>
+          <name lang="zh">待定</name>
+          <name lang="es">Por determinar</name>
+        </entity>      
+	  <entity key="250">
+          <name lang="en">thebridge</name>
+          <name lang="zh">thebridge</name>
+          <name lang="es">thebridge</name>
+        </entity>      
+	  <entity key="249">
+          <name lang="en">BASH</name>
+          <name lang="zh">BASH</name>
+          <name lang="es">BASH</name>
+        </entity>      
+	  <entity key="248">
+          <name lang="en">Spacemob</name>
+          <name lang="zh">Spacemob</name>
+          <name lang="es">Spacemob</name>
+        </entity>      
+	  <entity key="247">
+          <name lang="en">32 Carpenter Street</name>
+          <name lang="zh">32 Carpenter Street</name>
+          <name lang="es">32 Carpenter Street</name>
+        </entity>
+	  <entity key="246">
+          <name lang="en">Block 71</name>
+          <name lang="zh">Block 71</name>
+          <name lang="es">Block 71</name>
+        </entity>
+	  <entity key="245">
+          <name lang="en">Microsoft Singapore</name>
+          <name lang="zh">Microsoft Singapore</name>
+          <name lang="es">Microsoft Singapore</name>
+        </entity>      
+	  <entity key="243">
+          <name lang="en">Google Singapore</name>
+          <name lang="zh">Google Singapore</name>
+          <name lang="es">Google Singapore</name>
+        </entity>	      
+	  <entity key="242">
+          <name lang="en">The Blockchain Hub</name>
+          <name lang="zh">The Blockchain Hub</name>
+          <name lang="es">The Blockchain Hub</name>
+        </entity>	      
+	  <entity key="241">
+          <name lang="en">BitTemple</name>
+          <name lang="zh">BitTemple</name>
+          <name lang="es">BitTemple</name>
+        </entity>
+	  <entity key="240">
+          <name lang="en">ADD BLOCKCHAIN STUDIO</name>
+          <name lang="zh">ADD BLOCKCHAIN STUDIO</name>
+          <name lang="es">ADD BLOCKCHAIN STUDIO</name>
+        </entity>
+	  <entity key="239">
+          <name lang="en">Rosewood Beijing</name>
+          <name lang="zh">北京瑰丽酒店</name>
+          <name lang="es">Rosewood Beijing</name>
+        </entity>
+	  <entity key="238">
+          <name lang="en">Stratum</name>
+          <name lang="zh">Stratum</name>
+          <name lang="es">Stratum</name>
+        </entity>       
       </mapping>
     </field>
     <field bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000" id="time" type="BinaryTime">
@@ -375,21 +539,120 @@ EPUQyp2aDrV1aug=
           <name lang="en">Category 2</name>
           <name lang="zh">二类票</name>
         </entity>
-        <entity key="3">
+	       <entity key="3">
+          <name lang="en">Category 3</name>
+          <name lang="zh">三类票</name>
+        </entity>
+	       <entity key="4">
+          <name lang="en">Category 4</name>
+          <name lang="zh">四类票</name>
+        </entity>
+        <entity key="5">
           <name lang="en">Match Club</name>
           <name lang="zh">俱乐部坐席</name>
         </entity>
-	<entity key="4">
+	<entity key="6">
 		<name lang="en">Match House Premier</name>
+		<name lang="zh">比赛之家坐席</name>
 	</entity>
+	       <entity key="7">
+          <name lang="en">MATCH PAVILION</name>
+          <name lang="zh">款待大厅坐席</name>
+        </entity>
+	       <entity key="8">
+          <name lang="en">MATCH BUSINESS SEAT</name>
+          <name lang="zh">商务坐席</name>
+        </entity>
+	       <entity key="9">
+          <name lang="en">MATCH SHARED SUITE</name>
+          <name lang="zh">公共包厢</name>
+        </entity>
+	       <entity key="10">
+          <name lang="en">TSARSKY LOUNGE</name>
+          <name lang="zh">特拉斯基豪华包厢</name>
+        </entity>
+	         <entity key="11">
+          <name lang="en"> MATCH PRIVATE SUITE</name>
+          <name lang="zh">私人包厢</name>
+        </entity>    
+  
         <entity key="255">
-          <name lang="en">Singapore Unnamed Workshop</name>
-          <name lang="zh">新加坡一个还没取名字的活动</name>
+          <name lang="en">Singapore Blockchain Event</name>
+          <name lang="zh">新加坡区块链活动</name>
         </entity>
 	<entity key="254">
-          <name lang="en">Beijing Unnamed Workshop</name>
-          <name lang="zh">北京一个还没取名字的活动</name>
+          <name lang="en">TECHNOLOGY RADAR SUMMIT 2018</name>
+          <name lang="zh">技术雷达峰会2018</name>
         </entity>
+	       <entity key="253">
+          <name lang="en">Sydney Blockchain Event</name>
+          <name lang="zh">悉尼区块链活动</name>
+        </entity>
+	       <entity key="252">
+          <name lang="en">Beijing Blockchain Event</name>
+          <name lang="zh">北京区块链活动</name>
+        </entity>
+	       <entity key="251">
+          <name lang="en">Shanghai Blockchain Event</name>
+          <name lang="zh">上海区块链活动</name>
+        </entity>
+	       <entity key="250">
+          <name lang="en">Tokyo Blockchain Event</name>
+          <name lang="zh">东京区块链活动</name>
+        </entity>
+	       <entity key="249">
+          <name lang="en">Blockchain Event</name>
+          <name lang="zh">区块链活动</name>
+        </entity>
+	       <entity key="248">
+          <name lang="en">Other Events</name>
+          <name lang="zh">其他活动</name>
+        </entity>
+	       <entity key="247">
+          <name lang="en">Seoul Blockchain Event</name>
+          <name lang="zh">首尔区块链活动</name>
+        </entity>
+	       <entity key="246">
+          <name lang="en">Bangkok Blockchain Event</name>
+          <name lang="zh">曼谷区块链活动</name>
+        </entity>
+	       <entity key="245">
+          <name lang="en">AlphaWallet Event</name>
+          <name lang="zh">AlphaWallet活动</name>
+        </entity>
+	       <entity key="254">
+          <name lang="en">Stormbird Event</name>
+          <name lang="zh">Stormbird活动</name>
+        </entity>
+	       <entity key="253">
+          <name lang="en">UNITY VENTURES Event</name>
+          <name lang="zh">九合创投活动</name>
+        </entity>
+	       <entity key="252">
+          <name lang="en">Max's Event</name>
+          <name lang="zh">Max的活动</name>
+        </entity>
+	       <entity key="251">
+          <name lang="en">Chongqing Blockchain Event</name>
+          <name lang="zh">重庆区块链活动</name>
+        </entity>
+	       <entity key="250">
+          <name lang="en">Dubai Blockchain Event</name>
+          <name lang="zh">迪拜区块链活动</name>
+        </entity>
+	       <entity key="249">
+          <name lang="en">Silicon Valley Blockchain Event</name>
+          <name lang="zh">硅谷区块链活动</name>
+        </entity>
+	       <entity key="248">
+          <name lang="en">Melbourne Blockchain Event</name>
+          <name lang="zh">墨尔本区块链活动</name>
+        </entity>
+	       <entity key="247">
+          <name lang="en">General Event</name>
+          <name lang="zh">通用活动</name>
+        </entity>
+      
       </mapping>
     </field>
     <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="number" type="Integer">

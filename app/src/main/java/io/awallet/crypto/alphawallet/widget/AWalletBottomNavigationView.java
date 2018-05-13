@@ -9,9 +9,9 @@ import android.widget.LinearLayout;
 import io.awallet.crypto.alphawallet.R;
 
 public class AWalletBottomNavigationView extends LinearLayout {
-    public static final int MARKETPLACE = 0;
-    public static final int WALLET = 1;
-    public static final int TRANSACTIONS = 2;
+    public static final int TRANSACTIONS = 0;
+    public static final int MARKETPLACE = 1;
+    public static final int WALLET = 2;
     public static final int SETTINGS = 3;
 
     private ImageView transactions;

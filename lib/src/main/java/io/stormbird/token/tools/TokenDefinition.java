@@ -144,6 +144,7 @@ public class TokenDefinition {
         extract(xml, "gateway");
         extract(xml, "feemaster");
         extract(xml, "network");
+        extract(xml, "name");
     }
 
     public String getNetworkValue(int network, String field)

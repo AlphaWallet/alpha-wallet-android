@@ -5,9 +5,9 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import io.awallet.crypto.alphawallet.entity.CryptoFunctions;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.OrderContractAddressPair;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -36,6 +36,8 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.tools.ParseMagicLink;
 
 /**
  * Created by James on 19/02/2018.
@@ -45,18 +47,20 @@ public class BrowseMarketViewModel extends BaseViewModel
 {
     private static final long CHECK_MARKET_INTERVAL = 30;
 
+    private static ParseMagicLink parser;
+    private static CryptoFunctions cryptoFunctions;
     private final MarketQueueService marketQueueService;
     private final MarketBuyRouter marketBuyRouter;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
 
-    private final MutableLiveData<SalesOrder[]> market = new MutableLiveData<>();
+    private final MutableLiveData<MagicLinkData[]> market = new MutableLiveData<>();
     private final MutableLiveData<OrderContractAddressPair> tokenBalance = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> startUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> endUpdate = new MutableLiveData<>();
 
-    private List<SalesOrder> orders = new ArrayList<>();
+    private List<MagicLinkData> orders = new ArrayList<>();
     private List<OrderContractAddressPair> checkingPairs = new ArrayList<>();
     private List<OrderContractAddressPair> staticPairList = new ArrayList<>();
 
@@ -79,7 +83,16 @@ public class BrowseMarketViewModel extends BaseViewModel
         this.findDefaultWalletInteract = findDefaultWalletInteract;
     }
 
-    public LiveData<SalesOrder[]> updateMarket() {
+    private void initParser()
+    {
+        if (parser == null)
+        {
+            cryptoFunctions = new CryptoFunctions();
+            parser = new ParseMagicLink(cryptoFunctions);
+        }
+    }
+
+    public LiveData<MagicLinkData[]> updateMarket() {
         return market;
     }
     public LiveData<OrderContractAddressPair> updateBalance() {
@@ -150,18 +163,18 @@ public class BrowseMarketViewModel extends BaseViewModel
     }
 
     //3a. Add each set of orders, make a note of contract address and post to UI
-    private void onSalesOrders(SalesOrder[] tradeInstances)
+    private void onSalesOrders(MagicLinkData[] tradeInstances)
     {
+        initParser();
         if (tradeInstances.length > 0) {
             orders.addAll(Arrays.asList(tradeInstances));
-            for (SalesOrder so : tradeInstances)
+            for (MagicLinkData so : tradeInstances)
             {
                 Token orderToken = tokenMap.get(so.contractAddress);
                 //get the token info for display
-                so.tokenInfo = orderToken.tokenInfo;
+                so.contractName = orderToken.getFullName();// .tokenInfo = orderToken.tokenInfo;
 
-                //ecrecover owner key
-                so.getOwnerKey();
+                so.ownerAddress = parser.getOwnerKey(so);
 
                 //add pair if we haven't already
                 OrderContractAddressPair.addPair(checkingPairs, so);
@@ -174,7 +187,7 @@ public class BrowseMarketViewModel extends BaseViewModel
     private void postOrdersToUI()
     {
         staticPairList.addAll(checkingPairs);
-        SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
+        MagicLinkData[] compiledOrders = orders.toArray(new MagicLinkData[orders.size()]);
         //We can add to the list here, start displaying order details
         market.postValue(compiledOrders);
         checkingBalanceCycle();
@@ -231,7 +244,7 @@ public class BrowseMarketViewModel extends BaseViewModel
     {
         if (refreshUINeeded)
         {
-            SalesOrder[] compiledOrders = orders.toArray(new SalesOrder[orders.size()]);
+            MagicLinkData[] compiledOrders = orders.toArray(new MagicLinkData[orders.size()]);
             //We can add to the list here, start displaying order details
             market.postValue(compiledOrders);
         }
@@ -248,12 +261,12 @@ public class BrowseMarketViewModel extends BaseViewModel
     {
         refreshUINeeded = true;
         //now update the orders
-        for (SalesOrder order : orders)
+        for (MagicLinkData order : orders)
         {
             //updating this item?
             if (    order.contractAddress.equals(pair.order.contractAddress) //order address matches
                     && order.ownerAddress.equals(pair.order.ownerAddress)
-                    && order.balanceChange(pair.balance)) {
+                    && pair.order.balanceChange(order.balanceInfo)) {
                 order.balanceInfo = pair.balance;
                 refreshUINeeded = true;
             }
@@ -261,7 +274,7 @@ public class BrowseMarketViewModel extends BaseViewModel
     }
 
     //Context context, Token token, SalesOrder instance
-    public void showPurchaseTicket(Context context, SalesOrder instance)
+    public void showPurchaseTicket(Context context, MagicLinkParcel instance)
     {
         marketBuyRouter.open(context, instance);
     }

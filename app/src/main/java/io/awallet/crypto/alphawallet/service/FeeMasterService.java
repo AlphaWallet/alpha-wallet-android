@@ -1,26 +1,24 @@
 package io.awallet.crypto.alphawallet.service;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.CryptoFunctions;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
-import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.tools.ParseMagicLink;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,6 +31,8 @@ public class FeeMasterService
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
     private final PasswordStore passwordStore;
+    private CryptoFunctions cryptoFunctions;
+    private ParseMagicLink parser;
 
     public FeeMasterService(OkHttpClient httpClient,
                             TransactionRepositoryType transactionRepository,
@@ -40,6 +40,15 @@ public class FeeMasterService
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
         this.passwordStore = passwordStore;
+    }
+
+    private void initParser()
+    {
+        if (parser == null)
+        {
+            cryptoFunctions = new CryptoFunctions();
+            parser = new ParseMagicLink(cryptoFunctions);
+        }
     }
 
     //first generate and then sign the message
@@ -51,7 +60,7 @@ public class FeeMasterService
                 .toObservable();
     }
 
-    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, SalesOrder order)
+    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, MagicLinkData order)
     {
         return generateTicketString(order.tickets)
                 .flatMap(ticketStr -> sendFeemasterTransaction(url, wallet.address, order.expiry, ticketStr, order.signature))
@@ -60,7 +69,8 @@ public class FeeMasterService
 
     private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry)
     {
-        final byte[] tradeBytes = SalesOrder.getTradeBytes(indicesArray, contractAddress, price, expiry);
+        initParser();
+        final byte[] tradeBytes = parser.getTradeBytes(indicesArray, contractAddress, price, expiry);
         return passwordStore.getPassword(wallet)
                     .flatMap(password -> transactionRepository.getSignature(wallet, tradeBytes, password));
     }

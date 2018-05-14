@@ -68,7 +68,6 @@ public class TokenDefinition {
         public String applyToFieldValue(BigInteger data) {
             Date date=new Date(data.longValue());
             return date.toString();
-
         }
     }
 

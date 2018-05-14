@@ -5,6 +5,8 @@ import org.junit.Assert;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import io.stormbird.token.entity.EthereumReadBuffer;
+
 /**
  * Created by weiwu on 12/3/18.
  */

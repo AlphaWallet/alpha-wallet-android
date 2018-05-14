@@ -277,7 +277,6 @@
     <string name="formats">Formats</string>
     <string name="choose_formats">Choose Formats</string>
     <string name="qr_scanner">QR Scanner</string>
-    <string name="shengkai">Shengkai</string>
     <string name="dialog_title_select_locale">Select Locale:</string>
     <string name="settings_locale_lang">Locale</string>
     <string name="lang_en">English</string>

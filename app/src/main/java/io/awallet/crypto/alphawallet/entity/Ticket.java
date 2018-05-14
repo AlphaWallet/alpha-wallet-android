@@ -190,9 +190,9 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
+        tokenHolder.issuer.setText("FIXME");
         if (isLiveTicket())
         {
-            tokenHolder.issuer.setText(R.string.shengkai);
             tokenHolder.contractType.setVisibility(View.VISIBLE);
             tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
             tokenHolder.contractType.setText(R.string.erc875);

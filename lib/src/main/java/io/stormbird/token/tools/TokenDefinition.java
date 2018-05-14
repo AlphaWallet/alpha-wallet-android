@@ -28,6 +28,7 @@ public class TokenDefinition {
     protected String marketQueueAPI = null;
     protected String feemasterAPI = null;
     protected String tokenName = null;
+    protected String keyName = null;
 
     protected class FieldDefinition {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
@@ -147,6 +148,21 @@ public class TokenDefinition {
         }
         extractFeatureTag(xml);
         extractContractTag(xml);
+        extractSignedInfo(xml);
+    }
+
+    private void extractSignedInfo(Document xml) {
+        NodeList nList;
+        nList = xml.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "KeyName");
+        nList = xml.getElementsByTagName("ds:KeyName"); // previous statement returns empty list, strange...
+        if (nList.getLength() > 0) {
+            this.keyName = ((Element) nList.item(0)).getTextContent();
+        }
+        return; // even if the document is signed, often it doesn't have KeyName
+    }
+
+    public String getKeyName() {
+        return this.keyName;
     }
 
     public String getFeemasterAPI(){

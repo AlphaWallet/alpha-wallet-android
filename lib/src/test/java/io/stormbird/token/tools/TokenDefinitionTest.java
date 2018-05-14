@@ -38,9 +38,7 @@ public class TokenDefinitionTest {
 
     @Test
     public void FieldDefinitionShouldParse() throws IOException, SAXException {
-        assertTrue(file.exists());
         TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
-        assertFalse(ticketAsset.fields.isEmpty());
 
         NonFungibleToken ticket = new NonFungibleToken(ticketIDs[0], ticketAsset);
         assertEquals("Number", ticket.getAttribute("number").name);
@@ -49,6 +47,13 @@ public class TokenDefinitionTest {
         /* Travis isn't in Singapore ... */
         //assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getAttribute("time").text);
         assertEquals(BigInteger.ZERO, ticket.getAttribute("time").value);
+    }
+
+    @Test
+    public void XMLSignatureShouldValidate() throws IOException, SAXException {
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
+        assertEquals("Shankai", ticketAsset.getKeyName());
+        // TODO: link validation
     }
 
 }

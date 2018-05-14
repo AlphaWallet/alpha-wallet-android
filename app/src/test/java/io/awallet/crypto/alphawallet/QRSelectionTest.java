@@ -19,7 +19,6 @@ import javax.inject.Inject;
 
 import io.awallet.crypto.alphawallet.entity.MessagePair;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
@@ -32,6 +31,7 @@ import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.stormbird.token.entity.SalesOrderMalformed;
 
 import static org.junit.Assert.assertTrue;
 

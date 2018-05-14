@@ -1,6 +1,6 @@
 package io.awallet.crypto.alphawallet;
 
-import io.awallet.crypto.alphawallet.entity.EthereumReadBuffer;
+import io.stormbird.token.entity.EthereumReadBuffer;
 
 import org.junit.Test;
 import org.junit.Assert;

@@ -16,9 +16,9 @@ import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.utils.Numeric;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.ui.widget.OnSalesOrderClickListener;
+import io.stormbird.token.entity.MagicLinkData;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -28,11 +28,11 @@ import java.util.List;
  * Created by James on 21/02/2018.
  */
 
-public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.OnClickListener {
+public class OrderHolder extends BinderViewHolder<MagicLinkData> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1166;
 
-    private SalesOrder thisData;
+    private MagicLinkData thisData;
     private OnSalesOrderClickListener onOrderClickListener;
 
     private final TextView price;
@@ -68,14 +68,14 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
     }
 
     @Override
-    public void bind(@Nullable SalesOrder data, @NonNull Bundle addition) {
+    public void bind(@Nullable MagicLinkData data, @NonNull Bundle addition) {
         this.thisData = data;
         try {
             int seatStart = TicketDecode.getSeatIdInt(data.ticketStart);
             String seatRange = String.valueOf(seatStart);
             if (data.ticketCount > 1) seatRange = seatStart + "-" + (seatStart+(data.ticketCount-1));
             price.setText(String.valueOf(data.price));
-            name.setText(data.tokenInfo.name);
+            name.setText(data.contractName);
             setBalance(data);
             date.setText(TicketDecode.getDate(data.ticketStart));
             ticketIds.setText(seatRange);
@@ -101,7 +101,7 @@ public class OrderHolder extends BinderViewHolder<SalesOrder> implements View.On
         this.onOrderClickListener = onTokenClickListener;
     }
 
-    private void setBalance(SalesOrder data)
+    private void setBalance(MagicLinkData data)
     {
         if (data.balanceInfo != null)
         {

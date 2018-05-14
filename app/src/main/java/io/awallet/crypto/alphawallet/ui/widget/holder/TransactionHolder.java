@@ -23,7 +23,7 @@ import java.math.RoundingMode;
 
 import static io.awallet.crypto.alphawallet.C.ETHER_DECIMALS;
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
-import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.RECEIVE_FROM_UNIVERSAL_LINK;
+import static io.awallet.crypto.alphawallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
 public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
 
@@ -127,7 +127,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
 
-        if (ct.operation.equals(RECEIVE_FROM_UNIVERSAL_LINK))
+        if (ct.operation.equals(RECEIVE_FROM_MAGICLINK))
         {
             String valueStr = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
             value.setText(valueStr);

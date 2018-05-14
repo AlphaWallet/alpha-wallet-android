@@ -1,17 +1,16 @@
 package io.awallet.crypto.alphawallet.ui.widget.entity;
 
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.Token;
-import io.awallet.crypto.alphawallet.ui.widget.holder.SalesOrderHeaderHolder;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.ui.widget.holder.OrderHolder;
+import io.stormbird.token.entity.MagicLinkData;
 
 /**
  * Created by James on 21/02/2018.
  */
 
-public class SalesOrderSortedItem extends SortedItem<SalesOrder>
+public class SalesOrderSortedItem extends SortedItem<MagicLinkData>
 {
-    public SalesOrderSortedItem(SalesOrder value, int weight)
+    public SalesOrderSortedItem(MagicLinkData value, int weight)
     {
         super(OrderHolder.VIEW_TYPE, value, weight);
     }

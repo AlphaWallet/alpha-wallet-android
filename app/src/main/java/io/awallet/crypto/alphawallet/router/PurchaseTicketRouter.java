@@ -3,7 +3,7 @@ package io.awallet.crypto.alphawallet.router;
 import android.content.Context;
 import android.content.Intent;
 
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.ui.PurchaseTicketsActivity;
 
@@ -17,7 +17,7 @@ import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;
 
 public class PurchaseTicketRouter
 {
-    public void open(Context context, Token token, SalesOrder instance) {
+    public void open(Context context, Token token, MagicLinkParcel instance) {
         Intent intent = new Intent(context, PurchaseTicketsActivity.class);
         intent.putExtra(TICKET, token);
         intent.putExtra(MARKET_INSTANCE, instance);

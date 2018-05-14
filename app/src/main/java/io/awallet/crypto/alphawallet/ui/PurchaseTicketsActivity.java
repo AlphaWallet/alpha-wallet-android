@@ -17,7 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
@@ -34,6 +34,7 @@ import java.math.RoundingMode;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.MagicLinkData;
 
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;
@@ -51,7 +52,7 @@ public class PurchaseTicketsActivity extends BaseActivity
     private SystemView systemView;
     private ProgressView progressView;
 
-    private SalesOrder ticketRange;
+    private MagicLinkData ticketRange;
     private ERC875MarketAdapter adapter;
     private TextView ethPrice;
     private TextView usdPrice;
@@ -78,7 +79,7 @@ public class PurchaseTicketsActivity extends BaseActivity
         usdPrice = findViewById(R.id.fiat_price);
 
         RecyclerView list = findViewById(R.id.listTickets);
-        SalesOrder[] singleInstance = new SalesOrder[1];
+        MagicLinkData[] singleInstance = new MagicLinkData[1];
         singleInstance[0] = ticketRange;
         adapter = new ERC875MarketAdapter(this::onOrderClick, singleInstance);
 
@@ -171,14 +172,15 @@ public class PurchaseTicketsActivity extends BaseActivity
         dialog.show();
     }
 
-    private void onOrderClick(View view, SalesOrder instance)
+    private void onOrderClick(View view, MagicLinkData instance)
     {
         //do nothing
     }
 
     private void purchaseTicketsFinal()
     {
-        viewModel.buyRange(ticketRange);
+        MagicLinkParcel parcel = new MagicLinkParcel(ticketRange);
+        viewModel.buyRange(parcel);
         KeyboardUtils.hideKeyboard(getCurrentFocus());
     }
 

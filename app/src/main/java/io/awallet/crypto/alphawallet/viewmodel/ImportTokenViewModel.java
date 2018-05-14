@@ -6,10 +6,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import io.awallet.crypto.alphawallet.C;
+import io.awallet.crypto.alphawallet.entity.CryptoFunctions;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.ServiceErrorException;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
@@ -37,9 +36,12 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 
-import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
+import static io.awallet.crypto.alphawallet.entity.MagicLinkParcel.generateReverseTradeData;
 
 /**
  * Created by James on 9/03/2018.
@@ -57,6 +59,9 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FeeMasterService feeMasterService;
     private final AddTokenInteract addTokenInteract;
 
+    private CryptoFunctions cryptoFunctions;
+    private ParseMagicLink parser;
+
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
@@ -64,7 +69,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final MutableLiveData<Integer> invalidRange = new MutableLiveData<>();
     private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
 
-    private SalesOrder importOrder;
+    private MagicLinkData importOrder;
     private String univeralImportLink;
     private Ticket importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
@@ -90,6 +95,15 @@ public class ImportTokenViewModel extends BaseViewModel  {
         this.setupTokensInteract = setupTokensInteract;
         this.feeMasterService = feeMasterService;
         this.addTokenInteract = addTokenInteract;
+    }
+
+    private void initParser()
+    {
+        if (parser == null)
+        {
+            cryptoFunctions = new CryptoFunctions();
+            parser = new ParseMagicLink(cryptoFunctions);
+        }
     }
 
     public LiveData<TicketRange> importRange() {
@@ -123,7 +137,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         return network;
     }
     public Ticket getImportToken() { return importToken; }
-    public SalesOrder getSalesOrder() { return importOrder; }
+    public MagicLinkData getSalesOrder() { return importOrder; }
 
     private void onNetwork(NetworkInfo networkInfo)
     {
@@ -135,11 +149,12 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     //1. Receive the default wallet (if any), then decode the import order
     private void onWallet(Wallet wallet) {
+        initParser();
         this.wallet.setValue(wallet);
         try {
-            importOrder = SalesOrder.parseUniversalLink(univeralImportLink);
+            importOrder = parser.parseUniversalLink(univeralImportLink);
             //ecrecover the owner
-            importOrder.getOwnerKey();
+            importOrder.ownerAddress = parser.getOwnerKey(importOrder);
             //got to step 2. - get cached tokens
             fetchTokens();
             getEthereumTicker(); //simultaneously fetch the current eth price
@@ -306,9 +321,10 @@ public class ImportTokenViewModel extends BaseViewModel  {
     {
         try
         {
-            SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
+            initParser();
+            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             //ok let's try to drive this guy through
-            final byte[] tradeData = SalesOrder.generateReverseTradeData(order);
+            final byte[] tradeData = generateReverseTradeData(order);
             Log.d(TAG, "Approx value of trade: " + order.price);
             //now push the transaction
             disposable = createTransactionInteract
@@ -329,7 +345,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     {
         try
         {
-            SalesOrder order = SalesOrder.parseUniversalLink(univeralImportLink);
+            initParser();
+            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

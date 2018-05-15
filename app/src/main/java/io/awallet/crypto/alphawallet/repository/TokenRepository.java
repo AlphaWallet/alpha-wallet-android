@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import io.awallet.crypto.alphawallet.entity.BadContract;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
 import io.awallet.crypto.alphawallet.entity.Ticker;
@@ -39,21 +38,16 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthGetWork;
 import org.web3j.utils.Numeric;
-import org.web3j.tx.Contract;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -61,15 +55,14 @@ import java.util.Set;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.BadContract;
 import rx.functions.Func1;
 
-import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {

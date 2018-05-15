@@ -47,7 +47,6 @@ import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.zxing.FullScannerFragment;
 import io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity;
 import io.awallet.crypto.alphawallet.util.KeyboardUtils;
@@ -59,6 +58,7 @@ import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 import io.awallet.crypto.alphawallet.entity.FinishReceiver;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.EXTRA_STATE;
 import static io.awallet.crypto.alphawallet.C.EXTRA_TOKENID_LIST;

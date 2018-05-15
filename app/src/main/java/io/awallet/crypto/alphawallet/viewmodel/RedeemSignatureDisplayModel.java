@@ -9,11 +9,8 @@ import android.support.annotation.Nullable;
 import io.awallet.crypto.alphawallet.entity.MessagePair;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
-import io.awallet.crypto.alphawallet.entity.SubscribeWrapper;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
-import io.awallet.crypto.alphawallet.entity.TransactionInput;
-import io.awallet.crypto.alphawallet.entity.TransactionDecoder;
 import io.awallet.crypto.alphawallet.entity.TransferFromEventResponse;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.CreateTransactionInteract;
@@ -23,12 +20,9 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.MemPoolInteract;
 import io.awallet.crypto.alphawallet.interact.SignatureGenerateInteract;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 
 import org.web3j.abi.datatypes.generated.Uint16;
-import org.web3j.crypto.Hash;
-import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
@@ -40,7 +34,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import rx.functions.Action1;
+import io.stormbird.token.entity.TicketRange;
 
 /**
  * Created by James on 25/01/2018.

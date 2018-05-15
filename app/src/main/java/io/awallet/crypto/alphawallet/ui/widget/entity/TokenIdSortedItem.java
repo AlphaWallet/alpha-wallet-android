@@ -1,7 +1,7 @@
 package io.awallet.crypto.alphawallet.ui.widget.entity;
 
 import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
-import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
+import io.stormbird.token.entity.TicketRange;
 
 /**
  * Created by James on 10/02/2018.

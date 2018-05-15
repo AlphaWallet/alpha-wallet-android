@@ -4,9 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import io.awallet.crypto.alphawallet.entity.CryptoFunctions;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
-import io.awallet.crypto.alphawallet.entity.SalesOrderMalformed;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
@@ -16,7 +15,8 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.SellDetailRouter;
 import io.awallet.crypto.alphawallet.service.MarketQueueService;
-import io.awallet.crypto.alphawallet.ui.SellDetailActivity;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
 
@@ -33,6 +33,8 @@ public class SellDetailModel extends BaseViewModel {
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
 
     private Ticket ticket;
+    private CryptoFunctions cryptoFunctions;
+    private ParseMagicLink parser;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -55,6 +57,15 @@ public class SellDetailModel extends BaseViewModel {
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
+    }
+
+    private void initParser()
+    {
+        if (parser == null)
+        {
+            cryptoFunctions = new CryptoFunctions();
+            parser = new ParseMagicLink(cryptoFunctions);
+        }
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -104,11 +115,12 @@ public class SellDetailModel extends BaseViewModel {
 
     public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, BigInteger price, long expiry)
     {
+        initParser();
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
 
-        byte[] tradeBytes = SalesOrder.getTradeBytes(ticketSendIndexList, contractAddress, price, expiry);
+        byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, price, expiry);
         try {
-            linkMessage = SalesOrder.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, expiry);
+            linkMessage = parser.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, expiry);
         } catch (SalesOrderMalformed e) {
             //TODO: Display appropriate error to user
         }
@@ -126,8 +138,9 @@ public class SellDetailModel extends BaseViewModel {
 
     private void gotSignature(byte[] signature)
     {
+        initParser();
         try {
-            String universalLink = SalesOrder.completeUniversalLink(linkMessage, signature);
+            String universalLink = parser.completeUniversalLink(linkMessage, signature);
             //Now open the share icon
             universalLinkReady.postValue(universalLink);
         }

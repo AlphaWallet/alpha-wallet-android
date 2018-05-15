@@ -1,7 +1,7 @@
 package io.awallet.crypto.alphawallet.interact;
 
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.OrderContractAddressPair;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.Ticker;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
@@ -17,6 +17,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.MagicLinkData;
 
 public class FetchTokensInteract {
 
@@ -94,10 +95,10 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<OrderContractAddressPair> updateBalancePair(Token token, SalesOrder so)
+    public Observable<OrderContractAddressPair> updateBalancePair(Token token, MagicLinkData order)
     {
-        return tokenRepository.fetchActiveTokenBalance(so.ownerAddress, token)
-                .map(updateToken -> mapToPair(updateToken, so))
+        return tokenRepository.fetchActiveTokenBalance(order.ownerAddress, token)
+                .map(updateToken -> mapToPair(updateToken, order))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -115,7 +116,7 @@ public class FetchTokensInteract {
         return tokenRepository.getEthTicker();
     }
 
-    private OrderContractAddressPair mapToPair(Token token, SalesOrder so)
+    private OrderContractAddressPair mapToPair(Token token, MagicLinkData so)
     {
         OrderContractAddressPair pair = new OrderContractAddressPair();
         pair.order = so;

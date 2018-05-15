@@ -13,9 +13,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.MarketplaceEvent;
 import io.awallet.crypto.alphawallet.entity.OrderContractAddressPair;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.viewmodel.BrowseMarketViewModel;
@@ -28,6 +28,7 @@ import io.awallet.crypto.alphawallet.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.MagicLinkData;
 
 import static io.awallet.crypto.alphawallet.C.Key.MARKETPLACE_EVENT;
 
@@ -118,7 +119,7 @@ public class BrowseMarketActivity extends BaseActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void onMarketUpdate(SalesOrder[] trades)
+    private void onMarketUpdate(MagicLinkData[] trades)
     {
         RecyclerView list = findViewById(R.id.listTickets);
         adapter = new ERC875MarketAdapter(this::onOrderClick, trades);
@@ -147,10 +148,11 @@ public class BrowseMarketActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onOrderClick(View view, SalesOrder instance) {
+    private void onOrderClick(View view, MagicLinkData instance) {
         Context context = view.getContext();
+        MagicLinkParcel parcel = new MagicLinkParcel(instance);
         //TODO: just clicked on an order.
-        viewModel.showPurchaseTicket(context, instance);
+        viewModel.showPurchaseTicket(context, parcel);
     }
 
     private void startUpdate(Boolean dummy) {

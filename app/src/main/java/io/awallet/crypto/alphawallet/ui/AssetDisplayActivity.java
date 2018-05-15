@@ -2,34 +2,18 @@ package io.awallet.crypto.alphawallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.Toast;
-
-import java.io.IOException;
-import org.xml.sax.SAXException;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenInfo;
-import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.AssetDisplayViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.AssetDisplayViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
@@ -38,9 +22,9 @@ import io.awallet.crypto.alphawallet.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
-import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 
 /**
  * Created by James on 22/01/2018.

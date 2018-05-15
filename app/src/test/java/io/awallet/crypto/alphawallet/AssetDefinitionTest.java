@@ -1,5 +1,6 @@
 package io.awallet.crypto.alphawallet;
 
+import io.stormbird.token.entity.NonFungibleToken;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -14,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 
 public class AssetDefinitionTest {
     BigInteger[] ticketIDs = {

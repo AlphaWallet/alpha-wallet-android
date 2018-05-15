@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketRangeElement;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
@@ -24,6 +23,7 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TransferHeaderHolder;
+import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 
 import java.math.BigInteger;

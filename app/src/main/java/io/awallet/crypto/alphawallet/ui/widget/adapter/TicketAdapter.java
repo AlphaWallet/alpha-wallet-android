@@ -7,7 +7,6 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.TicketRangeElement;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
@@ -15,6 +14,7 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
+import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 
 import org.xml.sax.SAXException;

@@ -3,6 +3,8 @@ package io.stormbird.token.tools;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+
+import io.stormbird.token.entity.NonFungibleToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -199,4 +201,16 @@ public class TokenDefinition {
         return value;
     }
 
+    /* take a token ID in byte-32, find all the fields in it and call back
+     * token.setField(fieldID, fieldName, text-value). This is abandoned
+     * temporarily for the need to retrofit the class with J.B.'s design */
+
+    public void parseField(BigInteger tokenId, NonFungibleToken token) {
+        for (String key : fields.keySet()) {
+            FieldDefinition f = fields.get(key);
+            BigInteger val = tokenId.and(f.bitmask).shiftRight(f.bitshift);
+            token.setAttribute(f.id,
+                               new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
+        }
+    }
 }

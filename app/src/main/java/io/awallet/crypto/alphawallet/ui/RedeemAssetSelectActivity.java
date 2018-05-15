@@ -15,7 +15,6 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketSaleAdapter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.RedeemAssetSelectViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.ProgressView;
@@ -24,6 +23,7 @@ import io.awallet.crypto.alphawallet.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
 

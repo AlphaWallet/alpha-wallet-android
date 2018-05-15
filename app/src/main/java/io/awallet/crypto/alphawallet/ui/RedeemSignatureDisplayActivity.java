@@ -23,10 +23,9 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Ticket;
-import io.awallet.crypto.alphawallet.entity.TicketDecode;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.TicketAdapter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRangeParcel;
 import io.awallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModel;
 import io.awallet.crypto.alphawallet.viewmodel.RedeemSignatureDisplayModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
@@ -58,7 +57,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private Wallet wallet;
     private Ticket ticket;
-    private TicketRange ticketRange;
+    private TicketRangeParcel ticketRange;
 
     TicketAdapter adapter;
 
@@ -90,7 +89,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setText(getString(R.string.waiting_for_blockchain));
         tv.setVisibility(View.VISIBLE);
 
-        ticket.displayTicketHolder(ticketRange, this);
+        ticket.displayTicketHolder(ticketRange.range, this);
         finishReceiver = new FinishReceiver(this);
     }
 
@@ -117,7 +116,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket.tokenInfo.address, ticket, ticketRange);
+        viewModel.prepare(ticket.tokenInfo.address, ticket, ticketRange.range);
     }
 
     @Override

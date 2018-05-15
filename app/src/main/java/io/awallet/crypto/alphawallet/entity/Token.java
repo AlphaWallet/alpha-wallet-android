@@ -8,10 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
-import io.awallet.crypto.alphawallet.ui.AddTokenActivity;
-import io.awallet.crypto.alphawallet.ui.AddTokenActivity_MembersInjector;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 
@@ -21,13 +18,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
-import static io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
 public class Token implements Parcelable {
     public final TokenInfo tokenInfo;

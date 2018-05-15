@@ -1,24 +1,21 @@
 package io.stormbird.token.web;
 
+import io.stormbird.token.tools.TokenDefinition;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.web3j.utils.Numeric;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
-import io.stormbird.token.entity.AssetDefinition;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.SalesOrderMalformed;
@@ -35,7 +32,7 @@ public class AppSiteController {
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
-    private static AssetDefinition definitionParser;
+    private static TokenDefinition definitionParser;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -130,7 +127,7 @@ public class AppSiteController {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(AppSiteController.class, args);
 		parser.setCryptoInterface(cryptoFunctions);
-
-        definitionParser = new AssetDefinition("../app/src/main/assets/TicketingContract.xml");
+        File file = new File("../app/src/main/assets/TicketingContract.xml");
+        definitionParser = new TokenDefinition(new FileInputStream(file), "en");
 	}
 }

@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.util.Base64;
 
 import io.awallet.crypto.alphawallet.entity.MessagePair;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
 import io.awallet.crypto.alphawallet.entity.SignaturePair;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;

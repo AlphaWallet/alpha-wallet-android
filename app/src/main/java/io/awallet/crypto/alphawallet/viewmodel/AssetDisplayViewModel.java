@@ -19,7 +19,6 @@ import io.awallet.crypto.alphawallet.router.RedeemAssetSelectRouter;
 import io.awallet.crypto.alphawallet.router.MyTokensRouter;
 import io.awallet.crypto.alphawallet.router.SellTicketRouter;
 import io.awallet.crypto.alphawallet.router.TransferTicketRouter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +26,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.TicketRange;
 
 /**
  * Created by James on 22/01/2018.

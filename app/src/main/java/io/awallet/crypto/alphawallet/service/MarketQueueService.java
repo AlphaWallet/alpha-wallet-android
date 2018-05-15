@@ -1,6 +1,7 @@
 package io.awallet.crypto.alphawallet.service;
 
 import android.content.Context;
+import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,25 +13,26 @@ import java.io.DataOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.BaseViewCallback;
-import io.awallet.crypto.alphawallet.entity.SalesOrder;
+import io.awallet.crypto.alphawallet.entity.CryptoFunctions;
+import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.TradeInstance;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.PasswordStore;
-import io.awallet.crypto.alphawallet.repository.TokenRepository;
 import io.awallet.crypto.alphawallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.MessageData;
+import io.stormbird.token.tools.ParseMagicLink;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -56,6 +58,8 @@ public class MarketQueueService {
     private Disposable marketQueueProcessing;
     private ApiMarketQueue marketQueueConnector;
     private BaseViewCallback messageCallback;
+    private ParseMagicLink parser;
+    private CryptoFunctions cryptoFunctions;
 
     public MarketQueueService(Context ctx, OkHttpClient httpClient,
                               TransactionRepositoryType transactionRepository,
@@ -65,6 +69,15 @@ public class MarketQueueService {
         this.passwordStore = passwordStore;
 
         buildConnector();
+    }
+
+    private void initParser()
+    {
+        if (parser == null)
+        {
+            cryptoFunctions = new CryptoFunctions();
+            parser = new ParseMagicLink(cryptoFunctions);
+        }
     }
 
     //TODO: hook up retrofit2 instead of doing
@@ -203,29 +216,6 @@ public class MarketQueueService {
         return result;
     }
 
-    public byte[] generateReverseTradeData(Wallet wallet, SalesOrder marketInstance)
-    {
-        byte[] data = null;
-        try
-        {
-            BigInteger expiry = BigInteger.valueOf(marketInstance.expiry);
-            List<BigInteger> ticketIndices = new ArrayList<>();
-            for (int ticketIndex : marketInstance.tickets) {
-                ticketIndices.add(BigInteger.valueOf(ticketIndex));
-            }
-            //convert to signature representation
-            Sign.SignatureData sellerSig = sigFromByteArray(marketInstance.signature);
-
-            data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return data;
-    }
-
     public void setCallback(BaseViewCallback callback) {
         messageCallback = callback;
     }
@@ -303,28 +293,36 @@ public class MarketQueueService {
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
 
-    public Observable<SalesOrder[]> fetchSalesOrders(String contractAddress) {
+    public Observable<MagicLinkData[]> fetchSalesOrders(String contractAddress) {
         return Single.fromCallable(() -> {
             String result = readFromQueue(contractAddress);
 
-            if (result == null) return new SalesOrder[0];
+            initParser();
+
+            if (result == null) return new MagicLinkData[0];
 
             JSONObject stateData = new JSONObject(result);
             JSONArray orders = stateData.getJSONArray("orders");
-            SalesOrder[] trades = new SalesOrder[orders.length()];
+            MagicLinkData[] trades = new MagicLinkData[orders.length()];
 
             for (int i = 0; i < orders.length(); i++)
             {
+                MagicLinkData data = new MagicLinkData();
                 JSONObject order = (JSONObject)orders.get(i);
-                double price = order.getDouble("price");
-                int start = order.getInt("start");
+                data.price = order.getDouble("price");
+                data.ticketStart = order.getInt("start");
                 int stop = order.getInt("stop");
-                int count = order.getInt("count");
-                long expiry = order.getLong("expiry");
+                data.ticketCount = order.getInt("count");
+                data.expiry = order.getLong("expiry");
                 String base64Msg = order.getString("message");
                 String base64Sig = order.getString("signature");
 
-                trades[i] = new SalesOrder(price, expiry, start, count, contractAddress, base64Sig, base64Msg);
+                data.message = cryptoFunctions.Base64Decode(base64Msg);
+                MessageData msgData = parser.readByteMessage(data.message, cryptoFunctions.Base64Decode(base64Sig), data.ticketCount);
+                data.priceWei = msgData.priceWei;
+                data.tickets = msgData.tickets;
+                System.arraycopy(msgData.signature, 0, data.signature, 0, 65);
+                trades[i] = data;
             }
 
             return trades;

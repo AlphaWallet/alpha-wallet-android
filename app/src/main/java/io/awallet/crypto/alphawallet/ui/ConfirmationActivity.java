@@ -30,12 +30,12 @@ import io.awallet.crypto.alphawallet.entity.FinishReceiver;
 import io.awallet.crypto.alphawallet.entity.GasSettings;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.util.BalanceUtils;
 import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.ConfirmationViewModelFactory;
 import io.awallet.crypto.alphawallet.viewmodel.GasSettingsViewModel;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.PRUNE_ACTIVITY;
 

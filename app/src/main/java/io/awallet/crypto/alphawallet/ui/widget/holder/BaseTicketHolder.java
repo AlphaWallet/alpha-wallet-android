@@ -17,7 +17,7 @@ import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
 import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.ui.widget.OnTicketIdClickListener;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.stormbird.token.entity.TicketRange;
 
 public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener
 {

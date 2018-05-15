@@ -8,9 +8,9 @@ import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
-import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.RedeemSignatureDisplayRouter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRangeParcel;
+import io.stormbird.token.entity.TicketRange;
 
 /**
  * Created by James on 27/02/2018.
@@ -55,6 +55,7 @@ public class RedeemAssetSelectViewModel extends BaseViewModel
 
     public void showRedeemSignature(Context ctx, TicketRange range, Ticket ticket)
     {
-        redeemSignatureDisplayRouter.open(ctx, defaultWallet.getValue(), ticket, range);
+        TicketRangeParcel parcel = new TicketRangeParcel(range);
+        redeemSignatureDisplayRouter.open(ctx, defaultWallet.getValue(), ticket, parcel);
     }
 }

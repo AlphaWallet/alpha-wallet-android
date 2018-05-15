@@ -12,7 +12,6 @@ import io.awallet.crypto.alphawallet.ui.widget.OnTokenCheckListener;
 import io.awallet.crypto.alphawallet.ui.widget.entity.MarketSaleHeaderSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.QuantitySelectorSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.RedeemHeaderSortedItem;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TicketSaleSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TokenIdSortedItem;
 import io.awallet.crypto.alphawallet.ui.widget.entity.TransferHeaderSortedItem;
@@ -25,6 +24,7 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TicketSaleHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenDescriptionHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TotalBalanceHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TransferHeaderHolder;
+import io.stormbird.token.entity.TicketRange;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

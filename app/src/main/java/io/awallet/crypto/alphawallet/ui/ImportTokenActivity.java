@@ -22,13 +22,13 @@ import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.router.HomeRouter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.ImportTokenViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.AWalletAlertDialog;
 import io.awallet.crypto.alphawallet.widget.AWalletConfirmationDialog;
 import io.awallet.crypto.alphawallet.widget.SystemView;
 import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.ETH_SYMBOL;
 import static io.awallet.crypto.alphawallet.C.IMPORT_STRING;

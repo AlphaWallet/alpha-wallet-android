@@ -6,7 +6,8 @@ import android.content.Intent;
 import io.awallet.crypto.alphawallet.entity.MarketplaceEvent;
 import io.awallet.crypto.alphawallet.entity.Ticket;
 import io.awallet.crypto.alphawallet.ui.BrowseMarketActivity;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRangeParcel;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.Key.MARKETPLACE_EVENT;
 import static io.awallet.crypto.alphawallet.C.Key.TICKET;
@@ -30,9 +31,10 @@ public class MarketBrowseRouter
     }
 
     public void openRange(Context context, Ticket ticket, TicketRange range) {
+        TicketRangeParcel parcel = new TicketRangeParcel(range);
         Intent intent = new Intent(context, BrowseMarketActivity.class);
         intent.putExtra(TICKET, ticket);
-        intent.putExtra(TICKET_RANGE, range);
+        intent.putExtra(TICKET_RANGE, parcel);
         context.startActivity(intent);
     }
 }

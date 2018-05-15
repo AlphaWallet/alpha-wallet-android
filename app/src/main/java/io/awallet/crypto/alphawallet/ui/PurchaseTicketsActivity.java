@@ -13,14 +13,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.MagicLinkParcel;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.ui.widget.adapter.ERC875MarketAdapter;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 import io.awallet.crypto.alphawallet.util.KeyboardUtils;
 import io.awallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModel;
 import io.awallet.crypto.alphawallet.viewmodel.PurchaseTicketsViewModelFactory;
@@ -35,6 +33,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.TicketRange;
 
 import static io.awallet.crypto.alphawallet.C.Key.WALLET;
 import static io.awallet.crypto.alphawallet.C.MARKET_INSTANCE;

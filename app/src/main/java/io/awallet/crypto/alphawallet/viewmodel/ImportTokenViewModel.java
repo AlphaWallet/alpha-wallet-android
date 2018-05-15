@@ -23,7 +23,6 @@ import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
 import io.awallet.crypto.alphawallet.interact.SetupTokensInteract;
 import io.awallet.crypto.alphawallet.service.FeeMasterService;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
 
 import org.web3j.tx.Contract;
 
@@ -38,6 +37,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
 
 import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;

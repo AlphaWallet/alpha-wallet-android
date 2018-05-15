@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
+import io.stormbird.token.entity.TicketRange;
 
 /**
  * Created by weiwu on 1/3/18.  Each NonFungibleToken is a

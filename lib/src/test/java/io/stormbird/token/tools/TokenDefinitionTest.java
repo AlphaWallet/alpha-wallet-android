@@ -53,7 +53,7 @@ public class TokenDefinitionTest {
     public void XMLSignatureShouldValidate() throws IOException, SAXException {
         TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
         assertEquals("Shankai", ticketAsset.getKeyName());
-        // TODO: link validation
+        // TODO: actually validate XML signature
     }
 
 }

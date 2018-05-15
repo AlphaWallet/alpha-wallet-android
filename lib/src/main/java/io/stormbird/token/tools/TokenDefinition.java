@@ -238,5 +238,4 @@ public class TokenDefinition {
                     new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
         }
     }
-
 }

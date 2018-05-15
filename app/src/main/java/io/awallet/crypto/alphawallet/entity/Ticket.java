@@ -3,22 +3,17 @@ package io.awallet.crypto.alphawallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
-import io.awallet.crypto.alphawallet.repository.entity.NonFungibleToken;
 import io.awallet.crypto.alphawallet.repository.entity.RealmToken;
 import io.awallet.crypto.alphawallet.ui.BaseActivity;
-import io.awallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity;
-import io.awallet.crypto.alphawallet.ui.widget.entity.TicketRange;
-import io.awallet.crypto.alphawallet.ui.widget.holder.BaseTicketHolder;
-import io.awallet.crypto.alphawallet.ui.widget.holder.BinderViewHolder;
-import io.awallet.crypto.alphawallet.ui.widget.holder.TicketHolder;
 import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
+import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;

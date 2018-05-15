@@ -40,6 +40,14 @@ public class TicketRange
         this.isBurned = isBurned;
     }
 
+    public TicketRange(List<BigInteger> tokenIds, String contractAddress, boolean isBurned, boolean isChecked)
+    {
+        this.contractAddress = contractAddress;
+        this.tokenIds = tokenIds;
+        this.isChecked = isChecked;
+        this.isBurned = isBurned;
+    }
+
     public void selectSubRange(int count)
     {
         if (count < tokenIds.size())

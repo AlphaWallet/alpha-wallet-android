@@ -16,14 +16,19 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenDefinition {
     protected Document xml;
     public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
-    public String locale;
-    private Map<String, String> networkInfo = new ConcurrentHashMap<>();
+    protected String locale;
+    public Map<Integer, String> addresses = new HashMap<>();
+    protected String marketQueueAPI = null;
+    protected String feemasterAPI = null;
+    protected String tokenName = null;
+    protected String keyName = null;
 
     protected class FieldDefinition {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
@@ -63,7 +68,6 @@ public class TokenDefinition {
         public String applyToFieldValue(BigInteger data) {
             Date date=new Date(data.longValue());
             return date.toString();
-
         }
     }
 
@@ -141,47 +145,83 @@ public class TokenDefinition {
                 }
             }
         }
-
-        extract(xml, "address");
-        extract(xml, "gateway");
-        extract(xml, "feemaster");
-        extract(xml, "network");
+        extractFeatureTag(xml);
+        extractContractTag(xml);
+        extractSignedInfo(xml);
     }
 
-    public String getNetworkValue(int network, String field)
-    {
-        int definitionNetwork = Integer.valueOf(networkInfo.get("network"));
-        if (network == definitionNetwork)
-        {
-            return networkInfo.get(field);
+    private void extractSignedInfo(Document xml) {
+        NodeList nList;
+        nList = xml.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "KeyName");
+        nList = xml.getElementsByTagName("ds:KeyName"); // previous statement returns empty list, strange...
+        if (nList.getLength() > 0) {
+            this.keyName = ((Element) nList.item(0)).getTextContent();
         }
-        else
-        {
-            //XML doesn't apply to this request
-            return "";
-        }
+        return; // even if the document is signed, often it doesn't have KeyName
     }
 
-    private void extract(Document xml, String field)
-    {
-        NodeList nList = xml.getElementsByTagName(field);
-        String value = getNode(nList, field);
+    public String getKeyName() {
+        return this.keyName;
+    }
 
-        /*
-            Kludge: since feemaster is used to fetch internal transactions, and asset definition is not yet updated
-            remove 'claimToken' from line
-            TODO: remove 'claimToken' from assetdefinition in XML, then remove this patch
-         */
-        if (value.contains("claimToken"))
-        {
-            int index = value.indexOf("claimToken");
-            if (index > 0)
-            {
-                value = value.substring(0, index);
+    public String getFeemasterAPI(){
+        return feemasterAPI;
+    }
+
+    public String getContractAddress(int networkID) {
+        return addresses.get(networkID);
+    }
+
+    private void extractFeatureTag(Document xml) {
+        NodeList nList = xml.getElementsByTagName("feature");
+        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = (Element) nNode;
+                switch (eElement.getTagName()) {
+                    case "feemaster":
+                        feemasterAPI = eElement.getTextContent();
+                    case "trade":
+                        if (eElement.getAttribute("method").equals("market-queue")) {
+                            marketQueueAPI = eElement.getTextContent().trim();
+                        }
+                }
             }
         }
+    }
 
-        networkInfo.put(field, value);
+    private void extractContractTag(Document xml) {
+        String nameDefault = null;
+        String nameEnglish = null;
+        NodeList nList = xml.getElementsByTagName("contract");
+
+        /* we allow multiple contracts, e.g. for issuing asset and for
+         * proxy usage. but for now we only deal with the first if
+         * NullPointerException in the next statement, then XML file
+         * missing <contract> elements */
+        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = ((Element) nNode);
+                if (eElement.getTagName().equals("address")) {
+                    Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
+                    addresses.put(networkId, nNode.getTextContent());
+                }
+                if (eElement.getTagName().equals("name"))
+                    switch (eElement.getAttribute("lang")) {
+                        case "":
+                            nameDefault = eElement.getTextContent();
+                            break;
+                        case "en":
+                            nameEnglish = eElement.getTextContent(); // no "break;" for a reason.
+                        default:
+                            if (eElement.getAttribute("lang") == locale)
+                                tokenName = eElement.getTextContent();
+                    }
+            }
+        }
+        if (tokenName == null) {
+            tokenName = nameDefault == null ? nameEnglish : nameDefault;
+        }
+        // at this point, tokenName may still be null, and its acceptable
     }
 
     private String getNode(NodeList nList, String field)
@@ -210,7 +250,7 @@ public class TokenDefinition {
             FieldDefinition f = fields.get(key);
             BigInteger val = tokenId.and(f.bitmask).shiftRight(f.bitshift);
             token.setAttribute(f.id,
-                               new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
+                    new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
         }
     }
 }

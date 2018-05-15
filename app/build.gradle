@@ -23,8 +23,7 @@ android {
     buildToolsVersion '27.0.3'
     sourceSets {
         main {
-            // in the case we need to reorg xml repository location - weiwu
-            // assets.srcDirs = ['../xml']
+            assets.srcDirs = ['../contracts']
         }
     }
     defaultConfig {

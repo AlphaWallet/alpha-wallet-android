@@ -65,11 +65,15 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        try {
+        if (! data.isERC20) {
+            // TODO: apply styles for none ERC20 contracts
             contractType.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
-            issuer.setText(R.string.ethereum);
-            // We handled NPE. Exception handling is expensive, but not impotent here
+        }
+        try {
+            // TODO: only on the mainnet
+            issuer.setText(R.string.issuer + R.string.ethereum);
+            // We handled NPE. Exception handling is expensive, but not impotent here -james brown
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
                         : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));

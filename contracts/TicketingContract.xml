@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><asset><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>1EnORbF1WQITqwF66JaWyEoTIT0tktaGf29hdVd1/fY=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+AdZkI68YQ2gOAFmqyV+HEGQ52qp/T56e00l3vL6Y06xzCRwTMS9sSF2kG0PNqZi7xBusAWxO2Ubf
+vvnKX4lLPWtQAWVZXvZXJOMqH5FPSkT/MJ313DoKh510uvZEMNRbByLMFMOINAQF9s86y+BXHEBW
+v+J+th5FQxMgnTFpcJBdnXx9
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyName>Shankai</ds:KeyName>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIFBzCCBK2gAwIBAgIQKCMFmlBLtxz6L27XkUOsHjAKBggqhkjOPQQDAjCBkDELMAkGA1UEBhMC
+R0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UE
+ChMRQ09NT0RPIENBIExpbWl0ZWQxNjA0BgNVBAMTLUNPTU9ETyBFQ0MgRG9tYWluIFZhbGlkYXRp
+b24gU2VjdXJlIFNlcnZlciBDQTAeFw0xODA1MTEwMDAwMDBaFw0xOTA1MTEyMzU5NTlaMFAxITAf
+BgNVBAsTGERvbWFpbiBDb250cm9sIFZhbGlkYXRlZDEUMBIGA1UECxMLUG9zaXRpdmVTU0wxFTAT
+BgNVBAMTDHNrc3RyYXZlbC5jbjCBmzAQBgcqhkjOPQIBBgUrgQQAIwOBhgAEADc2VNAGlEOcdqeU
+A0vaxIC8gCFb9FDF8ZrrlJwqhpO/ZmnTCWUfe4LoI1a37Zv7QejC2+vPhyP0q55PvUtJT9INARfc
+VaG5jRpTw3ukSF1+ww/E/T6YqtrRV44U7rSF8XPTH0CmDrJD6z/b2aCXwcix4PByn8O6skTdZXOj
+LEXifqcjo4IC4zCCAt8wHwYDVR0jBBgwFoAUu/oI4L9U7lr9FqQ1AgmppMjs/UswHQYDVR0OBBYE
+FGyswybdwCsAau7aZaBGFEcL2XXmMA4GA1UdDwEB/wQEAwIFgDAMBgNVHRMBAf8EAjAAMB0GA1Ud
+JQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjBPBgNVHSAESDBGMDoGCysGAQQBsjEBAgIHMCswKQYI
+KwYBBQUHAgEWHWh0dHBzOi8vc2VjdXJlLmNvbW9kby5jb20vQ1BTMAgGBmeBDAECATBUBgNVHR8E
+TTBLMEmgR6BFhkNodHRwOi8vY3JsLmNvbW9kb2NhLmNvbS9DT01PRE9FQ0NEb21haW5WYWxpZGF0
+aW9uU2VjdXJlU2VydmVyQ0EuY3JsMIGFBggrBgEFBQcBAQR5MHcwTwYIKwYBBQUHMAKGQ2h0dHA6
+Ly9jcnQuY29tb2RvY2EuY29tL0NPTU9ET0VDQ0RvbWFpblZhbGlkYXRpb25TZWN1cmVTZXJ2ZXJD
+QS5jcnQwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmNvbW9kb2NhLmNvbTApBgNVHREEIjAgggxz
+a3N0cmF2ZWwuY26CEHd3dy5za3N0cmF2ZWwuY24wggEEBgorBgEEAdZ5AgQCBIH1BIHyAPAAdgDu
+S723dc5guuFCaR+r4Z5mow9+X7By2IMAxHuJeqj9ywAAAWNOX8kpAAAEAwBHMEUCIEIb/jymAGpZ
+LG4umW1TbfCe/7Sr5MEIYknkdRdd6I6qAiEA2pHlmnby7PaQwoZrFGqIPQEyJ6oChl+7VRrcoA4t
+5JsAdgB0ftqDMa0zEJEhnM4lT0Jwwr/9XkIgCMY3NXnmEHvMVgAAAWNOX8mcAAAEAwBHMEUCIQC/
+LOBZaO136CYN7GYr+OODcLZ/AG2r7ge7BigCRSk8fQIgC/n33uxEZD+w3ENTxTdOhCTxvSW6BL71
+wFYJPkFHYWkwCgYIKoZIzj0EAwIDSAAwRQIhAIi6VxP/HzmR3rGw6f9M6FLiH0TNgn1EbARAluAV
+bFTFAiBKJSQRqq66kI9yMPc1NJISGi8btpWfPiB78twtjuHe7A==
+</ds:X509Certificate>
+<ds:X509Certificate>
+MIIDnTCCAyKgAwIBAgIQUQYB5jtQZzxV7k4Z2jBMqDAKBggqhkjOPQQDAzCBhTELMAkGA1UEBhMC
+R0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UE
+ChMRQ09NT0RPIENBIExpbWl0ZWQxKzApBgNVBAMTIkNPTU9ETyBFQ0MgQ2VydGlmaWNhdGlvbiBB
+dXRob3JpdHkwHhcNMTQwMzEzMDAwMDAwWhcNMjkwMzEyMjM1OTU5WjCBkDELMAkGA1UEBhMCR0Ix
+GzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UEChMR
+Q09NT0RPIENBIExpbWl0ZWQxNjA0BgNVBAMTLUNPTU9ETyBFQ0MgRG9tYWluIFZhbGlkYXRpb24g
+U2VjdXJlIFNlcnZlciBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIg2jdgJVPWaKXk+JD06
+oiTxihgKVH3tQCza8LqO2YT1Rd03cJEkrLoU61FoIN3SSFUAXW9E7ggci/lVXySaVIOjggFlMIIB
+YTAfBgNVHSMEGDAWgBR1cacZSBm8nZ3qQUfflMRId5nTeTAdBgNVHQ4EFgQUu/oI4L9U7lr9FqQ1
+AgmppMjs/UswDgYDVR0PAQH/BAQDAgGGMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0lBBYwFAYI
+KwYBBQUHAwEGCCsGAQUFBwMCMBsGA1UdIAQUMBIwBgYEVR0gADAIBgZngQwBAgEwTAYDVR0fBEUw
+QzBBoD+gPYY7aHR0cDovL2NybC5jb21vZG9jYS5jb20vQ09NT0RPRUNDQ2VydGlmaWNhdGlvbkF1
+dGhvcml0eS5jcmwwcQYIKwYBBQUHAQEEZTBjMDsGCCsGAQUFBzAChi9odHRwOi8vY3J0LmNvbW9k
+b2NhLmNvbS9DT01PRE9FQ0NBZGRUcnVzdENBLmNydDAkBggrBgEFBQcwAYYYaHR0cDovL29jc3Au
+Y29tb2RvY2EuY29tMAoGCCqGSM49BAMDA2kAMGYCMQDtilgEuIgqZMub1nOMLJwPVr3Lrs/A4RVY
+uImPsVNTtWG65FL7j6YooeQtlSxIViACMQDvavtMsSKuUzwaH3x8vVhGiljleoI0iloIE64Adby0
+id6I7ObgYgAsmupHtaSvojI=
+</ds:X509Certificate>
+<ds:X509Certificate>
+MIID0DCCArigAwIBAgIQQ1ICP/qokB8Tn+P05cFETjANBgkqhkiG9w0BAQwFADBvMQswCQYDVQQG
+EwJTRTEUMBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsTHUFkZFRydXN0IEV4dGVybmFsIFRU
+UCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290MB4XDTAwMDUzMDEw
+NDgzOFoXDTIwMDUzMDEwNDgzOFowgYUxCzAJBgNVBAYTAkdCMRswGQYDVQQIExJHcmVhdGVyIE1h
+bmNoZXN0ZXIxEDAOBgNVBAcTB1NhbGZvcmQxGjAYBgNVBAoTEUNPTU9ETyBDQSBMaW1pdGVkMSsw
+KQYDVQQDEyJDT01PRE8gRUNDIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MHYwEAYHKoZIzj0CAQYF
+K4EEACIDYgAEA0d7L3XJghWF+3XkkRbUq2KZ9T5SCwbOQQB/l+EKJDwdAQTuPdKNCZcM4HXk+vt3
+iir1A2BLNosWIxatCXH0SvQoULT+iBxuP2wvLwlZW6VbCzOZ4sM9iflqLO+y0wbpo4H+MIH7MB8G
+A1UdIwQYMBaAFK29mHo0tCb3+sQmVO8DveAky1QaMB0GA1UdDgQWBBR1cacZSBm8nZ3qQUfflMRI
+d5nTeTAOBgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zARBgNVHSAECjAIMAYGBFUdIAAw
+SQYDVR0fBEIwQDA+oDygOoY4aHR0cDovL2NybC50cnVzdC1wcm92aWRlci5jb20vQWRkVHJ1c3RF
+eHRlcm5hbENBUm9vdC5jcmwwOgYIKwYBBQUHAQEELjAsMCoGCCsGAQUFBzABhh5odHRwOi8vb2Nz
+cC50cnVzdC1wcm92aWRlci5jb20wDQYJKoZIhvcNAQEMBQADggEBAB3H+i5AtlwFSw+8VTYBWOBT
+BT1k+6zZpTi4pyE7r5VbvkjI00PUIWxB7QktnHMAcZyuIXN+/46NuY5YkI78jG12yAA6nyCmLX3M
+F/3NmJYyCRrJZfwE67SaCnjllztSjxLCdJcBns/hbWjYk7mcJPuWJ0gBnOqUP3CYQbNzUTcp6PYB
+erknuCRR2RFo1KaFpzanpZa6gPim/a5thCCuNXZzQg+HCezF3OeTAyIal+6ailFhp5cmHunudVEI
+kAWvL54TnJM/ev/m6+loeYyv4Lb67psSE/5FjNJ80zXrIRKT/mZ1JioVhCb3ZsnLjbsJQdQYr7Gz
+EPUQyp2aDrV1aug=
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature>
+	<contract type="issuing">
+		<address network="1">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
+		<address network="3">0x4ebacae9e9901f0e50026ad021ea5bab82402bf7</address>
+		<name lang="ru">Билеты</name>
+		<name lang="en">Tickets</name>
+		<name lang="zh">票</name>
+		<name lang="es">Entradas</name>
+	</contract>
+  <!-- consider metadata of tokens, e.g. quantifier in each languages -->
+  <features>
+    <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
+      <trade method="market-queue" version="0.1">
+        <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
+      </trade>
+      <trade method="universal-link" version="9">
+        <prefix>https://app.awallet.io/</prefix>
+      </trade>
+      <feemaster>https://app.awallet.io:80/api/claimToken</feemaster>
+      <redeem>
+        <method name="QR"/>
+        <!--
+        <method name="Aztec"/>
+        <method name="Bluetooth"/>
+        -->
+      </redeem>
+    </feature>
+  </features>
+  <ordering>
+    <order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
+      <byName field="locality"/>
+      <byValue field="match"/>
+      <byValue field="number"/>
+    </order>
+    <order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="concise">
+      <byValue field="match"/>
+      <byValue field="category"/>
+      <byValue field="number"/>
+    </order>
+  </ordering>
+
+  <!-- token UI definition can happen here -->
+  <fields>
+    <!--
+    There are 64 matches (1-64), each has up to 16 ticket classes,
+    within each class, there are less than 65536 tickets.  A compact
+    format identifier would consist of 26 bits:
+
+    [6] [4] [16]
+
+    Representing:
+
+	    Match ID: 1-64
+	    Class: 1-16
+	    Seat: 0-65536
+
+    These are represented by 7 hex codes. Therefore 0x40F0481 means
+    the final match (64th), class F (highest) ticket number 1153. But
+    we didn't end up using this compatct form.
+
+    Information about a match, like Venue, City, Date, which team
+    against which, can all be looked up by MatchID. There are
+    advantages and disadvantages in encoding them by a look up table
+    or by a bit field.
+
+    The advantage of storing them as a bit field is that one can
+    enquiry the range of it in the market queue server without the
+    server kowing the meaning of the bitfields. Furthermore it make
+    the android and ios library which accesses the XML file a bit
+    easier to write, but at the cost that the ticket issuing
+    (authorisation) server is a bit more complicated.
+
+    For now we decide to use bit-fields.  The fields, together with
+    its bitwidth or byte-width are represented in this table:
+
+    Fields:           City,   Venue,  Date,   TeamA,  TeamB,  Match, Category
+    Maximum, 2018:    11,     12,     32,     32,     32,     64,    16
+    Maximum, all time:64,     64,     64,     32,     32,     64,    64
+    Bitwidth:         6,      6,      6,      5,      5,      6,     6
+    Bytewidth:        1,      1,      4,      3,      3,      1,     1,
+
+    In practise, because this XML file is used in 3 to 4 places
+    (authorisation server, ios, android, potentially market-queue),
+    Weiwu thought that it helps the developers if we use byte-fields
+    instead of bit-fields.
+  -->
+    <field bitmask="00000000000000000000000000000000FF000000000000000000000000000000" id="locality" type="Enumeration">
+      <name lang="ru">город</name>
+      <name lang="en">City</name>
+      <name lang="zh">城市</name>
+      <name lang="es">Ciudad</name>
+      <mapping>
+        <entity key="1">
+          <name lang="ru">Москва́</name>
+          <name lang="en">Moscow</name>
+          <name lang="zh">莫斯科</name>
+          <name lang="es">Moscú</name>
+        </entity>
+        <entity key="2">
+          <name lang="ru">Санкт-Петербу́рг</name>
+          <name lang="en">Saint Petersburg</name>
+          <name lang="zh">圣彼得堡</name>
+          <name lang="es">San Petersburgo</name>
+        </entity>
+        <entity key="3">
+          <name lang="ru">сочи</name>
+          <name lang="en">Sochi</name>
+          <name lang="zh">索契</name>
+          <name lang="es">Sochi</name>
+        </entity>
+        <entity key="4">
+          <name lang="ru">екатеринбург</name>
+          <name lang="en">Ekaterinburg</name>
+          <name lang="zh">叶卡捷琳堡</name>
+          <name lang="es">Ekaterinburg</name>
+        </entity>
+        <entity key="5">
+          <name lang="ru">Саранск</name>
+          <name lang="en">Saransk</name>
+          <name lang="zh">萨兰斯克</name>
+          <name lang="es">Saransk</name>
+        </entity>
+        <entity key="6">
+          <name lang="ru">казань</name>
+          <name lang="en">Kazan</name>
+          <name lang="zh">喀山</name>
+          <name lang="es">Kazan</name>
+        </entity>
+        <entity key="7">
+          <name lang="ru">Нижний Новгород</name>
+          <name lang="en">Nizhny Novgorod</name>
+          <name lang="zh">下诺夫哥罗德</name>
+          <name lang="es">Nizhny Novgorod</name>
+        </entity>
+        <entity key="8">
+          <name lang="ru">Ростов-на-Дону</name>
+          <name lang="en">Rostov-on-Don</name>
+          <name lang="zh">顿河畔罗斯托夫</name>
+          <name lang="es">Rostov-on-Don</name>
+        </entity>
+        <entity key="9">
+          <name lang="ru">Самара</name>
+          <name lang="en">Samara</name>
+          <name lang="zh">翅果</name>
+          <name lang="es">Samara</name>
+        </entity>
+        <entity key="10">
+          <name lang="ru">Волгоград</name>
+          <name lang="en">Volgograd</name>
+          <name lang="zh">伏尔加格勒</name>
+          <name lang="es">Volgogrado</name>
+        </entity>
+        <entity key="11">
+          <name lang="ru">Калининград</name>
+          <name lang="en">Kaliningrad</name>
+          <name lang="zh">加里宁格勒</name>
+          <name lang="es">Kaliningrad</name>
+        </entity>
+        <entity key="255">
+          <name lang="ru">Сидней</name>
+          <name lang="en">Sydney</name>
+          <name lang="zh">悉尼</name>
+          <name lang="es">Sídney</name>
+        </entity>
+        <entity key="254">
+          <name lang="ru">Сингапур</name>
+          <name lang="en">Singapore</name>
+          <name lang="zh">新加坡</name>
+          <name lang="es">Singapur</name>
+        </entity>
+      </mapping>
+    </field>
+    <field bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" id="venue" type="Enumeration">
+      <name lang="ru">место встречи</name>
+      <name lang="en">Venue</name>
+      <name lang="zh">场馆</name>
+      <name lang="es">Lugar</name>
+      <mapping>
+        <entity key="1">
+          <name lang="ru">Стадион Калининград</name>
+          <name lang="en">Kaliningrad Stadium</name>
+          <name lang="zh">加里寧格勒體育場</name>
+          <name lang="es">Estadio de Kaliningrado</name>
+        </entity>
+        <entity key="2">
+          <name lang="ru">Екатеринбург Арена</name>
+          <name lang="en">Volgograd Arena</name>
+          <name lang="zh">伏爾加格勒體育場</name>
+          <name lang="es">Volgogrado Arena</name>
+        </entity>
+        <entity key="3">
+          <name lang="ru">Казань Арена</name>
+          <name lang="en">Ekaterinburg Arena</name>
+          <name lang="zh">加里宁格勒体育场</name>
+          <name lang="es">Ekaterimburgo Arena</name>
+        </entity>
+        <entity key="4">
+          <name lang="ru">Мордовия Арена</name>
+          <name lang="en">Fisht Stadium</name>
+          <name lang="zh">菲什特奧林匹克體育場</name>
+          <name lang="es">Estadio Fisht</name>
+        </entity>
+        <entity key="5">
+          <name lang="ru">Ростов Арена</name>
+          <name lang="en">Kazan Arena</name>
+          <name lang="zh">喀山體育場</name>
+          <name lang="es">Kazan Arena</name>
+        </entity>
+        <entity key="6">
+          <name lang="ru">Самара Арена</name>
+          <name lang="en">Nizhny Novgorod Stadium</name>
+          <name lang="zh">下諾夫哥羅德體育場</name>
+          <name lang="es">Estadio de Nizhni Novgorod</name>
+        </entity>
+        <entity key="7">
+          <name lang="ru">Стадион Калининград</name>
+          <name lang="en">Luzhniki Stadium</name>
+          <name lang="zh">卢日尼基体育场</name>
+          <name lang="es">Estadio Luzhniki</name>
+        </entity>
+        <entity key="8">
+          <name lang="ru">Стадион Лужники</name>
+          <name lang="en">Samara Arena</name>
+          <name lang="zh">薩馬拉體育場</name>
+          <name lang="es">Samara Arena</name>
+        </entity>
+        <entity key="9">
+          <name lang="ru">Стадион Нижний Новгород</name>
+          <name lang="en">Rostov Arena</name>
+          <name lang="zh">羅斯托夫體育場</name>
+          <name lang="es">Rostov Arena</name>
+        </entity>
+        <entity key="10">
+          <name lang="ru">Стадион Спартак</name>
+          <name lang="en">Spartak Stadium</name>
+          <name lang="zh">斯巴達克體育場</name>
+          <name lang="es">Estadio del Spartak</name>
+        </entity>
+        <entity key="11">
+          <name lang="ru">Стадион Санкт-Петербург</name>
+          <name lang="en">Saint Petersburg Stadium</name>
+          <name lang="zh">十字架體育場</name>
+          <name lang="es">Estadio de San Petersburgo</name>
+        </entity>
+        <entity key="12">
+          <name lang="ru">Стадион Фишт</name>
+          <name lang="en">Mordovia Arena</name>
+          <name lang="zh">莫爾多維亞體育場</name>
+          <name lang="es">Mordovia Arena</name>
+        </entity>
+        <entity key="255">
+          <name lang="en">UNSW Michael Crouch Innovation Center</name>
+          <name lang="zh">新南威尔大学Michael Crouch创新中心</name>
+          <name lang="es">Centro de Innovación de Michael Crouch UNSW</name>
+        </entity>
+      </mapping>
+    </field>
+    <field bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000" id="time" type="BinaryTime">
+      <name lang="es">время</name>
+      <name lang="en">Time</name>
+      <name lang="zh">时间</name>
+      <name lang="es">Tiempo</name>
+    </field>
+    <field bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000" id="countryA" type="IA5String">
+      <!-- Intentionally avoid using countryName
+	   (SYNTAX 1.3.6.1.4.1.1466.115.121.1.11) per RFC 4519
+           CountryName is two-characters long, not 3-characters.
+	   -->
+      <name lang="en">Team A</name>
+      <name lang="zh">甲队</name>
+      <name lang="es">Equipo A</name>
+    </field>
+    <field bitmask="00000000000000000000000000000000000000000000000000FFFFFF00000000" id="countryB" type="IA5String">
+      <name lang="en">Team B</name>
+      <name lang="zh">乙队</name>
+      <name lang="es">Equipo B</name>
+    </field>
+    <field bitmask="00000000000000000000000000000000000000000000000000000000FF000000" id="match" type="Integer">
+      <name lang="en">Match</name>
+      <name lang="zh">场次</name>
+      <name lang="es">Evento</name>
+    </field>
+    <field bitmask="0000000000000000000000000000000000000000000000000000000000FF0000" id="category" type="Enumeration">
+      <name lang="en">Cat</name>
+      <name lang="zh">等级</name>
+      <name lang="es">Cat</name>
+      <mapping>
+        <entity key="1">
+          <name lang="en">FIFA VIP</name>
+          <name lang="zh">世界杯VIP</name>
+        </entity>
+        <entity key="2">
+          <name lang="en">FIFA Group VIP</name>
+          <name lang="zh">世界杯团票VIP</name>
+        </entity>
+        <entity key="3">
+          <name lang="en">FIFA 2018</name>
+          <name lang="zh">2018世界杯</name>
+        </entity>
+        <entity key="255">
+          <name lang="en">Singapore Unnamed Workshop</name>
+          <name lang="zh">新加坡一个还没取名字的活动</name>
+        </entity>
+	<entity key="254">
+          <name lang="en">Beijing Unnamed Workshop</name>
+          <name lang="zh">北京一个还没取名字的活动</name>
+        </entity>
+      </mapping>
+    </field>
+    <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="number" type="Integer">
+      <name lang="en">Number</name>
+      <name lang="zh">票号</name>
+      <name lang="es">Número</name>
+    </field>
+  </fields>
+</asset>

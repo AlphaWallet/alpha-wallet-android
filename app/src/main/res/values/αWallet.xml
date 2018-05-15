@@ -32,7 +32,6 @@
     <string name="hint_ids_to_sell">Enter Ticket IDs to place on market</string>
     <string name="create_sell_order">Create Sales Order</string>
     <string name="selection">selection:</string>
-    <string name="contract_issuer">trade    Smart Contract     Issuer: Shenkai</string>
     <string name="select_tickets">Select Tickets to Sell:</string>
     <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
     <string name="market_buy_title">Browse Ticket Market</string>
@@ -278,7 +277,6 @@
     <string name="formats">Formats</string>
     <string name="choose_formats">Choose Formats</string>
     <string name="qr_scanner">QR Scanner</string>
-    <string name="shengkai">Shengkai</string>
     <string name="dialog_title_select_locale">Select Locale:</string>
     <string name="settings_locale_lang">Locale</string>
     <string name="lang_en">English</string>

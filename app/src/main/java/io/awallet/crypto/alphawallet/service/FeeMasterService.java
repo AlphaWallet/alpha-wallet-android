@@ -109,7 +109,6 @@ public class FeeMasterService
                 MediaType mediaType = MediaType.parse("application/octet-stream");
                 StringBuilder sb = new StringBuilder();
                 sb.append(url);
-                sb.append("claimToken");
                 Map<String, String> args = new HashMap<>();
                 args.put("address", toAddress);
                 args.put("indices", indices);

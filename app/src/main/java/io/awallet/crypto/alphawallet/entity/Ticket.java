@@ -185,9 +185,9 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
+        tokenHolder.issuer.setText("FIXME");
         if (isLiveTicket())
         {
-            tokenHolder.issuer.setText(R.string.shengkai);
             tokenHolder.contractType.setVisibility(View.VISIBLE);
             tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
             tokenHolder.contractType.setText(R.string.erc875);
@@ -474,24 +474,6 @@ public class Ticket extends Token implements Parcelable
                 //TODO: Handle error
             }
         }
-    }
-
-    public String getXMLProperty(int network, String property, BaseActivity activity)
-    {
-        String value;
-        try
-        {
-            AssetDefinition ad = new AssetDefinition("TicketingContract.xml", activity.getResources());
-            value = ad.getNetworkValue(network, property);
-        }
-        catch (IOException | SAXException e)
-        {
-            e.printStackTrace();
-            //TODO: Handle error
-            value = "";
-        }
-
-        return value;
     }
 
     public boolean isLiveTicket()

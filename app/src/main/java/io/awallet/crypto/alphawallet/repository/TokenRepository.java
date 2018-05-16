@@ -241,14 +241,30 @@ public class TokenRepository implements TokenRepositoryType {
                 });
     }
 
-    private Single<Token> attachCachedEth(NetworkInfo network, Wallet wallet) {
-        return walletRepository.balanceInWei(wallet)
-                .map(balance -> {
-                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    Token eth = new Token(info, balance, System.currentTimeMillis());
-                    eth.setIsEthereum();
-                    return eth;
-                });
+//    private Single<Token> attachCachedEth(NetworkInfo network, Wallet wallet) {
+//        return walletRepository.balanceInWei(wallet)
+//                .map(balance -> {
+//                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
+//                    Token eth = new Token(info, balance, System.currentTimeMillis());
+//                    eth.setIsEthereum();
+//                    return eth;
+//                });
+//    }
+
+    private Single<Token> attachCachedEth(NetworkInfo network, Wallet wallet)
+    {
+        //get stored eth balance
+        return Single.fromCallable(() -> {
+            Token eth = localSource.getTokenBalance(network, wallet, wallet.address);
+            if (eth == null)
+            {
+                TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
+                BigDecimal balance = BigDecimal.ZERO;
+                eth = new Token(info, balance, System.currentTimeMillis());
+            }
+            eth.setIsEthereum();
+            return eth;
+        });
     }
 
     @Override
@@ -498,9 +514,20 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (BadContract e)
             {
-                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
-                localSource.updateTokenDestroyed(network, wallet, updated);
-                return updated;
+                //this doesn't mean the token is dead.
+                //did we previously have a balance?
+                if (token.hasPositiveBalance())
+                {
+                    //how many times have we checked?
+                    if (token.updateNullCheckCount() > 20)
+                    {
+                        //it could be dead. TODO: Add a last received date
+                    }
+                }
+                return token;
+//                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
+//                localSource.updateTokenDestroyed(network, wallet, updated);
+//                return updated;
             }
             catch (Exception e)
             {
@@ -589,9 +616,18 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
         return walletRepository.balanceInWei(wallet)
                 .map(balance -> {
+                    if (balance.equals(BigDecimal.valueOf(-1)))
+                    {
+                        //network error - retrieve from cache
+                        Token b = localSource.getTokenBalance(network, wallet, wallet.address);
+                        if (b != null) balance = b.balance;
+                        else balance = BigDecimal.ZERO;
+                    }
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
                     Token eth = new Token(info, balance, System.currentTimeMillis());
                     eth.setIsEthereum();
+                    //store token and balance
+                    localSource.updateTokenBalance(network, wallet, eth);
                     return eth;
                 })
                 .flatMap(token -> ethereumNetworkRepository.getTicker()

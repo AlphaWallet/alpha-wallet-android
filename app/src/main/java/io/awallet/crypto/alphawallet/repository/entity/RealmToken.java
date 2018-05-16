@@ -16,6 +16,7 @@ public class RealmToken extends RealmObject {
     private int tokenId;
     private boolean isStormbird;
     private String burnList;
+    private int nullCheckCount = 0;
 
     public int getDecimals() {
         return decimals;
@@ -110,5 +111,13 @@ public class RealmToken extends RealmObject {
     public void setStormbird(boolean stormbird)
     {
         isStormbird = stormbird;
+    }
+
+    public int updateNullCheckCount() { return nullCheckCount++; }
+    public void setNullCheckCount(int count) { nullCheckCount = count; }
+
+    public int getNullCheckCount()
+    {
+        return nullCheckCount;
     }
 }

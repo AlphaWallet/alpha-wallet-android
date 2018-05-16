@@ -16,6 +16,7 @@ public interface TokenLocalSource {
     Single<Token> saveToken(NetworkInfo networkInfo, Wallet wallet, Token token);
     Completable saveTokens(NetworkInfo networkInfo, Wallet wallet, Token[] items);
     void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
+    Token getTokenBalance(NetworkInfo network, Wallet wallet, String address);
     void updateTokenDestroyed(NetworkInfo network, Wallet wallet, Token token);
     void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled);
     void updateTokenBurn(NetworkInfo network, Wallet wallet, Token token, List<Integer> burn);

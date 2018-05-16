@@ -64,6 +64,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private int networkId = 0;
 
     private Wallet wallet;
+    private boolean isVisible;
 
     @Nullable
     @Override
@@ -109,6 +110,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
         initTabLayout(view);
 
+        isVisible = true;
+
         return view;
     }
 
@@ -118,6 +121,25 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         {
             viewModel.fetchTokens(); //require a full token refresh; number of tokens has changed
         }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        isVisible = isVisibleToUser;
+        if (isResumed()) { // fragment created
+            viewModel.setVisibility(isVisible);
+            if (isVisible) {
+                viewModel.reStartTokenUpdate();
+            }
+        }
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.setVisibility(false);
     }
 
     private void onToken(Token token)
@@ -201,6 +223,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     @Override
     public void onResume() {
         super.onResume();
+        viewModel.setVisibility(isVisible);
         viewModel.prepare();
     }
 

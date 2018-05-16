@@ -40,6 +40,8 @@ public class TransactionsViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showEmpty = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> clearAdapter = new MutableLiveData<>();
+
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -64,6 +66,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private String feemasterUrl = null;
     private int transactionCount;
     private long lastBlock = 0;
+    private boolean firstRun = false;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -102,11 +105,18 @@ public class TransactionsViewModel extends BaseViewModel {
 
     public void abortAndRestart()
     {
+        firstRun = false;
         handler.removeCallbacks(startFetchTransactionsTask);
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {
             fetchTransactionDisposable.dispose();
         }
+
+        fetchTransactionDisposable = null;
+
+        txArray = null;
+        txMap.clear();
+        setupTokensInteract.clearAll();
 
         prepare();
     }
@@ -123,8 +133,10 @@ public class TransactionsViewModel extends BaseViewModel {
         return transactions;
     }
     public LiveData<Boolean> showEmpty() { return showEmpty; }
+    public LiveData<Boolean>  clearAdapter() { return clearAdapter; }
 
     public void prepare() {
+        firstRun = false;
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
@@ -147,7 +159,7 @@ public class TransactionsViewModel extends BaseViewModel {
                 setupTokensInteract.setWalletAddr(wallet.getValue().address);
 
                 fetchTransactionDisposable =
-                        fetchTransactionsInteract.fetchCached(wallet.getValue())
+                        fetchTransactionsInteract.fetchCached(network.getValue(), wallet.getValue())
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(this::onTransactions, this::onError, this::fetchNetworkTransactions);
@@ -181,6 +193,17 @@ public class TransactionsViewModel extends BaseViewModel {
     private void onTransactions(Transaction[] transactions) {
         Log.d(TAG, "Found " + transactions.length + " Cached transactions");
         txArray = transactions;
+        if (transactions.length == 0)
+        {
+            firstRun = true;
+        }
+        else if (firstRun)
+        {
+            firstRun = false;
+            //clear the adapter
+            clearAdapter.postValue(true);
+        }
+
         for (Transaction tx : txArray)
         {
             txMap.put(tx.hash, tx);
@@ -408,6 +431,7 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         this.wallet.setValue(wallet);
+        setupTokensInteract.setWalletAddr(wallet.address);
         fetchTransactions(true);
     }
 
@@ -428,6 +452,7 @@ public class TransactionsViewModel extends BaseViewModel {
     //Called from the activity when it comes into view,
     //start updating transactions
     public void startTransactionRefresh() {
+        firstRun = false;
         isVisible = true;
         if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
         {

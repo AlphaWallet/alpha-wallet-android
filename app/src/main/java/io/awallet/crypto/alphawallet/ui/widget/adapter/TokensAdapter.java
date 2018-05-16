@@ -203,7 +203,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 {
                     if (token.hasPositiveBalance() || token.isEthereum())
                     {
-                        items.add(new TokenSortedItem(token, tsi.weight));
+                        tsi = new TokenSortedItem(token, tsi.weight);
+                        items.add(tsi);
+                        if (token.isEthereum()) notifyItemChanged(i, tsi); //notifyItemChanged(i);
                     }
                     else if (!thisToken.isEthereum())
                     {
@@ -222,7 +224,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         //However all other methods (notify range changed, notify dataset etc GPF under heavy stress.
         //If you want to switch on the view stress test search for 'throw new BadContract' in TokenRepository and uncomment the random throw
         //this causes tokens to pop in and out of this view very frequently.
-        if (!updated && !token.isTerminated() && token.hasPositiveBalance())
+        if (!updated && !token.isTerminated() && !token.isBad() && token.hasPositiveBalance())
         {
             needsRefresh = true;
         }
@@ -236,7 +238,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         for (Token token : tokens)
         {
-            if (!token.isTerminated() && (token.isEthereum() || token.hasPositiveBalance()))
+            if (!token.isBad() && (token.isEthereum() || token.hasPositiveBalance()))
             {
                 checkLiveToken(token);
                 switch (filterType)
@@ -264,7 +266,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         int weight = 0;
         String tokenName = token.getFullName();
         if(token.isEthereum()) return 5;
-        if(token.isTerminated()) return Integer.MAX_VALUE;
+        if(token.isBad()) return Integer.MAX_VALUE;
 
         int i = 4;
         int pos = 0;

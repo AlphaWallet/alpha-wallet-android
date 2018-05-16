@@ -72,11 +72,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         try {
             // TODO: only on the mainnet
-            issuer.setText(R.string.issuer + R.string.ethereum);
+            String displayTxt = getString(R.string.ethereum);
+            issuer.setText(displayTxt);
             // We handled NPE. Exception handling is expensive, but not impotent here -james brown
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
-                        : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
+                        : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
             token.setupContent(this);
         } catch (Exception ex) {

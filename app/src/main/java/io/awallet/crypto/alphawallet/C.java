@@ -49,6 +49,11 @@ public abstract class C {
     public static final String PRUNE_ACTIVITY =
             "io.awallet.crypto.alphawallet.PRUNE_ACTIVITY";
 
+    public static final String RESET_WALLET =
+            "io.awallet.crypto.alphawallet.RESET";
+    public static final String ADDED_TOKEN =
+            "io.awallet.crypto.alphawallet.ADDED";
+
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
     public static final String CHANGELLY_REF_ID = "968d4f0f0bf9";
@@ -67,7 +72,7 @@ public abstract class C {
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
     public static final boolean HARD_CODED_KEY = false;           //pre-loads a hard coded key in the app
     public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
-    public static final boolean OVERRIDE_DEFAULT_NETWORK = true;  //use the default network given below
+    public static final boolean OVERRIDE_DEFAULT_NETWORK = false;  //use the default network given below
 
     //Range of 3 test keys, they all have a little test eth pre-loaded on them
     public static final String HARD_PRIVATE_KEY1 = "bddb287b00c8047587f4fbf3de731a30f9404aa3735ae5d1766550534cf939da"; //0xc9034FF4266b1690d2B579584e5c3259009eD13c
@@ -78,7 +83,7 @@ public abstract class C {
     public static final String PRE_LOADED_KEY = HARD_PRIVATE_KEY3;
     public static final String HARD_CONTRACT_ADDR = "0x0B6732BAECC0793E38A98934799ABD3C7DC3CF31";
 
-    public static final String DEFAULT_NETWORK = ROPSTEN_NETWORK_NAME;
+    public static final String DEFAULT_NETWORK = ETHEREUM_NETWORK_NAME;
 
     public static final String TWITTER_PACKAGE_NAME = "com.twitter.android";
     public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";

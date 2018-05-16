@@ -315,12 +315,17 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                             TokenDefinition ticketToken = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
                                     Locale.getDefault().getDisplayLanguage());
                             String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
-                            if (address != null && address.equalsIgnoreCase(t.getAddress())) {
+                            if (address != null && address.equalsIgnoreCase(t.getAddress()))
+                            {
                                 viewModel.importThroughFeemaster(ticketToken.getFeemasterAPI());
-                            } else {
+                            }
+                            else
+                            {
                                 viewModel.performImport();
                             }
-                        } catch (IOException|SAXException e) {
+                        }
+                        catch (IOException|SAXException e)
+                        {
                             e.printStackTrace(); // TODO Handle the error!!
                         }
                     }

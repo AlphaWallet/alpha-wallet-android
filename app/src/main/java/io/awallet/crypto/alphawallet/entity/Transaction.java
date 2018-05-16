@@ -37,6 +37,8 @@ public class Transaction implements Parcelable {
     public final String error;
     public final String contentHash;
 
+    public boolean isConstructor = false;
+
     public Transaction(
             String hash,
             String error,

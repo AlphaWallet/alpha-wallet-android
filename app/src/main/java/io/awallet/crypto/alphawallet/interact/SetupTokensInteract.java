@@ -81,7 +81,7 @@ public class SetupTokensInteract {
             }
 
             //already has contract info
-            if (thisTrans.operations.length > 0 &&
+            if (thisTrans.isConstructor || thisTrans.operations.length > 0 &&
                     thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
             {
                 op = thisTrans.operations[0];
@@ -383,7 +383,7 @@ public class SetupTokensInteract {
                 if (t.input != null && t.input.length() > 20)
                 {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
-                    if (data != null && data.functionData != null)
+                    if (t.isConstructor || (data != null && data.functionData != null))
                     {
                         Token localToken = tokenMap.get(t.to);
                         if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);

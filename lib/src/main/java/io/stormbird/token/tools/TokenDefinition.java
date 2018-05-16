@@ -26,7 +26,25 @@ public class TokenDefinition {
     protected String locale;
     public Map<Integer, String> addresses = new HashMap<>();
 
-    //Too restrictive - needs to be a map
+    /* the following are incorrect, waiting to be further improved
+     with suitable XML, because none of these String values are going
+     to be one-per-XML-file:
+
+     - each contract <feature> normally should invoke new code modules
+       e.g. when a new decentralised protocol is introduced, a new
+       class to handle the protocol needs to be introduced, which owns
+       it own way of specifying implementation, like marketeQueueAPI.
+
+     - tokenName is going to be refactored into a field attribute -
+       that is, it's allowed that token names are different in the
+       same asset class. There are use-cases for this.
+
+     - each token definition XML file can incorporate multiple
+       contracts, eachwith different network IDs.
+
+     - each XML file can be signed mulitple times, with multiple
+       <KeyName>.
+    */
     protected String marketQueueAPI = null;
     protected String feemasterAPI = null;
     protected String tokenName = null;

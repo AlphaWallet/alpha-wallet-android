@@ -1,4 +1,4 @@
-//mainnet: 0xDBc5934463Effb93a770C62EfeE4FeaeaF462ede
+//mainnet: 0xA66A3F08068174e8F005112A8b2c7A507a822335
 
 // ["0x474d542b330000000000000000000000020b5b23d4704d415249524e04050001",
 // "0x474d542b330000000000000000000000020b5b23d4704d415249524e04050002",
@@ -30,10 +30,11 @@
 // "0x474d542b33000000000000000000000001075b2282f05255534b534101050012", 
 // "0x474d542b33000000000000000000000001075b2282f05255534b534101050013", 
 // "0x474d542b33000000000000000000000001075b2282f05255534b534101050014"], 
-// "Shankai", 
+// "FIFA WC2018", 
 // "SHANKAI", 
 // "0x0D590124d2fAaBbbdFa5561ccBf778914a50BCca", 
-// "0xFE6d4bC2De2D0b0E6FE47f08A28Ed52F9d052A02"
+// "0xFE6d4bC2De2D0b0E6FE47f08A28Ed52F9d052A02",
+// "0x2e558Bc42E2e37aB638daebA5CD1062e5b9923De"
 
 pragma solidity ^0.4.17;
 contract TicketPro
@@ -72,14 +73,14 @@ contract TicketPro
         string nameOfContract,
         string symbolForContract,
         address organiserAddr,
-        address paymasterAddr) public
+        address paymasterAddr,
+        address recipientAddr) public
     {
-        //assign some tickets to event organiser
-        inventory[organiser] = tickets;
         name = nameOfContract;
         symbol = symbolForContract;
         organiser = organiserAddr;
         paymaster = paymasterAddr;
+        inventory[recipientAddr] = tickets;
     }
 
     function getDecimals() public pure returns(uint)
@@ -123,8 +124,7 @@ contract TicketPro
             inventory[organiser].push(tickets[i]);    
         }
     }
-
-    //anyone can claim this for free, just have to place their address
+    
     function passTo(uint256 expiry,
                     uint16[] ticketIndices,
                     uint8 v,

@@ -8,15 +8,16 @@
 <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-<ds:DigestValue>yi3sBrV9UTzaB7aDhl/0xPbnPe+YGePWX3aE1pTl0tY=</ds:DigestValue>
+<ds:DigestValue>9LyJs+m3rIsijiTALuhKDKCJbtXG7ZxNPknoN2TGA8k=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
 <ds:SignatureValue>
-mlwDNqSphXenfoGeJwfum3XTj8NcMxpovL3FZk0JD4q9CzKsOr5cM+buB+aVZKv4gpX/FHnEVqer
-mnikWTVS7hKohBfRwGadozeJglfx9DGc/x2IQIMQEt67e52HFXEICDLe5tlGMOgi5hzlI6vFKEpK
-hjPhLxr2T0h2xf+NDc7RdQ==
+8Z029HJpgWJYyAlQpVHJ8MKj2qhPZ++vb1YK/8Wo3sCrzzgPBlT2N4A9SMvdKckALsc9TIl2JvL9
+ilmHTVpwI2iM6tVYJd6KBVBk9pcrRkBrUbxIXMb+gXPHDz3VA4Xa0PTnmTr5wczq6wu6JjicUg+3
+84vNCcFiQEO+y53GEErUWQ==
 </ds:SignatureValue>
 <ds:KeyInfo>
+<ds:KeyName>Shankai</ds:KeyName>
 <ds:X509Data>
 <ds:X509Certificate>
 MIIFBzCCBK2gAwIBAgIQKCMFmlBLtxz6L27XkUOsHjAKBggqhkjOPQQDAjCBkDELMAkGA1UEBhMC
@@ -92,6 +93,10 @@ EPUQyp2aDrV1aug=
 		<name lang="en">Tickets</name>
 		<name lang="zh">票</name>
 		<name lang="es">Entradas</name>
+	</contract>
+	<contract type="bag">
+	</contract>
+	<contract type="proxy">
 	</contract>
   <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>

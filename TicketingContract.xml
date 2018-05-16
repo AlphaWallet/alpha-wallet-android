@@ -87,7 +87,7 @@ EPUQyp2aDrV1aug=
 </ds:KeyInfo>
 </ds:Signature>
 	<contract type="issuing">
-		<address network="1">0x277b1318965030C62E1dAc9671a6F8dF77F855Cf</address>
+		<address network="1">0xA66A3F08068174e8F005112A8b2c7A507a822335</address>
 		<address network="3">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
 		<name lang="ru">Ваучеры</name>
 		<name lang="en">Vouchers</name>

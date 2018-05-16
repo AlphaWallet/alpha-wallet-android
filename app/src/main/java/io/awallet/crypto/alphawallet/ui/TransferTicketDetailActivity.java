@@ -102,6 +102,8 @@ public class TransferTicketDetailActivity extends BaseActivity
     private String prunedIds;
     private int transferStatus;
 
+    private AWalletConfirmationDialog confirmationDialog;
+
     private AppCompatRadioButton pickLink;
     private AppCompatRadioButton pickTransfer;
 
@@ -543,6 +545,11 @@ public class TransferTicketDetailActivity extends BaseActivity
     {
         super.onDestroy();
         unregisterReceiver(finishReceiver);
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.dismiss();
+            confirmationDialog = null;
+        }
     }
 
     private void onTicketIdClick(View view, TicketRange range)
@@ -598,16 +605,16 @@ public class TransferTicketDetailActivity extends BaseActivity
                 getResources().getString(ticketName) + "\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
-        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
-        dialog.setTitle(R.string.generate_pick_up_link);
-        dialog.setSmallText(R.string.generate_free_transfer_link);
-        dialog.setMediumText(qty);
-        dialog.setPrimaryButtonText(R.string.send_universal_link);
-        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        dialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
-        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
-        dialog.showShareLink();
-        dialog.show();
+        confirmationDialog = new AWalletConfirmationDialog(this);
+        confirmationDialog.setTitle(R.string.generate_pick_up_link);
+        confirmationDialog.setSmallText(R.string.generate_free_transfer_link);
+        confirmationDialog.setMediumText(qty);
+        confirmationDialog.setPrimaryButtonText(R.string.send_universal_link);
+        confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        confirmationDialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
+        confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
+        confirmationDialog.showShareLink();
+        confirmationDialog.show();
     }
 
     private void confirmTransfer()
@@ -629,15 +636,15 @@ public class TransferTicketDetailActivity extends BaseActivity
                 getResources().getString(R.string.to) + " " +
                 to;
 
-        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
-        dialog.setTitle(R.string.title_transaction_details);
-        dialog.setSmallText(R.string.confirm_transfer_details);
-        dialog.setMediumText(qty);
-        dialog.setPrimaryButtonText(R.string.transfer_tickets);
-        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        dialog.setPrimaryButtonListener(v1 -> transferTicketFinal());
-        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
-        dialog.show();
+        confirmationDialog = new AWalletConfirmationDialog(this);
+        confirmationDialog.setTitle(R.string.title_transaction_details);
+        confirmationDialog.setSmallText(R.string.confirm_transfer_details);
+        confirmationDialog.setMediumText(qty);
+        confirmationDialog.setPrimaryButtonText(R.string.transfer_tickets);
+        confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        confirmationDialog.setPrimaryButtonListener(v1 -> transferTicketFinal());
+        confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
+        confirmationDialog.show();
     }
 
     private void transferLinkFinal(String universalLink)

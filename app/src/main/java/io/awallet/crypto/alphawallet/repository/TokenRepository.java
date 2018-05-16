@@ -611,6 +611,8 @@ public class TokenRepository implements TokenRepositoryType {
         Function function = balanceOf(wallet.address);
         String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
 
+        if (responseValue == null) return null;
+
         List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
         if (response.size() == 1) {
             return new BigDecimal(((Uint256) response.get(0)).getValue());
@@ -704,6 +706,7 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
+        if (responseValue == null) return null;
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -722,6 +725,8 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
+        if (responseValue == null) return null;
+
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
@@ -735,6 +740,8 @@ public class TokenRepository implements TokenRepositoryType {
         org.web3j.abi.datatypes.Function function = symbolOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
+
+        if (responseValue == null) return null;
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -750,6 +757,8 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
 
+        if (responseValue == null) return null;
+
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
@@ -763,6 +772,7 @@ public class TokenRepository implements TokenRepositoryType {
         org.web3j.abi.datatypes.Function function = decimalsOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, temp);
+        if (responseValue == null) return 18;
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -846,11 +856,19 @@ public class TokenRepository implements TokenRepositoryType {
             Function function, String contractAddress, Wallet wallet) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
 
-        org.web3j.protocol.core.methods.request.Transaction transaction
-                = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
-        EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
-        return response.getValue();
+            return response.getValue();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static byte[] createTokenTransferData(String to, BigInteger tokenAmount) {

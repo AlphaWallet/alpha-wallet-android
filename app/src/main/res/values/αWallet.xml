@@ -75,6 +75,7 @@
     <string name="generate_pick_up_link">Generate a MagicLink</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
+    <string name="stormbird">Stormbird</string>
 
     <string-array name="filter_date">
         <item>Most Recent</item>

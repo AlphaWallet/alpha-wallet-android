@@ -25,10 +25,15 @@ public class TokenDefinition {
     public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
     protected String locale;
     public Map<Integer, String> addresses = new HashMap<>();
+
+    //Too restrictive - needs to be a map
     protected String marketQueueAPI = null;
     protected String feemasterAPI = null;
     protected String tokenName = null;
     protected String keyName = null;
+    protected int networkId = 1; //default to main net unless otherwise specified
+
+
 
     protected class FieldDefinition {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
@@ -168,22 +173,48 @@ public class TokenDefinition {
         return feemasterAPI;
     }
 
+    public int getNetworkId() { return networkId; }
+
+    public String getTokenName() { return tokenName; }
+
     public String getContractAddress(int networkID) {
         return addresses.get(networkID);
     }
 
-    private void extractFeatureTag(Document xml) {
+    private void extractFeatureTag(Document xml)
+    {
         NodeList nList = xml.getElementsByTagName("feature");
-        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+        for (Node nNode = nList.item(0).getFirstChild(); nNode != null; nNode = nNode.getNextSibling())
+        {
+            if (nNode.getNodeType() == Node.ELEMENT_NODE)
+            {
                 Element eElement = (Element) nNode;
-                switch (eElement.getTagName()) {
+                switch (eElement.getTagName())
+                {
                     case "feemaster":
                         feemasterAPI = eElement.getTextContent();
+                        break;
                     case "trade":
-                        if (eElement.getAttribute("method").equals("market-queue")) {
+                        if (eElement.getAttribute("method").equals("market-queue"))
+                        {
                             marketQueueAPI = eElement.getTextContent().trim();
                         }
+                        break;
+                    case "network":
+                        String networkIdStr = eElement.getTextContent();
+                        if (networkIdStr != null)
+                        {
+                            try
+                            {
+                                networkId = Integer.parseInt(networkIdStr);
+                            }
+                            catch (NumberFormatException e)
+                            {
+                                networkId = 1; //default to main net
+                            }
+                        }
+                        break;
+
                 }
             }
         }

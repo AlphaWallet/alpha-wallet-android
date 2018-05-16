@@ -66,9 +66,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, Transaction lastTrans) {
+	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromNetwork(networkInfo, wallet, lastTrans)
+		return fetchFromNetwork(networkInfo, wallet, lastBlock)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
@@ -192,21 +192,21 @@ public class TransactionRepository implements TransactionRepositoryType {
         return inDiskCache
                 .findLast(networkInfo, wallet)
                 .flatMap(lastTransaction -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(networkInfo, wallet, lastTransaction)))
+                        .fetchLastTransactions(networkInfo, wallet, Long.valueOf(lastTransaction.blockNumber))))
                 .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(networkInfo, wallet, null)))
+                        .fetchLastTransactions(networkInfo, wallet, 0)))
                 .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
                 .andThen(inDiskCache.fetchTransaction(networkInfo, wallet))
 				.observeOn(Schedulers.io());
     }
 
 	private Single<Transaction[]> fetchAllFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
-		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, null))
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, 0))
 				.observeOn(Schedulers.io());
 	}
 
-	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, Transaction lastTrans) {
-		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastTrans));
+	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, long lastBlock) {
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastBlock));
 	}
 
 	@Override

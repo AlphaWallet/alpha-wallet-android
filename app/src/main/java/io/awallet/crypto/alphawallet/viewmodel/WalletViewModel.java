@@ -112,6 +112,22 @@ public class WalletViewModel extends BaseViewModel {
         }
     }
 
+    //we changed wallets or network, ensure we clean up before displaying new data
+    public void abortAndRestart()
+    {
+        defaultWallet.setValue(null);
+        if (updateTokens != null && !updateTokens.isDisposed())
+        {
+            updateTokens.dispose();
+        }
+        if (fetchTokenBalanceDisposable != null && !fetchTokenBalanceDisposable.isDisposed())
+        {
+            fetchTokenBalanceDisposable.dispose();
+        }
+
+        fetchTokens();
+    }
+
     public void fetchTokens()
     {
         if (updateTokens != null && !updateTokens.isDisposed())

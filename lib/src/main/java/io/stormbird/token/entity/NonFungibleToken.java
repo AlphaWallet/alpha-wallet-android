@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by weiwu on 1/3/18.  Each NonFungibleToken is a
@@ -48,7 +49,7 @@ public class NonFungibleToken
 
     public NonFungibleToken(BigInteger tokenId) {
         id = tokenId;
-        attributes = new HashMap();
+        attributes = new HashMap<>();
     }
 
     public String getDate(String format)

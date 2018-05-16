@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import io.awallet.crypto.alphawallet.entity.TokenInterface;
+import io.awallet.crypto.alphawallet.entity.TokensReceiver;
 import io.stormbird.token.tools.TokenDefinition;
 import org.xml.sax.SAXException;
 
@@ -46,12 +48,15 @@ import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements View.OnClickListener {
+public class WalletFragment extends Fragment implements View.OnClickListener, TokenInterface
+{
     private static final String TAG = "WFRAG";
 
     @Inject
     WalletViewModelFactory walletViewModelFactory;
     private WalletViewModel viewModel;
+
+    private TokensReceiver tokenReceiver;
 
     private SystemView systemView;
     private ProgressView progressView;
@@ -99,6 +104,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         viewModel.endUpdate().observe(this, this::checkTokens);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
+
+        tokenReceiver = new TokensReceiver(getActivity(), this);
 
         initTabLayout(view);
 
@@ -221,6 +228,13 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        getContext().unregisterReceiver(tokenReceiver);
+    }
+
     private void onDefaultWallet(Wallet wallet)
     {
         this.wallet = wallet;
@@ -230,7 +244,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
         {
             TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
                     Locale.getDefault().getDisplayLanguage());
-            adapter.setLiveTokenAddress(ad.getContractAddress(networkId).toLowerCase());
+            String contractAddress = ad.getContractAddress(networkId);
+            if (contractAddress != null)
+            {
+                adapter.setLiveTokenAddress(contractAddress.toLowerCase());
+            }
         }
         catch (IOException |SAXException e)
         {
@@ -268,5 +286,19 @@ public class WalletFragment extends Fragment implements View.OnClickListener {
     private void refreshTokens(Boolean aBoolean)
     {
         viewModel.fetchTokens();
+    }
+
+    @Override
+    public void resetTokens()
+    {
+        //first abort the current operation
+        viewModel.abortAndRestart();
+        adapter.clear();
+    }
+
+    @Override
+    public void addedToken()
+    {
+
     }
 }

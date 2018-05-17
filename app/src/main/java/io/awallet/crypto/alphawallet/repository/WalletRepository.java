@@ -86,6 +86,7 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
 	public Single<BigDecimal> balanceInWei(Wallet wallet) {
 		return Single.fromCallable(() -> {
+			//return BigDecimal.valueOf(15.995).movePointRight(18);
 			try {
 				return new BigDecimal(Web3jFactory
 						.build(new org.web3j.protocol.http.HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
@@ -95,7 +96,7 @@ public class WalletRepository implements WalletRepositoryType
 			}
 			catch (IOException e)
 			{
-				return BigDecimal.ZERO;
+				return BigDecimal.valueOf(-1);
 			}
 		}).subscribeOn(Schedulers.io());
 	}

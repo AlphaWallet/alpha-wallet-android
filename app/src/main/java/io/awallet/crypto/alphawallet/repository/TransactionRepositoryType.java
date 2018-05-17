@@ -1,5 +1,7 @@
 package io.awallet.crypto.alphawallet.repository;
 
+import android.net.Network;
+
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
@@ -13,7 +15,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 
 public interface TransactionRepositoryType {
-	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet);
+	public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet);
 	Observable<Transaction[]> fetchTransaction(Wallet wallet);
 	Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock);
 	Observable<Transaction[]> fetchInternalTransactionsNetwork(Wallet wallet, String feemaster);

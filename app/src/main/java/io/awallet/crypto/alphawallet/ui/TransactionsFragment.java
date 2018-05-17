@@ -102,6 +102,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.showEmpty().observe(this, this::showEmptyTx);
+        viewModel.clearAdapter().observe(this, this::clearAdapter);
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
@@ -253,5 +254,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void addedToken()
     {
 
+    }
+
+    private void clearAdapter(Boolean aBoolean)
+    {
+        adapter.clear();
     }
 }

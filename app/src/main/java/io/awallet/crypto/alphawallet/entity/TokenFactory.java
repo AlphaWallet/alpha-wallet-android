@@ -55,6 +55,8 @@ public class TokenFactory
             thisToken = new Token(tokenInfo, balance, updateBlancaTime);
         }
 
+        thisToken.setNullCheckCount(realmItem.getNullCheckCount());
+
         return thisToken;
     }
 
@@ -76,6 +78,8 @@ public class TokenFactory
             BigDecimal balance = new BigDecimal(realmBalance);
             thisToken = new Token(tokenInfo, balance, updateBlancaTime);
         }
+
+        thisToken.setNullCheckCount(realmItem.getNullCheckCount());
 
         return thisToken;
     }

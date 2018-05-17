@@ -29,6 +29,7 @@ public class Token implements Parcelable {
     public boolean balanceIsLive = false;
     public boolean isERC20 = false; //TODO: when we see ERC20 functions in transaction decoder switch this on
     private boolean isEth = false;
+    private int nullCheckCounter = 0;
 
     public TokenTicker ticker;
 
@@ -300,6 +301,31 @@ public class Token implements Parcelable {
 
     public boolean isTerminated()
     {
-        return ((tokenInfo.name == null || tokenInfo.name.length() < 2));
+        if (nullCheckCounter > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;   //((tokenInfo.name == null || tokenInfo.name.length() < 2));
+        }
+    }
+
+    public boolean isBad()
+    {
+        return tokenInfo.name == null || tokenInfo.name.length() < 2;
+    }
+
+    public int getNullCheckCount()
+    {
+        return nullCheckCounter;
+    }
+    public void setNullCheckCount(int count)
+    {
+        nullCheckCounter = count;
+    }
+    public int updateNullCheckCount()
+    {
+        return nullCheckCounter++;
     }
 }

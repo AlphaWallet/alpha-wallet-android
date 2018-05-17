@@ -115,6 +115,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
+                        .notEqualTo("address", wallet.address)
                         .findAll();
                 return convert(realmItems, System.currentTimeMillis());
             } finally {
@@ -134,6 +135,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                         .sort("addedTime", Sort.ASCENDING)
                         .equalTo("isEnabled", true)
+                        .notEqualTo("address", wallet.address)
                         .findAll();
                 //Log.d("TRS", "Sz: " + realmItems.size());
                 return convertBalance(realmItems, System.currentTimeMillis());
@@ -305,10 +307,43 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Token getTokenBalance(NetworkInfo network, Wallet wallet, String address)
+    {
+        Realm realm = null;
+        Token result = null;
+        try
+        {
+            realm = realmManager.getRealmInstance(network, wallet);
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", address)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                TokenFactory tf = new TokenFactory();
+                TokenInfo info = tf.createTokenInfo(realmToken);
+                result = tf.createTokenBalance(info, realmToken, realmToken.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        finally
+        {
+            if (realm != null)
+            {
+                realm.close();
+            }
+        }
+        return result;
+    }
+
+    @Override
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token)
     {
         Realm realm = null;
-        if (token.isTerminated()) return; // don't update dead tokens
+        //if (token.isTerminated()) return; // don't update dead tokens
         try
         {
             realm = realmManager.getRealmInstance(network, wallet);
@@ -316,12 +351,22 @@ public class TokensRealmSource implements TokenLocalSource {
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
 
+            if (token.hasPositiveBalance() && realmToken == null)
+            {
+                saveToken(network, wallet, token, new Date());
+
+                realmToken = realm.where(RealmToken.class)
+                        .equalTo("address", token.tokenInfo.address)
+                        .findFirst();
+            }
+
             //Don't update realm unless we need to.
             if (realmToken != null && token.checkRealmBalanceChange(realmToken))
             {
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 token.setRealmBalance(realmToken);
+                realmToken.setNullCheckCount(0);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
             }
@@ -394,6 +439,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
                 realmToken.setBurnList("");
+                realmToken.setNullCheckCount(token.getNullCheckCount());
+
                 if (token instanceof Ticket) {
                     realmToken.setStormbird(true);
                 }

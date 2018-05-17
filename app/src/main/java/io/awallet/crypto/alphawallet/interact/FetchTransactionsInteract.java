@@ -22,9 +22,9 @@ public class FetchTransactionsInteract {
         this.transactionRepository = transactionRepository;
     }
 
-    public Observable<Transaction[]> fetchCached(Wallet wallet) {
+    public Observable<Transaction[]> fetchCached(NetworkInfo network, Wallet wallet) {
         return transactionRepository
-                .fetchCachedTransactions(wallet)
+                .fetchCachedTransactions(network, wallet)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

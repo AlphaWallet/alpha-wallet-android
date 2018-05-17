@@ -1,5 +1,7 @@
 package io.awallet.crypto.alphawallet.repository;
 
+import android.util.Log;
+
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
 import io.awallet.crypto.alphawallet.entity.TokenTransaction;
@@ -25,6 +27,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
+	private final String TAG = "TREPO";
 	private final EthereumNetworkRepositoryType networkRepository;
 	private final AccountKeystoreService accountKeystoreService;
     private final TransactionLocalSource inDiskCache;
@@ -42,9 +45,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet) {
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromCache(networkInfo, wallet)
+	public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet) {
+		Log.d(TAG, "Fetching Cached TX: " + network.name + " : " + wallet.address);
+		return fetchFromCache(network, wallet)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}

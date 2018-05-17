@@ -62,6 +62,7 @@ public class WalletViewModel extends BaseViewModel {
     private final GetDefaultWalletBalance getDefaultWalletBalance;
 
     private Token[] tokenCache = null;
+    private boolean isVisible = false;
 
     private Handler handler = new Handler();
 
@@ -152,7 +153,13 @@ public class WalletViewModel extends BaseViewModel {
     {
         progress.postValue(false);
         tokens.postValue(tokenCache);
-        if (fetchTokenBalanceDisposable == null || fetchTokenBalanceDisposable.isDisposed())
+        //test to see if we should continue to update
+        if (!isVisible && updateTokens != null)
+        {
+            updateTokens.dispose();
+            updateTokens = null;
+        }
+        else if (fetchTokenBalanceDisposable == null || fetchTokenBalanceDisposable.isDisposed())
         {
             updateTokenBalances();
         }
@@ -178,12 +185,19 @@ public class WalletViewModel extends BaseViewModel {
     private void onFetchTokensBalanceCompletable()
     {
         progress.postValue(false);
-        if (tokenCache != null && tokenCache.length > 0) {
+        if (tokenCache != null && tokenCache.length > 0)
+        {
             checkTokens.postValue(true);
         }
         else
         {
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
+        }
+
+        if (!isVisible && fetchTokenBalanceDisposable != null)
+        {
+            fetchTokenBalanceDisposable.dispose();
+            fetchTokenBalanceDisposable = null;
         }
     }
 
@@ -268,5 +282,17 @@ public class WalletViewModel extends BaseViewModel {
             return findDefaultNetworkInteract.find()
                     .flatMap(networkInfo -> findDefaultWalletInteract
                             .find()).toObservable();
+    }
+
+    public void setVisibility(boolean visibility) {
+        isVisible = visibility;
+    }
+
+    public void reStartTokenUpdate()
+    {
+        if (updateTokens == null || updateTokens.isDisposed())
+        {
+            fetchTokens();
+        }
     }
 }

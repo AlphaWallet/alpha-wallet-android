@@ -53,6 +53,14 @@ public class SetupTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+
+    public void clearAll()
+    {
+        contractMap.clear();
+        unknownContracts.clear();
+        walletAddr = null;
+    }
+
     public void setWalletAddr(String addr) { walletAddr = addr; }
 
     /**

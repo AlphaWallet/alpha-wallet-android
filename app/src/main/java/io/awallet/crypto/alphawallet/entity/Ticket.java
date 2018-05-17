@@ -14,6 +14,7 @@ import io.awallet.crypto.alphawallet.ui.widget.holder.TokenHolder;
 import io.awallet.crypto.alphawallet.viewmodel.BaseViewModel;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.tools.TokenDefinition;
 
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
@@ -185,9 +186,9 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
-        tokenHolder.issuer.setText("FIXME");
         if (isLiveTicket())
         {
+            tokenHolder.issuer.setText(R.string.stormbird);
             tokenHolder.contractType.setVisibility(View.VISIBLE);
             tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
             tokenHolder.contractType.setText(R.string.erc875);
@@ -456,13 +457,17 @@ public class Ticket extends Token implements Parcelable
                 BigInteger firstTicket = range.tokenIds.get(0);
                 AssetDefinition assetDefinition = new AssetDefinition("TicketingContract.xml", activity.getResources());
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
-                String venue = nonFungibleToken.getAttribute("venue").text;
+
+                String nameStr = assetDefinition.getTokenName();
+                String venueStr = nonFungibleToken.getAttribute("venue").text;
+                String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
+
                 String date = nonFungibleToken.getDate("dd MMM");
                 String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
                 textAmount.setText(seatCount);
-                textTicketName.setText(getFullName());
-                textVenue.setText(venue);
+                textTicketName.setText(nameStr);
+                textVenue.setText(venueStr);
                 textDate.setText(date);
                 textRange.setText(nonFungibleToken.getRangeStr(range));
                 textCat.setText(nonFungibleToken.getAttribute("category").text);
@@ -473,6 +478,46 @@ public class Ticket extends Token implements Parcelable
                 e.printStackTrace();
                 //TODO: Handle error
             }
+        }
+    }
+
+    public int getXMLTokenNetwork(BaseActivity activity)
+    {
+        TokenDefinition td = getTokenDefinition(activity);
+        if (td != null) return td.getNetworkId();
+        else return 1;
+    }
+
+    public String getXMLContractAddress(BaseActivity activity, int networkId)
+    {
+        TokenDefinition td = getTokenDefinition(activity);
+        if (td != null) return td.getContractAddress(networkId);
+        else return "0x";
+    }
+
+    public String getXMLTokenName(BaseActivity activity)
+    {
+        TokenDefinition td = getTokenDefinition(activity);
+        if (td != null) return td.getTokenName();
+        else return "Generic Token";
+    }
+
+    private TokenDefinition getTokenDefinition(BaseActivity activity)
+    {
+        try
+        {
+            return new TokenDefinition(activity.getResources().getAssets().open("TicketingContract.xml"),
+                                                 Locale.getDefault().getDisplayLanguage());
+        }
+        catch (IOException e)
+        {
+            //react to file not found
+            return null;
+        }
+        catch (SAXException e)
+        {
+            //react to interpretation exception
+            return null;
         }
     }
 

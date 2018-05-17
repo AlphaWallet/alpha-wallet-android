@@ -31,7 +31,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private final AssetDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final TextView name;
-    private final TextView amount;
+    private final TextView count; // word choice: "amount" would imply the amount of money it costs
     private final TextView ticketDate;
     private final TextView ticketTime;
     private final TextView venue;
@@ -45,7 +45,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     public BaseTicketHolder(int resId, ViewGroup parent, AssetDefinition definition, Token ticket) {
         super(resId, parent);
         name = findViewById(R.id.name);
-        amount = findViewById(R.id.amount);
+        count = findViewById(R.id.amount);
         venue = findViewById(R.id.venue);
         ticketDate = findViewById(R.id.date);
         ticketTime = findViewById(R.id.time);
@@ -73,22 +73,27 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         if (data.tokenIds.size() > 0) {
             BigInteger firstTokenId = data.tokenIds.get(0);
             String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
-            amount.setText(seatCount);
+            count.setText(seatCount);
             try {
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTokenId, assetDefinition);
                 //venue.setText(nonFungibleToken.getAttribute("venue").text);
-                name.setText(nonFungibleToken.getAttribute("category").text);
-                venue.setText(nonFungibleToken.getAttribute("venue").text);
+                String nameStr = nonFungibleToken.getAttribute("category").text;
+                String venueStr = nonFungibleToken.getAttribute("venue").text;
                 Date startTime = new Date(nonFungibleToken.getAttribute("time").value.longValue()*1000L);
-                ticketDate.setText(date.format(startTime));
+                int cat = nonFungibleToken.getAttribute("category").value.intValue();
+
+                name.setText(nameStr);
+                count.setText(seatCount);
+                venue.setText(venueStr);
+                ticketTime.setText(date.format(startTime));
                 ticketTime.setText(time.format(startTime));
                 ticketText.setText(
                         nonFungibleToken.getAttribute("countryA").text + "-" +
-                        nonFungibleToken.getAttribute("countryB").text
+                                nonFungibleToken.getAttribute("countryB").text
                 );
                 ticketCat.setText("M" + nonFungibleToken.getAttribute("match").text);
                 ticketDetails.setText(
-                                nonFungibleToken.getAttribute("locality").name + ": " +
+                        nonFungibleToken.getAttribute("locality").name + ": " +
                                 nonFungibleToken.getAttribute("locality").text
                 );
             } catch (NullPointerException e) {

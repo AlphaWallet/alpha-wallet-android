@@ -48,7 +48,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							null,
 							"https://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
-							"http://stormbird.duckdns.org:8545/",
+							"http://66.96.208.58:8545/",
                     "https://ropsten.trustwalletapp.com/",
                     "https://ropsten.etherscan.io/tx/",3, false,
 							"https://ropsten.infura.io/LY55hqqffzZcQ0b513JJ",
@@ -58,10 +58,10 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
                     "https://trust-sokol.herokuapp.com/",
                     "https://sokol-explorer.poa.network/account/",77, false),
 			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL,
-							"http://stormbird.duckdns.org:8541/",
+							"https://rinkeby.infura.io/LY55hqqffzZcQ0b513JJ",
 							"https://ropsten.trustwalletapp.com/",
 							"https://rinkeby.etherscan.io/tx/",4, false,
-							"https://rinkeby.infura.io/LY55hqqffzZcQ0b513JJ",
+							"https://rinkeby.infura.io/LY55hqqffzZcQ0b513JJ", //"http://stormbird.duckdns.org:8541/",
 							"https://api-rinkeby.etherscan.io/"),
 	};
 

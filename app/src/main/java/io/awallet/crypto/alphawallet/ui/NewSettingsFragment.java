@@ -27,6 +27,8 @@ import io.awallet.crypto.alphawallet.viewmodel.NewSettingsViewModelFactory;
 import io.awallet.crypto.alphawallet.widget.SelectLocaleDialog;
 import io.awallet.crypto.alphawallet.widget.SelectNetworkDialog;
 
+import static io.awallet.crypto.alphawallet.C.RESET_WALLET;
+
 public class NewSettingsFragment extends Fragment {
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
@@ -77,6 +79,7 @@ public class NewSettingsFragment extends Fragment {
                 if (!currentNetwork.equals(dialog.getSelectedItem())) {
                     viewModel.showHome(getContext(), true, true);
                 }
+                getActivity().sendBroadcast(new Intent(RESET_WALLET));
                 dialog.dismiss();
             });
             dialog.show();

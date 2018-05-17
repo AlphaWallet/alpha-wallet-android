@@ -27,6 +27,8 @@ import io.awallet.crypto.alphawallet.R;
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.HelpItem;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
+import io.awallet.crypto.alphawallet.entity.TokenInterface;
+import io.awallet.crypto.alphawallet.entity.TokensReceiver;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
 import io.awallet.crypto.alphawallet.repository.AssetDefinition;
@@ -52,10 +54,13 @@ import dagger.android.support.AndroidSupportInjection;
 
 import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
-public class TransactionsFragment extends Fragment implements View.OnClickListener {
+public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface
+{
     @Inject
     TransactionsViewModelFactory transactionsViewModelFactory;
     private TransactionsViewModel viewModel;
+
+    private TokensReceiver tokenReceiver;
 
     private SystemView systemView;
     private TransactionsAdapter adapter;
@@ -100,6 +105,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
+
+        tokenReceiver = new TokensReceiver(getActivity(), this);
 
         return view;
     }
@@ -155,6 +162,13 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.updateTransactions(transaction);
     }
 
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        getContext().unregisterReceiver(tokenReceiver);
+    }
+
     private void onDefaultWallet(Wallet wallet) {
         adapter.setDefaultWallet(wallet);
         //get the XML address
@@ -162,16 +176,23 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         {
             AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
             String contractAddress = ad.getContractAddress(networkId);
-            if (contractAddress == null) {
+            if (contractAddress == null)
+            {
                 // TODO: user gets status update and this asset class is marked invalid
-            } else {
-                    viewModel.setXMLContractAddress(contractAddress.toLowerCase());
-                    viewModel.setFeemasterURL(ad.getFeemasterAPI());
+            }
+            else
+            {
+                viewModel.setXMLContractAddress(contractAddress.toLowerCase());
+                viewModel.setFeemasterURL(ad.getFeemasterAPI());
             }
         }
         catch (IOException|SAXException e)
         {
-            e.printStackTrace(); // TOO BRITTLE!!
+            e.printStackTrace();
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -218,5 +239,19 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onDepositClick(View view, Uri uri) {
         viewModel.openDeposit(view.getContext(), uri);
+    }
+
+    @Override
+    public void resetTokens()
+    {
+        //first abort the current operation
+        viewModel.abortAndRestart();
+        adapter.clear();
+    }
+
+    @Override
+    public void addedToken()
+    {
+
     }
 }

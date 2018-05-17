@@ -15,7 +15,7 @@ import io.reactivex.Single;
 public interface TransactionRepositoryType {
 	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet);
 	Observable<Transaction[]> fetchTransaction(Wallet wallet);
-	Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, Transaction lastTx);
+	Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock);
 	Observable<Transaction[]> fetchInternalTransactionsNetwork(Wallet wallet, String feemaster);
 	Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token);
 	Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash);

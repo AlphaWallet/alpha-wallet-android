@@ -42,9 +42,9 @@ public class FetchTransactionsInteract {
                 .subscribeOn(Schedulers.io());
     }
 
-    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, Transaction lastTx) {
+    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, long lastBlock) {
         return transactionRepository
-                .fetchNetworkTransaction(wallet, lastTx)
+                .fetchNetworkTransaction(wallet, lastBlock)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

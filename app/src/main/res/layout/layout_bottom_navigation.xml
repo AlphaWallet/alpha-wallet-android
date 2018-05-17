@@ -6,14 +6,6 @@
     android:background="@color/white">
 
     <ImageView
-        android:id="@+id/nav_transactions"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="1"
-        android:src="@drawable/ic_transactions" />
-
-    <ImageView
         android:id="@+id/nav_marketplace"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -28,6 +20,14 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:src="@drawable/ic_wallet" />
+
+    <ImageView
+        android:id="@+id/nav_transactions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:src="@drawable/ic_transactions" />
 
     <ImageView
         android:id="@+id/nav_settings"

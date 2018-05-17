@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.math.BigInteger;
 import java.util.Locale;
 
@@ -28,10 +31,11 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private final AssetDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final TextView name;
-    private final TextView amount;
-    private final TextView date;
+    private final TextView count; // word choice: "amount" would imply the amount of money it costs
+    private final TextView ticketDate;
+    private final TextView ticketTime;
     private final TextView venue;
-    private final TextView ticketIds;
+    private final TextView ticketText;
     private final TextView ticketCat;
     protected final TextView ticketRedeemed;
     private final TextView ticketDetails;
@@ -41,10 +45,11 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     public BaseTicketHolder(int resId, ViewGroup parent, AssetDefinition definition, Token ticket) {
         super(resId, parent);
         name = findViewById(R.id.name);
-        amount = findViewById(R.id.amount);
+        count = findViewById(R.id.amount);
         venue = findViewById(R.id.venue);
-        date = findViewById(R.id.date);
-        ticketIds = findViewById(R.id.tickettext);
+        ticketDate = findViewById(R.id.date);
+        ticketTime = findViewById(R.id.time);
+        ticketText = findViewById(R.id.tickettext);
         ticketCat = findViewById(R.id.cattext);
         ticketDetails = findViewById(R.id.ticket_details);
         itemView.setOnClickListener(this);
@@ -58,43 +63,47 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
+        DateFormat date = android.text.format.DateFormat.getDateFormat(getContext());
+        date.setTimeZone(TimeZone.getTimeZone("Europe/Moscow")); // TODO: use the timezone defined in XML
+        DateFormat time = android.text.format.DateFormat.getTimeFormat(getContext());
+        time.setTimeZone(TimeZone.getTimeZone("Europe/Moscow")); // TODO: use the timezone defined in XML
         this.thisData = data;
         name.setText(ticket.tokenInfo.name);
 
-        try
-        {
-            if (data.tokenIds.size() > 0)
-            {
-                BigInteger firstTokenId = data.tokenIds.get(0);
-                String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+        if (data.tokenIds.size() > 0) {
+            BigInteger firstTokenId = data.tokenIds.get(0);
+            String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
+            count.setText(seatCount);
+            try {
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTokenId, assetDefinition);
+                //venue.setText(nonFungibleToken.getAttribute("venue").text);
                 String nameStr = nonFungibleToken.getAttribute("category").text;
                 String venueStr = nonFungibleToken.getAttribute("venue").text;
+                Date startTime = new Date(nonFungibleToken.getAttribute("time").value.longValue()*1000L);
                 int cat = nonFungibleToken.getAttribute("category").value.intValue();
 
                 name.setText(nameStr);
-                amount.setText(seatCount);
+                count.setText(seatCount);
                 venue.setText(venueStr);
-                date.setText(nonFungibleToken.getDate("dd MMM"));
-                ticketIds.setText(nonFungibleToken.getRangeStr(data));
-
-                ticketCat.setText(String.valueOf(cat));
-                ticketDetails.setText(ticket.getTicketInfo(nonFungibleToken));
-            }
-            else
-            {
-                fillEmpty();
+                ticketTime.setText(date.format(startTime));
+                ticketTime.setText(time.format(startTime));
+                ticketText.setText(
+                        nonFungibleToken.getAttribute("countryA").text + "-" +
+                                nonFungibleToken.getAttribute("countryB").text
+                );
+                ticketCat.setText("M" + nonFungibleToken.getAttribute("match").text);
+                ticketDetails.setText(
+                        nonFungibleToken.getAttribute("locality").name + ": " +
+                                nonFungibleToken.getAttribute("locality").text
+                );
+            } catch (NullPointerException e) {
+                /* likely our XML token definition is outdated, just
+                 * show raw data here. TODO: only the fields not
+                 * understood are displayed as raw
+                 */
+                name.setText(firstTokenId.toString(16));
             }
         }
-        catch (Exception ex)
-        {
-            fillEmpty();
-        }
-    }
-
-    protected void fillEmpty() {
-        name.setText(R.string.NA);
-        venue.setText(R.string.NA);
     }
 
     @Override

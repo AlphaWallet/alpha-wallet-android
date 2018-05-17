@@ -69,6 +69,8 @@ public class OrderHolder extends BinderViewHolder<MagicLinkData> implements View
 
     @Override
     public void bind(@Nullable MagicLinkData data, @NonNull Bundle addition) {
+        // wouldn't it be a good idea to make MagicLinkData and TicketRange inherit from the same class?
+        // therefore this bind and BaseTicketHolder.bind can merge. - Weiwu
         this.thisData = data;
         try {
             int seatStart = TicketDecode.getSeatIdInt(data.ticketStart);
@@ -79,7 +81,7 @@ public class OrderHolder extends BinderViewHolder<MagicLinkData> implements View
             setBalance(data);
             date.setText(TicketDecode.getDate(data.ticketStart));
             ticketIds.setText(seatRange);
-            ticketCat.setText(TicketDecode.getZone(data.ticketStart));
+            name.setText(TicketDecode.getZone(data.ticketStart) + data.contractName);
         } catch (Exception ex) {
             fillEmpty();
         }

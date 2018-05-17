@@ -127,7 +127,7 @@ public class AppSiteController {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(AppSiteController.class, args);
 		parser.setCryptoInterface(cryptoFunctions);
-        File file = new File("../app/src/main/assets/TicketingContract.xml");
+        File file = new File("../contracts/TicketingContract.xml");
         definitionParser = new TokenDefinition(new FileInputStream(file), "en");
 	}
 }

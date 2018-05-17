@@ -119,7 +119,7 @@ public class TicketAdapter extends TokensAdapter {
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
             NonFungibleToken nft = new NonFungibleToken(v, assetDefinition);
-            e.ticketNumber = nft.getAttribute("number").value.intValue();
+            e.ticketNumber = nft.getAttribute("numero").value.intValue();
             e.category = (short)nft.getAttribute("category").value.intValue();
             e.match = (short)nft.getAttribute("match").value.intValue();
             e.venue = (short)nft.getAttribute("venue").value.intValue();
@@ -176,7 +176,7 @@ public class TicketAdapter extends TokensAdapter {
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
             NonFungibleToken nft = new NonFungibleToken(v, assetDefinition);
-            e.ticketNumber = nft.getAttribute("number").value.intValue();
+            e.ticketNumber = nft.getAttribute("numero").value.intValue();
             e.category = (short)nft.getAttribute("category").value.intValue();
             e.match = (short)nft.getAttribute("match").value.intValue();
             e.venue = (short)nft.getAttribute("venue").value.intValue();

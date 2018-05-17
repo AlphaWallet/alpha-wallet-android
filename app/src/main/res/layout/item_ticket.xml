@@ -76,7 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_light"
-                        android:text="FIFA 2018 Final"
+                        android:text="@string/NA"
                         android:textColor="@color/text_black"
                         android:textSize="21sp" />
 
@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
                     android:fontFamily="@font/font_regular"
-                    android:text="Hammersmith"
+                    android:text="@string/NA"
                     android:textColor="@color/text_black"
                     android:textSize="12sp" />
 
@@ -116,13 +116,17 @@
 
                         <TextView
                             android:id="@+id/date"
+                            android:paddingRight="5dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:fontFamily="@font/font_semibold"
-                            android:text="30 Mar 2018"
-                            android:textColor="@color/semi_dark_grey"
-                            android:textSize="15sp" />
+                            android:layout_gravity="center_vertical" />
+
+                        <TextView
+                            android:id="@+id/time"
+                            android:paddingLeft="5dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -147,7 +151,6 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:fontFamily="@font/font_semibold"
-                            android:text="51-52"
                             android:textColor="@color/semi_dark_grey"
                             android:textSize="15sp" />
                     </LinearLayout>
@@ -174,7 +177,6 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:fontFamily="@font/font_semibold"
-                            android:text="Cat 1"
                             android:textColor="@color/semi_dark_grey"
                             android:textSize="15sp" />
                     </LinearLayout>

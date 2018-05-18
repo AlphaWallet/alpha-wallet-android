@@ -32,11 +32,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!--<data-->
-                <!--android:host="stormbird.duckdns.org"-->
-                <!--android:path="/import"-->
-                <!--android:scheme="http"/>-->
-
                 <data
                     android:host="app.awallet.io"
                     android:pathPrefix="/"

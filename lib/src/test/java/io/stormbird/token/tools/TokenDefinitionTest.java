@@ -31,7 +31,7 @@ public class TokenDefinitionTest {
         assertEquals(40+2, contractAddress.length());
 
         // test feature extraction
-        assertEquals("https://", ticketAsset.marketQueueAPI.substring(8));
+        assertEquals("https://", ticketAsset.marketQueueAPI.substring(0,8));
     }
 
     @Test

@@ -76,8 +76,8 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
             count.setText(seatCount);
             try {
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTokenId, assetDefinition);
-                //venue.setText(nonFungibleToken.getAttribute("venue").text);
-                String nameStr = nonFungibleToken.getAttribute("category").text;
+                String nameStr = assetDefinition.getTokenName();
+                nameStr = nonFungibleToken.getAttribute("category").text;
                 String venueStr = nonFungibleToken.getAttribute("venue").text;
                 Date startTime = new Date(nonFungibleToken.getAttribute("time").value.longValue()*1000L);
                 int cat = nonFungibleToken.getAttribute("category").value.intValue();
@@ -85,7 +85,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
                 name.setText(nameStr);
                 count.setText(seatCount);
                 venue.setText(venueStr);
-                ticketTime.setText(date.format(startTime));
+                ticketDate.setText(date.format(startTime));
                 ticketTime.setText(time.format(startTime));
                 ticketText.setText(
                         nonFungibleToken.getAttribute("countryA").text + "-" +

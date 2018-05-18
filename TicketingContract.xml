@@ -88,7 +88,7 @@ EPUQyp2aDrV1aug=
 </ds:Signature>
 	<contract type="issuing">
 		<address network="1">0xA66A3F08068174e8F005112A8b2c7A507a822335</address>
-		<address network="3">0x2Cd6CbC60219B33161F1BF69fbd6c741aD980BBa</address>
+		<address network="3">0xd8e5f58de3933e1e35f9c65eb72cb188674624f3</address>
 		<name lang="ru">Ваучеры</name>
 		<name lang="en">Vouchers</name>
 		<name lang="zh">门票兑换卷</name>

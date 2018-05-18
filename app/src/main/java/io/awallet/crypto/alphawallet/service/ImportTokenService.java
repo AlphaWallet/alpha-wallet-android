@@ -78,9 +78,9 @@ public class ImportTokenService {
         //2. package up the params:
         //ticketData,sig
         Map<String, String> paramData = new HashMap<>();
-        String ticketDataBase64 = Base64.encodeToString(importMessage, Base64.DEFAULT);
+        String ticketDataBase64 = Base64.encodeToString(importMessage, Base64.NO_WRAP);
         paramData.put("ticketData", ticketDataBase64);
-        paramData.put("sig", Base64.encodeToString(sigStr.getBytes(), Base64.DEFAULT));
+        paramData.put("sig", Base64.encodeToString(sigStr.getBytes(), Base64.NO_WRAP));
         String args = formEncodedData(paramData);
         String url = IMPORT_TOKEN_URL + IMPORT_ARG + args;
 

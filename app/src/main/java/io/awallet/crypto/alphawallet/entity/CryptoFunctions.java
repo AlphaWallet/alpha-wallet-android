@@ -21,7 +21,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
     @Override
     public byte[] Base64Encode(byte[] data)
     {
-        return Base64.encode(data, Base64.URL_SAFE);
+        return Base64.encode(data, Base64.URL_SAFE | Base64.NO_WRAP);
     }
 
     @Override

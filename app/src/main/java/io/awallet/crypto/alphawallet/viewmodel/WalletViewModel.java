@@ -10,12 +10,16 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import org.web3j.abi.datatypes.Bool;
+import org.xml.sax.SAXException;
 
 import io.awallet.crypto.alphawallet.entity.ErrorEnvelope;
 import io.awallet.crypto.alphawallet.entity.NetworkInfo;
 import io.awallet.crypto.alphawallet.entity.Token;
+import io.awallet.crypto.alphawallet.entity.TokenFactory;
+import io.awallet.crypto.alphawallet.entity.TokenInfo;
 import io.awallet.crypto.alphawallet.entity.Transaction;
 import io.awallet.crypto.alphawallet.entity.Wallet;
+import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -25,7 +29,9 @@ import io.awallet.crypto.alphawallet.router.AssetDisplayRouter;
 import io.awallet.crypto.alphawallet.router.ChangeTokenCollectionRouter;
 import io.awallet.crypto.alphawallet.router.SendTokenRouter;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +40,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.tools.TokenDefinition;
 
 import static io.awallet.crypto.alphawallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -51,6 +58,7 @@ public class WalletViewModel extends BaseViewModel {
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
+    private final AddTokenInteract addTokenInteract;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -79,7 +87,8 @@ public class WalletViewModel extends BaseViewModel {
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            GetDefaultWalletBalance getDefaultWalletBalance) {
+            GetDefaultWalletBalance getDefaultWalletBalance,
+            AddTokenInteract addTokenInteract) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -88,6 +97,7 @@ public class WalletViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
+        this.addTokenInteract = addTokenInteract;
     }
 
     public LiveData<Token[]> tokens() {
@@ -294,5 +304,20 @@ public class WalletViewModel extends BaseViewModel {
         {
             fetchTokens();
         }
+    }
+
+    public void setContractAddress(String contractAddress, String contractName)
+    {
+        TokenInfo tInfo = new TokenInfo(contractAddress, contractName, "", 0, true, true);
+
+        //add token if required
+        disposable = addTokenInteract.add(tInfo, defaultWallet.getValue())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::finishedImport, this::onError);
+    }
+
+    private void finishedImport(Token token)
+    {
+        Log.d("WVM", "Added " + token.tokenInfo.name);
     }
 }

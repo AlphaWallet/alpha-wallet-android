@@ -97,8 +97,10 @@ public class Token implements Parcelable {
         return tokenInfo.address;
     }
     public String getFullName() {
-        if (tokenInfo.name == null || tokenInfo.symbol == null) return null;
-        else return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
+        if (tokenInfo.name == null) return null;
+        return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol + ")" : "");
+        //if (tokenInfo.name == null || tokenInfo.symbol == null) return null;
+        //else return tokenInfo.name + "(" + tokenInfo.symbol.toUpperCase() + ")";
     }
 
     public BigInteger getIntAddress() { return Numeric.toBigInt(tokenInfo.address); }

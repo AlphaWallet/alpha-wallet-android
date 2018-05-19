@@ -9,9 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class TokenDefinitionTest {
@@ -26,14 +24,14 @@ public class TokenDefinitionTest {
         assertTrue(file.exists());
         TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
         assertFalse(ticketAsset.fields.isEmpty());
-        assertEquals("Tickets", ticketAsset.tokenName);
+        assertNotEquals(0, ticketAsset.tokenName.length());
 
         // test contract address extraction
         String contractAddress = ticketAsset.getContractAddress(1);
         assertEquals(40+2, contractAddress.length());
 
         // test feature extraction
-        assertEquals("https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/", ticketAsset.marketQueueAPI);
+        assertEquals("https://", ticketAsset.marketQueueAPI.substring(0,8));
     }
 
     @Test

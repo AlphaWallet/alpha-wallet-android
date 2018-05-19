@@ -1,6 +1,7 @@
 package io.awallet.crypto.alphawallet.di;
 
 
+import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -28,7 +29,8 @@ public class WalletModule {
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            GetDefaultWalletBalance getDefaultWalletBalance) {
+            GetDefaultWalletBalance getDefaultWalletBalance,
+            AddTokenInteract addTokenInteract) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
@@ -37,7 +39,8 @@ public class WalletModule {
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
-                getDefaultWalletBalance);
+                getDefaultWalletBalance,
+                addTokenInteract);
     }
 
     @Provides
@@ -69,6 +72,13 @@ public class WalletModule {
     FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
             EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
         return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
+    }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository,
+            WalletRepositoryType walletRepository) {
+        return new AddTokenInteract(walletRepository, tokenRepository);
     }
 
     @Provides

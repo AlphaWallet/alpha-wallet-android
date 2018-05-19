@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import io.awallet.crypto.alphawallet.interact.AddTokenInteract;
 import io.awallet.crypto.alphawallet.interact.FetchTokensInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultNetworkInteract;
 import io.awallet.crypto.alphawallet.interact.FindDefaultWalletInteract;
@@ -23,6 +24,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
+    private final AddTokenInteract addTokenInteract;
 
     public WalletViewModelFactory(/*FindDefaultNetworkInteract findDefaultNetworkInteract,*/
                                   FetchTokensInteract fetchTokensInteract,
@@ -32,7 +34,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   AssetDisplayRouter assetDisplayRouter,
                                   FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
-                                  GetDefaultWalletBalance getDefaultWalletBalance) {
+                                  GetDefaultWalletBalance getDefaultWalletBalance,
+                                  AddTokenInteract addTokenInteract) {
         //this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -42,6 +45,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
+        this.addTokenInteract = addTokenInteract;
     }
 
     @NonNull
@@ -56,6 +60,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
-                getDefaultWalletBalance);
+                getDefaultWalletBalance,
+                addTokenInteract);
     }
 }

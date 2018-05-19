@@ -271,6 +271,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
             if (contractAddress != null)
             {
                 adapter.setLiveTokenAddress(contractAddress.toLowerCase());
+                viewModel.setContractAddress(contractAddress.toLowerCase(), ad.getTokenName());
             }
         }
         catch (IOException |SAXException e)

@@ -38,7 +38,7 @@ import okhttp3.RequestBody;
 public class ImportTokenService {
     private static final long MARKET_INTERVAL = 10*60; // 10 minutes
     private static final int TRADE_AMOUNT = 2016;
-    private static final String IMPORT_TOKEN_URL = "http://stormbird.duckdns.org:8080/api";
+    private static final String IMPORT_TOKEN_URL = "http://app.awallet.io/";
     private static final String IMPORT_ARG = "/importTicket";
 
     private final OkHttpClient httpClient;
@@ -63,6 +63,7 @@ public class ImportTokenService {
                 //.map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
     }
 
+    // this function is obselete
     public void importTickets(Wallet wallet, byte[] importMessage) throws Exception
     {
         //1. generate the signature (observe)

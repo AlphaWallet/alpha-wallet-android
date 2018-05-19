@@ -47,14 +47,14 @@
         </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 
-    <io.awallet.crypto.alphawallet.widget.SystemView
+    <io.stormbird.wallet.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white"
         tools:visibility="gone" />
 
-    <io.awallet.crypto.alphawallet.widget.BackupWarningView
+    <io.stormbird.wallet.widget.BackupWarningView
         android:id="@+id/backup_warning"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

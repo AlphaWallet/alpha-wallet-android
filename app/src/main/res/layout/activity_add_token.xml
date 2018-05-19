@@ -36,20 +36,20 @@
                 android:textColor="@color/text_black"
                 android:textSize="25sp" />
 
-            <io.awallet.crypto.alphawallet.widget.InputAddressView
+            <io.stormbird.wallet.widget.InputAddressView
                 android:id="@+id/input_address_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp" />
 
-            <io.awallet.crypto.alphawallet.widget.InputView
+            <io.stormbird.wallet.widget.InputView
                 android:id="@+id/input_symbol"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
                 custom:label="@string/hint_contract_symbol" />
 
-            <io.awallet.crypto.alphawallet.widget.InputView
+            <io.stormbird.wallet.widget.InputView
                 android:id="@+id/input_decimal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 custom:inputType="number"
                 custom:label="@string/hint_contract_decimals" />
 
-            <io.awallet.crypto.alphawallet.widget.InputView
+            <io.stormbird.wallet.widget.InputView
                 android:id="@+id/input_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

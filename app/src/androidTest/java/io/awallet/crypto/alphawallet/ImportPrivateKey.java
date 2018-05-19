@@ -1,4 +1,4 @@
-package io.awallet.crypto.alphawallet;
+package io.stormbird.wallet;
 
 import android.support.test.runner.AndroidJUnit4;
 

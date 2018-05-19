@@ -1,13 +1,13 @@
-package io.awallet.crypto.alphawallet;
+package io.stormbird.wallet;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.service.AccountKeystoreService;
-import io.awallet.crypto.alphawallet.service.GethKeystoreAccountService;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AccountKeystoreService;
+import io.stormbird.wallet.service.GethKeystoreAccountService;
 
 import org.json.JSONObject;
 import org.junit.Before;

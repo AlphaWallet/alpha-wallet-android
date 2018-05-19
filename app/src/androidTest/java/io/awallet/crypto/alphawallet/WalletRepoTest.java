@@ -1,19 +1,19 @@
-package io.awallet.crypto.alphawallet;
+package io.stormbird.wallet;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import io.awallet.crypto.alphawallet.entity.Wallet;
-import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepository;
-import io.awallet.crypto.alphawallet.repository.EthereumNetworkRepositoryType;
-import io.awallet.crypto.alphawallet.repository.PreferenceRepositoryType;
-import io.awallet.crypto.alphawallet.repository.SharedPreferenceRepository;
-import io.awallet.crypto.alphawallet.repository.WalletRepository;
-import io.awallet.crypto.alphawallet.repository.WalletRepositoryType;
-import io.awallet.crypto.alphawallet.service.AccountKeystoreService;
-import io.awallet.crypto.alphawallet.service.GethKeystoreAccountService;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.PreferenceRepositoryType;
+import io.stormbird.wallet.repository.SharedPreferenceRepository;
+import io.stormbird.wallet.repository.WalletRepository;
+import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.service.AccountKeystoreService;
+import io.stormbird.wallet.service.GethKeystoreAccountService;
 
 import org.json.JSONObject;
 import org.junit.Assert;

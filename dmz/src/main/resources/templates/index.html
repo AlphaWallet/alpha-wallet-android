@@ -1,12 +1,10 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://app.alphawallet.io">
-<head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
     <title th:text="${tokenCount} + ' ' + ${tokenName} + ' ' + ${tokenAvailable}"/>
-
-<link rel="stylesheet" th:href="@{css/greenButton.css}"/>
-<link rel="stylesheet" th:href="@{css/main.css}"/>
-
-    <style type="text/css">
+    <link rel="stylesheet" th:href="@{css/main.css}"/>
+    <style type="text/css"> /* @media here instead of css file  */
         @media only screen and (max-width: 600px)  {
             #mobile_app_preview {
                 display: none;
@@ -18,8 +16,8 @@
             }
         }
     </style>
-</head>
-<body>
+  </head>
+  <body th:attr="class=${tokenAvailable}">
     <img id="mobile_app_preview" src="images/app_preview.png"/>
     <h1><strong th:text="${tokenCount}"/>
         <em th:text="${contractName}"/>
@@ -27,7 +25,7 @@
     </h1>
     <div id="assets">
         <p id="price"><strong th:text="${ethValue}"/> ETH
-            <strong id="status" th:attr="class=@{tokenAvailable}" th:text="${tokenAvailable}"/>
+            <strong id="status" th:text="${tokenAvailable}"/>
         </p>
         <p>
             <strong th:text="${tokenCount}"/>
@@ -47,7 +45,7 @@ bHP8xcE5SQql3JZgECgs/lTGIlGAGfQwEibAWaJJqdJo80hLDpFey3ILgT6n3M71jCUTwx4wvGY1lwFa
                 <img src="data:image/gif;base64,R0lGODlhFQAbAPMAAFTB41XB41TC41XC41bC41TB5FXB5FbB5FTC5FXC5FXD5VbC5FbD5AAAAAAAAAAAACH5BAEAAA0AIf8LSW1hZ2VNYWdpY2sNZ2FtbWE9MC40NTQ1NQAsAAAAABUAGwAABHuwGUArODdjYJrkRhhiYxZSUuetbJs2nCuvcTzLtareXt4oAkTPUlHAOjFD0MM4NJuHQw+549Go1pYPJm0wFOCw8UimMIZEnw2QLVez27b7Z5uk2T47E6AwKPhsc3KCcltvM2prd1g2Y1ZxbZBwWINJIpeYmHV3nABnDREAOw==" />
             </dt><dd th:text="${ticketMatch}"/>
         </dl>
-    </div>
+    </div> 
     <h2>How to purchase tickets:</h2>
     <h3>Step 1</h3>
     <p>Download the AlphaWallet app to purchase tickets!</p>
@@ -64,12 +62,10 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
     <h3>Step 2</h3>
     <p>Once you've downloaded the app on your phone, tap the "View Listing" button below and you're all set!</p>
     <div id="view_listing">
-        <a th:href="'https://app.wallet.io/' + ${base64}">View Listing</a>
-    </div>
-
+        <a th:href="'https://app.wallet.io/' + ${base64}">View Listing</a></div>
     <p class="footnote">
         Owner's Ethereum Address:
         <code th:text="${ownerAddress}"/>
     </p>
-</body>
-</html>
+  </body>
+</html> 

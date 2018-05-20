@@ -116,6 +116,7 @@ public class AppSiteController {
             model.addAttribute("ticketDate", token.getDate("dd MMM HH:mm"));
             model.addAttribute("ticketMatch", token.getAttribute("match").text);
             model.addAttribute("ticketCategory", token.getAttribute("category").text);
+            break; // we only need 1 token's info. rest assumed to be the same
         }
 
         if (selection.size() != data.tickets.length)

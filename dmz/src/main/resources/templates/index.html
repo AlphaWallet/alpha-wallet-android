@@ -39,7 +39,26 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
     </a></div>
     <h2>Then, import asset</h2>
     <div class="greenButton">
-        <a th:href="'https://app.wallet.io/' + ${base64}">Import Asset</a>
+        <script>
+            function handleClickOfImportAssetButton() {
+                var userAgent = navigator.userAgent || navigator.vendor || window.opera
+                var isiOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream
+                var isAndroid = /android/i.test(userAgent)
+                var iOSAppStoreURL = 'https://itunes.apple.com/us/app/alphawallet/id1358230430?ls=1&mt=8'
+                var androidPlayStoreURL = 'https://play.google.com/store/apps/details?id=io.stormbird.wallet'
+
+                setTimeout(function () {
+                    if (isiOS) {
+                        window.location = iOSAppStoreURL
+                    } else if (isAndroid) {
+                        window.location = androidPlayStoreURL
+                    } else {
+                        alert('Please click this button on your Android or iOS device')
+                    }
+                }, 10);
+            }
+        </script>
+        <a th:href="'https://app.wallet.io/' + ${base64}" onclick="handleClickOfImportAssetButton()">Import Asset</a>
     </div>
 
     <div th:if="${not #lists.isEmpty(descList)}">

@@ -6,13 +6,13 @@ import org.springframework.boot.autoconfigure.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,71 +51,75 @@ public class AppSiteController {
                 "}";
     }
 
-    @GetMapping(value = "/{magicLink}")
-    public String decodeLink(@PathVariable("magicLink") String magicLink, Model model)
+    @GetMapping(value = "/{UniversalLink}")
+    public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, Model model)
     {
-        model.addAttribute("base64", magicLink);
-        try
-        {
-            MagicLinkData data = parser.parseUniversalLink(magicLink);
-            parser.getOwnerKey(data);
-            model.addAttribute("contractAddress", data.contractAddress);
-            model.addAttribute("ethValue", data.price);
-            model.addAttribute("ownerAddress", data.ownerAddress);
-            model.addAttribute("ticketCount", data.ticketCount);
-
-            //find out the contract name, symbol and balance
-            //have to use blocking gets here
-            //TODO: we should be able to update components here instead of waiting
-            String contractName = txHandler.getName(data.contractAddress);
-            model.addAttribute("contractName", contractName);
-
-            List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
-            List<BigInteger> selection = new ArrayList<>();
-            //convert balance to match selection
-            for (int index : data.tickets)
-            {
-                if (balanceArray.size() > index && !balanceArray.get(index).equals(BigInteger.ZERO))
-                    selection.add(balanceArray.get(index));
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            for (BigInteger b : selection)
-            {
-                sb.append(",");
-                sb.append(Numeric.toHexString(b.toByteArray()));
-            }
-            sb.append("]");
-            model.addAttribute("tickets", sb.toString());
-
-            sb = new StringBuilder();
-
-            List<String> ticketList = new ArrayList<>();
-            for (BigInteger bi : selection)
-            {
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(bi, definitionParser);
-                String venue = nonFungibleToken.getAttribute("venue").text;
-                String date = nonFungibleToken.getDate("dd MMM");
-                String time = nonFungibleToken.getDate("HH:mm");
-                String cat =  nonFungibleToken.getAttribute("category").text;
-                String number = nonFungibleToken.getAttribute("number").text;
-
-                ticketList.add(venue + " " + date + " at " +time+ " Ticket #" + number);
-            }
-
-            model.addAttribute("descList", ticketList);
-
+        MagicLinkData data;
+        model.addAttribute("base64", universalLink);
+        try {
+            data = parser.parseUniversalLink(universalLink);
+        } catch(SalesOrderMalformed e) {
+            return "error";
         }
-        catch (SalesOrderMalformed e)
-        {
-            e.printStackTrace();
+        parser.getOwnerKey(data);
+        model.addAttribute("tokenName", definitionParser.getTokenName());
+        model.addAttribute("contractAddress", data.contractAddress);
+        model.addAttribute("ethValue", data.price);
+        model.addAttribute("ownerAddress", data.ownerAddress);
+        model.addAttribute("tokenCount", data.ticketCount); // TODO: length
+
+        try {
+            updateContractInfo(model, data.contractAddress);
+        } catch (Exception e) {
+            /* The link points to a non-existing contract - most
+	     * likely from a different chainID. Now, if Ethereum node
+	     * is offline, this may get triggered too. */
+            model.addAttribute("tokenAvailable", "unattainable");
+            return "index";
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
+
+        try {
+            updateTokenInfo(model, data);
+        } catch (Exception e) {
+            /* although contract is okay, we can't getting
+	     * tokens. This could be caused by a wrong signature. The
+	     * case that the tokens are redeemd is handled inside, not
+	     * as an exception */
+            model.addAttribute("tokenAvailable", "unavailable");
+            return "index";
         }
+        model.addAttribute("tokenAvailable", "available");
         return "index";
+    }
+
+    private void updateContractInfo(Model model, String contractAddress) {
+        //find out the contract name, symbol and balance
+        //have to use blocking gets here
+        //TODO: we should be able to update components here instead of waiting
+        String contractName = txHandler.getName(contractAddress);
+        model.addAttribute("contractName", contractName);
+    }
+
+    private void updateTokenInfo(Model model, MagicLinkData data) throws Exception {
+        List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
+
+        List<NonFungibleToken> selection = Arrays.stream(data.tickets)
+                .mapToObj(i -> balanceArray.get(i))
+                .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
+                .map(tokenId -> new NonFungibleToken(tokenId, definitionParser))
+                .collect(Collectors.toList());
+
+        for (NonFungibleToken token : selection) {
+            String sides = token.getAttribute("countryA").text;
+            sides += " - " + token.getAttribute("countryB").text;
+            model.addAttribute("ticketSides", sides);
+            model.addAttribute("ticketDate", token.getDate("dd MMM HH:mm"));
+            model.addAttribute("ticketMatch", token.getAttribute("match").text);
+            model.addAttribute("ticketCategory", token.getAttribute("category").text);
+        }
+
+        if (selection.size() != data.tickets.length)
+            throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
 
     @RequestMapping("/")

@@ -18,7 +18,7 @@
             android:layout_margin="@dimen/big_margin"
             android:orientation="vertical">
 
-            <io.awallet.crypto.alphawallet.widget.InputView
+            <io.stormbird.wallet.widget.InputView
                 android:id="@+id/input_private_key"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

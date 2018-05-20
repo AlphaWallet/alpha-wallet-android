@@ -1,4 +1,4 @@
-package io.awallet.crypto.alphawallet.views;
+package io.stormbird.wallet.views;
 
 
 import android.support.test.espresso.ViewInteraction;
@@ -9,8 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import io.awallet.crypto.alphawallet.R;
-import io.awallet.crypto.alphawallet.ui.SplashActivity;
+import io.stormbird.wallet.R;
+import io.stormbird.wallet.ui.SplashActivity;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

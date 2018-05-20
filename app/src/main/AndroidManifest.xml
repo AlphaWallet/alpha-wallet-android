@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.awallet.crypto.alphawallet">
+    package="io.stormbird.wallet">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name="io.awallet.crypto.alphawallet.App"
+        android:name="io.stormbird.wallet.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -20,7 +20,7 @@
         android:hardwareAccelerated="true"
         tools:replace="android:name, android:theme, android:allowBackup">
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.SplashActivity"
+            android:name="io.stormbird.wallet.ui.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,103 +40,103 @@
         </activity>
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.WalletsActivity"
+            android:name="io.stormbird.wallet.ui.WalletsActivity"
             android:label="@string/title_account_list" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.ImportWalletActivity"
+            android:name="io.stormbird.wallet.ui.ImportWalletActivity"
             android:label="@string/title_import"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.SettingsActivity"
+            android:name="io.stormbird.wallet.ui.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TransactionDetailActivity"
+            android:name="io.stormbird.wallet.ui.TransactionDetailActivity"
             android:label="@string/title_transaction_details" />
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.MyAddressActivity"
+            android:name="io.stormbird.wallet.ui.MyAddressActivity"
             android:label="@string/title_my_address" />
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TokensActivity"
+            android:name="io.stormbird.wallet.ui.TokensActivity"
             android:label="@string/title_my_tokens" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.SendActivity"
+            android:name="io.stormbird.wallet.ui.SendActivity"
             android:label="@string/title_activity_send"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.ConfirmationActivity"
+            android:name="io.stormbird.wallet.ui.ConfirmationActivity"
             android:label="@string/title_activity_confirmation" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.AddTokenActivity"
+            android:name="io.stormbird.wallet.ui.AddTokenActivity"
             android:label="@string/title_add_token" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.AssetDisplayActivity"
+            android:name="io.stormbird.wallet.ui.AssetDisplayActivity"
             android:label="@string/title_use_token" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.RedeemSignatureDisplayActivity"
+            android:name="io.stormbird.wallet.ui.RedeemSignatureDisplayActivity"
             android:label="@string/title_use_token" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.GasSettingsActivity"
+            android:name="io.stormbird.wallet.ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TokenChangeCollectionActivity"
+            android:name="io.stormbird.wallet.ui.TokenChangeCollectionActivity"
             android:label="@string/title_tokens" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.SellTicketActivity"
+            android:name="io.stormbird.wallet.ui.SellTicketActivity"
             android:label="@string/create_sell_order" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.BrowseMarketActivity"
+            android:name="io.stormbird.wallet.ui.BrowseMarketActivity"
             android:label="@string/marketplace_title" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.SellDetailActivity"
+            android:name="io.stormbird.wallet.ui.SellDetailActivity"
             android:label="@string/action_sell"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.PurchaseTicketsActivity"
+            android:name="io.stormbird.wallet.ui.PurchaseTicketsActivity"
             android:label="@string/title_marketplace" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.RedeemAssetSelectActivity"
+            android:name="io.stormbird.wallet.ui.RedeemAssetSelectActivity"
             android:label="@string/title_redeem" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.HomeActivity"
+            android:name="io.stormbird.wallet.ui.HomeActivity"
             android:label="@string/toolbar_header_wallet" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.ImportTokenActivity"
+            android:name="io.stormbird.wallet.ui.ImportTokenActivity"
             android:label="@string/title_import_token" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TransferTicketActivity"
+            android:name="io.stormbird.wallet.ui.TransferTicketActivity"
             android:label="@string/label_transfer_ticket" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.TransferTicketDetailActivity"
+            android:name="io.stormbird.wallet.ui.TransferTicketDetailActivity"
             android:label="@string/label_transfer_ticket_detail" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.HelpActivity"
+            android:name="io.stormbird.wallet.ui.HelpActivity"
             android:label="@string/toolbar_header_help" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.EthereumInfoActivity"
+            android:name="io.stormbird.wallet.ui.EthereumInfoActivity"
             android:label="@string/toolbar_ethereum_info" />
 
         <activity
-            android:name="io.awallet.crypto.alphawallet.ui.zxing.QRScanningActivity"
+            android:name="io.stormbird.wallet.ui.zxing.QRScanningActivity"
             android:label="@string/qr_scanner"/>
 
         <meta-data

@@ -36,7 +36,7 @@
             android:layout_height="match_parent" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <io.awallet.crypto.alphawallet.widget.SystemView
+    <io.stormbird.wallet.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -54,7 +54,7 @@
     <!--app:menu="@menu/menu_main_network"-->
     <!--/>-->
 
-    <io.awallet.crypto.alphawallet.widget.AWalletBottomNavigationView
+    <io.stormbird.wallet.widget.AWalletBottomNavigationView
         android:id="@+id/nav"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"

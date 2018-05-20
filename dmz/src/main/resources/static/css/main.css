@@ -1,15 +1,81 @@
-.callToAction {
+p {
+    max-width: 26em;
+}
+html {
+    padding-top: 20px;
+}
+body {
+    padding-left: 8px;
+    background-image: url('logo.png');
+    background-position: 60px 20px;
+    background-repeat: no-repeat;
+    font-family: 'Source Sans Pro', 'Open Sans', Roboto, 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', 'Myriad Pro', 'Segoe UI', Myriad, Helvetica, 'Lucida Grande', 'DejaVu Sans Condensed', 'Liberation Sans', 'Nimbus Sans L', Tahoma, Geneva, Arial, sans-serif;
+    color: darkslategray;
+}
+#download_app :link {
 	display: inline-block;
 	padding: 1ex;
 }
-#body {
-	width: 54%;
-	float: left;
-	border: thin solid grey;
-	border-radius: 10px;
-	margin: 4%;
-	padding: 1em;
+h1 {
+    padding-top: 2em;
+    margin-bottom: 1em;
+    color: slategray;
 }
-table {
-    margin: auto;
+
+#assets {
+    border: thin solid silver;
+    border-radius: 10px;
+    margin: 1ex;
+    padding: 1em;
+    width: 20em;
+}
+
+#status {
+    font-size: medium;
+    font-variant: small-caps;
+    border-radius: 0.5em;
+    padding-left: 1ex;
+    padding-right: 1ex;
+}
+
+.available #status {
+    background: forestgreen;
+    color: white;
+}
+.unavailable #status {
+    background-color: red;
+    color: white;
+}
+
+h2, h3 {
+    color: black;
+}
+
+#view_listing a {
+    background-color: goldenrod;
+    font-weight: bold;
+    border-radius: 0.5em;
+    padding: 1ex 3em;
+}
+
+#view_listing :link {
+    text-decoration: none;
+}
+#view_listing :visited {
+    text-decoration: none;
+}
+
+dt, dd {
+    display: inline-block;
+}
+dd {
+    margin-left: 0em;
+    padding-left: 1ex;
+    padding-right: 1em;
+}
+
+.footnote {
+    color: gray;
+    margin-top: 2em;
+    border-top: thin solid silver;
 }

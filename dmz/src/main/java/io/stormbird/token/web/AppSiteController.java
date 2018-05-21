@@ -51,8 +51,13 @@ public class AppSiteController {
                 "}";
     }
 
+    @RequestMapping("/")
+    public String home(HttpServletRequest request){
+        return "index";
+    }
+
     @GetMapping(value = "/{UniversalLink}")
-    public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, Model model)
+    public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, @RequestHeader("User-Agent") String agent, Model model)
     {
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
@@ -122,12 +127,6 @@ public class AppSiteController {
         if (selection.size() != data.tickets.length)
             throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
-
-    @RequestMapping("/")
-    public String home(HttpServletRequest request){
-        return "index";
-    }
-
 
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(AppSiteController.class, args);

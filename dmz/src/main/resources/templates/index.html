@@ -39,12 +39,12 @@
         <strong th:text="${tokenName}"/>
     </h1>
     <div id="assets">
-        <p id="price"><strong th:text="${ethValue}"/> ETH
+        <p id="price"><strong th:text="${link.price}"/> ETH
             <strong id="status" th:text="${tokenAvailable}"/>
         </p>
         <p>
-            <strong th:text="${tokenCount}"/>
-            <strong th:text="${tokenName}"/> |
+            <strong th:text="${link.tickets.length}"/>
+            <strong th:text="${tokenName}"/>
             <em th:text="${ticketCategory}"></em>
         </p>
         <dl>
@@ -60,6 +60,7 @@ bHP8xcE5SQql3JZgECgs/lTGIlGAGfQwEibAWaJJqdJo80hLDpFey3ILgT6n3M71jCUTwx4wvGY1lwFa
                 <img src="data:image/gif;base64,R0lGODlhFQAbAPMAAFTB41XB41TC41XC41bC41TB5FXB5FbB5FTC5FXC5FXD5VbC5FbD5AAAAAAAAAAAACH5BAEAAA0AIf8LSW1hZ2VNYWdpY2sNZ2FtbWE9MC40NTQ1NQAsAAAAABUAGwAABHuwGUArODdjYJrkRhhiYxZSUuetbJs2nCuvcTzLtareXt4oAkTPUlHAOjFD0MM4NJuHQw+549Go1pYPJm0wFOCw8UimMIZEnw2QLVez27b7Z5uk2T47E6AwKPhsc3KCcltvM2prd1g2Y1ZxbZBwWINJIpeYmHV3nABnDREAOw==" />
             </dt><dd th:text="${ticketMatch}"/>
         </dl>
+        <p>Available till <span th:attr="title='Unix Time is ' + ${link.expiry}" th:text="${#dates.format(new java.util.Date(link.expiry*1000))}"/></p>
     </div> 
     <h2>How to purchase tickets:</h2>
     <h3>Step 1</h3>
@@ -84,9 +85,13 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
         <p>Once you've downloaded the app on your phone,
             pull down this web page to see the "Open With AlphaWallet" button</p>
     </div>
-    <p class="footnote">
-        Owner's Ethereum Address:
-        <code th:text="${ownerAddress}"/>
-    </p>
+    <table class="footnote"><tbody>
+        <tr><th>Owner's Ethereum Address</th>
+            <td th:text="${link.ownerAddress}"/>
+        </tr>
+        <tr><th>Smart-contract Address</th>
+            <td th:text="${link.contractAddress}"/>
+        </tr>
+    </tbody></table>
   </body>
 </html>

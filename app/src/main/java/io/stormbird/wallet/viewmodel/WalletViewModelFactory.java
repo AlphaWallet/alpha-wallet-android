@@ -10,6 +10,7 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
@@ -25,6 +26,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final AddTokenInteract addTokenInteract;
+    private final SetupTokensInteract setupTokensInteract;
 
     public WalletViewModelFactory(/*FindDefaultNetworkInteract findDefaultNetworkInteract,*/
                                   FetchTokensInteract fetchTokensInteract,
@@ -35,7 +37,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
                                   GetDefaultWalletBalance getDefaultWalletBalance,
-                                  AddTokenInteract addTokenInteract) {
+                                  AddTokenInteract addTokenInteract,
+                                  SetupTokensInteract setupTokensInteract) {
         //this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -46,6 +49,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.addTokenInteract = addTokenInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     @NonNull
@@ -61,6 +65,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
-                addTokenInteract);
+                addTokenInteract,
+                setupTokensInteract);
     }
 }

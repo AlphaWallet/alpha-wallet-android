@@ -24,6 +24,7 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
@@ -59,6 +60,7 @@ public class WalletViewModel extends BaseViewModel {
     private final AssetDisplayRouter assetDisplayRouter;
     private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
     private final AddTokenInteract addTokenInteract;
+    private final SetupTokensInteract setupTokensInteract;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -88,7 +90,8 @@ public class WalletViewModel extends BaseViewModel {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            AddTokenInteract addTokenInteract) {
+            AddTokenInteract addTokenInteract,
+            SetupTokensInteract setupTokensInteract) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -98,6 +101,7 @@ public class WalletViewModel extends BaseViewModel {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.addTokenInteract = addTokenInteract;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     public LiveData<Token[]> tokens() {
@@ -308,12 +312,18 @@ public class WalletViewModel extends BaseViewModel {
 
     public void setContractAddress(String contractAddress, String contractName)
     {
-        TokenInfo tInfo = new TokenInfo(contractAddress, contractName, "", 0, true, true);
+        disposable = setupTokensInteract.addToken(contractAddress)
+                .map(tokenInfo -> createContractToken(tokenInfo, contractName, contractAddress))
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::finishedImport, this::onError);
+    }
 
-        //add token if required
-        disposable = addTokenInteract.add(tInfo, defaultWallet.getValue())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(this::finishedImport, this::onError);
+    private TokenInfo createContractToken(TokenInfo tokenInfo, String contractName, String contractAddress)
+    {
+        String tokenName = tokenInfo.name + " " + contractName;
+        TokenInfo tInfo = new TokenInfo(contractAddress, tokenName, tokenInfo.symbol, 0, true, true);
+        return tInfo;
     }
 
     private void finishedImport(Token token)

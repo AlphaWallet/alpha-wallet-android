@@ -161,6 +161,10 @@ public class WalletViewModel extends BaseViewModel {
     private void onTokens(Token[] tokens)
     {
         tokenCache = tokens;
+        for (Token t : tokens)
+        {
+            Log.d("WVM", "Token: " + t.getFullName());
+        }
     }
 
     private void onFetchTokensCompletable()

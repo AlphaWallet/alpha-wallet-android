@@ -514,16 +514,8 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (BadContract e)
             {
-                //this doesn't mean the token is dead.
+                //this doesn't mean the token is dead. Just try again
                 //did we previously have a balance?
-                if (token.hasPositiveBalance())
-                {
-                    //how many times have we checked?
-                    if (token.updateNullCheckCount() > 20)
-                    {
-                        //it could be dead. TODO: Add a last received date
-                    }
-                }
                 return token;
 //                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
 //                localSource.updateTokenDestroyed(network, wallet, updated);

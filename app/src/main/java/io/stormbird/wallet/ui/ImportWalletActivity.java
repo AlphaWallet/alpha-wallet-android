@@ -27,6 +27,7 @@ import io.stormbird.wallet.viewmodel.ImportWalletViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.ErrorCode.ALREADY_ADDED;
+import static io.stormbird.wallet.C.RESET_WALLET;
 
 public class ImportWalletActivity extends BaseActivity {
 
@@ -121,6 +122,8 @@ public class ImportWalletActivity extends BaseActivity {
             dialog.setCancelable(false);
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
+
+            sendBroadcast(new Intent(RESET_WALLET));
         }
     }
 

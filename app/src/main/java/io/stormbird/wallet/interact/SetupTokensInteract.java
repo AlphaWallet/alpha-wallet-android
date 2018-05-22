@@ -253,7 +253,7 @@ public class SetupTokensInteract {
     {
         if (token != null)
         {
-            if (token.isTerminated())
+            if (token.isBad())
             {
                 ct.name = EXPIRED_CONTRACT; //re-processing a contract that's been killed.
             }

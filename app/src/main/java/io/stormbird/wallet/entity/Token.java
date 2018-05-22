@@ -288,7 +288,8 @@ public class Token implements Parcelable
     {
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
-        else return !currentState.equals(balance.toString());
+        String currentBalance = getFullBalance();
+        return !currentState.equals(currentBalance);
     }
 
     public void setIsEthereum()

@@ -109,13 +109,9 @@ public class NewSettingsViewModel extends BaseViewModel {
         return localeRepository.getDefaultLocale();
     }
 
-    public void setDefaultLocale(Context context, String locale, String localeCode) {
-        localeRepository.setDefaultLocale(context, locale, localeCode);
+    public void setDefaultLocale(Context context, String locale) {
+        localeRepository.setDefaultLocale(context, locale);
         showHome(context, true); //Refresh activity to reflect changes
-    }
-
-    public String getDefaultLocaleCode() {
-        return localeRepository.getDefaultLocaleCode();
     }
 
     public String[] getNetworkList() {

@@ -9,9 +9,7 @@ import io.stormbird.wallet.entity.LocaleItem;
 public interface LocaleRepositoryType {
     String getDefaultLocale();
 
-    String getDefaultLocaleCode();
-
-    void setDefaultLocale(Context context, String locale, String localeCode);
+    void setDefaultLocale(Context context, String locale);
 
     ArrayList<LocaleItem> getLocaleList(Context context);
 }

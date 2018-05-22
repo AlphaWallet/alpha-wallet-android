@@ -51,7 +51,7 @@ public class SplashViewModel extends ViewModel {
     }
 
     public void setLocale(Context context) {
-        localeRepository.setDefaultLocale(context, preferenceRepository.getDefaultLocale(), preferenceRepository.getDefaultLocaleCode());
+        localeRepository.setDefaultLocale(context, preferenceRepository.getDefaultLocale());
     }
 
     /**

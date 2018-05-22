@@ -265,8 +265,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         //get the XML address
         try
         {
-            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
-                    Locale.getDefault().getDisplayLanguage());
+            String lang = Locale.getDefault().getDisplayLanguage();
+            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"), lang);
+
             String contractAddress = ad.getContractAddress(networkId);
             if (contractAddress != null)
             {

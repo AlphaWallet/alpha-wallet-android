@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +58,9 @@ public class AppSiteController {
         return "index";
     }
 
+    /* TODO: 3 types of instructions.
+     * 1) link redeemable, not redeemd and not expired;
+     * 2) link not redeemable; 3) iOS instructios */
     @GetMapping(value = "/{UniversalLink}")
     public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, @RequestHeader("User-Agent") String agent, Model model)
     {
@@ -68,10 +73,8 @@ public class AppSiteController {
         }
         parser.getOwnerKey(data);
         model.addAttribute("tokenName", definitionParser.getTokenName());
-        model.addAttribute("contractAddress", data.contractAddress);
-        model.addAttribute("ethValue", data.price);
-        model.addAttribute("ownerAddress", data.ownerAddress);
-        model.addAttribute("tokenCount", data.ticketCount); // TODO: length
+        model.addAttribute("link", data);
+        // model.addAttribute("linkExp");
 
         try {
             updateContractInfo(model, data.contractAddress);
@@ -93,7 +96,12 @@ public class AppSiteController {
             model.addAttribute("tokenAvailable", "unavailable");
             return "index";
         }
-        model.addAttribute("tokenAvailable", "available");
+
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
+            model.addAttribute("tokenAvailable", "expired");
+        } else {
+            model.addAttribute("tokenAvailable", "available");
+        }
         return "index";
     }
 

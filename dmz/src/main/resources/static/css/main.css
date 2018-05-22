@@ -46,6 +46,10 @@ h1 {
     background-color: red;
     color: white;
 }
+.expired #status {
+    background-color: maroon;
+    color: silver;
+}
 
 h2, h3 {
     color: black;

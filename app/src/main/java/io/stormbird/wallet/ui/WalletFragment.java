@@ -229,7 +229,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onTokens(Token[] tokens)
     {
-        for (Token t : tokens) if(!t.isTerminated() && t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
+        for (Token t : tokens) if(t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
         adapter.setTokens(tokens);
     }
 
@@ -265,8 +265,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         //get the XML address
         try
         {
-            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
-                    Locale.getDefault().getDisplayLanguage());
+            String lang = Locale.getDefault().getDisplayLanguage();
+            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"), lang);
+
             String contractAddress = ad.getContractAddress(networkId);
             if (contractAddress != null)
             {

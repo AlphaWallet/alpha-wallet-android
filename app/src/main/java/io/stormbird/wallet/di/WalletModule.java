@@ -6,6 +6,7 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
@@ -30,7 +31,8 @@ public class WalletModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
-            AddTokenInteract addTokenInteract) {
+            AddTokenInteract addTokenInteract,
+            SetupTokensInteract setupTokensInteract) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
@@ -40,7 +42,8 @@ public class WalletModule {
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
-                addTokenInteract);
+                addTokenInteract,
+                setupTokensInteract);
     }
 
     @Provides
@@ -90,5 +93,10 @@ public class WalletModule {
     GetDefaultWalletBalance provideGetDefaultWalletBalance(
             WalletRepositoryType walletRepository, EthereumNetworkRepositoryType ethereumNetworkRepository) {
         return new GetDefaultWalletBalance(walletRepository, ethereumNetworkRepository);
+    }
+
+    @Provides
+    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
+        return new SetupTokensInteract(tokenRepository);
     }
 }

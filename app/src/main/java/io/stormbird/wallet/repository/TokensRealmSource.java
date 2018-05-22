@@ -439,7 +439,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
                 realmToken.setBurnList("");
-                realmToken.setNullCheckCount(token.getNullCheckCount());
 
                 if (token instanceof Ticket) {
                     realmToken.setStormbird(true);
@@ -450,6 +449,19 @@ public class TokensRealmSource implements TokenLocalSource {
             else
             {
                 Log.d(TAG, "Update Token: " + token.getFullName());
+                if (!token.tokenInfo.name.equals(realmToken.getName()) || !token.tokenInfo.symbol.equals(realmToken.getSymbol()))
+                {
+                    //has token changed?
+                    TransactionsRealmCache.addRealm();
+                    realm.beginTransaction();
+                    realmToken.setName(token.tokenInfo.name);
+                    realmToken.setSymbol(token.tokenInfo.symbol);
+                    realmToken.setDecimals(token.tokenInfo.decimals);
+                    realmToken.setAddedTime(currentTime.getTime());
+                    realmToken.setEnabled(true);
+                    realm.commitTransaction();
+                    TransactionsRealmCache.subRealm();
+                }
                 //realmToken.setBalance(token.getFullBalance());
             }
         } catch (Exception ex) {

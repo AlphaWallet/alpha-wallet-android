@@ -1,17 +1,20 @@
 package io.stormbird.wallet.repository;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
-import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.LocaleItem;
+import io.stormbird.wallet.util.LocaleUtils;
 
 public class LocaleRepository implements LocaleRepositoryType {
+    private static final String[] LOCALES = {
+            "en",
+            "zh",
+            "es"
+    };
+
     private final PreferenceRepositoryType preferences;
 
     public LocaleRepository(PreferenceRepositoryType preferenceRepository) {
@@ -19,35 +22,22 @@ public class LocaleRepository implements LocaleRepositoryType {
     }
 
     @Override
-    public void setDefaultLocale(Context context, String locale, String localeCode) {
+    public void setDefaultLocale(Context context, String locale) {
         preferences.setDefaultLocale(locale);
-        preferences.setDefaultLocaleCode(localeCode);
-        setLocale(context, localeCode);
-    }
-
-    public String getDefaultLocaleCode() {
-        return preferences.getDefaultLocaleCode();
+        LocaleUtils.setLocale(context, locale);
     }
 
     public String getDefaultLocale() {
         return preferences.getDefaultLocale();
     }
 
-    public void setLocale(Context context, String localeCode) {
-        Locale myLocale = new Locale(localeCode);
-        Resources res = context.getResources();
-        DisplayMetrics dm = res.getDisplayMetrics();
-        Configuration conf = res.getConfiguration();
-        conf.locale = myLocale;
-        res.updateConfiguration(conf, dm);
-    }
-
     @Override
     public ArrayList<LocaleItem> getLocaleList(Context context) {
         ArrayList<LocaleItem> list = new ArrayList<>();
-        list.add(new LocaleItem(context.getString(R.string.lang_en), "en"));
-        list.add(new LocaleItem(context.getString(R.string.lang_zh), "zh"));
-        list.add(new LocaleItem(context.getString(R.string.lang_es), "es"));
+        for (String locale : LOCALES) {
+            Locale l = new Locale(locale);
+            list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale), locale));
+        }
         return list;
     }
 }

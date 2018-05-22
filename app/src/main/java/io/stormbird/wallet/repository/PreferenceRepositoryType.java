@@ -15,7 +15,4 @@ public interface PreferenceRepositoryType {
 
 	String getDefaultLocale();
 	void setDefaultLocale(String locale);
-
-	String getDefaultLocaleCode();
-	void setDefaultLocaleCode(String localeCode);
 }

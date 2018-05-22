@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.Locale;
+
 public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
 	private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";
@@ -14,7 +16,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 	private static final String NOTIFICATIONS_KEY = "notifications";
 	private static final String DEFAULT_SET_KEY = "default_net_set";
 	private static final String LOCALE_KEY = "locale";
-	private static final String LOCALE_CODE_KEY = "locale_code";
 
 	private final SharedPreferences pref;
 
@@ -67,21 +68,11 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
 	@Override
 	public String getDefaultLocale() {
-		return pref.getString(LOCALE_KEY, "English");
+		return pref.getString(LOCALE_KEY, Locale.getDefault().getLanguage());
 	}
 
 	@Override
 	public void setDefaultLocale(String locale) {
 		pref.edit().putString(LOCALE_KEY, locale).apply();
-	}
-
-	@Override
-	public String getDefaultLocaleCode() {
-		return pref.getString(LOCALE_CODE_KEY, "en");
-	}
-
-	@Override
-	public void setDefaultLocaleCode(String localeCode) {
-		pref.edit().putString(LOCALE_CODE_KEY, localeCode).apply();
 	}
 }

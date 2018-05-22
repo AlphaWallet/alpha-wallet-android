@@ -439,7 +439,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setAddedTime(currentTime.getTime());
                 realmToken.setEnabled(true);
                 realmToken.setBurnList("");
-                realmToken.setNullCheckCount(token.getNullCheckCount());
 
                 if (token instanceof Ticket) {
                     realmToken.setStormbird(true);

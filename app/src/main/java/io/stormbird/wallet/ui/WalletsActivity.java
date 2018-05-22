@@ -174,6 +174,8 @@ public class WalletsActivity extends BaseActivity implements
                 if (adapter.getItemCount() <= 1) {
                     viewModel.showHome(this);
                 }
+
+                sendBroadcast(new Intent(RESET_WALLET));
             }
         } else if (requestCode == SHARE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {

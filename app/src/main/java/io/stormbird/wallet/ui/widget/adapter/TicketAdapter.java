@@ -3,10 +3,10 @@ package io.stormbird.wallet.ui.widget.adapter;
 import android.content.Context;
 import android.view.ViewGroup;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
@@ -31,7 +31,7 @@ import java.util.List;
 public class TicketAdapter extends TokensAdapter {
     TicketRange currentRange = null;
     final Ticket ticket;
-    protected AssetDefinition assetDefinition;
+    protected TokenDefinition assetDefinition;
 
     protected OnTicketIdClickListener onTicketIdClickListener;
 
@@ -53,12 +53,15 @@ public class TicketAdapter extends TokensAdapter {
         setTicketRange(ticket, ticketIds);
     }
 
-    private AssetDefinition initAssetDefinition(Context ctx)
+    private TokenDefinition initAssetDefinition(Context ctx)
     {
-        AssetDefinition definition = null;
+        TokenDefinition definition = null;
         try
         {
-            definition = new AssetDefinition("TicketingContract.xml", ctx.getResources());
+            definition = new TokenDefinition(
+                    ctx.getResources().getAssets().open("TicketingContract.xml"),
+                    ctx.getResources().getConfiguration().locale);
+
         }
         catch (IOException |SAXException e)
         {

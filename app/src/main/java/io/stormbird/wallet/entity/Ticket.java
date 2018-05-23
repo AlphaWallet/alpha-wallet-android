@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
@@ -455,7 +454,9 @@ public class Ticket extends Token implements Parcelable
             try
             {
                 BigInteger firstTicket = range.tokenIds.get(0);
-                AssetDefinition assetDefinition = new AssetDefinition("TicketingContract.xml", activity.getResources());
+                TokenDefinition assetDefinition = new TokenDefinition(
+                        activity.getResources().getAssets().open("TicketingContract.xml"),
+                        Locale.getDefault());
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
 
                 String nameStr = assetDefinition.getTokenName();

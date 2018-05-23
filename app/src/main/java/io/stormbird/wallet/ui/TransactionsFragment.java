@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import io.stormbird.token.tools.TokenDefinition;
 import org.xml.sax.SAXException;
 
 import io.stormbird.wallet.R;
@@ -31,7 +32,6 @@ import io.stormbird.wallet.entity.TokenInterface;
 import io.stormbird.wallet.entity.TokensReceiver;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.wallet.ui.widget.adapter.HelpAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.util.RootUtil;
@@ -175,7 +175,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         //get the XML address
         try
         {
-            AssetDefinition ad = new AssetDefinition("TicketingContract.xml", getResources());
+            TokenDefinition ad = new TokenDefinition(
+                    getResources().getAssets().open("TicketingContract.xml"),
+                    getResources().getConfiguration().locale);
             String contractAddress = ad.getContractAddress(networkId);
             if (contractAddress == null)
             {

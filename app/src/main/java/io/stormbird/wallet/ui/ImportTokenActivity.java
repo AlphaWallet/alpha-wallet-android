@@ -23,7 +23,6 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;

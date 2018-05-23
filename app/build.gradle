@@ -87,6 +87,13 @@ project.ext {
 dependencies {
     implementation project(":lib")
 
+    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  
+    // WARNING!  Don't add depdency on Google Play Services without consulting
+    // WARNING!  The Chinese marketing team.
+    // WARNING!  Many Chinese Android phones kill any app that users google gms
+    // WARNING!  on site, like immune systems cleansing infections.
+    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING! 
+
     // Etherium client
     implementation "org.web3j:core:$project.web3jVersion"
     implementation "org.ethereum:geth:$project.gethVersion"
@@ -109,9 +116,6 @@ dependencies {
     // Bar code scanning
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     implementation 'com.google.zxing:core:3.3.2'
-
-    //implementation 'com.google.zxing:core:3.3.0'
-    implementation 'com.google.android.gms:play-services-vision:15.0.0'
 
     // Sugar
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'

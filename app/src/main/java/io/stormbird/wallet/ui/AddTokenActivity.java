@@ -3,7 +3,6 @@ package io.stormbird.wallet.ui;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -16,9 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
-
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
@@ -27,7 +23,6 @@ import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
-import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.viewmodel.AddTokenViewModel;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
@@ -132,22 +127,22 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
-            if (resultCode == CommonStatusCodes.SUCCESS) {
+            if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
-                    Barcode barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
+                    String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
-                    String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);
+                    String extracted_address = parser.extractAddressFromQrString(barcode);
                     if (extracted_address == null) {
                         Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Point[] p = barcode.cornerPoints;
                     inputAddressView.setAddress(extracted_address);
                 }
             } else {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                        CommonStatusCodes.getStatusCodeString(resultCode)));
+                        "Code: " + String.valueOf(resultCode)
+                        ));
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

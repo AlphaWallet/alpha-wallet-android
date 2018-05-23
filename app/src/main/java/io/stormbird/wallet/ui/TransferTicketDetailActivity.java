@@ -7,7 +7,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
@@ -25,9 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
@@ -564,27 +560,27 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (requestCode)
         {
             case BARCODE_READER_REQUEST_CODE:
-            if (resultCode == CommonStatusCodes.SUCCESS)
+            if (resultCode == FullScannerFragment.SUCCESS)
             {
                 if (data != null)
                 {
-                    Barcode barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
+                    String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
-                    String extracted_address = parser.extractAddressFromQrString(barcode.displayValue);
+                    String extracted_address = parser.extractAddressFromQrString(barcode);
                     if (extracted_address == null)
                     {
                         Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Point[] p = barcode.cornerPoints;
                     toAddressEditText.setText(extracted_address);
                 }
             }
             else
             {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                            CommonStatusCodes.getStatusCodeString(resultCode)));
+                        "Code: " + String.valueOf(resultCode)
+                        ));
             }
             break;
 

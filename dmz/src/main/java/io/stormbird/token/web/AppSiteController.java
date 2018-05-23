@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -140,6 +137,6 @@ public class AppSiteController {
 		SpringApplication.run(AppSiteController.class, args);
 		parser.setCryptoInterface(cryptoFunctions);
         File file = new File("../contracts/TicketingContract.xml");
-        definitionParser = new TokenDefinition(new FileInputStream(file), "en");
+        definitionParser = new TokenDefinition(new FileInputStream(file), new Locale("en"));
 	}
 }

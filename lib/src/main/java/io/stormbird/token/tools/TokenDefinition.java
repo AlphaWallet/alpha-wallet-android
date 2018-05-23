@@ -17,13 +17,14 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenDefinition {
     protected Document xml;
     public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
-    protected String locale;
+    protected Locale locale;
     public Map<Integer, String> addresses = new HashMap<>();
 
     /* the following are incorrect, waiting to be further improved
@@ -133,7 +134,7 @@ public class TokenDefinition {
         return name.getTextContent(); /* Should be the first occurrence of <name> */
     }
 
-    public TokenDefinition(InputStream xmlAsset, String locale) throws IOException, SAXException{
+    public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
         this.locale = locale;
         DocumentBuilder dBuilder;
         try {
@@ -262,7 +263,7 @@ public class TokenDefinition {
                         case "en":
                             nameEnglish = eElement.getTextContent(); // no "break;" for a reason.
                         default:
-                            if (eElement.getAttribute("lang") == locale)
+                            if (eElement.getAttribute("lang").equals(locale.getLanguage()))
                                 tokenName = eElement.getTextContent();
                     }
             }

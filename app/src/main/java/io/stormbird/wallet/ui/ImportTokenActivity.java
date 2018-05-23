@@ -312,8 +312,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
                         try {
-                            TokenDefinition ticketToken = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
-                                    Locale.getDefault().getDisplayLanguage());
+                            TokenDefinition ticketToken = new TokenDefinition(
+                                    getResources().getAssets().open("TicketingContract.xml"),
+                                    Locale.getDefault());
                             String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
                             if (address != null && address.equalsIgnoreCase(t.getAddress()))
                             {

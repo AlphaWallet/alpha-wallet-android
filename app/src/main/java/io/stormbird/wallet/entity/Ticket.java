@@ -506,8 +506,9 @@ public class Ticket extends Token implements Parcelable
     {
         try
         {
-            return new TokenDefinition(activity.getResources().getAssets().open("TicketingContract.xml"),
-                                                 Locale.getDefault().getDisplayLanguage());
+            return new TokenDefinition(
+                    activity.getResources().getAssets().open("TicketingContract.xml"),
+                    Locale.getDefault());
         }
         catch (IOException e)
         {

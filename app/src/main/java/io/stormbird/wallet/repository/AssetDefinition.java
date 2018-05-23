@@ -6,6 +6,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import io.stormbird.token.tools.TokenDefinition;
 
@@ -16,12 +17,12 @@ import io.stormbird.token.tools.TokenDefinition;
 
 public class AssetDefinition extends TokenDefinition {
 
-    public AssetDefinition(InputStream xmlAsset, String locale) throws IOException, SAXException {
+    public AssetDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException {
         super(xmlAsset, locale);
     }
 
     public AssetDefinition(String filename, Resources res) throws IOException, SAXException {
-        super(res.getAssets().open(filename), res.getConfiguration().locale.getLanguage());
+        super(res.getAssets().open(filename), res.getConfiguration().locale);
     }
 
 }

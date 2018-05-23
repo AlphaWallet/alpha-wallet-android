@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
@@ -22,7 +23,7 @@ public class TokenDefinitionTest {
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
         assertFalse(ticketAsset.fields.isEmpty());
         assertNotEquals(0, ticketAsset.tokenName.length());
 
@@ -36,7 +37,7 @@ public class TokenDefinitionTest {
 
     @Test
     public void FieldDefinitionShouldParse() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
 
         NonFungibleToken ticket = new NonFungibleToken(ticketIDs[0], ticketAsset);
         assertEquals("№", ticket.getAttribute("numero").name);
@@ -50,7 +51,7 @@ public class TokenDefinitionTest {
 
     @Test
     public void XMLSignatureShouldValidate() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), "en");
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
         assertEquals("Shankai", ticketAsset.getKeyName());
         // TODO: actually validate XML signature
     }

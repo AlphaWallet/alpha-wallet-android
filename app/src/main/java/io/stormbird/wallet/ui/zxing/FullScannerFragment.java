@@ -9,25 +9,19 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.stormbird.wallet.R;
-
 public class FullScannerFragment extends Fragment implements ZXingScannerView.ResultHandler
 {
     public static final String BarcodeObject = "Barcode";
+    public static final int SUCCESS = 0; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu */
 
     private static final String FLASH_STATE = "FLASH_STATE";
     private static final String AUTO_FOCUS_STATE = "AUTO_FOCUS_STATE";
@@ -100,10 +94,8 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         } catch (Exception e) {}
 
         Intent intent = new Intent();
-        Barcode barcode = new Barcode();
-        barcode.displayValue = rawResult.getText();
-        intent.putExtra(BarcodeObject, barcode);
-        getActivity().setResult(CommonStatusCodes.SUCCESS, intent);
+        intent.putExtra(BarcodeObject, rawResult.getText());
+        getActivity().setResult(SUCCESS, intent);
         getActivity().finish();
     }
 

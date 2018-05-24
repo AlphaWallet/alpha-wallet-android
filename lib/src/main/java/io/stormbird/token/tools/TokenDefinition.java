@@ -51,7 +51,7 @@ public class TokenDefinition {
     protected String tokenName = null;
     protected String keyName = null;
     protected int networkId = 1; //default to main net unless otherwise specified
-
+    private static Locale english = new Locale("en");
 
 
     protected class FieldDefinition {
@@ -121,12 +121,14 @@ public class TokenDefinition {
 
     String getLocalisedName(Element nameContainer) {
         Element name = null;
+        Locale currentNodeLang;
         for(Node node=nameContainer.getLastChild();
             node!=null; node=node.getPreviousSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("name")) {
                 // System.out.println("\nFound a name field: " + node.getNodeName());
                 name = (Element) node;
-                if (name.getAttribute("lang").equals(locale)) {
+                currentNodeLang = new Locale(name.getAttribute("lang"));
+                if (currentNodeLang.getLanguage().equals(locale.getLanguage())) {
                     return name.getTextContent();
                 }
             }
@@ -136,6 +138,10 @@ public class TokenDefinition {
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
         this.locale = locale;
+        /* guard input from bad programs which creates Locale not following ISO 639 */
+        if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {
+            throw new SAXException("Locale object wasn't created following ISO 639");
+        }
         DocumentBuilder dBuilder;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -255,23 +261,11 @@ public class TokenDefinition {
                     Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
                     addresses.put(networkId, nNode.getTextContent());
                 }
-                if (eElement.getTagName().equals("name"))
-                    switch (eElement.getAttribute("lang")) {
-                        case "":
-                            nameDefault = eElement.getTextContent();
-                            break;
-                        case "en":
-                            nameEnglish = eElement.getTextContent(); // no "break;" for a reason.
-                        default:
-                            if (eElement.getAttribute("lang").equals(locale.getLanguage()))
-                                tokenName = eElement.getTextContent();
-                    }
             }
+            /* if there is no token name in <contract> this breaks;
+             * token name shouldn't be in <contract> anyway, re-design pending */
+            tokenName = getLocalisedName((Element) nNode);
         }
-        if (tokenName == null) {
-            tokenName = nameDefault == null ? nameEnglish : nameDefault;
-        }
-        // at this point, tokenName may still be null, and its acceptable
     }
 
     private String getNode(NodeList nList, String field)

@@ -126,7 +126,7 @@ public class TokenDefinition {
             if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("name")) {
                 // System.out.println("\nFound a name field: " + node.getNodeName());
                 name = (Element) node;
-                if (name.getAttribute("lang").equals(locale)) {
+                if (name.getAttribute("lang").equals(locale.getLanguage())) {
                     return name.getTextContent();
                 }
             }

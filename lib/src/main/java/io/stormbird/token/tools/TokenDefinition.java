@@ -133,7 +133,7 @@ public class TokenDefinition {
                 }
             }
         }
-        return name.getTextContent(); /* Should be the first occurrence of <name> */
+        return name != null ? name.getTextContent() : " "; /* Should be the first occurrence of <name> */
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
@@ -264,7 +264,9 @@ public class TokenDefinition {
             }
             /* if there is no token name in <contract> this breaks;
              * token name shouldn't be in <contract> anyway, re-design pending */
-            tokenName = getLocalisedName((Element) nNode);
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                tokenName = getLocalisedName((Element) nNode);
+            }
         }
     }
 

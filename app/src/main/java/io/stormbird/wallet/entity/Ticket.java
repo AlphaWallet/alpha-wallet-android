@@ -473,11 +473,8 @@ public class Ticket extends Token implements Parcelable
                 textRange.setText(nonFungibleToken.getRangeStr(range));
                 textCat.setText(nonFungibleToken.getAttribute("category").text);
                 ticketDetails.setText(getTicketInfo(nonFungibleToken));
-            }
-            catch (IOException | SAXException e)
-            {
-                e.printStackTrace();
-                //TODO: Handle error
+            } catch (IOException | SAXException e) {
+                textTicketName.setText(e.getMessage());
             }
         }
     }

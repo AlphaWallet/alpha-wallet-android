@@ -91,8 +91,9 @@ EPUQyp2aDrV1aug=
 		<address network="3">0xd8e5f58de3933e1e35f9c65eb72cb188674624f3</address>
 		<name lang="ru">Ваучеры</name>
 		<name lang="en">Vouchers</name>
-		<name lang="zh">门票兑换卷</name>
+		<name lang="zh">门票兑换券</name>
 		<name lang="es">Cupones</name>
+		<name lang="ru">Ваучеры</name>
 	</contract>
 	<contract type="bag">
 	</contract>
@@ -172,10 +173,10 @@ EPUQyp2aDrV1aug=
     instead of bit-fields.
   -->
     <field bitmask="00000000000000000000000000000000FF000000000000000000000000000000" id="locality" type="Enumeration">
-      <name lang="ru">город</name>
       <name lang="en">City</name>
       <name lang="zh">城市</name>
       <name lang="es">Ciudad</name>
+      <name lang="ru">город</name>
       <mapping>
         <entity key="1">
           <name lang="ru">Москва́</name>
@@ -256,16 +257,16 @@ EPUQyp2aDrV1aug=
           <name lang="es">Singapur</name>
         </entity>
         <entity key="253">
-          <name lang="en">Shenzhen</name>
           <name lang="zh">深圳</name>
+          <name lang="en">Shenzhen</name>
         </entity>
 	<entity key="252">
-          <name lang="en">Beijing</name>
           <name lang="zh">北京</name>
+          <name lang="en">Beijing</name>
         </entity>
 	<entity key="251">
-          <name lang="en">Shanghai</name>
           <name lang="zh">上海</name>
+          <name lang="en">Shanghai</name>
         </entity>
 	<entity key="250">
           <name lang="en">Tokyo</name>
@@ -276,8 +277,8 @@ EPUQyp2aDrV1aug=
           <name lang="zh">首尔</name>
         </entity>      
 	<entity key="248">
-          <name lang="en">Chongqing</name>
           <name lang="zh">重庆</name>
+          <name lang="en">Chongqing</name>
         </entity>	      
 	<entity key="247">
           <name lang="en">New York</name>
@@ -292,8 +293,8 @@ EPUQyp2aDrV1aug=
           <name lang="zh">香港</name>
         </entity>     
 	<entity key="244">
-          <name lang="en">Chengdu</name>
           <name lang="zh">成都</name>
+          <name lang="en">Chengdu</name>
         </entity>	      
 	<entity key="243">
           <name lang="en">Kuala Lumpur</name>
@@ -342,10 +343,10 @@ EPUQyp2aDrV1aug=
       </mapping>
     </field>
     <field bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" id="venue" type="Enumeration">
-      <name lang="ru">место встречи</name>
       <name lang="en">Venue</name>
       <name lang="zh">场馆</name>
       <name lang="es">Lugar</name>
+      <name lang="ru">место встречи</name>
       <mapping>
         <entity key="1">
           <name lang="ru">Стадион Калининград</name>
@@ -524,10 +525,10 @@ EPUQyp2aDrV1aug=
       </mapping>
     </field>
     <field bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000" id="time" type="BinaryTime">
-      <name lang="ru">время</name>
       <name lang="en">Time</name>
       <name lang="zh">时间</name>
       <name lang="es">Tiempo</name>
+      <name lang="ru">время</name>
     </field>
     <field bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000" id="countryA" type="IA5String">
       <!-- Intentionally avoid using countryName

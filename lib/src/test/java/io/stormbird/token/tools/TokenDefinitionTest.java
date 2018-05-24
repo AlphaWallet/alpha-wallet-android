@@ -55,4 +55,9 @@ public class TokenDefinitionTest {
         assertEquals("Shankai", ticketAsset.getKeyName());
         // TODO: actually validate XML signature
     }
+
+    @Test(expected = SAXException.class)
+    public void BadLocaleShouldThrowException() throws IOException, SAXException {
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"));
+    }
 }

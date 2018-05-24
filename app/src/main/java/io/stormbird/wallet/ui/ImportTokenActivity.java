@@ -313,7 +313,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                         try {
                             TokenDefinition ticketToken = new TokenDefinition(
                                     getResources().getAssets().open("TicketingContract.xml"),
-                                    Locale.getDefault());
+                                    getResources().getConfiguration().locale);
                             String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
                             if (address != null && address.equalsIgnoreCase(t.getAddress()))
                             {

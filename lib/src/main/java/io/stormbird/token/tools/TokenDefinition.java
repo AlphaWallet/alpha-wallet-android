@@ -249,11 +249,16 @@ public class TokenDefinition {
         String nameDefault = null;
         String nameEnglish = null;
         NodeList nList = xml.getElementsByTagName("contract");
-
         /* we allow multiple contracts, e.g. for issuing asset and for
-         * proxy usage. but for now we only deal with the first if
-         * NullPointerException in the next statement, then XML file
-         * missing <contract> elements */
+         * proxy usage. but for now we only deal with the first */
+        Element contract = (Element) nList.item(0);
+
+        /* if there is no token name in <contract> this breaks;
+         * token name shouldn't be in <contract> anyway, re-design pending */
+        tokenName = getLocalisedName(contract);
+
+         /*if hit NullPointerException in the next statement, then XML file
+         * must be missing <contract> elements */
         for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = ((Element) nNode);
@@ -261,11 +266,6 @@ public class TokenDefinition {
                     Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
                     addresses.put(networkId, nNode.getTextContent());
                 }
-            }
-            /* if there is no token name in <contract> this breaks;
-             * token name shouldn't be in <contract> anyway, re-design pending */
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                tokenName = getLocalisedName((Element) nNode);
             }
         }
     }

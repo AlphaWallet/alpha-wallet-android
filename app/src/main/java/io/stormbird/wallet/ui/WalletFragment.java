@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -265,8 +266,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         //get the XML address
         try
         {
-            String lang = Locale.getDefault().getDisplayLanguage();
-            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"), lang);
+            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
+                    Objects.requireNonNull(getContext()).getResources().getConfiguration().locale);
 
             String contractAddress = ad.getContractAddress(networkId);
             if (contractAddress != null)

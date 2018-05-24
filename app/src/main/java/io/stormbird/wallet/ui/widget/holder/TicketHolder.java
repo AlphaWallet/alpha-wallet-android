@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.token.entity.TicketRange;
 
 /**
@@ -17,7 +17,7 @@ public class TicketHolder extends BaseTicketHolder
 {
     public static final int VIEW_TYPE = 1066;
 
-    public TicketHolder(int resId, ViewGroup parent, AssetDefinition definition, Token ticket)
+    public TicketHolder(int resId, ViewGroup parent, TokenDefinition definition, Token ticket)
     {
         super(resId, parent, definition, ticket);
     }

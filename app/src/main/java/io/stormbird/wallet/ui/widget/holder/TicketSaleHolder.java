@@ -10,9 +10,9 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
 import io.stormbird.token.entity.TicketRange;
 
@@ -29,7 +29,7 @@ public class TicketSaleHolder extends BaseTicketHolder
     private final AppCompatRadioButton select;
     private final LinearLayout ticketLayout;
 
-    public TicketSaleHolder(int resId, ViewGroup parent, AssetDefinition definition, Token token)
+    public TicketSaleHolder(int resId, ViewGroup parent, TokenDefinition definition, Token token)
     {
         super(resId, parent, definition, token);
         ticketLayout = findViewById(R.id.layout_select);

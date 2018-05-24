@@ -6,16 +6,6 @@ import android.os.Parcelable;
 import android.view.View;
 import android.widget.TextView;
 
-import io.stormbird.wallet.R;
-import io.stormbird.wallet.repository.AssetDefinition;
-import io.stormbird.wallet.repository.entity.RealmToken;
-import io.stormbird.wallet.ui.BaseActivity;
-import io.stormbird.wallet.ui.widget.holder.TokenHolder;
-import io.stormbird.wallet.viewmodel.BaseViewModel;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.TicketRange;
-import io.stormbird.token.tools.TokenDefinition;
-
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
@@ -27,6 +17,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
+import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.wallet.R;
+import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.ui.BaseActivity;
+import io.stormbird.wallet.ui.widget.holder.TokenHolder;
+import io.stormbird.wallet.viewmodel.BaseViewModel;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -455,7 +454,9 @@ public class Ticket extends Token implements Parcelable
             try
             {
                 BigInteger firstTicket = range.tokenIds.get(0);
-                AssetDefinition assetDefinition = new AssetDefinition("TicketingContract.xml", activity.getResources());
+                TokenDefinition assetDefinition = new TokenDefinition(
+                        activity.getResources().getAssets().open("TicketingContract.xml"),
+                        activity.getResources().getConfiguration().locale);
                 NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
 
                 String nameStr = assetDefinition.getTokenName();
@@ -472,11 +473,8 @@ public class Ticket extends Token implements Parcelable
                 textRange.setText(nonFungibleToken.getRangeStr(range));
                 textCat.setText(nonFungibleToken.getAttribute("category").text);
                 ticketDetails.setText(getTicketInfo(nonFungibleToken));
-            }
-            catch (IOException | SAXException e)
-            {
-                e.printStackTrace();
-                //TODO: Handle error
+            } catch (IOException | SAXException e) {
+                textTicketName.setText(e.getMessage());
             }
         }
     }
@@ -506,8 +504,9 @@ public class Ticket extends Token implements Parcelable
     {
         try
         {
-            return new TokenDefinition(activity.getResources().getAssets().open("TicketingContract.xml"),
-                                                 Locale.getDefault().getDisplayLanguage());
+            return new TokenDefinition(
+                    activity.getResources().getAssets().open("TicketingContract.xml"),
+                    activity.getResources().getConfiguration().locale);
         }
         catch (IOException e)
         {

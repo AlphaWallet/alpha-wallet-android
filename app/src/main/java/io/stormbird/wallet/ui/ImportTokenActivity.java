@@ -23,7 +23,6 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.repository.AssetDefinition;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
@@ -312,8 +311,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
                         try {
-                            TokenDefinition ticketToken = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
-                                    Locale.getDefault().getDisplayLanguage());
+                            TokenDefinition ticketToken = new TokenDefinition(
+                                    getResources().getAssets().open("TicketingContract.xml"),
+                                    getResources().getConfiguration().locale);
                             String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
                             if (address != null && address.equalsIgnoreCase(t.getAddress()))
                             {

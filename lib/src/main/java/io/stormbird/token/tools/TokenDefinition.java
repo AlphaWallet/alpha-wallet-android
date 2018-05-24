@@ -261,12 +261,15 @@ public class TokenDefinition {
                     Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
                     addresses.put(networkId, nNode.getTextContent());
                 }
+                /* if there is no token name in <contract> this breaks;
+                 * token name shouldn't be in <contract> anyway, re-design pending */
+                if (eElement.getTagName().equals("name")) {
+                    if (eElement.getAttribute("lang").equals(locale.getLanguage())) {
+                        tokenName = eElement.getTextContent();
+                    }
+                }
             }
-            /* if there is no token name in <contract> this breaks;
-             * token name shouldn't be in <contract> anyway, re-design pending */
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                tokenName = getLocalisedName((Element) nNode);
-            }
+
         }
     }
 

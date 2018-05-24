@@ -316,15 +316,25 @@ public class WalletViewModel extends BaseViewModel {
 
     public void setContractAddress(String contractAddress, String contractName)
     {
+//        XMLContractAddress = contractAddress;
+//        XMLContractName = contractName;
+
         disposable = setupTokensInteract.addToken(contractAddress)
                 .map(tokenInfo -> createContractToken(tokenInfo, contractName, contractAddress))
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::finishedImport, this::onError);
+                .subscribe(this::finishedImport, this::onTokenAddError);
     }
 
-    private TokenInfo createContractToken(TokenInfo tokenInfo, String contractName, String contractAddress)
+    private void onTokenAddError(Throwable throwable)
     {
+        //cannot add the token until we get internet connection
+        Log.d("WVM", "Wait for internet");
+    }
+
+    private TokenInfo createContractToken(TokenInfo tokenInfo, String contractName, String contractAddress) throws Exception
+    {
+        if (tokenInfo.name == null) throw new Exception("Token cannot be added"); //drop through react flow so token is not incorrectly added
         String tokenName = tokenInfo.name + " " + contractName;
         TokenInfo tInfo = new TokenInfo(contractAddress, tokenName, tokenInfo.symbol, 0, true, true);
         return tInfo;

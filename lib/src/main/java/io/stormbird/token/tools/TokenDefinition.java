@@ -51,7 +51,7 @@ public class TokenDefinition {
     protected String tokenName = null;
     protected String keyName = null;
     protected int networkId = 1; //default to main net unless otherwise specified
-
+    private static Locale english = new Locale("en");
 
 
     protected class FieldDefinition {
@@ -121,21 +121,27 @@ public class TokenDefinition {
 
     String getLocalisedName(Element nameContainer) {
         Element name = null;
+        Locale currentNodeLang;
         for(Node node=nameContainer.getLastChild();
             node!=null; node=node.getPreviousSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("name")) {
                 // System.out.println("\nFound a name field: " + node.getNodeName());
                 name = (Element) node;
-                if (name.getAttribute("lang").equals(locale)) {
+                currentNodeLang = new Locale(name.getAttribute("lang"));
+                if (currentNodeLang.getLanguage().equals(locale.getLanguage())) {
                     return name.getTextContent();
                 }
             }
         }
-        return name.getTextContent(); /* Should be the first occurrence of <name> */
+        return name != null ? name.getTextContent() : " "; /* Should be the first occurrence of <name> */
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
         this.locale = locale;
+        /* guard input from bad programs which creates Locale not following ISO 639 */
+        if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {
+            throw new SAXException("Locale object wasn't created following ISO 639");
+        }
         DocumentBuilder dBuilder;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -243,11 +249,16 @@ public class TokenDefinition {
         String nameDefault = null;
         String nameEnglish = null;
         NodeList nList = xml.getElementsByTagName("contract");
-
         /* we allow multiple contracts, e.g. for issuing asset and for
-         * proxy usage. but for now we only deal with the first if
-         * NullPointerException in the next statement, then XML file
-         * missing <contract> elements */
+         * proxy usage. but for now we only deal with the first */
+        Element contract = (Element) nList.item(0);
+
+        /* if there is no token name in <contract> this breaks;
+         * token name shouldn't be in <contract> anyway, re-design pending */
+        tokenName = getLocalisedName(contract);
+
+         /*if hit NullPointerException in the next statement, then XML file
+         * must be missing <contract> elements */
         for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = ((Element) nNode);
@@ -255,23 +266,15 @@ public class TokenDefinition {
                     Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
                     addresses.put(networkId, nNode.getTextContent());
                 }
-                if (eElement.getTagName().equals("name"))
-                    switch (eElement.getAttribute("lang")) {
-                        case "":
-                            nameDefault = eElement.getTextContent();
-                            break;
-                        case "en":
-                            nameEnglish = eElement.getTextContent(); // no "break;" for a reason.
-                        default:
-                            if (eElement.getAttribute("lang").equals(locale.getLanguage()))
-                                tokenName = eElement.getTextContent();
+                /* if there is no token name in <contract> this breaks;
+                 * token name shouldn't be in <contract> anyway, re-design pending */
+                if (eElement.getTagName().equals("name")) {
+                    if (eElement.getAttribute("lang").equals(locale.getLanguage())) {
+                        tokenName = eElement.getTextContent();
                     }
+                }
             }
         }
-        if (tokenName == null) {
-            tokenName = nameDefault == null ? nameEnglish : nameDefault;
-        }
-        // at this point, tokenName may still be null, and its acceptable
     }
 
     private String getNode(NodeList nList, String field)

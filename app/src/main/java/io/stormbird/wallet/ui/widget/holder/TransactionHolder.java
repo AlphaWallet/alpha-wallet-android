@@ -127,7 +127,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
 
-        if (ct.operation.equals(RECEIVE_FROM_MAGICLINK))
+        if (ct.operation.equals(getString(R.string.ticket_receive_from_magiclink)))
         {
             String valueStr = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
             value.setText(valueStr);

@@ -35,6 +35,7 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
+import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -103,6 +104,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .get(HomeViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
+        viewModel.setLocale(this);
 
         refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
 

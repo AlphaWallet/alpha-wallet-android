@@ -183,9 +183,6 @@
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>
     <string name="action_changelly">Changelly</string>
     <string name="action_wallets">Wallets</string>
-    <string name="action_next">Next</string>
-    <string name="action_edit">Edit</string>
-    <string name="action_save">Save</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_load_transaction">Failed to load transaction list</string>

@@ -272,4 +272,11 @@
 <string name="hint_contract_decimals">小数点</string>
 <string name="title_add_token">添加订制代币</string>
 <string name="suggestion_private_key">私人钥匙码至少64字数。</string>
+<string name="ticket_market_purchase">市场购买</string>
+<string name="ticket_redeem">赎回</string>
+<string name="ticket_receive_from">收到</string>
+
+    <string name="action_next">下一步</string>
+    <string name="action_edit">主编</string>
+    <string name="action_save">保存</string>
 </resources>

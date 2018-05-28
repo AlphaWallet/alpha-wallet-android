@@ -296,4 +296,8 @@
     <string name="ticket_expired_contract">Expired Contract</string>
     <string name="ticket_unknown_contract">Unknown Contract</string>
     <string name="ticket_admin_redeem">Admin Redeem</string>
+
+    <string name="action_next">Next</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
 </resources>

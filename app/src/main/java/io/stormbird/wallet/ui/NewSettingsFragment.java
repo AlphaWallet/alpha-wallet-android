@@ -28,6 +28,7 @@ import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
 import io.stormbird.wallet.widget.SelectNetworkDialog;
 
+import static io.stormbird.wallet.C.CHANGED_LOCALE;
 import static io.stormbird.wallet.C.RESET_WALLET;
 
 public class NewSettingsFragment extends Fragment {
@@ -48,6 +49,7 @@ public class NewSettingsFragment extends Fragment {
         viewModel = ViewModelProviders.of(this, newSettingsViewModelFactory).get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.setLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
@@ -56,7 +58,7 @@ public class NewSettingsFragment extends Fragment {
         localeSubtext = view.findViewById(R.id.locale_lang_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
 
-        localeSubtext.setText(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale()));
+        localeSubtext.setText(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
 
         updateNotificationState();
 
@@ -93,7 +95,8 @@ public class NewSettingsFragment extends Fragment {
             dialog.setOnClickListener(v1 -> {
                 if (!currentLocale.equals(dialog.getSelectedItemId())) {
                     viewModel.setDefaultLocale(getContext(), dialog.getSelectedItemId());
-                    localeSubtext.setText(LocaleUtils.getDisplayLanguage(dialog.getSelectedItemId()));
+                    localeSubtext.setText(LocaleUtils.getDisplayLanguage(dialog.getSelectedItemId(), currentLocale));
+                    getActivity().sendBroadcast(new Intent(CHANGED_LOCALE));
                 }
                 dialog.dismiss();
             });

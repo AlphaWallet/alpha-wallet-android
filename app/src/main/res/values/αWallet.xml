@@ -176,6 +176,7 @@
     <string name="toolbar_header_importing_tickets">Importing tickets</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
+    <string name="failed">Failed</string>
     <string name="total_cost_for_x_tickets">Total cost for %1d %2s:</string>
     <string name="import_ticket">Import Tickets</string>
     <string name="title_import_token">Import Tickets</string>

@@ -36,7 +36,7 @@ public class LocaleRepository implements LocaleRepositoryType {
         ArrayList<LocaleItem> list = new ArrayList<>();
         for (String locale : LOCALES) {
             Locale l = new Locale(locale);
-            list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale), locale));
+            list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale, getDefaultLocale()), locale));
         }
         return list;
     }

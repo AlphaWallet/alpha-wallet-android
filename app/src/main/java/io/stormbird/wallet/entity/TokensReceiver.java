@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import static io.stormbird.wallet.C.ADDED_TOKEN;
+import static io.stormbird.wallet.C.CHANGED_LOCALE;
 import static io.stormbird.wallet.C.RESET_WALLET;
 
 public class TokensReceiver extends BroadcastReceiver
@@ -16,6 +17,7 @@ public class TokensReceiver extends BroadcastReceiver
     {
         ctx.registerReceiver(this, new IntentFilter(RESET_WALLET));
         ctx.registerReceiver(this, new IntentFilter(ADDED_TOKEN));
+        ctx.registerReceiver(this, new IntentFilter(CHANGED_LOCALE));
         this.tokenInterface = tokenInterface;
     }
 
@@ -29,6 +31,9 @@ public class TokensReceiver extends BroadcastReceiver
                 break;
             case ADDED_TOKEN:
                 tokenInterface.addedToken();
+                break;
+            case CHANGED_LOCALE:
+                tokenInterface.changedLocale();
                 break;
             default:
                 break;

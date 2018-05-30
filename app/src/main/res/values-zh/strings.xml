@@ -176,6 +176,7 @@
     <string name="toolbar_header_importing_tickets">导入门票</string>
     <string name="ticket">门票</string>
     <string name="tickets">门票</string>
+    <string name="failed">失效</string>
     <string name="total_cost_for_x_tickets">成本价t for %1d %2s:</string>
     <string name="import_ticket">导入门票</string>
     <string name="title_import_token">导入门票</string>
@@ -242,6 +243,8 @@
     <string name="label_important">重要</string>
     <string name="eth_00">0.00 ETH</string>
     <string name="toolbar_title_my_wallets">我的钱包</string>
+    <string name="sent">发送了</string>
+    <string name="received">收到了</string>
 <string name="facebook">Facebook</string>
 <string name="twitter">Twitter</string>
 <string name="erc20">ERC 20</string>

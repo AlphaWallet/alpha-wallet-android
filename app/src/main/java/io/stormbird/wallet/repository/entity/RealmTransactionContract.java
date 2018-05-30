@@ -10,7 +10,7 @@ public class RealmTransactionContract extends RealmObject {
     private String symbol;
 
     private String balance;
-    private String operation;
+    private int operation;
     private String otherParty;
     private String indices;
     private int type;
@@ -59,12 +59,12 @@ public class RealmTransactionContract extends RealmObject {
     public void setBalance(String balance) { this.balance = balance; }
     public String getBalance() { return this.balance; }
 
-    public String getOperation()
+    public int getOperation()
     {
         return operation;
     }
 
-    public void setOperation(String operation)
+    public void setOperation(int operation)
     {
         this.operation = operation;
     }

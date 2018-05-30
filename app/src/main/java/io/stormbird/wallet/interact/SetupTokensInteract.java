@@ -4,6 +4,7 @@ package io.stormbird.wallet.interact;
  * Created by James on 16/01/2018.
  */
 
+import android.content.Context;
 import android.util.Log;
 
 import org.web3j.utils.Numeric;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
@@ -37,11 +39,12 @@ public class SetupTokensInteract {
     private List<String> unknownContracts = new ArrayList<>();
     private String walletAddr;
 
-    public final static String UNKNOWN_CONTRACT = "[Unknown Contract]";
-    public final static String EXPIRED_CONTRACT = "[Expired Contract]";
-    public final static String INVALID_OPERATION = "[Invalid Operation]";
-    public final static String CONTRACT_CONSTRUCTOR = "Contract Creation";
-    public final static String RECEIVE_FROM_MAGICLINK = "Receive From MagicLink";
+    public static final String UNKNOWN_CONTRACT = "[Unknown Contract]";
+    public static final String EXPIRED_CONTRACT = "[Expired Contract]";
+    public static final String INVALID_OPERATION = "[Invalid Operation]";
+    public static final String CONTRACT_CONSTRUCTOR = "Contract Creation";
+    public static final String RECEIVE_FROM_MAGICLINK = "Receive From MagicLink";
+
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -81,7 +84,10 @@ public class SetupTokensInteract {
             TransactionOperation[] newOps;
             TransactionContract ct;
             ERC875ContractTransaction ect = null;
-            String functionName = INVALID_OPERATION;
+
+            String functionName = "";
+
+            int operation = R.string.ticket_invalid_op;
 
             if (token == null && !unknownContracts.contains(thisTrans.to))
             {
@@ -95,11 +101,20 @@ public class SetupTokensInteract {
                 op = thisTrans.operations[0];
                 ect = (ERC875ContractTransaction) thisTrans.operations[0].contract;
                 ct = ect;
-                functionName = ect.operation;
+                operation = ect.operation;
                 newOps = thisTrans.operations;
+                if (data.functionData != null)
+                {
+                    functionName = data.functionData.functionFullName;
+                }
                 if (ect.type == -5)
                 {
                     ect.type = -2;
+                }
+                if (thisTrans.isConstructor)
+                {
+                    ect.operation = R.string.ticket_contract_constructor;
+                    functionName = CONTRACT_CONSTRUCTOR;
                 }
             }
             else if (data != null && data.functionData != null)
@@ -114,7 +129,8 @@ public class SetupTokensInteract {
                     {
                         ect.setIndicies(data.paramValues);
                     }
-                    ect.operation = functionName;
+                    ect.operation = operation;
+                    //ect.operationDisplayName = functionName;
                 }
                 else
                 {
@@ -143,16 +159,16 @@ public class SetupTokensInteract {
             switch (functionName)
             {
                 case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
-                    ect.operation = "Market purchase";
+                    ect.operation = R.string.ticket_market_purchase;
                     //until we can ecrecover from a signauture, we can't show our ticket as sold, but we can conclude it sold elsewhere, so this must be a buy
                     ect.type = 1; // buy/receive
                     break;
                 case "transferFrom(address,address,uint16[])":
-                    ect.operation = "Redeem";
+                    ect.operation = R.string.ticket_redeem;
                     if (!data.containsAddress(walletAddr))
                     {
                         //this must be an admin redeem
-                        ect.operation = "Admin Redeem";
+                        ect.operation = R.string.ticket_admin_redeem;
                     }
                     //one of our tickets was burned
                     ect.type = -1; //redeem
@@ -162,19 +178,29 @@ public class SetupTokensInteract {
                     //if addresses contains our address then it must be a recieve
                     if (data.containsAddress(walletAddr))
                     {
-                        ect.operation = "Receive From";
+                        ect.operation = R.string.ticket_receive_from;
                         ect.type = 1; //buy/receive
                         ect.otherParty = thisTrans.from;
                     }
                     else
                     {
-                        ect.operation = "Transfer To";
+                        ect.operation = R.string.ticket_transfer_to;
                         ect.type = -1; //sell
                         ect.otherParty = data.getFirstAddress();
                     }
                     break;
                 case "transfer(address,uint256)":
                     //ERC20 transfer
+                    if (token != null)
+                    {
+                        ct.decimals = token.tokenInfo.decimals;
+                        ct.symbol = token.tokenInfo.symbol;
+                    }
+                    else
+                    {
+                        ct.decimals = 18;
+                        ct.symbol = "";
+                    }
                     op.from = thisTrans.from;
                     op.to = data.getFirstAddress();
                     op.transactionId = thisTrans.hash;
@@ -182,21 +208,21 @@ public class SetupTokensInteract {
                     op.value = String.valueOf(data.getFirstValue());
                     break;
                 case "loadNewTickets(bytes32[])":
-                    ect.operation = data.functionData.functionName;
+                    ect.operation = R.string.ticket_load_new_tickets;
                     op.from = thisTrans.from;
-                    op.to = token != null ? token.getAddress() : UNKNOWN_CONTRACT;
+                    op.to = token != null ? token.getAddress() : "";
                     op.transactionId = thisTrans.hash;
                     op.value = String.valueOf(data.paramValues.size());
                     break;
                 case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
                     if (data.containsAddress(walletAddr))
                     {
-                        ect.operation = "Pass From";
+                        ect.operation = R.string.ticket_pass_from;
                         ect.type = 1;
                     }
                     else
                     {
-                        ect.operation = "Pass To";
+                        ect.operation = R.string.ticket_pass_to;
                         ect.type = -1;
                     }
                     op.from = thisTrans.from;
@@ -206,7 +232,7 @@ public class SetupTokensInteract {
                     op.value = String.valueOf(data.getFirstValue());
                     break;
                 case "endContract()":
-                    ect.operation = "Terminate";
+                    ect.operation = R.string.ticket_terminate_contract;
                     ct.name = thisTrans.to;
                     ect.type = -2;
                     break;
@@ -215,15 +241,28 @@ public class SetupTokensInteract {
                     fillContractInformation(thisTrans, ct);
                     break;
                 case RECEIVE_FROM_MAGICLINK:
+                    ect.operation = R.string.ticket_receive_from_magiclink;
+                    //ect.operation = RECEIVE_FROM_MAGICLINK;
                     op.value = String.valueOf(data.paramValues.size());
                     break;
                 case INVALID_OPERATION:
                     if (ect != null)
                     {
-                        ect.operation = INVALID_OPERATION;
+                        ect.operation = R.string.ticket_invalid_op;
+                        //ect.operation = INVALID_OPERATION;
+                        ect.badTransaction = true;
                     }
                     break;
                 default:
+                    if (ect != null)
+                    {
+                        ect.operation = R.string.ticket_invalid_op;
+                        ect.badTransaction = true;
+                    }
+                    else
+                    {
+                        ct.badTransaction = true;
+                    }
                     break;
             }
 
@@ -255,7 +294,7 @@ public class SetupTokensInteract {
         {
             if (token.isBad())
             {
-                ct.name = EXPIRED_CONTRACT; //re-processing a contract that's been killed.
+                ct.name = "";// EXPIRED_CONTRACT; //re-processing a contract that's been killed.
             }
             else
             {
@@ -265,11 +304,13 @@ public class SetupTokensInteract {
             ct.decimals = token.tokenInfo.decimals;
             ct.symbol = token.tokenInfo.symbol;
             ct.totalSupply = "0";
+            ct.badTransaction = false;
         }
         else
         {
-            ct.name = UNKNOWN_CONTRACT;
+            ct.name = "";
             ct.address = t.to;
+            ct.badTransaction = true;
         }
     }
 
@@ -280,7 +321,8 @@ public class SetupTokensInteract {
             ERC875ContractTransaction ct = (ERC875ContractTransaction) tc;
             Token token = contractMap.get(trans.to); //filled in from EtherscanTransaction
 
-            ct.operation = CONTRACT_CONSTRUCTOR;
+            ct.operation = R.string.ticket_contract_constructor;
+            //ct.operation = CONTRACT_CONSTRUCTOR;
 
             if (token != null)
             {

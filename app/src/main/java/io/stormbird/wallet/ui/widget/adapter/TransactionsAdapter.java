@@ -7,6 +7,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
@@ -24,7 +29,8 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
     private final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
-        public int compare(SortedItem left, SortedItem right) {
+        public int compare(SortedItem left, SortedItem right)
+        {
             return left.compare(right);
         }
 
@@ -63,9 +69,11 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
     private Wallet wallet;
     private NetworkInfo network;
+    private Map<String, TransactionSortedItem> checkMap = new HashMap<>();
 
     public TransactionsAdapter(OnTransactionClickListener onTransactionClickListener) {
         this.onTransactionClickListener = onTransactionClickListener;
+        setHasStableIds(true);
     }
 
     @Override
@@ -113,27 +121,58 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         notifyDataSetChanged();
     }
 
-    public void addTransactions(Transaction[] transactions) {
-        populateTransactions(items, transactions);
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
-    private void populateTransactions(SortedList<SortedItem> list, Transaction[] transactions)
+    private void createMap()
     {
-        list.beginBatchedUpdates();
-        for (Transaction transaction : transactions) {
+        checkMap.clear();
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem I = items.get(i);
+            if (I instanceof TransactionSortedItem)
+            {
+                TransactionSortedItem tsi = (TransactionSortedItem) I;
+                checkMap.put(tsi.value.hash, tsi);
+            }
+        }
+    }
+
+    public void updateTransactions(Transaction[] transactions)
+    {
+        createMap();
+
+        items.beginBatchedUpdates();
+
+        for (Transaction transaction : transactions)
+        {
             TransactionSortedItem sortedItem = new TransactionSortedItem(
                     TransactionHolder.VIEW_TYPE, transaction, TimestampSortedItem.DESC);
-            list.add(sortedItem);
-            list.add(DateSortedItem.round(transaction.timeStamp));
-        }
-        list.endBatchedUpdates();
-    }
 
-    public void updateTransactions(Transaction[] transactions) {
-        populateTransactions(items, transactions);
+            if (checkMap.containsKey(transaction.hash))
+            {
+                TransactionSortedItem data = checkMap.get(transaction.hash);
+                int position = items.indexOf(data);
+                if (!data.value.contentHash.equals(transaction.contentHash))
+                {
+                    items.updateItemAt(position, sortedItem);
+                    notifyItemChanged(position);
+                }
+            }
+            else
+            {
+                items.add(sortedItem);
+                items.add(DateSortedItem.round(transaction.timeStamp));
+            }
+        }
+
+        items.endBatchedUpdates();
     }
 
     public void clear() {
         items.clear();
+        notifyDataSetChanged();
     }
 }

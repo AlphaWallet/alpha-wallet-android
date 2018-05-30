@@ -20,6 +20,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.interact.ImportWalletInteract;
+import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HelpRouter;
@@ -39,6 +40,8 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.ui.HomeActivity;
+import io.stormbird.wallet.util.LocaleUtils;
 
 public class HomeViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -66,6 +69,7 @@ public class HomeViewModel extends BaseViewModel {
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
     private final HelpRouter helpRouter;
+    private final LocaleRepositoryType localeRepository;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -90,7 +94,8 @@ public class HomeViewModel extends BaseViewModel {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            LocaleRepositoryType localeRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -108,6 +113,7 @@ public class HomeViewModel extends BaseViewModel {
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
         this.helpRouter = helpRouter;
+        this.localeRepository = localeRepository;
     }
 
     @Override
@@ -247,5 +253,12 @@ public class HomeViewModel extends BaseViewModel {
 
     public void showHelp(Context context) {
         helpRouter.open(context);
+    }
+
+    public void setLocale(HomeActivity activity)
+    {
+        //get the current locale
+        String currentLocale = localeRepository.getDefaultLocale();
+        LocaleUtils.setLocale(activity, currentLocale);
     }
 }

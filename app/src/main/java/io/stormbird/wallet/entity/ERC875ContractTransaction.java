@@ -17,10 +17,11 @@ import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TY
 public class ERC875ContractTransaction extends TransactionContract implements Parcelable {
     public String balance;
     public String symbol;
-    public String operation;
+    public int operation;
     public String otherParty;
     public List<Integer> indices;
     public int type;
+    //public String operationDisplayName;
 
     @Override
     public int contractType()
@@ -33,8 +34,9 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         name = "";
         balance = "";
         symbol = "";
-        operation = "";
+        operation = 0;
         otherParty = "";
+        //operationDisplayName = "";
         indices = null;
     }
 
@@ -72,8 +74,9 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         name = in.readString();
         balance = in.readString();
         symbol = in.readString();
-        operation = in.readString();
+        operation = in.readInt();
         type = in.readInt();
+        //operationDisplayName = in.readString();
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         indices = new ArrayList<>();
         for (Object o : readObjArray)
@@ -106,8 +109,9 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         parcel.writeString(name);
         parcel.writeString(balance);
         parcel.writeString(symbol);
-        parcel.writeString(operation);
+        parcel.writeInt(operation);
         parcel.writeInt(type);
+        //parcel.writeString(operationDisplayName);
         if (indices != null) {
             parcel.writeArray(indices.toArray());
         }

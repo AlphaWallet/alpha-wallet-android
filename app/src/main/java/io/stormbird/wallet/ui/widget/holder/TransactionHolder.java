@@ -123,18 +123,25 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
                 colourResource = R.color.black;
                 break;
         }
-        type.setText(ct.operation);
+        if (ct.operation == 0)
+        {
+            ct.operation = R.string.ticket_invalid_op;
+        }
+
+        String opName = getString(ct.operation);
+
+        type.setText(getString(ct.operation));
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
 
-        if (ct.operation.equals(RECEIVE_FROM_MAGICLINK))
+        if (ct.operation == R.string.ticket_receive_from_magiclink)
         {
             String valueStr = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
             value.setText(valueStr);
             valueAmount = BigInteger.ZERO;
         }
         else if (ct.indices != null && ct.indices.size() > 0) {
-            String ticketMove = "x" + ct.indices.size() + " Tickets";
+            String ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
             value.setText(ticketMove);
         }
         else
@@ -146,7 +153,8 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         {
             ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
             layoutParams.setMarginStart(10);
-            supplimental.setText("Failed ☹");
+            String failure = getString(R.string.failed) + " ☹";
+            supplimental.setText(failure);
             supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
             typeIcon.setImageResource(R.drawable.ic_error);
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),

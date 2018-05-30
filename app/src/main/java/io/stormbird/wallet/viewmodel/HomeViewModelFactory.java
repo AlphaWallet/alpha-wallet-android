@@ -10,6 +10,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.interact.ImportWalletInteract;
+import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HelpRouter;
@@ -43,6 +44,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
     private final HelpRouter helpRouter;
+    private final LocaleRepositoryType localeRepository;
 
     public HomeViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -61,7 +63,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            LocaleRepositoryType localeRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -79,6 +82,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
         this.helpRouter = helpRouter;
+        this.localeRepository = localeRepository;
     }
 
     @NonNull
@@ -101,6 +105,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,
-                helpRouter);
+                helpRouter,
+                localeRepository);
     }
 }

@@ -176,6 +176,7 @@
     <string name="toolbar_header_importing_tickets">Importing tickets</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
+    <string name="failed">Failed</string>
     <string name="total_cost_for_x_tickets">Total cost for %1d %2s:</string>
     <string name="import_ticket">Import Tickets</string>
     <string name="title_import_token">Import Tickets</string>
@@ -281,4 +282,23 @@
     <string name="dialog_title_select_locale">Select Locale:</string>
     <string name="settings_locale_lang">Locale</string>
     <string name="settings_network">Network</string>
+    <string name="ticket_market_purchase">Market Purchase</string>
+    <string name="ticket_redeem">Redeem</string>
+    <string name="ticket_receive_from">Receive From</string>
+    <string name="ticket_transfer_to">Transfer To</string>
+    <string name="ticket_transfer">Transfer</string>
+    <string name="ticket_load_new_tickets">Load New Tickets</string>
+    <string name="ticket_pass_from">Pass From</string>
+    <string name="ticket_pass_to">Pass To</string>
+    <string name="ticket_terminate_contract">Terminate Contract</string>
+    <string name="ticket_contract_constructor">Constructor</string>
+    <string name="ticket_receive_from_magiclink">Receive From Magiclink</string>
+    <string name="ticket_invalid_op">Invalid Operation</string>
+    <string name="ticket_expired_contract">Expired Contract</string>
+    <string name="ticket_unknown_contract">Unknown Contract</string>
+    <string name="ticket_admin_redeem">Admin Redeem</string>
+
+    <string name="action_next">Next</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
 </resources>

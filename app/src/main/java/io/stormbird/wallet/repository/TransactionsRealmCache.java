@@ -29,7 +29,6 @@ import io.realm.RealmResults;
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
 import static io.stormbird.wallet.interact.SetupTokensInteract.INVALID_OPERATION;
-import static io.stormbird.wallet.interact.SetupTokensInteract.UNKNOWN_CONTRACT;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
 
@@ -113,7 +112,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     //replace transaction but don't store invalid operations
                     if (replacement != null)
                     {
-                        if (isInvalidOperation(replacement))
+                        if (isBadTransaction(replacement))
                         {
                             deleteList.add(t.hash);
                         }
@@ -141,7 +140,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 for (Transaction transaction : txMap.values()) {
                     //Log.d(TAG, "Attempting to store: " + transaction.hash);
                     //don't store any transaction that
-                    if (isUnknownContract(transaction) || isInvalidOperation(transaction))
+                    if (isBadTransaction(transaction))
                     {
                         //Log.d(TAG, "No Store");
                         continue;
@@ -175,25 +174,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
-    private boolean isUnknownContract(Transaction transaction)
+    private boolean isBadTransaction(Transaction transaction)
     {
-        if ((transaction.operations.length > 0 && transaction.operations[0].contract instanceof ERC875ContractTransaction)
-            && (transaction.operations[0].contract.name.contains(UNKNOWN_CONTRACT)))
+        if ((transaction.operations.length > 0 && transaction.operations[0].contract instanceof ERC875ContractTransaction))
         {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    private boolean isInvalidOperation(Transaction transaction)
-    {
-        if ((transaction.operations.length > 0 && transaction.operations[0].contract instanceof ERC875ContractTransaction)
-                && (((ERC875ContractTransaction) transaction.operations[0].contract).operation.equals(INVALID_OPERATION)))
-        {
-            return true;
+            return transaction.operations[0].contract.badTransaction;
         }
         else
         {

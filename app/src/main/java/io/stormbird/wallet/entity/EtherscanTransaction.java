@@ -1,6 +1,8 @@
 package io.stormbird.wallet.entity;
 
 
+import io.stormbird.wallet.R;
+
 import static io.stormbird.wallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
 import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
@@ -60,7 +62,7 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             op.from = contractAddress;
             ct.type = 2; // indicate that we need to load the contract
-            ct.operation = RECEIVE_FROM_MAGICLINK;
+            ct.operation = R.string.ticket_receive_from_magiclink;
 
             //fix up the received params to make parsing simple
             from = to;
@@ -80,7 +82,7 @@ public class EtherscanTransaction
             ERC875ContractTransaction ct = new ERC875ContractTransaction();
             o[0] = op;
             op.contract = ct;
-            ct.operation = CONTRACT_CONSTRUCTOR;
+            ct.operation = R.string.ticket_contract_constructor;
             ct.address = contractAddress;
             ct.type = -5; // indicate that we need to load the contract
             isConstructor = true;

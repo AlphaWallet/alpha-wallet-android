@@ -327,4 +327,10 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     {
 
     }
+
+    @Override
+    public void changedLocale()
+    {
+
+    }
 }

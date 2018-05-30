@@ -51,8 +51,6 @@ public class TokenDefinition {
     protected String tokenName = null;
     protected String keyName = null;
     protected int networkId = 1; //default to main net unless otherwise specified
-    private static Locale english = new Locale("en");
-
 
     protected class FieldDefinition {
         public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.

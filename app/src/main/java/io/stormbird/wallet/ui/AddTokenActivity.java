@@ -15,9 +15,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.ErrorEnvelope;
@@ -131,6 +134,26 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                 if (data != null) {
                     String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
 
+                    //on some phones we're not picking up this key. Reason is unknown.
+                    //instead we notice there is always one value in the intent data, this is the address we want
+                    //just look through the values and get that address.
+                    if (barcode == null && data.getExtras() != null)
+                    {
+                        Set<String> keys = data.getExtras().keySet();
+                        for (String s : keys)
+                        {
+                            barcode = data.getStringExtra(s);
+                            if (barcode != null) break;
+                        }
+                    }
+
+                    //if barcode is still null, ensure we don't GPF
+                    if (barcode == null)
+                    {
+                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode);
                     if (extracted_address == null) {
@@ -194,7 +217,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 //        String venue = this.venue.getText().toString();
 //        String date = this.date.getText().toString();
 //        String rawPrice = this.price.getText().toString();
-
 //        double priceDb = 0;
         int decimals = 0;
 

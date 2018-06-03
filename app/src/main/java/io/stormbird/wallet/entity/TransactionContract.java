@@ -3,6 +3,11 @@ package io.stormbird.wallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.math.BigInteger;
+import java.util.List;
+
+import io.stormbird.wallet.R;
+
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
 
 public class TransactionContract implements Parcelable {
@@ -56,5 +61,58 @@ public class TransactionContract implements Parcelable {
         parcel.writeInt(decimals);
         parcel.writeString(symbol);
         parcel.writeInt(badTransaction ? 1 : 0);
+    }
+
+    public boolean checkAddress(String address)
+    {
+        return false; //this style of contract doesn't involve indirect addresses (only ERC875 'trade' and 'passTo' functions).
+    }
+
+    public void interpretTradeData(String walletAddr, Transaction thisTrans)
+    {
+        //do nothing for ERC20
+    }
+
+    public void interpretTransferFrom(String walletAddr, TransactionInput data)
+    {
+
+    }
+
+    public void interpretTransfer(String walletAddr, TransactionInput data)
+    {
+
+    }
+
+    public void setOtherParty(String otherParty)
+    {
+
+    }
+
+    public void setOperation(int operation)
+    {
+        if (operation == R.string.ticket_invalid_op)
+        {
+            badTransaction = true;
+        }
+    }
+
+    public void interpretPassTo(String walletAddr, TransactionInput data)
+    {
+
+    }
+
+    public void setType(int type)
+    {
+
+    }
+
+    public void setIndicies(List<BigInteger> indicies)
+    {
+
+    }
+
+    public String getIndicesString()
+    {
+        return "";
     }
 }

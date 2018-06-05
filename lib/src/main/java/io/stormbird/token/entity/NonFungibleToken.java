@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -52,11 +53,12 @@ public class NonFungibleToken
         attributes = new HashMap<>();
     }
 
-    public String getDate(String format)
+    public String getDate(String format) // what date? expiration? available since? dateTraded?
     {
         long dateUTC = getAttribute("time").value.longValue();
         Date dateFormat = new Date(dateUTC * 1000L);
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(format, Locale.ENGLISH); //TODO: Get locale
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(format, Locale.ENGLISH);
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));//TODO: Get locale
         return dateFormatter.format(dateFormat.getTime());
     }
 

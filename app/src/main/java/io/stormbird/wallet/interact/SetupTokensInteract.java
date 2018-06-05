@@ -4,11 +4,11 @@ package io.stormbird.wallet.interact;
  * Created by James on 16/01/2018.
  */
 
-import android.content.Context;
 import android.util.Log;
 
 import org.web3j.utils.Numeric;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,127 +80,33 @@ public class SetupTokensInteract {
         Transaction newTransaction = thisTrans;
         try
         {
-            TransactionOperation op;
-            TransactionOperation[] newOps;
-            TransactionContract ct;
-            ERC875ContractTransaction ect = null;
-
-            String functionName = "";
-
-            int operation = R.string.ticket_invalid_op;
-
             if (token == null && !unknownContracts.contains(thisTrans.to))
             {
                 unknownContracts.add(thisTrans.to);
             }
 
-            //already has contract info
-            if (thisTrans.isConstructor || thisTrans.operations.length > 0 &&
-                    thisTrans.operations[0].contract instanceof ERC875ContractTransaction)
-            {
-                op = thisTrans.operations[0];
-                ect = (ERC875ContractTransaction) thisTrans.operations[0].contract;
-                ct = ect;
-                operation = ect.operation;
-                newOps = thisTrans.operations;
-                if (data.functionData != null)
-                {
-                    functionName = data.functionData.functionFullName;
-                }
-                if (ect.type == -5)
-                {
-                    ect.type = -2;
-                }
-                if (thisTrans.isConstructor)
-                {
-                    ect.operation = R.string.ticket_contract_constructor;
-                    functionName = CONTRACT_CONSTRUCTOR;
-                }
-            }
-            else if (data != null && data.functionData != null)
-            {
-                if (data.functionData.isERC875() || data.functionData.isConstructor()
-                        || (token != null && token.tokenInfo.isStormbird))
-                {
-                    ect = new ERC875ContractTransaction();
-                    ct = ect;
+            if(thisTrans.operations == null ||
+                    thisTrans.operations.length == 0 || data.functionData == null) return null; //shortcut, avoid extra processing in case something slips through
 
-                    if (data.functionData != null)
-                    {
-                        ect.setIndicies(data.paramValues);
-                    }
-                    ect.operation = operation;
-                    //ect.operationDisplayName = functionName;
-                }
-                else
-                {
-                    ct = new TransactionContract();
-                }
-
-                functionName = data.functionData.functionFullName;
-                op = new TransactionOperation();
-                newOps = new TransactionOperation[1];
-                newOps[0] = op;
-                op.contract = ct;
-            }
-            else
-            {
-                op = new TransactionOperation();
-                ect = new ERC875ContractTransaction();
-                newOps = new TransactionOperation[1];
-                newOps[0] = op;
-                ct = ect;
-                op.contract = ct;
-            }
+            //we should already have generated the structures
+            TransactionOperation[] newOps = thisTrans.operations;
+            TransactionOperation op = thisTrans.operations[0];
+            TransactionContract ct = op.contract;
 
             setupToken(token, ct, thisTrans);
 
-            //we could ecrecover the seller here
-            switch (functionName)
+            switch (data.functionData.functionFullName)
             {
                 case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
-                    ect.operation = R.string.ticket_market_purchase;
-                    //until we can ecrecover from a signauture, we can't show our ticket as sold, but we can conclude it sold elsewhere, so this must be a buy
-                    ect.type = 1; // buy/receive
+                    ct.interpretTradeData(walletAddr, thisTrans);
                     break;
                 case "transferFrom(address,address,uint16[])":
-                    ect.operation = R.string.ticket_redeem;
-                    if (!data.containsAddress(walletAddr))
-                    {
-                        //this must be an admin redeem
-                        ect.operation = R.string.ticket_admin_redeem;
-                    }
-                    //one of our tickets was burned
-                    ect.type = -1; //redeem
+                    ct.interpretTransferFrom(walletAddr, data);
                     break;
                 case "transfer(address,uint16[])":
-                    //this could be transfer to or from
-                    //if addresses contains our address then it must be a recieve
-                    if (data.containsAddress(walletAddr))
-                    {
-                        ect.operation = R.string.ticket_receive_from;
-                        ect.type = 1; //buy/receive
-                        ect.otherParty = thisTrans.from;
-                    }
-                    else
-                    {
-                        ect.operation = R.string.ticket_transfer_to;
-                        ect.type = -1; //sell
-                        ect.otherParty = data.getFirstAddress();
-                    }
+                    ct.interpretTransfer(walletAddr, data);
                     break;
-                case "transfer(address,uint256)":
-                    //ERC20 transfer
-                    if (token != null)
-                    {
-                        ct.decimals = token.tokenInfo.decimals;
-                        ct.symbol = token.tokenInfo.symbol;
-                    }
-                    else
-                    {
-                        ct.decimals = 18;
-                        ct.symbol = "";
-                    }
+                case "transfer(address,uint256)": //ERC20 transfer
                     op.from = thisTrans.from;
                     op.to = data.getFirstAddress();
                     op.transactionId = thisTrans.hash;
@@ -208,23 +114,14 @@ public class SetupTokensInteract {
                     op.value = String.valueOf(data.getFirstValue());
                     break;
                 case "loadNewTickets(bytes32[])":
-                    ect.operation = R.string.ticket_load_new_tickets;
+                    ct.setOperation(R.string.ticket_load_new_tickets);
                     op.from = thisTrans.from;
                     op.to = token != null ? token.getAddress() : "";
                     op.transactionId = thisTrans.hash;
                     op.value = String.valueOf(data.paramValues.size());
                     break;
                 case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
-                    if (data.containsAddress(walletAddr))
-                    {
-                        ect.operation = R.string.ticket_pass_from;
-                        ect.type = 1;
-                    }
-                    else
-                    {
-                        ect.operation = R.string.ticket_pass_to;
-                        ect.type = -1;
-                    }
+                    ct.interpretPassTo(walletAddr, data);
                     op.from = thisTrans.from;
                     op.to = data.getFirstAddress();
                     op.transactionId = thisTrans.hash;
@@ -232,37 +129,23 @@ public class SetupTokensInteract {
                     op.value = String.valueOf(data.getFirstValue());
                     break;
                 case "endContract()":
-                    ect.operation = R.string.ticket_terminate_contract;
+                    ct.setOperation(R.string.ticket_terminate_contract);
                     ct.name = thisTrans.to;
-                    ect.type = -2;
+                    ct.setType(-2);
                     break;
                 case CONTRACT_CONSTRUCTOR:
                     ct.name = thisTrans.to;
                     fillContractInformation(thisTrans, ct);
                     break;
                 case RECEIVE_FROM_MAGICLINK:
-                    ect.operation = R.string.ticket_receive_from_magiclink;
                     //ect.operation = RECEIVE_FROM_MAGICLINK;
                     op.value = String.valueOf(data.paramValues.size());
                     break;
                 case INVALID_OPERATION:
-                    if (ect != null)
-                    {
-                        ect.operation = R.string.ticket_invalid_op;
-                        //ect.operation = INVALID_OPERATION;
-                        ect.badTransaction = true;
-                    }
+                    ct.setOperation(R.string.ticket_invalid_op);
                     break;
                 default:
-                    if (ect != null)
-                    {
-                        ect.operation = R.string.ticket_invalid_op;
-                        ect.badTransaction = true;
-                    }
-                    else
-                    {
-                        ct.badTransaction = true;
-                    }
+                    ct.setOperation(R.string.ticket_invalid_op);
                     break;
             }
 
@@ -359,6 +242,7 @@ public class SetupTokensInteract {
         String walletAddr = Numeric.cleanHexPrefix(wallet.address);
         if (data.containsAddress(wallet.address)) involved = true;
         if (trans.from.contains(walletAddr)) involved = true;
+        if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(wallet.address)) involved = true;
         return involved;
     }
 
@@ -405,7 +289,10 @@ public class SetupTokensInteract {
 
                     if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
                         Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data);
-                        processedTransactions.add(newTx);
+                        if (newTx != null)
+                        {
+                            processedTransactions.add(newTx);
+                        }
                     }
                 }
                 //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
@@ -478,16 +365,19 @@ public class SetupTokensInteract {
         Log.d(TAG, "Re Processing " + token.getFullName());
         return Observable.fromCallable(() -> {
             List<Transaction> processedTxList = new ArrayList<>();
-            for (Transaction t : txMap.values())
+            if (token.getFullName() != null)
             {
-                if (t.to != null && t.to.equals(token.getAddress()))
+                for (Transaction t : txMap.values())
                 {
-                    TransactionInput data = transactionDecoder.decodeInput(t.input);
-                    if (data != null && data.functionData != null)
+                    if (t.to != null && t.to.equals(token.getAddress()))
                     {
-                        t = parseTransaction(token, t, data);
-                        processedTxList.add(t);
-                        txMap.remove(t.hash);
+                        TransactionInput data = transactionDecoder.decodeInput(t.input);
+                        if (data != null && data.functionData != null)
+                        {
+                            t = parseTransaction(token, t, data);
+                            processedTxList.add(t);
+                            txMap.remove(t.hash);
+                        }
                     }
                 }
             }

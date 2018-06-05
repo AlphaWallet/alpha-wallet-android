@@ -133,21 +133,45 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         type.setText(getString(ct.operation));
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
+        String valueStr;
+        String ticketMove;
+        String supplimentalTxt;
 
-        if (ct.operation == R.string.ticket_receive_from_magiclink)
+        switch (ct.operation)
         {
-            String valueStr = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-            value.setText(valueStr);
-            valueAmount = BigInteger.ZERO;
+            case R.string.ticket_magiclink_transfer: //transfered out of our wallet via magic link (0 value)
+            case R.string.ticket_magiclink_pickup: //received ticket from a magic link
+                valueAmount = BigInteger.ZERO;
+                ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
+                supplimentalTxt = "";
+                break;
+            case R.string.ticket_magiclink_sale: //we received ether from magiclink sale
+                ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
+                supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                break;
+            case R.string.ticket_magiclink_purchase: //we purchased a ticket from a magiclink
+                ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
+                supplimentalTxt = "-" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                break;
+            case R.string.ticket_receive_from_magiclink:
+                supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
+                valueAmount = BigInteger.ZERO;
+                break;
+            default:
+                if (ct.indices != null && ct.indices.size() > 0)
+                {
+                    ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
+                    supplimentalTxt = "";
+                }
+                else
+                {
+                    ticketMove = "";
+                    supplimentalTxt = "";
+                }
+                break;
         }
-        else if (ct.indices != null && ct.indices.size() > 0) {
-            String ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
-            value.setText(ticketMove);
-        }
-        else
-        {
-            value.setText("");
-        }
+
 
         if (!trans.error.equals("0"))
         {
@@ -160,18 +184,14 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
                                     PorterDuff.Mode.SRC_ATOP);
         }
-        else if (valueAmount.compareTo(BigInteger.ZERO) > 0)
+        else
         {
             ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
             layoutParams.setMarginStart(30);
-            String valueStr = (ct.type == 1 ? "-" : "+") + getScaledValue(transaction.value, 18) + " " + ETH_SYMBOL;
-            supplimental.setText(valueStr);
+            supplimental.setText(supplimentalTxt);
             supplimental.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            supplimental.setText(""); //looks bad
-            supplimental.setVisibility(View.GONE);
+            value.setText(ticketMove);
+
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
                                     PorterDuff.Mode.SRC_ATOP);
         }
@@ -185,10 +205,6 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             String valueStr,
             long decimals,
             long timestamp) {
-        if (defaultAddress == null || from == null)
-        {
-             System.out.println("yo");
-        }
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
         if (error == null || error.length() == 0) {

@@ -1,6 +1,7 @@
 package io.stormbird.wallet.entity;
 
 import org.web3j.crypto.Hash;
+import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
@@ -294,6 +295,39 @@ public class TransactionDecoder
         }
 
         return data;
+    }
+
+    public Sign.SignatureData getSignatureData(TransactionInput data)
+    {
+        Sign.SignatureData sigData = null;
+        if (data.functionData.hasSig && data.sigData != null && data.sigData.size() == 3)
+        {
+            BigInteger vBi = new BigInteger(data.sigData.get(0), 16);
+            BigInteger rBi = new BigInteger(data.sigData.get(1), 16);
+            BigInteger sBi = new BigInteger(data.sigData.get(2), 16);
+            byte v = (byte) vBi.intValue();
+            byte[] r = Numeric.toBytesPadded(rBi, 32);
+            byte[] s = Numeric.toBytesPadded(sBi, 32);
+
+            sigData = new Sign.SignatureData(v, r, s);
+        }
+
+        return sigData;
+    }
+
+    public int[] getIndices(TransactionInput data)
+    {
+        int[] indices = null;
+        if (data != null && data.paramValues != null)
+        {
+            indices = new int[data.paramValues.size()];
+            for (int i = 0; i < data.paramValues.size() ; i++)
+            {
+                indices[i] = data.paramValues.get(i).intValue();
+            }
+        }
+
+        return indices;
     }
 
     private String buildMethodId(String methodSignature) {

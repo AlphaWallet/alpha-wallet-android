@@ -67,6 +67,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private int transactionCount;
     private long lastBlock = 0;
     private boolean firstRun = false;
+    private boolean refreshCache = false;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -103,7 +104,7 @@ public class TransactionsViewModel extends BaseViewModel {
         }
     }
 
-    public void abortAndRestart()
+    public void abortAndRestart(boolean refreshCache)
     {
         firstRun = false;
         handler.removeCallbacks(startFetchTransactionsTask);
@@ -117,6 +118,7 @@ public class TransactionsViewModel extends BaseViewModel {
         txArray = null;
         txMap.clear();
         setupTokensInteract.clearAll();
+        this.refreshCache = refreshCache;
 
         prepare();
     }
@@ -209,6 +211,14 @@ public class TransactionsViewModel extends BaseViewModel {
             txMap.put(tx.hash, tx);
             if (Long.valueOf(tx.blockNumber) > lastBlock) lastBlock = Long.valueOf(tx.blockNumber);
         }
+
+        if (refreshCache)
+        {
+            lastBlock = 0;
+            txArray = new Transaction[0];
+            txMap.clear();
+            refreshCache = false;
+        }
     }
 
     /**
@@ -277,7 +287,7 @@ public class TransactionsViewModel extends BaseViewModel {
         txArray = txMap.values().toArray(new Transaction[txMap.size()]);
         transactionCount += txArray.length;
 
-        //Fetch all stored tokens, but no eth
+        //Fetch all stored tokens, but no ethd
         //TODO: after the map addTokenToChecklist stage we should be using a reduce instead of filtering in the fetch function
         fetchTransactionDisposable = fetchTokensInteract
                 .fetchSequentialNoEth(wallet.getValue())
@@ -344,22 +354,16 @@ public class TransactionsViewModel extends BaseViewModel {
 
     private void completeCycle(Transaction[] transactions)
     {
-        checkInternalTx();
         progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
         fetchTransactionDisposable = null;
-        checkIfRegularUpdateNeeded();
-    }
-
-    private void checkInternalTx()
-    {
-        if (feemasterUrl != null)
+        if (firstRun)
         {
-            disposable = fetchTransactionsInteract.fetchInternalTransactions(wallet.getValue(), feemasterUrl)
-                    .flatMap(transactions -> setupTokensInteract.processRemainingTransactions(transactions, tokenMap))
-                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::updateDisplay, this::onError);
+            firstRun = false;
+            clearAdapter.postValue(true);
+        }
+        else
+        {
+            checkIfRegularUpdateNeeded();
         }
     }
 
@@ -452,16 +456,15 @@ public class TransactionsViewModel extends BaseViewModel {
     //Called from the activity when it comes into view,
     //start updating transactions
     public void startTransactionRefresh() {
-        firstRun = false;
         isVisible = true;
         if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
         {
             checkIfRegularUpdateNeeded();
         }
-        if (txArray != null)
+        /*if (txArray != null)
         {
             this.transactions.postValue(txArray);
-        }
+        }*/
     }
 
     public void setVisibility(boolean visibility) {
@@ -473,4 +476,9 @@ public class TransactionsViewModel extends BaseViewModel {
         xmlContractAddress = address;
     }
     public void setFeemasterURL(String address) { feemasterUrl = address; };
+
+    public void clearTransactionEntries()
+    {
+
+    }
 }

@@ -63,4 +63,16 @@ public class TransactionOperation implements Parcelable {
         parcel.writeInt(contract.contractType());
         parcel.writeParcelable(contract, flags);
     }
+
+    public boolean walletInvolvedWithTransaction(String address)
+    {
+        if (contract != null)
+        {
+            return contract.checkAddress(address);
+        }
+        else
+        {
+            return false;
+        }
+    }
 }

@@ -248,7 +248,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void resetTokens()
     {
         //first abort the current operation
-        viewModel.abortAndRestart();
+        viewModel.abortAndRestart(true);
         adapter.clear();
     }
 
@@ -258,8 +258,19 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     }
 
+    @Override
+    public void changedLocale()
+    {
+        //need to refresh the transaction view
+        adapter.clear();
+        list.setAdapter(adapter);
+        viewModel.abortAndRestart(true);
+    }
+
     private void clearAdapter(Boolean aBoolean)
     {
         adapter.clear();
+        list.setAdapter(adapter);
+        viewModel.abortAndRestart(false);
     }
 }

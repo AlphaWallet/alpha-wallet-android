@@ -1,6 +1,15 @@
 package io.stormbird.wallet.entity;
 
 
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
+
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.R;
+
 import static io.stormbird.wallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
 import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
@@ -34,6 +43,9 @@ public class EtherscanTransaction
     int confirmations;
     public boolean internal = false;
 
+    private static TransactionDecoder decoder = null;
+    private static ParseMagicLink parser = null;
+
     public Transaction createTransaction()
     {
         boolean isConstructor = false;
@@ -60,34 +72,92 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             op.from = contractAddress;
             ct.type = 2; // indicate that we need to load the contract
-            ct.operation = RECEIVE_FROM_MAGICLINK;
+            ct.operation = R.string.ticket_receive_from_magiclink;
 
             //fix up the received params to make parsing simple
             from = to;
             to = contractAddress;
         }
-
-        //TODO: Do full interpretation here, to avoid needing to reallocate.
-        //Then in the transaction parsing we only need to fill in token information.
-        //Further work would make a master Token list in 'HomeViewModel' and the transaction holder just populates the name
-        //from there. That way we don't need to hold much information and we don't need to re-parse after this
         else if (contractAddress.length() > 0)
         {
             to = contractAddress;
             //add a constructor here
-            o = new TransactionOperation[1];
-            TransactionOperation op = new TransactionOperation();
-            ERC875ContractTransaction ct = new ERC875ContractTransaction();
-            o[0] = op;
-            op.contract = ct;
-            ct.operation = CONTRACT_CONSTRUCTOR;
+            o = generateERC875Op();
+            TransactionContract ct = o[0].contract;
+            ct.setOperation(R.string.ticket_contract_constructor);
             ct.address = contractAddress;
-            ct.type = -5; // indicate that we need to load the contract
+            ct.setType(-5);// indicate that we need to load the contract
             isConstructor = true;
         }
         else
         {
+            //Now perform as complete processing as we are able to here. This saves re-allocating and makes code far less brittle.
             o = new TransactionOperation[0];
+
+            if (isError.equals("0") && input != null && input.length() > 10)
+            {
+                TransactionOperation op;
+                TransactionContract ct;
+
+                if (decoder == null) decoder = new TransactionDecoder();
+                if (parser == null) parser = new ParseMagicLink();
+                TransactionInput f = decoder.decodeInput(input);
+                //is this a trade?
+                if (f.functionData != null && f.functionData.isERC875())
+                {
+                    //recover recipient
+                    //no need for passTo: address is embedded in the tx Input.
+                    //may be desirable for iOS though.
+                    switch (f.functionData.functionFullName)
+                    {
+                        case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
+                            o = processTrade(f);
+                            break;
+                        case "transferFrom(address,address,uint16[])":
+                            o = generateERC875Op();
+                            break;
+                        case "transfer(address,uint16[])":
+                            o = generateERC875Op();
+                            o[0].contract.setOtherParty(from);
+                            break;
+                        case "transfer(address,uint256)":
+                            o = generateERC20Op();
+                            op = o[0];
+                            op.from = from;
+                            op.to = f.getFirstAddress();
+                            op.transactionId = hash;
+                            op.value = String.valueOf(f.getFirstValue());
+                            break;
+                        case "loadNewTickets(bytes32[])":
+                            o = generateERC875Op();
+                            op = o[0];
+                            op.from = from;
+                            op.transactionId = hash;
+                            op.value = String.valueOf(f.paramValues.size());
+                            break;
+                        case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
+                            o = processPassTo(f);
+                            op = o[0];
+                            op.from = from;
+                            op.to = f.getFirstAddress();
+                            op.transactionId = hash;
+                            //value in what?
+                            op.value = String.valueOf(f.getFirstValue());
+                            //can we ecrecover?
+                            break;
+                        case "endContract()":
+                            o = generateERC875Op();
+                            op = o[0];
+                            ct = op.contract;
+                            ct.setOperation(R.string.ticket_terminate_contract);
+                            ct.name = to;
+                            ct.setType(-2);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
 
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
@@ -96,5 +166,70 @@ public class EtherscanTransaction
         tx.isConstructor = isConstructor;
 
         return tx;
+    }
+
+    private TransactionOperation[] generateERC20Op()
+    {
+        TransactionOperation[] o = new TransactionOperation[1];
+        TransactionOperation op = new TransactionOperation();
+        TransactionContract ct = new TransactionContract();
+        o[0] = op;
+        op.contract = ct;
+        return o;
+    }
+
+    private TransactionOperation[] generateERC875Op()
+    {
+        TransactionOperation[] o = new TransactionOperation[1];
+        TransactionOperation op = new TransactionOperation();
+        ERC875ContractTransaction ct = new ERC875ContractTransaction();
+        o[0] = op;
+        op.contract = ct;
+        return o;
+    }
+
+    private TransactionOperation[] processPassTo(TransactionInput f)
+    {
+        TransactionOperation[] o = processTrade(f);
+        if (o.length > 0)
+        {
+            o[0].contract.totalSupply = f.getFirstAddress(); //store destination address for this passTo. We don't use totalSupply for anything else in this case
+        }
+
+        return o;
+    }
+
+    private TransactionOperation[] processTrade(TransactionInput f)
+    {
+        TransactionOperation[] o;
+        try
+        {
+            Sign.SignatureData sig = decoder.getSignatureData(f);
+            //ecrecover the recipient of the ether
+            int[] ticketIndexArray = decoder.getIndices(f);
+            String expiryStr = f.miscData.get(0);
+            long expiry = Long.valueOf(expiryStr, 16);
+            BigInteger priceWei = new BigInteger(value);
+            contractAddress = to;
+            byte[] tradeBytes = parser.getTradeBytes(ticketIndexArray, contractAddress, priceWei, expiry);
+            //attempt ecrecover
+            BigInteger key = Sign.signedMessageToKey(tradeBytes, sig);
+
+            o = generateERC875Op();
+            TransactionOperation op = o[0];
+            TransactionContract ct = op.contract;
+
+            ct.setOtherParty("0x" + Keys.getAddress(key));
+            ct.address = contractAddress;
+            ct.setIndicies(f.paramValues);
+            ct.name = contractAddress;
+        }
+        catch (SignatureException sx)
+        {
+            o = new TransactionOperation[0];
+            sx.printStackTrace();
+        }
+
+        return o;
     }
 }

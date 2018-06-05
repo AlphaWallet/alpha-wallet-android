@@ -4,6 +4,7 @@ import android.text.format.DateUtils;
 
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionContract;
+import io.stormbird.wallet.ui.widget.holder.TransactionHolder;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -50,7 +51,8 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
                 Transaction oldTx = value;
                 Transaction newTx = (Transaction) newItem.value;
 
-                return oldTx.contentHash.equals(newTx.contentHash);
+                //return oldTx.contentHash.equals(newTx.contentHash);
+                return oldTx.hash.equals(newTx.hash);
             }
             else
             {
@@ -64,8 +66,26 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
     }
 
     @Override
-    public boolean areItemsTheSame(SortedItem other) {
-        return viewType == other.viewType;
+    public boolean areItemsTheSame(SortedItem other)
+    {
+        try
+        {
+            if (viewType == other.viewType && viewType == TransactionHolder.VIEW_TYPE)
+            {
+                Transaction oldTx = value;
+                Transaction newTx = (Transaction) other.value;
+
+                return oldTx.hash.equals(newTx.hash);
+            }
+            else
+            {
+                return viewType == other.viewType;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     @Override

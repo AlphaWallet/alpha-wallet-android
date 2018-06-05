@@ -67,15 +67,15 @@
     <string name="set_a_price">设置一个价格:</string>
     <string name="learn_more_about_ethereum">更多关于以太坊的知识</string>
     <string name="price_per_ticket">门票单价</string>
-    <string name="action_marketplaceSale">Marketplace</string>
-    <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
-    <string name="set_price_subtext_abr_magic">Set Ethereum price for magic link:</string>
-    <string name="transfer_tickets">Transfer Tickets</string>
-    <string name="link_valid_until">The link will be valid until:</string>
-    <string name="transfer_method">Transfer Method:</string>
-    <string name="generate_pick_up_link">Generate a pick-up link</string>
-    <string name="transfer_now">Transfer Now</string>
-    <string name="to">to</string>
+    <string name="action_marketplaceSale">放入市场</string>
+    <string name="set_price_subtext_abr">设置以太币价格(ETH)</string>
+    <string name="set_price_subtext_abr_magic">设置MagicLink的以太币ETH价格:</string>
+    <string name="transfer_tickets">转让门票</string>
+    <string name="link_valid_until">MagicLink有效期至:</string>
+    <string name="transfer_method">转让方式:</string>
+    <string name="generate_pick_up_link">通过MagicLink导出门票</string>
+    <string name="transfer_now">现在直接转让门票</string>
+    <string name="to">至</string>
 
     <string-array name="filter_date">
         <item>Most Recent</item>
@@ -176,6 +176,7 @@
     <string name="toolbar_header_importing_tickets">导入门票</string>
     <string name="ticket">门票</string>
     <string name="tickets">门票</string>
+    <string name="failed">失效</string>
     <string name="total_cost_for_x_tickets">成本价t for %1d %2s:</string>
     <string name="import_ticket">导入门票</string>
     <string name="title_import_token">导入门票</string>
@@ -242,6 +243,8 @@
     <string name="label_important">重要</string>
     <string name="eth_00">0.00 ETH</string>
     <string name="toolbar_title_my_wallets">我的钱包</string>
+    <string name="sent">发送了</string>
+    <string name="received">收到了</string>
 <string name="facebook">Facebook</string>
 <string name="twitter">Twitter</string>
 <string name="erc20">ERC 20</string>
@@ -272,4 +275,23 @@
 <string name="hint_contract_decimals">小数点</string>
 <string name="title_add_token">添加订制代币</string>
 <string name="suggestion_private_key">私人钥匙码至少64字数。</string>
+    <string name="ticket_market_purchase">买入</string>
+    <string name="ticket_redeem">兑换</string>
+    <string name="ticket_receive_from">收到</string>
+    <string name="ticket_transfer_to">转出</string>
+    <string name="ticket_transfer">转让</string>
+    <string name="ticket_load_new_tickets">填入新票</string>
+    <string name="ticket_pass_from">MagicLink导入</string>
+    <string name="ticket_pass_to">MagicLink导出</string>
+    <string name="ticket_terminate_contract">终止合约</string>
+    <string name="ticket_contract_constructor">合约创建人</string>
+    <string name="ticket_receive_from_magiclink">Magiclink买入</string>
+    <string name="ticket_invalid_op">无效操作</string>
+    <string name="ticket_expired_contract">合约已过期</string>
+    <string name="ticket_unknown_contract">未知合约</string>
+    <string name="ticket_admin_redeem">管理员兑换</string>
+
+    <string name="action_next">下一步</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_save">保存</string>
 </resources>

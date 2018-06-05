@@ -5,6 +5,9 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.LocaleRepository;
+import io.stormbird.wallet.repository.LocaleRepositoryType;
+import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -45,7 +48,8 @@ class HomeModule {
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
-            HelpRouter helpRouter) {
+            HelpRouter helpRouter,
+            LocaleRepositoryType localeRepository) {
         return new HomeViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -63,7 +67,8 @@ class HomeModule {
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,
-                helpRouter);
+                helpRouter,
+                localeRepository);
     }
 
     @Provides
@@ -140,4 +145,9 @@ class HomeModule {
 
     @Provides
     HelpRouter providesHelpRouter() { return new HelpRouter(); }
+
+    @Provides
+    LocaleRepositoryType provideLocaleRepository(PreferenceRepositoryType preferenceRepository) {
+        return new LocaleRepository(preferenceRepository);
+    }
 }

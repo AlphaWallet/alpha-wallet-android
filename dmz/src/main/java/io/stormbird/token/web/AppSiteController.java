@@ -69,7 +69,6 @@ public class AppSiteController {
             return "error";
         }
         parser.getOwnerKey(data);
-        model.addAttribute("tokenCount", data.ticketCount);
         model.addAttribute("tokenName", definitionParser.getTokenName());
         model.addAttribute("link", data);
         // model.addAttribute("linkExp");

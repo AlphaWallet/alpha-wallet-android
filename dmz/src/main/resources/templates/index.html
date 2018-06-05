@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
   <head>
-    <title th:text="${tokenCount} + ' ' + ${tokenName} + ' ' + ${tokenAvailable}"/>
+    <title th:text="${link.ticketCount} + ' ' + ${tokenName} + ' ' + ${tokenAvailable}"/>
     <link rel="stylesheet" th:href="@{css/main.css}"/>
     <style type="text/css"> /* @media here instead of css file  */
         @media only screen and (max-width: 600px)  {
@@ -34,7 +34,7 @@
   </head>
   <body th:attr="class=${tokenAvailable}">
     <img id="mobile_app_preview" src="images/app_preview.png"/>
-    <h1><strong th:text="${tokenCount}"/>
+    <h1><strong th:text="${link.ticketCount}"/>
         <em th:text="${contractName}"/>
         <strong th:text="${tokenName}"/>
     </h1>

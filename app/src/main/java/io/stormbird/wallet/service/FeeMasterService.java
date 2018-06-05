@@ -52,18 +52,18 @@ public class FeeMasterService
     }
 
     //first generate and then sign the message
-    public Observable<Integer> generateAndSendFeemasterTransaction(String url, Wallet wallet, String toAddress, Ticket ticket, long expiry, String indices)
+    public Observable<Integer> generateAndSendFeemasterTransaction(String url, Wallet wallet, int networkId, String toAddress, Ticket ticket, long expiry, String indices)
     {
         return generateTicketArray(indices, ticket)
                 .flatMap(indicesArray -> getTradeSig(wallet, indicesArray, ticket.getAddress(), BigInteger.ZERO, expiry))
-                .flatMap(tradeSig -> sendFeemasterTransaction(url, toAddress, expiry, indices, tradeSig))
+                .flatMap(tradeSig -> sendFeemasterTransaction(url, networkId, toAddress, expiry, indices, tradeSig))
                 .toObservable();
     }
 
-    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, MagicLinkData order)
+    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, int networkId, MagicLinkData order)
     {
         return generateTicketString(order.tickets)
-                .flatMap(ticketStr -> sendFeemasterTransaction(url, wallet.address, order.expiry, ticketStr, order.signature))
+                .flatMap(ticketStr -> sendFeemasterTransaction(url, networkId, wallet.address, order.expiry, ticketStr, order.signature))
                 .toObservable();
     }
 
@@ -100,7 +100,7 @@ public class FeeMasterService
         });
     }
 
-    private Single<Integer> sendFeemasterTransaction(String url, String toAddress, long expiry, String indices, byte[] tradeSig) {
+    private Single<Integer> sendFeemasterTransaction(String url, int networkId, String toAddress, long expiry, String indices, byte[] tradeSig) {
         return Single.fromCallable(() -> {
             Sign.SignatureData sigData = sigFromByteArray(tradeSig);
             Integer result = 500; //fail by default
@@ -113,6 +113,7 @@ public class FeeMasterService
                 args.put("address", toAddress);
                 args.put("indices", indices);
                 args.put("expiry", String.valueOf(expiry));
+                args.put("networkId", String.valueOf(networkId));
                 args.put("r", Numeric.toHexString(sigData.getR()));
                 args.put("s", Numeric.toHexString(sigData.getS()));
                 args.put("v", Integer.toHexString(sigData.getV()));

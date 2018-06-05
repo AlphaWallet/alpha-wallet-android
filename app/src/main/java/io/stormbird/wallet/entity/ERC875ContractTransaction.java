@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.stormbird.wallet.R;
+
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 
 /**
@@ -21,7 +23,6 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     public String otherParty;
     public List<Integer> indices;
     public int type;
-    //public String operationDisplayName;
 
     @Override
     public int contractType()
@@ -29,7 +30,8 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         return ERC875_CONTRACT_TYPE;
     }
 
-    public ERC875ContractTransaction() {
+    public ERC875ContractTransaction()
+    {
         address = "";
         name = "";
         balance = "";
@@ -38,15 +40,6 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         otherParty = "";
         //operationDisplayName = "";
         indices = null;
-    }
-
-    public void setIndicies(List<BigInteger> indices)
-    {
-        this.indices = new ArrayList<>();
-        for (BigInteger index : indices)
-        {
-            this.indices.add(index.intValue());
-        }
     }
 
     public void setIndicesFromString(String indicesStr)
@@ -76,6 +69,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         symbol = in.readString();
         operation = in.readInt();
         type = in.readInt();
+        otherParty = in.readString();
         //operationDisplayName = in.readString();
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         indices = new ArrayList<>();
@@ -86,7 +80,8 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         }
     }
 
-    public static final Creator<ERC875ContractTransaction> CREATOR = new Creator<ERC875ContractTransaction>() {
+    public static final Creator<ERC875ContractTransaction> CREATOR = new Creator<ERC875ContractTransaction>()
+    {
         @Override
         public ERC875ContractTransaction createFromParcel(Parcel in) {
             return new ERC875ContractTransaction(in);
@@ -104,19 +99,23 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(Parcel parcel, int i)
+    {
         parcel.writeString(address);
         parcel.writeString(name);
         parcel.writeString(balance);
         parcel.writeString(symbol);
         parcel.writeInt(operation);
         parcel.writeInt(type);
+        parcel.writeString(otherParty);
         //parcel.writeString(operationDisplayName);
-        if (indices != null) {
+        if (indices != null)
+        {
             parcel.writeArray(indices.toArray());
         }
     }
 
+    @Override
     public String getIndicesString()
     {
         boolean first = true;
@@ -136,5 +135,125 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public boolean checkAddress(String address)
+    {
+        return otherParty != null && otherParty.equals(address);
+    }
+
+    @Override
+    public void interpretTradeData(String walletAddr, Transaction thisTrans)
+    {
+        BigInteger priceWei = new BigInteger(thisTrans.value);
+        if (priceWei.equals(BigInteger.ZERO))
+        {
+            if (otherParty.equals(walletAddr))
+            {
+                //transfered out of our wallet via magic link
+                operation = R.string.ticket_magiclink_transfer;
+                type = -1;
+            }
+            else
+            {
+                //received ticket from a magic link
+                operation = R.string.ticket_magiclink_pickup;
+                type = 1;
+            }
+        }
+        else
+        {
+            if (otherParty.equals(walletAddr))
+            {
+                //we received ether from magiclink sale
+                operation = R.string.ticket_magiclink_sale;
+                type = -1;
+            }
+            else
+            {
+                //we purchased a ticket from a magiclink
+                operation = R.string.ticket_magiclink_purchase;
+                type = 1;
+            }
+        }
+    }
+
+    @Override
+    public void interpretTransferFrom(String walletAddr, TransactionInput data)
+    {
+        operation = R.string.ticket_redeem;
+        if (!data.containsAddress(walletAddr))
+        {
+            //this must be an admin redeem
+            operation = R.string.ticket_admin_redeem;
+        }
+        //one of our tickets was burned
+        type = -1; //redeem
+    }
+
+    @Override
+    public void interpretTransfer(String walletAddr, TransactionInput data)
+    {
+        //this could be transfer to or from
+        //if addresses contains our address then it must be a recieve
+        if (data.containsAddress(walletAddr))
+        {
+            operation = R.string.ticket_receive_from;
+            type = 1; //buy/receive
+        }
+        else
+        {
+            operation = R.string.ticket_transfer_to;
+            type = -1; //sell
+            otherParty = data.getFirstAddress();
+        }
+    }
+
+    @Override
+    public void setOtherParty(String otherParty)
+    {
+        this.otherParty = otherParty;
+    }
+
+    @Override
+    public void setOperation(int operation)
+    {
+        super.setOperation(operation);
+        this.operation = operation;
+    }
+
+    @Override
+    public void setType(int type)
+    {
+        this.type = type;
+    }
+
+    @Override
+    public void interpretPassTo(String walletAddr, TransactionInput data)
+    {
+        if (data.containsAddress(walletAddr))
+        {
+            //we received a ticket from magiclink with transfer paid by server
+            operation = R.string.ticket_pass_from;
+            type = 1;
+        }
+        else
+        {
+            //we had a ticket transferred out of our wallet paid for by server.
+            //This will not show up unless we ecrecover the address.
+            operation = R.string.ticket_pass_to;
+            type = -1;
+        }
+    }
+
+    @Override
+    public void setIndicies(List<BigInteger> indices)
+    {
+        this.indices = new ArrayList<>();
+        for (BigInteger index : indices)
+        {
+            this.indices.add(index.intValue());
+        }
     }
 }

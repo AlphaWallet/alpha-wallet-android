@@ -6,7 +6,6 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.util.KS;
@@ -55,7 +54,7 @@ public class TrustPasswordStore implements PasswordStore {
                 try {
                     return new String(KS.get(context, wallet.address));
                 } catch (Exception ex) {
-                    Crashlytics.logException(ex);
+                    //Crashlytics.logException(ex);
                     throw new ServiceErrorException(
                             ServiceErrorException.KEY_STORE_ERROR,
                             "Failed to get the password from the store.");
@@ -64,7 +63,7 @@ public class TrustPasswordStore implements PasswordStore {
                 try {
                     return PasswordManager.getPassword(wallet.address, context);
                 } catch (Exception ex) {
-                    Crashlytics.logException(ex);
+                    //Crashlytics.logException(ex);
                     throw new ServiceErrorException(
                             ServiceErrorException.KEY_STORE_ERROR,
                             "Failed to get the password from the password manager.");

@@ -40,4 +40,33 @@ public class QRScanningActivity extends BaseActivity
             ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        boolean handled = false;
+
+        if (requestCode == RC_HANDLE_CAMERA_PERM)
+        {
+            for (int i = 0; i < permissions.length; i++) {
+                String permission = permissions[i];
+                int grantResult = grantResults[i];
+
+                if (permission.equals(Manifest.permission.CAMERA))
+                {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED)
+                    {
+                        setContentView(R.layout.activity_full_screen_scanner_fragment);
+                        handled = true;
+                    }
+                }
+            }
+        }
+
+        if (!handled)
+        {
+            finish();
+        }
+    }
 }

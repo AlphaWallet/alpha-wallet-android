@@ -141,6 +141,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private void onNetwork(NetworkInfo networkInfo)
     {
+        network.setValue(networkInfo);
         network.postValue(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
@@ -347,7 +348,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             initParser();
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
-            disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), order)
+            disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), network.getValue().chainId, order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::processFeemasterResult, this::onError);
@@ -368,6 +369,9 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             switch (result)
             {
+                case 501:
+                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Duplicate transaction passed."));
+                    break;
                 case 401:
                     error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
                     break;
@@ -408,7 +412,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     {
         if (importToken != null)
         {
-            addTokenInteract.add(importToken.tokenInfo, wallet().getValue())
+            disposable = addTokenInteract.add(importToken.tokenInfo, wallet().getValue())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::finishedImport, this::onError);
         }

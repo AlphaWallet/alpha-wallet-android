@@ -8,6 +8,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
 import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
@@ -33,9 +34,10 @@ public class AssetDisplayModule {
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellTicketRouter sellTicketRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            MyAddressRouter myAddressRouter) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter);
     }
 
     @Provides
@@ -83,5 +85,10 @@ public class AssetDisplayModule {
     @Provides
     HomeRouter provideHomeRouter() {
         return new HomeRouter();
+    }
+
+    @Provides
+    MyAddressRouter provideMyAddressRouter() {
+        return new MyAddressRouter();
     }
 }

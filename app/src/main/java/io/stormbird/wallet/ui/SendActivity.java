@@ -66,6 +66,7 @@ public class SendActivity extends BaseActivity {
     private String symbol;
     private Wallet wallet;
     private Token token;
+    private String contractAddress;
 
     RelativeLayout ethDetailLayout;
     Button startTransferButton;
@@ -98,7 +99,7 @@ public class SendActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
 
-        myAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS); //contract address
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
@@ -106,6 +107,8 @@ public class SendActivity extends BaseActivity {
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+
+        myAddress = wallet.address;
 
         setupTokenContent();
 
@@ -218,14 +221,15 @@ public class SendActivity extends BaseActivity {
     }
 
     private void onBack() {
-        if (ethDetailLayout.getVisibility() == View.VISIBLE) {
+        if (ethDetailLayout.getVisibility() == View.VISIBLE)
+        {
             finish();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_info, menu);
+        getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -240,6 +244,9 @@ public class SendActivity extends BaseActivity {
                 new EthereumInfoRouter().open(this);
                 break;
             }
+            case R.id.action_qr:
+                viewModel.showContractInfo(this, contractAddress);
+                break;
         }
         return false;
     }

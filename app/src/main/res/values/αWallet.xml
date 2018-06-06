@@ -305,4 +305,6 @@
     <string name="action_next">Next</string>
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
+    <string name="action_contract_info">Contract Info</string>
+    <string name="contract_address">Contract Address</string>
 </resources>

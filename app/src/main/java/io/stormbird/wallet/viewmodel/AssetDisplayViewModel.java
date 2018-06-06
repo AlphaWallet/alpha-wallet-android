@@ -15,6 +15,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
 import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
@@ -27,6 +28,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.wallet.ui.AssetDisplayActivity;
 
 /**
  * Created by James on 22/01/2018.
@@ -42,6 +44,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SellTicketRouter sellTicketRouter;
+    private final MyAddressRouter myAddressRouter;
     
     private final HomeRouter homeRouter;
     private Token refreshToken;
@@ -62,7 +65,8 @@ public class AssetDisplayViewModel extends BaseViewModel {
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellTicketRouter sellTicketRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            MyAddressRouter myAddressRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -71,6 +75,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
         this.transferTicketRouter = transferTicketRouter;
         this.sellTicketRouter = sellTicketRouter;
         this.homeRouter = homeRouter;
+        this.myAddressRouter = myAddressRouter;
     }
 
     @Override
@@ -135,6 +140,11 @@ public class AssetDisplayViewModel extends BaseViewModel {
             getBalanceDisposable.dispose();
         }
         transferTicketRouter.open(context, ticket);
+    }
+
+    public void showContractInfo(Context ctx, String address)
+    {
+        myAddressRouter.open(ctx, address);
     }
 
     public void sellTicketRouter(Context ctx, Ticket ticket) {

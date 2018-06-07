@@ -94,6 +94,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         viewModel.importRange().observe(this, this::onImportRange);
         viewModel.invalidRange().observe(this, this::invalidTicket);
+        viewModel.invalidTime().observe(this, this::invalidTime);
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.invalidLink().observe(this, this::onBadLink);
@@ -201,6 +202,20 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTxt.setText(R.string.ticket_import_valid);
 
         ticket.displayTicketHolder(ticketRange, this);
+    }
+
+    private void invalidTime(Integer integer)
+    {
+        MagicLinkData order = viewModel.getSalesOrder();
+        importTxt.setText(R.string.ticket_range_expired);
+
+        setTicket(false, false, true);
+        Ticket t = viewModel.getImportToken();
+        TextView tv = findViewById(R.id.text_ticket_range);
+        String importText = String.valueOf(order.ticketCount) + "x ";
+        importText += t.getFullName();
+
+        tv.setText(importText);
     }
 
     private void invalidTicket(int count)

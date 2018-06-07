@@ -67,6 +67,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<TicketRange> importRange = new MutableLiveData<>();
     private final MutableLiveData<Integer> invalidRange = new MutableLiveData<>();
+    private final MutableLiveData<Integer> invalidTime = new MutableLiveData<>();
     private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
@@ -110,6 +111,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         return importRange;
     }
     public LiveData<Integer> invalidRange() { return invalidRange; }
+    public LiveData<Integer> invalidTime() { return invalidTime; }
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<Boolean> invalidLink() { return invalidLink; }
     public double getUSDPrice() { return priceUsd; };
@@ -261,10 +263,16 @@ public class ImportTokenViewModel extends BaseViewModel  {
             }
         }
 
+        long validTime = checkExpiry();
+
         if (newBalance.size() == 0 || newBalance.size() != importOrder.tickets.length)
         {
             //tickets already imported
             invalidRange.setValue(newBalance.size());
+        }
+        else if (validTime < 0)
+        {
+            invalidTime.setValue((int)validTime);
         }
         else if (balanceChange(newBalance))
         {
@@ -277,6 +285,15 @@ public class ImportTokenViewModel extends BaseViewModel  {
             importRange.setValue(range);
             regularBalanceCheck();
         }
+    }
+
+    private long checkExpiry()
+    {
+        //get current UNIX
+        long UTCTimeStamp = System.currentTimeMillis() / 1000;
+
+        //has the ticket expired already?
+        return (importOrder.expiry - UTCTimeStamp);
     }
 
     //perform a balance check cycle every CHECK_BALANCE_INTERVAL seconds

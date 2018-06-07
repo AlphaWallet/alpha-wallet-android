@@ -307,4 +307,5 @@
     <string name="action_save">Save</string>
     <string name="action_contract_info">Contract Info</string>
     <string name="contract_address">Contract Address</string>
+    <string name="ticket_range_expired">Magiclink Expired</string>
 </resources>

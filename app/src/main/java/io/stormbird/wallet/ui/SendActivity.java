@@ -262,6 +262,14 @@ public class SendActivity extends BaseActivity {
             if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
                     String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
+                    if (barcode == null) barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+
+                    //if barcode is still null, ensure we don't GPF
+                    if (barcode == null)
+                    {
+                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode);

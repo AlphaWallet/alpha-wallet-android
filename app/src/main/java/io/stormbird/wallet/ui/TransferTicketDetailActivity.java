@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -565,6 +566,14 @@ public class TransferTicketDetailActivity extends BaseActivity
                 if (data != null)
                 {
                     String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
+                    if (barcode == null) barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+
+                    //if barcode is still null, ensure we don't GPF
+                    if (barcode == null)
+                    {
+                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     QRURLParser parser = QRURLParser.getInstance();
                     String extracted_address = parser.extractAddressFromQrString(barcode);

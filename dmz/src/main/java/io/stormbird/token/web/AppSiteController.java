@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,6 +112,8 @@ public class AppSiteController {
     }
 
     private void updateTokenInfo(Model model, MagicLinkData data) throws Exception {
+        // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
 
         List<NonFungibleToken> selection = Arrays.stream(data.tickets)
@@ -123,7 +126,8 @@ public class AppSiteController {
             String sides = token.getAttribute("countryA").text;
             sides += " - " + token.getAttribute("countryB").text;
             model.addAttribute("ticketSides", sides);
-            model.addAttribute("ticketDate", token.getDate("dd MMM HH:mm"));
+            model.addAttribute("ticketDate",
+                    token.getZonedDateTime(token.getAttribute("time")).format(dateFormat));
             model.addAttribute("ticketMatch", token.getAttribute("match").text);
             model.addAttribute("ticketCategory", token.getAttribute("category").text);
             break; // we only need 1 token's info. rest assumed to be the same

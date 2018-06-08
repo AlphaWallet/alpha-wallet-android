@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -57,6 +58,12 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView priceUSD;
     private TextView importTxt;
 
+    private AppCompatRadioButton verified;
+    private AppCompatRadioButton unVerified;
+    private TextView textVerified;
+    private TextView textUnverified;
+    private LinearLayout verifiedLayer;
+
     private LinearLayout costLayout;
     private int networkId = 0;
 
@@ -80,6 +87,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         importTxt = findViewById(R.id.textImport);
         costLayout = findViewById(R.id.cost_layout);
+
+        verified = findViewById(R.id.radioVerified);
+        unVerified = findViewById(R.id.radioUnverified);
+        textVerified = findViewById(R.id.verified);
+        textUnverified = findViewById(R.id.unverified);
+        verifiedLayer = findViewById(R.id.verifiedLayer);
+        verifiedLayer.setVisibility(View.GONE);
 
         setTicket(false, true, false);
 
@@ -202,6 +216,31 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTxt.setText(R.string.ticket_import_valid);
 
         ticket.displayTicketHolder(ticketRange, this);
+
+        verifiedLayer.setVisibility(View.VISIBLE);
+
+        try
+        {
+            TokenDefinition ticketToken = new TokenDefinition(
+                    getResources().getAssets().open("TicketingContract.xml"),
+                    getResources().getConfiguration().locale);
+            String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
+            if (address != null && address.equalsIgnoreCase(ticketRange.contractAddress))
+            {
+                verified.setVisibility(View.VISIBLE);
+                textVerified.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                unVerified.setVisibility(View.VISIBLE);
+                textUnverified.setVisibility(View.VISIBLE);
+            }
+        }
+        catch (IOException|SAXException e)
+        {
+            unVerified.setVisibility(View.VISIBLE);
+            textUnverified.setVisibility(View.VISIBLE);
+        }
     }
 
     private void invalidTime(Integer integer)

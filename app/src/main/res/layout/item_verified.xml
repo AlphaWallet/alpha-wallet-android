@@ -5,33 +5,27 @@
     android:id="@+id/layout_select"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
     android:animateLayoutChanges="true"
-    android:visibility="gone"
-    android:orientation="vertical">
+    android:background="@drawable/background_card_shadow"
+    android:visibility="visible"
+    android:orientation="horizontal"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp">
 
-    <LinearLayout
-        android:id="@+id/verifiedLayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/background_card_shadow"
-        android:orientation="vertical">
-
-        <LinearLayout
+        <RelativeLayout
+            android:id="@+id/verifiedLayer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="5dp">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <android.support.v7.widget.AppCompatRadioButton
                 android:id="@+id/radioVerified"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="15dp"
                 android:background="@drawable/selector_radio_check"
                 android:checked="true"
                 android:text=""
@@ -42,7 +36,8 @@
                 android:id="@+id/radioUnverified"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_centerVertical="true"
                 android:background="@mipmap/ic_unverified"
                 android:checked="true"
                 android:text=""
@@ -53,24 +48,39 @@
                 android:id="@+id/verified"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/radioVerified"
                 android:fontFamily="@font/font_regular"
-                android:gravity="center_vertical"
                 android:text="@string/verified_contract"
                 android:textColor="@color/text_black"
-                android:visibility="gone"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/unverified"
+                android:layout_toRightOf="@id/radioUnverified"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                android:gravity="center_vertical"
+                android:layout_centerVertical="true"
                 android:text="@string/unverified_contract"
                 android:textColor="@color/text_black"
-                android:visibility="gone"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
-        </LinearLayout>
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textNetworkName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text=""
+                android:paddingEnd="5dp"
+                android:textColor="@color/text_black"
+                android:textSize="16sp"
+                android:visibility="visible" />
+
+        </RelativeLayout>
+
 </LinearLayout>

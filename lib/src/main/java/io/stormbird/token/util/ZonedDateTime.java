@@ -11,7 +11,6 @@ import java.util.TimeZone;
  */
 public class ZonedDateTime {
     private long time;
-    private int offset;
     private TimeZone timezone;
     private final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
 
@@ -34,7 +33,6 @@ public class ZonedDateTime {
     public ZonedDateTime(long unixTime, TimeZone timezone) {
         this.time = unixTime * 1000L;
         this.timezone = timezone;
-        this.offset = timezone.getOffset(time);
     }
 
     /* EVERY FUNCTION BELOW ARE SET OUT IN JAVA8 */

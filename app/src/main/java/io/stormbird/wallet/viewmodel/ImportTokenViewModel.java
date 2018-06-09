@@ -22,6 +22,7 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.service.FeeMasterService;
 
 import org.web3j.tx.Contract;
@@ -58,6 +59,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final SetupTokensInteract setupTokensInteract;
     private final FeeMasterService feeMasterService;
     private final AddTokenInteract addTokenInteract;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -69,6 +71,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final MutableLiveData<Integer> invalidRange = new MutableLiveData<>();
     private final MutableLiveData<Integer> invalidTime = new MutableLiveData<>();
     private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
+    private final MutableLiveData<String> checkContractNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> ticketNotValid = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
     private String univeralImportLink;
@@ -88,7 +92,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
                          FetchTokensInteract fetchTokensInteract,
                          SetupTokensInteract setupTokensInteract,
                          FeeMasterService feeMasterService,
-                         AddTokenInteract addTokenInteract) {
+                         AddTokenInteract addTokenInteract,
+                         EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -96,6 +101,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         this.setupTokensInteract = setupTokensInteract;
         this.feeMasterService = feeMasterService;
         this.addTokenInteract = addTokenInteract;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     private void initParser()
@@ -114,6 +120,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     public LiveData<Integer> invalidTime() { return invalidTime; }
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<Boolean> invalidLink() { return invalidLink; }
+    public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
+    public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
     public double getUSDPrice() { return priceUsd; };
 
     public void prepare(String importDataStr) {
@@ -154,13 +162,13 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void onWallet(Wallet wallet) {
         initParser();
         this.wallet.setValue(wallet);
-        try {
+        try
+        {
             importOrder = parser.parseUniversalLink(univeralImportLink);
             //ecrecover the owner
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
             //got to step 2. - get cached tokens
-            fetchTokens();
-            getEthereumTicker(); //simultaneously fetch the current eth price
+            checkContractNetwork.postValue(importOrder.contractAddress);
         }
         catch (SalesOrderMalformed e)
         {
@@ -170,6 +178,31 @@ public class ImportTokenViewModel extends BaseViewModel  {
         {
             invalidLink.postValue(true);
         }
+    }
+
+    public void switchNetwork(int newNetwork)
+    {
+        if (network.getValue() == null || network.getValue().chainId != newNetwork)
+        {
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+            for (NetworkInfo networkInfo : networks)
+            {
+                if (networkInfo.chainId == newNetwork)
+                {
+                    ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
+                    network.setValue(networkInfo);
+                    break;
+                }
+            }
+        }
+
+        loadToken();
+    }
+
+    public void loadToken()
+    {
+        fetchTokens();
+        getEthereumTicker(); //simultaneously fetch the current eth price
     }
 
     //2. Fetch all cached tokens and get eth price
@@ -220,7 +253,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
         }
         else
         {
-            invalidLink.postValue(true);
+            ticketNotValid.postValue(true);
+            //invalidLink.postValue(true);
         }
     }
 

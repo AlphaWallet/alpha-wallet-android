@@ -206,11 +206,6 @@ public class TokenDefinition {
 
     public int getNetworkFromContract(String contractAddress)
     {
-        if (addresses.containsValue(contractAddress))
-        {
-            System.out.print("yoless");
-        }
-
         for (Map.Entry e : addresses.entrySet())
         {
             if (((String)e.getValue()).equalsIgnoreCase(contractAddress))

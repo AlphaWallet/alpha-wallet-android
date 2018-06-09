@@ -1,14 +1,11 @@
 package io.stormbird.token.entity;
 
 import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.util.ZonedDateTime;
 
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by weiwu on 1/3/18.  Each NonFungibleToken is a
@@ -53,13 +50,9 @@ public class NonFungibleToken
         attributes = new HashMap<>();
     }
 
-    public String getDate(String format) // what date? expiration? available since? dateTraded?
-    {
-        long dateUTC = getAttribute("time").value.longValue();
-        Date dateFormat = new Date(dateUTC * 1000L);
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(format, Locale.ENGLISH);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));//TODO: Get locale
-        return dateFormatter.format(dateFormat.getTime());
+    public io.stormbird.token.util.ZonedDateTime getZonedDateTime(Attribute attribute) {
+        // TODO: get zoned DateTime directly from XML
+        return new ZonedDateTime(attribute.value.longValue(), TimeZone.getTimeZone("Europe/Moscow"));
     }
 
     public String getRangeStr(TicketRange data)

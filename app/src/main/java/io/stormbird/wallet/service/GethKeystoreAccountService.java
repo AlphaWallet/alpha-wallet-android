@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.WalletFile;
+import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -79,7 +80,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
     private String extractAddressFromStore(String store) throws Exception {
         try {
             JSONObject jsonObject = new JSONObject(store);
-            return "0x" + jsonObject.getString("address");
+            return "0x" + Numeric.cleanHexPrefix(jsonObject.getString("address"));
         } catch (JSONException ex) {
             throw new Exception("Invalid keystore");
         }

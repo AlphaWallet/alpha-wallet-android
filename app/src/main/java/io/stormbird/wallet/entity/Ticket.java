@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -229,7 +230,8 @@ public class Ticket extends Token implements Parcelable
     {
         String teamA = nonFungibleToken.getAttribute("countryA").text;
         String teamB = nonFungibleToken.getAttribute("countryB").text;
-        String time = nonFungibleToken.getDate("hh:mm");
+        SimpleDateFormat format = new SimpleDateFormat("hh:mm", Locale.ENGLISH);
+        String time = nonFungibleToken.getZonedDateTime(nonFungibleToken.getAttribute("time")).format(format);
         String locality = nonFungibleToken.getAttribute("locality").text;
         return time + "  " + locality + "\n\n" + teamA + " vs " + teamB;
     }
@@ -463,7 +465,8 @@ public class Ticket extends Token implements Parcelable
                 String venueStr = nonFungibleToken.getAttribute("venue").text;
                 String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
 
-                String date = nonFungibleToken.getDate("dd MMM");
+                SimpleDateFormat format = new SimpleDateFormat("dd MMM", Locale.ENGLISH);
+                String date = nonFungibleToken.getZonedDateTime(nonFungibleToken.getAttribute("time")).format(format);
                 String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
                 textAmount.setText(seatCount);

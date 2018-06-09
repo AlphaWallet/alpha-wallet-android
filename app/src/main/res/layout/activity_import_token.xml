@@ -35,6 +35,8 @@
                 android:textColor="@color/text_black"
                 android:textSize="25sp" />
 
+            <include layout="@layout/item_verified" />
+
             <include layout="@layout/item_ticket" />
 
             <include layout="@layout/item_ticket_overlay" />

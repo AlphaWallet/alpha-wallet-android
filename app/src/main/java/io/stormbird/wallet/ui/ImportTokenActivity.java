@@ -6,9 +6,11 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -57,8 +59,16 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView priceUSD;
     private TextView importTxt;
 
+    private AppCompatRadioButton verified;
+    private AppCompatRadioButton unVerified;
+    private TextView textVerified;
+    private TextView textUnverified;
+    private RelativeLayout verifiedLayer;
+
     private LinearLayout costLayout;
     private int networkId = 0;
+
+    private TokenDefinition ticketToken = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,6 +91,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTxt = findViewById(R.id.textImport);
         costLayout = findViewById(R.id.cost_layout);
 
+        verified = findViewById(R.id.radioVerified);
+        unVerified = findViewById(R.id.radioUnverified);
+        textVerified = findViewById(R.id.verified);
+        textUnverified = findViewById(R.id.unverified);
+        verifiedLayer = findViewById(R.id.verifiedLayer);
+        verifiedLayer.setVisibility(View.GONE);
+
         setTicket(false, true, false);
 
         Button importTickets = findViewById(R.id.import_ticket);
@@ -99,13 +116,77 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.error().observe(this, this::onError);
         viewModel.invalidLink().observe(this, this::onBadLink);
         viewModel.network().observe(this, this::onNetwork);
+        viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
+        viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
 
         ticketRange = null;
+
+        loadTicketToken();
+    }
+
+    private void loadTicketToken()
+    {
+        if (ticketToken == null)
+        {
+            try
+            {
+                ticketToken = new TokenDefinition(
+                        getResources().getAssets().open("TicketingContract.xml"),
+                        getResources().getConfiguration().locale);
+            }
+            catch (IOException|SAXException e)
+            {
+                unVerified.setVisibility(View.VISIBLE);
+                textUnverified.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void checkContractNetwork(String contractAddress)
+    {
+        if (ticketToken != null)
+        {
+            //is this address present in any of the networks?
+            int networkId = ticketToken.getNetworkFromContract(contractAddress);
+            if (networkId > 0)
+            {
+                viewModel.switchNetwork(networkId);
+            }
+            else
+            {
+                //TODO: attempt to determine which network the contract is on.
+                //TODO: Use Etherscan to ping the networks sequentially
+                viewModel.loadToken();
+            }
+        }
+        else
+        {
+            viewModel.loadToken();
+        }
     }
 
     private void onNetwork(NetworkInfo networkInfo)
     {
         networkId = networkInfo.chainId;
+        TextView networkText = findViewById(R.id.textNetworkName);
+        networkText.setText(networkInfo.name);
+    }
+
+    private void onInvalidTicket(Boolean aBoolean)
+    {
+        TextView tv = findViewById(R.id.text_ticket_range);
+        tv.setVisibility(View.GONE);
+        importTxt.setVisibility(View.GONE);
+        setTicket(false, false, true);
+        //bad link
+        hideDialog();
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
+        aDialog.setTitle(R.string.ticket_not_valid);// bad_import_link);
+        aDialog.setMessage(R.string.ticket_not_valid_body);// bad_import_link_body);
+        aDialog.setButtonText(R.string.action_cancel);
+        aDialog.setButtonListener(v -> aDialog.dismiss());
+        aDialog.show();
     }
 
     private void onBadLink(Boolean aBoolean)
@@ -163,7 +244,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         viewModel.prepare(importString);
     }
@@ -202,6 +284,28 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTxt.setText(R.string.ticket_import_valid);
 
         ticket.displayTicketHolder(ticketRange, this);
+
+        verifiedLayer.setVisibility(View.VISIBLE);
+
+        if (ticketToken != null)
+        {
+            String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
+            if (address != null && address.equalsIgnoreCase(ticketRange.contractAddress))
+            {
+                verified.setVisibility(View.VISIBLE);
+                textVerified.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                unVerified.setVisibility(View.VISIBLE);
+                textUnverified.setVisibility(View.VISIBLE);
+            }
+        }
+        else
+        {
+            unVerified.setVisibility(View.VISIBLE);
+            textUnverified.setVisibility(View.VISIBLE);
+        }
     }
 
     private void invalidTime(Integer integer)
@@ -325,10 +429,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else {
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
-                        try {
-                            TokenDefinition ticketToken = new TokenDefinition(
-                                    getResources().getAssets().open("TicketingContract.xml"),
-                                    getResources().getConfiguration().locale);
+                        if (ticketToken != null)
+                        {
                             String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
                             if (address != null && address.equalsIgnoreCase(t.getAddress()))
                             {
@@ -339,9 +441,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                                 viewModel.performImport();
                             }
                         }
-                        catch (IOException|SAXException e)
+                        else
                         {
-                            e.printStackTrace(); // TODO Handle the error!!
+                            viewModel.performImport();
                         }
                     }
                 }

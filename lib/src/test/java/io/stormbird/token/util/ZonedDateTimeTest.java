@@ -11,13 +11,15 @@ import static org.junit.Assert.assertEquals;
 
 public class ZonedDateTimeTest {
     final long unixTime = 0;
+    final String ISO8601 = "1970-01-01T03:00+03:00";
 
     @Test
     public void DemonstrateBehaviourOfJave8ZonedDateTime() {
         java.time.LocalDateTime time = java.time.LocalDateTime.ofEpochSecond(unixTime, 0, java.time.ZoneOffset.of("+3"));
         java.time.ZoneId moscow = java.time.ZoneId.of("Europe/Moscow");
         java.time.ZonedDateTime timeInMoscow = java.time.ZonedDateTime.of(time, moscow);
-        // timeInMoscow is the Epoch
+        assertEquals(ISO8601, timeInMoscow.toString().substring(0, ISO8601.length()));
+        // timeInMoscow is at the Epoch
         assertEquals(unixTime, timeInMoscow.toEpochSecond());
         // yet the hour value read from it is based on Moscow time.
         assertEquals(3, timeInMoscow.getHour());
@@ -32,10 +34,11 @@ public class ZonedDateTimeTest {
         assertEquals("03:00", format.format(epoch));
 
         // okay let's verify this with the ZonedDateTime
-        ZonedDateTime moscowTime = new ZonedDateTime(unixTime, TimeZone.getTimeZone("Europe/Moscow"));
-        assertEquals(unixTime, moscowTime.toEpochSecond());
-        assertEquals(3, moscowTime.getHour());
-        assertEquals(0, moscowTime.getMinute());
+        ZonedDateTime timeInMoscow = new ZonedDateTime(unixTime, TimeZone.getTimeZone("Europe/Moscow"));
+        assertEquals(ISO8601, timeInMoscow.toString());
+        assertEquals(unixTime, timeInMoscow.toEpochSecond());
+        assertEquals(3, timeInMoscow.getHour());
+        assertEquals(0, timeInMoscow.getMinute());
     }
 
 }

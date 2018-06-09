@@ -1,6 +1,7 @@
 package io.stormbird.token.util;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -12,6 +13,8 @@ public class ZonedDateTime {
     private long time;
     private int offset;
     private TimeZone timezone;
+    private final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
+
 
     /* For anyone deleting this class to use Java8 ZonedDateTime:
      *
@@ -41,12 +44,21 @@ public class ZonedDateTime {
     }
 
     public int getHour() {
-        /* experiment shows getHours start with 1, not 0. */
+        /* you can't just do this:
         return new Date(time + offset).getHours() - 1;
+        because Date applies the local (the JRE's) timezone
+         */
+        SimpleDateFormat format = new SimpleDateFormat("H");
+        return Integer.valueOf(format(format));
     }
 
     public int getMinute() {
-        return new Date(time + offset).getMinutes();
+        SimpleDateFormat format = new SimpleDateFormat("m");
+        return Integer.valueOf(format(format));
+    }
+
+    public String toString() {
+        return format(ISO8601);
     }
 
     public String format(DateFormat format) {

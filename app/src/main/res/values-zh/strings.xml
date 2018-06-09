@@ -295,13 +295,13 @@
     <string name="action_edit">编辑</string>
     <string name="action_save">保存</string>
 
-    <string name="ticket_magiclink_pickup">Receive from Magiclink</string> <!-- we received a free ticket from a magic link -->
-    <string name="ticket_magiclink_transfer">Magiclink Transfer</string> <!-- someone picked up the ticket from our magiclink -->
+    <string name="ticket_magiclink_pickup">从MagicLink收到</string> <!-- we received a free ticket from a magic link -->
+    <string name="ticket_magiclink_transfer">MagicLink转手</string> <!-- someone picked up the ticket from our magiclink -->
     <string name="ticket_magiclink_sale">经MagicLink售出</string>         <!-- someone bought our magiclink and we received some eth -->
-    <string name="ticket_magiclink_purchase">Magiclink Purchase</string> <!-- we purchased a ticket using a magiclink -->
+    <string name="ticket_magiclink_purchase">经MagicLink买入</string> <!-- we purchased a ticket using a magiclink -->
 
-    <string name="action_contract_info">Contract Info</string> <!-- displayed on tablets only underneath the 'contract info' menu button to take user to the contract address page -->
-    <string name="contract_address">Contract Address</string>  <!-- displayed on copy to clipboard button that copies contract address -->
+    <string name="action_contract_info">智能合约信息</string> <!-- displayed on tablets only underneath the 'contract info' menu button to take user to the contract address page -->
+    <string name="contract_address">智能合约地址</string>  <!-- displayed on copy to clipboard button that copies contract address -->
     <string name="ticket_range_expired">MagicLink已经过期</string>
     <string name="verified_contract">已通过Stormbird验证</string>
     <string name="unverified_contract">没有验证过的合约</string>

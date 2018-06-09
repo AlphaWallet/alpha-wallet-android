@@ -133,19 +133,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
                     String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
-
-                    //on some phones we're not picking up this key. Reason is unknown.
-                    //instead we notice there is always one value in the intent data, this is the address we want
-                    //just look through the values and get that address.
-                    if (barcode == null && data.getExtras() != null)
-                    {
-                        Set<String> keys = data.getExtras().keySet();
-                        for (String s : keys)
-                        {
-                            barcode = data.getStringExtra(s);
-                            if (barcode != null) break;
-                        }
-                    }
+                    if (barcode == null) barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                     //if barcode is still null, ensure we don't GPF
                     if (barcode == null)

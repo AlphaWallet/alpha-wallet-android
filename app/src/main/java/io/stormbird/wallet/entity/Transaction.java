@@ -129,22 +129,32 @@ public class Transaction implements Parcelable {
 	private String calculateContentHash()
 	{
 		String operationContent = "";
-		if (operations != null && operations.length > 0)
+		String calcHash = "";
+		try
 		{
-			if (operations[0].contract instanceof ERC875ContractTransaction)
+			if (operations != null && operations.length > 0)
 			{
-				ERC875ContractTransaction ctx = (ERC875ContractTransaction)operations[0].contract;
-				operationContent = ctx.address + ctx.operation + ctx.getIndicesString() + ctx.type + ctx.name;
+				if (operations[0].contract instanceof ERC875ContractTransaction)
+				{
+					ERC875ContractTransaction ctx = (ERC875ContractTransaction) operations[0].contract;
+					operationContent = ctx.address + ctx.operation + ctx.getIndicesString() + ctx.type + ctx.name;
+				}
+				else
+				{
+					TransactionContract ctx = operations[0].contract;
+					String addend = "";
+					if (operations[0].viewType != null) addend = operations[0].viewType;
+					operationContent = ctx.address + ctx.totalSupply + ctx.name + addend;
+				}
 			}
-			else
-			{
-				TransactionContract ctx = operations[0].contract;
-				String addend = "";
-				if (operations[0].viewType != null) addend = operations[0].viewType;
-				operationContent = ctx.address + ctx.totalSupply + ctx.name + addend;
-			}
+
+			calcHash = Hash.sha3String(to + hash + input + timeStamp + blockNumber + gasPrice + from + value + nonce + operationContent);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 
-		return Hash.sha3String(to + hash + input + timeStamp + blockNumber + gasPrice + from + value + nonce + operationContent);
+		return calcHash;
 	}
 }

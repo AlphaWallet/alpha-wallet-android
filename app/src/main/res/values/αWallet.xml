@@ -288,8 +288,8 @@
     <string name="ticket_transfer_to">Transfer To</string>
     <string name="ticket_transfer">Transfer</string>
     <string name="ticket_load_new_tickets">Load New Tickets</string>
-    <string name="ticket_pass_from">Pass From</string>
-    <string name="ticket_pass_to">Pass To</string>
+    <string name="ticket_pass_from">Receive From Magiclink Free</string>
+    <string name="ticket_pass_to">Magiclink Transfer</string>
     <string name="ticket_terminate_contract">Terminate Contract</string>
     <string name="ticket_contract_constructor">Constructor</string>
     <string name="ticket_receive_from_magiclink">Receive From Magiclink</string>
@@ -297,8 +297,15 @@
     <string name="ticket_expired_contract">Expired Contract</string>
     <string name="ticket_unknown_contract">Unknown Contract</string>
     <string name="ticket_admin_redeem">Admin Redeem</string>
+    <string name="ticket_magiclink_pickup">Receive from Magiclink</string> <!-- receive ticket from magic link -->
+    <string name="ticket_magiclink_transfer">Magiclink Transfer</string> <!-- transfer out of our wallet by magiclink -->
+    <string name="ticket_magiclink_sale">Sold via Magiclink</string>
+    <string name="ticket_magiclink_purchase">Magiclink Purchase</string>
 
     <string name="action_next">Next</string>
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
+    <string name="action_contract_info">Contract Info</string>
+    <string name="contract_address">Contract Address</string>
+    <string name="ticket_range_expired">Magiclink Expired</string>
 </resources>

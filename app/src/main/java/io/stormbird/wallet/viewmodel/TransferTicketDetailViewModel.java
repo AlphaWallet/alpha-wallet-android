@@ -172,7 +172,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void feeMasterCall(String url, String to, Ticket t, String indices)
     {
-        disposable = feeMasterService.generateAndSendFeemasterTransaction(url, defaultWallet.getValue(), to, t, 0, indices)
+        disposable = feeMasterService.generateAndSendFeemasterTransaction(url, defaultWallet.getValue(), defaultNetwork.getValue().chainId, to, t, 0, indices)
             .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::processResult, this::txError);

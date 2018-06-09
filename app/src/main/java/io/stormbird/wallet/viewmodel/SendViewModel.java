@@ -8,6 +8,7 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.ui.SendActivity;
 
 import java.math.BigInteger;
 
@@ -33,5 +34,10 @@ public class SendViewModel extends BaseViewModel {
 
     public void showMyAddress(Context context, Wallet wallet) {
         myAddressRouter.open(context, wallet);
+    }
+
+    public void showContractInfo(Context ctx, String contractAddress)
+    {
+        myAddressRouter.open(ctx, contractAddress);
     }
 }

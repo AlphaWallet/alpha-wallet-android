@@ -9,6 +9,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
 import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
@@ -29,6 +30,7 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final SellTicketRouter sellTicketRouter;
     private final HomeRouter homeRouter;
+    private final MyAddressRouter myAddressRouter;
 
     public AssetDisplayViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
@@ -39,7 +41,8 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellTicketRouter sellTicketRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            MyAddressRouter myAddressRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -49,11 +52,12 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
         this.transferTicketRouter = transferTicketRouter;
         this.sellTicketRouter = sellTicketRouter;
         this.homeRouter = homeRouter;
+        this.myAddressRouter = myAddressRouter;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter);
+        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter);
     }
 }

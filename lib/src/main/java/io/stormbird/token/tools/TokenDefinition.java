@@ -204,6 +204,24 @@ public class TokenDefinition {
         return addresses.get(networkID);
     }
 
+    public int getNetworkFromContract(String contractAddress)
+    {
+        if (addresses.containsValue(contractAddress))
+        {
+            System.out.print("yoless");
+        }
+
+        for (Map.Entry e : addresses.entrySet())
+        {
+            if (((String)e.getValue()).equalsIgnoreCase(contractAddress))
+            {
+                return (Integer)e.getKey();
+            }
+        }
+
+        return -1;
+    }
+
     private void extractFeatureTag(Document xml)
     {
         NodeList nList = xml.getElementsByTagName("feature");

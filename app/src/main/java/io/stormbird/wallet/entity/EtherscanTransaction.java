@@ -115,10 +115,12 @@ public class EtherscanTransaction
                             break;
                         case "transferFrom(address,address,uint16[])":
                             o = generateERC875Op();
+                            o[0].contract.setIndicies(f.paramValues);
                             break;
                         case "transfer(address,uint16[])":
                             o = generateERC875Op();
                             o[0].contract.setOtherParty(from);
+                            o[0].contract.setIndicies(f.paramValues);
                             break;
                         case "transfer(address,uint256)":
                             o = generateERC20Op();
@@ -143,7 +145,6 @@ public class EtherscanTransaction
                             op.transactionId = hash;
                             //value in what?
                             op.value = String.valueOf(f.getFirstValue());
-                            //can we ecrecover?
                             break;
                         case "endContract()":
                             o = generateERC875Op();

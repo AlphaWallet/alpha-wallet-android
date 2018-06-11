@@ -114,6 +114,11 @@
                             android:contentDescription="@string/empty"
                             android:src="@drawable/ic_calendar" />
 
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/date"
                             android:paddingRight="5dp"
@@ -123,16 +128,20 @@
 
                         <TextView
                             android:id="@+id/time"
-                            android:paddingLeft="5dp"
+                            android:paddingRight="5dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:textSize="12sp"
                             android:layout_gravity="center_vertical" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/ticketlayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="1"
                         android:orientation="horizontal">
 
@@ -159,6 +168,7 @@
                         android:id="@+id/catlayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="1"
                         android:orientation="horizontal">
 

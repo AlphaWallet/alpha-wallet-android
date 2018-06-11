@@ -63,7 +63,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        DateFormat date = android.text.format.DateFormat.getDateFormat(getContext());
+        DateFormat date = android.text.format.DateFormat.getLongDateFormat(getContext());
         date.setTimeZone(TimeZone.getTimeZone("Europe/Moscow")); // TODO: use the timezone defined in XML
         DateFormat time = android.text.format.DateFormat.getTimeFormat(getContext());
         time.setTimeZone(TimeZone.getTimeZone("Europe/Moscow")); // TODO: use the timezone defined in XML

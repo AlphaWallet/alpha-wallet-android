@@ -307,4 +307,5 @@
     <string name="unverified_contract">没有验证过的合约</string>
     <string name="ticket_not_valid">无效的Token</string>
     <string name="ticket_not_valid_body">在当前网络上此地址没有有效智能合约： 合同可能已经被终止，或者它可能位于不同的网络上。 可以尝试将网络改为“Ropsten（测试网络）”。</string>
+    <string name="loading">正在导入</string>
 </resources>

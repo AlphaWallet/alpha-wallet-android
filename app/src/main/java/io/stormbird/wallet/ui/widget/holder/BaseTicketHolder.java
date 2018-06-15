@@ -55,7 +55,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         itemView.setOnClickListener(this);
         ticketRedeemed = findViewById(R.id.redeemed);
         ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
-        ticketLayout = findViewById(R.id.layout_select);
+        ticketLayout = findViewById(R.id.layout_select_ticket);
         assetDefinition = definition;
         this.ticket = (Ticket)ticket;
     }

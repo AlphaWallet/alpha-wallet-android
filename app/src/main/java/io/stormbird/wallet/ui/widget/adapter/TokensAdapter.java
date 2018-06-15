@@ -41,7 +41,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_ALL = 0;
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
-    public static final int FILTER_OTHER_ASSETS = 3;
 
     private int filterType;
     private Context context;
@@ -164,14 +163,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         switch (filterType)
         {
-            case FILTER_OTHER_ASSETS:
-                if (!token.tokenInfo.isStormbird && !token.isEthereum())
-                {
-                    updateToken(token);
-                }
-                break;
             case FILTER_ASSETS:
-                if (token.tokenInfo.isStormbird)
+                if (!token.isEthereum())
                 {
                     updateToken(token);
                 }
@@ -269,14 +262,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     case FILTER_ALL:
                         items.add(new TokenSortedItem(token, calculateWeight(token)));
                         break;
-                    case FILTER_OTHER_ASSETS:
-                        if (!token.tokenInfo.isStormbird && !token.isEthereum())
-                        {
-                            items.add(new TokenSortedItem(token, calculateWeight(token)));
-                        }
-                        break;
                     case FILTER_ASSETS:
-                        if (token.tokenInfo.isStormbird)
+                        if (!token.isEthereum())
                         {
                             items.add(new TokenSortedItem(token, calculateWeight(token)));
                         }
@@ -308,14 +295,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token token = ((TokenSortedItem) item).value;
                 switch (filterType)
                 {
-                    case FILTER_OTHER_ASSETS: //anything not ERC875 or Eth
-                        if (token.tokenInfo.isStormbird || token.isEthereum())
-                        {
-                            needsClean = true;
-                        }
-                        break;
                     case FILTER_ASSETS: //assets are ERC875 only
-                        if (!token.tokenInfo.isStormbird)
+                        if (token.isEthereum())
                         {
                             needsClean = true;
                         }

@@ -14,6 +14,7 @@ import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HelpRouter;
+import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MarketBrowseRouter;
 import io.stormbird.wallet.router.MarketplaceRouter;
@@ -39,7 +40,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final MarketBrowseRouter marketBrowseRouter;
-    private final WalletRouter walletRouter;
+    private final ImportTokenRouter importTokenRouter;
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
@@ -59,7 +60,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
-            WalletRouter walletRouter,
+            ImportTokenRouter importTokenRouter,
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
@@ -77,7 +78,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.marketBrowseRouter = marketBrowseRouter;
-        this.walletRouter = walletRouter;
+        this.importTokenRouter = importTokenRouter;
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
@@ -101,7 +102,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 myTokensRouter,
                 externalBrowserRouter,
                 marketBrowseRouter,
-                walletRouter,
+                importTokenRouter,
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,

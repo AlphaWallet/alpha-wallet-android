@@ -215,7 +215,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
 
     private void onToken(Token token)
     {
-        if (token.addressMatches(importOrder.contractAddress))
+        if (token.addressMatches(importOrder.contractAddress) && (token instanceof Ticket))
         {
             importToken = (Ticket) token;
             regularBalanceCheck(); //fetch balance and display
@@ -261,7 +261,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
     //4a. Receive balance
     private void onBalance(Token token)
     {
-        if (token != null && token instanceof Ticket) {
+        if (token != null && token instanceof Ticket)
+        {
             importToken = (Ticket) token;
         }
     }
@@ -360,11 +361,15 @@ public class ImportTokenViewModel extends BaseViewModel  {
 //    }
 
     public void onError(Throwable throwable) {
-        if (throwable.getCause() instanceof ServiceErrorException) {
-            if (((ServiceErrorException) throwable.getCause()).code == C.ErrorCode.ALREADY_ADDED){
+        if (throwable.getCause() instanceof ServiceErrorException)
+        {
+            if (((ServiceErrorException) throwable.getCause()).code == C.ErrorCode.ALREADY_ADDED)
+            {
                 error.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
             }
-        } else {
+        }
+        else
+        {
             error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
         }
     }

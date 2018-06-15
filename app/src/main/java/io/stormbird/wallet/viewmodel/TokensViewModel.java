@@ -59,7 +59,7 @@ public class TokensViewModel extends BaseViewModel {
 
     public void fetchTokens() {
         progress.postValue(true);
-        fetchTokensInteract
+        disposable = fetchTokensInteract
                 .fetch(wallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }

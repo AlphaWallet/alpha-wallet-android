@@ -153,26 +153,28 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.other_assets));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch(tab.getPosition()) {
-                    case 0: {
+                    case 0:
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
                         viewModel.fetchTokens();
                         break;
-                    }
-                    case 1: {
+                    case 1:
                         adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
                         viewModel.fetchTokens();
                         break;
-                    }
-                    case 2: {
+                    case 2:
                         adapter.setFilterType(TokensAdapter.FILTER_ASSETS);
                         viewModel.fetchTokens();
                         break;
-                    }
+                    case 3:
+                        adapter.setFilterType(TokensAdapter.FILTER_OTHER_ASSETS);
+                        viewModel.fetchTokens();
+                        break;
                     default:
                         break;
                 }

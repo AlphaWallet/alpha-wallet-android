@@ -33,6 +33,10 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
+                    android:host="app.wallet.io"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
                     android:host="app.awallet.io"
                     android:pathPrefix="/"
                     android:scheme="https" />

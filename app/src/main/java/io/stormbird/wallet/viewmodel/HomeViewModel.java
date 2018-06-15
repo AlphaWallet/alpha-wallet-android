@@ -24,6 +24,7 @@ import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HelpRouter;
+import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MarketBrowseRouter;
 import io.stormbird.wallet.router.MarketplaceRouter;
@@ -64,7 +65,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MyTokensRouter myTokensRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final MarketBrowseRouter marketBrowseRouter;
-    private final WalletRouter walletRouter;
+    private final ImportTokenRouter importTokenRouter;
     private final MarketplaceRouter marketplaceRouter;
     private final NewSettingsRouter newSettingsRouter;
     private final AddTokenRouter addTokenRouter;
@@ -90,7 +91,7 @@ public class HomeViewModel extends BaseViewModel {
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
-            WalletRouter walletRouter,
+            ImportTokenRouter importTokenRouter,
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
@@ -108,7 +109,7 @@ public class HomeViewModel extends BaseViewModel {
         this.myTokensRouter = myTokensRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.marketBrowseRouter = marketBrowseRouter;
-        this.walletRouter = walletRouter;
+        this.importTokenRouter = importTokenRouter;
         this.marketplaceRouter = marketplaceRouter;
         this.newSettingsRouter = newSettingsRouter;
         this.addTokenRouter = addTokenRouter;
@@ -199,11 +200,13 @@ public class HomeViewModel extends BaseViewModel {
                 FETCH_TRANSACTIONS_INTERVAL * DateUtils.SECOND_IN_MILLIS);
     }
 
-    public void showWallets(Context context) {
+    public void showWallets(Context context)
+    {
         manageWalletsRouter.open(context, false);
     }
 
-    public void showSettings(Context context) {
+    public void showSettings(Context context)
+    {
         settingsRouter.open(context);
     }
 
@@ -217,6 +220,11 @@ public class HomeViewModel extends BaseViewModel {
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
+    }
+
+    public void showImportLink(Context context, String importData)
+    {
+        importTokenRouter.open(context, importData);
     }
 
 //    public void showMyAddress(Context context) {

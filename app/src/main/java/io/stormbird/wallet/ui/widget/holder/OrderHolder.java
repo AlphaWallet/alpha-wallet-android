@@ -60,7 +60,7 @@ public class OrderHolder extends BinderViewHolder<MagicLinkData> implements View
         ticketTypeText = findViewById(R.id.ticket_type);
         updateOverlay = findViewById(R.id.update_overlay);
         unavailableOverlay = findViewById(R.id.unavailable_overlay);
-        ticketLayout = findViewById(R.id.layout_select);
+        ticketLayout = findViewById(R.id.layout_select_ticket);
         calendarImg = findViewById(R.id.calendar);
         ticketImg = findViewById(R.id.ticketicon);
         catImg = findViewById(R.id.caticon);

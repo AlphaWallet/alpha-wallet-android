@@ -13,6 +13,7 @@ import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HelpRouter;
+import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MarketBrowseRouter;
 import io.stormbird.wallet.router.MarketplaceRouter;
@@ -22,7 +23,6 @@ import io.stormbird.wallet.router.NewSettingsRouter;
 import io.stormbird.wallet.router.SendRouter;
 import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
-import io.stormbird.wallet.router.WalletRouter;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 
 import dagger.Module;
@@ -44,7 +44,7 @@ class HomeModule {
             MyTokensRouter myTokensRouter,
             ExternalBrowserRouter externalBrowserRouter,
             MarketBrowseRouter marketBrowseRouter,
-            WalletRouter walletRouter,
+            ImportTokenRouter importTokenRouter,
             MarketplaceRouter marketplaceRouter,
             NewSettingsRouter newSettingsRouter,
             AddTokenRouter addTokenRouter,
@@ -63,7 +63,7 @@ class HomeModule {
                 myTokensRouter,
                 externalBrowserRouter,
                 marketBrowseRouter,
-                walletRouter,
+                importTokenRouter,
                 marketplaceRouter,
                 newSettingsRouter,
                 addTokenRouter,
@@ -135,7 +135,7 @@ class HomeModule {
     MarketBrowseRouter provideMarketBrowseRouter() { return new MarketBrowseRouter(); }
 
     @Provides
-    WalletRouter providesWalletRouter() { return new WalletRouter(); }
+    ImportTokenRouter providesImportTokenRouter() { return new ImportTokenRouter(); }
 
     @Provides
     MarketplaceRouter providesMarketplaceRouter() { return new MarketplaceRouter(); }

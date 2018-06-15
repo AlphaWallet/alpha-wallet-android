@@ -227,7 +227,7 @@ public class EtherscanTransaction
         }
         catch (SignatureException sx)
         {
-            o = new TransactionOperation[0];
+            o = generateERC875Op();
             sx.printStackTrace();
         }
 

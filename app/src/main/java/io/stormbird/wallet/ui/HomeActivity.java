@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -16,14 +15,11 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -31,11 +27,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
-import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -126,6 +118,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onResume();
         viewModel.prepare();
         checkRoot();
+        //check clipboard
+        String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
+        if (importData != null)
+        {
+            //let's try to import the link
+            viewModel.showImportLink(this, importData);
+        }
     }
 
     @Override

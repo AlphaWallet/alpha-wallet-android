@@ -76,11 +76,22 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
         </a>
     </p>
     <h3>Step 2</h3>
-    <div id="view_listing">
+	<form id="view_listing"
+          th:action="${base64}"
+          onsubmit="
+            this.elements['uri'].select();
+            document.execCommand('copy');
+            this.elements['message'].hidden = false;
+            this.elements['uri'].hidden     = true;
+            this.elements['submit'].hidden  = true;
+            return false;"
+	>
         <p>Once you've downloaded the app on your phone,
-            tap the "View Listing" button below and you're all set!</p>
-        <a th:href="'https://app.awallet.io/' + ${base64}">View Listing</a>
-    </div>
+            copy this link and switch to the app.</p>
+        <input name="uri" readonly="readonly" th:value="'https://app.awallet.io/' + ${base64}" />
+        <input name="message" readonly="readonly" hidden="hidden" value="Link copied to clipboard."/><br/>
+        <input name="submit" type="submit" value="Copy to clipboard"/>
+    </form>
     <div id="pull_down">
         <p>Once you've downloaded the app on your phone,
             pull down this web page to see the "Open With AlphaWallet" button</p>

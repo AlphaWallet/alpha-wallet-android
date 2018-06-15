@@ -5,16 +5,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.viewmodel.SplashViewModel;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 
 import static io.stormbird.wallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
@@ -40,6 +39,11 @@ public class SplashActivity extends BaseActivity {
         if (data != null)
         {
             importData = data.toString();
+        }
+        else
+        {
+            //try the clipboard
+            importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
         }
 
         splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)

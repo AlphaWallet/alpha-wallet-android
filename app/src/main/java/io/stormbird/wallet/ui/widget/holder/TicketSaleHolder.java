@@ -32,7 +32,7 @@ public class TicketSaleHolder extends BaseTicketHolder
     public TicketSaleHolder(int resId, ViewGroup parent, TokenDefinition definition, Token token)
     {
         super(resId, parent, definition, token);
-        ticketLayout = findViewById(R.id.layout_select);
+        ticketLayout = findViewById(R.id.layout_select_ticket);
         select = findViewById(R.id.radioBox);
         itemView.setOnClickListener(this);
     }

@@ -3,6 +3,7 @@ package io.stormbird.wallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -433,6 +434,38 @@ public class Ticket extends Token implements Parcelable
         }
 
         return displayIDs;
+    }
+
+    /**
+     * Routine to blank a ticket on a page. It can be static because it doesn't use any class members
+     * It will throw an exception if given an activity page with no ticket on it
+     * @param activity
+     * @param blankingString
+     */
+    public static void blankTicketHolder(int blankingString, BaseActivity activity)
+    {
+        try
+        {
+            TextView textAmount = activity.findViewById(R.id.amount);
+            TextView textTicketName = activity.findViewById(R.id.name);
+            TextView textVenue = activity.findViewById(R.id.venue);
+            TextView textDate = activity.findViewById(R.id.date);
+            TextView textRange = activity.findViewById(R.id.tickettext);
+            TextView textCat = activity.findViewById(R.id.cattext);
+            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
+
+            textAmount.setText("");
+            textTicketName.setText(blankingString);
+            textVenue.setText("");
+            textDate.setText("");
+            textRange.setText("");
+            textCat.setText("");
+            ticketDetails.setText("");
+        }
+        catch (Exception e)
+        {
+            Log.d("TICKET", e.getMessage());
+        }
     }
 
     /**

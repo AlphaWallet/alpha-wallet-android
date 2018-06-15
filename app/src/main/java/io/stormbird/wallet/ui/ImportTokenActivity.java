@@ -121,6 +121,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         ticketRange = null;
 
+        Ticket.blankTicketHolder(R.string.loading,this);
+
         loadTicketToken();
     }
 

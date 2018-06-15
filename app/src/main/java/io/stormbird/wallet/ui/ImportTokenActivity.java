@@ -13,15 +13,22 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.xml.sax.SAXException;
+
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Address;
+import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
@@ -31,10 +38,6 @@ import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SystemView;
-import io.stormbird.token.tools.TokenDefinition;
-import org.xml.sax.SAXException;
-import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.TicketRange;
 
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.IMPORT_STRING;
@@ -207,7 +210,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         hideDialog();
     }
@@ -215,9 +219,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void setTicket(boolean ticket, boolean progress, boolean invalid)
     {
         LinearLayout progress_ticket = findViewById(R.id.layout_select_overlay);
-        LinearLayout valid_ticket = findViewById(R.id.layout_select);
+        LinearLayout valid_ticket = findViewById(R.id.layout_select_ticket);
         LinearLayout invalid_ticket = findViewById(R.id.layout_select_invalid);
-        if (ticket) {
+        if (ticket)
+        {
             valid_ticket.setVisibility(View.VISIBLE);
             costLayout.setVisibility(View.VISIBLE);
         }
@@ -470,5 +475,42 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         df.setRoundingMode(RoundingMode.CEILING);
         String formatted = df.format(ethPrice);
         return formatted;
+    }
+
+    public static String getMagiclinkFromClipboard(Context ctx)
+    {
+        String magiclink = null;
+
+        try
+        {
+            //try clipboard data
+            ClipboardManager clipboard = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null)
+            {
+                CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
+                //see if text is a magic link
+                if (text != null && text.length() > 60 && text.length() < 300)
+                {
+                    //could be magiclink
+                    CryptoFunctions cryptoFunctions = new CryptoFunctions();
+                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
+                    MagicLinkData order = parser.parseUniversalLink(text.toString());
+                    if (Address.isAddress(order.contractAddress) && order.tickets.length > 0)
+                    {
+                        magiclink = text.toString();
+                        //now clear the clipboard - we only ever do this if it's definitely a magiclink in the clipboard
+                        ClipData clipData = ClipData.newPlainText("", "");
+                        clipboard.setPrimaryClip(clipData);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            //not a magiclink
+            magiclink = null;
+        }
+
+        return magiclink;
     }
 }

@@ -158,21 +158,18 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch(tab.getPosition()) {
-                    case 0: {
+                    case 0:
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
                         viewModel.fetchTokens();
                         break;
-                    }
-                    case 1: {
+                    case 1:
                         adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
                         viewModel.fetchTokens();
                         break;
-                    }
-                    case 2: {
+                    case 2:
                         adapter.setFilterType(TokensAdapter.FILTER_ASSETS);
                         viewModel.fetchTokens();
                         break;
-                    }
                     default:
                         break;
                 }

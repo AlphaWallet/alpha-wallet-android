@@ -164,8 +164,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         switch (filterType)
         {
             case FILTER_ASSETS:
+                if (!token.isEthereum())
+                {
+                    updateToken(token);
+                }
+                break;
             case FILTER_CURRENCY:
-                if (token.isCurrency())
+                if (token.isEthereum())
                 {
                     updateToken(token);
                 }
@@ -233,7 +238,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void populateTokens(Token[] tokens)
     {
         items.beginBatchedUpdates();
-        if (needsRefresh) items.clear();
+        if (!needsRefresh && filterType != FILTER_ALL)
+        {
+            needsRefresh = checkForInvalidTokenPresence();
+        }
+
+        if (needsRefresh)
+        {
+            items.clear();
+            needsRefresh = false;
+        }
+
         items.add(total);
 
         for (Token token : tokens)
@@ -244,9 +259,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 checkLiveToken(token);
                 switch (filterType)
                 {
+                    case FILTER_ALL:
+                        items.add(new TokenSortedItem(token, calculateWeight(token)));
+                        break;
                     case FILTER_ASSETS:
+                        if (!token.isEthereum())
+                        {
+                            items.add(new TokenSortedItem(token, calculateWeight(token)));
+                        }
+                        break;
                     case FILTER_CURRENCY:
-                        if (token.isCurrency())
+                        if (token.isEthereum())
                         {
                             items.add(new TokenSortedItem(token, calculateWeight(token)));
                         }
@@ -259,7 +282,38 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
-        needsRefresh = false;
+    }
+
+    private boolean checkForInvalidTokenPresence()
+    {
+        boolean needsClean = false;
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem item = items.get(i);
+            if (item.viewType == TokenHolder.VIEW_TYPE)
+            {
+                Token token = ((TokenSortedItem) item).value;
+                switch (filterType)
+                {
+                    case FILTER_ASSETS: //assets are ERC875 only
+                        if (token.isEthereum())
+                        {
+                            needsClean = true;
+                        }
+                        break;
+                    case FILTER_CURRENCY: //currency is Eth only
+                        if (!token.isEthereum())
+                        {
+                            needsClean = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return needsClean;
     }
 
     private int calculateWeight(Token token)

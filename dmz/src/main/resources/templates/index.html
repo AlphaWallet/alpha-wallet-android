@@ -15,22 +15,8 @@
                 float: right;
             }
         }
-        #pull_down {
-            display: none;
-        }
+
     </style>
-      <script>
-          function ImportAssetInstruction() {
-              var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-              var isiOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-              var isAndroid = /android/i.test(userAgent);
-              if (isiOS) {
-                  document.getElementById("pull_down").setAttribute("style", "display: block;");
-                  document.getElementById("view_listing").setAttribute("style", "display: none;");
-              }
-          }
-          window.onload = ImportAssetInstruction;
-      </script>
   </head>
   <body th:attr="class=${tokenAvailable}">
     <img id="mobile_app_preview" src="images/app_preview.png"/>
@@ -92,10 +78,6 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
         <input name="message" readonly="readonly" hidden="hidden" value="Link copied to clipboard."/><br/>
         <input name="submit" type="submit" value="Copy to clipboard"/>
     </form>
-    <div id="pull_down">
-        <p>Once you've downloaded the app on your phone,
-            pull down this web page to see the "Open With AlphaWallet" button</p>
-    </div>
     <table class="footnote"><tbody>
         <tr><th>Owner's Ethereum Address</th>
             <td th:text="${link.ownerAddress}"/>

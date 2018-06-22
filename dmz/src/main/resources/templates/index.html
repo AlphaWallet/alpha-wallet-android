@@ -76,7 +76,6 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
           th:action="${base64}"
           onsubmit="
             this.elements['uri'].select();
-            document.execCommand('copy');
             clipboard.writeText(this.elements['uri'].value);
             this.elements['message'].hidden = false;
             this.elements['uri'].hidden     = true;

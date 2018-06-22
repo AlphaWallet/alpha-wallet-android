@@ -209,7 +209,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void fetchTokens() {
         importToken = null;
         disposable = fetchTokensInteract
-                .fetchSequentialNoEth(wallet.getValue())
+                .fetchStoredToken(wallet.getValue(), importOrder.contractAddress)
                 .subscribe(this::onToken, this::onError, this::fetchTokensComplete);
     }
 
@@ -334,12 +334,20 @@ public class ImportTokenViewModel extends BaseViewModel  {
     //perform a balance check cycle every CHECK_BALANCE_INTERVAL seconds
     private void regularBalanceCheck()
     {
-        getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .updateBalance(importOrder.ownerAddress, importToken)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onBalance, this::onError, this::gotBalance)).subscribe();
+        long validTime = checkExpiry();
+        if (validTime < 0)
+        {
+            invalidTime.setValue((int)validTime);
+        }
+        else
+        {
+            getBalanceDisposable = Observable.interval(0, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> fetchTokensInteract
+                            .updateBalance(importOrder.ownerAddress, importToken)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::onBalance, this::onError, this::gotBalance)).subscribe();
+        }
     }
 
 //    //Store contract details if the contract is live,

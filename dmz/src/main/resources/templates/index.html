@@ -4,7 +4,9 @@
   <head>
     <title th:text="${link.ticketCount} + ' ' + ${tokenName} + ' ' + ${tokenAvailable}"/>
     <link rel="stylesheet" th:href="@{css/main.css}"/>
-    <style type="text/css"> /* @media here instead of css file  */
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+      <style type="text/css"> /* @media here instead of css file  */
         @media only screen and (max-width: 600px)  {
             #mobile_app_preview {
                 display: none;
@@ -16,6 +18,9 @@
             }
         }
 
+      #uri {
+          width: 70%;
+      }
     </style>
     <script>
         !function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.clipboard=e():t.clipboard=e()}(this,function(){return function(t){function e(r){if(n[r])return n[r].exports;var o=n[r]={i:r,l:!1,exports:{}};return t[r].call(o.exports,o,o.exports,e),o.l=!0,o.exports}var n={};return e.m=t,e.c=n,e.d=function(t,n,r){e.o(t,n)||Object.defineProperty(t,n,{configurable:!1,enumerable:!0,get:r})},e.n=function(t){var n=t&&t.__esModule?function(){return t.default}:function(){return t};return e.d(n,"a",n),n},e.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},e.p="",e(e.s=0)}([function(t,e,n){"use strict";function r(t,e,n){y("listener called"),t.success=!0,e.forEach(function(e,r){n.clipboardData.setData(r,e),r===_&&n.clipboardData.getData(r)!=e&&(y("setting text/plain failed"),t.success=!1)}),n.preventDefault()}function o(t){var e=new x,n=r.bind(this,e,t);document.addEventListener("copy",n);try{document.execCommand("copy")}finally{document.removeEventListener("copy",n)}return e.success}function i(t,e){c(t);var n=o(e);return a(),n}function u(t){var e=document.createElement("div");e.setAttribute("style","-webkit-user-select: text !important"),e.textContent="temporary element",document.body.appendChild(e);var n=i(e,t);return document.body.removeChild(e),n}function s(t){y("copyTextUsingDOM");var e=document.createElement("div");e.setAttribute("style","-webkit-user-select: text !important");var n=e;e.attachShadow&&(y("Using shadow DOM."),n=e.attachShadow({mode:"open"}));var r=document.createElement("span");r.innerText=t,n.appendChild(r),document.body.appendChild(e),c(r);var o=document.execCommand("copy");return a(),document.body.removeChild(e),o}function c(t){var e=document.getSelection(),n=document.createRange();n.selectNodeContents(t),e.removeAllRanges(),e.addRange(n)}function a(){document.getSelection().removeAllRanges()}function l(t){var e=new v.DT;return e.setData(_,t),e}function f(){return"undefined"==typeof ClipboardEvent&&void 0!==window.clipboardData&&void 0!==window.clipboardData.setData}function d(t){var e=t.getData(_);if(void 0!==e)return window.clipboardData.setData("Text",e);throw"No `text/plain` value was specified."}function p(){return new m(function(t,e){var n=window.clipboardData.getData("Text");""===n?e(new Error("Empty clipboard or could not read plain text from clipboard")):t(n)})}Object.defineProperty(e,"__esModule",{value:!0});var h=n(1),v=n(5),m="undefined"==typeof Promise?h.Promise:Promise,y=function(t){},w=!0,b=function(){(console.warn||console.log).apply(console,arguments)},g=b.bind("[clipboard-polyfill]"),_="text/plain",T=function(){function t(){}return t.setDebugLog=function(t){y=t},t.suppressWarnings=function(){w=!1,v.suppressDTWarnings()},t.write=function(t){return w&&!t.getData(_)&&g("clipboard.write() was called without a `text/plain` data type. On some platforms, this may result in an empty clipboard. Call clipboard.suppressWarnings() to suppress this warning."),new m(function(e,n){if(f())return void(d(t)?e():n(new Error("Copying failed, possibly because the user rejected it.")));if(o(t))return y("regular execCopy worked"),void e();if(navigator.userAgent.indexOf("Edge")>-1)return y('UA "Edge" => assuming success'),void e();if(i(document.body,t))return y("copyUsingTempSelection worked"),void e();if(u(t))return y("copyUsingTempElem worked"),void e();var r=t.getData(_);if(void 0!==r&&s(r))return y("copyTextUsingDOM worked"),void e();n(new Error("Copy command failed."))})},t.writeText=function(t){if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);var e=new v.DT;return e.setData(_,t),this.write(e)},t.read=function(){var t=this;return new m(function(e,n){t.readText().then(function(t){return e(l(t))},n)})},t.readText=function(){return navigator.clipboard&&navigator.clipboard.readText?navigator.clipboard.readText():f()?p():new m(function(t,e){e("Read is not supported in your browser.")})},t.DT=v.DT,t}();e.default=T;var x=function(){function t(){this.success=!1}return t}();t.exports=T},function(t,e,n){(function(e,r){/*!
@@ -84,15 +89,15 @@ src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAABSCAMAAABkOBgeAAAABGdBT
 	>
         <p>Once you've downloaded the app on your phone,
             copy this link and switch to the app.</p>
-        <input name="uri" readonly="readonly" th:value="'https://app.awallet.io/' + ${base64}" />
+        <input name="uri" readonly="readonly" id="uri" th:value="'https://app.awallet.io/' + ${base64}" class="form-control form-control-lg" />
         <input name="message" readonly="readonly" hidden="hidden" value="Link copied to clipboard."/><br/>
-        <input name="submit" type="submit" value="Copy to clipboard"/>
+        <input name="submit" type="submit" id="submit-button" value="Copy to clipboard" class="btn btn-danger btn-lg"/>
     </form>
     <table class="footnote"><tbody>
         <tr><th>Owner's Ethereum Address</th>
             <td th:text="${link.ownerAddress}"/>
         </tr>
-        <tr><th>Smart-contract Address</th>
+        <tr><th>Contract Address</th>
             <td th:text="${link.contractAddress}"/>
         </tr>
     </tbody></table>

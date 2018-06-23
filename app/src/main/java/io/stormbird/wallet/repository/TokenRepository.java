@@ -278,6 +278,15 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    @Override
+    public Observable<Token> fetchCachedSingleToken(String walletAddress, String tokenAddress)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchCachedToken(network, wallet, tokenAddress)
+                .toObservable();
+    }
+
     /**
      * Just updates the balance of a token
      *

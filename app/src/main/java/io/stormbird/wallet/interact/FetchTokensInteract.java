@@ -57,6 +57,12 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<Token> fetchStoredToken(Wallet wallet, String tokenAddress) {
+        return tokenRepository.fetchCachedSingleToken(wallet.address, tokenAddress)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<Token[]> fetchStoredWithEth(Wallet wallet) {
         return tokenRepository.fetchActiveStoredPlusEth(wallet.address)
                 .subscribeOn(Schedulers.io())

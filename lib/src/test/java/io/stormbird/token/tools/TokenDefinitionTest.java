@@ -24,7 +24,7 @@ public class TokenDefinitionTest {
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
         TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
-        assertFalse(ticketAsset.fields.isEmpty());
+        assertFalse(ticketAsset.attributes.isEmpty());
         assertNotEquals(0, ticketAsset.tokenName.length());
 
         // test contract address extraction

@@ -23,25 +23,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, FieldDefinition> fields = new ConcurrentHashMap<>();
+    public Map<String, AttributeType> attributes = new ConcurrentHashMap<>();
     protected Locale locale;
     public Map<Integer, String> addresses = new HashMap<>();
 
     /* the following are incorrect, waiting to be further improved
-     with suitable XML, because none of these String values are going
-     to be one-per-XML-file:
+     with suitable XML, because none of these String typed class variables
+     are going to be one-per-XML-file:
 
      - each contract <feature> normally should invoke new code modules
        e.g. when a new decentralised protocol is introduced, a new
        class to handle the protocol needs to be introduced, which owns
        it own way of specifying implementation, like marketeQueueAPI.
 
-     - tokenName is going to be refactored into a field attribute -
+     - tokenName is going to be selectable through filters -
        that is, it's allowed that token names are different in the
        same asset class. There are use-cases for this.
 
      - each token definition XML file can incorporate multiple
-       contracts, eachwith different network IDs.
+       contracts, each with different network IDs.
 
      - each XML file can be signed mulitple times, with multiple
        <KeyName>.
@@ -52,9 +52,101 @@ public class TokenDefinition {
     protected String keyName = null;
     protected int networkId = 1; //default to main net unless otherwise specified
 
+    public enum Syntax {
+        DirectoryString, IA5String, Integer, GeneralizedTime,
+        Boolean, BitString, CountryString, JPEG, NumericString
+    }
+
+    public enum As {  // always assume big endian
+        UTF8, Unsigned, Signed
+    }
+
+    protected class AttributeType {
+        public BigInteger bitmask;    // TODO: BigInteger !== BitInt. Test edge conditions.
+        public String name;  // TODO: should be polyglot because user change change language in the run
+        public String id;
+        public int bitshift = 0;
+        public Syntax syntax;
+        public As as;
+
+        public AttributeType(Element attr) {
+            name = getLocalisedName(attr);
+            id = attr.getAttribute("id");
+            switch(attr.getAttribute("as")) {
+                case "signed":
+                    as = As.Signed;
+                    break;
+                case "UTF8":
+                    as = As.UTF8;
+                    break;
+                default: // "unsigned"
+                    as = As.Unsigned;
+            }
+            try {
+                switch (getContentByTagName(attr, "syntax")) { // We don't validate syntax here; schema does it.
+                    case "1.3.6.1.4.1.1466.115.121.1.6":
+                        syntax = Syntax.BitString;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.7":
+                        syntax = Syntax.Boolean;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.11":
+                        syntax = Syntax.CountryString;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.28":
+                        syntax = Syntax.JPEG;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.36":
+                        syntax = Syntax.NumericString;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.24":
+                        syntax = Syntax.GeneralizedTime;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.26":
+                        syntax = Syntax.IA5String;
+                        break;
+                    case "1.3.6.1.4.1.1466.115.121.1.27":
+                        syntax = Syntax.Integer;
+                        break;
+                    default: // unknown syntax treat as Directory String
+                        syntax = Syntax.DirectoryString;
+                }
+            } catch (NullPointerException e) { // missing <syntax>
+                syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
+            }
+            bitmask = null;
+            for(Node node=attr.getFirstChild();
+                node!=null; node=node.getNextSibling()){
+                if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("origin")) {
+                    // System.out.println("\nFound a name field: " + node.getNodeName());
+                    Element origin = (Element) node;
+                    if (origin.hasAttribute("bitmask")) {
+                        bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
+                    }
+                }
+            }
+            if (bitmask != null ) {
+                while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
+                bitshift--;
+            }
+            // System.out.println("New FieldDefinition :" + name);
+        }
+
+        public String toString(BigInteger data) {
+            if (as == As.UTF8) {
+                try {
+                    return new String(data.toByteArray(), "UTF8");
+                } catch(UnsupportedEncodingException e){
+                    return null;
+                }
+            }
+           return data.toString(); // FIXME!!! wrong for Unsigned
+        }
+    }
+
     protected class FieldDefinition {
-        public BigInteger bitmask;   // TODO: BigInteger !== BitInt. Test edge conditions.
-        public String name;
+        public BigInteger bitmask;
+        public String name;  // TODO: should be polyglot because user change change language in the run
         public String id;
         public int bitshift = 0;
         public FieldDefinition(Element field) {
@@ -151,27 +243,12 @@ public class TokenDefinition {
         }
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize(); // also good for parcel
-        NodeList nList = xml.getElementsByTagName("field");
+        NodeList nList = xml.getElementsByTagName("attribute-type");
         for (int i = 0; i < nList.getLength(); i++) {
-            Node nNode = nList.item(i);
-            // System.out.println("\nParsing Element :" + nNode.getNodeName());
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = (Element) nNode;
-                String id = ((Element) nNode).getAttribute("id");
-                switch (eElement.getAttribute("type")) {
-                    case "Enumeration":
-                        fields.put(id, new Enumeration(eElement));
-                        break;
-                    case "BinaryTime":
-                        fields.put(id, new BinaryTime(eElement));
-                        break;
-                    case "IA5String":
-                        fields.put(id, new IA5String(eElement));
-                        break;
-                    default: /* Integer */
-                        fields.put(id, new FieldDefinition(eElement));
-                }
-            }
+            AttributeType attr = new AttributeType((Element) nList.item(i));
+            if (attr.bitmask != null) {// has <origin> which is from bitmask
+                attributes.put(attr.id, attr);
+            } // TODO: take care of attributes whose value does not originate from bitmask!
         }
         extractFeatureTag(xml);
         extractContractTag(xml);
@@ -217,41 +294,33 @@ public class TokenDefinition {
         return -1;
     }
 
+    private String getContentByTagName(Node node, String tagname) {
+        /* I hope stream() -like pattern is supported in DOM but they don't want to evolve */
+        for (Node nNode = node.getFirstChild(); nNode != null; nNode = nNode.getNextSibling()) {
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = (Element) nNode;
+                if (eElement.getTagName() == tagname) {
+                    return eElement.getTextContent();
+                }
+            }
+        }
+        return null;
+    }
+
     private void extractFeatureTag(Document xml)
     {
         NodeList nList = xml.getElementsByTagName("feature");
-        for (Node nNode = nList.item(0).getFirstChild(); nNode != null; nNode = nNode.getNextSibling())
-        {
-            if (nNode.getNodeType() == Node.ELEMENT_NODE)
-            {
-                Element eElement = (Element) nNode;
-                switch (eElement.getTagName())
-                {
-                    case "feemaster":
-                        feemasterAPI = eElement.getTextContent();
-                        break;
-                    case "trade":
-                        if (eElement.getAttribute("method").equals("market-queue"))
-                        {
-                            marketQueueAPI = eElement.getTextContent().trim();
-                        }
-                        break;
-                    case "network":
-                        String networkIdStr = eElement.getTextContent();
-                        if (networkIdStr != null)
-                        {
-                            try
-                            {
-                                networkId = Integer.parseInt(networkIdStr);
-                            }
-                            catch (NumberFormatException e)
-                            {
-                                networkId = 1; //default to main net
-                            }
-                        }
-                        break;
-
-                }
+        for (int i = 0; i < nList.getLength(); i++) {
+            Element feature = (Element) nList.item(i);
+            switch (feature.getAttribute("type")) {
+                case "feemaster":
+                    feemasterAPI = getContentByTagName(feature, "feemaster");
+                    break;
+                case "market-queue":
+                    marketQueueAPI = getContentByTagName(feature, "gateway");
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -270,6 +339,7 @@ public class TokenDefinition {
 
          /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */
+         /* TODO: select the contract of type "holding_contract" */
         for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = ((Element) nNode);
@@ -288,33 +358,16 @@ public class TokenDefinition {
         }
     }
 
-    private String getNode(NodeList nList, String field)
-    {
-        String value = "";
-        for (int i = 0; i < nList.getLength(); i++)
-        {
-            Node nNode = nList.item(i);
-            if (nNode.getNodeName().equals("#text")) return nNode.getNodeValue();
-            NodeList childNodes = nNode.getChildNodes();
-            if (childNodes.getLength() > 0)
-            {
-                return getNode(childNodes, field);
-            }
-        }
-
-        return value;
-    }
-
     /* take a token ID in byte-32, find all the fields in it and call back
      * token.setField(fieldID, fieldName, text-value). This is abandoned
      * temporarily for the need to retrofit the class with J.B.'s design */
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
-        for (String key : fields.keySet()) {
-            FieldDefinition f = fields.get(key);
-            BigInteger val = tokenId.and(f.bitmask).shiftRight(f.bitshift);
-            token.setAttribute(f.id,
-                    new NonFungibleToken.Attribute(f.id, f.name, val, f.applyToFieldValue(val)));
+        for (String key : attributes.keySet()) {
+            AttributeType attr = attributes.get(key);
+            BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
+            token.setAttribute(attr.id,
+                    new NonFungibleToken.Attribute(attr.id, attr.name, val, attr.toString(val)));
         }
     }
 }

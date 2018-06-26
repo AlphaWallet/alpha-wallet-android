@@ -58,7 +58,7 @@ public class TokenDefinition {
     }
 
     public enum As {  // always assume big endian
-        UTF8, Unsigned, Signed
+        UTF8, Unsigned, Signed, Mapping
     }
 
     protected class AttributeType {
@@ -68,22 +68,14 @@ public class TokenDefinition {
         public int bitshift = 0;
         public Syntax syntax;
         public As as;
+        public Map<BigInteger, String> members;
 
         public AttributeType(Element attr) {
-            name = getLocalisedName(attr);
+            name = getLocalisedName(attr,"name");
             id = attr.getAttribute("id");
-            switch(attr.getAttribute("as")) {
-                case "signed":
-                    as = As.Signed;
-                    break;
-                case "UTF8":
-                    as = As.UTF8;
-                    break;
-                default: // "unsigned"
-                    as = As.Unsigned;
-            }
+
             try {
-                switch (getContentByTagName(attr, "syntax")) { // We don't validate syntax here; schema does it.
+                switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
                     case "1.3.6.1.4.1.1466.115.121.1.6":
                         syntax = Syntax.BitString;
                         break;
@@ -120,8 +112,25 @@ public class TokenDefinition {
                 if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("origin")) {
                     // System.out.println("\nFound a name field: " + node.getNodeName());
                     Element origin = (Element) node;
+                    switch(origin.getAttribute("as").toLowerCase()) {
+                        case "signed":
+                            as = As.Signed;
+                            break;
+                        case "utf8":
+                            as = As.UTF8;
+                            break;
+                        case "mapping":
+                            as = As.Mapping;
+                            break;
+                        default: // "unsigned"
+                            as = As.Unsigned;
+                    }
                     if (origin.hasAttribute("bitmask")) {
                         bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
+                    }
+                    if(syntax.equals(Syntax.DirectoryString)){
+                        members = new ConcurrentHashMap<>();
+                        populate(origin);
                     }
                 }
             }
@@ -132,15 +141,37 @@ public class TokenDefinition {
             // System.out.println("New FieldDefinition :" + name);
         }
 
-        public String toString(BigInteger data) {
-            if (as == As.UTF8) {
-                try {
-                    return new String(data.toByteArray(), "UTF8");
-                } catch(UnsupportedEncodingException e){
-                    return null;
+        private void populate(Element mapping) {
+            Element option;
+            for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
+                if (child.getNodeType() == Node.ELEMENT_NODE) {
+                    option = (Element) child;
+                    members.put(new BigInteger(option.getAttribute("key")), getLocalisedName(option,"value"));
                 }
             }
-           return data.toString(); // FIXME!!! wrong for Unsigned
+        }
+
+        public String toString(BigInteger data) {
+            try {
+                if (as == As.UTF8) {
+                    return new String(data.toByteArray(), "UTF8");
+                }else if(as==As.Unsigned){
+                    return Integer.toString(data.intValue());
+                }else{
+                    if(syntax==Syntax.GeneralizedTime){
+                        Date date=new Date(data.longValue());
+                        return  date.toString();
+                    }else if(syntax==Syntax.DirectoryString){
+                        if(as == As.Mapping&&members!=null){
+                            return  members.get(data);
+                        }
+                    }
+
+                }
+            } catch(UnsupportedEncodingException e){
+                return null;
+            }
+           return data.toString();
         }
     }
 
@@ -150,7 +181,7 @@ public class TokenDefinition {
         public String id;
         public int bitshift = 0;
         public FieldDefinition(Element field) {
-            name = getLocalisedName(field);
+            name = getLocalisedName(field,"name");
             id = field.getAttribute("id");
             bitmask = new BigInteger(field.getAttribute("bitmask"), 16);
             while(bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)); // !!
@@ -200,7 +231,7 @@ public class TokenDefinition {
             for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
                 if (child.getNodeType() == Node.ELEMENT_NODE) {
                     entity = (Element) child;
-                    members.put(new BigInteger(entity.getAttribute("key")), getLocalisedName(entity));
+                    members.put(new BigInteger(entity.getAttribute("key")), getLocalisedName(entity,"name"));
                 }
             }
         }
@@ -209,12 +240,12 @@ public class TokenDefinition {
         }
     }
 
-    String getLocalisedName(Element nameContainer) {
+    String getLocalisedName(Element nameContainer,String targetName) {
         Element name = null;
         Locale currentNodeLang;
         for(Node node=nameContainer.getLastChild();
             node!=null; node=node.getPreviousSibling()){
-            if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("name")) {
+            if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals(targetName)) {
                 // System.out.println("\nFound a name field: " + node.getNodeName());
                 name = (Element) node;
                 currentNodeLang = new Locale(name.getAttribute("lang"));
@@ -245,6 +276,7 @@ public class TokenDefinition {
         xml.getDocumentElement().normalize(); // also good for parcel
         NodeList nList = xml.getElementsByTagName("attribute-type");
         for (int i = 0; i < nList.getLength(); i++) {
+            Node nNode = nList.item(i);
             AttributeType attr = new AttributeType((Element) nList.item(i));
             if (attr.bitmask != null) {// has <origin> which is from bitmask
                 attributes.put(attr.id, attr);
@@ -335,7 +367,7 @@ public class TokenDefinition {
 
         /* if there is no token name in <contract> this breaks;
          * token name shouldn't be in <contract> anyway, re-design pending */
-        tokenName = getLocalisedName(contract);
+        tokenName = getLocalisedName(contract,"name");
 
          /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */

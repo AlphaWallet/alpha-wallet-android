@@ -1,8 +1,10 @@
 package io.stormbird.token.web;
 
 import io.stormbird.token.tools.TokenDefinition;
+import org.apache.commons.io.IOUtils;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +39,7 @@ public class AppSiteController {
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
     private static TokenDefinition definitionParser;
-    private static Collection<String> addresses;
+    private static Set<Map.Entry<String, String>> addresses;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -142,7 +144,7 @@ public class AppSiteController {
             throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
 
-	public static void main(String[] args) throws IOException, SAXException { // FIXME: should run System.exit() if IOException
+	public static void main(String[] args) throws IOException, SAXException { // TODO: should run System.exit() if IOException
         File file = new File("../contracts/TicketingContract.xml");
         definitionParser = new TokenDefinition(new FileInputStream(file), new Locale("en"));
 
@@ -153,33 +155,46 @@ public class AppSiteController {
                 Paths.get("../contracts"))) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
                     .map(path -> getContractAddresses(path))
-                    .flatMap(Collection::stream).collect(Collectors.toList());
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
         }
 
         if (addresses == null || addresses.size() == 0) {
-            System.out.println("No Contract XML found. Bailing out.");
-            System.exit(0);
+            System.err.println("No Contract XML found. Bailing out.");
+            System.exit(255);
         } else {
             System.out.println("Recognising the following contracts:");
             addresses.forEach(string -> System.out.println(string));
         }
-
 	}
 
-	private static Collection<String> getContractAddresses(Path path) {
+	private static Set<Map.Entry<String, String>> getContractAddresses(Path path) {
+        HashMap<String, String> map = new HashMap<>();
         try (InputStream input = Files.newInputStream(path)) {
             TokenDefinition token = new TokenDefinition(input, new Locale("en"));
-            return token.addresses.values();
+            token.addresses.values().stream().forEach(address -> map.put(address, path.toString()));
+            return map.entrySet();
         } catch (IOException | SAXException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // make it safe to use in stream
         }
     }
 
-    @GetMapping(value = "/0x{address}") // :0x[0-9a-fA-F]{20}
-    @ResponseBody
-    public String getContractBehaviour(@PathVariable("address") String address)
+    // TODO: closely inspect the content type returned to see if it is correct.
+    @GetMapping(value = "/0x{address}", produces = MediaType.APPLICATION_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
+    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address) throws IOException
     {
-        return "THIS IS A HIT";
+        address = "0x" + address;
+        for(Map.Entry<String, String> entry : addresses) {
+            if (entry.getKey().toLowerCase().equals(address.toLowerCase())) {
+                File file = new File(entry.getValue());
+                FileInputStream in = new FileInputStream(file);
+                return IOUtils.toString(in, "utf8"); // TODO: find a better way to serve XML without assuming UTF8
+            }
+        }
+        // TODO: return 400 instead of this default XML file
+        File file = new File("../contracts/TicketingContract.xml");
+        FileInputStream in = new FileInputStream(file);
+        return IOUtils.toString(in, "utf8");
     }
     /* -------------------  REPO SERVER ENDS  -------------------- */
 }

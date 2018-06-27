@@ -7,12 +7,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,6 +25,7 @@ import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
+import org.xml.sax.SAXException;
 
 
 @Controller
@@ -33,6 +37,7 @@ public class AppSiteController {
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
     private static TokenDefinition definitionParser;
+    private static Collection<String> addresses;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -137,10 +142,44 @@ public class AppSiteController {
             throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
 
-	public static void main(String[] args) throws Exception {
-		SpringApplication.run(AppSiteController.class, args);
-		parser.setCryptoInterface(cryptoFunctions);
+	public static void main(String[] args) throws IOException, SAXException { // FIXME: should run System.exit() if IOException
         File file = new File("../contracts/TicketingContract.xml");
         definitionParser = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+
+        /* ------------------- REPO SERVER STARTS -------------------- */
+		SpringApplication.run(AppSiteController.class, args);
+		parser.setCryptoInterface(cryptoFunctions);
+        try (Stream<Path> dirStream = Files.list(
+                Paths.get("../contracts"))) {
+            addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+                    .map(path -> getContractAddresses(path))
+                    .flatMap(Collection::stream).collect(Collectors.toList());
+        }
+
+        if (addresses == null || addresses.size() == 0) {
+            System.out.println("No Contract XML found. Bailing out.");
+            System.exit(0);
+        } else {
+            System.out.println("Recognising the following contracts:");
+            addresses.forEach(string -> System.out.println(string));
+        }
+
 	}
+
+	private static Collection<String> getContractAddresses(Path path) {
+        try (InputStream input = Files.newInputStream(path)) {
+            TokenDefinition token = new TokenDefinition(input, new Locale("en"));
+            return token.addresses.values();
+        } catch (IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping(value = "/0x{address}") // :0x[0-9a-fA-F]{20}
+    @ResponseBody
+    public String getContractBehaviour(@PathVariable("address") String address)
+    {
+        return "THIS IS A HIT";
+    }
+    /* -------------------  REPO SERVER ENDS  -------------------- */
 }

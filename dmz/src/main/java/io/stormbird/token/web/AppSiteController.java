@@ -4,6 +4,8 @@ import io.stormbird.token.tools.TokenDefinition;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +29,7 @@ import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.xml.sax.SAXException;
 
 
@@ -179,22 +182,23 @@ public class AppSiteController {
         }
     }
 
-    // TODO: closely inspect the content type returned to see if it is correct.
-    @GetMapping(value = "/0x{address}", produces = MediaType.APPLICATION_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
-    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address) throws IOException
+    @GetMapping(value = "/0x{address}", produces = MediaType.TEXT_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
+    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address) throws IOException, NoHandlerFoundException
     {
         address = "0x" + address;
         for(Map.Entry<String, String> entry : addresses) {
             if (entry.getKey().toLowerCase().equals(address.toLowerCase())) {
                 File file = new File(entry.getValue());
                 FileInputStream in = new FileInputStream(file);
-                return IOUtils.toString(in, "utf8"); // TODO: find a better way to serve XML without assuming UTF8
+                /* Spring always append charset=UTF8 in
+                 * Content-Type. As long as the XML is encoded in UTF8
+                 * this is not a problem.
+                 * TODO: check XML's encoding and serve a charset according to the encoding */
+                return IOUtils.toString(in, "utf8");
             }
         }
-        // TODO: return 400 instead of this default XML file
-        File file = new File("../contracts/TicketingContract.xml");
-        FileInputStream in = new FileInputStream(file);
-        return IOUtils.toString(in, "utf8");
+        /* TODO: the following is HTTP 406. Return HTTP 404 instead */
+        throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
     }
     /* -------------------  REPO SERVER ENDS  -------------------- */
 }

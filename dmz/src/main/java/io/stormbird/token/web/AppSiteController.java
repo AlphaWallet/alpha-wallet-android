@@ -67,7 +67,7 @@ public class AppSiteController {
 
     @GetMapping(value = "/{UniversalLink}")
     public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, @RequestHeader("User-Agent") String agent, Model model)
-    throws FileNotFoundException, IOException, SAXException, NoHandlerFoundException
+            throws IOException, SAXException, NoHandlerFoundException
     {
         MagicLinkData data;
         TokenDefinition definition = null;
@@ -78,7 +78,7 @@ public class AppSiteController {
             return "error"; // TODO: give nice error
         }
         parser.getOwnerKey(data);
-        if (!addresses.containsKey(data.contractAddress)) { // this works because contractAddress is always lowercase
+        if (!addresses.containsKey(data.contractAddress)) { // this works as contractAddress is always in lowercase
             throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
         }
         try(FileInputStream in = new FileInputStream(addresses.get(data.contractAddress))) {
@@ -161,7 +161,7 @@ public class AppSiteController {
         repoDir = Paths.get(value);
     }
 
-    public static void main(String[] args) throws IOException, SAXException { // TODO: should run System.exit() if IOException
+    public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
         SpringApplication.run(AppSiteController.class, args);
         parser.setCryptoInterface(cryptoFunctions);
         if (repoDir == null ) {
@@ -200,7 +200,8 @@ public class AppSiteController {
     }
 
     @GetMapping(value = "/0x{address}", produces = MediaType.TEXT_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
-    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address) throws IOException, NoHandlerFoundException
+    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address)
+            throws IOException, NoHandlerFoundException
     {
         /* TODO: should parse the address, do checksum, store in a byte160 */
         address = "0x" + address.toLowerCase();
@@ -214,5 +215,4 @@ public class AppSiteController {
             throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
         }
     }
-    /* -------------------  REPO SERVER ENDS  -------------------- */
 }

@@ -73,17 +73,17 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
         list = findViewById(R.id.listTickets);
 
-        adapter = new TicketAdapter(this, this::onTicketIdClick, ticket);
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setAdapter(adapter);
-        list.setHapticFeedbackEnabled(true);
-
         viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
                 .get(AssetDisplayViewModel.class);
 
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
+
+        adapter = new TicketAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
+        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setAdapter(adapter);
+        list.setHapticFeedbackEnabled(true);
 
         findViewById(R.id.button_use).setOnClickListener(this);
         findViewById(R.id.button_sell).setOnClickListener(this);

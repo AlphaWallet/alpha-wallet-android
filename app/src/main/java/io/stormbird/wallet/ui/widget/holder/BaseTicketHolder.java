@@ -19,6 +19,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
@@ -28,7 +29,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private TicketRange thisData;
     private Ticket ticket;
     private OnTicketIdClickListener onTicketClickListener;
-    private final TokenDefinition assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
+    private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final TextView name;
     private final TextView count; // word choice: "amount" would imply the amount of money it costs
@@ -42,7 +43,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     protected final LinearLayout ticketDetailsLayout;
     protected final LinearLayout ticketLayout;
 
-    public BaseTicketHolder(int resId, ViewGroup parent, TokenDefinition definition, Token ticket) {
+    public BaseTicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service) {
         super(resId, parent);
         name = findViewById(R.id.name);
         count = findViewById(R.id.amount);
@@ -56,7 +57,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         ticketRedeemed = findViewById(R.id.redeemed);
         ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
         ticketLayout = findViewById(R.id.layout_select_ticket);
-        assetDefinition = definition;
+        assetService = service;
         this.ticket = (Ticket)ticket;
     }
 
@@ -75,9 +76,8 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
             String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
             count.setText(seatCount);
             try {
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTokenId, assetDefinition);
-                String nameStr = assetDefinition.getTokenName();
-                nameStr = nonFungibleToken.getAttribute("category").text;
+                NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTokenId);
+                String nameStr = nonFungibleToken.getAttribute("category").text;
                 String venueStr = nonFungibleToken.getAttribute("venue").text;
                 Date startTime = new Date(nonFungibleToken.getAttribute("time").value.longValue()*1000L);
                 int cat = nonFungibleToken.getAttribute("category").value.intValue();

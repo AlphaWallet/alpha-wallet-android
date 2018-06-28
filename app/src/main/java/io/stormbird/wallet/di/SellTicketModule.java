@@ -7,6 +7,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.SellDetailRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.SellTicketModelFactory;
 
 import dagger.Module;
@@ -24,9 +25,10 @@ public class SellTicketModule
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellDetailRouter sellDetailRouter) {
+            SellDetailRouter sellDetailRouter,
+            AssetDefinitionService assetDefinitionService) {
         return new SellTicketModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellDetailRouter);
+                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellDetailRouter, assetDefinitionService);
     }
 
     @Provides

@@ -60,7 +60,6 @@ public class SellTicketActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        setupSalesOrder();
 
         address = ticket.getAddress();
 
@@ -96,6 +95,7 @@ public class SellTicketActivity extends BaseActivity {
         });
 
         finishReceiver = new FinishReceiver(this);
+        setupSalesOrder();
     }
 
     private void setupSalesOrder() {
@@ -104,7 +104,7 @@ public class SellTicketActivity extends BaseActivity {
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }

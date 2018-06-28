@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 /**
  * Created by James on 9/02/2018.
@@ -17,9 +18,9 @@ public class TicketHolder extends BaseTicketHolder
 {
     public static final int VIEW_TYPE = 1066;
 
-    public TicketHolder(int resId, ViewGroup parent, TokenDefinition definition, Token ticket)
+    public TicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service)
     {
-        super(resId, parent, definition, ticket);
+        super(resId, parent, ticket, service);
     }
 
     @Override

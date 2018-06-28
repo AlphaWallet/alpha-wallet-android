@@ -57,7 +57,6 @@ public class TransferTicketActivity extends BaseActivity
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        setupSalesOrder();
 
         toolbar();
 
@@ -76,6 +75,8 @@ public class TransferTicketActivity extends BaseActivity
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
 
+        setupSalesOrder();
+
         Button nextButton = findViewById(R.id.button_next);
         nextButton.setOnClickListener(v -> {
             onNext();
@@ -90,7 +91,7 @@ public class TransferTicketActivity extends BaseActivity
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
         adapter.setTransferTicket(ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);

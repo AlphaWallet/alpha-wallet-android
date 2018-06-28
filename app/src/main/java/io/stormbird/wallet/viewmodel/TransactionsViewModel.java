@@ -31,8 +31,10 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
-public class TransactionsViewModel extends BaseViewModel {
+public class TransactionsViewModel extends BaseViewModel
+{
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
     private static final String TAG = "TVM";
 
@@ -49,6 +51,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final TransactionDetailRouter transactionDetailRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -62,8 +65,6 @@ public class TransactionsViewModel extends BaseViewModel {
     private Transaction[] txArray;
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
-    private String xmlContractAddress = null;
-    private String feemasterUrl = null;
     private int transactionCount;
     private long lastBlock = 0;
     private boolean firstRun = false;
@@ -78,7 +79,8 @@ public class TransactionsViewModel extends BaseViewModel {
             AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -88,6 +90,7 @@ public class TransactionsViewModel extends BaseViewModel {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @Override
@@ -312,7 +315,7 @@ public class TransactionsViewModel extends BaseViewModel {
     private void siftUnknownTransactions()
     {
         //add in the XML contract address to list of unknowns to fetch if we don't have it already
-        setupTokensInteract.setupUnknownList(tokenMap, xmlContractAddress);
+        setupTokensInteract.setupUnknownList(tokenMap, assetDefinitionService.getAllContracts(network.getValue().chainId));
 
         fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[0]), tokenMap) //patches tx's and returns unknown contracts
                 .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store patched TX
@@ -470,12 +473,6 @@ public class TransactionsViewModel extends BaseViewModel {
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
     }
-
-    public void setXMLContractAddress(String address)
-    {
-        xmlContractAddress = address;
-    }
-    public void setFeemasterURL(String address) { feemasterUrl = address; };
 
     public void clearTransactionEntries()
     {

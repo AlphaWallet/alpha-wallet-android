@@ -6,6 +6,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.RedeemSignatureDisplayRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.RedeemAssetSelectViewModelFactory;
 
 import dagger.Module;
@@ -22,10 +23,11 @@ public class RedeemAssetSelectModule
     RedeemAssetSelectViewModelFactory redeemTokenSelectViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            RedeemSignatureDisplayRouter redeemSignatureDisplayRouter) {
+            RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
+            AssetDefinitionService assetDefinitionService) {
 
         return new RedeemAssetSelectViewModelFactory(
-                findDefaultWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter);
+                findDefaultWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter, assetDefinitionService);
     }
 
     @Provides

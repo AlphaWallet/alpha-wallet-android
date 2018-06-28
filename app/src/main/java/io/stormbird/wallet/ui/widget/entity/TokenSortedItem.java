@@ -33,7 +33,7 @@ public class TokenSortedItem extends SortedItem<Token> {
                 Ticket oTick = (Ticket) oldToken;
                 Ticket nTick = (Ticket) newToken;
                 if (!oTick.getBurnList().equals(nTick.getBurnList())) return false;
-                else return oTick.isLiveTicket() == nTick.isLiveTicket();
+                else return oTick.isMatchedInXML() == nTick.isMatchedInXML();
             }
 
             //TODO: balance value gone stale

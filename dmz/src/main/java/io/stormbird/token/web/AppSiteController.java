@@ -2,6 +2,7 @@ package io.stormbird.token.web;
 
 import io.stormbird.token.tools.TokenDefinition;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
 import org.springframework.http.HttpHeaders;
@@ -40,7 +41,7 @@ public class AppSiteController {
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
-    private static Set<Map.Entry<String, String>> addresses;
+    private static Map<String, File> addresses;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -77,16 +78,13 @@ public class AppSiteController {
             return "error"; // TODO: give nice error
         }
         parser.getOwnerKey(data);
-        for(Map.Entry<String, String> entry : addresses) {
-            if (entry.getKey().toLowerCase().equals(data.contractAddress.toLowerCase())) {
-                File file = new File(entry.getValue());
-                definition = new TokenDefinition(new FileInputStream(file), new Locale("en"));
-            }
+        if (!addresses.containsKey(data.contractAddress)) { // this works because contractAddress is always lowercase
+            throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
         }
-        if (definition == null ) {
+        try(FileInputStream in = new FileInputStream(addresses.get(data.contractAddress))) {
             // TODO: give more detail in the error
             // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
-            throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
+            definition = new TokenDefinition(in, new Locale("en"));
         }
 
         model.addAttribute("tokenName", definition.getTokenName());
@@ -156,25 +154,29 @@ public class AppSiteController {
             throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
 
+    private static Path repoDir;
+
+    @Value("${repository.dir}")
+    public void setRepoDir(String value) {
+        repoDir = Paths.get(value);
+    }
+
     public static void main(String[] args) throws IOException, SAXException { // TODO: should run System.exit() if IOException
         SpringApplication.run(AppSiteController.class, args);
         parser.setCryptoInterface(cryptoFunctions);
-        Path repo = null;
-        for(String arg:args) {
-            if (arg.startsWith("--repository.dir="))
-                repo = Paths.get(arg.substring(17));
-        }
-        if (repo == null ) {
+        if (repoDir == null ) {
             System.err.println("Don't know where is the contract behaviour XML repository.");
             System.err.println("Try run with --repository.dir=/dir/to/repo");
             System.exit(255);
         }
 
-        try (Stream<Path> dirStream = Files.list(repo)) {
+        try (Stream<Path> dirStream = Files.list(repoDir)) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
                     .map(path -> getContractAddresses(path))
                     .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toMap(
+                            entry -> entry.getKey().toLowerCase(),
+                            entry -> new File(entry.getValue())));
         }
 
         if (addresses == null || addresses.size() == 0) {
@@ -182,7 +184,7 @@ public class AppSiteController {
             System.exit(255);
         } else {
             System.out.println("Recognising the following contracts:");
-            addresses.forEach(string -> System.out.println(string));
+            addresses.forEach((addr, xml) -> System.out.println(addr));
         }
 	}
 
@@ -200,19 +202,17 @@ public class AppSiteController {
     @GetMapping(value = "/0x{address}", produces = MediaType.TEXT_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
     public @ResponseBody String getContractBehaviour(@PathVariable("address") String address) throws IOException, NoHandlerFoundException
     {
-        address = "0x" + address;
-        for(Map.Entry<String, String> entry : addresses) {
-            if (entry.getKey().toLowerCase().equals(address.toLowerCase())) {
-                File file = new File(entry.getValue());
-                FileInputStream in = new FileInputStream(file);
-                /* Spring always append charset=UTF8 in
-                 * Content-Type. As long as the XML is encoded in UTF8
-                 * this is not a problem.
-                 * TODO: check XML's encoding and serve a charset according to the encoding */
+        /* TODO: should parse the address, do checksum, store in a byte160 */
+        address = "0x" + address.toLowerCase();
+        if (addresses.containsKey(address)) {
+            File file = addresses.get(address);
+            try (FileInputStream in = new FileInputStream(file)) {
+                /* TODO: check XML's encoding and serve a charset according to the encoding */
                 return IOUtils.toString(in, "utf8");
             }
+        } else {
+            throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
         }
-        throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
     }
     /* -------------------  REPO SERVER ENDS  -------------------- */
 }

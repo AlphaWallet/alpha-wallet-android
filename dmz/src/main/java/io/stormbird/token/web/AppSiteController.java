@@ -40,7 +40,6 @@ public class AppSiteController {
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
-    private static TokenDefinition definitionParser;
     private static Set<Map.Entry<String, String>> addresses;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
@@ -65,21 +64,32 @@ public class AppSiteController {
         return "index";
     }
 
-    /* TODO: 3 types of instructions.
-     * 1) link redeemable, not redeemd and not expired;
-     * 2) link not redeemable; 3) iOS instructios */
     @GetMapping(value = "/{UniversalLink}")
     public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, @RequestHeader("User-Agent") String agent, Model model)
+    throws FileNotFoundException, IOException, SAXException, NoHandlerFoundException
     {
         MagicLinkData data;
+        TokenDefinition definition = null;
         model.addAttribute("base64", universalLink);
         try {
             data = parser.parseUniversalLink(universalLink);
         } catch(SalesOrderMalformed e) {
-            return "error";
+            return "error"; // TODO: give nice error
         }
         parser.getOwnerKey(data);
-        model.addAttribute("tokenName", definitionParser.getTokenName());
+        for(Map.Entry<String, String> entry : addresses) {
+            if (entry.getKey().toLowerCase().equals(data.contractAddress.toLowerCase())) {
+                File file = new File(entry.getValue());
+                definition = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+            }
+        }
+        if (definition == null ) {
+            // TODO: give more detail in the error
+            // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
+            throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
+        }
+
+        model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
         // model.addAttribute("linkExp");
 
@@ -94,7 +104,7 @@ public class AppSiteController {
         }
 
         try {
-            updateTokenInfo(model, data);
+            updateTokenInfo(model, data, definition);
         } catch (Exception e) {
             /* although contract is okay, we can't getting
 	     * tokens. This could be caused by a wrong signature. The
@@ -120,7 +130,7 @@ public class AppSiteController {
         model.addAttribute("contractName", contractName);
     }
 
-    private void updateTokenInfo(Model model, MagicLinkData data) throws Exception {
+    private void updateTokenInfo(Model model, MagicLinkData data, TokenDefinition definition) throws Exception {
         // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
@@ -128,7 +138,7 @@ public class AppSiteController {
         List<NonFungibleToken> selection = Arrays.stream(data.tickets)
                 .mapToObj(i -> balanceArray.get(i))
                 .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
-                .map(tokenId -> new NonFungibleToken(tokenId, definitionParser))
+                .map(tokenId -> new NonFungibleToken(tokenId, definition))
                 .collect(Collectors.toList());
 
         for (NonFungibleToken token : selection) {
@@ -146,15 +156,21 @@ public class AppSiteController {
             throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
 
-	public static void main(String[] args) throws IOException, SAXException { // TODO: should run System.exit() if IOException
-        File file = new File("../contracts/TicketingContract.xml");
-        definitionParser = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+    public static void main(String[] args) throws IOException, SAXException { // TODO: should run System.exit() if IOException
+        SpringApplication.run(AppSiteController.class, args);
+        parser.setCryptoInterface(cryptoFunctions);
+        Path repo = null;
+        for(String arg:args) {
+            if (arg.startsWith("--repository.dir="))
+                repo = Paths.get(arg.substring(17));
+        }
+        if (repo == null ) {
+            System.err.println("Don't know where is the contract behaviour XML repository.");
+            System.err.println("Try run with --repository.dir=/dir/to/repo");
+            System.exit(255);
+        }
 
-        /* ------------------- REPO SERVER STARTS -------------------- */
-		SpringApplication.run(AppSiteController.class, args);
-		parser.setCryptoInterface(cryptoFunctions);
-        try (Stream<Path> dirStream = Files.list(
-                Paths.get("../contracts"))) {
+        try (Stream<Path> dirStream = Files.list(repo)) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
                     .map(path -> getContractAddresses(path))
                     .flatMap(Collection::stream)
@@ -196,7 +212,6 @@ public class AppSiteController {
                 return IOUtils.toString(in, "utf8");
             }
         }
-        /* TODO: the following is HTTP 406. Return HTTP 404 instead */
         throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
     }
     /* -------------------  REPO SERVER ENDS  -------------------- */

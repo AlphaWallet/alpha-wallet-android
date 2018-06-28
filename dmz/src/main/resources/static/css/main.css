@@ -1,74 +1,154 @@
-p {
-    max-width: 26em;
-}
-html {
-    padding-top: 20px;
-}
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700);
+html,
 body {
-    padding-left: 8px;
-    background-image: url('logo.png');
-    background-position: 60px 20px;
-    background-repeat: no-repeat;
-    font-family: 'Source Sans Pro', 'Open Sans', Roboto, 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', 'Myriad Pro', 'Segoe UI', Myriad, Helvetica, 'Lucida Grande', 'DejaVu Sans Condensed', 'Liberation Sans', 'Nimbus Sans L', Tahoma, Geneva, Arial, sans-serif;
-    color: darkslategray;
-}
-#download_app :link {
-	display: inline-block;
-	padding: 1ex;
-}
-h1 {
-    padding-top: 2em;
-    margin-bottom: 1em;
-    color: slategray;
-}
+  height: 100%; }
 
-#assets {
-    border: thin solid silver;
-    border-radius: 10px;
-    margin: 1ex;
-    padding: 1em;
-    width: 20em;
-}
+body {
+  background-image: url('logo.png');
+  background-size: 40px 28px;
+  background-position: 50px 60px;
+  background-repeat: no-repeat;
+  padding-top: 150px;
+  font-family: "Source Sans Pro", sans-serif;
+  color: #2f2f2f; }
+    @media (min-width: 992px) {
+        body {
+      background-image: url('logo.png');
+  background-size: 40px 28px;
+  background-position: 100px 60px;
+  background-repeat: no-repeat; } }
 
-#status {
-    font-size: medium;
-    font-variant: small-caps;
-    border-radius: 0.5em;
-    padding-left: 1ex;
-    padding-right: 1ex;
-}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-family: "Source Sans Pro", sans-serif;
+  color: "Source Sans Pro", sans-serif;
+  margin-bottom: 1rem; }
 
-.available #status {
-    background: forestgreen;
-    color: white;
-}
-.unavailable #status {
-    background-color: red;
-    color: white;
-}
-.expired #status {
-    background-color: maroon;
-    color: silver;
-}
 
-h2, h3 {
-    color: black;
-}
+header.main {
+  position: relative;
+  width: 100%;
+  padding-top: 0px;
+  padding-bottom: 100px;
+  color: #2f2f2f; }
+  header.main .header-content {
+  width: 300px;
+  margin-left: -110px;
+  margin-bottom: 100px; }
+    header.main .header-content h1 {
+      font-size: 18px; }
+  header.main .device-container {
+    margin-right: auto;
+    margin-left: -200px;
+    max-width: 600px; }
+  @media (min-width: 992px) {
+    header.main {
+      height: 100vh;
+      min-height: 775px;
+      padding-top: 0;
+      padding-bottom: 0; }
+      header.main .header-content {
+        width: 500px;
+        margin-bottom: 50px;
+        margin-left: 30px; }
+        header.main .header-content h1 {
+          font-size: 30px; }
+      header.main .device-container {
+        max-width: 400px;
+        margin-left: 0; } }
 
 #view_listing a {
-    background-color: goldenrod;
-    font-weight: bold;
-    border-radius: 0.5em;
-    padding: 1ex 3em;
-}
+  background-color: goldenrod;
+  font-weight: bold;
+  border-radius: 0.5em;
+  padding: 1ex 3em; }
 
 #view_listing :link {
-    text-decoration: none;
-}
+  text-decoration: none; }
+
 #view_listing :visited {
-    text-decoration: none;
+  text-decoration: none; }
+
+.ticket-table {
+  width: 294px;
+  height: 250px;
+  border-radius: 20px;
+  box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.07);
+  background-color: #ffffff;
+  border: solid 1px #f3f3f3;
+  padding: 1.5em; }
+    @media (min-width: 992px) {
+.ticket-table {
+  width: 346px;
+  height: 250px;
+  border-radius: 20px;
+  box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.07);
+  background-color: #ffffff;
+  border: solid 1px #f3f3f3;
+  padding: 1.5em; } }
+
+.box-img {
+  height: 20px;
+  width: 20px; }
+@media (min-width: 992px) {
+.box-img {
+  height: 25px;
+  width: 25px; } }
+
+#status {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 15px;
+  font-variant: small-caps;
+  border-radius: 8px;
+  padding-left: 1ex;
+  padding-right: 1ex; }
+
+.available #status {
+  background: #75b943;
+  color: white; }
+
+.unavailable #status {
+  background-color: #E70000;
+  color: white; }
+
+.expired #status {
+  background-color: #800000;
+  color: silver; }
+
+  .btn-y {
+  background-color: #f9d021;
+  font-family: "Source Sans Pro", sans-serif;
+  border-radius: 18.7px;
+  border: 0;
+  color: white;
 }
 
+.btn-xl {
+  font-size: 16px;
+  padding: 8px 50px;
+  font-weight: 300;
+}
+@media (min-width: 992px) {
+.btn-xl {
+  font-size: 16px;
+  padding: 10px 100px;
+  font-weight: 300;
+} }
+
+dt, dd {
+    display: inline;
+}
+dd {
+    margin-left: 0em;
+    padding-left: 1ex;
+    padding-right: 1em;
+}
+@media (min-width: 992px) {
 dt, dd {
     display: inline-block;
 }
@@ -76,10 +156,24 @@ dd {
     margin-left: 0em;
     padding-left: 1ex;
     padding-right: 1em;
-}
+} }
 
-.footnote {
-    color: gray;
-    margin-top: 2em;
-    border-top: thin solid silver;
+.purchase {
+  font-size: 30px;
+  font-weight: 300;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #2f2f2f;
 }
+@media (min-width: 992px) {
+.purchase {
+  font-size: 38px;
+  font-weight: 300;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #2f2f2f;
+} }

@@ -1,0 +1,35 @@
+// Styling for ticket box
+
+.ticket-table {
+  width: 346px;
+  height: 250px;
+  border-radius: 20px;
+  box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.07);
+  background-color: #ffffff;
+  border: solid 1px #f3f3f3;
+  padding: 1.5em; }
+
+  .box-img {
+  	height: 25px;
+    width: 25px; }
+
+	#status {
+	    font-family: "Source Sans Pro", sans-serif;
+	    font-size: 15px;
+	    font-variant: small-caps;
+	    border-radius: 8px;
+	    padding-left: 1ex;
+	    padding-right: 1ex;
+	} 
+	.available #status {
+	    background: #75b943;
+	    color: white;
+	}
+	.unavailable #status {
+	    background-color: #E70000;
+	    color: white;
+	}
+	.expired #status {
+	    background-color: #800000;
+	    color: silver;
+	} 

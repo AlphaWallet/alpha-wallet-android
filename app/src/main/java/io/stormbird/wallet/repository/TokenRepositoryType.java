@@ -2,6 +2,7 @@ package io.stormbird.wallet.repository;
 
 import org.web3j.protocol.core.methods.response.Transaction;
 
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SubscribeWrapper;
 import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.entity.Token;
@@ -39,4 +40,5 @@ public interface TokenRepositoryType {
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
     Single<Ticker> getEthTicker();
+    Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
 }

@@ -4,10 +4,17 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Map;
+
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.WalletHolder;
+
+import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
@@ -68,18 +75,31 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 		return WalletHolder.VIEW_TYPE;
 	}
 
-	public void setDefaultWallet(Wallet wallet) {
+	public void setDefaultWallet(Wallet wallet)
+	{
 		this.defaultWallet = wallet;
 		notifyDataSetChanged();
 	}
 
-	public void setWallets(Wallet[] wallets) {
+	public void setWallets(Wallet[] wallets)
+	{
 		this.wallets = wallets == null ? new Wallet[0] : wallets;
 		notifyDataSetChanged();
 	}
 
     public Wallet getDefaultWallet() {
         return defaultWallet;
+    }
+
+    public void updateWalletBalances(Map<String, BigDecimal> balances)
+    {
+        for (Wallet wallet : wallets)
+        {
+            wallet.balance = weiToEth(balances.get(wallet.address))
+                    .setScale(4, RoundingMode.HALF_UP)
+                    .stripTrailingZeros().toPlainString();
+        }
+        notifyDataSetChanged();
     }
 
     public interface OnSetWalletDefaultListener {

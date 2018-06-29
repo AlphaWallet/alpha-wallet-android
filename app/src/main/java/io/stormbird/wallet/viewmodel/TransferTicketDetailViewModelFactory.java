@@ -9,6 +9,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
 
@@ -25,6 +26,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     private TransferTicketDetailRouter transferTicketDetailRouter;
     private FeeMasterService feeMasterService;
     private AssetDisplayRouter assetDisplayRouter;
+    private AssetDefinitionService assetDefinitionService;
 
     public TransferTicketDetailViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                                 FindDefaultWalletInteract findDefaultWalletInteract,
@@ -32,7 +34,8 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
                                                 CreateTransactionInteract createTransactionInteract,
                                                 TransferTicketDetailRouter transferTicketDetailRouter,
                                                 FeeMasterService feeMasterService,
-                                                AssetDisplayRouter assetDisplayRouter) {
+                                                AssetDisplayRouter assetDisplayRouter,
+                                                AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -40,12 +43,13 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.feeMasterService = feeMasterService;
         this.assetDisplayRouter = assetDisplayRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter);
+        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService);
     }
 }
 

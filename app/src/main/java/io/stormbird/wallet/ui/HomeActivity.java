@@ -98,8 +98,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.error().observe(this, this::onError);
         viewModel.setLocale(this);
 
-        refreshLayout.setOnRefreshListener(() -> viewModel.fetchTransactions(true));
-
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
             showPage(SETTINGS);
         } else {
@@ -164,7 +162,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.try_again: {
-                viewModel.fetchTransactions(true);
+
             }
             break;
             case R.id.action_buy: {

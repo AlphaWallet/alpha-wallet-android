@@ -3,6 +3,7 @@ package io.stormbird.wallet.di;
 import android.content.Context;
 
 import com.google.gson.Gson;
+
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.GasSettingsRepository;
@@ -21,6 +22,7 @@ import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.WalletRepository;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.AccountKeystoreService;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.CoinmarketcapTickerService;
 import io.stormbird.wallet.service.EthplorerTokenService;
 import io.stormbird.wallet.service.FeeMasterService;
@@ -160,6 +162,12 @@ public class RepositoriesModule {
 											 TransactionRepositoryType transactionRepository,
 											 PasswordStore passwordStore) {
 		return new FeeMasterService(okHttpClient, transactionRepository, passwordStore);
+	}
+
+	@Singleton
+	@Provides
+	AssetDefinitionService provideAssetDefinitionService(Context ctx) {
+		return new AssetDefinitionService(ctx);
 	}
 
 	@Singleton

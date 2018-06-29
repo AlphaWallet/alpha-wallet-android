@@ -12,6 +12,7 @@ import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModelFactory;
 
 import dagger.Module;
@@ -31,9 +32,10 @@ public class RedeemSignatureDisplayModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract,
-            AssetDisplayRouter assetDisplayRouter) {
+            AssetDisplayRouter assetDisplayRouter,
+            AssetDefinitionService assetDefinitionService) {
         return new RedeemSignatureDisplayModelFactory(
-                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter);
+                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
     }
 
     @Provides

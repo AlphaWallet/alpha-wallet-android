@@ -28,13 +28,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.AssetDisplayActivity;
 
 /**
  * Created by James on 22/01/2018.
  */
 
-public class AssetDisplayViewModel extends BaseViewModel {
+public class AssetDisplayViewModel extends BaseViewModel
+{
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ADVM";
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -45,6 +47,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SellTicketRouter sellTicketRouter;
     private final MyAddressRouter myAddressRouter;
+    private final AssetDefinitionService assetDefinitionService;
     
     private final HomeRouter homeRouter;
     private Token refreshToken;
@@ -66,7 +69,8 @@ public class AssetDisplayViewModel extends BaseViewModel {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -76,6 +80,7 @@ public class AssetDisplayViewModel extends BaseViewModel {
         this.sellTicketRouter = sellTicketRouter;
         this.homeRouter = homeRouter;
         this.myAddressRouter = myAddressRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @Override
@@ -121,6 +126,11 @@ public class AssetDisplayViewModel extends BaseViewModel {
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 
     private void onToken(Token t)

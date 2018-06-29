@@ -49,7 +49,6 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         toolbar();
         setTitle(getString(R.string.toolbar_header_wallet));
 
-        adapter = new TokensAdapter(this::onTokenClick);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
         progressView = findViewById(R.id.progress_view);
@@ -72,6 +71,8 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
+
+        adapter = new TokensAdapter(this::onTokenClick, null);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }

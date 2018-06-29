@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
 import io.stormbird.wallet.ui.widget.entity.MarketSaleHeaderSortedItem;
@@ -41,8 +42,8 @@ public class TicketSaleAdapter extends TicketAdapter {
     private QuantitySelectorHolder quantitySelector;
 
     /* Context ctx is used to initialise assetDefinition in the super class */
-    public TicketSaleAdapter(Context ctx, OnTicketIdClickListener onTicketIdClickListener, Ticket t) {
-        super(ctx, onTicketIdClickListener, t);
+    public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t, AssetDefinitionService assetService) {
+        super(onTicketIdClickListener, t, assetService);
         onTokenCheckListener = this::onTokenCheck;
         selectedTicketRange = null;
     }
@@ -52,12 +53,12 @@ public class TicketSaleAdapter extends TicketAdapter {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
-                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, assetDefinition, ticket);
+                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, ticket, assetService);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 holder = tokenHolder;
             } break;
             case TicketSaleHolder.VIEW_TYPE: {
-                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, assetDefinition, ticket);
+                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, ticket, assetService);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 tokenHolder.setOnTokenCheckListener(onTokenCheckListener);
                 holder = tokenHolder;
@@ -66,7 +67,7 @@ public class TicketSaleAdapter extends TicketAdapter {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
             } break;
             case TokenDescriptionHolder.VIEW_TYPE: {
-                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent);
+                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, ticket, assetService);
             } break;
             case SalesOrderHeaderHolder.VIEW_TYPE: {
                 holder = new SalesOrderHeaderHolder(R.layout.item_redeem_ticket, parent);
@@ -90,7 +91,6 @@ public class TicketSaleAdapter extends TicketAdapter {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TransferHeaderSortedItem(t));
-
         addRanges(t);
 
         items.endBatchedUpdates();
@@ -108,7 +108,7 @@ public class TicketSaleAdapter extends TicketAdapter {
             if (v.compareTo(BigInteger.ZERO) == 0) continue;
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
-            NonFungibleToken nft = new NonFungibleToken(v, assetDefinition);
+            NonFungibleToken nft = assetService.getNonFungibleToken(v);
             e.ticketNumber = nft.getAttribute("numero").value.intValue();
             e.category = (short)nft.getAttribute("category").value.intValue();
             e.match = (short)nft.getAttribute("match").value.intValue();

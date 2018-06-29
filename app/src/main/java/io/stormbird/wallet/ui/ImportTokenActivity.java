@@ -71,8 +71,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private LinearLayout costLayout;
     private int networkId = 0;
 
-    private TokenDefinition ticketToken = null;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -125,47 +123,19 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         ticketRange = null;
 
         Ticket.blankTicketHolder(R.string.loading,this);
-
-        loadTicketToken();
-    }
-
-    private void loadTicketToken()
-    {
-        if (ticketToken == null)
-        {
-            try
-            {
-                ticketToken = new TokenDefinition(
-                        getResources().getAssets().open("TicketingContract.xml"),
-                        getResources().getConfiguration().locale);
-            }
-            catch (IOException|SAXException e)
-            {
-                unVerified.setVisibility(View.VISIBLE);
-                textUnverified.setVisibility(View.VISIBLE);
-            }
-        }
     }
 
     private void checkContractNetwork(String contractAddress)
     {
-        if (ticketToken != null)
+        int checkNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition().getNetworkFromContract(contractAddress);
+        if (checkNetworkId > 0)
         {
-            //is this address present in any of the networks?
-            int networkId = ticketToken.getNetworkFromContract(contractAddress);
-            if (networkId > 0)
-            {
-                viewModel.switchNetwork(networkId);
-            }
-            else
-            {
-                //TODO: attempt to determine which network the contract is on.
-                //TODO: Use Etherscan to ping the networks sequentially
-                viewModel.loadToken();
-            }
+            viewModel.switchNetwork(checkNetworkId);
         }
         else
         {
+            //TODO: attempt to determine which network the contract is on.
+            //TODO: Use Etherscan to ping the networks sequentially
             viewModel.loadToken();
         }
     }
@@ -290,23 +260,15 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         importTxt.setText(R.string.ticket_import_valid);
 
-        ticket.displayTicketHolder(ticketRange, this);
+        ticket.displayTicketHolder(ticketRange, this, viewModel.getAssetDefinitionService());
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        if (ticketToken != null)
+        int contractNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition().getNetworkFromContract(ticket.getAddress());
+        if (contractNetworkId == networkId)
         {
-            String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
-            if (address != null && address.equalsIgnoreCase(ticketRange.contractAddress))
-            {
-                verified.setVisibility(View.VISIBLE);
-                textVerified.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                unVerified.setVisibility(View.VISIBLE);
-                textUnverified.setVisibility(View.VISIBLE);
-            }
+            verified.setVisibility(View.VISIBLE);
+            textVerified.setVisibility(View.VISIBLE);
         }
         else
         {
@@ -436,17 +398,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else {
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
-                        if (ticketToken != null)
+                        int checkNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition().getNetworkFromContract(t.getAddress());
+                        if (checkNetworkId > 0)
                         {
-                            String address = ticketToken.getContractAddress(networkId); // Null if contract address undefined for given networkID
-                            if (address != null && address.equalsIgnoreCase(t.getAddress()))
-                            {
-                                viewModel.importThroughFeemaster(ticketToken.getFeemasterAPI());
-                            }
-                            else
-                            {
-                                viewModel.performImport();
-                            }
+                            viewModel.importThroughFeemaster(viewModel.getAssetDefinitionService().getAssetDefinition().getFeemasterAPI());
                         }
                         else
                         {

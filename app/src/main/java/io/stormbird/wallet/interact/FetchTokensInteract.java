@@ -1,6 +1,7 @@
 package io.stormbird.wallet.interact;
 
 import io.stormbird.wallet.entity.MagicLinkParcel;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.OrderContractAddressPair;
 import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.entity.Ticket;
@@ -92,6 +93,13 @@ public class FetchTokensInteract {
                         .setBurnList(wallet, token, burnList)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Token> fetchEth(NetworkInfo network, Wallet wallet)
+    {
+        return tokenRepository.getEthBalance(network, wallet).toObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Token> updateBalance(Wallet wallet, Token token)

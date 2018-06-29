@@ -140,7 +140,8 @@ public class TransactionsViewModel extends BaseViewModel
     public LiveData<Boolean> showEmpty() { return showEmpty; }
     public LiveData<Boolean>  clearAdapter() { return clearAdapter; }
 
-    public void prepare() {
+    public void prepare()
+    {
         firstRun = false;
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
@@ -198,16 +199,6 @@ public class TransactionsViewModel extends BaseViewModel
     private void onTransactions(Transaction[] transactions) {
         Log.d(TAG, "Found " + transactions.length + " Cached transactions");
         txArray = transactions;
-        if (transactions.length == 0)
-        {
-            firstRun = true;
-        }
-        else if (firstRun)
-        {
-            firstRun = false;
-            //clear the adapter
-            clearAdapter.postValue(true);
-        }
 
         for (Transaction tx : txArray)
         {
@@ -284,6 +275,12 @@ public class TransactionsViewModel extends BaseViewModel
      */
     private void enumerateTokens()
     {
+        //check transaction difference - this is a first run if we have network transactions but no cached transactions
+        if (txArray.length == 0 && txMap.size() > 0)
+        {
+            firstRun = true;
+        }
+
         //stop the spinner
         progress.postValue(false);
         Log.d(TAG, "Enumerating tokens");

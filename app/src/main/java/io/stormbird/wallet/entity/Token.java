@@ -90,7 +90,14 @@ public class Token implements Parcelable
 
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(balance.toString());
+        if (balance != null)
+        {
+            realmToken.setBalance(balance.toString());
+        }
+        else
+        {
+            realmToken.setBalance("0");
+        }
     }
 
     public String getAddress() {

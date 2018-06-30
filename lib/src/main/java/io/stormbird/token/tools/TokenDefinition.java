@@ -326,6 +326,14 @@ public class TokenDefinition {
         return -1;
     }
 
+    public Map<BigInteger, String> getMappingMembersByKey(String key){
+        if(attributes.containsKey(key)) {
+            AttributeType attr = attributes.get(key);
+            return attr.members;
+        }
+        return null;
+    }
+
     private String getContentByTagName(Node node, String tagname) {
         /* I hope stream() -like pattern is supported in DOM but they don't want to evolve */
         for (Node nNode = node.getFirstChild(); nNode != null; nNode = nNode.getNextSibling()) {

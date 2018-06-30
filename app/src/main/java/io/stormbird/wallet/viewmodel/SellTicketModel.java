@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 import static io.stormbird.wallet.ui.SellDetailActivity.SET_A_PRICE;
 
@@ -30,6 +31,7 @@ public class SellTicketModel  extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final SellDetailRouter sellDetailRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -42,11 +44,13 @@ public class SellTicketModel  extends BaseViewModel {
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellDetailRouter sellDetailRouter) {
+            SellDetailRouter sellDetailRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.sellDetailRouter = sellDetailRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @Override
@@ -119,5 +123,10 @@ public class SellTicketModel  extends BaseViewModel {
         {
 
         }
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

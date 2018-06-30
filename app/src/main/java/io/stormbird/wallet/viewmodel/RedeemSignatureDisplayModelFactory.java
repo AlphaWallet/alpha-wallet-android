@@ -15,6 +15,7 @@ import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.MemPoolInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 /**
  * Created by James on 22/01/2018.
@@ -29,6 +30,7 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memPoolInteract;
     private final AssetDisplayRouter assetDisplayRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     public RedeemSignatureDisplayModelFactory(
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -37,7 +39,8 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract,
-            AssetDisplayRouter assetDisplayRouter) {
+            AssetDisplayRouter assetDisplayRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
@@ -45,11 +48,12 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
         this.fetchTokensInteract = fetchTokensInteract;
         this.memPoolInteract = memPoolInteract;
         this.assetDisplayRouter = assetDisplayRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new RedeemSignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter);
+        return (T) new RedeemSignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
     }
 }

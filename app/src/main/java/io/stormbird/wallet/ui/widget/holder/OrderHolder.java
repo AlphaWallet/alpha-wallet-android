@@ -12,11 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.utils.Numeric;
-
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.TicketDecode;
 import io.stormbird.wallet.ui.widget.OnSalesOrderClickListener;
 import io.stormbird.token.entity.MagicLinkData;
 
@@ -73,15 +69,16 @@ public class OrderHolder extends BinderViewHolder<MagicLinkData> implements View
         // therefore this bind and BaseTicketHolder.bind can merge. - Weiwu
         this.thisData = data;
         try {
-            int seatStart = TicketDecode.getSeatIdInt(data.ticketStart);
-            String seatRange = String.valueOf(seatStart);
-            if (data.ticketCount > 1) seatRange = seatStart + "-" + (seatStart+(data.ticketCount-1));
-            price.setText(String.valueOf(data.price));
-            name.setText(data.contractName);
-            setBalance(data);
-            date.setText(TicketDecode.getDate(data.ticketStart));
-            ticketIds.setText(seatRange);
-            name.setText(TicketDecode.getZone(data.ticketStart) + data.contractName);
+            //TODO:`use XML data
+//            int seatStart = TicketDecode.getSeatIdInt(data.ticketStart);
+//            String seatRange = String.valueOf(seatStart);
+//            if (data.ticketCount > 1) seatRange = seatStart + "-" + (seatStart+(data.ticketCount-1));
+//            price.setText(String.valueOf(data.price));
+            name.setText("XML Decoder, OrderHolder.java");
+//            setBalance(data);
+//            date.setText(TicketDecode.getDate(data.ticketStart));
+//            ticketIds.setText(seatRange);
+//            name.setText(TicketDecode.getZone(data.ticketStart) + data.contractName);
         } catch (Exception ex) {
             fillEmpty();
         }

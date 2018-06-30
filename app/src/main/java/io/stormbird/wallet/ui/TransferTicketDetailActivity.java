@@ -129,12 +129,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         transferStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
         prunedIds = ticketIds;
 
-        //we should import a token and a list of chosen ids
-        RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this, this::onTicketIdClick, ticket, ticketIds);
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setAdapter(adapter);
-
         toolbar();
         setTitle(getString(R.string.empty));
         systemView = findViewById(R.id.system_view);
@@ -154,6 +148,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.userTransaction().observe(this, this::onUserTransaction);
+
+        //we should import a token and a list of chosen ids
+        RecyclerView list = findViewById(R.id.listTickets);
+        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService());
+        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setAdapter(adapter);
 
         textQuantity = findViewById(R.id.text_quantity);
         titleText = findViewById(R.id.title_transfer);

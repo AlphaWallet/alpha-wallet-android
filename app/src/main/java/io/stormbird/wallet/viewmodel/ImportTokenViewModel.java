@@ -23,6 +23,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
 import org.web3j.tx.Contract;
@@ -48,7 +49,8 @@ import static io.stormbird.wallet.entity.MagicLinkParcel.generateReverseTradeDat
  * Created by James on 9/03/2018.
  */
 
-public class ImportTokenViewModel extends BaseViewModel  {
+public class ImportTokenViewModel extends BaseViewModel
+{
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ITVM";
 
@@ -60,6 +62,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FeeMasterService feeMasterService;
     private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final AssetDefinitionService assetDefinitionService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -93,7 +96,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
                          SetupTokensInteract setupTokensInteract,
                          FeeMasterService feeMasterService,
                          AddTokenInteract addTokenInteract,
-                         EthereumNetworkRepositoryType ethereumNetworkRepository) {
+                         EthereumNetworkRepositoryType ethereumNetworkRepository,
+                         AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -102,6 +106,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         this.feeMasterService = feeMasterService;
         this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     private void initParser()
@@ -485,5 +490,10 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void finishedImport(Token token)
     {
         Log.d(TAG, "Added to Watch list: " + token.getFullName());
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

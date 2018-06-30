@@ -14,6 +14,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.SellDetailRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
@@ -42,6 +43,7 @@ public class SellDetailModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
     private final AssetDisplayRouter assetDisplayRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private byte[] linkMessage;
 
@@ -50,13 +52,15 @@ public class SellDetailModel extends BaseViewModel {
                           MarketQueueService marketQueueService,
                     CreateTransactionInteract createTransactionInteract,
                     SellDetailRouter sellDetailRouter,
-                    AssetDisplayRouter assetDisplayRouter) {
+                    AssetDisplayRouter assetDisplayRouter,
+                    AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     private void initParser()
@@ -149,6 +153,11 @@ public class SellDetailModel extends BaseViewModel {
             //TODO: Display appropriate error to user
             sm.printStackTrace();
         }
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 
     public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)

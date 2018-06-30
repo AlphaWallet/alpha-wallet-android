@@ -9,6 +9,7 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.RedeemSignatureDisplayRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.token.entity.TicketRange;
 
@@ -21,19 +22,21 @@ public class RedeemAssetSelectViewModel extends BaseViewModel
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final RedeemSignatureDisplayRouter redeemSignatureDisplayRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
-
     public RedeemAssetSelectViewModel(
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            RedeemSignatureDisplayRouter redeemSignatureDisplayRouter) {
+            RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemSignatureDisplayRouter = redeemSignatureDisplayRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public void prepare() {
@@ -57,5 +60,10 @@ public class RedeemAssetSelectViewModel extends BaseViewModel
     {
         TicketRangeParcel parcel = new TicketRangeParcel(range);
         redeemSignatureDisplayRouter.open(ctx, defaultWallet.getValue(), ticket, parcel);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

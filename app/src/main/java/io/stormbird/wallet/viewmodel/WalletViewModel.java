@@ -113,7 +113,6 @@ public class WalletViewModel extends BaseViewModel {
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> endUpdate() { return checkTokens; }
 
-
     @Override
     protected void onCleared() {
         super.onCleared();

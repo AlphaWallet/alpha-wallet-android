@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,7 +25,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
     private final RadioButton defaultAction;
 	private final ImageView deleteAction;
 	private final TextView address;
+	private final TextView balance;
     private final ImageView exportAction;
+    private final LinearLayout ethLayout;
     private WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
 	private WalletsAdapter.OnWalletDeleteListener onWalletDeleteListener;
 	private WalletsAdapter.OnExportWalletListener onExportWalletListener;
@@ -38,6 +41,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		deleteAction = findViewById(R.id.delete_action);
 		exportAction = findViewById(R.id.export_action);
 		address = findViewById(R.id.address);
+		balance = findViewById(R.id.balance_eth);
+		ethLayout = findViewById(R.id.layout_eth);
 
 		address.setOnClickListener(this);
 		defaultAction.setOnClickListener(this);
@@ -50,11 +55,21 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		wallet = null;
 		address.setText(null);
 		defaultAction.setEnabled(false);
-		if (data == null) {
+		if (data == null)
+		{
 			return;
 		}
 		this.wallet = data;
 		address.setText(wallet.address);
+		balance.setText(wallet.balance);
+		if (wallet.balance.equals("-"))
+		{
+			ethLayout.setVisibility(View.INVISIBLE);
+		}
+		else
+		{
+			ethLayout.setVisibility(View.VISIBLE);
+		}
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));

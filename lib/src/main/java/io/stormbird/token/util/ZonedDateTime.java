@@ -1,7 +1,10 @@
 package io.stormbird.token.util;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -33,6 +36,16 @@ public class ZonedDateTime {
     public ZonedDateTime(long unixTime, TimeZone timezone) {
         this.time = unixTime * 1000L;
         this.timezone = timezone;
+    }
+
+    /* Creating ZonedDateTime from GeneralizedTime */
+    public ZonedDateTime(String time) throws ParseException {
+        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
+        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
+        //SimpleDateFormat generalizedTime = new SimpleDateFormat("yyyyMMddHHmmssZ");
+        //Date date = generalizedTime.parse(time);
+        this.time = odt.toInstant().getEpochSecond();
+        this.timezone = TimeZone.getTimeZone("Europe/Moscow");
     }
 
     /* EVERY FUNCTION BELOW ARE SET OUT IN JAVA8 */

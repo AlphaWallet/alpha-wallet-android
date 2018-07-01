@@ -2,6 +2,7 @@ package io.stormbird.token.util;
 
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -12,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class ZonedDateTimeTest {
     final long unixTime = 0;
     final String ISO8601 = "1970-01-01T03:00+03:00";
+    final String GeneralizedTime = "19700101030000+0300";
 
     @Test
     public void DemonstrateBehaviourOfJave8ZonedDateTime() {
@@ -35,6 +37,15 @@ public class ZonedDateTimeTest {
 
         // okay let's verify this with the ZonedDateTime
         ZonedDateTime timeInMoscow = new ZonedDateTime(unixTime, TimeZone.getTimeZone("Europe/Moscow"));
+        assertEquals(ISO8601, timeInMoscow.toString());
+        assertEquals(unixTime, timeInMoscow.toEpochSecond());
+        assertEquals(3, timeInMoscow.getHour());
+        assertEquals(0, timeInMoscow.getMinute());
+    }
+
+    @Test
+    public void ZonedDateTimeCanBeCreatedFromGeneralizedTime() throws ParseException {
+        ZonedDateTime timeInMoscow = new ZonedDateTime(GeneralizedTime);
         assertEquals(ISO8601, timeInMoscow.toString());
         assertEquals(unixTime, timeInMoscow.toEpochSecond());
         assertEquals(3, timeInMoscow.getHour());

@@ -155,23 +155,17 @@ public class TokenDefinition {
             try {
                 if (as == As.UTF8) {
                     return new String(data.toByteArray(), "UTF8");
-                }else if(as==As.Unsigned){
-                    return Integer.toString(data.intValue());
-                }else{
-                    if(syntax==Syntax.GeneralizedTime){
-                        Date date=new Date(data.longValue());
-                        return  date.toString();
-                    }else if(syntax==Syntax.DirectoryString){
-                        if(as == As.Mapping&&members!=null){
-                            return  members.get(data);
-                        }
-                    }
-
+                } else if(as == As.Unsigned){
+                    return data.toString();
+                } else if(as == As.Mapping){
+                    // members might be null, but it is better to throw up ( NullPointerException )
+                    // than silently ignore
+                    return members.get(data);
                 }
+                throw new NullPointerException("Missing valid 'as' attribute");
             } catch(UnsupportedEncodingException e){
                 return null;
             }
-           return data.toString();
         }
     }
 

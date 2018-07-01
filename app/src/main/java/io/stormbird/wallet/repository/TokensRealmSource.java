@@ -373,6 +373,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         catch (Exception ex)
         {
+            ex.printStackTrace();
             if (realm != null && realm.isInTransaction())
             {
                 realm.cancelTransaction();
@@ -504,7 +505,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     private Token convertSingle(RealmResults<RealmToken> realmItems, long now) {
-        int len = realmItems.size();
+        if (realmItems.size() == 0) return null;
         TokenFactory tf = new TokenFactory();
         Token result = null;
         RealmToken realmItem = realmItems.get(0);

@@ -215,7 +215,13 @@ public class ImportTokenViewModel extends BaseViewModel
         importToken = null;
         disposable = fetchTokensInteract
                 .fetchStoredToken(wallet.getValue(), importOrder.contractAddress)
-                .subscribe(this::onToken, this::onError, this::fetchTokensComplete);
+                .subscribe(this::onToken, this::onFetchError, this::fetchTokensComplete);
+    }
+
+    private void onFetchError(Throwable throwable)
+    {
+        //there was no token found, retrieve from blockchain
+        setupTokenAddr(importOrder.contractAddress);
     }
 
     private void onToken(Token token)

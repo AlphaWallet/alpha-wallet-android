@@ -40,12 +40,18 @@ public class ZonedDateTime {
 
     /* Creating ZonedDateTime from GeneralizedTime */
     public ZonedDateTime(String time) throws ParseException {
-        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
-        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
-        //SimpleDateFormat generalizedTime = new SimpleDateFormat("yyyyMMddHHmmssZ");
-        //Date date = generalizedTime.parse(time);
-        this.time = odt.toInstant().getEpochSecond();
+        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMddHHmmssZZZZ");
         this.timezone = TimeZone.getTimeZone("Europe/Moscow");
+        isoFormat.setTimeZone(timezone);
+        Date date = isoFormat.parse(time);
+        this.time = date.getTime();
+
+//        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
+//        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
+//        //SimpleDateFormat generalizedTime = new SimpleDateFormat("yyyyMMddHHmmssZ");
+//        //Date date = generalizedTime.parse(time);
+//        this.time = odt.toInstant().getEpochSecond();
+//        this.timezone = TimeZone.getTimeZone("Europe/Moscow");
     }
 
     /* EVERY FUNCTION BELOW ARE SET OUT IN JAVA8 */

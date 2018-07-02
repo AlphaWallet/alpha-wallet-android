@@ -237,7 +237,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         MagicLinkData order = viewModel.getSalesOrder();
 
         String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
-        String priceUsd = "$" + getUsdString(viewModel.getUSDPrice());
+        String priceUsd = "$" + getUsdString(viewModel.getUSDPrice() * order.price);
 
         if (order.price == 0) {
             priceETH.setText(R.string.free_import);

@@ -3,11 +3,10 @@ package io.stormbird.token.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /*
  * by Weiwu, 2018. Modeled after Java8's ZonedDateTime, intended to be
  * replaced by Java8's ZonedDateTime as soon as Android 8.0 gets popular
@@ -41,8 +40,15 @@ public class ZonedDateTime {
     /* Creating ZonedDateTime from GeneralizedTime */
     public ZonedDateTime(String time) throws ParseException {
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMddHHmmssZZZZ");
-        this.timezone = TimeZone.getTimeZone("Europe/Moscow");
-        isoFormat.setTimeZone(timezone);
+        Pattern p = Pattern.compile("(\\+\\d{4})");
+        Matcher m = p.matcher(time);
+        if (m.find()) {
+            this.timezone = TimeZone.getTimeZone("GMT"+m.group(1));
+            isoFormat.setTimeZone(this.timezone);
+        }else{
+            throw new IllegalArgumentException("not Generlized Time");
+        }
+
         Date date = isoFormat.parse(time);
         this.time = date.getTime();
 

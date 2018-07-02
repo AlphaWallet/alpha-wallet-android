@@ -376,7 +376,7 @@ public class SetupTokensInteract {
                         {
                             t = parseTransaction(token, t, data);
                             processedTxList.add(t);
-                            txMap.remove(t.hash);
+                            if (t != null) txMap.remove(t.hash);
                         }
                     }
                 }

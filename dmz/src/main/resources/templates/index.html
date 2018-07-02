@@ -72,15 +72,15 @@
               <p class="mb-3" style="font-weight: 300;">Once you've downloaded the app on your phone,
               copy this link and switch to the app.</p>
               <input name="uri" readonly="readonly" id="uri" th:value="'https://app.awallet.io/' + ${base64}" class="form-control-tx form-control-lg" />
-              <input name="message" readonly="readonly" id="message" hidden="hidden" value="Link copied to clipboard." class="form-control-tx form-control-lg"/><br/>
+              <input name="message" readonly="readonly" id="message" hidden="hidden" value="Link copied to clipboard." class="form-control-tx form-control-lg"/>
               <input name="submit" type="submit" id="clipboard-button" value="Copy to Clipboard" class="btn-y btn-xl"/>
             </form>
             <br>
             <hr>
             <h5 class="mt-4 mb-2"><b>Owner's Ethereum Address</b></h5>
-            <h5 style="font-size: 14px;" class="mb-4" th:text="${link.ownerAddress}"/>
+            <h5 style="font-size: 12px;" class="mb-4" th:text="${link.ownerAddress}"/>
             <h5 class="mb-2"><b>Contract Address</b></h6>
-            <h5 style="font-size: 14px;" th:text="${link.contractAddress}"/>
+            <h5 style="font-size: 12px;" th:text="${link.contractAddress}"/>
           </div>
         </div>
         <div class="col-lg-5">

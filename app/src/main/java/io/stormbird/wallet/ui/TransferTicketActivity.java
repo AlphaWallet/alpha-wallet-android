@@ -62,6 +62,8 @@ public class TransferTicketActivity extends BaseActivity
 
         setTitle(getString(R.string.empty));
 
+        setContentView(R.layout.activity_transfer_ticket_select);
+
         systemView = findViewById(R.id.system_view);
         systemView.hide();
 
@@ -87,8 +89,6 @@ public class TransferTicketActivity extends BaseActivity
 
     private void setupSalesOrder()
     {
-        setContentView(R.layout.activity_transfer_ticket_select);
-
         RecyclerView list = findViewById(R.id.listTickets);
 
         adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());

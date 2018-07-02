@@ -47,7 +47,8 @@ header.main {
       header.main .header-content h2, h3, p {
       margin: 15px; }
       header.main .header-content h5 {
-      margin-left: 15px; }
+      margin-left: 15px;
+      font-size: 16px; }
   header.main .device-container {
     max-width: 325px;
     margin-right: auto;
@@ -88,7 +89,6 @@ header.main {
 
 .ticket-table {
   width: 100%;
-  height: 260px;
   border-radius: 20px;
   box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.07);
   background-color: #ffffff;
@@ -97,7 +97,6 @@ header.main {
     @media (min-width: 992px) {
 .ticket-table {
   width: 346px;
-  height: 250px;
   border-radius: 20px;
   box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.07);
   background-color: #ffffff;
@@ -147,8 +146,8 @@ font-family: "Source Sans Pro", sans-serif;
 border-radius: 18.7px;
 border: 0;
 color: white;
-margin-top: -0.5em;
-margin-left: 2em; }
+margin-top: 0.5em;
+margin-left: 15px; }
 @media (min-width: 992px) {
       .btn-y {
           background-color: #f9d021;
@@ -156,14 +155,14 @@ margin-left: 2em; }
           border-radius: 18.7px;
           border: 0;
           color: white;
-          margin-top: 0;
+          margin-top: 1.5em;
           margin-left: 0;
         } }
 
 
 .btn-xl {
 font-size: 16px;
-padding: 8px 80px;
+padding: 8px 70px;
 font-weight: 300; }
     @media (min-width: 992px) {
     .btn-xl {

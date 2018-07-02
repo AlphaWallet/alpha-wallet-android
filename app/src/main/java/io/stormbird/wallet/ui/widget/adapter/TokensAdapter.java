@@ -326,7 +326,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         int weight = 0;
         String tokenName = token.getFullName();
-        if(token.isEthereum()) return 5;
+        if(token.isEthereum()) return 1;
         if(token.isBad()) return Integer.MAX_VALUE;
 
         int i = 4;
@@ -335,7 +335,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         while (i >= 0 && pos < tokenName.length())
         {
             char c = tokenName.charAt(pos++);
-            int w = Character.toLowerCase(c) - 'a' + 1;
+            //Character.isIdeographic()
+            int w = tokeniseCharacter(c);
             if (w > 0)
             {
                 int component = (int)Math.pow(26, i)*w;
@@ -352,7 +353,31 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             weight += w;
         }
 
+        if (weight < 2) weight = 2;
+
         return weight;
+    }
+
+    private int tokeniseCharacter(char c)
+    {
+        int w = Character.toLowerCase(c) - 'a' + 1;
+        if (w > 'z')
+        {
+            //could be ideographic, in which case we may want to display this first
+            //just use a modulus
+            w = w % 10;
+        }
+        else if (w < 0)
+        {
+            //must be a number
+            w = 1 + (c - '0');
+        }
+        else
+        {
+            w += 10;
+        }
+
+        return w;
     }
 
     public void setTotal(BigDecimal totalInCurrency) {

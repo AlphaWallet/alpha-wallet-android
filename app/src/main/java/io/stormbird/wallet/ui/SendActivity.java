@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import org.web3j.abi.datatypes.Address;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 import javax.inject.Inject;
 
@@ -67,6 +69,7 @@ public class SendActivity extends BaseActivity {
     private Wallet wallet;
     private Token token;
     private String contractAddress;
+    private double currentEthPrice;
 
     RelativeLayout ethDetailLayout;
     Button startTransferButton;
@@ -85,6 +88,9 @@ public class SendActivity extends BaseActivity {
     TextView balanceEth;
     TextView symbolText;
     TextView arrayBalance;
+
+    TextView priceUSD;
+    LinearLayout priceUSDLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -113,6 +119,36 @@ public class SendActivity extends BaseActivity {
         setupTokenContent();
 
         initViews();
+
+        if (token.addressMatches(myAddress))
+        {
+            viewModel.startEthereumTicker();
+            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
+        }
+        else
+        {
+            //currently we don't evaluate ERC20 token value. TODO: Should we?
+            priceUSDLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void onNewEthPrice(Double ethPrice)
+    {
+        currentEthPrice = ethPrice;
+        //just got a new eth price
+        //recalculate the equivalent USD price
+        updateUSDValue();
+    }
+
+    private void updateUSDValue()
+    {
+        String amount = amountEditText.getText().toString();
+        if (amount.length() == 0) amount = "0"; //this is to reset the USD equivalent if you delete a large eth value
+        if (isValidAmount(amount))
+        {
+            String usdEquivStr = "$" + getUsdString(Double.valueOf(amount) * currentEthPrice);
+            priceUSD.setText(usdEquivStr);
+        }
     }
 
     @Override
@@ -125,7 +161,8 @@ public class SendActivity extends BaseActivity {
         }
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         amountSymbolText = findViewById(R.id.edit_amount_symbol);
         amountSymbolText.setText(token.tokenInfo.symbol);
         toAddressError = findViewById(R.id.to_address_error);
@@ -133,6 +170,8 @@ public class SendActivity extends BaseActivity {
         myAddressText = findViewById(R.id.address);
         myAddressText.setText(myAddress);
         ethDetailLayout = findViewById(R.id.layout_eth_detail);
+        priceUSD = findViewById(R.id.textImportPriceUSD);
+        priceUSDLayout = findViewById(R.id.layout_usd_price);
 
         startTransferButton = findViewById(R.id.button_start_transfer);
         startTransferButton.setOnClickListener(v -> onStartTransfer());
@@ -162,7 +201,8 @@ public class SendActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                //update USD price
+                updateUSDValue();
             }
         });
 
@@ -368,5 +408,13 @@ public class SendActivity extends BaseActivity {
 
         balanceEth.setVisibility(View.VISIBLE);
         arrayBalance.setVisibility(View.GONE);
+    }
+
+    public static String getUsdString(double usdPrice)
+    {
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.CEILING);
+        String formatted = df.format(usdPrice);
+        return formatted;
     }
 }

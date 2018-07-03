@@ -1,7 +1,8 @@
 <!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:th="http://www.thymeleaf.org">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <head>
     <title th:text="${link.ticketCount} + ' ' + ${tokenName} + ' ' + ${tokenAvailable}"/>
     <link rel="stylesheet" th:href="@{css/bootstrap.min.css}"/>
@@ -81,6 +82,7 @@
             <h5 style="font-size: 12px;" class="mb-4" th:text="${link.ownerAddress}"/>
             <h5 class="mb-2"><b>Contract Address</b></h6>
             <h5 style="font-size: 12px;" th:text="${link.contractAddress}"/>
+            <br>
           </div>
         </div>
         <div class="col-lg-5">

@@ -10,6 +10,7 @@ body {
   background-position: 28px 30px;
   background-repeat: no-repeat;
   padding-top: 100px;
+  padding-bottom: 0;
   font-family: "Source Sans Pro", sans-serif;
   color: #2f2f2f; }
     @media (min-width: 992px) {
@@ -18,7 +19,8 @@ body {
           padding-top: 150px;
           background-size: 40px 28px;
           background-position: 110px 60px;
-          background-repeat: no-repeat; } }
+          background-repeat: no-repeat;
+          padding-bottom: 50px; } }
 
 h1,
 h2,
@@ -36,7 +38,7 @@ header.main {
   position: relative;
   width: 100%;
   padding-top: 0px;
-  padding-bottom: 50px;
+  padding-bottom: 80px;
   color: #2f2f2f; }
   header.main .header-content {
   max-width: 800px;
@@ -141,13 +143,15 @@ header.main {
   color: silver; }
 
 .btn-y {
+display: inline-block;
 background-color: #f9d021;
 font-family: "Source Sans Pro", sans-serif;
 border-radius: 18.7px;
 border: 0;
 color: white;
+margin-top: none;
 margin-right: auto;
-margin-left: auto; }
+margin-left: 15px; }
 @media (min-width: 992px) {
       .btn-y {
           background-color: #f9d021;
@@ -155,6 +159,7 @@ margin-left: auto; }
           border-radius: 18.7px;
           border: 0;
           color: white;
+          margin-top: 1em;
           margin-right: auto;
           margin-left: auto;
         } }
@@ -162,7 +167,7 @@ margin-left: auto; }
 
 .btn-xl {
 font-size: 16px;
-padding: 8px 80px;
+padding: 8px 70px;
 font-weight: 300; }
     @media (min-width: 992px) {
     .btn-xl {

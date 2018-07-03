@@ -52,7 +52,7 @@ header.main {
   header.main .device-container {
     max-width: 325px;
     margin-right: auto;
-    margin-left: 2em; }
+    margin-left: 1.8em; }
   @media (min-width: 992px) {
     header.main {
       height: 100vh;
@@ -72,7 +72,7 @@ header.main {
           margin: 0; }
       header.main .device-container {
         max-width: 325px;
-        margin-left: 3.2em; } }
+        margin-left: 4em; } }
 
 
 #view_listing a {
@@ -146,8 +146,8 @@ font-family: "Source Sans Pro", sans-serif;
 border-radius: 18.7px;
 border: 0;
 color: white;
-margin-top: 0.5em;
-margin-left: 15px; }
+margin-right: auto;
+margin-left: auto; }
 @media (min-width: 992px) {
       .btn-y {
           background-color: #f9d021;
@@ -155,14 +155,14 @@ margin-left: 15px; }
           border-radius: 18.7px;
           border: 0;
           color: white;
-          margin-top: 1.5em;
-          margin-left: 0;
+          margin-right: auto;
+          margin-left: auto;
         } }
 
 
 .btn-xl {
 font-size: 16px;
-padding: 8px 70px;
+padding: 8px 80px;
 font-weight: 300; }
     @media (min-width: 992px) {
     .btn-xl {

@@ -15,6 +15,7 @@ import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
@@ -38,9 +39,10 @@ public class ImportTokenModule {
             SetupTokensInteract setupTokensInteract,
             FeeMasterService feeMasterService,
             AddTokenInteract addTokenInteract,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            AssetDefinitionService assetDefinitionService) {
         return new ImportTokenViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository);
+                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService);
     }
 
     @Provides

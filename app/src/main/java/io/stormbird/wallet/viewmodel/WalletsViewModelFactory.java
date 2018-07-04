@@ -7,7 +7,9 @@ import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetDefaultWalletInteract;
 import io.stormbird.wallet.router.HomeRouter;
@@ -23,6 +25,8 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
 	private final FetchWalletsInteract fetchWalletsInteract;
 	private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final ExportWalletInteract exportWalletInteract;
+    private final FetchTokensInteract fetchTokensInteract;
+    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
 
 	private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
@@ -37,7 +41,9 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             FindDefaultWalletInteract findDefaultWalletInteract,
             ExportWalletInteract exportWalletInteract,
             ImportWalletRouter importWalletRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+			FetchTokensInteract fetchTokensInteract,
+			FindDefaultNetworkInteract findDefaultNetworkInteract) {
 		this.createWalletInteract = createWalletInteract;
 		this.setDefaultWalletInteract = setDefaultWalletInteract;
 		this.deleteWalletInteract = deleteWalletInteract;
@@ -46,6 +52,8 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
 		this.exportWalletInteract = exportWalletInteract;
 		this.importWalletRouter = importWalletRouter;
 		this.homeRouter = homeRouter;
+		this.fetchTokensInteract = fetchTokensInteract;
+		this.findDefaultNetworkInteract = findDefaultNetworkInteract;
 	}
 
 	@NonNull
@@ -59,6 +67,8 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultWalletInteract,
                 exportWalletInteract,
                 importWalletRouter,
-                homeRouter);
+                homeRouter,
+				fetchTokensInteract,
+				findDefaultNetworkInteract);
 	}
 }

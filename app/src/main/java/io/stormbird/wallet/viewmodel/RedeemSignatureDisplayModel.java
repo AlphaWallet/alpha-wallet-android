@@ -35,12 +35,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 /**
  * Created by James on 25/01/2018.
  */
 
-public class RedeemSignatureDisplayModel extends BaseViewModel {
+public class RedeemSignatureDisplayModel extends BaseViewModel
+{
     private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
@@ -51,6 +53,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final MemPoolInteract memoryPoolInteract;
     private final AssetDisplayRouter assetDisplayRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -80,7 +83,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memoryPoolInteract,
-            AssetDisplayRouter assetDisplayRouter) {
+            AssetDisplayRouter assetDisplayRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -88,6 +92,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
         this.fetchTokensInteract = fetchTokensInteract;
         this.memoryPoolInteract = memoryPoolInteract;
         this.assetDisplayRouter = assetDisplayRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -301,5 +306,10 @@ public class RedeemSignatureDisplayModel extends BaseViewModel {
 
     public void showAssets(Context context, Ticket t, boolean isClearStack) {
         assetDisplayRouter.open(context, t, isClearStack);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

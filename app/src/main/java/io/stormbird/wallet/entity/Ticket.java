@@ -22,9 +22,11 @@ import java.util.Locale;
 
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
@@ -43,7 +45,7 @@ public class Ticket extends Token implements Parcelable
 {
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
-    private boolean isLiveTicket = false;
+    private boolean isMatchedInXML = false;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -180,20 +182,18 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void setupContent(TokenHolder tokenHolder)
+    public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
     {
         tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
         tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
-        if (isLiveTicket())
-        {
-            tokenHolder.issuer.setText(R.string.stormbird);
-            tokenHolder.contractType.setVisibility(View.VISIBLE);
-            tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
-            tokenHolder.contractType.setText(R.string.erc875);
-        }
+
+        tokenHolder.issuer.setText(asset.getIssuerName(getAddress()));
+        tokenHolder.contractType.setVisibility(View.VISIBLE);
+        tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
+        tokenHolder.contractType.setText(R.string.erc875);
 
         tokenHolder.text24HoursSub.setText(R.string.burned);
         tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
@@ -473,7 +473,7 @@ public class Ticket extends Token implements Parcelable
      * @param range TicketRange
      * @param activity BaseActivity of Holder of ticket
      */
-    public void displayTicketHolder(TicketRange range, BaseActivity activity)
+    public void displayTicketHolder(TicketRange range, BaseActivity activity, AssetDefinitionService assetService)
     {
         TextView textAmount = activity.findViewById(R.id.amount);
         TextView textTicketName = activity.findViewById(R.id.name);
@@ -486,83 +486,90 @@ public class Ticket extends Token implements Parcelable
         int numberOfTickets = range.tokenIds.size();
         if (numberOfTickets > 0)
         {
-            try
-            {
-                BigInteger firstTicket = range.tokenIds.get(0);
-                TokenDefinition assetDefinition = new TokenDefinition(
-                        activity.getResources().getAssets().open("TicketingContract.xml"),
-                        activity.getResources().getConfiguration().locale);
-                NonFungibleToken nonFungibleToken = new NonFungibleToken(firstTicket, assetDefinition);
+            BigInteger firstTicket = range.tokenIds.get(0);
+            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTicket);
 
-                String nameStr = assetDefinition.getTokenName();
-                String venueStr = nonFungibleToken.getAttribute("venue").text;
-                String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
+            String venueStr = nonFungibleToken.getAttribute("venue").text;
+            String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
 
-                SimpleDateFormat format = new SimpleDateFormat("dd MMM", Locale.ENGLISH);
-                String date = nonFungibleToken.getZonedDateTime(nonFungibleToken.getAttribute("time")).format(format);
-                String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
+            SimpleDateFormat format = new SimpleDateFormat("dd MMM", Locale.ENGLISH);
+            String date = nonFungibleToken.getZonedDateTime(nonFungibleToken.getAttribute("time")).format(format);
+            String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
-                textAmount.setText(seatCount);
-                textTicketName.setText(nameStr);
-                textVenue.setText(venueStr);
-                textDate.setText(date);
-                textRange.setText(nonFungibleToken.getRangeStr(range));
-                textCat.setText(nonFungibleToken.getAttribute("category").text);
-                ticketDetails.setText(getTicketInfo(nonFungibleToken));
-            } catch (IOException | SAXException e) {
-                textTicketName.setText(e.getMessage());
-            }
+            textAmount.setText(seatCount);
+            textTicketName.setText(getTokenName(assetService));
+            textVenue.setText(venueStr);
+            textDate.setText(date);
+            textRange.setText(nonFungibleToken.getRangeStr(range));
+            textCat.setText(nonFungibleToken.getAttribute("category").text);
+            ticketDetails.setText(getTicketInfo(nonFungibleToken));
         }
     }
 
-    public int getXMLTokenNetwork(BaseActivity activity)
+    public String getTokenName(AssetDefinitionService assetService)
     {
-        TokenDefinition td = getTokenDefinition(activity);
-        if (td != null) return td.getNetworkId();
-        else return 1;
-    }
-
-    public String getXMLContractAddress(BaseActivity activity, int networkId)
-    {
-        TokenDefinition td = getTokenDefinition(activity);
-        if (td != null) return td.getContractAddress(networkId);
-        else return "0x";
-    }
-
-    public String getXMLTokenName(BaseActivity activity)
-    {
-        TokenDefinition td = getTokenDefinition(activity);
-        if (td != null) return td.getTokenName();
-        else return "Generic Token";
-    }
-
-    private TokenDefinition getTokenDefinition(BaseActivity activity)
-    {
-        try
+        //see if this token is covered by any contract
+        int networkId = assetService.getAssetDefinition().getNetworkFromContract(getAddress());
+        if (networkId >= 1)
         {
-            return new TokenDefinition(
-                    activity.getResources().getAssets().open("TicketingContract.xml"),
-                    activity.getResources().getConfiguration().locale);
+            return assetService.getAssetDefinition().getTokenName();
         }
-        catch (IOException e)
+        else
         {
-            //react to file not found
-            return null;
-        }
-        catch (SAXException e)
-        {
-            //react to interpretation exception
-            return null;
+            return tokenInfo.name;
         }
     }
 
-    public boolean isLiveTicket()
+//    public int getXMLTokenNetwork(BaseActivity activity)
+//    {
+//        TokenDefinition td = getTokenDefinition(activity);
+//        if (td != null) return td.getNetworkId();
+//        else return 1;
+//    }
+//
+//    public String getXMLContractAddress(BaseActivity activity, int networkId)
+//    {
+//        TokenDefinition td = getTokenDefinition(activity);
+//        if (td != null) return td.getContractAddress(networkId);
+//        else return "0x";
+//    }
+//
+//    public String getXMLTokenName()
+//    {
+//        TokenDefinition td = getTokenDefinition(activity);
+//        if (td != null) return td.
+//                getTokenName();
+//        else return "Generic Token";
+//    }
+
+//    private TokenDefinition getTokenDefinition(BaseActivity activity)
+//    {
+//        try
+//        {
+//            return new TokenDefinition(
+//                    activity.getResources().getAssets().open("TicketingContract.xml"),
+//                    activity.getResources().getConfiguration().locale);
+//        }
+//        catch (IOException e)
+//        {
+//            //react to file not found
+//            return null;
+//        }
+//        catch (SAXException e)
+//        {
+//            //react to interpretation exception
+//            return null;
+//        }
+//    }
+
+    public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        return isLiveTicket;
+        int networkId = assetService.getAssetDefinition().getNetworkFromContract(getAddress());
+        isMatchedInXML = networkId >= 1;
     }
 
-    public void setLiveTicket()
+    public boolean isMatchedInXML()
     {
-        isLiveTicket = true;
+        return isMatchedInXML;
     }
 }

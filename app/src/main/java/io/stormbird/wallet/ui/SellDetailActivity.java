@@ -123,7 +123,7 @@ public class SellDetailActivity extends BaseActivity {
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this, this::onTicketIdClick, ticket, ticketIds);
+        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -206,7 +206,7 @@ public class SellDetailActivity extends BaseActivity {
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
-        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, String.valueOf(sellPriceValue)));
+        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, getCleanValue(sellPriceValue)));
         confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr));
     }
 
@@ -493,7 +493,7 @@ public class SellDetailActivity extends BaseActivity {
         String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
 
         String qty = String.valueOf(quantity) + " " + unit + "\n" +
-                String.valueOf(sellPriceValue) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
+                String.valueOf(getCleanValue(sellPriceValue)) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
                 getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
@@ -514,7 +514,7 @@ public class SellDetailActivity extends BaseActivity {
         //how many tickets are we selling?
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String qty = String.valueOf(quantity) + " " + unit + " @" + getCleanValue(sellPriceValue) + " Eth/Ticket";
+        String qty = String.valueOf(quantity) + " " + unit + " @" + getCleanValue(sellPriceValue) + getString(R.string.eth_per_ticket);
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);

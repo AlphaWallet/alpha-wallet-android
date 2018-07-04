@@ -84,73 +84,197 @@
                     <include layout="@layout/item_input_address" />
                 </LinearLayout>
 
+
+                <!-- -->
+
                 <LinearLayout
-                    android:id="@+id/layout_input_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="15dp"
-                    android:orientation="vertical"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/layout_input_amount"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="5dp"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/label_amount_to_transfer"
-                        android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
-                        android:textSize="10sp" />
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <EditText
-                            android:id="@+id/edit_amount"
-                            android:layout_width="match_parent"
-                            android:layout_height="47dp"
-                            android:layout_alignParentLeft="true"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/background_quantity"
-                            android:fontFamily="@font/font_semibold"
-                            android:hint="@string/hint_input_eth_amount"
-                            android:imeOptions="actionDone"
-                            android:inputType="numberDecimal"
-                            android:paddingEnd="50dp"
-                            android:paddingStart="15dp"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textColorHint="@color/light_gray"
-                            android:textSize="21sp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/edit_amount_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="15dp"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="5dp"
                             android:fontFamily="@font/font_regular"
-                            android:text="@string/eth"
+                            android:text="@string/label_amount_to_transfer"
                             android:textAllCaps="true"
-                            android:textColor="@color/semi_dark_grey" />
-                    </RelativeLayout>
+                            android:textColor="@color/light_gray"
+                            android:textSize="10sp" />
 
-                    <TextView
-                        android:id="@+id/amount_error"
-                        android:layout_width="match_parent"
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:id="@+id/edit_amount"
+                                android:layout_width="match_parent"
+                                android:layout_height="47dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/background_quantity"
+                                android:fontFamily="@font/font_semibold"
+                                android:hint="0.00"
+                                android:imeOptions="actionDone"
+                                android:inputType="numberDecimal"
+                                android:paddingStart="15dp"
+                                android:textColor="@color/colorPrimaryDark"
+                                android:textColorHint="@color/light_gray"
+                                android:textSize="21sp" />
+
+                            <TextView
+                                android:id="@+id/edit_amount_symbol"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginRight="15dp"
+                                android:fontFamily="@font/font_regular"
+                                android:text="@string/eth"
+                                android:textColor="@color/semi_dark_grey" />
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/amount_error"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:fontFamily="@font/font_regular"
+                            android:gravity="center"
+                            android:text="@string/error_invalid_amount"
+                            android:textColor="@color/cancel_red"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layout_usd_price"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:fontFamily="@font/font_regular"
-                        android:gravity="center"
-                        android:text="@string/error_invalid_amount"
-                        android:textColor="@color/cancel_red"
-                        android:textSize="14sp"
-                        android:visibility="gone" />
+                        android:layout_weight="0.75"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="15dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/white" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="5dp"
+                            android:fontFamily="@font/font_regular"
+                            android:text="@string/equivalent_in_usd"
+                            android:textAllCaps="true"
+                            android:textColor="@color/light_gray"
+                            android:textSize="10sp" />
+
+                        <LinearLayout
+                            android:id="@+id/layout_equivalent_usd"
+                            android:layout_width="match_parent"
+                            android:layout_height="47dp"
+                            android:layout_gravity="center"
+                            android:background="@drawable/background_round_grey"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/textImportPriceUSD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/font_semibold"
+                                android:gravity="center"
+                                android:text="$0"
+                                android:textColor="@color/light_gray"
+                                android:textSize="21sp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
                 </LinearLayout>
+
+                <!-- -->
+
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/layout_input_amount"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:layout_marginBottom="15dp"-->
+                    <!--android:orientation="vertical"-->
+                    <!--android:paddingLeft="15dp"-->
+                    <!--android:paddingRight="15dp">-->
+
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_gravity="center_horizontal"-->
+                        <!--android:layout_marginBottom="5dp"-->
+                        <!--android:fontFamily="@font/font_regular"-->
+                        <!--android:text="@string/label_amount_to_transfer"-->
+                        <!--android:textAllCaps="true"-->
+                        <!--android:textColor="@color/light_gray"-->
+                        <!--android:textSize="10sp" />-->
+
+                    <!--<RelativeLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content">-->
+
+                        <!--<EditText-->
+                            <!--android:id="@+id/edit_amount"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="47dp"-->
+                            <!--android:layout_alignParentLeft="true"-->
+                            <!--android:layout_centerVertical="true"-->
+                            <!--android:background="@drawable/background_quantity"-->
+                            <!--android:fontFamily="@font/font_semibold"-->
+                            <!--android:hint="@string/hint_input_eth_amount"-->
+                            <!--android:imeOptions="actionDone"-->
+                            <!--android:inputType="numberDecimal"-->
+                            <!--android:paddingEnd="50dp"-->
+                            <!--android:paddingStart="15dp"-->
+                            <!--android:textColor="@color/colorPrimaryDark"-->
+                            <!--android:textColorHint="@color/light_gray"-->
+                            <!--android:textSize="21sp" />-->
+
+                        <!--<TextView-->
+                            <!--android:id="@+id/edit_amount_symbol"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_alignParentRight="true"-->
+                            <!--android:layout_centerVertical="true"-->
+                            <!--android:layout_marginRight="15dp"-->
+                            <!--android:fontFamily="@font/font_regular"-->
+                            <!--android:text="@string/eth"-->
+                            <!--android:textAllCaps="true"-->
+                            <!--android:textColor="@color/semi_dark_grey" />-->
+                    <!--</RelativeLayout>-->
+
+                    <!--<TextView-->
+                        <!--android:id="@+id/amount_error"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_marginTop="10dp"-->
+                        <!--android:fontFamily="@font/font_regular"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="@string/error_invalid_amount"-->
+                        <!--android:textColor="@color/cancel_red"-->
+                        <!--android:textSize="14sp"-->
+                        <!--android:visibility="gone" />-->
+                <!--</LinearLayout>-->
 
                 <LinearLayout
                     android:id="@+id/container_my_address"

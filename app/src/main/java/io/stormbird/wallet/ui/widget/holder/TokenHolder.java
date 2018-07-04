@@ -15,9 +15,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
@@ -40,11 +44,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView textAppreciationSub;
     public final TextView contractType;
     public final View contractSeparator;
+    private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent) {
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService)
+    {
         super(resId, parent);
 
         icon = findViewById(R.id.icon);
@@ -60,26 +66,28 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         itemView.setOnClickListener(this);
+        assetDefinition = assetService;
     }
 
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        if (! data.isERC20) {
+        if (! data.isERC20)
+        {
             // TODO: apply styles for none ERC20 contracts
             contractType.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
         }
-        try {
-            // TODO: only on the mainnet
-            String displayTxt = getString(R.string.ethereum);
+        try
+        {
+            String displayTxt = assetDefinition.getIssuerName(token.getAddress());
             issuer.setText(displayTxt);
             // We handled NPE. Exception handling is expensive, but not impotent here -james brown
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
                         : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
-            token.setupContent(this);
+            token.setupContent(this, assetDefinition);
         } catch (Exception ex) {
             fillEmpty();
         }

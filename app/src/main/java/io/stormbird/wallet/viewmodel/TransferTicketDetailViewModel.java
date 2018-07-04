@@ -18,6 +18,7 @@ import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.ui.TransferTicketDetailActivity;
@@ -51,6 +52,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final FeeMasterService feeMasterService;
     private final AssetDisplayRouter assetDisplayRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -63,7 +65,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   CreateTransactionInteract createTransactionInteract,
                                   TransferTicketDetailRouter transferTicketDetailRouter,
                                   FeeMasterService feeMasterService,
-                                  AssetDisplayRouter assetDisplayRouter) {
+                                  AssetDisplayRouter assetDisplayRouter,
+                                  AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -71,6 +74,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.feeMasterService = feeMasterService;
         this.assetDisplayRouter = assetDisplayRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -198,6 +202,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                     break;
             }
         }
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 
     public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)

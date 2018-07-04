@@ -60,7 +60,6 @@ public class SellTicketActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         ticket = getIntent().getParcelableExtra(TICKET);
-        setupSalesOrder();
 
         address = ticket.getAddress();
 
@@ -70,14 +69,18 @@ public class SellTicketActivity extends BaseActivity {
 
         setTitle(getString(R.string.empty));
 
-        systemView = findViewById(R.id.system_view);
-        systemView.hide();
+        setContentView(R.layout.activity_sell_ticket);
+
+        viewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(SellTicketModel.class);
+
+        setupSalesOrder();
 
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(SellTicketModel.class);
+        systemView = findViewById(R.id.system_view);
+        systemView.hide();
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
@@ -100,11 +103,10 @@ public class SellTicketActivity extends BaseActivity {
 
     private void setupSalesOrder() {
         ticketRange = null;
-        setContentView(R.layout.activity_sell_ticket);
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }

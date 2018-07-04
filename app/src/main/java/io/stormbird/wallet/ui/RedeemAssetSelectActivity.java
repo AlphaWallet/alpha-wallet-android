@@ -73,8 +73,6 @@ public class RedeemAssetSelectActivity extends BaseActivity
             onRedeem();
         });
 
-        setupRedeemSelector();
-
         toolbar();
 
 //        setTitle(getString(R.string.title_redeem_token));
@@ -94,6 +92,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
         finishReceiver = new FinishReceiver(this);
+        setupRedeemSelector();
     }
 
     private void setupRedeemSelector()
@@ -105,7 +104,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this, this::onTicketIdClick, ticket);
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
         adapter.setRedeemTicket(ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);

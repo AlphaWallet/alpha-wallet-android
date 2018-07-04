@@ -23,6 +23,7 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
 import org.web3j.tx.Contract;
@@ -48,7 +49,8 @@ import static io.stormbird.wallet.entity.MagicLinkParcel.generateReverseTradeDat
  * Created by James on 9/03/2018.
  */
 
-public class ImportTokenViewModel extends BaseViewModel  {
+public class ImportTokenViewModel extends BaseViewModel
+{
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ITVM";
 
@@ -60,6 +62,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private final FeeMasterService feeMasterService;
     private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final AssetDefinitionService assetDefinitionService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -78,7 +81,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private String univeralImportLink;
     private Ticket importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
-    private double priceUsd;
     private double ethToUsd = 0;
 
     @Nullable
@@ -93,7 +95,8 @@ public class ImportTokenViewModel extends BaseViewModel  {
                          SetupTokensInteract setupTokensInteract,
                          FeeMasterService feeMasterService,
                          AddTokenInteract addTokenInteract,
-                         EthereumNetworkRepositoryType ethereumNetworkRepository) {
+                         EthereumNetworkRepositoryType ethereumNetworkRepository,
+                         AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -102,6 +105,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
         this.feeMasterService = feeMasterService;
         this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     private void initParser()
@@ -122,7 +126,7 @@ public class ImportTokenViewModel extends BaseViewModel  {
     public LiveData<Boolean> invalidLink() { return invalidLink; }
     public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
-    public double getUSDPrice() { return priceUsd; };
+    public double getUSDPrice() { return ethToUsd; };
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
@@ -210,7 +214,13 @@ public class ImportTokenViewModel extends BaseViewModel  {
         importToken = null;
         disposable = fetchTokensInteract
                 .fetchStoredToken(wallet.getValue(), importOrder.contractAddress)
-                .subscribe(this::onToken, this::onError, this::fetchTokensComplete);
+                .subscribe(this::onToken, this::onFetchError, this::fetchTokensComplete);
+    }
+
+    private void onFetchError(Throwable throwable)
+    {
+        //there was no token found, retrieve from blockchain
+        setupTokenAddr(importOrder.contractAddress);
     }
 
     private void onToken(Token token)
@@ -284,9 +294,6 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void updateToken()
     {
         List<BigInteger> newBalance = new ArrayList<>();
-        //calculate USD price of tickets
-        priceUsd = importOrder.price * ethToUsd;
-
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {
@@ -485,5 +492,10 @@ public class ImportTokenViewModel extends BaseViewModel  {
     private void finishedImport(Token token)
     {
         Log.d(TAG, "Added to Watch list: " + token.getFullName());
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

@@ -70,6 +70,7 @@ public class AppSiteController {
             throws IOException, SAXException, NoHandlerFoundException
     {
         MagicLinkData data;
+        File xml = null;
         TokenDefinition definition = null;
         model.addAttribute("base64", universalLink);
         try {
@@ -78,10 +79,18 @@ public class AppSiteController {
             return "error"; // TODO: give nice error
         }
         parser.getOwnerKey(data);
-        if (!addresses.containsKey(data.contractAddress)) { // this works as contractAddress is always in lowercase
+        for (String address : addresses.keySet()) {
+            xml = addresses.get(address);
+            // TODO: when xml-schema-v1 is merged, produce a new "default XML" to fill the role of fallback.
+            if (address.equals(data.contractAddress)) { // this works as contractAddress is always in lowercase
+                break;
+            }
+        }
+        if (xml == null) {
+            /* this is impossible to happen, because at least 1 xml should present or main() bails out */
             throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
         }
-        try(FileInputStream in = new FileInputStream(addresses.get(data.contractAddress))) {
+        try(FileInputStream in = new FileInputStream(xml)) {
             // TODO: give more detail in the error
             // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
             definition = new TokenDefinition(in, new Locale("en"));

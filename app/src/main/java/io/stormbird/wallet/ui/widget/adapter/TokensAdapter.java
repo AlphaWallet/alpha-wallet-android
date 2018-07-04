@@ -12,12 +12,15 @@ import android.view.animation.AnimationUtils;
 
 import org.web3j.utils.Numeric;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenDiffCallback;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionDiffCallback;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
@@ -45,7 +48,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     private Context context;
     private boolean needsRefresh;
-    private String liveTokenAddress = "";
+    private final AssetDefinitionService assetService;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -87,19 +90,22 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener) {
+    public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
         this.context = context;
         this.onTokenClickListener = onTokenClickListener;
         needsRefresh = true;
+        this.assetService = aService;
     }
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener) {
+    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
         this.onTokenClickListener = onTokenClickListener;
         needsRefresh = true;
+        this.assetService = aService;
     }
 
     public TokensAdapter() {
         onTokenClickListener = null;
+        assetService = null;
     }
 
     @Override
@@ -112,7 +118,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent);
+                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
                 setAnimation(holder.itemView);
@@ -320,7 +326,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         int weight = 0;
         String tokenName = token.getFullName();
-        if(token.isEthereum()) return 5;
+        if(token.isEthereum()) return 1;
         if(token.isBad()) return Integer.MAX_VALUE;
 
         int i = 4;
@@ -329,7 +335,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         while (i >= 0 && pos < tokenName.length())
         {
             char c = tokenName.charAt(pos++);
-            int w = Character.toLowerCase(c) - 'a' + 1;
+            //Character.isIdeographic()
+            int w = tokeniseCharacter(c);
             if (w > 0)
             {
                 int component = (int)Math.pow(26, i)*w;
@@ -346,7 +353,31 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             weight += w;
         }
 
+        if (weight < 2) weight = 2;
+
         return weight;
+    }
+
+    private int tokeniseCharacter(char c)
+    {
+        int w = Character.toLowerCase(c) - 'a' + 1;
+        if (w > 'z')
+        {
+            //could be ideographic, in which case we may want to display this first
+            //just use a modulus
+            w = w % 10;
+        }
+        else if (w < 0)
+        {
+            //must be a number
+            w = 1 + (c - '0');
+        }
+        else
+        {
+            w += 10;
+        }
+
+        return w;
     }
 
     public void setTotal(BigDecimal totalInCurrency) {
@@ -367,11 +398,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.endBatchedUpdates();
     }
 
-    public void setLiveTokenAddress(String address)
-    {
-        this.liveTokenAddress = address;
-    }
-
     public void setFilterType(int filterType) {
         this.filterType = filterType;
     }
@@ -386,9 +412,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void checkLiveToken(Token t)
     {
-        if (t instanceof Ticket && t.getAddress().equalsIgnoreCase(liveTokenAddress))
+        if (t instanceof Ticket)
         {
-            ((Ticket)t).setLiveTicket();
+            ((Ticket)t).checkIsMatchedInXML(assetService);
         }
     }
 }

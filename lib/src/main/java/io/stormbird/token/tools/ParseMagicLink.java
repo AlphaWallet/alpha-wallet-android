@@ -135,8 +135,8 @@ public class ParseMagicLink
         //now we have to build the message that the contract is expecting the signature for
         data.message = getTradeBytes(data);
 
-        BigInteger milliWei = Convert.fromWei(data.priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
-        data.price = milliWei.doubleValue() / 1000.0;
+        BigInteger microEth = Convert.fromWei(new BigDecimal(data.priceWei), Convert.Unit.SZABO).abs().toBigInteger();
+        data.price = microEth.doubleValue() / 1000000.0;
 
         return data;
     }

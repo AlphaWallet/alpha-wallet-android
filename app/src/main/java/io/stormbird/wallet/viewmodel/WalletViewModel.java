@@ -32,6 +32,8 @@ import io.stormbird.wallet.router.SendTokenRouter;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +44,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.ui.WalletFragment;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -70,6 +74,7 @@ public class WalletViewModel extends BaseViewModel {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
+    private final AssetDefinitionService assetDefinitionService;
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
@@ -91,7 +96,8 @@ public class WalletViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             AddTokenInteract addTokenInteract,
-            SetupTokensInteract setupTokensInteract) {
+            SetupTokensInteract setupTokensInteract,
+            AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -102,6 +108,7 @@ public class WalletViewModel extends BaseViewModel {
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public LiveData<Token[]> tokens() {
@@ -112,7 +119,6 @@ public class WalletViewModel extends BaseViewModel {
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> endUpdate() { return checkTokens; }
-
 
     @Override
     protected void onCleared() {
@@ -219,6 +225,11 @@ public class WalletViewModel extends BaseViewModel {
         }
     }
 
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
+    }
+
     //NB: This function is used to calculate total value of all tokens plus eth.
     //TODO: On mainnet, get tickers for all token values and calculate the overall $ value of all tokens + eth
 //    private void showTotalBalance(Token[] tokens) {
@@ -281,6 +292,7 @@ public class WalletViewModel extends BaseViewModel {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
+        assetDefinitionService.setCurrentNetwork(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -314,16 +326,28 @@ public class WalletViewModel extends BaseViewModel {
         }
     }
 
-    public void setContractAddress(String contractAddress, String contractName)
+    public void setContractAddresses()
     {
 //        XMLContractAddress = contractAddress;
 //        XMLContractName = contractName;
 
-        disposable = setupTokensInteract.addToken(contractAddress)
-                .map(tokenInfo -> createContractToken(tokenInfo, contractName, contractAddress))
+        disposable = fetchAllContractAddresses()
+                .flatMapIterable(address -> address)
+                .flatMap(setupTokensInteract::addToken)
+                .map(tokenInfo -> createContractToken(tokenInfo))
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::finishedImport, this::onTokenAddError);
+    }
+
+    private Observable<List<String>> fetchAllContractAddresses()
+    {
+        return Observable.fromCallable(() -> {
+            //populate contracts from service
+            List<String> contracts = assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
+
+            return contracts;
+        });
     }
 
     private void onTokenAddError(Throwable throwable)
@@ -332,11 +356,11 @@ public class WalletViewModel extends BaseViewModel {
         Log.d("WVM", "Wait for internet");
     }
 
-    private TokenInfo createContractToken(TokenInfo tokenInfo, String contractName, String contractAddress) throws Exception
+    private TokenInfo createContractToken(TokenInfo tokenInfo) throws Exception
     {
         if (tokenInfo.name == null) throw new Exception("Token cannot be added"); //drop through react flow so token is not incorrectly added
-        String tokenName = tokenInfo.name + " " + contractName;
-        TokenInfo tInfo = new TokenInfo(contractAddress, tokenName, tokenInfo.symbol, 0, true, true);
+        String tokenName = tokenInfo.name + " " + assetDefinitionService.getAssetDefinition().getTokenName(); //TODO: must use address
+        TokenInfo tInfo = new TokenInfo(tokenInfo.address, tokenName, tokenInfo.symbol, 0, true, true);
         return tInfo;
     }
 

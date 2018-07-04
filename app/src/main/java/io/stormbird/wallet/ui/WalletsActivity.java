@@ -17,12 +17,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -94,6 +98,7 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.exportedStore().observe(this, this::openShareDialog);
         viewModel.exportWalletError().observe(this, this::onExportWalletError);
         viewModel.deleteWalletError().observe(this, this::onDeleteWalletError);
+        viewModel.updateBalance().observe(this, this::onUpdatedBalance);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchWallets);
     }
@@ -161,7 +166,8 @@ public class WalletsActivity extends BaseActivity implements
 
         if (requestCode == IMPORT_REQUEST_CODE) {
             showToolbar();
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK)
+            {
                 viewModel.fetchWallets();
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
@@ -230,6 +236,11 @@ public class WalletsActivity extends BaseActivity implements
     public void onImportWallet(View view) {
         hideDialog();
         viewModel.importWallet(this);
+    }
+
+    private void onUpdatedBalance(Map<String, BigDecimal> balances)
+    {
+        adapter.updateWalletBalances(balances);
     }
 
     private void onAddWallet() {

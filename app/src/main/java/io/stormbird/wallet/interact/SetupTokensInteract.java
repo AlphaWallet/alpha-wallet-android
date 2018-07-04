@@ -339,12 +339,12 @@ public class SetupTokensInteract {
         return tokenRepository.update(address);
     }
 
-    public void setupUnknownList(Map<String, Token> tokenMap, String xmlContractAddress)
+    public void setupUnknownList(Map<String, Token> tokenMap, List<String> xmlContractAddresses)
     {
         unknownContracts.clear();
-        if (xmlContractAddress != null && !tokenMap.containsKey(xmlContractAddress))
+        for (String address : xmlContractAddresses)
         {
-            unknownContracts.add(xmlContractAddress);
+            unknownContracts.add(address);
         }
     }
 
@@ -376,7 +376,7 @@ public class SetupTokensInteract {
                         {
                             t = parseTransaction(token, t, data);
                             processedTxList.add(t);
-                            txMap.remove(t.hash);
+                            if (t != null) txMap.remove(t.hash);
                         }
                     }
                 }

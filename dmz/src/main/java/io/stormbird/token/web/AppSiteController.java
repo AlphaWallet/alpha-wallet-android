@@ -1,18 +1,25 @@
 package io.stormbird.token.web;
 
 import io.stormbird.token.tools.TokenDefinition;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,6 +29,8 @@ import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.xml.sax.SAXException;
 
 
 @Controller
@@ -32,7 +41,7 @@ public class AppSiteController {
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static TransactionHandler txHandler = new TransactionHandler();
-    private static TokenDefinition definitionParser;
+    private static Map<String, File> addresses;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -56,21 +65,38 @@ public class AppSiteController {
         return "index";
     }
 
-    /* TODO: 3 types of instructions.
-     * 1) link redeemable, not redeemd and not expired;
-     * 2) link not redeemable; 3) iOS instructios */
     @GetMapping(value = "/{UniversalLink}")
     public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, @RequestHeader("User-Agent") String agent, Model model)
+            throws IOException, SAXException, NoHandlerFoundException
     {
         MagicLinkData data;
+        File xml = null;
+        TokenDefinition definition = null;
         model.addAttribute("base64", universalLink);
         try {
             data = parser.parseUniversalLink(universalLink);
         } catch(SalesOrderMalformed e) {
-            return "error";
+            return "error"; // TODO: give nice error
         }
         parser.getOwnerKey(data);
-        model.addAttribute("tokenName", definitionParser.getTokenName());
+        for (String address : addresses.keySet()) {
+            xml = addresses.get(address);
+            // TODO: when xml-schema-v1 is merged, produce a new "default XML" to fill the role of fallback.
+            if (address.equals(data.contractAddress)) { // this works as contractAddress is always in lowercase
+                break;
+            }
+        }
+        if (xml == null) {
+            /* this is impossible to happen, because at least 1 xml should present or main() bails out */
+            throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
+        }
+        try(FileInputStream in = new FileInputStream(xml)) {
+            // TODO: give more detail in the error
+            // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
+            definition = new TokenDefinition(in, new Locale("en"));
+        }
+
+        model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
         // model.addAttribute("linkExp");
 
@@ -85,7 +111,7 @@ public class AppSiteController {
         }
 
         try {
-            updateTokenInfo(model, data);
+            updateTokenInfo(model, data, definition);
         } catch (Exception e) {
             /* although contract is okay, we can't getting
 	     * tokens. This could be caused by a wrong signature. The
@@ -111,7 +137,7 @@ public class AppSiteController {
         model.addAttribute("contractName", contractName);
     }
 
-    private void updateTokenInfo(Model model, MagicLinkData data) throws Exception {
+    private void updateTokenInfo(Model model, MagicLinkData data, TokenDefinition definition) throws Exception {
         // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
@@ -119,7 +145,7 @@ public class AppSiteController {
         List<NonFungibleToken> selection = Arrays.stream(data.tickets)
                 .mapToObj(i -> balanceArray.get(i))
                 .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
-                .map(tokenId -> new NonFungibleToken(tokenId, definitionParser))
+                .map(tokenId -> new NonFungibleToken(tokenId, definition))
                 .collect(Collectors.toList());
 
         for (NonFungibleToken token : selection) {
@@ -137,10 +163,65 @@ public class AppSiteController {
             throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
     }
 
-	public static void main(String[] args) throws Exception {
-		SpringApplication.run(AppSiteController.class, args);
-		parser.setCryptoInterface(cryptoFunctions);
-        File file = new File("../contracts/TicketingContract.xml");
-        definitionParser = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+    private static Path repoDir;
+
+    @Value("${repository.dir}")
+    public void setRepoDir(String value) {
+        repoDir = Paths.get(value);
+    }
+
+    public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
+        SpringApplication.run(AppSiteController.class, args);
+        parser.setCryptoInterface(cryptoFunctions);
+        if (repoDir == null ) {
+            System.err.println("Don't know where is the contract behaviour XML repository.");
+            System.err.println("Try run with --repository.dir=/dir/to/repo");
+            System.exit(255);
+        }
+
+        try (Stream<Path> dirStream = Files.list(repoDir)) {
+            addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+                    .map(path -> getContractAddresses(path))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toMap(
+                            entry -> entry.getKey().toLowerCase(),
+                            entry -> new File(entry.getValue())));
+        }
+
+        if (addresses == null || addresses.size() == 0) {
+            System.err.println("No Contract XML found. Bailing out.");
+            System.exit(255);
+        } else {
+            System.out.println("Recognising the following contracts:");
+            addresses.forEach((addr, xml) -> System.out.println(addr));
+        }
 	}
+
+	private static Set<Map.Entry<String, String>> getContractAddresses(Path path) {
+        HashMap<String, String> map = new HashMap<>();
+        try (InputStream input = Files.newInputStream(path)) {
+            TokenDefinition token = new TokenDefinition(input, new Locale("en"));
+            token.addresses.values().stream().forEach(address -> map.put(address, path.toString()));
+            return map.entrySet();
+        } catch (IOException | SAXException e) {
+            throw new RuntimeException(e); // make it safe to use in stream
+        }
+    }
+
+    @GetMapping(value = "/0x{address}", produces = MediaType.TEXT_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
+    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address)
+            throws IOException, NoHandlerFoundException
+    {
+        /* TODO: should parse the address, do checksum, store in a byte160 */
+        address = "0x" + address.toLowerCase();
+        if (addresses.containsKey(address)) {
+            File file = addresses.get(address);
+            try (FileInputStream in = new FileInputStream(file)) {
+                /* TODO: check XML's encoding and serve a charset according to the encoding */
+                return IOUtils.toString(in, "utf8");
+            }
+        } else {
+            throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
+        }
+    }
 }

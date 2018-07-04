@@ -1,10 +1,12 @@
 package io.stormbird.token.util;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /*
  * by Weiwu, 2018. Modeled after Java8's ZonedDateTime, intended to be
  * replaced by Java8's ZonedDateTime as soon as Android 8.0 gets popular
@@ -33,6 +35,29 @@ public class ZonedDateTime {
     public ZonedDateTime(long unixTime, TimeZone timezone) {
         this.time = unixTime * 1000L;
         this.timezone = timezone;
+    }
+
+    /* Creating ZonedDateTime from GeneralizedTime */
+    public ZonedDateTime(String time) throws ParseException {
+        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMddHHmmssZZZZ");
+        Pattern p = Pattern.compile("(\\+\\d{4})");
+        Matcher m = p.matcher(time);
+        if (m.find()) {
+            this.timezone = TimeZone.getTimeZone("GMT"+m.group(1));
+            isoFormat.setTimeZone(this.timezone);
+        }else{
+            throw new IllegalArgumentException("not Generlized Time");
+        }
+
+        Date date = isoFormat.parse(time);
+        this.time = date.getTime();
+
+//        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
+//        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
+//        //SimpleDateFormat generalizedTime = new SimpleDateFormat("yyyyMMddHHmmssZ");
+//        //Date date = generalizedTime.parse(time);
+//        this.time = odt.toInstant().getEpochSecond();
+//        this.timezone = TimeZone.getTimeZone("Europe/Moscow");
     }
 
     /* EVERY FUNCTION BELOW ARE SET OUT IN JAVA8 */

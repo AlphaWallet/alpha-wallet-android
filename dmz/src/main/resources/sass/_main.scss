@@ -1,0 +1,42 @@
+//Styling for main
+
+
+header.main {
+    position: relative;
+    width: 100%;
+    padding-top: 150px;
+    padding-bottom: 100px;
+    color: $body-color;
+    .header-content {
+        max-width: 300px;
+        margin-bottom: 100px;
+        h1 {
+            font-size: 18px;
+        }
+    }
+    .device-container {
+        max-width: 325px;
+        margin-right: auto;
+        margin-left: auto;
+        .screen img {
+            border-radius: 3px;
+        }
+    }
+    @media (min-width: 992px) {
+        height: 100vh;
+        min-height: 775px;
+        padding-top: 0;
+        padding-bottom: 0;
+        .header-content {
+            margin-bottom: 0;
+
+            text-align: left;
+            h1 {
+                font-size: 30px;
+            }
+        }
+        .device-container {
+            max-width: 325px;
+        }
+    }
+}

@@ -13,6 +13,7 @@ import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.TransactionsViewModelFactory;
 
 import dagger.Module;
@@ -30,7 +31,8 @@ class TransactionsModule {
             AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            AssetDefinitionService assetDefinitionService) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -40,7 +42,8 @@ class TransactionsModule {
                 addTokenInteract,
                 transactionDetailRouter,
                 externalBrowserRouter,
-                homeRouter);
+                homeRouter,
+                assetDefinitionService);
     }
 
     @Provides

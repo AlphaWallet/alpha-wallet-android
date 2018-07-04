@@ -74,8 +74,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
-        adapter = new TokensAdapter(getContext(), this::onTokenClick);
-        adapter.setHasStableIds(true);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
@@ -84,9 +82,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         progressView.setWhiteCircle();
 
         RecyclerView list = view.findViewById(R.id.list);
-
-        list.setLayoutManager(new LinearLayoutManager(getContext()));
-        list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -104,6 +99,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.endUpdate().observe(this, this::checkTokens);
+
+        adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
+        adapter.setHasStableIds(true);
+        list.setLayoutManager(new LinearLayoutManager(getContext()));
+        list.setAdapter(adapter);
 
         refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
 
@@ -261,22 +261,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         this.wallet = wallet;
         viewModel.fetchTokens();
         //get the XML address
-        try
-        {
-            TokenDefinition ad = new TokenDefinition(getResources().getAssets().open("TicketingContract.xml"),
-                    Objects.requireNonNull(getContext()).getResources().getConfiguration().locale);
-
-            String contractAddress = ad.getContractAddress(networkId);
-            if (contractAddress != null)
-            {
-                adapter.setLiveTokenAddress(contractAddress.toLowerCase());
-                viewModel.setContractAddress(contractAddress.toLowerCase(), ad.getTokenName());
-            }
-        }
-        catch (IOException |SAXException e)
-        {
-            e.printStackTrace();
-        }
+        viewModel.setContractAddresses();
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo)

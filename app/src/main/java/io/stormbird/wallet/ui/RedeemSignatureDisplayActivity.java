@@ -44,7 +44,8 @@ import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
  * Created by James on 24/01/2018.
  */
 
-public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener {
+public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener
+{
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
 
@@ -89,7 +90,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setText(getString(R.string.waiting_for_blockchain));
         tv.setVisibility(View.VISIBLE);
 
-        ticket.displayTicketHolder(ticketRange.range, this);
+        ticket.displayTicketHolder(ticketRange.range, this, viewModel.getAssetDefinitionService());
         finishReceiver = new FinishReceiver(this);
     }
 

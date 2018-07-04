@@ -124,13 +124,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber));
 
-				Gson reader = new Gson();
-				JSONObject stateData = new JSONObject(response);
-				JSONArray orders = stateData.getJSONArray("result");
-				EtherscanTransaction[] myTxs = reader.fromJson(orders.toString(), EtherscanTransaction[].class);
-				for (EtherscanTransaction etx : myTxs)
+				if (response != null)
 				{
-					result.add(etx.createTransaction());
+					Gson reader = new Gson();
+					JSONObject stateData = new JSONObject(response);
+					JSONArray orders = stateData.getJSONArray("result");
+					EtherscanTransaction[] myTxs = reader.fromJson(orders.toString(), EtherscanTransaction[].class);
+					for (EtherscanTransaction etx : myTxs)
+					{
+						result.add(etx.createTransaction());
+					}
 				}
 			}
 			catch (Exception e)

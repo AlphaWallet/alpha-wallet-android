@@ -3,10 +3,14 @@ package io.stormbird.wallet.di;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetDefaultWalletInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
+import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
@@ -27,7 +31,9 @@ class AccountsManageModule {
 			FindDefaultWalletInteract findDefaultWalletInteract,
 			ExportWalletInteract exportWalletInteract,
 			ImportWalletRouter importWalletRouter,
-            HomeRouter homeRouter) {
+			HomeRouter homeRouter,
+			FetchTokensInteract fetchTokensInteract,
+			FindDefaultNetworkInteract findDefaultNetworkInteract) {
 		return new WalletsViewModelFactory(createWalletInteract,
                 setDefaultWalletInteract,
                 deleteWalletInteract,
@@ -35,7 +41,9 @@ class AccountsManageModule {
                 findDefaultWalletInteract,
                 exportWalletInteract,
                 importWalletRouter,
-                homeRouter);
+                homeRouter,
+				fetchTokensInteract,
+				findDefaultNetworkInteract);
 	}
 
 	@Provides
@@ -80,4 +88,15 @@ class AccountsManageModule {
     HomeRouter provideHomeRouter() {
 	    return new HomeRouter();
     }
+
+	@Provides
+	FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+		return new FetchTokensInteract(tokenRepository);
+	}
+
+	@Provides
+	FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
+			EthereumNetworkRepositoryType networkRepository) {
+		return new FindDefaultNetworkInteract(networkRepository);
+	}
 }

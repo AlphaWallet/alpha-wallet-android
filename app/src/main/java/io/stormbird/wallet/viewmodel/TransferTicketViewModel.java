@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
@@ -24,6 +25,7 @@ public class TransferTicketViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -36,11 +38,13 @@ public class TransferTicketViewModel extends BaseViewModel {
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            TransferTicketDetailRouter transferTicketDetailRouter) {
+            TransferTicketDetailRouter transferTicketDetailRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @Override
@@ -100,5 +104,10 @@ public class TransferTicketViewModel extends BaseViewModel {
         } catch (Exception e) {
 
         }
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

@@ -20,6 +20,7 @@ import io.stormbird.wallet.router.NewSettingsRouter;
 import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.router.WalletRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 
@@ -32,6 +33,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final TransactionDetailRouter transactionDetailRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final HomeRouter homeRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -42,7 +44,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
             ExternalBrowserRouter externalBrowserRouter,
-            HomeRouter homeRouter) {
+            HomeRouter homeRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -52,6 +55,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
@@ -66,6 +70,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 addTokenInteract,
                 transactionDetailRouter,
                 externalBrowserRouter,
-                homeRouter);
+                homeRouter,
+                assetDefinitionService);
     }
 }

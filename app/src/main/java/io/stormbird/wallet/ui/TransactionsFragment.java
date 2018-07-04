@@ -170,36 +170,13 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         getContext().unregisterReceiver(tokenReceiver);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         adapter.setDefaultWallet(wallet);
-        //get the XML address
-        try
-        {
-            TokenDefinition ad = new TokenDefinition(
-                    getResources().getAssets().open("TicketingContract.xml"),
-                    getResources().getConfiguration().locale);
-            String contractAddress = ad.getContractAddress(networkId);
-            if (contractAddress == null)
-            {
-                // TODO: user gets status update and this asset class is marked invalid
-            }
-            else
-            {
-                viewModel.setXMLContractAddress(contractAddress.toLowerCase());
-                viewModel.setFeemasterURL(ad.getFeemasterAPI());
-            }
-        }
-        catch (IOException|SAXException e)
-        {
-            e.printStackTrace();
-        }
-        catch (NumberFormatException e)
-        {
-            e.printStackTrace();
-        }
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
         adapter.setDefaultNetwork(networkInfo);
         networkId = networkInfo.chainId;
     }

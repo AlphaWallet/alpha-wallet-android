@@ -1,0 +1,106 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700);
+html,
+body {
+  width: 100%;
+  height: 100%; }
+
+body {
+  padding-top: 150px;
+  font-family: "Source Sans Pro", sans-serif;
+  color: #2f2f2f; }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Source Sans Pro", sans-serif;
+  color: "Source Sans Pro", sans-serif;
+  margin-bottom: 1rem; }
+
+p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px; }
+
+section {
+  padding: 100px 0; }
+  section h2 {
+    font-size: 50px; }
+
+header.main {
+  position: relative;
+  width: 100%;
+  padding-top: 150px;
+  padding-bottom: 100px;
+  color: #2f2f2f; }
+  header.main .header-content {
+    max-width: 300px;
+    margin-bottom: 100px; }
+    header.main .header-content h1 {
+      font-size: 18px; }
+  header.main .device-container {
+    max-width: 325px;
+    margin-right: auto;
+    margin-left: auto; }
+    header.main .device-container .screen img {
+      border-radius: 3px; }
+  @media (min-width: 992px) {
+    header.main {
+      height: 100vh;
+      min-height: 775px;
+      padding-top: 0;
+      padding-bottom: 0; }
+      header.main .header-content {
+        margin-bottom: 0;
+        text-align: left; }
+        header.main .header-content h1 {
+          font-size: 30px; }
+      header.main .device-container {
+        max-width: 325px; } }
+
+#view_listing a {
+  background-color: goldenrod;
+  font-weight: bold;
+  border-radius: 0.5em;
+  padding: 1ex 3em; }
+
+#view_listing :link {
+  text-decoration: none; }
+
+#view_listing :visited {
+  text-decoration: none; }
+
+.ticket-table {
+  width: 346px;
+  height: 250px;
+  border-radius: 20px;
+  box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.07);
+  background-color: #ffffff;
+  border: solid 1px #f3f3f3;
+  padding: 1.5em; }
+
+.box-img {
+  height: 25px;
+  width: 25px; }
+
+#status {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 15px;
+  font-variant: small-caps;
+  border-radius: 8px;
+  padding-left: 1ex;
+  padding-right: 1ex; }
+
+.available #status {
+  background: #75b943;
+  color: white; }
+
+.unavailable #status {
+  background-color: #E70000;
+  color: white; }
+
+.expired #status {
+  background-color: #800000;
+  color: silver; }

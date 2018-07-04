@@ -1,0 +1,15 @@
+// Steps
+
+ #view_listing a {
+    background-color: goldenrod;
+    font-weight: bold;
+    border-radius: 0.5em;
+    padding: 1ex 3em;
+}
+
+ #view_listing :link {
+    text-decoration: none;
+}
+ #view_listing :visited {
+    text-decoration: none;
+} 

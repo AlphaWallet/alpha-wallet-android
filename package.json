@@ -1,0 +1,25 @@
+{
+  "name": "alpha-wallet",
+  "version": "1.0.0",
+  "description": "Each module has its own README. Please click the name of the module to go to the corrisponding README file.",
+  "main": "gulpfile.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/James-Sangalli/alpha-wallet.git"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/James-Sangalli/alpha-wallet/issues"
+  },
+  "homepage": "https://github.com/James-Sangalli/alpha-wallet#readme",
+  "dependencies": {
+    "normalize.css": "^8.0.0"
+  }
+}

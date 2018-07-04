@@ -7,8 +7,10 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
@@ -90,7 +92,14 @@ public class Token implements Parcelable
 
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(balance.toString());
+        if (balance != null)
+        {
+            realmToken.setBalance(balance.toString());
+        }
+        else
+        {
+            realmToken.setBalance("0");
+        }
     }
 
     public String getAddress() {
@@ -159,7 +168,7 @@ public class Token implements Parcelable
         }
     }
 
-    public void setupContent(TokenHolder holder)
+    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0

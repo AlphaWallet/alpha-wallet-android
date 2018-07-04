@@ -6,11 +6,10 @@ When the user accesses a contract, the client downloads or updates the XML files
 - the app discovers that the user has (or had) tokens under a Contract;
 - the user actively seek to use a Contract (scan its QR code or copying its address from the Internet);
 - the user gets sent Universal Link which refers to a Contract or its assets
+- the app launches
 
 The XML file is downloaded or updated by accessing a link like this:
 https://repo.awallet.io/0xA66A3F08068174e8F005112A8b2c7A507a822335
-
-The link will change to https://app.awallet.io if I found that it is impractical to use hostname-based virtual-host in HTTPS in Spring/Thymeleaf.
 
 ## For downloading the first time ##
 
@@ -21,6 +20,10 @@ The XML file is downloaded to the mobile phone, validated for signature (in the 
 ## For checking updates ##
 
 Include the `IF-Modified-Since` header HTTP header with the local XML's last modified date in the GET request. If the XML on the server has not been modified, a `304` will be returned with an empty body. Be careful with timezone! Put a bit of thinking cases like this: the user moves from timezone A to timezone B and missing a latest update for up to 24 hours.
+
+Example for the client to enquire repo.awallet.io for the latest update.
+
+    curl "Accept: text/xml; charset=UTF-8" -H "IF-Modified-Since: Mon, 02 Jul 2018 13:23:00 GMT" -H "X-Client-Name: AlphaWallet" -H "X-Client-Version: 1.0.3" -H "X-Platform-Name: iOS" -H "X-Platform-Version: 11.1.2".   https://repo.awallet.io:8080/0xd8e5f58de3933e1e35f9c65eb72cb188674624f3
 
 If an update is needed, the new file will be available in the body. Validate for signature (in the future, validate against schemas). If invalid, keep the old file and log the event (or secrectly send us an email). If valid, replace the local file with it and set the modified timestamp again:
 
@@ -43,7 +46,7 @@ These are two identical files stored *twice* on the mobile's file storage, and t
 
 These headers should be included with every request:
 
-    "Accept": "application/xml"
+    "Accept": "text/xml; charset=UTF-8"
     "X-Client-Name": "AlphaWallet"
     "X-Client-Version": "1.0.3"
     "X-Platform-Name": "iOS"

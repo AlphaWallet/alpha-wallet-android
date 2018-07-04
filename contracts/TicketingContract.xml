@@ -385,6 +385,10 @@ bFTFAiBKJSQRqq66kI9yMPc1NJISGi8btpWfPiB78twtjuHe7A==
           <value lang="en">TBC</value>
           <value lang="zh">待定</value>
         </option>
+         <option key="232">
+          <value lang="en">Exhibition stand A311</value>
+          <value lang="zh">展台A311</value>
+        </option>
       </origin>
     </attribute-type>
     <attribute-type id="venue" syntax="1.3.6.1.4.1.1466.115.121.1.15">
@@ -526,6 +530,10 @@ bFTFAiBKJSQRqq66kI9yMPc1NJISGi8btpWfPiB78twtjuHe7A==
         <option key="237">
           <value lang="en">Hong Kong Convention and Exhibition Centre</value>
           <value lang="zh">香港会议展览中心</value>
+        </option>
+        <option key="236">
+          <value lang="en">P2联合创业办公社 中关村e世界</value>
+          <value lang="zh">P2联合创业办公社 中关村e世界</value>
         </option>
       </origin>
     </attribute-type>
@@ -678,41 +686,45 @@ bFTFAiBKJSQRqq66kI9yMPc1NJISGi8btpWfPiB78twtjuHe7A==
           <value lang="en">AlphaWallet Event</value>
           <value lang="zh">AlphaWallet活动</value>
         </option>
-        <option key="254">
+        <option key="243">
           <value lang="en">Stormbird Event</value>
           <value lang="zh">Stormbird活动</value>
         </option>
-        <option key="253">
+        <option key="242">
           <value lang="en">UNITY VENTURES Event</value>
           <value lang="zh">九合创投活动</value>
         </option>
-        <option key="252">
+        <option key="241">
           <value lang="en">Max's Event</value>
           <value lang="zh">Max的活动</value>
         </option>
-        <option key="251">
+        <option key="240">
           <value lang="en">Chongqing Blockchain Event</value>
           <value lang="zh">重庆区块链活动</value>
         </option>
-        <option key="250">
+        <option key="239">
           <value lang="en">Dubai Blockchain Event</value>
           <value lang="zh">迪拜区块链活动</value>
         </option>
-        <option key="249">
+        <option key="238">
           <value lang="en">Silicon Valley Blockchain Event</value>
           <value lang="zh">硅谷区块链活动</value>
         </option>
-        <option key="248">
+        <option key="237">
           <value lang="en">Melbourne Blockchain Event</value>
           <value lang="zh">墨尔本区块链活动</value>
         </option>
-        <option key="247">
+        <option key="236">
           <value lang="en">General Event</value>
           <value lang="zh">通用活动</value>
         </option>
-        <option key="246">
+        <option key="235">
           <value lang="en">AlphaWallet Meeting Slot</value>
           <value lang="zh">AlphaWallet面议机会</value>
+        </option>
+        <option key="234">
+          <value lang="en">ERC875 Meetup</value>
+          <value lang="zh">ERC875线下聚会</value>
         </option>
       </origin>
     </attribute-type>

@@ -30,6 +30,8 @@ import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
 
 
@@ -60,9 +62,9 @@ public class AppSiteController {
                 "}";
     }
 
-    @RequestMapping("/")
-    public String home(HttpServletRequest request){
-        return "index";
+    @GetMapping("/")
+    public RedirectView home(RedirectAttributes attributes){
+        return new RedirectView("https://awallet.io");
     }
 
     @GetMapping(value = "/{UniversalLink}")

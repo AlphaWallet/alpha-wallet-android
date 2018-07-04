@@ -18,9 +18,9 @@ import static org.junit.Assert.*;
 public class TokenDefinitionTest {
     Stream<BigInteger> ticketIDs = Stream.of(
             // time: 5B2282F0, TPE vs DEN match: 01, category 0C
-            "5B2282F054504544454E010CCB53", "5B2282F054504544454E010CCB54",
+            "01015B2282F054504544454E010CCB53", "01015B2282F054504544454E010CCB54",
             // time: 5B23D470, VIE vs SIN match: 02, category 02
-            "5B2282F056494553494E0202CB53", "5B2282F056494553494E0202CB54"
+            "01015B2282F056494553494E0202CB53", "01015B2282F056494553494E0202CB54"
     ).map(hexstr -> new BigInteger(hexstr, 16));
     File file = new File("../contracts/TicketingContract.xml");
 
@@ -48,7 +48,7 @@ public class TokenDefinitionTest {
             assertTrue(BigInteger.valueOf(0xCB53).compareTo(ticket.getAttribute("numero").value) < 1);
             assertTrue(BigInteger.valueOf(0xCB54).compareTo(ticket.getAttribute("numero").value) > -1);
             assertEquals("№", ticket.getAttribute("numero").name);
-            //assertEquals("20180614180000+0300", ticket.getAttribute("time").text);
+            assertEquals("20180614180000+0300", ticket.getAttribute("time").text);
         });
         /* Epoch, the following test only works from Singapore */
         /* Travis isn't in Singapore ... */

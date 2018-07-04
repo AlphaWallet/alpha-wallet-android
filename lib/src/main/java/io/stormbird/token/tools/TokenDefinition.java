@@ -121,16 +121,15 @@ public class TokenDefinition {
                             break;
                         case "mapping":
                             as = As.Mapping;
+                            // TODO: Syntax is not checked
+                            members = new ConcurrentHashMap<>();
+                            populate(origin);
                             break;
                         default: // "unsigned"
                             as = As.Unsigned;
                     }
                     if (origin.hasAttribute("bitmask")) {
                         bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
-                    }
-                    if(syntax.equals(Syntax.DirectoryString)){
-                        members = new ConcurrentHashMap<>();
-                        populate(origin);
                     }
                 }
             }
@@ -160,6 +159,8 @@ public class TokenDefinition {
                 } else if(as == As.Mapping){
                     // members might be null, but it is better to throw up ( NullPointerException )
                     // than silently ignore
+                    System.out.println(data);
+                    System.out.println(members.toString());
                     return members.get(data);
                 }
                 throw new NullPointerException("Missing valid 'as' attribute");

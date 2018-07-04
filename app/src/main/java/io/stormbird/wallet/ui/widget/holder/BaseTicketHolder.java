@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui.widget.holder;
 
+import java.text.ParseException;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +15,7 @@ import java.util.TimeZone;
 import java.math.BigInteger;
 import java.util.Locale;
 
-import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.util.ZonedDateTime;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
@@ -65,9 +66,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
         DateFormat date = android.text.format.DateFormat.getLongDateFormat(getContext());
-        date.setTimeZone(TimeZone.getTimeZone("Europe/Moscow")); // TODO: use the timezone defined in XML
         DateFormat time = android.text.format.DateFormat.getTimeFormat(getContext());
-        time.setTimeZone(TimeZone.getTimeZone("Europe/Moscow")); // TODO: use the timezone defined in XML
         this.thisData = data;
         name.setText(ticket.tokenInfo.name);
 
@@ -79,14 +78,10 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
                 NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTokenId);
                 String nameStr = nonFungibleToken.getAttribute("category").text;
                 String venueStr = nonFungibleToken.getAttribute("venue").text;
-                Date startTime = new Date(nonFungibleToken.getAttribute("time").value.longValue()*1000L);
-                int cat = nonFungibleToken.getAttribute("category").value.intValue();
 
                 name.setText(nameStr);
                 count.setText(seatCount);
                 venue.setText(venueStr);
-                ticketDate.setText(date.format(startTime));
-                ticketTime.setText(time.format(startTime));
                 ticketText.setText(
                         nonFungibleToken.getAttribute("countryA").text + "-" +
                                 nonFungibleToken.getAttribute("countryB").text
@@ -96,12 +91,17 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
                         nonFungibleToken.getAttribute("locality").name + ": " +
                                 nonFungibleToken.getAttribute("locality").text
                 );
+                ZonedDateTime datetime = new ZonedDateTime(nonFungibleToken.getAttribute("time").text);
+                ticketDate.setText(datetime.format(date));
+                ticketTime.setText(datetime.format(time));
             } catch (NullPointerException e) {
                 /* likely our XML token definition is outdated, just
                  * show raw data here. TODO: only the fields not
                  * understood are displayed as raw
                  */
                 name.setText(firstTokenId.toString(16));
+            } catch (ParseException e) {
+                /* the last bit of the try block about setting date and time will simply not execute */
             }
         }
     }

@@ -97,7 +97,7 @@ public class SplashViewModel extends ViewModel {
     private void fetchWallets()
     {
         fetchWalletsInteract
-                .fetch()
+                .fetch(null)
                 .subscribe(wallets::postValue, this::onError);
     }
 

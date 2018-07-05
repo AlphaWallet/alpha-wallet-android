@@ -62,14 +62,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		this.wallet = data;
 		address.setText(wallet.address);
 		balance.setText(wallet.balance);
-		if (wallet.balance.equals("-"))
-		{
-			ethLayout.setVisibility(View.INVISIBLE);
-		}
-		else
-		{
-			ethLayout.setVisibility(View.VISIBLE);
-		}
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));

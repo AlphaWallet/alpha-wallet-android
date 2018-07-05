@@ -54,10 +54,6 @@ public class ZonedDateTime {
 
 //        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
 //        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
-//        //SimpleDateFormat generalizedTime = new SimpleDateFormat("yyyyMMddHHmmssZ");
-//        //Date date = generalizedTime.parse(time);
-//        this.time = odt.toInstant().getEpochSecond();
-//        this.timezone = TimeZone.getTimeZone("Europe/Moscow");
     }
 
     /* EVERY FUNCTION BELOW ARE SET OUT IN JAVA8 */

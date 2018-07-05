@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><asset><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><token><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
 <ds:SignedInfo>
 <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"/>
@@ -8,16 +8,16 @@
 <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-<ds:DigestValue>l0+H/ux1/ozangfPfGKo3Aoj5/mOVgTMJP1QzOx/dac=</ds:DigestValue>
+<ds:DigestValue>MJVWADdSI8p7RwR3uptlPL5LZmwtwBsclKTwVPEmWYs=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
 <ds:SignatureValue>
-ATRL0F0zJAwFve3Pgn46pensOc32BgNaTtgc9xs0SSiEInYtSZytHf5Ng2o1Qf/PKZeYbdo3nqME
-9BPmZX0pIi38AeH6DODklaJ/3lnIozQ7uce/phNrkwca6eZgJtH2xTBPOUgT2JDVNbcxSusfHfkO
-FY02mddlviO8tBYzl4AzN9Pj
+kporx19FbGkNJaJAF4hMmpT6riH/lv2wdJdoMOIj8JVva5KIBc4eY0TW3tGz6sH7QwtAkDtb+n92
+41/ebewwRVGHqYQ6lsNiS1AXq14e3nnSQkBEB4IwJ/4svy57e2TqQsPgiYfyf0kNpvQnhIUbHX6z
+zSg6McerMl4TIo7sE/+gUw==
 </ds:SignatureValue>
 <ds:KeyInfo>
-<ds:KeyName>Shankai</ds:KeyName>
+  <ds:KeyName>Shankai</ds:KeyName>
 <ds:X509Data>
 <ds:X509Certificate>
 MIIFBzCCBK2gAwIBAgIQKCMFmlBLtxz6L27XkUOsHjAKBggqhkjOPQQDAjCBkDELMAkGA1UEBhMC
@@ -44,76 +44,117 @@ LOBZaO136CYN7GYr+OODcLZ/AG2r7ge7BigCRSk8fQIgC/n33uxEZD+w3ENTxTdOhCTxvSW6BL71
 wFYJPkFHYWkwCgYIKoZIzj0EAwIDSAAwRQIhAIi6VxP/HzmR3rGw6f9M6FLiH0TNgn1EbARAluAV
 bFTFAiBKJSQRqq66kI9yMPc1NJISGi8btpWfPiB78twtjuHe7A==
 </ds:X509Certificate>
-<ds:X509Certificate>
-MIIDnTCCAyKgAwIBAgIQUQYB5jtQZzxV7k4Z2jBMqDAKBggqhkjOPQQDAzCBhTELMAkGA1UEBhMC
-R0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UE
-ChMRQ09NT0RPIENBIExpbWl0ZWQxKzApBgNVBAMTIkNPTU9ETyBFQ0MgQ2VydGlmaWNhdGlvbiBB
-dXRob3JpdHkwHhcNMTQwMzEzMDAwMDAwWhcNMjkwMzEyMjM1OTU5WjCBkDELMAkGA1UEBhMCR0Ix
-GzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UEChMR
-Q09NT0RPIENBIExpbWl0ZWQxNjA0BgNVBAMTLUNPTU9ETyBFQ0MgRG9tYWluIFZhbGlkYXRpb24g
-U2VjdXJlIFNlcnZlciBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIg2jdgJVPWaKXk+JD06
-oiTxihgKVH3tQCza8LqO2YT1Rd03cJEkrLoU61FoIN3SSFUAXW9E7ggci/lVXySaVIOjggFlMIIB
-YTAfBgNVHSMEGDAWgBR1cacZSBm8nZ3qQUfflMRId5nTeTAdBgNVHQ4EFgQUu/oI4L9U7lr9FqQ1
-AgmppMjs/UswDgYDVR0PAQH/BAQDAgGGMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0lBBYwFAYI
-KwYBBQUHAwEGCCsGAQUFBwMCMBsGA1UdIAQUMBIwBgYEVR0gADAIBgZngQwBAgEwTAYDVR0fBEUw
-QzBBoD+gPYY7aHR0cDovL2NybC5jb21vZG9jYS5jb20vQ09NT0RPRUNDQ2VydGlmaWNhdGlvbkF1
-dGhvcml0eS5jcmwwcQYIKwYBBQUHAQEEZTBjMDsGCCsGAQUFBzAChi9odHRwOi8vY3J0LmNvbW9k
-b2NhLmNvbS9DT01PRE9FQ0NBZGRUcnVzdENBLmNydDAkBggrBgEFBQcwAYYYaHR0cDovL29jc3Au
-Y29tb2RvY2EuY29tMAoGCCqGSM49BAMDA2kAMGYCMQDtilgEuIgqZMub1nOMLJwPVr3Lrs/A4RVY
-uImPsVNTtWG65FL7j6YooeQtlSxIViACMQDvavtMsSKuUzwaH3x8vVhGiljleoI0iloIE64Adby0
-id6I7ObgYgAsmupHtaSvojI=
-</ds:X509Certificate>
-<ds:X509Certificate>
-MIID0DCCArigAwIBAgIQQ1ICP/qokB8Tn+P05cFETjANBgkqhkiG9w0BAQwFADBvMQswCQYDVQQG
-EwJTRTEUMBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsTHUFkZFRydXN0IEV4dGVybmFsIFRU
-UCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290MB4XDTAwMDUzMDEw
-NDgzOFoXDTIwMDUzMDEwNDgzOFowgYUxCzAJBgNVBAYTAkdCMRswGQYDVQQIExJHcmVhdGVyIE1h
-bmNoZXN0ZXIxEDAOBgNVBAcTB1NhbGZvcmQxGjAYBgNVBAoTEUNPTU9ETyBDQSBMaW1pdGVkMSsw
-KQYDVQQDEyJDT01PRE8gRUNDIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MHYwEAYHKoZIzj0CAQYF
-K4EEACIDYgAEA0d7L3XJghWF+3XkkRbUq2KZ9T5SCwbOQQB/l+EKJDwdAQTuPdKNCZcM4HXk+vt3
-iir1A2BLNosWIxatCXH0SvQoULT+iBxuP2wvLwlZW6VbCzOZ4sM9iflqLO+y0wbpo4H+MIH7MB8G
-A1UdIwQYMBaAFK29mHo0tCb3+sQmVO8DveAky1QaMB0GA1UdDgQWBBR1cacZSBm8nZ3qQUfflMRI
-d5nTeTAOBgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zARBgNVHSAECjAIMAYGBFUdIAAw
-SQYDVR0fBEIwQDA+oDygOoY4aHR0cDovL2NybC50cnVzdC1wcm92aWRlci5jb20vQWRkVHJ1c3RF
-eHRlcm5hbENBUm9vdC5jcmwwOgYIKwYBBQUHAQEELjAsMCoGCCsGAQUFBzABhh5odHRwOi8vb2Nz
-cC50cnVzdC1wcm92aWRlci5jb20wDQYJKoZIhvcNAQEMBQADggEBAB3H+i5AtlwFSw+8VTYBWOBT
-BT1k+6zZpTi4pyE7r5VbvkjI00PUIWxB7QktnHMAcZyuIXN+/46NuY5YkI78jG12yAA6nyCmLX3M
-F/3NmJYyCRrJZfwE67SaCnjllztSjxLCdJcBns/hbWjYk7mcJPuWJ0gBnOqUP3CYQbNzUTcp6PYB
-erknuCRR2RFo1KaFpzanpZa6gPim/a5thCCuNXZzQg+HCezF3OeTAyIal+6ailFhp5cmHunudVEI
-kAWvL54TnJM/ev/m6+loeYyv4Lb67psSE/5FjNJ80zXrIRKT/mZ1JioVhCb3ZsnLjbsJQdQYr7Gz
-EPUQyp2aDrV1aug=
-</ds:X509Certificate>
 </ds:X509Data>
 </ds:KeyInfo>
 </ds:Signature>
-	<contract type="issuing">
-		<address network="1">0xA66A3F08068174e8F005112A8b2c7A507a822335</address>
-		<address network="3">0xd8e5f58de3933e1e35f9c65eb72cb188674624f3</address>
-		<name lang="ru">Ваучеры</name>
-		<name lang="en">Vouchers</name>
-		<name lang="zh">门票兑换券</name>
-		<name lang="es">Cupones</name>
-		<name lang="ru">Ваучеры</name>
-	</contract>
-	<contract type="bag">
-	</contract>
-	<contract type="proxy">
-	</contract>
+  <contract id="holding_contract" type="holding">
+    <address network="1">0xA66A3F08068174e8F005112A8b2c7A507a822335</address>
+    <address network="3">0xd8e5f58de3933e1e35f9c65eb72cb188674624f3</address>
+    <name lang="ru">Ваучеры</name>
+    <name lang="en">Vouchers</name>
+    <name lang="zh">门票兑换券</name>
+    <name lang="es">Cupones</name>
+    <name lang="ru">Ваучеры</name>
+    <interface>erc875</interface>
+  </contract>
+  <contract type="market">
+    <name>Blind Auction</name>
+  </contract>
+  <contract type="wallet">
+    <!-- users can buy tickets using SPG points -->
+    <address network="1">0xdecafbaddecafbaddecafbaddecafbaddecafbad</address>
+    <name>Starwood Preferred Guest</name>
+  </contract>
   <!-- consider metadata of tokens, e.g. quantifier in each languages -->
   <features>
-    <feature bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF">
-      <trade method="market-queue" version="0.1"><gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway></trade>
-      <trade method="universal-link" version="9"><prefix>https://app.awallet.io/</prefix></trade>
+    <!-- a feature is only usable if all tokens are included, but, if
+         only some are excluded, the feature is still available for
+         the ones that are not excluded. Think about redeem function,
+         the button should be grayed out with the "include" message
+         there -->
+    <feature type="market-queue">
+      <include>valid</include>
+      <exclude>invited</exclude>
+      <exclude>discounted</exclude>
+      <gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</gateway>
+      <message lang="en" type="exclude">%name% can't be traded on the market</message>
+      <message lang="zh" type="exclude">%name% 不能再在市场上交易</message>
+      <message type="include">Only %name% can be traded on the market</message>
+      <message type="include">只有%name%才可以在市场上交易</message>
+    </feature>
+    <feature type="market-contract">
+      <include>valid</include>
+      <exclude>discounted</exclude>
+      <exclude>invited</exclude>
+      <!-- buy and sell tokens on this contract -->
+      <address network="1">0xdecafbaddecafbaddecafbaddecafbaddecafbad</address>
+      <message lang="en" type="exclude">%name% can't be traded on the market</message>
+      <message lang="zh" type="exclude">%name% 不能再在市场上交易</message>
+      <message type="include">Only %name% can be traded on the market</message>
+      <message type="include">只有%name%才可以在市场上交易</message>
+    </feature>
+    <feature type="magic-link">
+      <include>valid</include>
+      <exclude>discounted</exclude>
+      <prefix>https://app.awallet.io/</prefix>
+      <message lang="en" type="exclude">%name% can't be traded with MagicLink</message>
+      <message type="include">Only %name% can be traded with MagicLink</message>
+      <message lang="zh" type="exclude">%name% 不能用MagicLink交易</message>
+      <message lang="zh" type="include">只有末到期的票才可以用MagicLink交易</message>
+    </feature>
+    <feature type="transfer-link">
+      <exclude>discounted</exclude>
+      <exclude>invited</exclude>
+      <prefix>https://app.awallet.io/</prefix>
+      <message lang="en" type="exclude">%name% can't be traded on the market</message>
+      <message lang="zh" type="exclude">%name% 不能再在市场上交易</message>
+    </feature>
+    <feature type="feemaster">
+      <exclude>expired</exclude>
       <feemaster>https://app.awallet.io:80/api/claimToken</feemaster>
-      <redeem>
-        <method name="QR"/>
-        <!--
-        <method name="Aztec"/>
-        <method name="Bluetooth"/>
-        -->
-      </redeem>
+      <message lang="en" type="include">%name% can't be imported</message>
+      <message lang="zh" type="include">不能收下%name%</message>
+    </feature>
+    <feature type="qr-redeem">
+      <include>valid</include>
+      <redeem format="Aztec"/>
+      <message lang="en" type="include">Only %name% can be redeemed for paper tickets</message>
+      <message lang="zh" type="include">只有%name%才可以兑换纸票</message>
+    </feature>
+    <feature type="nfc-redeem">
+      <include>valid</include>
+      <device>decafbaddecafbad</device>
+      <message lang="en" type="include">Only %name% can be redeemed for paper tickets</message>
+      <message lang="zh" type="include">只有%name%才可以兑换纸票</message>
     </feature>
   </features>
+  <selections>
+    <selection id="discounted">
+      <name lang="en">Discount Tickets</name>
+      <name lang="zh">打折票</name>
+      <filter>(|category=打折票)(category=Discounted))</filter>
+    </selection>
+    <selection id="invited">
+      <name lang="en">Gift Ticket</name>
+      <name lang="zh">赠票</name>
+      <filter>gifted</filter>
+    </selection>
+    <selection id="valid">
+      <name lang="en">Tickets not expired</name>
+      <name lang="zh">末到期票</name>
+      <filter>!expired</filter>
+    </selection>
+    <selection id="expired">
+      <name lang="en">Expired Tickets</name>
+      <name lang="zh">已经过期的票</name>
+      <filter>expired</filter>
+    </selection>
+  </selections>
+  <grouping>
+    <group bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
+      <consecutive_groups/>
+    </group>
+  </grouping>
   <ordering>
     <order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
       <byName field="locality"/>
@@ -128,7 +169,7 @@ EPUQyp2aDrV1aug=
   </ordering>
 
   <!-- token UI definition can happen here -->
-  <fields>
+  <attribute-types>
     <!--
     There are 64 matches (1-64), each has up to 16 ticket classes,
     within each class, there are less than 65536 tickets.  A compact
@@ -138,9 +179,9 @@ EPUQyp2aDrV1aug=
 
     Representing:
 
-	    Match ID: 1-64
-	    Class: 1-16
-	    Seat: 0-65536
+        Match ID: 1-64
+        Class: 1-16
+        Seat: 0-65536
 
     These are represented by 7 hex codes. Therefore 0x40F0481 means
     the final match (64th), class F (highest) ticket number 1153. But
@@ -171,575 +212,542 @@ EPUQyp2aDrV1aug=
     (authorisation server, ios, android, potentially market-queue),
     Weiwu thought that it helps the developers if we use byte-fields
     instead of bit-fields.
+    1.3.6.1.4.1.1466.115.121.1.15 is DirectoryString
+    1.3.6.1.4.1.1466.115.121.1.24 is GeneralisedTime
+    1.3.6.1.4.1.1466.115.121.1.26 is IA5String
+    1.3.6.1.4.1.1466.115.121.1.27 is Integer
   -->
-    <field bitmask="00000000000000000000000000000000FF000000000000000000000000000000" id="locality" type="Enumeration">
+    <attribute-type id="locality" oid="2.5.4.7" syntax="1.3.6.1.4.1.1466.115.121.1.15">
       <name lang="en">City</name>
       <name lang="zh">城市</name>
       <name lang="es">Ciudad</name>
       <name lang="ru">город</name>
-      <mapping>
-        <entity key="1">
-          <name lang="ru">Москва́</name>
-          <name lang="en">Moscow</name>
-          <name lang="zh">莫斯科</name>
-          <name lang="es">Moscú</name>
-        </entity>
-        <entity key="2">
-          <name lang="ru">Санкт-Петербу́рг</name>
-          <name lang="en">Saint Petersburg</name>
-          <name lang="zh">圣彼得堡</name>
-          <name lang="es">San Petersburgo</name>
-        </entity>
-        <entity key="3">
-          <name lang="ru">сочи</name>
-          <name lang="en">Sochi</name>
-          <name lang="zh">索契</name>
-          <name lang="es">Sochi</name>
-        </entity>
-        <entity key="4">
-          <name lang="ru">екатеринбург</name>
-          <name lang="en">Ekaterinburg</name>
-          <name lang="zh">叶卡捷琳堡</name>
-          <name lang="es">Ekaterinburg</name>
-        </entity>
-        <entity key="5">
-          <name lang="ru">Саранск</name>
-          <name lang="en">Saransk</name>
-          <name lang="zh">萨兰斯克</name>
-          <name lang="es">Saransk</name>
-        </entity>
-        <entity key="6">
-          <name lang="ru">казань</name>
-          <name lang="en">Kazan</name>
-          <name lang="zh">喀山</name>
-          <name lang="es">Kazan</name>
-        </entity>
-        <entity key="7">
-          <name lang="ru">Нижний Новгород</name>
-          <name lang="en">Nizhny Novgorod</name>
-          <name lang="zh">下诺夫哥罗德</name>
-          <name lang="es">Nizhny Novgorod</name>
-        </entity>
-        <entity key="8">
-          <name lang="ru">Ростов-на-Дону</name>
-          <name lang="en">Rostov-on-Don</name>
-          <name lang="zh">顿河畔罗斯托夫</name>
-          <name lang="es">Rostov-on-Don</name>
-        </entity>
-        <entity key="9">
-          <name lang="ru">Самара</name>
-          <name lang="en">Samara</name>
-          <name lang="zh">萨马拉</name>
-          <name lang="es">Samara</name>
-        </entity>
-        <entity key="10">
-          <name lang="ru">Волгоград</name>
-          <name lang="en">Volgograd</name>
-          <name lang="zh">伏尔加格勒</name>
-          <name lang="es">Volgogrado</name>
-        </entity>
-        <entity key="11">
-          <name lang="ru">Калининград</name>
-          <name lang="en">Kaliningrad</name>
-          <name lang="zh">加里宁格勒</name>
-          <name lang="es">Kaliningrad</name>
-        </entity>
-        <entity key="255">
-          <name lang="ru">Сидней</name>
-          <name lang="en">Sydney</name>
-          <name lang="zh">悉尼</name>
-          <name lang="es">Sídney</name>
-        </entity>
-        <entity key="254">
-          <name lang="ru">Сингапур</name>
-          <name lang="en">Singapore</name>
-          <name lang="zh">新加坡</name>
-          <name lang="es">Singapur</name>
-        </entity>
-        <entity key="253">
-          <name lang="zh">深圳</name>
-          <name lang="en">Shenzhen</name>
-        </entity>
-	<entity key="252">
-          <name lang="zh">北京</name>
-          <name lang="en">Beijing</name>
-        </entity>
-	<entity key="251">
-          <name lang="zh">上海</name>
-          <name lang="en">Shanghai</name>
-        </entity>
-	<entity key="250">
-          <name lang="en">Tokyo</name>
-          <name lang="zh">东京</name>
-        </entity>      
-	<entity key="249">
-          <name lang="en">Seoul</name>
-          <name lang="zh">首尔</name>
-        </entity>      
-	<entity key="248">
-          <name lang="zh">重庆</name>
-          <name lang="en">Chongqing</name>
-        </entity>	      
-	<entity key="247">
-          <name lang="en">New York</name>
-          <name lang="zh">纽约</name>
-        </entity>	      
-	<entity key="246">
-          <name lang="en">Melbourne</name>
-          <name lang="zh">墨尔本</name>
-        </entity>      
-	<entity key="245">
-          <name lang="en">Hong Kong</name>
-          <name lang="zh">香港</name>
-        </entity>     
-	<entity key="244">
-          <name lang="zh">成都</name>
-          <name lang="en">Chengdu</name>
-        </entity>	      
-	<entity key="243">
-          <name lang="en">Kuala Lumpur</name>
-          <name lang="zh">吉隆坡</name>
-        </entity>	      
-	<entity key="242">
-          <name lang="en">Bangkok</name>
-          <name lang="zh">曼谷</name>
-        </entity>	      
-	<entity key="241">
-          <name lang="en">San Francisco</name>
-          <name lang="zh">三藩市</name>
-        </entity>	      
-	<entity key="240">
-          <name lang="en">Las Vegas</name>
-          <name lang="zh">拉斯维加斯</name>
-        </entity>	      
-	<entity key="239">
-          <name lang="en">London</name>
-          <name lang="zh">伦敦</name>
-        </entity>	      
-	<entity key="238">
-          <name lang="en">Barcelona</name>
-          <name lang="zh">巴塞罗那</name>
-        </entity>	      
-	<entity key="237">
-          <name lang="en">Madrid</name>
-          <name lang="zh">马德里</name>
-        </entity>
-	<entity key="236">
-          <name lang="en">Zug</name>
-          <name lang="zh">楚格</name>
-        </entity>	      
-	<entity key="235">
-          <name lang="en">Paris</name>
-          <name lang="zh">巴黎</name>
-        </entity>	      
-	<entity key="234">
-          <name lang="en">Dubai</name>
-          <name lang="zh">迪拜</name>
-        </entity>
-	<entity key="233">
-          <name lang="en">TBC</name>
-          <name lang="zh">待定</name>
-        </entity>      
-      </mapping>
-    </field>
-    <field bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" id="venue" type="Enumeration">
+      <origin as="mapping" bitmask="00000000000000000000000000000000FF000000000000000000000000000000">
+        <option key="1">
+          <value lang="ru">Москва́</value>
+          <value lang="en">Moscow</value>
+          <value lang="zh">莫斯科</value>
+          <value lang="es">Moscú</value>
+        </option>
+        <option key="2">
+          <value lang="ru">Санкт-Петербу́рг</value>
+          <value lang="en">Saint Petersburg</value>
+          <value lang="zh">圣彼得堡</value>
+          <value lang="es">San Petersburgo</value>
+        </option>
+        <option key="3">
+          <value lang="ru">сочи</value>
+          <value lang="en">Sochi</value>
+          <value lang="zh">索契</value>
+          <value lang="es">Sochi</value>
+        </option>
+        <option key="4">
+          <value lang="ru">екатеринбург</value>
+          <value lang="en">Ekaterinburg</value>
+          <value lang="zh">叶卡捷琳堡</value>
+          <value lang="es">Ekaterinburg</value>
+        </option>
+        <option key="5">
+          <value lang="ru">Саранск</value>
+          <value lang="en">Saransk</value>
+          <value lang="zh">萨兰斯克</value>
+          <value lang="es">Saransk</value>
+        </option>
+        <option key="6">
+          <value lang="ru">казань</value>
+          <value lang="en">Kazan</value>
+          <value lang="zh">喀山</value>
+          <value lang="es">Kazan</value>
+        </option>
+        <option key="7">
+          <value lang="ru">Нижний Новгород</value>
+          <value lang="en">Nizhny Novgorod</value>
+          <value lang="zh">下诺夫哥罗德</value>
+          <value lang="es">Nizhny Novgorod</value>
+        </option>
+        <option key="8">
+          <value lang="ru">Ростов-на-Дону</value>
+          <value lang="en">Rostov-on-Don</value>
+          <value lang="zh">顿河畔罗斯托夫</value>
+          <value lang="es">Rostov-on-Don</value>
+        </option>
+        <option key="9">
+          <value lang="ru">Самара</value>
+          <value lang="en">Samara</value>
+          <value lang="zh">萨马拉</value>
+          <value lang="es">Samara</value>
+        </option>
+        <option key="10">
+          <value lang="ru">Волгоград</value>
+          <value lang="en">Volgograd</value>
+          <value lang="zh">伏尔加格勒</value>
+          <value lang="es">Volgogrado</value>
+        </option>
+        <option key="11">
+          <value lang="ru">Калининград</value>
+          <value lang="en">Kaliningrad</value>
+          <value lang="zh">加里宁格勒</value>
+          <value lang="es">Kaliningrad</value>
+        </option>
+        <option key="255">
+          <value lang="ru">Сидней</value>
+          <value lang="en">Sydney</value>
+          <value lang="zh">悉尼</value>
+          <value lang="es">Sídney</value>
+        </option>
+        <option key="254">
+          <value lang="ru">Сингапур</value>
+          <value lang="en">Singapore</value>
+          <value lang="zh">新加坡</value>
+          <value lang="es">Singapur</value>
+        </option>
+        <option key="253">
+          <value lang="zh">深圳</value>
+          <value lang="en">Shenzhen</value>
+        </option>
+        <option key="252">
+          <value lang="zh">北京</value>
+          <value lang="en">Beijing</value>
+        </option>
+        <option key="251">
+          <value lang="zh">上海</value>
+          <value lang="en">Shanghai</value>
+        </option>
+        <option key="250">
+          <value lang="en">Tokyo</value>
+          <value lang="zh">东京</value>
+        </option>
+        <option key="249">
+          <value lang="en">Seoul</value>
+          <value lang="zh">首尔</value>
+        </option>
+        <option key="248">
+          <value lang="zh">重庆</value>
+          <value lang="en">Chongqing</value>
+        </option>
+        <option key="247">
+          <value lang="en">New York</value>
+          <value lang="zh">纽约</value>
+        </option>
+        <option key="246">
+          <value lang="en">Melbourne</value>
+          <value lang="zh">墨尔本</value>
+        </option>
+        <option key="245">
+          <value lang="en">Hong Kong</value>
+          <value lang="zh">香港</value>
+        </option>
+        <option key="244">
+          <value lang="zh">成都</value>
+          <value lang="en">Chengdu</value>
+        </option>
+        <option key="243">
+          <value lang="en">Kuala Lumpur</value>
+          <value lang="zh">吉隆坡</value>
+        </option>
+        <option key="242">
+          <value lang="en">Bangkok</value>
+          <value lang="zh">曼谷</value>
+        </option>
+        <option key="241">
+          <value lang="en">San Francisco</value>
+          <value lang="zh">三藩市</value>
+        </option>
+        <option key="240">
+          <value lang="en">Las Vegas</value>
+          <value lang="zh">拉斯维加斯</value>
+        </option>
+        <option key="239">
+          <value lang="en">London</value>
+          <value lang="zh">伦敦</value>
+        </option>
+        <option key="238">
+          <value lang="en">Barcelona</value>
+          <value lang="zh">巴塞罗那</value>
+        </option>
+        <option key="237">
+          <value lang="en">Madrid</value>
+          <value lang="zh">马德里</value>
+        </option>
+        <option key="236">
+          <value lang="en">Zug</value>
+          <value lang="zh">楚格</value>
+        </option>
+        <option key="235">
+          <value lang="en">Paris</value>
+          <value lang="zh">巴黎</value>
+        </option>
+        <option key="234">
+          <value lang="en">Dubai</value>
+          <value lang="zh">迪拜</value>
+        </option>
+        <option key="233">
+          <value lang="en">TBC</value>
+          <value lang="zh">待定</value>
+        </option>
+         <option key="232">
+          <value lang="en">Exhibition stand A311</value>
+          <value lang="zh">展台A311</value>
+        </option>
+      </origin>
+    </attribute-type>
+    <attribute-type id="venue" syntax="1.3.6.1.4.1.1466.115.121.1.15">
       <name lang="en">Venue</name>
       <name lang="zh">场馆</name>
       <name lang="es">Lugar</name>
       <name lang="ru">место встречи</name>
-      <mapping>
-        <entity key="1">
-          <name lang="ru">Стадион Калининград</name>
-          <name lang="en">Kaliningrad Stadium</name>
-          <name lang="zh">加里宁格勒体育场</name>
-          <name lang="es">Estadio de Kaliningrado</name>
-        </entity>
-        <entity key="2">
-          <name lang="ru">Екатеринбург Арена</name>
-          <name lang="en">Volgograd Arena</name>
-          <name lang="zh">伏尔加格勒体育场</name>
-          <name lang="es">Volgogrado Arena</name>
-        </entity>
-        <entity key="3">
-          <name lang="ru">Казань Арена</name>
-          <name lang="en">Ekaterinburg Arena</name>
-          <name lang="zh">加里宁格勒体育场</name>
-          <name lang="es">Ekaterimburgo Arena</name>
-        </entity>
-        <entity key="4">
-          <name lang="ru">Мордовия Арена</name>
-          <name lang="en">Fisht Stadium</name>
-          <name lang="zh">费什体育场</name>
-          <name lang="es">Estadio Fisht</name>
-        </entity>
-        <entity key="5">
-          <name lang="ru">Ростов Арена</name>
-          <name lang="en">Kazan Arena</name>
-          <name lang="zh">喀山体育场</name>
-          <name lang="es">Kazan Arena</name>
-        </entity>
-        <entity key="6">
-          <name lang="ru">Самара Арена</name>
-          <name lang="en">Nizhny Novgorod Stadium</name>
-          <name lang="zh">下诺夫哥罗德体育场</name>
-          <name lang="es">Estadio de Nizhni Novgorod</name>
-        </entity>
-        <entity key="7">
-          <name lang="ru">Стадион Калининград</name>
-          <name lang="en">Luzhniki Stadium</name>
-          <name lang="zh">卢日尼基体育场</name>
-          <name lang="es">Estadio Luzhniki</name>
-        </entity>
-        <entity key="8">
-          <name lang="ru">Стадион Лужники</name>
-          <name lang="en">Samara Arena</name>
-          <name lang="zh">萨马拉体育场</name>
-          <name lang="es">Samara Arena</name>
-        </entity>
-        <entity key="9">
-          <name lang="ru">Стадион Нижний Новгород</name>
-          <name lang="en">Rostov Arena</name>
-          <name lang="zh">罗斯托夫体育场</name>
-          <name lang="es">Rostov Arena</name>
-        </entity>
-        <entity key="10">
-          <name lang="ru">Стадион Спартак</name>
-          <name lang="en">Spartak Stadium</name>
-          <name lang="zh">斯巴达克体育场</name>
-          <name lang="es">Estadio del Spartak</name>
-        </entity>
-        <entity key="11">
-          <name lang="ru">Стадион Санкт-Петербург</name>
-          <name lang="en">Saint Petersburg Stadium</name>
-          <name lang="zh">圣彼得堡体育场</name>
-          <name lang="es">Estadio de San Petersburgo</name>
-        </entity>
-        <entity key="12">
-          <name lang="ru">Стадион Фишт</name>
-          <name lang="en">Mordovia Arena</name>
-          <name lang="zh">莫多维亚体育场</name>
-          <name lang="es">Mordovia Arena</name>
-        </entity>
-        <entity key="255">
-	  <name lang="ru">UNSW Michael Crouch Innovation Center</name>	
-          <name lang="en">UNSW Michael Crouch Innovation Center</name>
-          <name lang="zh">新南威尔大学Michael Crouch创新中心</name>
-          <name lang="es">Centro de Innovación de Michael Crouch UNSW</name>
-        </entity>
-	  <entity key="254">
-	  <name lang="ru">FOUR SEASONS HOTEL SHENZHEN</name>	  
-          <name lang="en">FOUR SEASONS HOTEL SHENZHEN</name>
-          <name lang="zh">深圳四季酒店</name>
-          <name lang="es">FOUR SEASONS HOTEL SHENZHEN</name>
-        </entity>
-	  <entity key="253">
-	  <name lang="ru">Paypal Innovation Lab</name>		  
-          <name lang="en">Paypal Innovation Lab</name>
-          <name lang="zh">Paypal Innovation Lab</name>
-          <name lang="es">Paypal Innovation Lab</name>
-        </entity>
-	  <entity key="252">
-	  <name lang="ru">The Centrepoint</name>	  
-          <name lang="en">The Centrepoint</name>
-          <name lang="zh">The Centrepoint</name>
-          <name lang="es">The Centrepoint</name>
-        </entity>      
-	  <entity key="251">
-	  <name lang="ru">The Centrepoint</name>	  
-          <name lang="en">TBC</name>
-          <name lang="zh">待定</name>
-          <name lang="es">Por determinar</name>
-        </entity>      
-	  <entity key="250">
-	  <name lang="ru">thebridge</name>	  
-          <name lang="en">thebridge</name>
-          <name lang="zh">thebridge</name>
-          <name lang="es">thebridge</name>
-        </entity>      
-	  <entity key="249">
-	  <name lang="ru">BASH</name>	  
-          <name lang="en">BASH</name>
-          <name lang="zh">BASH</name>
-          <name lang="es">BASH</name>
-        </entity>      
-	  <entity key="248">
-	  <name lang="ru">Spacemob</name>	  
-          <name lang="en">Spacemob</name>
-          <name lang="zh">Spacemob</name>
-          <name lang="es">Spacemob</name>
-        </entity>      
-	  <entity key="247">
-	  <name lang="ru">32 Carpenter Street</name>
-          <name lang="en">32 Carpenter Street</name>
-          <name lang="zh">32 Carpenter Street</name>
-          <name lang="es">32 Carpenter Street</name>
-        </entity>
-	  <entity key="246">
-	  <name lang="ru">Block 71</name>	  
-          <name lang="en">Block 71</name>
-          <name lang="zh">Block 71</name>
-          <name lang="es">Block 71</name>
-        </entity>
-	  <entity key="245">
-	  <name lang="ru">Microsoft Singapore</name>
-          <name lang="en">Microsoft Singapore</name>
-          <name lang="zh">Microsoft Singapore</name>
-          <name lang="es">Microsoft Singapore</name>
-        </entity>      
-	  <entity key="243">
-	  <name lang="ru">Google Singapore</name>	  
-          <name lang="en">Google Singapore</name>
-          <name lang="zh">Google Singapore</name>
-          <name lang="es">Google Singapore</name>
-        </entity>	      
-	  <entity key="242">
-	  <name lang="ru">The Blockchain Hub</name>	  
-          <name lang="en">The Blockchain Hub</name>
-          <name lang="zh">The Blockchain Hub</name>
-          <name lang="es">The Blockchain Hub</name>
-        </entity>	      
-	  <entity key="241">
-	  <name lang="ru">BitTemple</name>	  
-          <name lang="en">BitTemple</name>
-          <name lang="zh">BitTemple</name>
-          <name lang="es">BitTemple</name>
-        </entity>
-	  <entity key="240">
-	  <name lang="ru">ADD BLOCKCHAIN STUDIO</name>	  
-          <name lang="en">ADD BLOCKCHAIN STUDIO</name>
-          <name lang="zh">ADD BLOCKCHAIN STUDIO</name>
-          <name lang="es">ADD BLOCKCHAIN STUDIO</name>
-        </entity>
-	  <entity key="239">
-	  <name lang="ru">Rosewood Beijing</name>	  
-          <name lang="en">Rosewood Beijing</name>
-          <name lang="zh">北京瑰丽酒店</name>
-          <name lang="es">Rosewood Beijing</name>
-        </entity>
-	  <entity key="238">
-	  <name lang="ru">Stratum</name>
-          <name lang="en">Stratum</name>
-          <name lang="zh">Stratum</name>
-          <name lang="es">Stratum</name>
-        </entity>       
-      </mapping>
-    </field>
-    <field bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000" id="time" type="BinaryTime">
+      <origin as="mapping" bitmask="0000000000000000000000000000000000FF0000000000000000000000000000">
+        <option key="1">
+          <value lang="ru">Стадион Калининград</value>
+          <value lang="en">Kaliningrad Stadium</value>
+          <value lang="zh">加里宁格勒体育场</value>
+          <value lang="es">Estadio de Kaliningrado</value>
+        </option>
+        <option key="2">
+          <value lang="ru">Екатеринбург Арена</value>
+          <value lang="en">Volgograd Arena</value>
+          <value lang="zh">伏尔加格勒体育场</value>
+          <value lang="es">Volgogrado Arena</value>
+        </option>
+        <option key="3">
+          <value lang="ru">Казань Арена</value>
+          <value lang="en">Ekaterinburg Arena</value>
+          <value lang="zh">加里宁格勒体育场</value>
+          <value lang="es">Ekaterimburgo Arena</value>
+        </option>
+        <option key="4">
+          <value lang="ru">Мордовия Арена</value>
+          <value lang="en">Fisht Stadium</value>
+          <value lang="zh">费什体育场</value>
+          <value lang="es">Estadio Fisht</value>
+        </option>
+        <option key="5">
+          <value lang="ru">Ростов Арена</value>
+          <value lang="en">Kazan Arena</value>
+          <value lang="zh">喀山体育场</value>
+          <value lang="es">Kazan Arena</value>
+        </option>
+        <option key="6">
+          <value lang="ru">Самара Арена</value>
+          <value lang="en">Nizhny Novgorod Stadium</value>
+          <value lang="zh">下诺夫哥罗德体育场</value>
+          <value lang="es">Estadio de Nizhni Novgorod</value>
+        </option>
+        <option key="7">
+          <value lang="ru">Стадион Калининград</value>
+          <value lang="en">Luzhniki Stadium</value>
+          <value lang="zh">卢日尼基体育场</value>
+          <value lang="es">Estadio Luzhniki</value>
+        </option>
+        <option key="8">
+          <value lang="ru">Стадион Лужники</value>
+          <value lang="en">Samara Arena</value>
+          <value lang="zh">萨马拉体育场</value>
+          <value lang="es">Samara Arena</value>
+        </option>
+        <option key="9">
+          <value lang="ru">Стадион Нижний Новгород</value>
+          <value lang="en">Rostov Arena</value>
+          <value lang="zh">罗斯托夫体育场</value>
+          <value lang="es">Rostov Arena</value>
+        </option>
+        <option key="10">
+          <value lang="ru">Стадион Спартак</value>
+          <value lang="en">Spartak Stadium</value>
+          <value lang="zh">斯巴达克体育场</value>
+          <value lang="es">Estadio del Spartak</value>
+        </option>
+        <option key="11">
+          <value lang="ru">Стадион Санкт-Петербург</value>
+          <value lang="en">Saint Petersburg Stadium</value>
+          <value lang="zh">圣彼得堡体育场</value>
+          <value lang="es">Estadio de San Petersburgo</value>
+        </option>
+        <option key="12">
+          <value lang="ru">Стадион Фишт</value>
+          <value lang="en">Mordovia Arena</value>
+          <value lang="zh">莫多维亚体育场</value>
+          <value lang="es">Mordovia Arena</value>
+        </option>
+        <option key="255">
+          <value lang="en">UNSW Michael Crouch Innovation Center</value>
+          <value lang="zh">新南威尔大学Michael Crouch创新中心</value>
+          <value lang="es">Centro de Innovación de Michael Crouch UNSW</value>
+        </option>
+        <option key="254">
+          <value lang="en">FOUR SEASONS HOTEL SHENZHEN</value>
+          <value lang="zh">深圳四季酒店</value>
+        </option>
+        <option key="253">
+          <value lang="en">Paypal Innovation Lab</value>
+        </option>
+        <option key="252">
+          <value lang="en">The Centrepoint</value>
+        </option>
+        <option key="251">
+          <value lang="en">TBC</value>
+          <value lang="zh">待定</value>
+        </option>
+        <option key="250">
+          <value>thebridge</value>
+        </option>
+        <option key="249">
+          <value>BASH</value>
+        </option>
+        <option key="248">
+          <value>Spacemob</value>
+        </option>
+        <option key="247">
+          <value lang="en">32 Carpenter Street</value>
+        </option>
+        <option key="246">
+          <value>Block 71</value>
+        </option>
+        <option key="245">
+          <value lang="en">Microsoft Singapore</value>
+          <value lang="zh">微软新加坡</value>
+        </option>
+        <option key="243">
+          <value lang="en">Google Singapore</value>
+        </option>
+        <option key="242">
+          <value lang="en">The Blockchain Hub</value>
+        </option>
+        <option key="241">
+          <value>BitTemple</value>
+        </option>
+        <option key="240">
+          <value lang="en">ADD BLOCKCHAIN STUDIO</value>
+        </option>
+        <option key="239">
+          <value lang="en">Rosewood Beijing</value>
+          <value lang="zh">北京瑰丽酒店</value>
+        </option>
+        <option key="238">
+          <value lang="en">Stratum</value>
+          <value lang="zh">臻宛</value>
+        </option>
+        <option key="237">
+          <value lang="en">Hong Kong Convention and Exhibition Centre</value>
+          <value lang="zh">香港会议展览中心</value>
+        </option>
+        <option key="236">
+          <value lang="en">P2联合创业办公社 中关村e世界</value>
+          <value lang="zh">P2联合创业办公社 中关村e世界</value>
+        </option>
+      </origin>
+    </attribute-type>
+    <attribute-type id="time" syntax="1.3.6.1.4.1.1466.115.121.1.24">
       <name lang="en">Time</name>
       <name lang="zh">时间</name>
       <name lang="es">Tiempo</name>
       <name lang="ru">время</name>
-    </field>
-    <field bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000" id="countryA" type="IA5String">
+      <!-- keys used here are BinaryTime (RFC6019) for backward compatibility,
+           don't copy this behaviour when creating new assets -->
+      <origin as="mapping" bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000">
+        <!-- $ TZ=Europe/Moscow date -d @1528988400 +%Y%m%d%H%M%S%z -->
+        <option key="1528988400">
+          <value>20180614180000+0300</value>
+        </option>
+        <!-- $ TZ=Europe/Moscow date -d @1529074800 +%Y%m%d%H%M%S%z -->
+        <option key="1529074800">
+          <value>20180615180000+0300</value>
+        </option>
+        <!-- $ TZ=Europe/Moscow date -d @1529420400 +%Y%m%d%H%M%S%z -->
+        <option key="1529420400">
+          <value>20180619180000+0300</value>
+        </option>
+        <!-- $ TZ=Europe/Moscow date -d @1529431200 +%Y%m%d%H%M%S%z -->
+        <option key="1529431200">
+          <value>20180619210000+0300</value>
+        </option>
+        <!-- $ TZ=Europe/Moscow date -d @1530900000 +%Y%m%d%H%M%S%z -->
+        <option key="1530900000">
+          <value>20180706210000+0300</value>
+        </option>
+        <!-- $ TZ=Europe/Moscow date -d @1531576800 +%Y%m%d%H%M%S%z -->
+        <option key="1531576800">
+          <value>20180714170000+0300</value>
+        </option>
+        <!-- For RISE conference in Hong Kong. The key is not UnixTime as UnixTime should be 1531299600
+         $ TZ=Asia/Hong_Kong date -d @1531299600 +%Y%m%d%H%M%S%z
+         20180711170000+0800--> 
+        <option key="1531328400">
+          <value>20180711170000+0800</value>
+        </option>
+      </origin>
+    </attribute-type>
+    <attribute-type id="countryA" syntax="1.3.6.1.4.1.1466.115.121.1.26">
       <!-- Intentionally avoid using countryName
-	   (SYNTAX 1.3.6.1.4.1.1466.115.121.1.11) per RFC 4519
+       (SYNTAX 1.3.6.1.4.1.1466.115.121.1.11) per RFC 4519
            CountryName is two-characters long, not 3-characters.
-	   -->
+       -->
       <name lang="en">Team A</name>
       <name lang="zh">甲队</name>
       <name lang="es">Equipo A</name>
-    </field>
-    <field bitmask="00000000000000000000000000000000000000000000000000FFFFFF00000000" id="countryB" type="IA5String">
+      <origin as="utf8" bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000"/>
+    </attribute-type>
+    <attribute-type id="countryB" syntax="1.3.6.1.4.1.1466.115.121.1.26">
       <name lang="en">Team B</name>
       <name lang="zh">乙队</name>
       <name lang="es">Equipo B</name>
-    </field>
-    <field bitmask="00000000000000000000000000000000000000000000000000000000FF000000" id="match" type="Integer">
+      <origin as="utf8" bitmask="00000000000000000000000000000000000000000000000000FFFFFF00000000"/>
+    </attribute-type>
+    <attribute-type id="match" syntax="1.3.6.1.4.1.1466.115.121.1.27">
       <name lang="en">Match</name>
       <name lang="zh">场次</name>
       <name lang="es">Evento</name>
-    </field>
-    <field bitmask="0000000000000000000000000000000000000000000000000000000000FF0000" id="category" type="Enumeration">
+      <origin as="unsigned" bitmask="00000000000000000000000000000000000000000000000000000000FF000000"/>
+    </attribute-type>
+    <attribute-type id="category" syntax="1.3.6.1.4.1.1466.115.121.1.15">
       <name lang="en">Cat</name>
       <name lang="zh">等级</name>
       <name lang="es">Cat</name>
-      <mapping>
-        <entity key="1">
-	  <name lang="ru">Category 1</name>
-          <name lang="en">Category 1</name>
-          <name lang="zh">一类票</name>
-	  <name lang="es">Category 1</name>
-        </entity>
-        <entity key="2">
-	  <name lang="ru">Category 2</name>
-          <name lang="en">Category 2</name>
-          <name lang="zh">二类票</name>
-	  <name lang="es">Category 2</name>
-        </entity>
-	  <entity key="3">
-	  <name lang="ru">Category 3</name>
-          <name lang="en">Category 3</name>
-          <name lang="zh">三类票</name>
-	  <name lang="es">Category 3</name> 	  
-        </entity>
-	       <entity key="4">
-	  <name lang="ru">Category 4</name>	       
-          <name lang="en">Category 4</name>
-          <name lang="zh">四类票</name>
-	  <name lang="es">Category 4</name>	       
-        </entity>
-        <entity key="5">
-	  <name lang="ru">Match Club</name>	
-          <name lang="en">Match Club</name>
-          <name lang="zh">俱乐部坐席</name>
-	  <name lang="es">Match Club</name>	
-        </entity>
-	<entity key="6">
-		<name lang="ru">Match House Premier</name>
-		<name lang="en">Match House Premier</name>
-		<name lang="zh">比赛之家坐席</name>
-		<name lang="es">Match House Premier</name>
-	</entity>
-	       <entity key="7">
-          <name lang="ru">MATCH PAVILION</name>
-          <name lang="en">MATCH PAVILION</name>
-          <name lang="zh">款待大厅坐席</name>
-       	  <name lang="es">MATCH PAVILION</name>
-        </entity>
-	       <entity key="8">
-	  <name lang="ru">MATCH BUSINESS SEAT</name>	       
-          <name lang="en">MATCH BUSINESS SEAT</name>
-          <name lang="zh">商务坐席</name>
-	  <name lang="es">MATCH BUSINESS SEAT</name>	       
-        </entity>
-	       <entity key="9">
-	  <name lang="ru">MATCH SHARED SUITE</name>
-          <name lang="en">MATCH SHARED SUITE</name>
-          <name lang="zh">公共包厢</name>
-	  <name lang="es">MATCH SHARED SUITE</name>	       
-        </entity>
-	       <entity key="10">
-          <name lang="ru">TSARSKY LOUNGE</name>
-          <name lang="en">TSARSKY LOUNGE</name>
-          <name lang="zh">特拉斯基豪华包厢</name>
-	  <name lang="es">TSARSKY LOUNGE</name>	       
-        </entity>
-	         <entity key="11">
-	  <name lang="ru"> MATCH PRIVATE SUITE</name>		 
-          <name lang="en"> MATCH PRIVATE SUITE</name>
-          <name lang="zh">私人包厢</name>
-	  <name lang="es"> MATCH PRIVATE SUITE</name>
-        </entity>    
-  
-        <entity key="255">
-	  <name lang="ru">Singapore Blockchain Event</name>
-          <name lang="en">Singapore Blockchain Event</name>
-          <name lang="zh">新加坡区块链活动</name>
-	  <name lang="es">Singapore Blockchain Event</name>
-        </entity>
-	<entity key="254">
-	  <name lang="ru">Singapore Blockchain Event</name>	
-          <name lang="en">TECHNOLOGY RADAR SUMMIT 2018</name>
-          <name lang="zh">技术雷达峰会2018</name>
-	  <name lang="es">Singapore Blockchain Event</name>	
-        </entity>
-	       <entity key="253">
-          <name lang="ru">Sydney Blockchain Event</name>
-          <name lang="en">Sydney Blockchain Event</name>
-          <name lang="zh">悉尼区块链活动</name>
-	  <name lang="es">Sydney Blockchain Event</name>	       
-        </entity>
-	       <entity key="252">
-          <name lang="ru">Beijing Blockchain Event</name>
-          <name lang="en">Beijing Blockchain Event</name>
-          <name lang="zh">北京区块链活动</name>
-          <name lang="es">Beijing Blockchain Event</name>
-        </entity>
-	       <entity key="251">
-          <name lang="ru">Shanghai Blockchain Event</name>
-          <name lang="en">Shanghai Blockchain Event</name>
-          <name lang="zh">上海区块链活动</name>
-          <name lang="es">Shanghai Blockchain Event</name>
-        </entity>
-	       <entity key="250">
-          <name lang="ru">Tokyo Blockchain Event</name>
-          <name lang="en">Tokyo Blockchain Event</name>
-          <name lang="zh">东京区块链活动</name>
-          <name lang="es">Tokyo Blockchain Event</name>
-        </entity>
-	       <entity key="249">
-	  <name lang="ru">Blockchain Event</name>
-          <name lang="en">Blockchain Event</name>
-          <name lang="zh">区块链活动</name>
-	  <name lang="es">Blockchain Event</name>
-        </entity>
-	       <entity key="248">
-          <name lang="ru">Other Events</name>
-          <name lang="en">Other Events</name>
-          <name lang="zh">其他活动</name>
-	  <name lang="es">Other Events</name>	       
-        </entity>
-	       <entity key="247">
-          <name lang="ru">Seoul Blockchain Event</name>
-          <name lang="en">Seoul Blockchain Event</name>
-          <name lang="zh">首尔区块链活动</name>
-          <name lang="es">Seoul Blockchain Event</name>
-        </entity>
-	       <entity key="246">
-          <name lang="ru">Bangkok Blockchain Event</name>
-          <name lang="en">Bangkok Blockchain Event</name>
-          <name lang="zh">曼谷区块链活动</name>
-          <name lang="es">Bangkok Blockchain Event</name>
-        </entity>
-	       <entity key="245">
-          <name lang="ru">AlphaWallet Event</name>
-          <name lang="en">AlphaWallet Event</name>
-          <name lang="zh">AlphaWallet活动</name>
-          <name lang="es">AlphaWallet Event</name>
-        </entity>
-	       <entity key="254">
-	  <name lang="ru">Stormbird Event</name>	       
-          <name lang="en">Stormbird Event</name>
-          <name lang="zh">Stormbird活动</name>
-	  <name lang="es">Stormbird Event</name>	       
-        </entity>
-	       <entity key="253">
-          <name lang="ru">UNITY VENTURES Event</name>
-          <name lang="en">UNITY VENTURES Event</name>
-          <name lang="zh">九合创投活动</name>
-          <name lang="es">UNITY VENTURES Event</name>
-        </entity>
-	       <entity key="252">
-	  <name lang="ru">Max's Event</name>	       
-          <name lang="en">Max's Event</name>
-          <name lang="zh">Max的活动</name>
-          <name lang="es">Max's Event</name>
-        </entity>
-	       <entity key="251">
-          <name lang="ru">Chongqing Blockchain Event</name>
-          <name lang="en">Chongqing Blockchain Event</name>
-          <name lang="zh">重庆区块链活动</name>
-          <name lang="es">Chongqing Blockchain Event</name>
-        </entity>
-	       <entity key="250">
-          <name lang="ru">Dubai Blockchain Event</name>
-          <name lang="en">Dubai Blockchain Event</name>
-          <name lang="zh">迪拜区块链活动</name>
-	  <name lang="es">Dubai Blockchain Event</name>	       
-        </entity>
-	       <entity key="249">
-          <name lang="ru">Silicon Valley Blockchain Event</name>
-          <name lang="en">Silicon Valley Blockchain Event</name>
-          <name lang="zh">硅谷区块链活动</name>
-          <name lang="es">Silicon Valley Blockchain Event</name>
-        </entity>
-	       <entity key="248">
-          <name lang="ru">Melbourne Blockchain Event</name>
-          <name lang="en">Melbourne Blockchain Event</name>
-          <name lang="zh">墨尔本区块链活动</name>
-	  <name lang="es">Melbourne Blockchain Event</name>
-        </entity>
-	       <entity key="247">
-          <name lang="ru">General Event</name>
-          <name lang="en">General Event</name>
-          <name lang="zh">通用活动</name>
-	  <name lang="es">General Event</name>	       
-        </entity>
-      
-      </mapping>
-    </field>
-    <field bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" id="numero" type="Integer">
+      <origin as="mapping" bitmask="0000000000000000000000000000000000000000000000000000000000FF0000">
+        <option key="1">
+          <value lang="en">Category 1</value>
+          <value lang="zh">一类票</value>
+        </option>
+        <option key="2">
+          <value lang="en">Category 2</value>
+          <value lang="zh">二类票</value>
+        </option>
+        <option key="3">
+          <value lang="en">Category 3</value>
+          <value lang="zh">三类票</value>
+        </option>
+        <option key="4">
+          <value lang="en">Category 4</value>
+          <value lang="zh">四类票</value>
+        </option>
+        <option key="5">
+          <value lang="en">Match Club</value>
+          <value lang="zh">俱乐部坐席</value>
+        </option>
+        <option key="6">
+          <value lang="en">Match House Premier</value>
+          <value lang="zh">比赛之家坐席</value>
+        </option>
+        <option key="7">
+          <value lang="en">MATCH PAVILION</value>
+          <value lang="zh">款待大厅坐席</value>
+        </option>
+        <option key="8">
+          <value lang="en">MATCH BUSINESS SEAT</value>
+          <value lang="zh">商务坐席</value>
+        </option>
+        <option key="9">
+          <value lang="en">MATCH SHARED SUITE</value>
+          <value lang="zh">公共包厢</value>
+        </option>
+        <option key="10">
+          <value lang="en">TSARSKY LOUNGE</value>
+          <value lang="zh">特拉斯基豪华包厢</value>
+        </option>
+        <option key="11">
+          <value lang="en">MATCH PRIVATE SUITE</value>
+          <value lang="zh">私人包厢</value>
+        </option>
+        <option key="255">
+          <value lang="en">Singapore Blockchain Event</value>
+          <value lang="zh">新加坡区块链活动</value>
+        </option>
+        <option key="254">
+          <value lang="en">TECHNOLOGY RADAR SUMMIT 2018</value>
+          <value lang="zh">技术雷达峰会2018</value>
+        </option>
+        <option key="253">
+          <value lang="en">Sydney Blockchain Event</value>
+          <value lang="zh">悉尼区块链活动</value>
+        </option>
+        <option key="252">
+          <value lang="en">Beijing Blockchain Event</value>
+          <value lang="zh">北京区块链活动</value>
+        </option>
+        <option key="251">
+          <value lang="en">Shanghai Blockchain Event</value>
+          <value lang="zh">上海区块链活动</value>
+        </option>
+        <option key="250">
+          <value lang="en">Tokyo Blockchain Event</value>
+          <value lang="zh">东京区块链活动</value>
+        </option>
+        <option key="249">
+          <value lang="en">Blockchain Event</value>
+          <value lang="zh">区块链活动</value>
+        </option>
+        <option key="248">
+          <value lang="en">Other Events</value>
+          <value lang="zh">其他活动</value>
+        </option>
+        <option key="247">
+          <value lang="en">Seoul Blockchain Event</value>
+          <value lang="zh">首尔区块链活动</value>
+        </option>
+        <option key="246">
+          <value lang="en">Bangkok Blockchain Event</value>
+          <value lang="zh">曼谷区块链活动</value>
+        </option>
+        <option key="245">
+          <value lang="en">AlphaWallet Event</value>
+          <value lang="zh">AlphaWallet活动</value>
+        </option>
+        <option key="243">
+          <value lang="en">Stormbird Event</value>
+          <value lang="zh">Stormbird活动</value>
+        </option>
+        <option key="242">
+          <value lang="en">UNITY VENTURES Event</value>
+          <value lang="zh">九合创投活动</value>
+        </option>
+        <option key="241">
+          <value lang="en">Max's Event</value>
+          <value lang="zh">Max的活动</value>
+        </option>
+        <option key="240">
+          <value lang="en">Chongqing Blockchain Event</value>
+          <value lang="zh">重庆区块链活动</value>
+        </option>
+        <option key="239">
+          <value lang="en">Dubai Blockchain Event</value>
+          <value lang="zh">迪拜区块链活动</value>
+        </option>
+        <option key="238">
+          <value lang="en">Silicon Valley Blockchain Event</value>
+          <value lang="zh">硅谷区块链活动</value>
+        </option>
+        <option key="237">
+          <value lang="en">Melbourne Blockchain Event</value>
+          <value lang="zh">墨尔本区块链活动</value>
+        </option>
+        <option key="236">
+          <value lang="en">General Event</value>
+          <value lang="zh">通用活动</value>
+        </option>
+        <option key="235">
+          <value lang="en">AlphaWallet Meeting Slot</value>
+          <value lang="zh">AlphaWallet面议机会</value>
+        </option>
+        <option key="234">
+          <value lang="en">ERC875 Meetup</value>
+          <value lang="zh">ERC875线下聚会</value>
+        </option>
+      </origin>
+    </attribute-type>
+    <attribute-type id="numero" syntax="1.3.6.1.4.1.1466.115.121.1.27">
       <name>№</name>
-    </field>
-  </fields>
-</asset>
+      <origin as="unsigned" bitmask="000000000000000000000000000000000000000000000000000000000000FFFF"/>
+    </attribute-type>
+    <attribute-type id="expired" syntax="1.3.6.1.4.1.1466.115.121.1.7">
+      <origin contract="holding-contract">
+        <function>isExpired</function>
+      </origin>
+    </attribute-type>
+    <attribute-type id="gifted" syntax="1.3.6.1.4.1.1466.115.121.1.7">
+      <origin contract="holding-contract">
+        <function>isGifted</function>
+        <parameter>TokenID</parameter><!-- place holder - actual format undefined yet -->
+      </origin>
+    </attribute-type>
+  </attribute-types>
+</token>

@@ -50,11 +50,6 @@ public class NonFungibleToken
         attributes = new HashMap<>();
     }
 
-    public io.stormbird.token.util.ZonedDateTime getZonedDateTime(Attribute attribute) {
-        // TODO: get zoned DateTime directly from XML
-        return new ZonedDateTime(attribute.value.longValue(), TimeZone.getTimeZone("Europe/Moscow"));
-    }
-
     public String getRangeStr(TicketRange data)
     {
         int ticketStart = getAttribute("category").value.intValue();

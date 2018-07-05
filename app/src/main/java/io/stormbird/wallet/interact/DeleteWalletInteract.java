@@ -22,7 +22,7 @@ public class DeleteWalletInteract {
 	public Single<Wallet[]> delete(Wallet wallet) {
 		return passwordStore.getPassword(wallet)
 				.flatMapCompletable(password -> walletRepository.deleteWallet(wallet.address, password))
-				.andThen(walletRepository.fetchWallets())
+				.andThen(walletRepository.fetchWallets(null))
 				.observeOn(AndroidSchedulers.mainThread());
 	}
 }

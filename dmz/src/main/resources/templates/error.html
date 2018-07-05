@@ -1,0 +1,31 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${error}">Error</title>
+  <style type="text/css">
+      #footer dt, #footer dd {
+          display: inline;
+      }
+      #footer dt {
+          font-weight: bold;
+      }
+      #footer dd {
+          margin-left: 0em;
+          padding-left: 1em;
+          margin-right: 3em;
+      }
+  </style>
+</head>
+<body>
+<h1 th:text="${error}">Error</h1>
+<p th:text="${message}">Error Message</p>
+
+<hr/>
+<dl id="footer">
+  <dt>Time: </dt><dd th:text="${timestamp}"></dd>
+  <dt>Path: </dt><dd th:text="${path}"></dd>
+  <dt>Message: </dt><dd th:text="${message}"></dd>
+</dl>
+</body>
+</html>

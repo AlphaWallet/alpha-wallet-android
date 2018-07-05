@@ -1,5 +1,6 @@
 package io.stormbird.wallet.repository;
 
+import io.reactivex.SingleSource;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AccountKeystoreService;
 
@@ -8,6 +9,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -29,13 +31,29 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Wallet[]> fetchWallets() {
-		return accountKeystoreService.fetchAccounts();
+	public Single<Wallet[]> fetchWallets(Map<String, BigDecimal> walletBalances)
+	{
+		return accountKeystoreService.fetchAccounts()
+				.flatMap(wallets -> addBalances(wallets, walletBalances));
+	}
+
+	private Single<Wallet[]> addBalances(Wallet[] wallets, Map<String, BigDecimal> walletBalances)
+	{
+		return Single.fromCallable(() -> {
+			if (walletBalances != null)
+			{
+				for (Wallet w : wallets)
+				{
+					if (walletBalances.get(w.address) != null) w.setWalletBalance(walletBalances.get(w.address));
+				}
+			}
+			return wallets;
+		});
 	}
 
 	@Override
 	public Single<Wallet> findWallet(String address) {
-		return fetchWallets()
+		return fetchWallets(null)
 				.flatMap(accounts -> {
 					for (Wallet wallet : accounts) {
 						if (wallet.sameAddress(address)) {

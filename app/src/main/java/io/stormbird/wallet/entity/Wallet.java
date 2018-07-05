@@ -3,7 +3,12 @@ package io.stormbird.wallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 import org.web3j.utils.Numeric;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
+
+import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 
 public class Wallet implements Parcelable {
     public final String address;
@@ -47,5 +52,12 @@ public class Wallet implements Parcelable {
 	{
 		parcel.writeString(address);
 		parcel.writeString(balance);
+	}
+
+	public void setWalletBalance(BigDecimal balanceBD)
+	{
+		 balance = weiToEth(balanceBD)
+				.setScale(4, RoundingMode.HALF_UP)
+				.stripTrailingZeros().toPlainString();
 	}
 }

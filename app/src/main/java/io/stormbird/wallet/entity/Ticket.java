@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import io.stormbird.token.util.ZonedDateTime;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
@@ -14,6 +15,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -231,10 +233,15 @@ public class Ticket extends Token implements Parcelable
     {
         String teamA = nonFungibleToken.getAttribute("countryA").text;
         String teamB = nonFungibleToken.getAttribute("countryB").text;
-        SimpleDateFormat format = new SimpleDateFormat("hh:mm", Locale.ENGLISH);
-        String time = nonFungibleToken.getZonedDateTime(nonFungibleToken.getAttribute("time")).format(format);
+        String time = nonFungibleToken.getAttribute("time").text;
         String locality = nonFungibleToken.getAttribute("locality").text;
-        return time + "  " + locality + "\n\n" + teamA + " vs " + teamB;
+        try {
+            ZonedDateTime datetime = new ZonedDateTime(time);
+            time = datetime.format(new SimpleDateFormat("hh:mm", Locale.ENGLISH));
+        } catch (ParseException e) {
+            // time is returned as un-parsed, original string
+        }
+        return time + locality + "\n\n" + teamA + " vs " + teamB;
     }
 
 
@@ -490,19 +497,21 @@ public class Ticket extends Token implements Parcelable
             NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(range.contractAddress, firstTicket);
 
             String venueStr = nonFungibleToken.getAttribute("venue").text;
-            String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
 
-            SimpleDateFormat format = new SimpleDateFormat("dd MMM", Locale.ENGLISH);
-            String date = nonFungibleToken.getZonedDateTime(nonFungibleToken.getAttribute("time")).format(format);
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
             textAmount.setText(seatCount);
             textTicketName.setText(getTokenName(assetService));
             textVenue.setText(venueStr);
-            textDate.setText(date);
             textRange.setText(nonFungibleToken.getRangeStr(range));
             textCat.setText(nonFungibleToken.getAttribute("category").text);
             ticketDetails.setText(getTicketInfo(nonFungibleToken));
+            try {
+                ZonedDateTime datetime = new ZonedDateTime(nonFungibleToken.getAttribute("time").text);
+                textDate.setText(datetime.format(new SimpleDateFormat("dd MMM", Locale.ENGLISH)));
+            } catch (ParseException e) {
+                textDate.setText("N.A.");
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package io.stormbird.token.web;
 
 import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.util.ZonedDateTime;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
@@ -30,6 +31,8 @@ import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
 
 
@@ -60,9 +63,9 @@ public class AppSiteController {
                 "}";
     }
 
-    @RequestMapping("/")
-    public String home(HttpServletRequest request){
-        return "index";
+    @GetMapping("/")
+    public RedirectView home(RedirectAttributes attributes){
+        return new RedirectView("https://awallet.io");
     }
 
     @GetMapping(value = "/{UniversalLink}")
@@ -153,7 +156,7 @@ public class AppSiteController {
             sides += " - " + token.getAttribute("countryB").text;
             model.addAttribute("ticketSides", sides);
             model.addAttribute("ticketDate",
-                    token.getZonedDateTime(token.getAttribute("time")).format(dateFormat));
+                    new ZonedDateTime(token.getAttribute("time").text).format(dateFormat));
             model.addAttribute("ticketMatch", token.getAttribute("match").text);
             model.addAttribute("ticketCategory", token.getAttribute("category").text);
             break; // we only need 1 token's info. rest assumed to be the same

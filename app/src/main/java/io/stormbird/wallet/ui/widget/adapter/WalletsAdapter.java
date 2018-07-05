@@ -95,9 +95,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         for (Wallet wallet : wallets)
         {
-            wallet.balance = weiToEth(balances.get(wallet.address))
-                    .setScale(4, RoundingMode.HALF_UP)
-                    .stripTrailingZeros().toPlainString();
+        	wallet.setWalletBalance(balances.get(wallet.address));
         }
         notifyDataSetChanged();
     }

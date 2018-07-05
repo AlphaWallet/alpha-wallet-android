@@ -82,7 +82,6 @@ public class ImportTokenViewModel extends BaseViewModel
     private String univeralImportLink;
     private Ticket importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
-    private double priceUsd;
     private double ethToUsd = 0;
 
     @Nullable
@@ -128,7 +127,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<Boolean> invalidLink() { return invalidLink; }
     public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
-    public double getUSDPrice() { return priceUsd; };
+    public double getUSDPrice() { return ethToUsd; };
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
@@ -296,9 +295,6 @@ public class ImportTokenViewModel extends BaseViewModel
     private void updateToken()
     {
         List<BigInteger> newBalance = new ArrayList<>();
-        //calculate USD price of tickets
-        priceUsd = importOrder.price * ethToUsd;
-
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
             if (importToken.balanceArray.size() > index) {

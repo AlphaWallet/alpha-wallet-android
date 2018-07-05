@@ -487,7 +487,7 @@ public class Ticket extends Token implements Parcelable
         if (numberOfTickets > 0)
         {
             BigInteger firstTicket = range.tokenIds.get(0);
-            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTicket);
+            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(range.contractAddress, firstTicket);
 
             String venueStr = nonFungibleToken.getAttribute("venue").text;
             String catStr = String.valueOf(nonFungibleToken.getAttribute("category").value.intValue());
@@ -509,10 +509,10 @@ public class Ticket extends Token implements Parcelable
     public String getTokenName(AssetDefinitionService assetService)
     {
         //see if this token is covered by any contract
-        int networkId = assetService.getAssetDefinition().getNetworkFromContract(getAddress());
+        int networkId = assetService.getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
         if (networkId >= 1)
         {
-            return assetService.getAssetDefinition().getTokenName();
+            return assetService.getAssetDefinition(getAddress()).getTokenName();
         }
         else
         {
@@ -564,7 +564,7 @@ public class Ticket extends Token implements Parcelable
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        int networkId = assetService.getAssetDefinition().getNetworkFromContract(getAddress());
+        int networkId = assetService.getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
         isMatchedInXML = networkId >= 1;
     }
 

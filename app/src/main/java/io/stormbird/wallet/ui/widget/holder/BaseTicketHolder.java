@@ -76,7 +76,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
             String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
             count.setText(seatCount);
             try {
-                NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTokenId);
+                NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(ticket.getAddress(), firstTokenId);
                 String nameStr = nonFungibleToken.getAttribute("category").text;
                 String venueStr = nonFungibleToken.getAttribute("venue").text;
                 Date startTime = new Date(nonFungibleToken.getAttribute("time").value.longValue()*1000L);

@@ -1,6 +1,7 @@
 package io.stormbird.wallet.viewmodel;
 
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -359,7 +360,7 @@ public class WalletViewModel extends BaseViewModel {
     private TokenInfo createContractToken(TokenInfo tokenInfo) throws Exception
     {
         if (tokenInfo.name == null) throw new Exception("Token cannot be added"); //drop through react flow so token is not incorrectly added
-        String tokenName = tokenInfo.name + " " + assetDefinitionService.getAssetDefinition().getTokenName(); //TODO: must use address
+        String tokenName = tokenInfo.name + " " + assetDefinitionService.getAssetDefinition(tokenInfo.address).getTokenName(); //TODO: must use address
         TokenInfo tInfo = new TokenInfo(tokenInfo.address, tokenName, tokenInfo.symbol, 0, true, true);
         return tInfo;
     }

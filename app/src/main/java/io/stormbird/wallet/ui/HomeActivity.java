@@ -1,6 +1,8 @@
 package io.stormbird.wallet.ui;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -16,6 +19,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +32,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -45,6 +50,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Inject
     HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
+
+    public static final int RC_HANDLE_EXTERNAL_WRITE_PERM = 22;
 
     private SystemView systemView;
     private Dialog dialog;
@@ -103,6 +110,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         } else {
             showPage(WALLET);
         }
+
+        requestWritePermission();
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -284,6 +293,33 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         @Override
         public int getCount() {
             return 4;
+        }
+    }
+
+    private void requestWritePermission()
+    {
+        Log.w("Asset service", "Folder write permission is not granted. Requesting permission");
+
+        final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                                                                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_EXTERNAL_WRITE_PERM);
+        }
+        else
+        {
+            viewModel.createXMLDirectory();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == RC_HANDLE_EXTERNAL_WRITE_PERM)
+        {
+            viewModel.createXMLDirectory();
         }
     }
 }

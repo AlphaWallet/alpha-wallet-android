@@ -16,6 +16,7 @@ import android.widget.TextView;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -23,6 +24,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
@@ -157,8 +159,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         hideDialog();
         aDialog = new AWalletAlertDialog(this);
         aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setTitle(R.string.ticket_not_valid);// bad_import_link);
-        aDialog.setMessage(R.string.ticket_not_valid_body);// bad_import_link_body);
+        aDialog.setTitle(R.string.ticket_not_valid);
+        aDialog.setMessage(R.string.ticket_not_valid_body);
         aDialog.setButtonText(R.string.action_cancel);
         aDialog.setButtonListener(v -> aDialog.dismiss());
         aDialog.show();
@@ -286,7 +288,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Ticket t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
-        importText += t.getFullName();
+        importText += t.getTokenName(viewModel.getAssetDefinitionService());
 
         tv.setText(importText);
     }
@@ -307,9 +309,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Ticket t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
-        importText += t.getFullName();
-
+        importText += t.getTokenName(viewModel.getAssetDefinitionService());
         tv.setText(importText);
+        //Note: it's actually not possible to pull the event or anything like that since we can't get the tokenID if it's been imported.
     }
 
     private void onProgress(boolean shouldShowProgress) {

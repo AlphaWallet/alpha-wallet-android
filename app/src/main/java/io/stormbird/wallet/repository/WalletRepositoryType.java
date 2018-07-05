@@ -4,13 +4,14 @@ import io.stormbird.wallet.entity.TradeInstance;
 import io.stormbird.wallet.entity.Wallet;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
 public interface WalletRepositoryType {
-	Single<Wallet[]> fetchWallets();
+	Single<Wallet[]> fetchWallets(Map<String, BigDecimal> walletBalances);
 	Single<Wallet> findWallet(String address);
 
 	Single<Wallet> createWallet(String password);

@@ -141,7 +141,7 @@ public class WalletsViewModel extends BaseViewModel
 		currentNetwork = networkInfo;
 		//now load the current wallets
 		disposable = fetchWalletsInteract
-				.fetch()
+				.fetch(walletBalances)
 				.subscribe(this::onFetchWallets, this::onError);
 	}
 

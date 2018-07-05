@@ -1,5 +1,8 @@
 package io.stormbird.wallet.interact;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 
@@ -15,9 +18,9 @@ public class FetchWalletsInteract {
 		this.accountRepository = accountRepository;
 	}
 
-	public Single<Wallet[]> fetch() {
+	public Single<Wallet[]> fetch(Map<String, BigDecimal> walletBalances) {
 		return accountRepository
-				.fetchWallets()
+				.fetchWallets(walletBalances)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread());
 	}

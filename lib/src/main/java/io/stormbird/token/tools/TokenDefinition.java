@@ -301,7 +301,7 @@ public class TokenDefinition {
                 Element eElement = ((Element) nNode);
                 if (eElement.getTagName().equals("address")) {
                     Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
-                    addresses.put(nNode.getTextContent(), networkId);
+                    addresses.put(nNode.getTextContent().toLowerCase(), networkId);
                 }
                 /* if there is no token name in <contract> this breaks;
                  * token name shouldn't be in <contract> anyway, re-design pending */

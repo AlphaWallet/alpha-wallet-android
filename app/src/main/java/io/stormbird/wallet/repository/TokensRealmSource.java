@@ -4,17 +4,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.TokenTicker;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.entity.RealmToken;
-import io.stormbird.wallet.repository.entity.RealmTokenTicker;
-import io.stormbird.wallet.service.RealmManager;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,6 +15,16 @@ import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenFactory;
+import io.stormbird.wallet.entity.TokenInfo;
+import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.repository.entity.RealmTokenTicker;
+import io.stormbird.wallet.service.RealmManager;
 
 import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
@@ -343,7 +342,6 @@ public class TokensRealmSource implements TokenLocalSource {
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token)
     {
         Realm realm = null;
-        //if (token.isTerminated()) return; // don't update dead tokens
         try
         {
             realm = realmManager.getRealmInstance(network, wallet);

@@ -493,7 +493,7 @@ public class TokenRepository implements TokenRepositoryType {
             TokenFactory tFactory = new TokenFactory();
             try
             {
-                if (token.ticker != null && token.isEthereum())
+                if (token.isEthereum())
                 {
                     return token; //already have the balance for ETH
                 }

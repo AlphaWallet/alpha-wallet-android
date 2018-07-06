@@ -298,12 +298,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void requestWritePermission()
     {
-        Log.w("Asset service", "Folder write permission is not granted. Requesting permission");
-
         final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                                                                  Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            Log.w("Asset service", "Folder write permission is not granted. Requesting permission");
             ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_EXTERNAL_WRITE_PERM);
         }
         else

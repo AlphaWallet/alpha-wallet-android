@@ -471,7 +471,6 @@ public class ImportTokenViewModel extends BaseViewModel
         getTickerDisposable = fetchTokensInteract.getEthereumTicker()
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::onTicker, this::onError);
-
     }
 
     private void onTicker(Ticker ticker)

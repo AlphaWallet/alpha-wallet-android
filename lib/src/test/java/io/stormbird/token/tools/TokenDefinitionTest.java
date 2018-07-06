@@ -32,8 +32,11 @@ public class TokenDefinitionTest {
         assertNotEquals(0, ticketAsset.tokenName.length());
 
         // test contract address extraction
-        String contractAddress = ticketAsset.getContractAddress(1);
-        assertEquals(40+2, contractAddress.length());
+        assertTrue(ticketAsset.addresses.size() > 0); //we have at least one address
+        for (String address : ticketAsset.addresses.keySet())
+        {
+            assertEquals(40+2, address.length());
+        }
 
         // test feature extraction
         assertEquals("https://", ticketAsset.marketQueueAPI.substring(0,8));

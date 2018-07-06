@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 
 import javax.inject.Inject;
@@ -241,7 +242,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
         String priceUsd = "$" + getUsdString(viewModel.getUSDPrice() * order.price);
 
-        if (order.price == 0) {
+        if (order.price == 0)
+        {
             priceETH.setText(R.string.free_import);
             priceETH.setVisibility(View.VISIBLE);
             priceUSD.setVisibility(View.GONE);
@@ -262,7 +264,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         importTxt.setText(R.string.ticket_import_valid);
 
-        ticket.displayTicketHolder(ticketRange, this, viewModel.getAssetDefinitionService());
+        View baseView = findViewById(android.R.id.content);
+
+        ticket.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
 
         verifiedLayer.setVisibility(View.VISIBLE);
 

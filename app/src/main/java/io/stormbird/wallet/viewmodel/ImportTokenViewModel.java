@@ -136,9 +136,11 @@ public class ImportTokenViewModel extends BaseViewModel
     }
 
     @Override
-    protected void onCleared() {
+    protected void onCleared()
+    {
         super.onCleared();
-        if (getBalanceDisposable != null) {
+        if (getBalanceDisposable != null)
+        {
             getBalanceDisposable.dispose();
         }
     }

@@ -4,6 +4,7 @@ import java.text.ParseException;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -32,28 +33,16 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private OnTicketIdClickListener onTicketClickListener;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
-    private final TextView name;
-    private final TextView count; // word choice: "amount" would imply the amount of money it costs
-    private final TextView ticketDate;
-    private final TextView ticketTime;
-    private final TextView venue;
-    private final TextView ticketText;
-    private final TextView ticketCat;
+    private final View activityView;
     protected final TextView ticketRedeemed;
-    private final TextView ticketDetails;
     protected final LinearLayout ticketDetailsLayout;
     protected final LinearLayout ticketLayout;
 
     public BaseTicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service) {
         super(resId, parent);
-        name = findViewById(R.id.name);
-        count = findViewById(R.id.amount);
-        venue = findViewById(R.id.venue);
-        ticketDate = findViewById(R.id.date);
-        ticketTime = findViewById(R.id.time);
-        ticketText = findViewById(R.id.tickettext);
-        ticketCat = findViewById(R.id.cattext);
-        ticketDetails = findViewById(R.id.ticket_details);
+
+        activityView = this.itemView;
+
         itemView.setOnClickListener(this);
         ticketRedeemed = findViewById(R.id.redeemed);
         ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
@@ -65,44 +54,10 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        DateFormat date = android.text.format.DateFormat.getLongDateFormat(getContext());
-        DateFormat time = android.text.format.DateFormat.getTimeFormat(getContext());
         this.thisData = data;
-        name.setText(ticket.tokenInfo.name);
-
-        if (data.tokenIds.size() > 0) {
-            BigInteger firstTokenId = data.tokenIds.get(0);
-            String seatCount = String.format(Locale.getDefault(), "x%d", data.tokenIds.size());
-            count.setText(seatCount);
-            try {
-                NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTokenId);
-                String nameStr = nonFungibleToken.getAttribute("category").text;
-                String venueStr = nonFungibleToken.getAttribute("venue").text;
-
-                name.setText(nameStr);
-                count.setText(seatCount);
-                venue.setText(venueStr);
-                ticketText.setText(
-                        nonFungibleToken.getAttribute("countryA").text + "-" +
-                                nonFungibleToken.getAttribute("countryB").text
-                );
-                ticketCat.setText("M" + nonFungibleToken.getAttribute("match").text);
-                ticketDetails.setText(
-                        nonFungibleToken.getAttribute("locality").name + ": " +
-                                nonFungibleToken.getAttribute("locality").text
-                );
-                ZonedDateTime datetime = new ZonedDateTime(nonFungibleToken.getAttribute("time").text);
-                ticketDate.setText(datetime.format(date));
-                ticketTime.setText(datetime.format(time));
-            } catch (NullPointerException e) {
-                /* likely our XML token definition is outdated, just
-                 * show raw data here. TODO: only the fields not
-                 * understood are displayed as raw
-                 */
-                name.setText(firstTokenId.toString(16));
-            } catch (ParseException e) {
-                /* the last bit of the try block about setting date and time will simply not execute */
-            }
+        if (data.tokenIds.size() > 0)
+        {
+            ticket.displayTicketHolder(data, activityView, assetService, getContext());
         }
     }
 

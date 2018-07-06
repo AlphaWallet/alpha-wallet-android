@@ -7,25 +7,23 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import io.stormbird.token.util.ZonedDateTime;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
-import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.util.ZonedDateTime;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -476,19 +474,26 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Setup the single view of a ticket. Since this is repeatedly used and is exclusive info to a ticket it should go in here
-     * @param range TicketRange
-     * @param activity BaseActivity of Holder of ticket
+     * This is a single method that populates any instance of graphic ticket anywhere
+     *
+     * @param range
+     * @param activity
+     * @param assetService
+     * @param ctx needed to create date/time format objects
      */
-    public void displayTicketHolder(TicketRange range, BaseActivity activity, AssetDefinitionService assetService)
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx)
     {
-        TextView textAmount = activity.findViewById(R.id.amount);
-        TextView textTicketName = activity.findViewById(R.id.name);
-        TextView textVenue = activity.findViewById(R.id.venue);
-        TextView textDate = activity.findViewById(R.id.date);
-        TextView textRange = activity.findViewById(R.id.tickettext);
-        TextView textCat = activity.findViewById(R.id.cattext);
-        TextView ticketDetails = activity.findViewById(R.id.ticket_details);
+        DateFormat date = android.text.format.DateFormat.getLongDateFormat(ctx);
+        DateFormat time = android.text.format.DateFormat.getTimeFormat(ctx);
+
+        TextView amount = activity.findViewById(R.id.amount);
+        TextView name = activity.findViewById(R.id.name);
+        TextView venue = activity.findViewById(R.id.venue);
+        TextView ticketDate = activity.findViewById(R.id.date);
+        TextView ticketRange = activity.findViewById(R.id.tickettext);
+        TextView cat = activity.findViewById(R.id.cattext);
+        TextView details = activity.findViewById(R.id.ticket_details);
+        TextView ticketTime = activity.findViewById(R.id.time);
 
         int numberOfTickets = range.tokenIds.size();
         if (numberOfTickets > 0)
@@ -497,22 +502,55 @@ public class Ticket extends Token implements Parcelable
             NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(firstTicket);
 
             String venueStr = nonFungibleToken.getAttribute("venue").text;
+            String nameStr = getTokenTitle(nonFungibleToken); //nonFungibleToken.getAttribute("category").text;
 
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
-            textAmount.setText(seatCount);
-            textTicketName.setText(getTokenName(assetService));
-            textVenue.setText(venueStr);
-            textRange.setText(nonFungibleToken.getRangeStr(range));
-            textCat.setText(nonFungibleToken.getAttribute("category").text);
-            ticketDetails.setText(getTicketInfo(nonFungibleToken));
-            try {
-                ZonedDateTime datetime = new ZonedDateTime(nonFungibleToken.getAttribute("time").text);
-                textDate.setText(datetime.format(new SimpleDateFormat("dd MMM", Locale.ENGLISH)));
-            } catch (ParseException e) {
-                textDate.setText("N.A.");
+            name.setText(nameStr);
+            amount.setText(seatCount);
+            venue.setText(venueStr);
+            ticketRange.setText(
+                    nonFungibleToken.getAttribute("countryA").text + "-" +
+                            nonFungibleToken.getAttribute("countryB").text
+            );
+            cat.setText("M" + nonFungibleToken.getAttribute("match").text);
+            details.setText(
+                    nonFungibleToken.getAttribute("locality").name + ": " +
+                            nonFungibleToken.getAttribute("locality").text
+            );
+            try
+            {
+                String eventTime = nonFungibleToken.getAttribute("time").text;
+
+                if (eventTime != null)
+                {
+                    ZonedDateTime datetime = new ZonedDateTime(eventTime);
+                    ticketDate.setText(datetime.format(date));
+                    ticketTime.setText(datetime.format(time));
+                }
+                else
+                {
+                    Date current = new Date();
+                    ticketDate.setText(date.format(current));
+                    ticketTime.setText(time.format(current));
+                }
+            }
+            catch (ParseException e)
+            {
+                ticketDate.setText("N.A.");
             }
         }
+    }
+
+    private String getTokenTitle(NonFungibleToken nonFungibleToken)
+    {
+        String tokenTitle = nonFungibleToken.getAttribute("category").text;
+        if (tokenTitle == null || tokenTitle.length() == 0)
+        {
+            tokenTitle = getFullName();
+        }
+
+        return tokenTitle;
     }
 
     public String getTokenName(AssetDefinitionService assetService)

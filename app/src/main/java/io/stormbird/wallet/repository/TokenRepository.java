@@ -734,7 +734,13 @@ public class TokenRepository implements TokenRepositoryType {
         }
         else
         {
-            return null;
+            return rx.Observable.fromCallable(() -> {
+                TransferFromEventResponse event = new TransferFromEventResponse();
+                event._from = "";
+                event._to = "";
+                event._indices = null;
+                return event;
+            });
         }
     }
 

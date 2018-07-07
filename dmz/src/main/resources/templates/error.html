@@ -1,31 +1,33 @@
 <!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title th:text="${error}">Error</title>
-  <style type="text/css">
-      #footer dt, #footer dd {
-          display: inline;
-      }
-      #footer dt {
-          font-weight: bold;
-      }
-      #footer dd {
-          margin-left: 0em;
-          padding-left: 1em;
-          margin-right: 3em;
-      }
-  </style>
-</head>
-<body>
-<h1 th:text="${error}">Error</h1>
-<p th:text="${message}">Error Message</p>
-
-<hr/>
-<dl id="footer">
-  <dt>Time: </dt><dd th:text="${timestamp}"></dd>
-  <dt>Path: </dt><dd th:text="${path}"></dd>
-  <dt>Message: </dt><dd th:text="${message}"></dd>
-</dl>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <title th:text="${error}">Error</title>
+    <link rel="stylesheet" th:href="@{css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{css/error.css}"/>
+  </head>
+  <body>
+    <header class="main">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="header-content">
+              <b><h1 th:text="${error}">Error</h1></b>
+              <br>
+              <p th:text="${message}">Error Message</p>
+              <b><h1>Error</h1></b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <footer class="footer">
+      <p>Time: <dd th:text="${timestamp}"></dd></p>
+      <p>Path:  <dd th:text="${path}"></dd></p>
+      <p>Message: <dd th:text="${message}"></dd></p>
+    </dl>
+  </footer>
 </body>
 </html>

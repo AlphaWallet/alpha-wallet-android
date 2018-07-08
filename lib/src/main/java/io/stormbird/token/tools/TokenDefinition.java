@@ -264,7 +264,17 @@ public class TokenDefinition {
         }
         return null;
     }
-
+    public Map<BigInteger, String> getConvertedMappingMembersByKey(String key){
+        if(attributes.containsKey(key)) {
+            Map<BigInteger,String> convertedMembers=new HashMap<>();
+            AttributeType attr = attributes.get(key);
+            for(BigInteger actualValue:attr.members.keySet()){
+                convertedMembers.put(actualValue.shiftLeft(attr.bitshift).and(attr.bitmask),attr.members.get(actualValue));
+            }
+            return convertedMembers;
+        }
+        return null;
+    }
     private String getContentByTagName(Node node, String tagname) {
         /* I hope stream() -like pattern is supported in DOM but they don't want to evolve */
         for (Node nNode = node.getFirstChild(); nNode != null; nNode = nNode.getNextSibling()) {

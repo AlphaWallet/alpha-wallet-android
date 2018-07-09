@@ -2,6 +2,15 @@ apply plugin: 'application'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(path: ':lib')
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "../app/src/main/assets/"
+        }
+    }
 }
 
 sourceCompatibility = "1.8"

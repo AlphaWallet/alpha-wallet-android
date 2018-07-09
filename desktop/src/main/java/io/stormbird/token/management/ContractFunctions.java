@@ -1,6 +1,14 @@
 package io.stormbird.token.management;
 
 import javax.swing.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.util.Locale;
+
+import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.tools.TokenDefinition;
+import org.xml.sax.SAXException;
 
 public class ContractFunctions extends JFrame {
     private JPanel contentPane;
@@ -22,7 +30,15 @@ public class ContractFunctions extends JFrame {
     private JTextField numeroField;
     private JTextPane statusBar;
 
+    public InputStream ticketXML = getClass().getResourceAsStream("/TicketingContract.xml");
+
     public ContractFunctions() {
+        try {
+            TokenDefinition ad = new TokenDefinition(ticketXML, Locale.getDefault());
+            NonFungibleToken ticket = new NonFungibleToken(BigInteger.valueOf(0x010CCB53), ad);
+        } catch (IOException | IllegalArgumentException | SAXException e){
+            e.printStackTrace();
+        }
         setContentPane(contentPane);
         setSize(1000,600); // without this, the window won't display. TODO: find a way to auto size.
         setTitle("Simple");

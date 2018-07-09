@@ -105,16 +105,28 @@ header.main {
   border: solid 1px #f3f3f3;
   padding: 1.5em; } }
 
+ .inline-box {
+  margin-top: 0;
+}
+  @media (min-width: 992px) {
+     .inline-box {
+  margin-top: 1em;
+  position: relative;
+  display: inline-block;
+} }
+
+
 .box-img {
   margin-left: 1em;
-  height: 20px;
-  width: 20px; }
+  height: 16px;
+  width: 16px; }
 @media (min-width: 992px) {
 .box-img {
-  margin-top: 1em;
   margin-left: 0;
-  height: 25px;
-  width: 25px; } }
+  height: 20px;
+  width: 20px; } }
+
+
 
 .device-img {
   width: 90%; }

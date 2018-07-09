@@ -14,36 +14,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.xml.sax.SAXException;
 
 public class TokenViewModel extends TokenDefinition {
-    public static List<ComboBoxDataModel> comboBoxDataModelList;
-    public static List<TextFieldDataModel> textFieldDataModelList;
+    public List<ComboBoxDataModel> comboBoxDataModelList;
+    public List<TextFieldDataModel> textFieldDataModelList;
     public TokenViewModel(InputStream xmlAsset, Locale locale) throws IOException, SAXException {
         super(xmlAsset, locale);
+        this.comboBoxDataModelList=new ArrayList<>();
+        this.textFieldDataModelList=new ArrayList<>();
+        constructTokenViewModelForGUI(this);
     }
-//
-//    public TokenViewModel(String filename) throws IOException, SAXException {
-//        super(new FileInputStream(new File(filename)), Locale.getDefault());
-//    }
-//
-//    /* take a token ID in byte-32, find all the fields in it and call back
-//     * token.setField(fieldID, fieldName, text-value). This is abandoned
-//     * temporarily for the need to retrofit the class with J.B.'s design */
-//
-//    public void parseField(BigInteger tokenId, NonFungibleToken token) {
-//        for (String key : attributes.keySet()) {
-//            AttributeType attr = attributes.get(key);
-//            BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-//            token.setAttribute(attr.id,
-//                    new NonFungibleToken.Attribute(attr.id, attr.name, val, attr.toString(val)));
-//        }
-//    }
-//    public Map<BigInteger, String> getEnumerationMembersByKey(String key){
-//        return super.getMappingMembersByKey(key);
-//    }
 
-    public static void constructDataMapForGUI(TokenDefinition ad){
-        TokenViewModel.comboBoxDataModelList=new ArrayList<>();
-        TokenViewModel.textFieldDataModelList=new ArrayList<>();
-
+    private void constructTokenViewModelForGUI(TokenDefinition ad){
         Map<BigInteger,List<String>> bitmaskIdsMap=new ConcurrentHashMap<>();
         Map<String, ComboBoxDataModel[]> comboBoxDataMap = new ConcurrentHashMap<String, ComboBoxDataModel[]>();
 
@@ -66,7 +46,7 @@ public class TokenViewModel extends TokenDefinition {
                 textFieldDataModel.setBitshift(attr.bitshift);
                 textFieldDataModel.setType(attr.syntax.name());
                 textFieldDataModel.setAs(attr.as.name());
-                TokenViewModel.textFieldDataModelList.add(textFieldDataModel);
+                this.textFieldDataModelList.add(textFieldDataModel);
             }
         }
         for(BigInteger bitmask : bitmaskIdsMap.keySet()){
@@ -86,7 +66,7 @@ public class TokenViewModel extends TokenDefinition {
             model.setName(labelName.replaceFirst(".$",""));
             List<ComboBoxDataModel.ComboBoxOption> options=model.convertToComboBoxDataModel(membersList);
             model.setComboBoxOptions(options.toArray(new ComboBoxDataModel.ComboBoxOption[options.size()]));
-            TokenViewModel.comboBoxDataModelList.add(model);
+            this.comboBoxDataModelList.add(model);
         }
     }
 

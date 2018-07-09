@@ -26,7 +26,14 @@ public class TokenInfo implements Parcelable {
     public final boolean isStormbird;
 
     public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled) {
-        this.address = address;
+        if (address != null)
+        {
+            this.address = address.toLowerCase();
+        }
+        else
+        {
+            this.address = null;
+        }
         this.name = name;
         this.symbol = symbol;
         this.decimals = decimals;
@@ -34,7 +41,14 @@ public class TokenInfo implements Parcelable {
         this.isStormbird = false;
     }
     public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, boolean isStormbird) {
-        this.address = address;
+        if (address != null)
+        {
+            this.address = address.toLowerCase();
+        }
+        else
+        {
+            this.address = null;
+        }
         this.name = name;
         this.symbol = symbol;
         this.decimals = decimals;

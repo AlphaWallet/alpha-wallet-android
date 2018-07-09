@@ -30,8 +30,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 7
-        versionName "1.0.5"
+        versionCode 10
+        versionName "1.0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true

@@ -27,7 +27,6 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 public class AssetDefinitionService
 {
     private TokenDefinition assetDefinition;
-    private NetworkInfo currentNetworkInfo;
     private Context context;
 
     public AssetDefinitionService(Context ctx)
@@ -51,16 +50,6 @@ public class AssetDefinitionService
         {
             e.printStackTrace();
         }
-    }
-
-    //TODO: these won't be needed when we have multi-XML handling
-    public void setCurrentNetwork(NetworkInfo networkInfo)
-    {
-        currentNetworkInfo = networkInfo;
-    }
-    private boolean isMainNet()
-    {
-        return currentNetworkInfo.isMainNetwork;
     }
 
     public TokenDefinition getAssetDefinition()
@@ -89,7 +78,7 @@ public class AssetDefinitionService
     {
         //only specify the issuer name if we're on mainnet, otherwise default to 'Ethereum'
         //TODO: Remove the main-net stipulation once we do multi-XML handling
-        if (isMainNet() && assetDefinition.getNetworkFromContract(contractAddress) > 0)
+        if (assetDefinition.getNetworkFromContract(contractAddress) == 1)
         {
             return assetDefinition.getKeyName();
         }

@@ -24,7 +24,7 @@ public class TokenInfo implements Parcelable {
             this.address = null;
         }
         this.name = name;
-        this.symbol = symbol;
+        this.symbol = symbol != null ? symbol.toUpperCase() : null;
         this.decimals = decimals;
         this.isEnabled = isEnabled;
         this.isStormbird = false;
@@ -39,7 +39,7 @@ public class TokenInfo implements Parcelable {
             this.address = null;
         }
         this.name = name;
-        this.symbol = symbol;
+        this.symbol = symbol != null ? symbol.toUpperCase() : null;
         this.decimals = decimals;
         this.isEnabled = isEnabled;
         this.isStormbird = isStormbird;

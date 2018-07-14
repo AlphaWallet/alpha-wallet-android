@@ -311,7 +311,6 @@ public class WalletViewModel extends BaseViewModel {
         disposable = fetchAllContractAddresses()
                 .flatMapIterable(address -> address)
                 .flatMap(setupTokensInteract::addToken)
-                .map(tokenInfo -> createContractToken(tokenInfo))
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::finishedImport, this::onTokenAddError);
@@ -331,14 +330,6 @@ public class WalletViewModel extends BaseViewModel {
     {
         //cannot add the token until we get internet connection
         Log.d("WVM", "Wait for internet");
-    }
-
-    private TokenInfo createContractToken(TokenInfo tokenInfo) throws Exception
-    {
-        if (tokenInfo.name == null) throw new Exception("Token cannot be added"); //drop through react flow so token is not incorrectly added
-        String tokenName = tokenInfo.name + " " + assetDefinitionService.getAssetDefinition().getTokenName(); //TODO: must use address
-        TokenInfo tInfo = new TokenInfo(tokenInfo.address, tokenName, tokenInfo.symbol, 0, true, true);
-        return tInfo;
     }
 
     private void finishedImport(Token token)

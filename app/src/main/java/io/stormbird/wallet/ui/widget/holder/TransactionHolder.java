@@ -97,7 +97,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     private void fillERC875(Transaction trans, ERC875ContractTransaction ct)
     {
         int colourResource;
-        BigInteger valueAmount = new BigInteger(transaction.value);
+        TransactionOperation operation = transaction.operations[0];
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
 
         switch (ct.type)
@@ -153,6 +153,9 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
                 break;
             case R.string.ticket_receive_from_magiclink:
                 supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                break;
+            case R.string.ticket_load_new_tickets:
+                ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
                 break;
             default:
                 break;

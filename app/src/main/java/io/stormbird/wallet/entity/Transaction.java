@@ -70,11 +70,12 @@ public class Transaction implements Parcelable {
 		this.contentHash = calculateContentHash();
 	}
 
-	protected Transaction(Parcel in) {
-        hash = in.readString();
-        error = in.readString();
-        blockNumber = in.readString();
-        timeStamp = in.readLong();
+	protected Transaction(Parcel in)
+	{
+		hash = in.readString();
+		error = in.readString();
+		blockNumber = in.readString();
+		timeStamp = in.readLong();
 		nonce = in.readInt();
 		from = in.readString();
 		to = in.readString();
@@ -83,13 +84,14 @@ public class Transaction implements Parcelable {
 		gasPrice = in.readString();
 		input = in.readString();
 		gasUsed = in.readString();
-        Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
-        TransactionOperation[] operations = null;
-        if (parcelableArray != null) {
-            operations = Arrays.copyOf(parcelableArray, parcelableArray.length, TransactionOperation[].class);
-        }
+		Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
+		this.contentHash = in.readString();
+		TransactionOperation[] operations = null;
+		if (parcelableArray != null)
+		{
+			operations = Arrays.copyOf(parcelableArray, parcelableArray.length, TransactionOperation[].class);
+		}
 		this.operations = operations;
-		this.contentHash = calculateContentHash();
 	}
 
 	public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
@@ -124,6 +126,7 @@ public class Transaction implements Parcelable {
 		dest.writeString(input);
 		dest.writeString(gasUsed);
 		dest.writeParcelableArray(operations, flags);
+		dest.writeString(contentHash);
 	}
 
 	private String calculateContentHash()
@@ -153,6 +156,7 @@ public class Transaction implements Parcelable {
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			calcHash = Hash.sha3String(to + hash + timeStamp + nonce);
 		}
 
 		return calcHash;

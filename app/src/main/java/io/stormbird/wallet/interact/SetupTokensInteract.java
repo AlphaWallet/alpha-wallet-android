@@ -103,10 +103,15 @@ public class SetupTokensInteract {
 
             //we should already have generated the structures
             TransactionOperation[] newOps = thisTrans.operations;
-            TransactionOperation op = thisTrans.operations[0];
-            TransactionContract ct = op.contract;
+            TransactionOperation op = null;
+            TransactionContract ct = null;
 
-            setupToken(token, ct, thisTrans);
+            if (thisTrans.operations.length > 0)
+            {
+                op = thisTrans.operations[0];
+                ct = op.contract;
+                setupToken(token, ct, thisTrans);
+            }
 
             switch (functionName)
             {

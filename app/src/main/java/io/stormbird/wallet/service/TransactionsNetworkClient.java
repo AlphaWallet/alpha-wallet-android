@@ -79,41 +79,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				.subscribeOn(Schedulers.io());
 	}
 
-	private Transaction[] fetchLastTransactionsTrust(Wallet wallet, long lastBlock)
-	{
-		final long lastBlockPlus = lastBlock + 1;
-		List<Transaction> result = new ArrayList<>();
-		int pages = 0;
-		int page = 0;
-		boolean hasMore = true;
-		do {
-			page++;
-			try {
-				Call<ApiClientResponse> call = apiClient.fetchTransactions(PAGE_LIMIT, page, wallet.address);
-				Response<ApiClientResponse> response = call.execute();
-				if (response.isSuccessful()) {
-					ApiClientResponse body = response.body();
-					if (body != null) {
-						pages = body.pages;
-						for (Transaction transaction : body.docs) {
-							if (Long.valueOf(transaction.blockNumber) <= lastBlockPlus) {
-								hasMore = false;
-								break;
-							}
-							result.add(transaction);
-						}
-					}
-				}
-			}
-			catch (IOException e) //Connection gets severed if the owning fragment is cleared by Android OS
-			//The best we can do is catch the exception thrown by OKHTTP
-			{
-				return result.toArray(new Transaction[result.size()]);
-			}
-		} while (page < pages && hasMore);
-		return result.toArray(new Transaction[result.size()]);
-	}
-
 	@Override
 	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock)
 	{
@@ -139,8 +104,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				//if this process fails, also try trust eth wallet API
-				return fetchLastTransactionsTrust(wallet, lastBlock);
+				// Do not try the Trust API - this often returns malformed transactions.
 			}
 
 			return result.toArray(new Transaction[result.size()]);

@@ -85,8 +85,21 @@ public class SetupTokensInteract {
                 unknownContracts.add(thisTrans.to);
             }
 
-            if(thisTrans.operations == null ||
-                    thisTrans.operations.length == 0 || data.functionData == null) return null; //shortcut, avoid extra processing in case something slips through
+            String functionName = null;
+
+            if (thisTrans.isConstructor)
+            {
+                functionName = CONTRACT_CONSTRUCTOR;
+            }
+            else if (data.functionData != null)
+            {
+                functionName = data.functionData.functionFullName;
+            }
+            else
+            {
+                //if no result from the transaction decode then simply return the already built etherscan decode
+                return thisTrans;
+            }
 
             //we should already have generated the structures
             TransactionOperation[] newOps = thisTrans.operations;
@@ -95,7 +108,7 @@ public class SetupTokensInteract {
 
             setupToken(token, ct, thisTrans);
 
-            switch (data.functionData.functionFullName)
+            switch (functionName)
             {
                 case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
                     ct.interpretTradeData(walletAddr, thisTrans);

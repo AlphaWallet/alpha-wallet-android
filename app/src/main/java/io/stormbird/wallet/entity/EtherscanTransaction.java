@@ -94,7 +94,7 @@ public class EtherscanTransaction
             //Now perform as complete processing as we are able to here. This saves re-allocating and makes code far less brittle.
             o = new TransactionOperation[0];
 
-            if (isError.equals("0") && input != null && input.length() > 10)
+            if (input != null && input.length() >= 10)
             {
                 TransactionOperation op;
                 TransactionContract ct;
@@ -103,7 +103,7 @@ public class EtherscanTransaction
                 if (parser == null) parser = new ParseMagicLink();
                 TransactionInput f = decoder.decodeInput(input);
                 //is this a trade?
-                if (f.functionData != null && f.functionData.isERC875())
+                if (f.functionData != null)
                 {
                     //recover recipient
                     //no need for passTo: address is embedded in the tx Input.

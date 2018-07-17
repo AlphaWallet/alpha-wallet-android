@@ -225,10 +225,10 @@ public class EtherscanTransaction
             ct.setIndicies(f.paramValues);
             ct.name = contractAddress;
         }
-        catch (SignatureException sx)
+        catch (Exception e)
         {
             o = generateERC875Op();
-            sx.printStackTrace();
+            e.printStackTrace();
         }
 
         return o;

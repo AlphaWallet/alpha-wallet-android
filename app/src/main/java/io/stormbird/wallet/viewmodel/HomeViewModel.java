@@ -114,4 +114,10 @@ public class HomeViewModel extends BaseViewModel {
         String currentLocale = localeRepository.getDefaultLocale();
         LocaleUtils.setLocale(activity, currentLocale);
     }
+
+    public void downloadAndInstall()
+    {
+        //download the new app locally
+        //download to stormbird folder for easy delete
+    }
 }

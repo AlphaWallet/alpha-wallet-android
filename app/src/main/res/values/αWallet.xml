@@ -313,4 +313,8 @@
     <string name="ticket_not_valid">Invalid Ticket</string>
     <string name="ticket_not_valid_body">No valid contract at this address on this network. The contract could have been terminated or it may be on a different network. Try changing to \'Ropsten (Test)\'.</string>
     <string name="loading">Loading …</string>
+    <string name="new_version_title">Update available</string>
+    <string name="new_version">Version update is available on the AlphaWallet website.</string>
+    <string name="confirm_update">Download and Install</string>
+    <string name="dialog_later">Later</string>
 </resources>

@@ -26,6 +26,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.DownloadInterface;
+import io.stormbird.wallet.entity.DownloadReceiver;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.util.RootUtil;
@@ -33,6 +35,7 @@ import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
@@ -41,7 +44,8 @@ import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface
+{
     @Inject
     HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
@@ -50,6 +54,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private Dialog dialog;
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
+    private DownloadReceiver downloadReceiver;
+    private AWalletConfirmationDialog cDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -103,6 +109,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         } else {
             showPage(WALLET);
         }
+
+        downloadReceiver = new DownloadReceiver(this, this);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -226,6 +234,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.openDeposit(view.getContext(), uri);
     }
 
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(downloadReceiver);
+    }
+
     private void showPage(int page) {
         switch (page) {
             case MARKETPLACE: {
@@ -284,6 +299,34 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         @Override
         public int getCount() {
             return 4;
+        }
+    }
+
+    @Override
+    public void downloadReady(String build)
+    {
+        hideDialog();
+        //display download ready popup
+        //Possibly only show this once per day otherwise too annoying!
+        cDialog = new AWalletConfirmationDialog(this);
+        cDialog.setTitle(R.string.new_version_title);
+        cDialog.setSmallText(R.string.new_version);
+        String newBuild = "New version: " + build;
+        cDialog.setMediumText(newBuild);
+        cDialog.setPrimaryButtonText(R.string.confirm_update);
+        cDialog.setPrimaryButtonListener(v -> {
+            viewModel.downloadAndInstall();
+            cDialog.dismiss();
+        });
+        cDialog.setSecondaryButtonText(R.string.dialog_later);
+        cDialog.setSecondaryButtonListener(v -> cDialog.dismiss());
+        cDialog.show();
+    }
+
+    private void hideDialog()
+    {
+        if (cDialog != null && cDialog.isShowing()) {
+            cDialog.dismiss();
         }
     }
 }

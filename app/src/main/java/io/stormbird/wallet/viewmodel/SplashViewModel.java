@@ -4,7 +4,23 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
+import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
@@ -18,6 +34,7 @@ import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 
 import static io.stormbird.wallet.C.DEFAULT_NETWORK;
+import static io.stormbird.wallet.C.DOWNLOAD_READY;
 import static io.stormbird.wallet.C.HARD_CODED_KEY;
 import static io.stormbird.wallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.stormbird.wallet.C.PRE_LOADED_KEY;
@@ -167,5 +184,163 @@ public class SplashViewModel extends ViewModel {
                     fetchWallets();
                     createWallet.postValue(account);
                 }, this::onError);
+    }
+
+    public void checkVersionUpdate(Context ctx)
+    {
+        if (!isPlayStoreInstalled(ctx))
+        {
+            //check the current install version string against the current version on the alphawallet page
+            //current version number as string
+            try
+            {
+                PackageInfo pInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
+                String version = pInfo.versionName;
+                String versionName = BuildConfig.VERSION_NAME;
+                //convert number into actual number
+                int buildValue = getBuildValueFromString(versionName);
+                //get remote filename on server
+                checkWebsiteAPKFilename(buildValue, ctx);
+            }
+            catch (PackageManager.NameNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean isPlayStoreInstalled(Context ctx)
+    {
+        // A list with valid installers package name
+        List<String> validInstallers = new ArrayList<>(Arrays.asList("com.android.vending", "com.google.android.feedback"));
+
+        // The package name of the app that has installed your app
+        final String installer = ctx.getPackageManager().getInstallerPackageName(ctx.getPackageName());
+
+        // true if your app has been downloaded from Play Store
+        return installer != null && validInstallers.contains(installer);
+    }
+
+    private String stripFilename(String name)
+    {
+        int index = name.lastIndexOf(".apk");
+        if (index > 0)
+        {
+            name = name.substring(0, index);
+        }
+        index = name.lastIndexOf("-");
+        if (index > 0)
+        {
+            name = name.substring(index+1);
+        }
+        return name;
+    }
+
+    private int getBuildValueFromString(String versionName)
+    {
+        versionName = stripFilename(versionName);
+
+        String[] values = versionName.split("[.]");
+        int version = 0;
+        try
+        {
+            if (values.length >= 3)
+            {
+                version = Integer.valueOf(values[0]) * 100 * 100 + Integer.valueOf(values[1]) * 100 + Integer.valueOf(values[2]);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+        }
+
+        return version;
+    }
+
+    private void checkWebsiteAPKFilename(int buildValue, final Context baseContext)
+    {
+        Disposable d = getFileNameFromURL("https://awallet.io/apk").toObservable()
+                //.flatMap(name -> checkNeedUpdate(name, buildValue))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> onUpdate(result, buildValue, baseContext), this::onError);
+    }
+
+    private Observable<Boolean> checkNeedUpdate(String name, int buildValue)
+    {
+        return Observable.fromCallable(() -> {
+            Boolean needUpdate = false;
+            int newValue = getBuildValueFromString(name);
+            if (newValue > buildValue)
+            {
+                needUpdate = true;
+            }
+            return needUpdate;
+        });
+    }
+
+    private void onUpdate(String name, int buildValue, Context baseContext)
+    {
+        //if needs update can we spring open a dialogue box from here?
+        int newValue = getBuildValueFromString(name);
+        if (newValue > buildValue)
+        {
+            String newVersion = stripFilename(name);
+            Intent intent = new Intent(DOWNLOAD_READY);
+            intent.putExtra("Version", newVersion);
+            baseContext.sendBroadcast(intent);
+            System.out.println("yoless");
+        }
+    }
+//
+//    private int getBuildValueFromString(String versionName)
+//    {
+//        String[] values = versionName.split(".");
+//        int version = 0;
+//        try
+//        {
+//            if (values.length == 3)
+//            {
+//                version = Integer.valueOf(values[0]) * 100 * 100 + Integer.valueOf(values[1]) * 100 + Integer.valueOf(values[2]);
+//            }
+//        }
+//        catch (NumberFormatException e)
+//        {
+//            e.printStackTrace();
+//        }
+//
+//        return version;
+//    }
+//
+//    private boolean isPlayStoreInstalled(Context ctx)
+//    {
+//        // A list with valid installers package name
+//        List<String> validInstallers = new ArrayList<>(Arrays.asList("com.android.vending", "com.google.android.feedback"));
+//
+//        // The package name of the app that has installed your app
+//        final String installer = ctx.getPackageManager().getInstallerPackageName(ctx.getPackageName());
+//
+//        // true if your app has been downloaded from Play Store
+//        return installer != null && validInstallers.contains(installer);
+//    }
+
+    private Single<String> getFileNameFromURL(final String location)
+    {
+        return Single.fromCallable(() -> {
+            HttpURLConnection connection = null;
+            String stepLocation = location;
+            for (;;)
+            {
+                URL url = new URL(stepLocation);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setInstanceFollowRedirects(false);
+                String redirectLocation = connection.getHeaderField("Location");
+                if (redirectLocation == null) break;
+                stepLocation = redirectLocation;
+            }
+            String fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
+
+            return fileName;
+        });
     }
 }

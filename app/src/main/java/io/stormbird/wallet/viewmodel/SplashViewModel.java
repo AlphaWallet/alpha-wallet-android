@@ -292,7 +292,9 @@ public class SplashViewModel extends ViewModel {
                 String redirectLocation = connection.getHeaderField("Location");
                 if (redirectLocation == null) break;
                 stepLocation = redirectLocation;
+                connection.disconnect();
             }
+            connection.disconnect();
             return stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
         });
     }

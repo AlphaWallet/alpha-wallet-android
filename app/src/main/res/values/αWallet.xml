@@ -317,4 +317,7 @@
     <string name="new_version">Version update is available on the AlphaWallet website.</string>
     <string name="confirm_update">Download and Install</string>
     <string name="dialog_later">Later</string>
+    <string name="alphawallet_update">Alphawallet update</string>
+    <string name="install_error">Unable to update App</string>
+    <string name="require_write_permission">Storage write permission not given.</string>
 </resources>

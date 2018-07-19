@@ -38,6 +38,7 @@ import static io.stormbird.wallet.C.DOWNLOAD_READY;
 import static io.stormbird.wallet.C.HARD_CODED_KEY;
 import static io.stormbird.wallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.stormbird.wallet.C.PRE_LOADED_KEY;
+import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
 public class SplashViewModel extends ViewModel {
     private final FetchWalletsInteract fetchWalletsInteract;
@@ -259,24 +260,10 @@ public class SplashViewModel extends ViewModel {
 
     private void checkWebsiteAPKFilename(int buildValue, final Context baseContext)
     {
-        Disposable d = getFileNameFromURL("https://awallet.io/apk").toObservable()
-                //.flatMap(name -> checkNeedUpdate(name, buildValue))
+        Disposable d = getFileNameFromURL(ALPHAWALLET_FILE_URL).toObservable()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> onUpdate(result, buildValue, baseContext), this::onError);
-    }
-
-    private Observable<Boolean> checkNeedUpdate(String name, int buildValue)
-    {
-        return Observable.fromCallable(() -> {
-            Boolean needUpdate = false;
-            int newValue = getBuildValueFromString(name);
-            if (newValue > buildValue)
-            {
-                needUpdate = true;
-            }
-            return needUpdate;
-        });
     }
 
     private void onUpdate(String name, int buildValue, Context baseContext)
@@ -289,47 +276,15 @@ public class SplashViewModel extends ViewModel {
             Intent intent = new Intent(DOWNLOAD_READY);
             intent.putExtra("Version", newVersion);
             baseContext.sendBroadcast(intent);
-            System.out.println("yoless");
         }
     }
-//
-//    private int getBuildValueFromString(String versionName)
-//    {
-//        String[] values = versionName.split(".");
-//        int version = 0;
-//        try
-//        {
-//            if (values.length == 3)
-//            {
-//                version = Integer.valueOf(values[0]) * 100 * 100 + Integer.valueOf(values[1]) * 100 + Integer.valueOf(values[2]);
-//            }
-//        }
-//        catch (NumberFormatException e)
-//        {
-//            e.printStackTrace();
-//        }
-//
-//        return version;
-//    }
-//
-//    private boolean isPlayStoreInstalled(Context ctx)
-//    {
-//        // A list with valid installers package name
-//        List<String> validInstallers = new ArrayList<>(Arrays.asList("com.android.vending", "com.google.android.feedback"));
-//
-//        // The package name of the app that has installed your app
-//        final String installer = ctx.getPackageManager().getInstallerPackageName(ctx.getPackageName());
-//
-//        // true if your app has been downloaded from Play Store
-//        return installer != null && validInstallers.contains(installer);
-//    }
 
     private Single<String> getFileNameFromURL(final String location)
     {
         return Single.fromCallable(() -> {
             HttpURLConnection connection = null;
             String stepLocation = location;
-            for (;;)
+            for (;;) //crawl through the URL linkage until we get the base filename
             {
                 URL url = new URL(stepLocation);
                 connection = (HttpURLConnection) url.openConnection();
@@ -338,9 +293,7 @@ public class SplashViewModel extends ViewModel {
                 if (redirectLocation == null) break;
                 stepLocation = redirectLocation;
             }
-            String fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
-
-            return fileName;
+            return stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
         });
     }
 }

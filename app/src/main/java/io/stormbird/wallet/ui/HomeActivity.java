@@ -329,6 +329,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         buildVersion = build;
         //display download ready popup
         //Possibly only show this once per day otherwise too annoying!
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        int asks = pref.getInt("update_asks", 0) + 1;
         cDialog = new AWalletConfirmationDialog(this);
         cDialog.setTitle(R.string.new_version_title);
         cDialog.setSmallText(R.string.new_version);
@@ -342,8 +344,19 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             cDialog.dismiss();
         });
-        cDialog.setSecondaryButtonText(R.string.dialog_later);
-        cDialog.setSecondaryButtonListener(v -> cDialog.dismiss());
+        if (asks > 1)
+        {
+            cDialog.setSecondaryButtonText(R.string.dialog_not_again);
+        }
+        else
+        {
+            cDialog.setSecondaryButtonText(R.string.dialog_later);
+        }
+        cDialog.setSecondaryButtonListener(v -> {
+            //only dismiss twice before we stop warning.
+            pref.edit().putInt("update_asks", asks).apply();
+            cDialog.dismiss();
+        });
         cDialog.show();
     }
 
@@ -436,6 +449,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
+
+        //Blank install time here so that next time the app runs the install time will be correctly set up
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref.edit().putLong("install_time", 0).apply();
         finish();
     }
 }

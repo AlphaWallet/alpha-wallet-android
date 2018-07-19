@@ -320,4 +320,5 @@
     <string name="alphawallet_update">Alphawallet update</string>
     <string name="install_error">Unable to update App</string>
     <string name="require_write_permission">Storage write permission not given.</string>
+    <string name="dialog_not_again">Skip until next release</string>
 </resources>

@@ -5,8 +5,10 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.preference.PreferenceManager;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -193,19 +195,20 @@ public class SplashViewModel extends ViewModel {
         {
             //check the current install version string against the current version on the alphawallet page
             //current version number as string
-            try
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+            //pref.edit().putLong("install_time", 1000).apply(); //for testing, you can reset the clock to a time that's before the release on the website
+
+            //get the current install date
+            long currentInstallDate = pref.getLong("install_time", 0);
+            int asks = pref.getInt("update_asks", 0);
+            if (currentInstallDate == 0 || asks == 2) // if user cancels update twice stop asking them until the next release
             {
-                PackageInfo pInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
-                String version = pInfo.versionName;
-                String versionName = BuildConfig.VERSION_NAME;
-                //convert number into actual number
-                int buildValue = getBuildValueFromString(versionName);
-                //get remote filename on server
-                checkWebsiteAPKFilename(buildValue, ctx);
+                pref.edit().putInt("update_asks", 0).apply();
+                pref.edit().putLong("install_time", System.currentTimeMillis()).apply();
             }
-            catch (PackageManager.NameNotFoundException e)
+            else
             {
-                e.printStackTrace();
+                checkWebsiteAPKFileData(currentInstallDate, ctx);
             }
         }
     }
@@ -237,65 +240,61 @@ public class SplashViewModel extends ViewModel {
         return name;
     }
 
-    private int getBuildValueFromString(String versionName)
+    private void checkWebsiteAPKFileData(long currentInstallDate, final Context baseContext)
     {
-        versionName = stripFilename(versionName);
-
-        String[] values = versionName.split("[.]");
-        int version = 0;
-        try
-        {
-            if (values.length >= 3)
-            {
-                version = Integer.valueOf(values[0]) * 100 * 100 + Integer.valueOf(values[1]) * 100 + Integer.valueOf(values[2]);
-            }
-        }
-        catch (NumberFormatException e)
-        {
-            e.printStackTrace();
-        }
-
-        return version;
-    }
-
-    private void checkWebsiteAPKFilename(int buildValue, final Context baseContext)
-    {
-        Disposable d = getFileNameFromURL(ALPHAWALLET_FILE_URL).toObservable()
+        Disposable d = getFileDataFromURL(ALPHAWALLET_FILE_URL).toObservable()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> onUpdate(result, buildValue, baseContext), this::onError);
+                .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), this::onError);
     }
 
-    private void onUpdate(String name, int buildValue, Context baseContext)
+    private void onUpdate(FileData data, long currentInstallDate, Context baseContext)
     {
         //if needs update can we spring open a dialogue box from here?
-        int newValue = getBuildValueFromString(name);
-        if (newValue > buildValue)
+        if (data.fileDate > currentInstallDate)
         {
-            String newVersion = stripFilename(name);
+            String newVersion = stripFilename(data.fileName);
             Intent intent = new Intent(DOWNLOAD_READY);
             intent.putExtra("Version", newVersion);
             baseContext.sendBroadcast(intent);
         }
     }
 
-    private Single<String> getFileNameFromURL(final String location)
+    private Single<FileData> getFileDataFromURL(final String location)
     {
         return Single.fromCallable(() -> {
             HttpURLConnection connection = null;
             String stepLocation = location;
+            FileData fileData = new FileData();
             for (;;) //crawl through the URL linkage until we get the base filename
             {
                 URL url = new URL(stepLocation);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setInstanceFollowRedirects(false);
                 String redirectLocation = connection.getHeaderField("Location");
-                if (redirectLocation == null) break;
+                if (redirectLocation == null)
+                {
+                    fileData.fileDate = connection.getDate(); //long lastModified = connection.getLastModified();
+                    fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
+                    break;
+                }
                 stepLocation = redirectLocation;
                 connection.disconnect();
             }
             connection.disconnect();
-            return stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
+            return fileData;
         });
+    }
+
+    class FileData
+    {
+        Long fileDate;
+        String fileName;
+
+        FileData()
+        {
+            fileDate = 0L;
+            fileName = "";
+        }
     }
 }

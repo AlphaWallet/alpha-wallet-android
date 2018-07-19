@@ -175,7 +175,7 @@ public class HomeViewModel extends BaseViewModel {
         final Uri uri = Uri.parse("file://" + testFile.getPath());
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(ALPHAWALLET_FILE_URL));
-        request.setDescription(ctx.getString(R.string.alphawallet_update) + " v" + version);
+        request.setDescription(ctx.getString(R.string.alphawallet_update) + " " + version);
         request.setTitle(ctx.getString(R.string.app_name));
         request.setDestinationUri(uri);
         final DownloadManager manager = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);

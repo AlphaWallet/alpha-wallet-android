@@ -1,21 +1,10 @@
 package io.stormbird.wallet.entity;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 
-import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.AddTokenActivity;
-import io.stormbird.wallet.ui.widget.holder.TokenHolder;
-import io.stormbird.wallet.viewmodel.BaseViewModel;
-import io.stormbird.wallet.viewmodel.TokensViewModel;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-
-import static io.stormbird.wallet.ui.widget.holder.TokenHolder.EMPTY_BALANCE;
 
 public class TokenInfo implements Parcelable {
     public final String address;
@@ -35,7 +24,7 @@ public class TokenInfo implements Parcelable {
             this.address = null;
         }
         this.name = name;
-        this.symbol = symbol;
+        this.symbol = symbol != null ? symbol.toUpperCase() : null;
         this.decimals = decimals;
         this.isEnabled = isEnabled;
         this.isStormbird = false;
@@ -50,7 +39,7 @@ public class TokenInfo implements Parcelable {
             this.address = null;
         }
         this.name = name;
-        this.symbol = symbol;
+        this.symbol = symbol != null ? symbol.toUpperCase() : null;
         this.decimals = decimals;
         this.isEnabled = isEnabled;
         this.isStormbird = isStormbird;

@@ -108,7 +108,7 @@ public class TransactionDecoder
     {
         state = ARGS;
         BigInteger count;
-        if (thisData.functionData.args != null)
+        if (thisData.functionData != null && thisData.functionData.args != null)
         {
             for (String type : thisData.functionData.args)
             {

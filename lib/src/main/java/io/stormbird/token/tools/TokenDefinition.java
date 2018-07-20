@@ -231,7 +231,8 @@ public class TokenDefinition {
         return this.keyName;
     }
 
-    public String getFeemasterAPI(){
+    public String getFeemasterAPI()
+    {
         return feemasterAPI;
     }
 
@@ -255,7 +256,7 @@ public class TokenDefinition {
         for (Node nNode = node.getFirstChild(); nNode != null; nNode = nNode.getNextSibling()) {
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) nNode;
-                if (eElement.getTagName() == tagname) {
+                if (eElement.getTagName().equals(tagname)) {
                     return eElement.getTextContent();
                 }
             }

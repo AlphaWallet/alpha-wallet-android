@@ -29,17 +29,17 @@
                   <strong th:text="${tokenName}"/>
                   <em th:text="${ticketCategory}"></em>
                 </p>
-                <dl>
+                <dl class="inline-box">
                   <dt>
                   <img class="box-img" src="images/calendar.png" />
                   </dt>
-                  <dd th:text="${ticketDate}"/>
+                  <dd class="ml-1" style="font-size: 0.85em;" th:text="${ticketDate}"/>
                   <dt>
                   <img class="box-img" src="images/ticket.png" />
-                  </dt><dd th:text="${ticketSides}"/>
+                  </dt><dd class="ml-1" style="font-size: 0.85em;" th:text="${ticketSides}"/>
                   <dt>
                   <img class="box-img" src="images/category.png" />
-                  </dt><dd th:text="${ticketMatch}"/>
+                  </dt><dd class="ml-1" style="font-size: 0.85em;" th:text="${ticketMatch}"/>
                 </dl>
                 <p>Available till <span th:attr="title='Unix Time is ' + ${link.expiry}" th:text="${#dates.format(new java.util.Date(link.expiry*1000))}"/></p>
               </span>

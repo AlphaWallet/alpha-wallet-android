@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -23,11 +24,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+
+import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 
 
 /**
@@ -38,10 +42,8 @@ import okhttp3.Request;
 
 public class AssetDefinitionService
 {
-    private static final String XML_DIR = "Alpha Wallet";
     private static final String XML_EXT = "xml";
     private TokenDefinition assetDefinition;
-    private NetworkInfo currentNetworkInfo;
     private final Context context;
     private final OkHttpClient okHttpClient;
     private Map<String, TokenDefinition> assetDefinitions;
@@ -52,7 +54,25 @@ public class AssetDefinitionService
         context = ctx;
         okHttpClient = client;
         networkMappings = new HashMap<>();
-        init(ctx);
+
+        loadLocalContracts();
+    }
+
+    private void loadLocalContracts()
+    {
+        assetDefinition = null;
+        assetDefinitions = new HashMap<>();
+
+        try
+        {
+            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
+            assetDefinitions.clear();
+            loadContracts(context.getFilesDir());
+        }
+        catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -73,17 +93,19 @@ public class AssetDefinitionService
      * TODO: if user doesn't give permission then use the app private folder and tell user they can't
      *  load contracts themselves
      */
-    public void gotPermission()
+    public void checkExternalDirectoryAndLoad()
     {
         //create XML repository directory
         File directory = new File(
                 Environment.getExternalStorageDirectory()
-                        + File.separator + XML_DIR);
+                        + File.separator + ALPHAWALLET_DIR);
 
         if (!directory.exists())
         {
-            directory.mkdir();
+            directory.mkdir(); //does this throw if we haven't given permission?
         }
+
+        loadExternalContracts();
     }
 
     /**
@@ -101,7 +123,7 @@ public class AssetDefinitionService
         if (assetDef == null)
         {
             //try to load from the cache directory
-            File xmlFile = checkXMLDirectory(correctedAddress);
+            File xmlFile = getXMLFile(correctedAddress);
 
             //try web
             if (xmlFile == null)
@@ -144,36 +166,14 @@ public class AssetDefinitionService
         //TODO: Remove the main-net stipulation once we do multi-XML handling
         //Note we check that the contract is actually specified in the XML - if we're just using the XML
         //as a default then we will just get default 'ethereum' issuer.
-        if (isMainNet() && assetDefinition.getNetworkFromContract(contractAddress) > 0)
+        TokenDefinition definition = getAssetDefinition(contractAddress);
+        if (definition != null && definition.getNetworkFromContract(contractAddress) == 1)
         {
             return assetDefinition.getKeyName();
         }
         else
         {
             return context.getString(R.string.ethereum);
-        }
-    }
-
-    private void init(Context ctx)
-    {
-        assetDefinition = null;
-        assetDefinitions = new HashMap<>();
-        try
-        {
-            //Load background XML as fall-back
-            //TODO: fetch this from the server
-            assetDefinition = new TokenDefinition(
-                    ctx.getResources().getAssets().open("TicketingContract.xml"),
-                    ctx.getResources().getConfiguration().locale);
-
-            assignNetworks(assetDefinition);
-
-            //parse all contracts to populate the network map (some contract addresses are within the XML, not at the filename)
-            loadAllContracts();
-        }
-        catch (IOException | SAXException e)
-        {
-            e.printStackTrace();
         }
     }
 
@@ -193,10 +193,18 @@ public class AssetDefinitionService
     private TokenDefinition loadTokenDefinition(String address)
     {
         TokenDefinition definition = null;
-        File xmlFile = checkXMLDirectory(address.toLowerCase());
-        if (xmlFile != null && xmlFile.exists())
+        File xmlFile = getXMLFile(address.toLowerCase());
+        try
         {
-            definition = parseFile(xmlFile);
+            if (xmlFile != null && xmlFile.exists())
+            {
+                FileInputStream is = new FileInputStream(xmlFile);
+                definition = parseFile(is);
+            }
+        }
+        catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
         }
 
         if (definition == null) definition = assetDefinition;
@@ -204,23 +212,15 @@ public class AssetDefinitionService
         return definition;
     }
 
-    private TokenDefinition parseFile(File xmlFile)
+    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException
     {
         TokenDefinition definition = null;
-        try
-        {
-            FileInputStream is = new FileInputStream(xmlFile);
-            definition = new TokenDefinition(
-                    is,
-                    context.getResources().getConfiguration().locale);
+        definition = new TokenDefinition(
+                xmlInputStream,
+                context.getResources().getConfiguration().locale);
 
-            //now assign the networks
-            assignNetworks(definition);
-        }
-        catch (IOException | SAXException e)
-        {
-            e.printStackTrace();
-        }
+        //now assign the networks
+        assignNetworks(definition);
 
         return definition;
     }
@@ -290,82 +290,120 @@ public class AssetDefinitionService
         });
     }
 
-    private File checkXMLDirectory(String contractAddress)
+    private File getExternalFile(String contractAddress)
     {
         File directory = new File(
                 Environment.getExternalStorageDirectory()
-                        + File.separator + XML_DIR);
+                        + File.separator + ALPHAWALLET_DIR);
 
         if (directory.exists())
         {
-            return findXMLFile(directory, contractAddress);
+            File externalFile = new File(directory, contractAddress.toLowerCase());
+            if (externalFile.exists())
+            {
+                return externalFile;
+            }
         }
-        else
+
+        return null;
+    }
+
+    public void loadExternalContracts()
+    {
+        //TODO: Check if external contracts override the internal ones - this is the expected behaviour
+        File directory = new File(
+                Environment.getExternalStorageDirectory()
+                        + File.separator + ALPHAWALLET_DIR);
+
+        try
         {
-            return null;
+            loadContracts(directory);
+        }
+        catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
         }
     }
 
-    private void loadAllContracts()
+    private void loadContracts(File directory) throws IOException, SAXException
     {
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + XML_DIR);
-
         File[] files = directory.listFiles();
-        for (File f : files)
+        if (files != null)
         {
-            String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
-            if (extension.equals("xml"))
+            for (File f : files)
             {
-                TokenDefinition definition = parseFile(f);
+                String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
+                if (extension.equals("xml"))
+                {
+                    FileInputStream stream = new FileInputStream(f);
+                    parseFile(stream);
+                }
             }
         }
     }
 
-    private File findXMLFile(File directory, String contractAddress)
+    /**
+     * Given contract address, find the corresponding File.
+     * We have to search in the internal area and the external storage area
+     * The reason we need two areas is prevent the need for normal users to have to give
+     * permission to access external storage.
+     * @param contractAddress
+     * @return
+     */
+    private File getXMLFile(String contractAddress)
     {
         //build filename
         String fileName = contractAddress.toLowerCase() + "." + XML_EXT;
 
         //check
-        File check = new File(directory, fileName);
+        File check = new File(context.getFilesDir(), fileName);
         if (check.exists())
         {
             return check;
         }
         else
         {
-            return null;
+            return getExternalFile(contractAddress);
         }
     }
 
+    /**
+     * Use internal directory to store contracts fetched from the server
+     * @param address
+     * @param result
+     * @return
+     * @throws IOException
+     */
     private File storeFile(String address, String result) throws IOException
     {
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + XML_DIR);
+//        File directory = new File(
+//                Environment.getExternalStorageDirectory()
+//                        + File.separator + ALPHAWALLET_DIR);
 
         String fName = address + ".xml";
 
-        File file = new File(directory, fName);
+        //Store received files in the internal storage area - no need to ask for permissions
+        File file = new File(context.getFilesDir(), fName);
 
         FileOutputStream fos = new FileOutputStream(file);
         OutputStream os = new BufferedOutputStream(fos);
-        os.write(result.getBytes(), 0, result.length());
+        os.write(result.getBytes());
+        fos.flush();
         os.close();
         fos.close();
         return file;
     }
 
-    //TODO: these won't be needed when we have multi-XML handling
-    public void setCurrentNetwork(NetworkInfo networkInfo)
+    public int getNetworkId(String address)
     {
-        currentNetworkInfo = networkInfo;
+        TokenDefinition definition = getAssetDefinition(address);
+        if (definition != null)
+        {
+            return definition.getNetworkFromContract(address);
+        }
+        else
+        {
+            return 0;
+        }
     }
-    private boolean isMainNet()
-    {
-        return currentNetworkInfo.isMainNetwork;
-    }
-
 }

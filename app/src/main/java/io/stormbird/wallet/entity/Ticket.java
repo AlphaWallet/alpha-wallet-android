@@ -611,7 +611,7 @@ public class Ticket extends Token implements Parcelable
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        int networkId = assetService.getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
+        int networkId = assetService.getNetworkId(getAddress());// getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
         isMatchedInXML = networkId >= 1;
     }
 

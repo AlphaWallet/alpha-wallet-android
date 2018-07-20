@@ -29,6 +29,8 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
                 Transaction oldTx = value;
                 Transaction newTx = (Transaction) other.value;
 
+                // Note: This fails if the transaction is badly formed - this is intentional as we need to be certain that
+                //       All failure mechanisms have been removed
                 return oldTx.contentHash.compareTo(newTx.contentHash);
             }
             else

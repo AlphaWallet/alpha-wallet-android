@@ -120,14 +120,16 @@ public class RepositoriesModule {
             TokenExplorerClientType tokenExplorerClientType,
             TokenLocalSource tokenLocalSource,
             TransactionLocalSource inDiskCache,
-            TickerService tickerService) {
+            TickerService tickerService,
+			AssetDefinitionService assetDefinitionService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
 	            walletRepository,
 	            tokenExplorerClientType,
                 tokenLocalSource,
                 inDiskCache,
-                tickerService);
+                tickerService,
+				assetDefinitionService);
     }
 
 	@Singleton

@@ -5,18 +5,21 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.text.format.DateUtils;
 import android.util.Log;
 
-import org.web3j.abi.datatypes.Bool;
-import org.xml.sax.SAXException;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
@@ -30,23 +33,7 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.ui.WalletFragment;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -79,8 +66,6 @@ public class WalletViewModel extends BaseViewModel {
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
-
-    private Handler handler = new Handler();
 
     @Nullable
     private Disposable fetchTokenBalanceDisposable;
@@ -168,10 +153,6 @@ public class WalletViewModel extends BaseViewModel {
     private void onTokens(Token[] tokens)
     {
         tokenCache = tokens;
-        for (Token t : tokens)
-        {
-            Log.d("WVM", "Token: " + t.getFullName());
-        }
     }
 
     private void onFetchTokensCompletable()
@@ -293,7 +274,6 @@ public class WalletViewModel extends BaseViewModel {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        assetDefinitionService.setCurrentNetwork(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -329,13 +309,9 @@ public class WalletViewModel extends BaseViewModel {
 
     public void setContractAddresses()
     {
-//        XMLContractAddress = contractAddress;
-//        XMLContractName = contractName;
-
         disposable = fetchAllContractAddresses()
                 .flatMapIterable(address -> address)
                 .flatMap(setupTokensInteract::addToken)
-                .map(tokenInfo -> createContractToken(tokenInfo))
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::finishedImport, this::onTokenAddError);
@@ -355,14 +331,6 @@ public class WalletViewModel extends BaseViewModel {
     {
         //cannot add the token until we get internet connection
         Log.d("WVM", "Wait for internet");
-    }
-
-    private TokenInfo createContractToken(TokenInfo tokenInfo) throws Exception
-    {
-        if (tokenInfo.name == null) throw new Exception("Token cannot be added"); //drop through react flow so token is not incorrectly added
-        String tokenName = tokenInfo.name + " " + assetDefinitionService.getAssetDefinition(tokenInfo.address).getTokenName(); //TODO: must use address
-        TokenInfo tInfo = new TokenInfo(tokenInfo.address, tokenName, tokenInfo.symbol, 0, true, true);
-        return tInfo;
     }
 
     private void finishedImport(Token token)

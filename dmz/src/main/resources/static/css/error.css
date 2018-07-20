@@ -1,0 +1,62 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700);
+html,
+body {
+  min-height: 100%;}
+
+
+body {
+    background-image: url('/images/alogobg.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 280px;
+    background-attachment: fixed;
+    background-color: #56C9E9;
+    font-family: "Source Sans Pro", sans-serif; }
+    @media (min-width: 992px) { 
+      body {
+      background-image: url('/images/alogobg.png');
+      background-repeat: no-repeat;
+      background-position: 630px 200px;
+      background-attachment: fixed;
+      background-size: 50%;
+      background-color: #56C9E9; } }
+
+
+header.main {
+  width: 100%;
+  color: white; }
+  header.main .header-content {
+  margin-top: 50px;
+  max-width: 100%;
+  text-align: center; }
+    header.main .header-content h1 {
+      font-size: 68px; }
+          header.main .header-content p {
+      font-size: 22px; }
+      @media (min-width: 992px) { 
+        header.main {
+  width: 100%;
+  color: white; }
+  header.main .header-content {
+  margin-top: 150px;
+  max-width: 100%;
+  text-align: center; }
+    header.main .header-content h1 {
+      font-size: 72px; }
+          header.main .header-content p {
+      font-size: 24px; }
+      }
+
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 120px; /* Set the fixed height of the footer here */
+}
+
+.footer p {
+  font-size: 12px;
+  margin-left: 2em;
+  color: white;
+}

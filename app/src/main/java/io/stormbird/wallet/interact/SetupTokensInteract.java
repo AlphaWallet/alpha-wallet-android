@@ -85,17 +85,35 @@ public class SetupTokensInteract {
                 unknownContracts.add(thisTrans.to);
             }
 
-            if(thisTrans.operations == null ||
-                    thisTrans.operations.length == 0 || data.functionData == null) return null; //shortcut, avoid extra processing in case something slips through
+            String functionName = null;
+
+            if (thisTrans.isConstructor)
+            {
+                functionName = CONTRACT_CONSTRUCTOR;
+            }
+            else if (data.functionData != null)
+            {
+                functionName = data.functionData.functionFullName;
+            }
+            else
+            {
+                //if no result from the transaction decode then simply return the already built etherscan decode
+                return thisTrans;
+            }
 
             //we should already have generated the structures
             TransactionOperation[] newOps = thisTrans.operations;
-            TransactionOperation op = thisTrans.operations[0];
-            TransactionContract ct = op.contract;
+            TransactionOperation op = null;
+            TransactionContract ct = null;
 
-            setupToken(token, ct, thisTrans);
+            if (thisTrans.operations.length > 0)
+            {
+                op = thisTrans.operations[0];
+                ct = op.contract;
+                setupToken(token, ct, thisTrans);
+            }
 
-            switch (data.functionData.functionFullName)
+            switch (functionName)
             {
                 case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
                     ct.interpretTradeData(walletAddr, thisTrans);
@@ -342,9 +360,12 @@ public class SetupTokensInteract {
     public void setupUnknownList(Map<String, Token> tokenMap, List<String> xmlContractAddresses)
     {
         unknownContracts.clear();
-        for (String address : xmlContractAddresses)
+        if (xmlContractAddresses != null)
         {
-            unknownContracts.add(address);
+            for (String address : xmlContractAddresses)
+            {
+                if (tokenMap.get(address) == null) unknownContracts.add(address);
+            }
         }
     }
 

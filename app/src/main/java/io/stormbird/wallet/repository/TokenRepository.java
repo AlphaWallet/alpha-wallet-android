@@ -16,6 +16,7 @@ import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.entity.TransferFromEventResponse;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
 
@@ -74,6 +75,7 @@ public class TokenRepository implements TokenRepositoryType {
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionLocalSource transactionsLocalCache;
+    private final AssetDefinitionService assetDefinitionService;
     private final TickerService tickerService;
     private Web3j web3j;
     private boolean useBackupNode = false;
@@ -85,7 +87,8 @@ public class TokenRepository implements TokenRepositoryType {
             TokenExplorerClientType tokenNetworkService,
             TokenLocalSource localSource,
             TransactionLocalSource transactionsLocalCache,
-            TickerService tickerService) {
+            TickerService tickerService,
+            AssetDefinitionService assetDefinitionService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.walletRepository = walletRepository;
         this.tokenNetworkService = tokenNetworkService;
@@ -93,6 +96,7 @@ public class TokenRepository implements TokenRepositoryType {
         this.transactionsLocalCache = transactionsLocalCache;
         this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
+        this.assetDefinitionService = assetDefinitionService;
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
@@ -142,12 +146,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchActive(String walletAddress) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
-//        return Single.merge(
-//                fetchCachedEnabledTokens(network, wallet), // Immediately show the cache.
-//                updateTokens(network, wallet) // Looking for new tokens
-//                        .andThen(fetchCachedEnabledTokens(network, wallet))) // and showing the cach
-//            .toObservable();
-        //This is now handled in transaction view. If we repeat here then we conflict with processing in transaction view
         return fetchCachedEnabledTokens(network, wallet).toObservable();
     }
 
@@ -493,7 +491,7 @@ public class TokenRepository implements TokenRepositoryType {
             TokenFactory tFactory = new TokenFactory();
             try
             {
-                if (token.ticker != null && token.isEthereum())
+                if (token.isEthereum())
                 {
                     return token; //already have the balance for ETH
                 }
@@ -801,7 +799,12 @@ public class TokenRepository implements TokenRepositoryType {
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
-            return (String)response.get(0).getValue();
+            String name = (String)response.get(0).getValue();
+            if (assetDefinitionService.getAllContracts(network.chainId).contains(address))
+            {
+                name = name + " " + assetDefinitionService.getAssetDefinition(address).getTokenName(); //TODO: must use address
+            }
+            return name;
         } else {
             return null;
         }
@@ -1009,16 +1012,11 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 long now = System.currentTimeMillis();
-                String name = getContractData(address, stringParam("name"));
-                if (name == null)
-                {
-                    name = getName(address);
-                }
                 Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
                 if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,
-                        name,
+                        getName(address),
                         getContractData(address, stringParam("symbol")),
                         getDecimals(address),
                         true,
@@ -1043,11 +1041,7 @@ public class TokenRepository implements TokenRepositoryType {
                 for (String address : addresses)
                 {
                     long now = System.currentTimeMillis();
-                    String name = getContractData(address, stringParam("name"));
-                    if (name == null)
-                    {
-                        name = getName(address);
-                    }
+                    String name = getName(address);
                     Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"));
                     if (isStormbird == null) isStormbird = false;
                     TokenInfo result = new TokenInfo(

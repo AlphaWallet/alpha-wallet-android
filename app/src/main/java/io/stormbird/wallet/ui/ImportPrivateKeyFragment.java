@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.widget.InputView;
@@ -44,11 +45,18 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     public void onClick(View view) {
         privateKey.setError(null);
         String value = privateKey.getText().toString();
-        if (TextUtils.isEmpty(value) || value.length() != 64) {
-            privateKey.setError(getString(R.string.error_field_required));
-        } else {
-            onImportPrivateKeyListener.onPrivateKey(privateKey.getText().toString());
+
+        if (!TextUtils.isEmpty(value))
+        {
+            value = Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
+            if (value.length() == 64)
+            {
+                onImportPrivateKeyListener.onPrivateKey(value);
+                return;
+            }
         }
+
+        privateKey.setError(getString(R.string.error_field_required));
     }
 
     public void setOnImportPrivateKeyListener(OnImportPrivateKeyListener onImportPrivateKeyListener) {

@@ -4,17 +4,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.TokenTicker;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.entity.RealmToken;
-import io.stormbird.wallet.repository.entity.RealmTokenTicker;
-import io.stormbird.wallet.service.RealmManager;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,6 +15,16 @@ import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenFactory;
+import io.stormbird.wallet.entity.TokenInfo;
+import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.repository.entity.RealmTokenTicker;
+import io.stormbird.wallet.service.RealmManager;
 
 import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
@@ -117,13 +116,70 @@ public class TokensRealmSource implements TokenLocalSource {
                         .equalTo("isEnabled", true)
                         .notEqualTo("address", wallet.address)
                         .findAll();
+
+                realmItems = deleteCapsAddresses(realm, realmItems, wallet.address);
+
                 return convert(realmItems, System.currentTimeMillis());
-            } finally {
-                if (realm != null) {
+            }
+            finally
+            {
+                if (realm != null)
+                {
                     realm.close();
                 }
             }
         });
+    }
+
+    //TODO: Deprecate this function after 2 months (September). Only purpose is to fix a problem with duplicate address being logged
+    //TODO: If the address was specified in the XML file as a mixture of caps and lowercase. This has been fixed within the root token handling
+    //TODO: However artifacts from those ancient times may still persist and cause update problems hence this function.
+    private RealmResults<RealmToken> deleteCapsAddresses(Realm realm, RealmResults<RealmToken> realmItems, String walletAddress)
+    {
+        boolean withinRealmTx = false;
+        for (int i = 0; i < realmItems.size(); i++)
+        {
+            RealmToken realmItem = realmItems.get(i);
+            if (containsCaps(realmItem)) //remove any entry who's address contains caps. NB this only happens when address is taken from XML
+                                         // but, since we don't control XML content we need to deal with problems here
+            {
+                if (!withinRealmTx)
+                {
+                    realm.beginTransaction();
+                    withinRealmTx = true;
+                }
+                realmItem.deleteFromRealm();
+            }
+        }
+
+        if (withinRealmTx)
+        {
+            realm.commitTransaction();
+
+            realmItems = realm.where(RealmToken.class)
+                    .sort("addedTime", Sort.ASCENDING)
+                    .equalTo("isEnabled", true)
+                    .notEqualTo("address", walletAddress)
+                    .findAll();
+        }
+
+        return realmItems;
+    }
+
+    private boolean containsCaps(RealmToken token)
+    {
+        String address = token.getAddress();
+
+        for (int n = 0; n < address.length(); n++)
+        {
+            char ch = address.charAt(n);
+            if (ch >= 'A' && ch <= 'F')
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -343,7 +399,6 @@ public class TokensRealmSource implements TokenLocalSource {
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token)
     {
         Realm realm = null;
-        //if (token.isTerminated()) return; // don't update dead tokens
         try
         {
             realm = realmManager.getRealmInstance(network, wallet);
@@ -429,7 +484,8 @@ public class TokensRealmSource implements TokenLocalSource {
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
-            if (realmToken == null) {
+            if (realmToken == null)
+            {
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);

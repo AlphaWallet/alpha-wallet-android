@@ -4,17 +4,27 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,11 +35,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.DownloadInterface;
+import io.stormbird.wallet.entity.DownloadReceiver;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -38,6 +53,7 @@ import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
@@ -46,17 +62,22 @@ import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener {
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface
+{
     @Inject
     HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
-
-    public static final int RC_HANDLE_EXTERNAL_WRITE_PERM = 22;
 
     private SystemView systemView;
     private Dialog dialog;
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
+    private DownloadReceiver downloadReceiver;
+    private AWalletConfirmationDialog cDialog;
+    private String buildVersion;
+
+    public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
+    public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,6 +125,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.setLocale(this);
+        viewModel.installIntent().observe(this, this::onInstallIntent);
 
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
             showPage(SETTINGS);
@@ -111,7 +133,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             showPage(WALLET);
         }
 
-        requestWritePermission();
+        viewModel.loadExternalXMLContracts();
+        downloadReceiver = new DownloadReceiver(this, this);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -235,6 +258,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.openDeposit(view.getContext(), uri);
     }
 
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(downloadReceiver);
+    }
+
     private void showPage(int page) {
         switch (page) {
             case MARKETPLACE: {
@@ -296,18 +326,72 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void requestWritePermission()
+    @Override
+    public void downloadReady(String build)
     {
-        final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                                                                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            Log.w("Asset service", "Folder write permission is not granted. Requesting permission");
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_EXTERNAL_WRITE_PERM);
+        hideDialog();
+        buildVersion = build;
+        //display download ready popup
+        //Possibly only show this once per day otherwise too annoying!
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        int asks = pref.getInt("update_asks", 0) + 1;
+        cDialog = new AWalletConfirmationDialog(this);
+        cDialog.setTitle(R.string.new_version_title);
+        cDialog.setSmallText(R.string.new_version);
+        String newBuild = "New version: " + build;
+        cDialog.setMediumText(newBuild);
+        cDialog.setPrimaryButtonText(R.string.confirm_update);
+        cDialog.setPrimaryButtonListener(v -> {
+            if (checkWritePermission(RC_DOWNLOAD_EXTERNAL_WRITE_PERM))
+            {
+                viewModel.downloadAndInstall(build, this);
+            }
+            cDialog.dismiss();
+        });
+        if (asks > 1)
+        {
+            cDialog.setSecondaryButtonText(R.string.dialog_not_again);
         }
         else
         {
-            viewModel.createXMLDirectory();
+            cDialog.setSecondaryButtonText(R.string.dialog_later);
+        }
+        cDialog.setSecondaryButtonListener(v -> {
+            //only dismiss twice before we stop warning.
+            pref.edit().putInt("update_asks", asks).apply();
+            cDialog.dismiss();
+        });
+        cDialog.show();
+    }
+
+    private void hideDialog()
+    {
+        if (cDialog != null && cDialog.isShowing()) {
+            cDialog.dismiss();
+        }
+    }
+
+    private boolean checkWritePermission(int permissionTag)
+    {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED)
+        {
+            return true;
+        }
+        else
+        {
+            final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                                                                     Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            {
+                Log.w("HomeActivity", "Folder write permission is not granted. Requesting permission");
+                ActivityCompat.requestPermissions(this, permissions, permissionTag);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 
@@ -316,9 +400,79 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == RC_HANDLE_EXTERNAL_WRITE_PERM)
+        if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
         {
-            viewModel.createXMLDirectory();
+            //check permission is granted
+            for (int i = 0; i < permissions.length; i++)
+            {
+                String p = permissions[i];
+                if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                {
+                    if (grantResults[i] != -1)
+                    {
+                        switch (requestCode)
+                        {
+                            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                                viewModel.loadExternalXMLContracts();
+                                break;
+                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                                viewModel.downloadAndInstall(buildVersion, this);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (requestCode)
+                        {
+                            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                                //no warning
+                                break;
+                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                                showRequirePermissionError();
+                                break;
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private void showRequirePermissionError()
+    {
+        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
+        aDialog.setTitle(R.string.install_error);
+        aDialog.setMessage(R.string.require_write_permission);
+        aDialog.setButtonText(R.string.action_cancel);
+        aDialog.setButtonListener(v -> {
+            aDialog.dismiss();
+        });
+        aDialog.show();
+    }
+
+    private void onInstallIntent(File installFile)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
+            Uri apkUri = FileProvider.getUriForFile(getApplicationContext(), authority, installFile);
+            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+            intent.setData(apkUri);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        }
+        else
+        {
+            Uri apkUri = Uri.fromFile(installFile);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+
+        //Blank install time here so that next time the app runs the install time will be correctly set up
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref.edit().putLong("install_time", 0).apply();
+        finish();
     }
 }

@@ -56,7 +56,6 @@ public class SetupTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-
     public void clearAll()
     {
         contractMap.clear();

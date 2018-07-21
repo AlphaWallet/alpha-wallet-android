@@ -75,6 +75,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
+    private NewSettingsFragment settingsFragment;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -312,7 +313,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 case WALLET:
                     return new WalletFragment();
                 case SETTINGS:
-                    return new NewSettingsFragment();
+                    settingsFragment = new NewSettingsFragment();
+                    return settingsFragment;
                 case TRANSACTIONS:
                     return new TransactionsFragment();
                 default:
@@ -414,6 +416,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         {
                             case RC_ASSET_EXTERNAL_WRITE_PERM:
                                 viewModel.loadExternalXMLContracts();
+                                settingsFragment.refresh();
                                 break;
                             case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
                                 viewModel.downloadAndInstall(buildVersion, this);

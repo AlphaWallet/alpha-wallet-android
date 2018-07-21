@@ -800,7 +800,7 @@ public class TokenRepository implements TokenRepositoryType {
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
             String name = (String)response.get(0).getValue();
-            if (assetDefinitionService.getAllContracts(network.chainId).contains(address))
+            if (assetDefinitionService.getNetworkId(address) > 0)
             {
                 name = name + " " + assetDefinitionService.getAssetDefinition(address).getTokenName(); //TODO: must use address
             }

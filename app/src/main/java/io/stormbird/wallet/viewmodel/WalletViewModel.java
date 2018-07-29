@@ -1,6 +1,7 @@
 package io.stormbird.wallet.viewmodel;
 
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;

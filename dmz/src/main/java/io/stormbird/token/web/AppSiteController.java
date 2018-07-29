@@ -204,7 +204,7 @@ public class AppSiteController {
         HashMap<String, String> map = new HashMap<>();
         try (InputStream input = Files.newInputStream(path)) {
             TokenDefinition token = new TokenDefinition(input, new Locale("en"));
-            token.addresses.values().stream().forEach(address -> map.put(address, path.toString()));
+            token.addresses.keySet().stream().forEach(address -> map.put(address, path.toString()));
             return map.entrySet();
         } catch (IOException | SAXException e) {
             throw new RuntimeException(e); // make it safe to use in stream

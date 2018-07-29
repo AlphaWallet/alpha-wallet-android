@@ -9,6 +9,7 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.SettingsRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 
 @Module
@@ -19,13 +20,15 @@ class HomeModule {
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
-            SettingsRouter settingsRouter) {
+            SettingsRouter settingsRouter,
+            AssetDefinitionService assetDefinitionService) {
         return new HomeViewModelFactory(
                 localeRepository,
                 importTokenRouter,
                 externalBrowserRouter,
                 addTokenRouter,
-                settingsRouter);
+                settingsRouter,
+                assetDefinitionService);
     }
 
     @Provides

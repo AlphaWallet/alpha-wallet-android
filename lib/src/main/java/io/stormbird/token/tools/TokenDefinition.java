@@ -25,7 +25,7 @@ public class TokenDefinition {
     protected Document xml;
     public Map<String, AttributeType> attributes = new ConcurrentHashMap<>();
     protected Locale locale;
-    public Map<Integer, String> addresses = new HashMap<>();
+    public Map<String, Integer> addresses = new HashMap<>();
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -236,25 +236,11 @@ public class TokenDefinition {
         return feemasterAPI;
     }
 
-    public int getNetworkId() { return networkId; }
-
     public String getTokenName() { return tokenName; }
-
-    public String getContractAddress(int networkID) {
-        return addresses.get(networkID);
-    }
 
     public int getNetworkFromContract(String contractAddress)
     {
-        for (Map.Entry e : addresses.entrySet())
-        {
-            if (((String)e.getValue()).equalsIgnoreCase(contractAddress))
-            {
-                return (Integer)e.getKey();
-            }
-        }
-
-        return -1;
+        return (addresses.get(contractAddress) == null ? -1 : addresses.get(contractAddress));
     }
 
     public Map<BigInteger, String> getMappingMembersByKey(String key){
@@ -316,7 +302,7 @@ public class TokenDefinition {
                 Element eElement = ((Element) nNode);
                 if (eElement.getTagName().equals("address")) {
                     Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
-                    addresses.put(networkId, nNode.getTextContent());
+                    addresses.put(nNode.getTextContent().toLowerCase(), networkId);
                 }
                 /* if there is no token name in <contract> this breaks;
                  * token name shouldn't be in <contract> anyway, re-design pending */

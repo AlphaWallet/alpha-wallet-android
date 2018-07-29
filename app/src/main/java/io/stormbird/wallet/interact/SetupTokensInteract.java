@@ -56,7 +56,6 @@ public class SetupTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-
     public void clearAll()
     {
         contractMap.clear();
@@ -360,9 +359,12 @@ public class SetupTokensInteract {
     public void setupUnknownList(Map<String, Token> tokenMap, List<String> xmlContractAddresses)
     {
         unknownContracts.clear();
-        for (String address : xmlContractAddresses)
+        if (xmlContractAddresses != null)
         {
-            unknownContracts.add(address);
+            for (String address : xmlContractAddresses)
+            {
+                if (tokenMap.get(address) == null) unknownContracts.add(address);
+            }
         }
     }
 

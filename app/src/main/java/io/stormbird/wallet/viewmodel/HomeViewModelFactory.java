@@ -18,18 +18,21 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final ImportTokenRouter importTokenRouter;
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
+    private final AssetDefinitionService assetDefinitionService;
 
     public HomeViewModelFactory(
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
-            SettingsRouter settingsRouter) {
+            SettingsRouter settingsRouter,
+            AssetDefinitionService assetDefinitionService) {
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.addTokenRouter = addTokenRouter;
         this.settingsRouter = settingsRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
@@ -40,6 +43,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         importTokenRouter,
         externalBrowserRouter,
         addTokenRouter,
-        settingsRouter);
+        settingsRouter,
+        assetDefinitionService);
     }
 }

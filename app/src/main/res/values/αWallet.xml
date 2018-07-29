@@ -321,4 +321,7 @@
     <string name="install_error">Unable to update App</string>
     <string name="require_write_permission">Storage write permission not given.</string>
     <string name="dialog_not_again">Skip until next release</string>
+    <string name="enable_xml_override_dir">Enable XML Override</string>
+    <string name="explain_xml_override">Enable XML override will create a directory \'AlphaWallet\' in your phone storage. Token config files (XML) can be dropped into this directory which will override default or network Token configs.</string>
+    <string name="ask_user_about_xml_override">Do you wish to enable Token config override directory?</string>
 </resources>

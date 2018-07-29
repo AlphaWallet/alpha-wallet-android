@@ -1,7 +1,9 @@
 package io.stormbird.wallet.ui;
 
+import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,32 +18,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.stormbird.wallet.entity.TokenInterface;
-import io.stormbird.wallet.entity.TokensReceiver;
-import io.stormbird.token.tools.TokenDefinition;
-import org.xml.sax.SAXException;
+import java.math.BigDecimal;
+import java.util.Map;
 
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenInterface;
+import io.stormbird.wallet.entity.TokensReceiver;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
 import io.stormbird.wallet.viewmodel.WalletViewModelFactory;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 

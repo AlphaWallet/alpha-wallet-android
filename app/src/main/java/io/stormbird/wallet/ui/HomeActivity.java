@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.arch.lifecycle.ViewModelProviders;
@@ -46,6 +47,7 @@ import io.stormbird.wallet.entity.DownloadInterface;
 import io.stormbird.wallet.entity.DownloadReceiver;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -73,8 +75,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
+    private NewSettingsFragment settingsFragment;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
+    public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,6 +134,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             showPage(WALLET);
         }
 
+        viewModel.loadExternalXMLContracts();
         downloadReceiver = new DownloadReceiver(this, this);
     }
 
@@ -308,7 +313,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 case WALLET:
                     return new WalletFragment();
                 case SETTINGS:
-                    return new NewSettingsFragment();
+                    settingsFragment = new NewSettingsFragment();
+                    return settingsFragment;
                 case TRANSACTIONS:
                     return new TransactionsFragment();
                 default:
@@ -338,7 +344,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         cDialog.setMediumText(newBuild);
         cDialog.setPrimaryButtonText(R.string.confirm_update);
         cDialog.setPrimaryButtonListener(v -> {
-            if (haveWritePermission())
+            if (checkWritePermission(RC_DOWNLOAD_EXTERNAL_WRITE_PERM))
             {
                 viewModel.downloadAndInstall(build, this);
             }
@@ -367,7 +373,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private boolean haveWritePermission()
+    private boolean checkWritePermission(int permissionTag)
     {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED)
@@ -381,7 +387,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                                                                      Manifest.permission.WRITE_EXTERNAL_STORAGE))
             {
                 Log.w("HomeActivity", "Folder write permission is not granted. Requesting permission");
-                ActivityCompat.requestPermissions(this, permissions, RC_DOWNLOAD_EXTERNAL_WRITE_PERM);
+                ActivityCompat.requestPermissions(this, permissions, permissionTag);
                 return false;
             }
             else
@@ -396,7 +402,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM)
+        if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
         {
             //check permission is granted
             for (int i = 0; i < permissions.length; i++)
@@ -404,13 +410,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 String p = permissions[i];
                 if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
                 {
-                    if (grantResults[i] != 1)
+                    if (grantResults[i] != -1)
                     {
-                        viewModel.downloadAndInstall(buildVersion, this);
+                        switch (requestCode)
+                        {
+                            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                                viewModel.loadExternalXMLContracts();
+                                settingsFragment.refresh();
+                                break;
+                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                                viewModel.downloadAndInstall(buildVersion, this);
+                                break;
+                        }
                     }
                     else
                     {
-                        showRequirePermissionError();
+                        switch (requestCode)
+                        {
+                            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                                //no warning
+                                break;
+                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                                showRequirePermissionError();
+                                break;
+                        }
                     }
                 }
             }

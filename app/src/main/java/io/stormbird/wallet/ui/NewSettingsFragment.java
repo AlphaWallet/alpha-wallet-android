@@ -1,13 +1,18 @@
 package io.stormbird.wallet.ui;
 
 
+import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,11 +30,13 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
+import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
 import io.stormbird.wallet.widget.SelectNetworkDialog;
 
 import static io.stormbird.wallet.C.CHANGED_LOCALE;
 import static io.stormbird.wallet.C.RESET_WALLET;
+import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
 public class NewSettingsFragment extends Fragment {
     @Inject
@@ -41,6 +48,7 @@ public class NewSettingsFragment extends Fragment {
     private TextView walletsSubtext;
     private TextView localeSubtext;
     private Switch notificationState;
+    private LinearLayout layoutEnableXML;
 
     @Nullable
     @Override
@@ -141,6 +149,16 @@ public class NewSettingsFragment extends Fragment {
             startActivity(intent);
         });
 
+        layoutEnableXML = view.findViewById(R.id.layout_xml_override);
+        if (checkWritePermission() == false)
+        {
+            layoutEnableXML.setVisibility(View.VISIBLE);
+            layoutEnableXML.setOnClickListener(v -> {
+                //ask OS to ask user if we can use the 'AlphaWallet' directory
+                showXMLOverrideDialog();
+            });
+        }
+
         return view;
     }
 
@@ -163,5 +181,59 @@ public class NewSettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         viewModel.prepare();
+    }
+
+    private void showXMLOverrideDialog()
+    {
+        AWalletConfirmationDialog cDialog = new AWalletConfirmationDialog(getActivity());
+        cDialog.setTitle(R.string.enable_xml_override_dir);
+        cDialog.setSmallText(R.string.explain_xml_override);
+        cDialog.setMediumText(R.string.ask_user_about_xml_override);
+        cDialog.setPrimaryButtonText(R.string.dialog_ok);
+        cDialog.setPrimaryButtonListener(v -> {
+            //ask for OS permission and write directory
+            askWritePermission();
+            cDialog.dismiss();
+        });
+        cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        cDialog.setSecondaryButtonListener(v -> {
+            cDialog.dismiss();
+        });
+        cDialog.show();
+    }
+
+    private boolean checkWritePermission()
+    {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void refresh()
+    {
+        if (layoutEnableXML != null)
+        {
+            if (checkWritePermission())
+            {
+                layoutEnableXML.setVisibility(View.GONE);
+            }
+            else
+            {
+                layoutEnableXML.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void askWritePermission()
+    {
+        final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
+        ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
     }
 }

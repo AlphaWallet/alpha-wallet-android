@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.ErrorEnvelope;
@@ -470,7 +471,6 @@ public class ImportTokenViewModel extends BaseViewModel
         getTickerDisposable = fetchTokensInteract.getEthereumTicker()
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::onTicker, this::onError);
-
     }
 
     private void onTicker(Ticker ticker)
@@ -499,5 +499,10 @@ public class ImportTokenViewModel extends BaseViewModel
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public TokenDefinition getAssetDefinition(String address)
+    {
+        return assetDefinitionService.getAssetDefinition(address);
     }
 }

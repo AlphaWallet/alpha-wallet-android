@@ -130,7 +130,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void checkContractNetwork(String contractAddress)
     {
-        int checkNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition().getNetworkFromContract(contractAddress);
+        int checkNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition(contractAddress).getNetworkFromContract(contractAddress);
         if (checkNetworkId > 0)
         {
             viewModel.switchNetwork(checkNetworkId);
@@ -270,7 +270,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition().getNetworkFromContract(ticket.getAddress());
+        int contractNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition(ticket.getAddress()).getNetworkFromContract(ticket.getAddress());
         if (contractNetworkId == networkId)
         {
             verified.setVisibility(View.VISIBLE);
@@ -404,10 +404,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else {
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
-                        int checkNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition().getNetworkFromContract(t.getAddress());
+                        int checkNetworkId = viewModel.getAssetDefinition(t.getAddress()).getNetworkFromContract(t.getAddress());
                         if (checkNetworkId > 0)
                         {
-                            viewModel.importThroughFeemaster(viewModel.getAssetDefinitionService().getAssetDefinition().getFeemasterAPI());
+                            viewModel.importThroughFeemaster(viewModel.getAssetDefinition(t.getAddress()).getFeemasterAPI());
                         }
                         else
                         {

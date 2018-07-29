@@ -108,7 +108,7 @@ public class TicketSaleAdapter extends TicketAdapter {
             if (v.compareTo(BigInteger.ZERO) == 0) continue;
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
-            NonFungibleToken nft = assetService.getNonFungibleToken(v);
+            NonFungibleToken nft = assetService.getNonFungibleToken(t.getAddress(), v);
             e.ticketNumber = nft.getAttribute("numero").value.intValue();
             e.category = (short)nft.getAttribute("category").value.intValue();
             e.match = (short)nft.getAttribute("match").value.intValue();

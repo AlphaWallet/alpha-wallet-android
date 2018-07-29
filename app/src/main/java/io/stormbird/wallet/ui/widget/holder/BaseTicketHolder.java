@@ -55,6 +55,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
         this.thisData = data;
+
         if (data.tokenIds.size() > 0)
         {
             ticket.displayTicketHolder(data, activityView, assetService, getContext());

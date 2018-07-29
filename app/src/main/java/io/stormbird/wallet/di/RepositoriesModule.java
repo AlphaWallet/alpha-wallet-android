@@ -168,8 +168,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AssetDefinitionService provideAssetDefinitionService(Context ctx) {
-		return new AssetDefinitionService(ctx);
+	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx) {
+		return new AssetDefinitionService(okHttpClient, ctx);
 	}
 
 	@Singleton

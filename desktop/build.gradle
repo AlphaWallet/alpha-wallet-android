@@ -8,7 +8,7 @@ dependencies {
 sourceSets {
     main {
         resources {
-            srcDirs "../app/src/main/assets/"
+            srcDirs "../contracts"
         }
     }
 }

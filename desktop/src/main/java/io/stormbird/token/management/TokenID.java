@@ -32,6 +32,7 @@ public class TokenID extends JFrame{
 
             contentPane = new JPanel();
             addComponentsToPane(contentPane);
+            contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
             this.setContentPane(contentPane);
             this.setTitle("TokenID Generator");
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

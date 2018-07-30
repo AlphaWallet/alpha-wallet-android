@@ -7,6 +7,7 @@ import io.stormbird.token.tools.TokenDefinition;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class TokenID extends JFrame{
             this.setContentPane(contentPane);
             this.setTitle("TokenID Generator");
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            this.setLocationByPlatform(true);
             this.setResizable(true);
             this.pack();
         } catch (IOException | IllegalArgumentException | SAXException e){
@@ -48,30 +50,44 @@ public class TokenID extends JFrame{
     }
 
     private  void addComponentsToPane(final Container pane){
+        int gridy=0;
         GridBagConstraints col1Constraints = new GridBagConstraints();
-        col1Constraints.fill = GridBagConstraints.HORIZONTAL;
-        col1Constraints.weightx=5.0;
+        col1Constraints.fill = GridBagConstraints.BOTH;
+        col1Constraints.anchor=GridBagConstraints.CENTER;
+        col1Constraints.ipadx=30;col1Constraints.ipady=30;
+        col1Constraints.weightx=0.3;
+        col1Constraints.gridwidth=1;
         col1Constraints.gridx = 0;
-        col1Constraints.gridy = 0;
+        col1Constraints.gridy = gridy;
         GridBagConstraints col2Constraints = new GridBagConstraints();
-        col2Constraints.fill = GridBagConstraints.HORIZONTAL;
-        col2Constraints.weightx=5.0;
+        col2Constraints.fill = GridBagConstraints.BOTH;
+        col2Constraints.anchor=GridBagConstraints.CENTER;
+        col2Constraints.ipadx=30;col2Constraints.ipady=30;
+        col2Constraints.weightx=0.3;
+        col2Constraints.gridwidth=1;
         col2Constraints.gridx = 1;
-        col2Constraints.gridy = 0;
+        col2Constraints.gridy = gridy;
         GridBagConstraints col3Constraints = new GridBagConstraints();
-        col3Constraints.fill = GridBagConstraints.HORIZONTAL;
-        col3Constraints.weightx = 35.0;
+        col3Constraints.fill = GridBagConstraints.BOTH;
+        col3Constraints.anchor=GridBagConstraints.CENTER;
+        col3Constraints.ipadx=25;col3Constraints.ipady=25;
+        col3Constraints.weightx = 0.5;
+        col3Constraints.gridwidth=1;
         col3Constraints.gridx = 2;
-        col3Constraints.gridy = 0;
+        col3Constraints.gridy = gridy;
         GridBagConstraints col4Constraints = new GridBagConstraints();
-        col4Constraints.fill = GridBagConstraints.HORIZONTAL;
-        col4Constraints.weightx = 35.0;
+        col4Constraints.fill = GridBagConstraints.BOTH;
+        col4Constraints.anchor=GridBagConstraints.CENTER;
+        col4Constraints.ipadx=25;col4Constraints.ipady=25;
+        col4Constraints.weightx = 0.5;
+        col4Constraints.gridwidth=1;
         col4Constraints.gridx = 3;
-        col4Constraints.gridy = 0;
+        col4Constraints.gridy = gridy;
 
         // render column title
         JPanel controlsPane = new JPanel(); //control panel to hold token attribute UI components
-        controlsPane.setLayout(new GridLayout(0,4));    //full column: attribute name|type|value|encode value
+        controlsPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+        controlsPane.setLayout(new GridBagLayout());    //full column: attribute name|type|value|encode value
         final JLabel label1 = new JLabel();
         label1.setText("Attribute Name");
         controlsPane.add(label1,col1Constraints);
@@ -87,6 +103,8 @@ public class TokenID extends JFrame{
 
         // render dropdown list
         for(ComboBoxDataModel comboBoxDataModel : tokenViewModel.comboBoxDataModelList){
+            gridy+=1;
+            col1Constraints.gridy=col2Constraints.gridy=col3Constraints.gridy=col4Constraints.gridy=gridy;
             JLabel labelAttrName = new JLabel();
             labelAttrName.setText(comboBoxDataModel.name);
             controlsPane.add(labelAttrName,col1Constraints);
@@ -115,6 +133,8 @@ public class TokenID extends JFrame{
             });
         }
         for(TextFieldDataModel model : tokenViewModel.textFieldDataModelList){
+            gridy+=1;
+            col1Constraints.gridy=col2Constraints.gridy=col3Constraints.gridy=col4Constraints.gridy=gridy;
             JLabel labelAttrName = new JLabel();
             labelAttrName.setText(model.name);
             controlsPane.add(labelAttrName,col1Constraints);
@@ -159,15 +179,21 @@ public class TokenID extends JFrame{
 
 //        JPanel bottomPane = new JPanel();
 //        bottomPane.setLayout(new GridLayout(0,2));
-        controlsPane.add(new JSeparator());
-        controlsPane.add(new JSeparator());
-        controlsPane.add(new JSeparator());
-        controlsPane.add(new JSeparator());
+        gridy+=1;
+        GridBagConstraints colConstraints = new GridBagConstraints();
+        colConstraints.fill = GridBagConstraints.HORIZONTAL;
+        colConstraints.weightx = 0.5;
+        colConstraints.gridwidth=1;
+        colConstraints.gridx = 3;
+        colConstraints.gridy = gridy;
+        controlsPane.add(new JSeparator(),colConstraints);
+        gridy+=1;
+        col1Constraints.gridy=col2Constraints.gridy=col3Constraints.gridy=col4Constraints.gridy=gridy;
         JLabel labelTokenID = new JLabel();
         labelTokenID.setText("TokenID");
         controlsPane.add(labelTokenID, col1Constraints);
-        controlsPane.add(new JLabel(" "));
-        controlsPane.add(new JLabel(" "));
+//        controlsPane.add(new JLabel(" "));
+//        controlsPane.add(new JLabel(" "));
         fieldTokenID = new JTextField();
         fieldTokenID.setEditable(false);
         fieldTokenID.setEnabled(true);
@@ -176,7 +202,7 @@ public class TokenID extends JFrame{
 //        constraints.gridwidth=2;
 //        constraints.gridx = 2;
 //        constraints.gridy = 0;
-        controlsPane.add(fieldTokenID);
+        controlsPane.add(fieldTokenID,col4Constraints);
         pane.add(controlsPane,BorderLayout.CENTER);
         //pane.add(new JSeparator(), BorderLayout.CENTER);
         //pane.add(bottomPane,BorderLayout.SOUTH);

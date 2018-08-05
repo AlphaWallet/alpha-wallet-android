@@ -2,8 +2,17 @@ apply plugin: 'application'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(path: ':lib')
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "../contracts"
+        }
+    }
 }
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
-mainClassName = "io.stormbird.token.management.LoginPopup"
+mainClassName = "io.stormbird.token.management.TokenID"

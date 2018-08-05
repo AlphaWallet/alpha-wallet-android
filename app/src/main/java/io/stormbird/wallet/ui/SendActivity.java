@@ -248,15 +248,17 @@ public class SendActivity extends BaseActivity {
 
         toAddressError.setVisibility(View.GONE);
         final String to = toAddressEditText.getText().toString();
-        if (!isAddressValid(to)) {
+        if (!isAddressValid(to))
+        {
             toAddressError.setVisibility(View.VISIBLE);
             toAddressError.setText(getString(R.string.error_invalid_address));
             isValid = false;
         }
 
-        if (isValid) {
+        if (isValid)
+        {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amountEditText.getText().toString(), decimals);
-            viewModel.openConfirmation(this, to, amountInSubunits, myAddress, decimals, symbol, sendingTokens);
+            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens);
         }
     }
 

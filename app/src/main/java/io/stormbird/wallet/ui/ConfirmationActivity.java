@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -57,6 +58,8 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView gasPriceText;
     private TextView gasLimitText;
     private TextView networkFeeText;
+    private TextView contractAddrText;
+    private TextView contractAddrLabel;
     private Button sendButton;
 
     private BigInteger amount;
@@ -87,12 +90,9 @@ public class ConfirmationActivity extends BaseActivity {
         gasLimitText = findViewById(R.id.text_gas_limit);
         networkFeeText = findViewById(R.id.text_network_fee);
         sendButton = findViewById(R.id.send_button);
+        contractAddrText = findViewById(R.id.text_contract);
+        contractAddrLabel = findViewById(R.id.label_contract);
         sendButton.setOnClickListener(view -> onSend());
-
-//        systemView = findViewById(R.id.system_view);
-//        systemView.hide();
-//        progressView = findViewById(R.id.progress_view);
-//        progressView.hide();
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
@@ -104,17 +104,24 @@ public class ConfirmationActivity extends BaseActivity {
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         String amountString;
 
+        amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+
         switch (confirmationType) {
             case ETH:
-                amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
                 amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
                 tokenTransfer = false;
                 break;
             case ERC20:
+                contractAddrText.setVisibility(View.VISIBLE);
+                contractAddrLabel.setVisibility(View.VISIBLE);
+                contractAddrText.setText(contractAddress);
                 amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
                 tokenTransfer = true;
                 break;
             case ERC875:
+                contractAddrText.setVisibility(View.VISIBLE);
+                contractAddrLabel.setVisibility(View.VISIBLE);
+                contractAddrText.setText(contractAddress);
                 amountString = tokenList;
                 tokenTransfer = true;
                 break;

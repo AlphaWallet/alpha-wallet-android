@@ -112,6 +112,33 @@
                     android:textIsSelectable="true"
                     android:textSize="14sp" />
 
+                <TextView
+                    android:id="@+id/label_contract"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/label_contract"
+                    android:textAllCaps="true"
+                    android:visibility="gone"
+                    android:textColor="@color/light_gray"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/text_contract"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/background_round_grey"
+                    android:fontFamily="@font/font_semibold"
+                    android:gravity="center"
+                    android:padding="15dp"
+                    android:visibility="gone"
+                    android:textIsSelectable="true"
+                    android:textSize="14sp" />
+
 
                 <LinearLayout
                     android:layout_width="match_parent"

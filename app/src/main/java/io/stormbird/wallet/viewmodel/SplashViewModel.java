@@ -6,23 +6,18 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 
-import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
@@ -189,26 +184,22 @@ public class SplashViewModel extends ViewModel {
                 }, this::onError);
     }
 
-    public void checkVersionUpdate(Context ctx)
+    public void checkVersionUpdate(Context ctx, long updateTime)
     {
         if (!isPlayStoreInstalled(ctx))
         {
             //check the current install version string against the current version on the alphawallet page
             //current version number as string
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-            //pref.edit().putLong("install_time", 1000).apply(); //for testing, you can reset the clock to a time that's before the release on the website
-
-            //get the current install date
-            long currentInstallDate = pref.getLong("install_time", 0);
             int asks = pref.getInt("update_asks", 0);
-            if (currentInstallDate == 0 || asks == 2) // if user cancels update twice stop asking them until the next release
+            if (updateTime == 0 || asks == 2) // if user cancels update twice stop asking them until the next release
             {
                 pref.edit().putInt("update_asks", 0).apply();
                 pref.edit().putLong("install_time", System.currentTimeMillis()).apply();
             }
             else
             {
-                checkWebsiteAPKFileData(currentInstallDate, ctx);
+                checkWebsiteAPKFileData(updateTime, ctx);
             }
         }
     }

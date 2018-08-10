@@ -2,18 +2,8 @@ package io.stormbird.wallet.repository;
 
 import android.util.Log;
 
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenTransaction;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.TransactionsNetworkClientType;
-
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
@@ -24,6 +14,13 @@ import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenTransaction;
+import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AccountKeystoreService;
+import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
@@ -147,12 +144,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
 		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
-		return Single.fromCallable(() -> {
-			EthGetTransactionCount ethGetTransactionCount = web3j
-					.ethGetTransactionCount(from.address, DefaultBlockParameterName.LATEST)
-					.send();
-			return ethGetTransactionCount.getTransactionCount();
-		})
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
 		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
 		.flatMap(signedMessage -> Single.fromCallable( () -> {
 			EthSendTransaction raw = web3j

@@ -14,7 +14,6 @@ public interface EthereumNetworkRepositoryType {
 	NetworkInfo getDefaultNetwork();
 
 	Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
-	void resetCurrentNonce();
 
 	String getActiveRPC();
 	void setActiveRPC(String rpcURL);

@@ -71,7 +71,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	private final PreferenceRepositoryType preferences;
     private final TickerService tickerService;
     private NetworkInfo defaultNetwork;
-    private BigInteger currentNonce = BigInteger.ZERO;
     private String currentActiveRPC;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
 
@@ -107,22 +106,10 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	{
 		return Single.fromCallable(() -> {
 			EthGetTransactionCount ethGetTransactionCount = web3j
-					.ethGetTransactionCount(walletAddress, DefaultBlockParameterName.LATEST)
+					.ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
 					.send();
-			BigInteger receivedNonce = ethGetTransactionCount.getTransactionCount();
-			if (receivedNonce.compareTo(currentNonce) <= 0) //less than or equal to
-			{
-				receivedNonce = currentNonce.add(BigInteger.ONE);
-			}
-			currentNonce = receivedNonce;
-			return receivedNonce;
+			return ethGetTransactionCount.getTransactionCount();
 		});
-	}
-
-	@Override
-	public void resetCurrentNonce()
-	{
-		currentNonce = BigInteger.ZERO;
 	}
 
 	@Override
@@ -144,7 +131,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		}
 	}
 
-	@Override
 	public void setDefaultNetworkInfo(NetworkInfo networkInfo) {
 		defaultNetwork = networkInfo;
 		preferences.setDefaultNetwork(defaultNetwork.name);

@@ -195,7 +195,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.observeOn(Schedulers.io());
     }
 
-	private Single<Transaction[]> fetchAllFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
+	private Single<Transaction[]> fetchAllFromNetwork(NetworkInfo networkInfo, Wallet wallet)
+	{
 		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, 0))
 				.observeOn(Schedulers.io());
 	}

@@ -104,7 +104,6 @@ public class TokenRepository implements TokenRepositoryType {
         network = defaultNetwork;
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
         web3j = Web3jFactory.build(publicNodeService);
-        ethereumNetworkRepository.resetCurrentNonce();
         ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool

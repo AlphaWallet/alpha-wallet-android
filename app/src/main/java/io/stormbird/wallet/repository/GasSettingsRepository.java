@@ -16,8 +16,8 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
-public class GasSettingsRepository implements GasSettingsRepositoryType {
-
+public class GasSettingsRepository implements GasSettingsRepositoryType
+{
     private final EthereumNetworkRepositoryType networkRepository;
     private BigInteger cachedGasPrice;
     private Disposable gasSettingsDisposable;
@@ -36,7 +36,7 @@ public class GasSettingsRepository implements GasSettingsRepositoryType {
 
     private void fetchGasSettings() {
 
-        final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+        final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getActiveRPC()));
 
         try {
             EthGasPrice price = web3j

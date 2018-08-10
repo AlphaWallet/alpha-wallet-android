@@ -9,6 +9,10 @@ public interface EthereumNetworkRepositoryType {
 
 	NetworkInfo getDefaultNetwork();
 
+	String getActiveRPC();
+
+	void setActiveRPC(String rpcURL);
+
 	void setDefaultNetworkInfo(NetworkInfo networkInfo);
 
 	NetworkInfo[] getAvailableNetworkList();

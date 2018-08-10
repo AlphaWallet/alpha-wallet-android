@@ -296,6 +296,7 @@ public class Token implements Parcelable
     {
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
+        if (tokenInfo.name != null && realmToken.getName() == null) return true; //signal to update database if correct name has been fetched (node timeout etc)
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
     }

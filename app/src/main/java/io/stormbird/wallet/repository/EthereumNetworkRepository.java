@@ -2,10 +2,15 @@ package io.stormbird.wallet.repository;
 
 import android.text.TextUtils;
 
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.service.TickerService;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -92,6 +97,19 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	@Override
 	public NetworkInfo getDefaultNetwork() {
 		return defaultNetwork;
+	}
+
+	// fetches the last transaction nonce; if it's identical to the last used one then increment by one
+	// to ensure we don't get transaction replacement
+	@Override
+	public Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress)
+	{
+		return Single.fromCallable(() -> {
+			EthGetTransactionCount ethGetTransactionCount = web3j
+					.ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
+					.send();
+			return ethGetTransactionCount.getTransactionCount();
+		});
 	}
 
 	@Override

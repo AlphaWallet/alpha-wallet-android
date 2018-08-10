@@ -421,6 +421,12 @@ public class TokensRealmSource implements TokenLocalSource {
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 token.setRealmBalance(realmToken);
+                if (token.tokenInfo.name != null)
+                {
+                    realmToken.setName(token.tokenInfo.name);
+                    realmToken.setSymbol(token.tokenInfo.symbol);
+                    realmToken.setDecimals(token.tokenInfo.decimals);
+                }
                 realmToken.setNullCheckCount(0);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();

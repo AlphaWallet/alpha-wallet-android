@@ -72,6 +72,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
     private final TickerService tickerService;
     private NetworkInfo defaultNetwork;
     private BigInteger currentNonce = BigInteger.ZERO;
+    private String currentActiveRPC;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
 
     public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService) {
@@ -122,6 +123,25 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public void resetCurrentNonce()
 	{
 		currentNonce = BigInteger.ZERO;
+	}
+
+	@Override
+	public void setActiveRPC(String rpcURL)
+	{
+		currentActiveRPC = rpcURL;
+	}
+
+	@Override
+	public String getActiveRPC()
+	{
+		if (currentActiveRPC != null)
+		{
+			return currentActiveRPC;
+		}
+		else
+		{
+			return defaultNetwork.rpcServerUrl;
+		}
 	}
 
 	@Override

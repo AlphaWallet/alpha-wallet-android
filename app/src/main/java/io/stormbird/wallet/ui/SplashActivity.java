@@ -1,9 +1,15 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.multidex.MultiDex;
 
 import javax.inject.Inject;
 
@@ -24,6 +30,12 @@ public class SplashActivity extends BaseActivity {
     SplashViewModel splashViewModel;
 
     private String importData;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +64,9 @@ public class SplashActivity extends BaseActivity {
         splashViewModel.createWallet().observe(this, this::onWalletCreate);
         splashViewModel.setLocale(getApplicationContext());
 
-        splashViewModel.checkVersionUpdate(getBaseContext());
+        long getAppUpdateTime = getAppLastUpdateTime();
+
+        splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
         splashViewModel.startOverridesChain();
     }
 
@@ -62,6 +76,29 @@ public class SplashActivity extends BaseActivity {
         Wallet[] wallets = new Wallet[1];
         wallets[0] = wallet;
         onWallets(wallets);
+    }
+
+    private long getAppLastUpdateTime()
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        long currentInstallDate = pref.getLong("install_time", 0);
+
+        if (currentInstallDate == 0)
+        {
+            pref.edit().putLong("install_time", System.currentTimeMillis()).apply();
+        }
+
+        try
+        {
+            PackageInfo info =  getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
+            if (info.lastUpdateTime > currentInstallDate) currentInstallDate = info.lastUpdateTime;
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
+        return currentInstallDate;
     }
 
     private void onWallets(Wallet[] wallets) {

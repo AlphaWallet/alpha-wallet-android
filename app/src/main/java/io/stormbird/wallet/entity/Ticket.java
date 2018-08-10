@@ -61,21 +61,29 @@ public class Ticket extends Token implements Parcelable
 
     private Ticket(Parcel in) {
         super(in);
-        Object[] readObjArray = in.readArray(Object.class.getClassLoader());
-        Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
         balanceArray = new ArrayList<>();
         burnIndices = new ArrayList<Integer>();
-        for (Object o : readObjArray)
+        int objSize = in.readInt();
+        int burnSize = in.readInt();
+        if (objSize > 0)
         {
-            BigInteger val = (BigInteger)o;
-            balanceArray.add(val);
+            Object[] readObjArray = in.readArray(Object.class.getClassLoader());
+            for (Object o : readObjArray)
+            {
+                BigInteger val = (BigInteger)o;
+                balanceArray.add(val);
+            }
         }
 
-        //check to see if burn notice is needed
-        for (Object o : readBurnArray)
+        if (burnSize > 0)
         {
-            Integer val = (Integer)o;
-            burnIndices.add(val);
+            Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
+            //check to see if burn notice is needed
+            for (Object o : readBurnArray)
+            {
+                Integer val = (Integer)o;
+                burnIndices.add(val);
+            }
         }
     }
 
@@ -110,8 +118,10 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeArray(balanceArray.toArray());
-        dest.writeArray(burnIndices.toArray());
+        dest.writeInt(balanceArray.size());
+        dest.writeInt(burnIndices.size());
+        if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
+        if (burnIndices.size() > 0) dest.writeArray(burnIndices.toArray());
     }
 
     /**

@@ -104,6 +104,7 @@ public class TokenRepository implements TokenRepositoryType {
         network = defaultNetwork;
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
         web3j = Web3jFactory.build(publicNodeService);
+        ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
         Disposable d = getWorkHash()
@@ -131,6 +132,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(network.backupNodeUrl);
         web3j = Web3jFactory.build(publicNodeService);
+        ethereumNetworkRepository.setActiveRPC(network.backupNodeUrl);
     }
 
     private Single<BigInteger> getWorkHash()

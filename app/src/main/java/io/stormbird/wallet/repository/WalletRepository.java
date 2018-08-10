@@ -107,7 +107,7 @@ public class WalletRepository implements WalletRepositoryType
 			//return BigDecimal.valueOf(15.995).movePointRight(18);
 			try {
 				return new BigDecimal(Web3jFactory
-						.build(new org.web3j.protocol.http.HttpService(networkRepository.getDefaultNetwork().rpcServerUrl))
+						.build(new org.web3j.protocol.http.HttpService(networkRepository.getActiveRPC()))
 						.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
 						.send()
 						.getBalance());

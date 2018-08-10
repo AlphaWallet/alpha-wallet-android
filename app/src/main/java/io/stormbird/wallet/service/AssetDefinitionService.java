@@ -108,6 +108,19 @@ public class AssetDefinitionService
         loadExternalContracts();
     }
 
+    public boolean hasDefinition(String contractAddress)
+    {
+        TokenDefinition d = getAssetDefinition(contractAddress.toLowerCase());
+        if (d != assetDefinition)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     /**
      * Get asset definition given contract address
      *
@@ -167,9 +180,10 @@ public class AssetDefinitionService
         //Note we check that the contract is actually specified in the XML - if we're just using the XML
         //as a default then we will just get default 'ethereum' issuer.
         TokenDefinition definition = getAssetDefinition(contractAddress);
-        if (definition != null && definition.getNetworkFromContract(contractAddress) == 1)
+
+        if (definition != null && definition.addresses.containsKey(contractAddress))
         {
-            return assetDefinition.getKeyName();
+            return definition.getKeyName();
         }
         else
         {

@@ -225,7 +225,8 @@ public class SendActivity extends BaseActivity {
         });
     }
 
-    private void copyAddress() {
+    private void copyAddress()
+    {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(KEY_ADDRESS, wallet.address);
         if (clipboard != null) {
@@ -262,7 +263,8 @@ public class SendActivity extends BaseActivity {
         }
     }
 
-    private void onBack() {
+    private void onBack()
+    {
         if (ethDetailLayout.getVisibility() == View.VISIBLE)
         {
             finish();
@@ -270,7 +272,8 @@ public class SendActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }

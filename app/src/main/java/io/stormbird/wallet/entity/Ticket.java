@@ -5,6 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.web3j.abi.datatypes.generated.Uint16;
@@ -506,6 +508,10 @@ public class Ticket extends Token implements Parcelable
         TextView cat = activity.findViewById(R.id.cattext);
         TextView details = activity.findViewById(R.id.ticket_details);
         TextView ticketTime = activity.findViewById(R.id.time);
+        ImageView ticketIcon = activity.findViewById(R.id.ticketicon);
+        ImageView catIcon = activity.findViewById(R.id.caticon);
+        LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
+        LinearLayout catLayout = activity.findViewById(R.id.catlayout);
 
         int numberOfTickets = range.tokenIds.size();
         if (numberOfTickets > 0)
@@ -521,11 +527,30 @@ public class Ticket extends Token implements Parcelable
             name.setText(nameStr);
             amount.setText(seatCount);
             venue.setText(venueStr);
-            ticketRange.setText(
-                    nonFungibleToken.getAttribute("countryA").text + "-" +
-                            nonFungibleToken.getAttribute("countryB").text
-            );
-            cat.setText("M" + nonFungibleToken.getAttribute("match").text);
+
+            String countryA = nonFungibleToken.getAttribute("countryA").text;
+            String countryB = nonFungibleToken.getAttribute("countryB").text;
+
+            if (countryA.charAt(0) == 0 && countryB.charAt(0) == 0)
+            {
+                ticketLayout.setVisibility(View.GONE);
+            }
+            else
+            {
+                ticketRange.setText(countryA + "-" + countryB);
+            }
+
+            String catTxt = nonFungibleToken.getAttribute("match").text;
+
+            if (catTxt.equals("0"))
+            {
+                catLayout.setVisibility(View.GONE);
+            }
+            else
+            {
+                cat.setText("M" + catTxt);
+            }
+
             details.setText(
                     nonFungibleToken.getAttribute("locality").name + ": " +
                             nonFungibleToken.getAttribute("locality").text

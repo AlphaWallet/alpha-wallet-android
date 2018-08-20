@@ -22,7 +22,7 @@ public class TokenDefinitionTest {
             // time: 5B23D470, VIE vs SIN match: 02, category 02
             "01015B2282F056494553494E0202CB53", "01015B2282F056494553494E0202CB54"
     ).map(hexstr -> new BigInteger(hexstr, 16));
-    File file = new File("../contracts/TicketingContract.xml");
+    File file = new File("contracts/TicketingContract.xml");
 
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {

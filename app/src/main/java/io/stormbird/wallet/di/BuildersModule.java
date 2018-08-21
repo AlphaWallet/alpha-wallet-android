@@ -32,6 +32,7 @@ import io.stormbird.wallet.ui.WalletsActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
+import io.stormbird.wallet.ui.DappBrowserFragment;
 
 @Module
 public abstract class BuildersModule {
@@ -148,4 +149,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = HelpModule.class)
 	abstract HelpActivity bindHelpActivity();
+
+	@FragmentScope
+	@ContributesAndroidInjector(modules = DappBrowserModule.class)
+	abstract DappBrowserFragment bindDappBrowserFragment();
 }

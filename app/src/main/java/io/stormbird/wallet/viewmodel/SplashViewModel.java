@@ -265,7 +265,7 @@ public class SplashViewModel extends ViewModel {
                 String redirectLocation = connection.getHeaderField("Location");
                 if (redirectLocation == null)
                 {
-                    fileData.fileDate = connection.getDate(); //long lastModified = connection.getLastModified();
+                    fileData.fileDate = connection.getLastModified();//connection.getDate(); //long lastModified = connection.getLastModified();
                     fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
                     break;
                 }

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class ZonedDateTime {
     private long time;
     private TimeZone timezone;
-    private final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
+    //private final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
 
 
     /* For anyone deleting this class to use Java8 ZonedDateTime:
@@ -38,7 +38,8 @@ public class ZonedDateTime {
     }
 
     /* Creating ZonedDateTime from GeneralizedTime */
-    public ZonedDateTime(String time) throws ParseException {
+    public ZonedDateTime(String time) throws ParseException, IllegalArgumentException
+    {
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMddHHmmssZZZZ");
         Pattern p = Pattern.compile("(\\+\\d{4})");
         Matcher m = p.matcher(time);
@@ -76,9 +77,9 @@ public class ZonedDateTime {
         return Integer.valueOf(format(format));
     }
 
-    public String toString() {
+    /*public String toString() {
         return format(ISO8601);
-    }
+    }*/
 
     public String format(DateFormat format) {
         format.setTimeZone(timezone);

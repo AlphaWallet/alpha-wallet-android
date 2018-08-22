@@ -18,7 +18,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -554,27 +556,43 @@ public class Ticket extends Token implements Parcelable
                             nonFungibleToken.getAttribute("locality").text
             );
 
+            long eventTime = nonFungibleToken.getAttribute("time").value.longValue();
+            String eventTimeStr = nonFungibleToken.getAttribute("time").text;
+
             try
             {
-                String eventTime = nonFungibleToken.getAttribute("time").text;
-
-                if (eventTime != null)
+                if (eventTimeStr != null)
                 {
-                    ZonedDateTime datetime = new ZonedDateTime(eventTime);
+                    ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
                     ticketDate.setText(datetime.format(date));
                     ticketTime.setText(datetime.format(time));
                 }
                 else
                 {
-                    Date current = new Date();
-                    ticketDate.setText(date.format(current));
-                    ticketTime.setText(time.format(current));
+                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
                 }
             }
-            catch (ParseException e)
+            catch (ParseException | IllegalArgumentException e)
             {
-                ticketDate.setText("N.A.");
+                setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
             }
+        }
+    }
+
+    private void setDateFromTokenID(TextView ticketDate, TextView ticketTime, long eventTime, DateFormat date, DateFormat time)
+    {
+        if (eventTime > 0)
+        {
+            Calendar calendar = GregorianCalendar.getInstance(); //UTC time
+            calendar.setTimeInMillis( eventTime*1000 );
+            date.setTimeZone(calendar.getTimeZone());
+            time.setTimeZone(calendar.getTimeZone());
+            ticketDate.setText(date.format(calendar.getTime()));
+            ticketTime.setText(time.format(calendar.getTime()));
+        }
+        else
+        {
+            ticketDate.setText("N.A.");
         }
     }
 

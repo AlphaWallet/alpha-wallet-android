@@ -18,11 +18,19 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
+
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
@@ -38,9 +46,12 @@ import io.stormbird.wallet.web3.entity.Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+
 
 public class DappBrowserFragment extends Fragment implements
-        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener {
+        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener
+{
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     private static final String XCONTRACT_URL = "https://xcontract.herokuapp.com/sign";
 
@@ -133,19 +144,71 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     @Override
-    public void onSignMessage(Message<String> message) {
+    public void onSignMessage(Message<String> message)
+    {
+        DAppFunction dAppFunction = new DAppFunction()
+        {
+            @Override
+            public void DAppError(Throwable error, Message<String> message)
+            {
+                web3.onSignCancel(message);
+                dialog.dismiss();
+            }
+
+            @Override
+            public void DAppReturn(byte[] data, Message<String> message)
+            {
+                String signHex = Numeric.toHexString(data);
+                web3.onSignMessageSuccessful(message, signHex);
+
+                //TODO: Justin - here's how to to verify - which you should hook it's "web3Handler.verify(web3, message, signature)"
+                //TODO: which returns an address. Ideally we edit the javascript to popup 'success' if the address returned matches the wallet address
+                System.out.println(checkSignature(message, signHex));
+
+                dialog.dismiss();
+            }
+        };
+
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
-            String signHex = "signed message"; //TODO: Sign the message
-            web3.onSignMessageSuccessful(message, signHex);
-            dialog.dismiss();
+            viewModel.signMessage(message.value, dAppFunction, message);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(message);
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    private String checkSignature(Message<String> message, String signHex)
+    {
+        byte[] messageCheck = message.value.getBytes();
+        //if we're passed a hex then sign it correctly
+        if (message.value.substring(0,2).equals("0x"))
+        {
+            messageCheck = Numeric.hexStringToByteArray(message.value);
+        }
+
+        //convert to signature
+        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
+        String recoveredAddress = "";
+
+        try
+        {
+            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
+            recoveredAddress = Keys.getAddress(recoveredKey);
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+        }
+        catch (SignatureException e)
+        {
+            e.printStackTrace();
+        }
+
+        return recoveredAddress;
     }
 
     @Override

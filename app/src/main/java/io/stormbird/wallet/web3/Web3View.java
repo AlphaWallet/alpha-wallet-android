@@ -36,6 +36,8 @@ public class Web3View extends WebView {
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
     @Nullable
     private OnSignTypedMessageListener onSignTypedMessageListener;
+    @Nullable
+    private OnVerifyListener onVerifyListener;
     private JsInjectorClient jsInjectorClient;
     private Web3ViewClient webViewClient;
 

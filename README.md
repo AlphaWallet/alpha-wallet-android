@@ -3,9 +3,7 @@
 [![Build Status](https://travis-ci.com/alpha-wallet/alpha-wallet.svg?branch=master)](https://travis-ci.com/alpha-wallet/alpha-wallet.svg?branch=master)
 [![License](https://img.shields.io/badge/license-GPL3-green.svg?style=flat)](https://github.com/fastlane/fastlane/blob/master/LICENSE)
 
-[<img src="https://github.com/alpha-wallet/alpha-wallet-ios/blob/master/resources/screens.png">](https://awallet.io/)
-
-[<img src=/images/googleplay.png height="88">](https://play.google.com/store/apps/details?id=io.stormbird.wallet&hl=en_US)
+[<img src=dmz/src/main/resources/static/images/googleplay.png height="88">](https://play.google.com/store/apps/details?id=io.stormbird.wallet&hl=en_US)
 
 ## Getting Started
 

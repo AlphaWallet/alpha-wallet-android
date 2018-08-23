@@ -182,8 +182,10 @@ public class AppSiteController {
             System.exit(255);
         }
 
-        try (Stream<Path> dirStream = Files.list(repoDir)) {
+        try (Stream<Path> dirStream = Files.walk(repoDir)) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+                    .filter(Files::isRegularFile)
+                    .filter(Files::isReadable)
                     .map(path -> getContractAddresses(path))
                     .flatMap(Collection::stream)
                     .collect(Collectors.toMap(

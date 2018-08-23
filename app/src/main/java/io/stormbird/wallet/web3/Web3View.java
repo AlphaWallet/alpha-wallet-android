@@ -42,11 +42,13 @@ public class Web3View extends WebView {
     private Web3ViewClient webViewClient;
 
     public Web3View(@NonNull Context context) {
-        this(context, null);
+        super(context);
+        init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
+        init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -69,7 +71,7 @@ public class Web3View extends WebView {
     private void init() {
         jsInjectorClient = new JsInjectorClient(getContext());
         webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
-        WebSettings webSettings = super.getSettings();
+        WebSettings webSettings = getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setBuiltInZoomControls(true);
@@ -77,6 +79,10 @@ public class Web3View extends WebView {
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setDomStorageEnabled(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,
@@ -87,10 +93,10 @@ public class Web3View extends WebView {
         super.setWebViewClient(webViewClient);
     }
 
-    @Override
-    public WebSettings getSettings() {
-        return new WrapWebSettings(super.getSettings());
-    }
+//    @Override
+//    public WebSettings getSettings() {
+//        return new WrapWebSettings(super.getSettings());
+//    }
 
 
     public void setWalletAddress(@NonNull Address address) {
@@ -244,10 +250,7 @@ public class Web3View extends WebView {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            WebResourceResponse response = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                response = externalClient.shouldInterceptRequest(view, request);
-            }
+            WebResourceResponse response = externalClient.shouldInterceptRequest(view, request);
             if (response != null) {
                 try {
                     InputStream in = response.getData();

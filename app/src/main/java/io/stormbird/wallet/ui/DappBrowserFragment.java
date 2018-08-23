@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,8 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -50,8 +53,7 @@ import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 
 public class DappBrowserFragment extends Fragment implements
-        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener
-{
+        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener {
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     private static final String XCONTRACT_URL = "https://xcontract.herokuapp.com/sign";
 
@@ -60,7 +62,7 @@ public class DappBrowserFragment extends Fragment implements
     private DappBrowserViewModel viewModel;
 
     private Web3View web3;
-    private EditText url;
+    private EditText urlText;
     private ProgressBar progressBar;
     private Wallet wallet;
     private NetworkInfo networkInfo;
@@ -71,40 +73,47 @@ public class DappBrowserFragment extends Fragment implements
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_webview, container, false);
-        web3 = view.findViewById(R.id.web3view);
-        progressBar = view.findViewById(R.id.progressBar);
-        url = view.findViewById(R.id.url);
-
-        viewModel = ViewModelProviders.of(this, dappBrowserViewModelFactory)
-                .get(DappBrowserViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-
+        initView(view);
+        initViewModel();
         return view;
     }
 
-    private void onDefaultWallet(Wallet wallet) {
-        this.wallet = wallet;
-        init();
-    }
+    private void initView(View view) {
+        web3 = view.findViewById(R.id.web3view);
+        progressBar = view.findViewById(R.id.progressBar);
+        urlText = view.findViewById(R.id.url);
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        this.networkInfo = networkInfo;
-    }
-
-    private void init() {
-        url.setText(XCONTRACT_URL);
-        url.setOnEditorActionListener((v, actionId, event) -> {
+        urlText.setText(XCONTRACT_URL);
+        urlText.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                web3.loadUrl(url.getText().toString());
+                web3.loadUrl(urlText.getText().toString());
                 web3.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(urlText.getWindowToken(), 0);
                 handled = true;
             }
             return handled;
         });
-        web3.loadUrl(url.getText().toString());
+    }
+
+    private void initViewModel() {
+        viewModel = ViewModelProviders.of(this, dappBrowserViewModelFactory)
+                .get(DappBrowserViewModel.class);
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+    }
+
+    private void onDefaultWallet(Wallet wallet) {
+        this.wallet = wallet;
         setupWeb3();
+
+        // Default to XContract
+        web3.loadUrl(XCONTRACT_URL);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        this.networkInfo = networkInfo;
     }
 
     private void setupWeb3() {
@@ -114,6 +123,7 @@ public class DappBrowserFragment extends Fragment implements
         web3.setChainId(1);
         web3.setRpcUrl(ETH_RPC_URL);
         web3.setWalletAddress(new Address(wallet.address));
+
         web3.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView webview, int newProgress) {
@@ -131,6 +141,14 @@ public class DappBrowserFragment extends Fragment implements
             }
         });
 
+        web3.setWebViewClient(new WebViewClient(){
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                urlText.setText(url);
+                return false;
+            }
+        });
+
         web3.setOnSignMessageListener(this);
         web3.setOnSignPersonalMessageListener(this);
         web3.setOnSignTransactionListener(this);
@@ -144,20 +162,16 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     @Override
-    public void onSignMessage(Message<String> message)
-    {
-        DAppFunction dAppFunction = new DAppFunction()
-        {
+    public void onSignMessage(Message<String> message) {
+        DAppFunction dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message)
-            {
+            public void DAppError(Throwable error, Message<String> message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
 
             @Override
-            public void DAppReturn(byte[] data, Message<String> message)
-            {
+            public void DAppReturn(byte[] data, Message<String> message) {
                 String signHex = Numeric.toHexString(data);
                 web3.onSignMessageSuccessful(message, signHex);
 
@@ -181,12 +195,10 @@ public class DappBrowserFragment extends Fragment implements
         dialog.show();
     }
 
-    private String checkSignature(Message<String> message, String signHex)
-    {
+    private String checkSignature(Message<String> message, String signHex) {
         byte[] messageCheck = message.value.getBytes();
         //if we're passed a hex then sign it correctly
-        if (message.value.substring(0,2).equals("0x"))
-        {
+        if (message.value.substring(0, 2).equals("0x")) {
             messageCheck = Numeric.hexStringToByteArray(message.value);
         }
 
@@ -194,17 +206,12 @@ public class DappBrowserFragment extends Fragment implements
         Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
         String recoveredAddress = "";
 
-        try
-        {
+        try {
             BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
             recoveredAddress = Keys.getAddress(recoveredKey);
-        }
-        catch (SecurityException e)
-        {
+        } catch (SecurityException e) {
             e.printStackTrace();
-        }
-        catch (SignatureException e)
-        {
+        } catch (SignatureException e) {
             e.printStackTrace();
         }
 

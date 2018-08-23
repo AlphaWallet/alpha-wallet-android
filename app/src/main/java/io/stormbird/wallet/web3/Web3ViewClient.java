@@ -113,6 +113,8 @@ public class Web3ViewClient extends WebViewClient {
         }
         if (response == null || response.isRedirect) {
             return null;
+        } else if (TextUtils.isEmpty(response.data)){
+            return null;
         } else {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(response.data.getBytes());
             WebResourceResponse webResourceResponse = new WebResourceResponse(

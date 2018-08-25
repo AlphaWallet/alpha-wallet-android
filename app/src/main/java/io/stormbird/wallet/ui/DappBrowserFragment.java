@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -178,6 +179,7 @@ public class DappBrowserFragment extends Fragment implements
             @Override
             public void DAppReturn(byte[] data, Message<String> message) {
                 String signHex = Numeric.toHexString(data);
+                Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignMessageSuccessful(message, signHex);
 
                 //TODO: Justin - here's how to to verify - which you should hook it's "web3Handler.verify(web3, message, signature)"
@@ -208,6 +210,7 @@ public class DappBrowserFragment extends Fragment implements
         Log.d(TAG, "signHex: " + signHex);
         Log.d(TAG, "verification address: " + checkSignature(message, signHex));
         Log.d(TAG, "address: " + wallet.address);
+        message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
         StringBuilder recoveredAddress = new StringBuilder("0x");
         recoveredAddress.append(checkSignature(message, signHex));
 

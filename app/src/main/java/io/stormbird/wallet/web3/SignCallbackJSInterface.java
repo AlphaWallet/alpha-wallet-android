@@ -9,11 +9,11 @@ import com.google.gson.Gson;
 
 import java.math.BigInteger;
 
+import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
-import io.stormbird.wallet.util.Hex;
 
 public class SignCallbackJSInterface {
 
@@ -26,18 +26,22 @@ public class SignCallbackJSInterface {
     private final OnSignPersonalMessageListener onSignPersonalMessageListener;
     @NonNull
     private final OnSignTypedMessageListener onSignTypedMessageListener;
+    @NonNull
+    private final OnVerifyListener onVerifyListener;
 
     public SignCallbackJSInterface(
             WebView webView,
             @NonNull OnSignTransactionListener onSignTransactionListener,
             @NonNull OnSignMessageListener onSignMessageListener,
             @NonNull OnSignPersonalMessageListener onSignPersonalMessageListener,
-            @NonNull OnSignTypedMessageListener onSignTypedMessageListener) {
+            @NonNull OnSignTypedMessageListener onSignTypedMessageListener,
+            @NonNull OnVerifyListener onVerifyListener) {
         this.webView = webView;
         this.onSignTransactionListener = onSignTransactionListener;
         this.onSignMessageListener = onSignMessageListener;
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
         this.onSignTypedMessageListener = onSignTypedMessageListener;
+        this.onVerifyListener = onVerifyListener;
     }
 
     @JavascriptInterface
@@ -83,6 +87,11 @@ public class SignCallbackJSInterface {
             }
             onSignTypedMessageListener.onSignTypedMessage(new Message<>(typedData, getUrl(), callbackId));
         });
+    }
+
+    @JavascriptInterface
+    public void verify(String message, String signHex) {
+        onVerifyListener.onVerify(message, signHex);
     }
 
     private String getUrl() {

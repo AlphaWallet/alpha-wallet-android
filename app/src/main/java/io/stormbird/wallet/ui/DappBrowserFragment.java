@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,12 +37,14 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
 import io.stormbird.wallet.web3.OnSignMessageListener;
 import io.stormbird.wallet.web3.OnSignPersonalMessageListener;
 import io.stormbird.wallet.web3.OnSignTransactionListener;
 import io.stormbird.wallet.web3.OnSignTypedMessageListener;
+import io.stormbird.wallet.web3.OnVerifyListener;
 import io.stormbird.wallet.web3.Web3View;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
@@ -53,7 +56,8 @@ import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 
 public class DappBrowserFragment extends Fragment implements
-        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener {
+        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener, OnVerifyListener {
+    private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     private static final String XCONTRACT_URL = "https://xcontract.herokuapp.com/sign";
 
@@ -141,7 +145,7 @@ public class DappBrowserFragment extends Fragment implements
             }
         });
 
-        web3.setWebViewClient(new WebViewClient(){
+        web3.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 urlText.setText(url);
@@ -153,6 +157,7 @@ public class DappBrowserFragment extends Fragment implements
         web3.setOnSignPersonalMessageListener(this);
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
+        web3.setOnVerifyListener(this);
     }
 
     @Override
@@ -177,6 +182,7 @@ public class DappBrowserFragment extends Fragment implements
 
                 //TODO: Justin - here's how to to verify - which you should hook it's "web3Handler.verify(web3, message, signature)"
                 //TODO: which returns an address. Ideally we edit the javascript to popup 'success' if the address returned matches the wallet address
+
                 System.out.println(checkSignature(message, signHex));
 
                 dialog.dismiss();
@@ -186,6 +192,7 @@ public class DappBrowserFragment extends Fragment implements
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
+
             viewModel.signMessage(message.value, dAppFunction, message);
         });
         dialog.setOnRejectListener(v -> {
@@ -195,27 +202,23 @@ public class DappBrowserFragment extends Fragment implements
         dialog.show();
     }
 
-    private String checkSignature(Message<String> message, String signHex) {
-        byte[] messageCheck = message.value.getBytes();
-        //if we're passed a hex then sign it correctly
-        if (message.value.substring(0, 2).equals("0x")) {
-            messageCheck = Numeric.hexStringToByteArray(message.value);
-        }
+    @Override
+    public void onVerify(String message, String signHex) {
+        Log.d(TAG, "message: " + message);
+        Log.d(TAG, "signHex: " + signHex);
+        Log.d(TAG, "verification address: " + checkSignature(message, signHex));
+        Log.d(TAG, "address: " + wallet.address);
+        StringBuilder recoveredAddress = new StringBuilder("0x");
+        recoveredAddress.append(checkSignature(message, signHex));
 
-        //convert to signature
-        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
-        String recoveredAddress = "";
+        Log.d(TAG, "recovered address: " + recoveredAddress.toString());
+        String result = wallet.address.equals(recoveredAddress.toString()) ? "Verification Successful" : "Verication Failed";
 
-        try {
-            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
-            recoveredAddress = Keys.getAddress(recoveredKey);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-
-        return recoveredAddress;
+        web3.post(() -> {
+            web3.loadUrl("javascript:(function() {" +
+                    "alert('" + result + "')" +
+                    "})()");
+        });
     }
 
     @Override
@@ -247,4 +250,52 @@ public class DappBrowserFragment extends Fragment implements
         Toast.makeText(getActivity(), str, Toast.LENGTH_LONG).show();
         web3.onSignCancel(transaction);
     }
+
+    private String checkSignature(Message<String> message, String signHex) {
+        byte[] messageCheck = message.value.getBytes();
+        //if we're passed a hex then sign it correctly
+        if (message.value.substring(0, 2).equals("0x")) {
+            messageCheck = Numeric.hexStringToByteArray(message.value);
+        }
+
+        //convert to signature
+        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
+        String recoveredAddress = "";
+
+        try {
+            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
+            recoveredAddress = Keys.getAddress(recoveredKey);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+
+        return recoveredAddress;
+    }
+
+    private String checkSignature(String message, String signHex) {
+        byte[] messageCheck = message.getBytes();
+        //if we're passed a hex then sign it correctly
+        if (message.substring(0, 2).equals("0x")) {
+            messageCheck = Numeric.hexStringToByteArray(message);
+        }
+
+        //convert to signature
+        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
+        String recoveredAddress = "";
+
+        try {
+            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
+            recoveredAddress = Keys.getAddress(recoveredKey);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+
+        return recoveredAddress;
+    }
+
+
 }

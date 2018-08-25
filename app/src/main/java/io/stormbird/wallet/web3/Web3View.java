@@ -88,7 +88,8 @@ public class Web3View extends WebView {
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
-                innerOnSignTypedMessageListener), "trust");
+                innerOnSignTypedMessageListener,
+                innerOnVerifyListener), "trust");
 
         super.setWebViewClient(webViewClient);
     }
@@ -144,9 +145,13 @@ public class Web3View extends WebView {
     public void setOnSignPersonalMessageListener(@Nullable OnSignPersonalMessageListener onSignPersonalMessageListener) {
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
     }
-    
+
     public void setOnSignTypedMessageListener(@Nullable OnSignTypedMessageListener onSignTypedMessageListener) {
         this.onSignTypedMessageListener = onSignTypedMessageListener;
+    }
+
+    public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener) {
+        this.onVerifyListener = onVerifyListener;
     }
 
     public void onSignTransactionSuccessful(Transaction transaction, String signHex) {
@@ -223,6 +228,15 @@ public class Web3View extends WebView {
         }
     };
 
+    private final OnVerifyListener innerOnVerifyListener = new OnVerifyListener() {
+        @Override
+        public void onVerify(String message, String signHex) {
+            if (onVerifyListener != null) {
+                onVerifyListener.onVerify(message, signHex);
+            }
+        }
+    };
+
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;
         private final WebViewClient externalClient;
@@ -232,6 +246,23 @@ public class Web3View extends WebView {
             this.internalClient = internalClient;
             this.externalClient = externalClient;
             this.jsInjectorClient = jsInjectorClient;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+
+            /* Inject javascript to override verify button onclick */
+            view.loadUrl("javascript:(function() { " +
+                    "var messageBox = document.getElementById('messageBox');" +
+                    "var verifyMessageBox = document.getElementById('verifyMessageBox');" +
+                    "var signatureBox = document.getElementById('signatureBox');" +
+                    "var verificationAddressBox = document.getElementById('verificationAddressBox');" +
+                    "var verifyBtn = document.getElementById('verifyButton');" +
+                    "verifyBtn.onclick = function(){ " +
+                    "trust.verify(verifyMessageBox.value, signatureBox.value) " +
+                    "};" +
+                    "})()");
         }
 
         @Override

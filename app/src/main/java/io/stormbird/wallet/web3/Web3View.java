@@ -189,6 +189,15 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
+    public void onVerify(String recoveredAddress, String result) {
+        post(() -> {
+            loadUrl("javascript:(function() {" +
+                    "alert('" + result + "');" +
+                    "verificationAddressBox.value = '"+ recoveredAddress +"';" +
+                    "})()");
+        });
+    }
+
     private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

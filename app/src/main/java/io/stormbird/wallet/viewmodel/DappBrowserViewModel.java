@@ -2,7 +2,9 @@ package io.stormbird.wallet.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -13,6 +15,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
+import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
@@ -51,6 +54,7 @@ public class DappBrowserViewModel extends BaseViewModel {
     public LiveData<NetworkInfo> defaultNetwork() {
         return defaultNetwork;
     }
+
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
@@ -82,12 +86,10 @@ public class DappBrowserViewModel extends BaseViewModel {
                             .find()).toObservable();
     }
 
-    public void signMessage(String hexSig, DAppFunction dAppFunction, Message<String> message)
-    {
+    public void signMessage(String hexSig, DAppFunction dAppFunction, Message<String> message) {
         byte[] signRequest = message.value.getBytes();
         //if we're passed a hex then sign it correctly
-        if (message.value.substring(0,2).equals("0x"))
-        {
+        if (message.value.substring(0, 2).equals("0x")) {
             signRequest = Numeric.hexStringToByteArray(message.value);
         }
 
@@ -95,7 +97,7 @@ public class DappBrowserViewModel extends BaseViewModel {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
-                           error -> dAppFunction.DAppError(error, message));
+                        error -> dAppFunction.DAppError(error, message));
     }
 
     public String checkSignature(Message<String> message, String signHex) {
@@ -142,5 +144,26 @@ public class DappBrowserViewModel extends BaseViewModel {
         }
 
         return recoveredAddress;
+    }
+
+    public String getVerificationResult(Context context, Wallet wallet, String message, String signHex) {
+//        Log.d(TAG, "message: " + message);
+//        Log.d(TAG, "signHex: " + signHex);
+//        Log.d(TAG, "verification address: " + viewModel.checkSignature(message, signHex));
+//        Log.d(TAG, "address: " + wallet.address);
+        message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
+        StringBuilder recoveredAddress = new StringBuilder("0x");
+        recoveredAddress.append(checkSignature(message, signHex));
+
+//        Log.d(TAG, "recovered address: " + recoveredAddress.toString());
+        String result = wallet.address.equals(recoveredAddress.toString()) ? context.getString(R.string.popup_verification_success) : context.getString(R.string.popup_verification_failed);
+        return result;
+    }
+
+    public String getRecoveredAddress(String message, String signHex) {
+        message = Hash.sha3String(message);
+        StringBuilder recoveredAddress = new StringBuilder("0x");
+        recoveredAddress.append(checkSignature(message, signHex));
+        return recoveredAddress.toString();
     }
 }

@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import org.web3j.crypto.Hash;
-
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
@@ -173,12 +171,6 @@ public class DappBrowserFragment extends Fragment implements
                 String signHex = Numeric.toHexString(data);
                 Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignMessageSuccessful(message, signHex);
-
-                //TODO: Justin - here's how to to verify - which you should hook it's "web3Handler.verify(web3, message, signature)"
-                //TODO: which returns an address. Ideally we edit the javascript to popup 'success' if the address returned matches the wallet address
-
-                System.out.println(viewModel.checkSignature(message, signHex));
-
                 dialog.dismiss();
             }
         };
@@ -228,21 +220,7 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onVerify(String message, String signHex) {
-        Log.d(TAG, "message: " + message);
-        Log.d(TAG, "signHex: " + signHex);
-        Log.d(TAG, "verification address: " + viewModel.checkSignature(message, signHex));
-        Log.d(TAG, "address: " + wallet.address);
-        message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
-        StringBuilder recoveredAddress = new StringBuilder("0x");
-        recoveredAddress.append(viewModel.checkSignature(message, signHex));
+        web3.onVerify(viewModel.getRecoveredAddress(message, signHex), viewModel.getVerificationResult(getContext(), wallet, message, signHex));
 
-        Log.d(TAG, "recovered address: " + recoveredAddress.toString());
-        String result = wallet.address.equals(recoveredAddress.toString()) ? "Verification Successful" : "Verication Failed";
-
-        web3.post(() -> {
-            web3.loadUrl("javascript:(function() {" +
-                    "alert('" + result + "')" +
-                    "})()");
-        });
     }
 }

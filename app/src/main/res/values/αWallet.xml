@@ -332,4 +332,6 @@
     <string name="dialog_title_sign_message">Sign Message</string>
     <string name="dialog_reject">Reject</string>
     <string name="dialog_approve">Approve</string>
+    <string name="popup_verification_success">Verification Successful</string>
+    <string name="popup_verification_failed">Verification Failed</string>
 </resources>

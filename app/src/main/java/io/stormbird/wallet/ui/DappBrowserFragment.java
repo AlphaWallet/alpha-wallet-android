@@ -190,9 +190,32 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onSignPersonalMessage(Message<String> message) {
-        //TODO
-        Toast.makeText(getActivity(), message.value, Toast.LENGTH_LONG).show();
-        web3.onSignCancel(message);
+        DAppFunction dAppFunction = new DAppFunction() {
+            @Override
+            public void DAppError(Throwable error, Message<String> message) {
+                web3.onSignCancel(message);
+                dialog.dismiss();
+            }
+
+            @Override
+            public void DAppReturn(byte[] data, Message<String> message) {
+                String signHex = Numeric.toHexString(data);
+                Log.d(TAG, "Initial Msg: " + message.value);
+                web3.onSignPersonalMessageSuccessful(message, signHex);
+                dialog.dismiss();
+            }
+        };
+
+        dialog = new SignMessageDialog(getActivity(), message);
+        dialog.setAddress(wallet.address);
+        dialog.setOnApproveListener(v -> {
+            viewModel.signMessage(message.value, dAppFunction, message);
+        });
+        dialog.setOnRejectListener(v -> {
+            web3.onSignCancel(message);
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 
     @Override

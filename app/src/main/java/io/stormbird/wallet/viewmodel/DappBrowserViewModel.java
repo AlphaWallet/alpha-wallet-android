@@ -3,6 +3,12 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -15,6 +21,8 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.web3.entity.Message;
+
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class DappBrowserViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -88,5 +96,51 @@ public class DappBrowserViewModel extends BaseViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
                            error -> dAppFunction.DAppError(error, message));
+    }
+
+    public String checkSignature(Message<String> message, String signHex) {
+        byte[] messageCheck = message.value.getBytes();
+        //if we're passed a hex then sign it correctly
+        if (message.value.substring(0, 2).equals("0x")) {
+            messageCheck = Numeric.hexStringToByteArray(message.value);
+        }
+
+        //convert to signature
+        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
+        String recoveredAddress = "";
+
+        try {
+            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
+            recoveredAddress = Keys.getAddress(recoveredKey);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+
+        return recoveredAddress;
+    }
+
+    public String checkSignature(String message, String signHex) {
+        byte[] messageCheck = message.getBytes();
+        //if we're passed a hex then sign it correctly
+        if (message.substring(0, 2).equals("0x")) {
+            messageCheck = Numeric.hexStringToByteArray(message);
+        }
+
+        //convert to signature
+        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
+        String recoveredAddress = "";
+
+        try {
+            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
+            recoveredAddress = Keys.getAddress(recoveredKey);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+
+        return recoveredAddress;
     }
 }

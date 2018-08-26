@@ -23,11 +23,6 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import org.web3j.crypto.Hash;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-
-import java.math.BigInteger;
-import java.security.SignatureException;
 
 import javax.inject.Inject;
 
@@ -38,7 +33,6 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
 import io.stormbird.wallet.web3.OnSignMessageListener;
@@ -52,8 +46,6 @@ import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.widget.SignMessageDialog;
-
-import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 
 public class DappBrowserFragment extends Fragment implements
@@ -185,7 +177,7 @@ public class DappBrowserFragment extends Fragment implements
                 //TODO: Justin - here's how to to verify - which you should hook it's "web3Handler.verify(web3, message, signature)"
                 //TODO: which returns an address. Ideally we edit the javascript to popup 'success' if the address returned matches the wallet address
 
-                System.out.println(checkSignature(message, signHex));
+                System.out.println(viewModel.checkSignature(message, signHex));
 
                 dialog.dismiss();
             }
@@ -202,26 +194,6 @@ public class DappBrowserFragment extends Fragment implements
             dialog.dismiss();
         });
         dialog.show();
-    }
-
-    @Override
-    public void onVerify(String message, String signHex) {
-        Log.d(TAG, "message: " + message);
-        Log.d(TAG, "signHex: " + signHex);
-        Log.d(TAG, "verification address: " + checkSignature(message, signHex));
-        Log.d(TAG, "address: " + wallet.address);
-        message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
-        StringBuilder recoveredAddress = new StringBuilder("0x");
-        recoveredAddress.append(checkSignature(message, signHex));
-
-        Log.d(TAG, "recovered address: " + recoveredAddress.toString());
-        String result = wallet.address.equals(recoveredAddress.toString()) ? "Verification Successful" : "Verication Failed";
-
-        web3.post(() -> {
-            web3.loadUrl("javascript:(function() {" +
-                    "alert('" + result + "')" +
-                    "})()");
-        });
     }
 
     @Override
@@ -254,51 +226,23 @@ public class DappBrowserFragment extends Fragment implements
         web3.onSignCancel(transaction);
     }
 
-    private String checkSignature(Message<String> message, String signHex) {
-        byte[] messageCheck = message.value.getBytes();
-        //if we're passed a hex then sign it correctly
-        if (message.value.substring(0, 2).equals("0x")) {
-            messageCheck = Numeric.hexStringToByteArray(message.value);
-        }
+    @Override
+    public void onVerify(String message, String signHex) {
+        Log.d(TAG, "message: " + message);
+        Log.d(TAG, "signHex: " + signHex);
+        Log.d(TAG, "verification address: " + viewModel.checkSignature(message, signHex));
+        Log.d(TAG, "address: " + wallet.address);
+        message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
+        StringBuilder recoveredAddress = new StringBuilder("0x");
+        recoveredAddress.append(viewModel.checkSignature(message, signHex));
 
-        //convert to signature
-        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
-        String recoveredAddress = "";
+        Log.d(TAG, "recovered address: " + recoveredAddress.toString());
+        String result = wallet.address.equals(recoveredAddress.toString()) ? "Verification Successful" : "Verication Failed";
 
-        try {
-            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
-            recoveredAddress = Keys.getAddress(recoveredKey);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-
-        return recoveredAddress;
+        web3.post(() -> {
+            web3.loadUrl("javascript:(function() {" +
+                    "alert('" + result + "')" +
+                    "})()");
+        });
     }
-
-    private String checkSignature(String message, String signHex) {
-        byte[] messageCheck = message.getBytes();
-        //if we're passed a hex then sign it correctly
-        if (message.substring(0, 2).equals("0x")) {
-            messageCheck = Numeric.hexStringToByteArray(message);
-        }
-
-        //convert to signature
-        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
-        String recoveredAddress = "";
-
-        try {
-            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
-            recoveredAddress = Keys.getAddress(recoveredKey);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-
-        return recoveredAddress;
-    }
-
-
 }

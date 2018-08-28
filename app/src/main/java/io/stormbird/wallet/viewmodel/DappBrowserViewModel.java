@@ -17,34 +17,41 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
+import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.web3.entity.Message;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class DappBrowserViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
+    private final FetchGasSettingsInteract fetchGasSettingsInteract;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             AssetDefinitionService assetDefinitionService,
-            CreateTransactionInteract createTransactionInteract) {
+            CreateTransactionInteract createTransactionInteract,
+            FetchGasSettingsInteract fetchGasSettingsInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
+        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -57,6 +64,9 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
+    }
+    public MutableLiveData<GasSettings> gasSettings() {
+        return gasSettings;
     }
 
     public void prepare() {
@@ -75,6 +85,16 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
+        if (gasSettings.getValue() == null)
+        {
+            disposable = fetchGasSettingsInteract
+                    .fetch(false)
+                    .subscribe(this::onGasSettings, this::onError);
+        }
+    }
+
+    private void onGasSettings(GasSettings gasSettings) {
+        this.gasSettings.postValue(gasSettings);
     }
 
     public Observable<Wallet> getWallet() {
@@ -86,18 +106,62 @@ public class DappBrowserViewModel extends BaseViewModel {
                             .find()).toObservable();
     }
 
-    public void signMessage(String hexSig, DAppFunction dAppFunction, Message<String> message) {
-        byte[] signRequest = message.value.getBytes();
+    public void signMessage(String msg, DAppFunction dAppFunction, Message<String> message) {
+        byte[] signRequest = msg.getBytes();
         //if we're passed a hex then sign it correctly
-        if (message.value.substring(0, 2).equals("0x")) {
-            signRequest = Numeric.hexStringToByteArray(message.value);
+        if (msg.substring(0, 2).equals("0x")) {
+            signRequest = Numeric.hexStringToByteArray(msg);
         }
 
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
-                        error -> dAppFunction.DAppError(error, message));
+                           error -> dAppFunction.DAppError(error, message));
+    }
+
+    public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction)
+    {
+        BigInteger gasLimit = transaction.gasLimit;
+        BigInteger gasPrice = transaction.gasPrice;
+        if (gasLimit.equals(BigInteger.ZERO))
+        {
+            gasLimit = gasSettings.getValue().gasLimit;
+        }
+        if (gasPrice.equals(BigInteger.ZERO))
+        {
+            gasPrice = gasSettings.getValue().gasPrice;
+        }
+        //convert payload to data
+        byte[] data = Numeric.hexStringToByteArray(transaction.payload);
+
+        BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
+        if (addr.equals(BigInteger.ZERO))
+        {
+            disposable = createTransactionInteract
+                    .create(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
+                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction), this::onError);
+
+        }
+        else
+        {
+
+            disposable = createTransactionInteract
+                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
+                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction), this::onError);
+        }
+
+//        disposable = createTransactionInteract.create(defaultWallet.getValue(), signRequest)
+//                .subscribeOn(Schedulers.computation())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
+//                           error -> dAppFunction.DAppError(error, message));
+    }
+
+    private void onCreateTransaction(String s, DAppFunction dAppFunction)
+    {
+        //pushed transaction
+        dAppFunction.DAppReturn(s.getBytes(), null);
     }
 
     public String checkSignature(Message<String> message, String signHex) {

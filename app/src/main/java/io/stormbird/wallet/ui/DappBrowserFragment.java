@@ -22,6 +22,10 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
@@ -41,7 +45,7 @@ import io.stormbird.wallet.web3.OnVerifyListener;
 import io.stormbird.wallet.web3.Web3View;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
-import io.stormbird.wallet.web3.entity.Transaction;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
@@ -209,7 +213,11 @@ public class DappBrowserFragment extends Fragment implements
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
-            viewModel.signMessage(message.value, dAppFunction, message);
+            String hex = hexToUtf8(message.value);
+            String signMessage = ("\u0019Ethereum Signed Message:\n"
+                    + hex.getBytes().length
+                    + org.web3j.utils.Numeric.cleanHexPrefix(hex));
+            viewModel.signMessage(signMessage, dAppFunction, message);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(message);
@@ -226,7 +234,7 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     @Override
-    public void onSignTransaction(Transaction transaction) {
+    public void onSignTransaction(Web3Transaction transaction, String url) {
         //TODO
         String str = new StringBuilder()
                 .append(transaction.recipient == null ? "" : transaction.recipient.toString()).append(" : ")
@@ -237,13 +245,56 @@ public class DappBrowserFragment extends Fragment implements
                 .append(transaction.nonce).append(" : ")
                 .append(transaction.payload).append(" : ")
                 .toString();
-        Toast.makeText(getActivity(), str, Toast.LENGTH_LONG).show();
-        web3.onSignCancel(transaction);
+
+        DAppFunction dAppFunction = new DAppFunction() {
+            @Override
+            public void DAppError(Throwable error, Message<String> message) {
+                web3.onSignCancel(message);
+                dialog.dismiss();
+            }
+
+            @Override
+            public void DAppReturn(byte[] data, Message<String> message) {
+                String txHash = Numeric.toHexString(data);
+                Log.d(TAG, "Initial Msg: " + message.value);
+                web3.onSignTransactionSuccessful(transaction, txHash);  //onSignPersonalMessageSuccessful(message, signHex);
+                dialog.dismiss();
+            }
+        };
+
+        dialog = new SignMessageDialog(getActivity());
+        dialog.setRequester(url);
+        dialog.setMessage("Transaction");
+        dialog.setAddress(wallet.address);
+        dialog.setOnApproveListener(v -> {
+            viewModel.signTransaction(transaction, dAppFunction);
+        });
+        dialog.setOnRejectListener(v -> {
+            web3.onSignCancel(transaction);
+            dialog.dismiss();
+        });
+        dialog.show();
+
+        //Toast.makeText(getActivity(), str, Toast.LENGTH_LONG).show();
+        //web3.onSignCancel(transaction);
     }
 
     @Override
     public void onVerify(String message, String signHex) {
         web3.onVerify(viewModel.getRecoveredAddress(message, signHex), viewModel.getVerificationResult(getContext(), wallet, message, signHex));
 
+    }
+
+    public static String hexToUtf8(String hex)
+    {
+        hex = org.web3j.utils.Numeric.cleanHexPrefix(hex);
+        ByteBuffer buff = ByteBuffer.allocate(hex.length()/2);
+        for (int i = 0; i < hex.length(); i+=2) {
+            buff.put((byte)Integer.parseInt(hex.substring(i, i+2), 16));
+        }
+        buff.rewind();
+        Charset cs = Charset.forName("UTF-8");
+        CharBuffer cb = cs.decode(buff);
+        return cb.toString();
     }
 }

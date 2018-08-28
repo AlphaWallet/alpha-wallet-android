@@ -120,8 +120,9 @@ public class DappBrowserViewModel extends BaseViewModel {
                            error -> dAppFunction.DAppError(error, message));
     }
 
-    public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction)
+    public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction, String url)
     {
+        Message errorMsg = new Message<>("Error executing transaction", url, 0);
         BigInteger gasLimit = transaction.gasLimit;
         BigInteger gasPrice = transaction.gasPrice;
         if (gasLimit.equals(BigInteger.ZERO))
@@ -132,36 +133,32 @@ public class DappBrowserViewModel extends BaseViewModel {
         {
             gasPrice = gasSettings.getValue().gasPrice;
         }
-        //convert payload to data
-        byte[] data = Numeric.hexStringToByteArray(transaction.payload);
 
         BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
-        if (addr.equals(BigInteger.ZERO))
+
+        if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
-                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction), this::onError);
+                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
+                               error -> dAppFunction.DAppError(error, errorMsg));
 
         }
         else
         {
-
+            byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
-                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction), this::onError);
+                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
+                               error -> dAppFunction.DAppError(error, errorMsg));
         }
-
-//        disposable = createTransactionInteract.create(defaultWallet.getValue(), signRequest)
-//                .subscribeOn(Schedulers.computation())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
-//                           error -> dAppFunction.DAppError(error, message));
     }
 
-    private void onCreateTransaction(String s, DAppFunction dAppFunction)
+    private void onCreateTransaction(String s, DAppFunction dAppFunction, String url)
     {
         //pushed transaction
-        dAppFunction.DAppReturn(s.getBytes(), null);
+        Message<String> msg = new Message<>(s, url, 0);
+        dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
     public String checkSignature(Message<String> message, String signHex) {

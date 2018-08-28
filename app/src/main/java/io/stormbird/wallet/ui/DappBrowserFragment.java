@@ -54,7 +54,7 @@ public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener, OnVerifyListener {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
-    private static final String XCONTRACT_URL = "https://xcontract.herokuapp.com/sign";
+    private static final String XCONTRACT_URL = "https://alpha-wallet.github.io/ERC875-token-factory/index.html";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -250,6 +250,7 @@ public class DappBrowserFragment extends Fragment implements
             @Override
             public void DAppError(Throwable error, Message<String> message) {
                 web3.onSignCancel(message);
+                //TODO: Display 'fail' dialog.
                 dialog.dismiss();
             }
 
@@ -267,7 +268,7 @@ public class DappBrowserFragment extends Fragment implements
         dialog.setMessage("Transaction");
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
-            viewModel.signTransaction(transaction, dAppFunction);
+            viewModel.signTransaction(transaction, dAppFunction, url);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(transaction);

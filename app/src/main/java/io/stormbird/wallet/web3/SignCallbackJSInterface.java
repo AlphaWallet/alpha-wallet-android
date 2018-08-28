@@ -12,7 +12,7 @@ import java.math.BigInteger;
 import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
-import io.stormbird.wallet.web3.entity.Transaction;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
 
 public class SignCallbackJSInterface {
@@ -53,17 +53,19 @@ public class SignCallbackJSInterface {
             String gasLimit,
             String gasPrice,
             String payload) {
-        Transaction transaction = new Transaction(
+        if (value.equals("undefined")) value = "0";
+        if (gasPrice == null) gasPrice = "0";
+        Web3Transaction transaction = new Web3Transaction(
                 TextUtils.isEmpty(recipient) ? Address.EMPTY : new Address(recipient),
                 null,
                 Hex.hexToBigInteger(value),
                 Hex.hexToBigInteger(gasPrice, BigInteger.ZERO),
-                Hex.hexToLong(gasLimit, 0),
+                Hex.hexToBigInteger(gasLimit, BigInteger.ZERO),
                 Hex.hexToLong(nonce, -1),
                 payload,
                 callbackId);
-        onSignTransactionListener.onSignTransaction(transaction);
 
+        webView.post(() -> onSignTransactionListener.onSignTransaction(transaction, getUrl()));
     }
 
     @JavascriptInterface

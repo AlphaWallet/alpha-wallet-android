@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
-import io.stormbird.wallet.web3.entity.Transaction;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
 
 public class Web3View extends WebView {
@@ -161,7 +161,7 @@ public class Web3View extends WebView {
         this.onGetBalanceListener = onGetBalanceListener;
     }
 
-    public void onSignTransactionSuccessful(Transaction transaction, String signHex) {
+    public void onSignTransactionSuccessful(Web3Transaction transaction, String signHex) {
         long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
@@ -176,7 +176,7 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
-    public void onSignError(Transaction transaction, String error) {
+    public void onSignError(Web3Transaction transaction, String error) {
         long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
@@ -186,7 +186,7 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
-    public void onSignCancel(Transaction transaction) {
+    public void onSignCancel(Web3Transaction transaction) {
         long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
@@ -225,9 +225,9 @@ public class Web3View extends WebView {
 
     private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {
         @Override
-        public void onSignTransaction(Transaction transaction) {
+        public void onSignTransaction(Web3Transaction transaction, String url) {
             if (onSignTransactionListener != null) {
-                onSignTransactionListener.onSignTransaction(transaction);
+                onSignTransactionListener.onSignTransaction(transaction, url);
             }
         }
     };

@@ -46,8 +46,9 @@ import io.stormbird.wallet.web3.OnVerifyListener;
 import io.stormbird.wallet.web3.Web3View;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
-import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
 
@@ -67,6 +68,7 @@ public class DappBrowserFragment extends Fragment implements
     private Wallet wallet;
     private NetworkInfo networkInfo;
     private SignMessageDialog dialog;
+    private AWalletAlertDialog resultDialog;
 
     @Nullable
     @Override
@@ -184,7 +186,6 @@ public class DappBrowserFragment extends Fragment implements
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
-
             viewModel.signMessage(message.value, dAppFunction, message);
         });
         dialog.setOnRejectListener(v -> {
@@ -237,7 +238,6 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url) {
-        //TODO
         String str = new StringBuilder()
                 .append(transaction.recipient == null ? "" : transaction.recipient.toString()).append(" : ")
                 .append(transaction.contract == null ? "" : transaction.contract.toString()).append(" : ")
@@ -252,8 +252,14 @@ public class DappBrowserFragment extends Fragment implements
             @Override
             public void DAppError(Throwable error, Message<String> message) {
                 web3.onSignCancel(message);
-                //TODO: Display 'fail' dialog.
                 dialog.dismiss();
+
+                resultDialog = new AWalletAlertDialog(getActivity());
+                resultDialog.setTitle(getString(R.string.dialog_sign_transaction_failed));
+                resultDialog.setIcon(AWalletAlertDialog.ERROR);
+                resultDialog.setMessage(error.getMessage());
+                resultDialog.setButtonText(R.string.dialog_ok);
+                resultDialog.show();
             }
 
             @Override
@@ -262,6 +268,13 @@ public class DappBrowserFragment extends Fragment implements
                 Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignTransactionSuccessful(transaction, txHash);  //onSignPersonalMessageSuccessful(message, signHex);
                 dialog.dismiss();
+
+                resultDialog = new AWalletAlertDialog(getActivity());
+                resultDialog.setTitle(getString(R.string.dialog_sign_transaction_success));
+                resultDialog.setIcon(AWalletAlertDialog.SUCCESS);
+                resultDialog.setMessage(txHash);
+                resultDialog.setButtonText(R.string.dialog_ok);
+                resultDialog.show();
             }
         };
 

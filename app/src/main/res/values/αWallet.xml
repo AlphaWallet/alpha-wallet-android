@@ -334,4 +334,6 @@
     <string name="dialog_approve">Approve</string>
     <string name="popup_verification_success">Verification Successful</string>
     <string name="popup_verification_failed">Verification Failed</string>
+    <string name="dialog_sign_transaction_success">Sign Transaction Successful</string>
+    <string name="dialog_sign_transaction_failed">Sign Transaction Failed</string>
 </resources>

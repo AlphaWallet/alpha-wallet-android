@@ -166,4 +166,13 @@ public class DappBrowserViewModel extends BaseViewModel {
         recoveredAddress.append(checkSignature(message, signHex));
         return recoveredAddress.toString();
     }
+
+    public String getFormattedBalance(String balance) {
+        if (balance == null) {
+            return "0";
+        } else {
+            //TODO: Format balance text
+            return balance;
+        }
+    }
 }

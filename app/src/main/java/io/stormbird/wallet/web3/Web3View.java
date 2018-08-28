@@ -38,6 +38,8 @@ public class Web3View extends WebView {
     private OnSignTypedMessageListener onSignTypedMessageListener;
     @Nullable
     private OnVerifyListener onVerifyListener;
+    @Nullable
+    private OnGetBalanceListener onGetBalanceListener;
     private JsInjectorClient jsInjectorClient;
     private Web3ViewClient webViewClient;
 
@@ -89,7 +91,8 @@ public class Web3View extends WebView {
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener,
-                innerOnVerifyListener), "trust");
+                innerOnVerifyListener,
+                innerOnGetBalanceListener), "trust");
 
         super.setWebViewClient(webViewClient);
     }
@@ -154,6 +157,10 @@ public class Web3View extends WebView {
         this.onVerifyListener = onVerifyListener;
     }
 
+    public void setOnGetBalanceListener(@Nullable OnGetBalanceListener onGetBalanceListener) {
+        this.onGetBalanceListener = onGetBalanceListener;
+    }
+
     public void onSignTransactionSuccessful(Transaction transaction, String signHex) {
         long callbackId = transaction.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
@@ -193,7 +200,18 @@ public class Web3View extends WebView {
         post(() -> {
             loadUrl("javascript:(function() {" +
                     "alert('" + result + "');" +
-                    "verificationAddressBox.value = '"+ recoveredAddress +"';" +
+                    "verificationAddressBox.value = '" + recoveredAddress + "';" +
+                    "})()");
+        });
+    }
+
+    public void onGetBalance(String balance) {
+        post(() -> {
+            loadUrl("javascript:(function() {" +
+                    "var balanceDiv = document.createElement('div');" +
+                    "balanceDiv.style.cssText = 'color:white';" +
+                    "balanceDiv.innerHTML = 'Wallet Balance: " + balance + "';" +
+                    "document.getElementsByClassName('container')[0].appendChild(balanceDiv);" +
                     "})()");
         });
     }
@@ -246,6 +264,15 @@ public class Web3View extends WebView {
         }
     };
 
+    private final OnGetBalanceListener innerOnGetBalanceListener = new OnGetBalanceListener() {
+        @Override
+        public void onGetBalance(String balance) {
+            if (onGetBalanceListener != null) {
+                onGetBalanceListener.onGetBalance(balance);
+            }
+        }
+    };
+
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;
         private final WebViewClient externalClient;
@@ -269,8 +296,15 @@ public class Web3View extends WebView {
                     "var verificationAddressBox = document.getElementById('verificationAddressBox');" +
                     "var verifyBtn = document.getElementById('verifyButton');" +
                     "verifyBtn.onclick = function(){ " +
-                    "trust.verify(verifyMessageBox.value, signatureBox.value) " +
+                    "trust.verify(verifyMessageBox.value, signatureBox.value); " +
                     "};" +
+                    // Get Balance
+                    "var account = web3.eth.accounts[0];" +
+                    "var walletBalance = web3.eth.getBalance(account, " +
+                    "function(error, result) { " +
+                    "if (error) alert(error);" +
+                    "trust.getBalance(result.toString());" +
+                    "});" +
                     "})()");
         }
 

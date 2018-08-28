@@ -33,6 +33,7 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
+import io.stormbird.wallet.web3.OnGetBalanceListener;
 import io.stormbird.wallet.web3.OnSignMessageListener;
 import io.stormbird.wallet.web3.OnSignPersonalMessageListener;
 import io.stormbird.wallet.web3.OnSignTransactionListener;
@@ -47,7 +48,7 @@ import io.stormbird.wallet.widget.SignMessageDialog;
 
 
 public class DappBrowserFragment extends Fragment implements
-        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener, OnVerifyListener {
+        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener, OnVerifyListener, OnGetBalanceListener {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     private static final String XCONTRACT_URL = "https://xcontract.herokuapp.com/sign";
@@ -149,6 +150,7 @@ public class DappBrowserFragment extends Fragment implements
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
         web3.setOnVerifyListener(this);
+        web3.setOnGetBalanceListener(this);
     }
 
     @Override
@@ -245,5 +247,10 @@ public class DappBrowserFragment extends Fragment implements
     public void onVerify(String message, String signHex) {
         web3.onVerify(viewModel.getRecoveredAddress(message, signHex), viewModel.getVerificationResult(getContext(), wallet, message, signHex));
 
+    }
+
+    @Override
+    public void onGetBalance(String balance) {
+        web3.onGetBalance(viewModel.getFormattedBalance(balance));
     }
 }

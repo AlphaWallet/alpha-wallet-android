@@ -35,6 +35,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
 import io.stormbird.wallet.web3.OnGetBalanceListener;
@@ -89,7 +90,7 @@ public class DappBrowserFragment extends Fragment implements
         urlText.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                web3.loadUrl(urlText.getText().toString());
+                web3.loadUrl(Utils.formatUrl(urlText.getText().toString()));
                 web3.requestFocus();
                 InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(urlText.getWindowToken(), 0);

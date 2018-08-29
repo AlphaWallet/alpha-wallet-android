@@ -4,11 +4,13 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
+import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -22,13 +24,15 @@ public class DappBrowserModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            FetchGasSettingsInteract fetchGasSettingsInteract) {
+            FetchGasSettingsInteract fetchGasSettingsInteract,
+            FetchTokensInteract fetchTokensInteract) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
-                fetchGasSettingsInteract);
+                fetchGasSettingsInteract,
+                fetchTokensInteract);
     }
 
     @Provides
@@ -51,5 +55,10 @@ public class DappBrowserModule {
     @Provides
     FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
         return new FetchGasSettingsInteract(gasSettingsRepository);
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 }

@@ -23,6 +23,13 @@ public class SignMessageDialog extends Dialog {
     private TextView message;
     private TextView requester;
     private TextView address;
+    private TextView value;
+    private TextView valueLabel;
+    private TextView messageLabel;
+    private TextView title;
+    private LinearLayout valueLayout;
+    private TextView valueUSD;
+    private TextView usdLabel;
     private Button btnApprove;
     private Button btnReject;
     private Context context;
@@ -36,9 +43,16 @@ public class SignMessageDialog extends Dialog {
         setCanceledOnTouchOutside(true);
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
+        title = findViewById(R.id.dialog_main_text);
         message = findViewById(R.id.message);
         requester = findViewById(R.id.requester);
         address = findViewById(R.id.address);
+        value = findViewById(R.id.value);
+        valueLabel = findViewById(R.id.value_label);
+        messageLabel = findViewById(R.id.message_label);
+        valueLayout = findViewById(R.id.value_layout);
+        valueUSD = findViewById(R.id.value_usd);
+        usdLabel = findViewById(R.id.usd_label);
         btnApprove = findViewById(R.id.btn_approve);
         btnReject = findViewById(R.id.btn_reject);
         btnReject.setOnClickListener(v -> dismiss());
@@ -61,6 +75,26 @@ public class SignMessageDialog extends Dialog {
 
     public void setAddress(CharSequence address) {
         this.address.setText(address);
+    }
+
+    public void setValue(CharSequence value, CharSequence dollarValue, String networkName)
+    {
+        title.setText(R.string.dialog_title_sign_transaction);
+
+        this.message.setVisibility(View.GONE);
+        this.messageLabel.setVisibility(View.GONE);
+
+        this.valueLayout.setVisibility(View.VISIBLE);
+        this.valueLabel.setVisibility(View.VISIBLE);
+
+        this.valueUSD.setText(dollarValue);
+        this.value.setText(value);
+
+        if (networkName.length() > 0)
+        {
+            usdLabel.setVisibility(View.VISIBLE);
+            usdLabel.setText(networkName);
+        }
     }
 
     public void setOnApproveListener(View.OnClickListener listener) {

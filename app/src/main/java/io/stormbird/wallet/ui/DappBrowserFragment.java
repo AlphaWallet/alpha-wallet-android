@@ -2,8 +2,10 @@ package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -58,6 +60,7 @@ public class DappBrowserFragment extends Fragment implements
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     private static final String XCONTRACT_URL = "https://alpha-wallet.github.io/ERC875-token-factory/index.html";
+    private static final String DAPP_LASTURL_KEY = "dappURL";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -86,7 +89,10 @@ public class DappBrowserFragment extends Fragment implements
         progressBar = view.findViewById(R.id.progressBar);
         urlText = view.findViewById(R.id.url);
 
-        urlText.setText(XCONTRACT_URL);
+        String lastURL = PreferenceManager.getDefaultSharedPreferences(getContext())
+                .getString(DAPP_LASTURL_KEY, XCONTRACT_URL);
+        urlText.setText(lastURL);
+
         urlText.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -94,6 +100,8 @@ public class DappBrowserFragment extends Fragment implements
                 web3.requestFocus();
                 InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(urlText.getWindowToken(), 0);
+                PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .edit().putString(DAPP_LASTURL_KEY, urlText.getText().toString()).apply();
                 handled = true;
             }
             return handled;
@@ -111,8 +119,13 @@ public class DappBrowserFragment extends Fragment implements
         this.wallet = wallet;
         setupWeb3();
 
-        // Default to XContract
-        web3.loadUrl(XCONTRACT_URL);
+        // Default to last opened site
+        if (web3.getUrl() == null)
+        {
+            String lastURL = PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .getString(DAPP_LASTURL_KEY, XCONTRACT_URL);
+            web3.loadUrl(Utils.formatUrl(lastURL));
+        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {

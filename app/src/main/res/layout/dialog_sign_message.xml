@@ -176,9 +176,8 @@
             android:background="@drawable/selector_settings_item_reverse"
             android:gravity="center">
 
-            <Button
+            <TextView
                 android:id="@+id/btn_approve"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"

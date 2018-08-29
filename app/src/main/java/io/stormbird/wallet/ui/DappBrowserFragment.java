@@ -264,7 +264,7 @@ public class DappBrowserFragment extends Fragment implements
             @Override
             public void DAppError(Throwable error, Message<String> message) {
                 web3.onSignCancel(message);
-                dialog.dismiss();
+                resultDialog.dismiss();
 
                 resultDialog = new AWalletAlertDialog(getActivity());
                 resultDialog.setTitle(getString(R.string.dialog_sign_transaction_failed));
@@ -279,7 +279,7 @@ public class DappBrowserFragment extends Fragment implements
                 String txHash = Numeric.toHexString(data);
                 Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignTransactionSuccessful(transaction, txHash);  //onSignPersonalMessageSuccessful(message, signHex);
-                dialog.dismiss();
+                resultDialog.dismiss();
 
                 resultDialog = new AWalletAlertDialog(getActivity());
                 resultDialog.setTitle(getString(R.string.dialog_sign_transaction_success));
@@ -305,6 +305,9 @@ public class DappBrowserFragment extends Fragment implements
         String usdPrice = viewModel.getUSDValue(eth.doubleValue());
         dialog.setValue(ethPrice, usdPrice, viewModel.getNetworkName());
         dialog.setOnApproveListener(v -> {
+            dialog.dismiss();
+            //popup transaction wait dialog
+            onProgress();
             viewModel.signTransaction(transaction, dAppFunction, url);
         });
         dialog.setOnRejectListener(v -> {
@@ -338,5 +341,16 @@ public class DappBrowserFragment extends Fragment implements
         Charset cs = Charset.forName("UTF-8");
         CharBuffer cb = cs.decode(buff);
         return cb.toString();
+    }
+
+    private void onProgress()
+    {
+        resultDialog = new AWalletAlertDialog(getActivity());
+        resultDialog.setIcon(AWalletAlertDialog.NONE);
+        resultDialog.setTitle(R.string.title_dialog_sending);
+        resultDialog.setMessage(R.string.transfer);
+        resultDialog.setProgressMode();
+        resultDialog.setCancelable(false);
+        resultDialog.show();
     }
 }

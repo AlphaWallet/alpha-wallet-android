@@ -30,7 +30,6 @@ public class SignMessageDialog extends Dialog {
     private LinearLayout valueLayout;
     private TextView valueUSD;
     private TextView usdLabel;
-    private Button btnApprove;
     private Button btnReject;
     private LinearLayout layoutBtnApprove;
     private Context context;
@@ -54,7 +53,6 @@ public class SignMessageDialog extends Dialog {
         valueLayout = findViewById(R.id.value_layout);
         valueUSD = findViewById(R.id.value_usd);
         usdLabel = findViewById(R.id.usd_label);
-        btnApprove = findViewById(R.id.btn_approve);
         btnReject = findViewById(R.id.btn_reject);
         layoutBtnApprove = findViewById(R.id.button_container);
         btnReject.setOnClickListener(v -> dismiss());

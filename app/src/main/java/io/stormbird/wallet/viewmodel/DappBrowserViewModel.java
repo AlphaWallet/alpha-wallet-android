@@ -19,16 +19,20 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 public class DappBrowserViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -40,18 +44,23 @@ public class DappBrowserViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
+    private final FetchTokensInteract fetchTokensInteract;
+
+    private double ethToUsd = 0;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            FetchGasSettingsInteract fetchGasSettingsInteract) {
+            FetchGasSettingsInteract fetchGasSettingsInteract,
+            FetchTokensInteract fetchTokensInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -67,6 +76,30 @@ public class DappBrowserViewModel extends BaseViewModel {
     }
     public MutableLiveData<GasSettings> gasSettings() {
         return gasSettings;
+    }
+
+    public String getUSDValue(double eth)
+    {
+        if (defaultNetwork.getValue().chainId == 1)
+        {
+            return "$" + getUsdString(ethToUsd * eth);
+        }
+        else
+        {
+            return "$0.00";
+        }
+    }
+
+    public String getNetworkName()
+    {
+        if (defaultNetwork.getValue().chainId == 1)
+        {
+            return "";
+        }
+        else
+        {
+            return defaultNetwork.getValue().name;
+        }
     }
 
     public void prepare() {
@@ -95,6 +128,18 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     private void onGasSettings(GasSettings gasSettings) {
         this.gasSettings.postValue(gasSettings);
+
+        disposable = fetchTokensInteract.getEthereumTicker()
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::onTicker, this::onError);
+    }
+
+    private void onTicker(Ticker ticker)
+    {
+        if (ticker != null && ticker.price_usd != null)
+        {
+            ethToUsd = Double.valueOf(ticker.price_usd);
+        }
     }
 
     public Observable<Wallet> getWallet() {
@@ -123,23 +168,13 @@ public class DappBrowserViewModel extends BaseViewModel {
     public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction, String url)
     {
         Message errorMsg = new Message<>("Error executing transaction", url, 0);
-        BigInteger gasLimit = transaction.gasLimit;
-        BigInteger gasPrice = transaction.gasPrice;
-        if (gasLimit.equals(BigInteger.ZERO))
-        {
-            gasLimit = gasSettings.getValue().gasLimit;
-        }
-        if (gasPrice.equals(BigInteger.ZERO))
-        {
-            gasPrice = gasSettings.getValue().gasPrice;
-        }
 
         BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
 
         if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
+                    .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
                                error -> dAppFunction.DAppError(error, errorMsg));
 
@@ -148,7 +183,7 @@ public class DappBrowserViewModel extends BaseViewModel {
         {
             byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
+                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
                                error -> dAppFunction.DAppError(error, errorMsg));
         }
@@ -235,5 +270,28 @@ public class DappBrowserViewModel extends BaseViewModel {
             //TODO: Format balance text
             return balance;
         }
+    }
+
+    public Web3Transaction doGasSettings(Web3Transaction transaction)
+    {
+        BigInteger gasLimit = transaction.gasLimit;
+        BigInteger gasPrice = transaction.gasPrice;
+        if (gasLimit.equals(BigInteger.ZERO))
+        {
+            gasLimit = gasSettings.getValue().gasLimit;
+        }
+        if (gasPrice.equals(BigInteger.ZERO))
+        {
+            gasPrice = gasSettings.getValue().gasPrice;
+        }
+
+        return new Web3Transaction(transaction.recipient,
+                                                    transaction.contract,
+                                                    transaction.value,
+                                                    gasPrice,
+                                                    gasLimit,
+                                                    transaction.nonce,
+                                                    transaction.payload,
+                                                    transaction.leafPosition);
     }
 }

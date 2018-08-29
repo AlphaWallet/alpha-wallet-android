@@ -173,7 +173,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:background="@drawable/background_round_primary"
+            android:background="@drawable/selector_settings_item_reverse"
             android:gravity="center">
 
             <Button

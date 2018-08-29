@@ -24,6 +24,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -31,12 +33,14 @@ import java.nio.charset.Charset;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.stormbird.token.tools.Convert;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
@@ -53,6 +57,9 @@ import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
+
+import static io.stormbird.wallet.C.ETH_SYMBOL;
+import static io.stormbird.wallet.ui.ImportTokenActivity.getEthString;
 
 
 public class DappBrowserFragment extends Fragment implements
@@ -252,15 +259,6 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url) {
-        String str = new StringBuilder()
-                .append(transaction.recipient == null ? "" : transaction.recipient.toString()).append(" : ")
-                .append(transaction.contract == null ? "" : transaction.contract.toString()).append(" : ")
-                .append(transaction.value.toString()).append(" : ")
-                .append(transaction.gasPrice.toString()).append(" : ")
-                .append(transaction.gasLimit).append(" : ")
-                .append(transaction.nonce).append(" : ")
-                .append(transaction.payload).append(" : ")
-                .toString();
 
         DAppFunction dAppFunction = new DAppFunction() {
             @Override
@@ -296,11 +294,21 @@ public class DappBrowserFragment extends Fragment implements
         dialog.setRequester(url);
         dialog.setMessage("Transaction");
         dialog.setAddress(wallet.address);
+        //calculate value of eth + gas
+        Web3Transaction cTrans = viewModel.doGasSettings(transaction);
+
+        BigInteger gasPrice = cTrans.gasPrice.multiply(cTrans.gasLimit); // TODO: Use web3 estimate gas
+        BigInteger value = cTrans.value.add(gasPrice);
+        BigDecimal eth = BalanceUtils.weiToEth(new BigDecimal(value));
+
+        String ethPrice = getEthString(eth.doubleValue()) + " " + ETH_SYMBOL;
+        String usdPrice = viewModel.getUSDValue(eth.doubleValue());
+        dialog.setValue(ethPrice, usdPrice, viewModel.getNetworkName());
         dialog.setOnApproveListener(v -> {
             viewModel.signTransaction(transaction, dAppFunction, url);
         });
         dialog.setOnRejectListener(v -> {
-            web3.onSignCancel(transaction);
+            web3.onSignCancel(cTrans);
             dialog.dismiss();
         });
         dialog.show();

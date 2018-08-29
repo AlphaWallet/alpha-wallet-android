@@ -51,6 +51,7 @@ public class AWalletAlertDialog extends Dialog {
         progressBar = findViewById(R.id.dialog_progress);
         viewContainer = findViewById(R.id.dialog_view);
 
+        button.setOnClickListener(v -> dismiss());
         secondaryButton.setOnClickListener(v -> dismiss());
     }
 

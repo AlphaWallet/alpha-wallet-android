@@ -12,17 +12,22 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <EditText
-            android:id="@+id/url"
+        <AutoCompleteTextView
+            android:id="@+id/url_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_address_bar"
+            android:completionThreshold="1"
+            android:dropDownAnchor="@id/anchor"
+            android:fontFamily="@font/font_regular"
             android:imeOptions="actionGo"
             android:inputType="textUri"
-            android:paddingBottom="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="5dp" />
+            android:padding="5dp" />
+
+        <View
+            android:id="@+id/anchor"
+            android:layout_width="match_parent"
+            android:layout_height="1dp" />
 
     </LinearLayout>
 

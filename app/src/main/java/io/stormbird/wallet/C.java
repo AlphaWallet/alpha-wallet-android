@@ -112,4 +112,7 @@ public abstract class C {
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
         String FROM_SETTINGS = "from_settings";
     }
+
+    public static final String DAPP_LASTURL_KEY = "dappURL";
+    public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
 }

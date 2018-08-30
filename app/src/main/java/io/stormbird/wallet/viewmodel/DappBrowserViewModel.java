@@ -3,6 +3,11 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
@@ -10,11 +15,13 @@ import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
+import java.util.ArrayList;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.GasSettings;
@@ -27,7 +34,6 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
@@ -293,5 +299,27 @@ public class DappBrowserViewModel extends BaseViewModel {
                                                     transaction.nonce,
                                                     transaction.payload,
                                                     transaction.leafPosition);
+    }
+
+    public ArrayList<String> getBrowserHistoryFromPrefs(Context context) {
+        ArrayList<String> history;
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_BROWSER_HISTORY, "");
+        if (!historyJson.isEmpty()) {
+            history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<String>>(){}.getType());
+        } else {
+            history = new ArrayList<>();
+        }
+
+        for (String url : history) {
+            Log.d("JuSTIN", url);
+        }
+        return history;
+    }
+
+    public void addToBrowserHistory(Context context, String url) {
+        ArrayList<String> history = getBrowserHistoryFromPrefs(context);
+        history.add(url);
+        String historyJson = new Gson().toJson(history);
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_HISTORY, historyJson).apply();
     }
 }

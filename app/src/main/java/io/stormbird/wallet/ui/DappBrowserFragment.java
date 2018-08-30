@@ -2,7 +2,6 @@ package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,7 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.EditText;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -29,17 +28,19 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import io.stormbird.token.tools.Convert;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
@@ -67,19 +68,19 @@ public class DappBrowserFragment extends Fragment implements
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     private static final String XCONTRACT_URL = "https://alpha-wallet.github.io/ERC875-token-factory/index.html";
-    private static final String DAPP_LASTURL_KEY = "dappURL";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
     private DappBrowserViewModel viewModel;
 
     private Web3View web3;
-    private EditText urlText;
+    private AutoCompleteTextView urlTv;
     private ProgressBar progressBar;
     private Wallet wallet;
     private NetworkInfo networkInfo;
     private SignMessageDialog dialog;
     private AWalletAlertDialog resultDialog;
+    private AutoCompleteUrlAdapter adapter;
 
     @Nullable
     @Override
@@ -88,31 +89,53 @@ public class DappBrowserFragment extends Fragment implements
         View view = inflater.inflate(R.layout.fragment_webview, container, false);
         initView(view);
         initViewModel();
+        setupAddressBar();
+        viewModel.prepare();
         return view;
     }
 
     private void initView(View view) {
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);
-        urlText = view.findViewById(R.id.url);
+        urlTv = view.findViewById(R.id.url_tv);
+    }
 
+    private void setupAddressBar() {
         String lastURL = PreferenceManager.getDefaultSharedPreferences(getContext())
-                .getString(DAPP_LASTURL_KEY, XCONTRACT_URL);
-        urlText.setText(lastURL);
+                .getString(C.DAPP_LASTURL_KEY, XCONTRACT_URL);
+        urlTv.setText(lastURL);
 
-        urlText.setOnEditorActionListener((v, actionId, event) -> {
+        ArrayList<String> history = viewModel.getBrowserHistoryFromPrefs(getContext());
+        adapter = new AutoCompleteUrlAdapter(getContext(), history);
+        urlTv.setAdapter(adapter);
+
+        urlTv.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                web3.loadUrl(Utils.formatUrl(urlText.getText().toString()));
+                web3.loadUrl(Utils.formatUrl(urlTv.getText().toString()));
                 web3.requestFocus();
-                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(urlText.getWindowToken(), 0);
+                dismissKeyboard();
                 PreferenceManager.getDefaultSharedPreferences(getContext())
-                    .edit().putString(DAPP_LASTURL_KEY, urlText.getText().toString()).apply();
+                        .edit().putString(C.DAPP_LASTURL_KEY, urlTv.getText().toString()).apply();
+
+                viewModel.addToBrowserHistory(getContext(), urlTv.getText().toString());
+                adapter.add(urlTv.getText().toString());
+                adapter.notifyDataSetChanged();
                 handled = true;
             }
             return handled;
         });
+
+        urlTv.setOnItemClickListener((parent, view, position, id) -> {
+            web3.loadUrl(Utils.formatUrl(adapter.getItem(position)));
+            web3.requestFocus();
+            dismissKeyboard();
+        });
+    }
+
+    private void dismissKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(urlTv.getWindowToken(), 0);
     }
 
     private void initViewModel() {
@@ -127,10 +150,9 @@ public class DappBrowserFragment extends Fragment implements
         setupWeb3();
 
         // Default to last opened site
-        if (web3.getUrl() == null)
-        {
+        if (web3.getUrl() == null) {
             String lastURL = PreferenceManager.getDefaultSharedPreferences(getContext())
-                    .getString(DAPP_LASTURL_KEY, XCONTRACT_URL);
+                    .getString(C.DAPP_LASTURL_KEY, XCONTRACT_URL);
             web3.loadUrl(Utils.formatUrl(lastURL));
         }
     }
@@ -167,7 +189,7 @@ public class DappBrowserFragment extends Fragment implements
         web3.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                urlText.setText(url);
+                urlTv.setText(url);
                 return false;
             }
         });
@@ -183,7 +205,6 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
-        viewModel.prepare();
     }
 
     @Override
@@ -330,12 +351,11 @@ public class DappBrowserFragment extends Fragment implements
         web3.onGetBalance(viewModel.getFormattedBalance(balance));
     }
 
-    public static String hexToUtf8(String hex)
-    {
+    public static String hexToUtf8(String hex) {
         hex = org.web3j.utils.Numeric.cleanHexPrefix(hex);
-        ByteBuffer buff = ByteBuffer.allocate(hex.length()/2);
-        for (int i = 0; i < hex.length(); i+=2) {
-            buff.put((byte)Integer.parseInt(hex.substring(i, i+2), 16));
+        ByteBuffer buff = ByteBuffer.allocate(hex.length() / 2);
+        for (int i = 0; i < hex.length(); i += 2) {
+            buff.put((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
         }
         buff.rewind();
         Charset cs = Charset.forName("UTF-8");
@@ -343,8 +363,7 @@ public class DappBrowserFragment extends Fragment implements
         return cb.toString();
     }
 
-    private void onProgress()
-    {
+    private void onProgress() {
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.NONE);
         resultDialog.setTitle(R.string.title_dialog_sending);

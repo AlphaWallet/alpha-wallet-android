@@ -45,7 +45,7 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String> {
     @Override
     public void add(@Nullable String object) {
         if (!history.contains(object)) {
-            super.add(object);
+            super.insert(object, 0);
         }
     }
 

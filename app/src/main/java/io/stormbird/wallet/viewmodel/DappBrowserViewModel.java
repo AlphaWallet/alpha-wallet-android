@@ -314,7 +314,7 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     public void addToBrowserHistory(Context context, String url) {
         ArrayList<String> history = getBrowserHistoryFromPrefs(context);
-        history.add(url);
+        history.add(0, url);
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_HISTORY, historyJson).apply();
     }

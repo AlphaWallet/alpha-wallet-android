@@ -295,7 +295,7 @@ public class Web3View extends WebView {
                     "var signatureBox = document.getElementById('signatureBox');" +
                     "var verificationAddressBox = document.getElementById('verificationAddressBox');" +
                     "var verifyBtn = document.getElementById('verifyButton');" +
-                    "verifyBtn.onclick = function(){ " +
+                    "if (verifyBtn) verifyBtn.onclick = function(){ " +
                     "trust.verify(verifyMessageBox.value, signatureBox.value); " +
                     "};" +
                     // Get Balance

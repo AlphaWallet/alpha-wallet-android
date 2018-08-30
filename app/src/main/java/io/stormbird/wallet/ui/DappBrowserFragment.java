@@ -123,6 +123,8 @@ public class DappBrowserFragment extends Fragment implements
             web3.requestFocus();
             dismissKeyboard();
         });
+
+        urlTv.setOnClickListener(v -> urlTv.showDropDown());
     }
 
     private void dismissKeyboard() {

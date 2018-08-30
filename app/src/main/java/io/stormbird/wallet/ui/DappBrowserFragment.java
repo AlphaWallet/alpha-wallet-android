@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -28,7 +27,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -66,8 +64,6 @@ import static io.stormbird.wallet.ui.ImportTokenActivity.getEthString;
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener, OnVerifyListener, OnGetBalanceListener {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
-    private static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
-    private static final String XCONTRACT_URL = "https://alpha-wallet.github.io/ERC875-token-factory/index.html";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -101,26 +97,22 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void setupAddressBar() {
-        String lastURL = PreferenceManager.getDefaultSharedPreferences(getContext())
-                .getString(C.DAPP_LASTURL_KEY, XCONTRACT_URL);
-        urlTv.setText(lastURL);
+        urlTv.setText(viewModel.getLastUrl(getContext()));
 
-        ArrayList<String> history = viewModel.getBrowserHistoryFromPrefs(getContext());
-        adapter = new AutoCompleteUrlAdapter(getContext(), history);
+        adapter = new AutoCompleteUrlAdapter(getContext(), viewModel.getBrowserHistoryFromPrefs(getContext()));
         urlTv.setAdapter(adapter);
 
         urlTv.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                web3.loadUrl(Utils.formatUrl(urlTv.getText().toString()));
+                String urlText = urlTv.getText().toString();
+                web3.loadUrl(Utils.formatUrl(urlText));
                 web3.requestFocus();
-                dismissKeyboard();
-                PreferenceManager.getDefaultSharedPreferences(getContext())
-                        .edit().putString(C.DAPP_LASTURL_KEY, urlTv.getText().toString()).apply();
-
-                viewModel.addToBrowserHistory(getContext(), urlTv.getText().toString());
-                adapter.add(urlTv.getText().toString());
+                viewModel.setLastUrl(getContext(), urlText);
+                viewModel.addToBrowserHistory(getContext(), urlText);
+                adapter.add(urlText);
                 adapter.notifyDataSetChanged();
+                dismissKeyboard();
                 handled = true;
             }
             return handled;
@@ -151,9 +143,7 @@ public class DappBrowserFragment extends Fragment implements
 
         // Default to last opened site
         if (web3.getUrl() == null) {
-            String lastURL = PreferenceManager.getDefaultSharedPreferences(getContext())
-                    .getString(C.DAPP_LASTURL_KEY, XCONTRACT_URL);
-            web3.loadUrl(Utils.formatUrl(lastURL));
+            web3.loadUrl(Utils.formatUrl(viewModel.getLastUrl(getContext())));
         }
     }
 
@@ -166,7 +156,7 @@ public class DappBrowserFragment extends Fragment implements
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
         web3.setChainId(1);
-        web3.setRpcUrl(ETH_RPC_URL);
+        web3.setRpcUrl(C.ETH_RPC_URL);
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {

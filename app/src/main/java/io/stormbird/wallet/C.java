@@ -12,7 +12,7 @@ public abstract class C {
     public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
-    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)" ;
+    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
 
     public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TIKER = "poa";
@@ -113,6 +113,8 @@ public abstract class C {
         String FROM_SETTINGS = "from_settings";
     }
 
+    public static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     public static final String DAPP_LASTURL_KEY = "dappURL";
     public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
+    public static final String DAPP_DEFAULT_URL = "https://alpha-wallet.github.io/ERC875-token-factory/index.html";
 }

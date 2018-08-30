@@ -309,10 +309,6 @@ public class DappBrowserViewModel extends BaseViewModel {
         } else {
             history = new ArrayList<>();
         }
-
-        for (String url : history) {
-            Log.d("JuSTIN", url);
-        }
         return history;
     }
 
@@ -321,5 +317,15 @@ public class DappBrowserViewModel extends BaseViewModel {
         history.add(url);
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_HISTORY, historyJson).apply();
+    }
+
+    public String getLastUrl(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(C.DAPP_LASTURL_KEY, C.DAPP_DEFAULT_URL);
+    }
+
+    public void setLastUrl(Context context, String url) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
     }
 }

@@ -2,7 +2,10 @@ package io.stormbird.wallet.web3;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -15,14 +18,20 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.google.gson.Gson;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.web3.entity.TypedData;
+
+import static io.stormbird.wallet.C.PAGE_LOADED;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
@@ -277,6 +286,8 @@ public class Web3View extends WebView {
         private final Web3ViewClient internalClient;
         private final WebViewClient externalClient;
         private final JsInjectorClient jsInjectorClient;
+        private boolean loadingError = false;
+        private boolean redirect = false;
 
         public WrapWebViewClient(Web3ViewClient internalClient, WebViewClient externalClient, JsInjectorClient jsInjectorClient) {
             this.internalClient = internalClient;
@@ -285,8 +296,26 @@ public class Web3View extends WebView {
         }
 
         @Override
+        public void onPageStarted(WebView view, String url,Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+        }
+
+        @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+
+            if (!redirect && !loadingError)
+            {
+                Intent intent = new Intent(PAGE_LOADED);
+                intent.putExtra("url", url);
+                getContext().sendBroadcast(intent);
+            }
+            else
+            {
+                redirect = false;
+            }
+
+            loadingError = false;
 
             /* Inject javascript to override verify button onclick */
             view.loadUrl("javascript:(function() { " +
@@ -310,13 +339,24 @@ public class Web3View extends WebView {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            redirect = true;
+
             return externalClient.shouldOverrideUrlLoading(view, url)
                     || internalClient.shouldOverrideUrlLoading(view, url);
+        }
+
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
+        {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            loadingError = true;
         }
 
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            redirect = true;
+
             return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, request);
         }

@@ -14,6 +14,8 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 
@@ -21,6 +23,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
@@ -312,9 +315,32 @@ public class DappBrowserViewModel extends BaseViewModel {
         return history;
     }
 
-    public void addToBrowserHistory(Context context, String url) {
+    public void addToBrowserHistory(Context context, String url)
+    {
+        String checkVal = url;
+        checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
         ArrayList<String> history = getBrowserHistoryFromPrefs(context);
+        for (String item : history)
+        {
+            if (item.contains(checkVal))
+            {
+                //replace with this new one
+                history.remove(item);
+                if (!history.contains(item))
+                {
+                    history.add(0, url);
+                }
+                writeURLHistory(context, history);
+                return;
+            }
+        }
+
         history.add(0, url);
+        writeURLHistory(context, history);
+    }
+
+    private void writeURLHistory(Context context, ArrayList<String> history)
+    {
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_HISTORY, historyJson).apply();
     }

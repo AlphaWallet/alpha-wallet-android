@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,8 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.URLLoadInterface;
+import io.stormbird.wallet.entity.URLLoadReceiver;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.util.BalanceUtils;
@@ -62,7 +65,9 @@ import static io.stormbird.wallet.ui.ImportTokenActivity.getEthString;
 
 
 public class DappBrowserFragment extends Fragment implements
-        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener, OnVerifyListener, OnGetBalanceListener {
+        OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
+        OnVerifyListener, OnGetBalanceListener, URLLoadInterface
+{
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
 
     @Inject
@@ -77,6 +82,7 @@ public class DappBrowserFragment extends Fragment implements
     private SignMessageDialog dialog;
     private AWalletAlertDialog resultDialog;
     private AutoCompleteUrlAdapter adapter;
+    private URLLoadReceiver URLReceiver;
 
     @Nullable
     @Override
@@ -87,6 +93,7 @@ public class DappBrowserFragment extends Fragment implements
         initViewModel();
         setupAddressBar();
         viewModel.prepare();
+        URLReceiver = new URLLoadReceiver(getActivity(), this);
         return view;
     }
 
@@ -109,7 +116,6 @@ public class DappBrowserFragment extends Fragment implements
                 web3.loadUrl(Utils.formatUrl(urlText));
                 web3.requestFocus();
                 viewModel.setLastUrl(getContext(), urlText);
-                viewModel.addToBrowserHistory(getContext(), urlText);
                 adapter.add(urlText);
                 adapter.notifyDataSetChanged();
                 dismissKeyboard();
@@ -363,5 +369,11 @@ public class DappBrowserFragment extends Fragment implements
         resultDialog.setProgressMode();
         resultDialog.setCancelable(false);
         resultDialog.show();
+    }
+
+    @Override
+    public void onWebpageLoaded(String url)
+    {
+        viewModel.addToBrowserHistory(getContext(), url);
     }
 }

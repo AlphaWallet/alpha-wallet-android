@@ -102,10 +102,13 @@ public class TicketAdapter extends TokensAdapter {
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
             NonFungibleToken nft = assetService.getNonFungibleToken(ticket.getAddress(), v);
-            e.ticketNumber = nft.getAttribute("numero").value.intValue();
-            e.category = (short)nft.getAttribute("category").value.intValue();
-            e.match = (short)nft.getAttribute("match").value.intValue();
-            e.venue = (short)nft.getAttribute("venue").value.intValue();
+            if (nft != null)
+            {
+                e.ticketNumber = nft.getAttribute("numero").value.intValue();
+                e.category = (short) nft.getAttribute("category").value.intValue();
+                e.match = (short) nft.getAttribute("match").value.intValue();
+                e.venue = (short) nft.getAttribute("venue").value.intValue();
+            }
             sortedList.add(e);
         }
         TicketRangeElement.sortElements(sortedList);
@@ -159,10 +162,13 @@ public class TicketAdapter extends TokensAdapter {
             TicketRangeElement e = new TicketRangeElement();
             e.id = v;
             NonFungibleToken nft = assetService.getNonFungibleToken(ticket.getAddress(), v);
-            e.ticketNumber = nft.getAttribute("numero").value.intValue();
-            e.category = (short)nft.getAttribute("category").value.intValue();
-            e.match = (short)nft.getAttribute("match").value.intValue();
-            e.venue = (short)nft.getAttribute("venue").value.intValue();
+            if (nft != null)
+            {
+                e.ticketNumber = nft.getAttribute("numero").value.intValue();
+                e.category = (short) nft.getAttribute("category").value.intValue();
+                e.match = (short) nft.getAttribute("match").value.intValue();
+                e.venue = (short) nft.getAttribute("venue").value.intValue();
+            }
             sortedList.add(e);
         }
         TicketRangeElement.sortElements(sortedList);

@@ -69,7 +69,7 @@ public final class Convert {
 
     public static String getEthString(double ethPrice)
     {
-        DecimalFormat df = new DecimalFormat("#.####");
+        DecimalFormat df = new DecimalFormat("#.#####");
         df.setRoundingMode(RoundingMode.CEILING);
         String formatted = df.format(ethPrice);
         return formatted;

@@ -42,6 +42,7 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SystemView;
 
+import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.IMPORT_STRING;
 
@@ -429,14 +430,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
         String formatted = df.format(usdPrice);
-        return formatted;
-    }
-
-    public static String getEthString(double ethPrice)
-    {
-        DecimalFormat df = new DecimalFormat("#.####");
-        df.setRoundingMode(RoundingMode.CEILING);
-        String formatted = df.format(ethPrice);
         return formatted;
     }
 

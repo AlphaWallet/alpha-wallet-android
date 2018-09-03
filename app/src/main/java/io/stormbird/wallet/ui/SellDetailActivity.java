@@ -46,6 +46,7 @@ import io.stormbird.wallet.viewmodel.SellDetailModelFactory;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.token.entity.TicketRange;
 
+import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.EXTRA_PRICE;
 import static io.stormbird.wallet.C.EXTRA_STATE;
 import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
@@ -204,9 +205,9 @@ public class SellDetailActivity extends BaseActivity {
 
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
+        String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue));
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
-        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, getCleanValue(sellPriceValue)));
+        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, getEthString(sellPriceValue)));
         confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr));
     }
 
@@ -395,18 +396,11 @@ public class SellDetailActivity extends BaseActivity {
         }
     }
 
-    private String getCleanValue(double value)
-    {
-        DecimalFormat df = new DecimalFormat("#.#####");
-        df.setRoundingMode(RoundingMode.UP);
-        return df.format(value);
-    }
-
     private void updateSellPrice(int quantity) {
         if (!sellPrice.getText().toString().isEmpty()) {
             try {
                 sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue)));
+                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue)));
                 updateUSDBalance();
             } catch (NumberFormatException e) {
                 //silent fail, just don't update
@@ -490,10 +484,10 @@ public class SellDetailActivity extends BaseActivity {
         //how many tickets are we selling?
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String totalCostStr = getString(R.string.total_cost, getCleanValue(quantity * sellPriceValue));
+        String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue));
 
         String qty = String.valueOf(quantity) + " " + unit + "\n" +
-                String.valueOf(getCleanValue(sellPriceValue)) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
+                String.valueOf(getEthString(sellPriceValue)) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
                 getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
@@ -514,7 +508,7 @@ public class SellDetailActivity extends BaseActivity {
         //how many tickets are we selling?
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String qty = String.valueOf(quantity) + " " + unit + " @" + getCleanValue(sellPriceValue) + getString(R.string.eth_per_ticket);
+        String qty = String.valueOf(quantity) + " " + unit + " @" + getEthString(sellPriceValue) + getString(R.string.eth_per_ticket);
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
         dialog.setTitle(R.string.confirm_sale_title);

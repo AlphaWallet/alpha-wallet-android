@@ -117,5 +117,5 @@ public abstract class C {
     public static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
     public static final String DAPP_LASTURL_KEY = "dappURL";
     public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
-    public static final String DAPP_DEFAULT_URL = "https://alpha-wallet.github.io/ERC875-token-factory/index.html";
+    public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
 }

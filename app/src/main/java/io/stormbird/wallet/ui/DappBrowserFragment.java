@@ -60,6 +60,7 @@ import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
+import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getEthString;
 
@@ -111,15 +112,10 @@ public class DappBrowserFragment extends Fragment implements
 
         urlTv.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
-            if (actionId == EditorInfo.IME_ACTION_GO) {
+            if (actionId == EditorInfo.IME_ACTION_GO)
+            {
                 String urlText = urlTv.getText().toString();
-                web3.loadUrl(Utils.formatUrl(urlText));
-                web3.requestFocus();
-                viewModel.setLastUrl(getContext(), urlText);
-                adapter.add(urlText);
-                adapter.notifyDataSetChanged();
-                dismissKeyboard();
-                handled = true;
+                handled = loadUrl(urlText);
             }
             return handled;
         });
@@ -375,5 +371,22 @@ public class DappBrowserFragment extends Fragment implements
     public void onWebpageLoaded(String url)
     {
         viewModel.addToBrowserHistory(getContext(), url);
+    }
+
+    public void homePressed()
+    {
+        urlTv.setText(DAPP_DEFAULT_URL);
+        loadUrl(DAPP_DEFAULT_URL);
+    }
+
+    private boolean loadUrl(String urlText)
+    {
+        web3.loadUrl(Utils.formatUrl(urlText));
+        web3.requestFocus();
+        viewModel.setLastUrl(getContext(), urlText);
+        adapter.add(urlText);
+        adapter.notifyDataSetChanged();
+        dismissKeyboard();
+        return true;
     }
 }

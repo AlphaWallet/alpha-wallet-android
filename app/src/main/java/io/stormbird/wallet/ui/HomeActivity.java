@@ -71,6 +71,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
     private NewSettingsFragment settingsFragment;
+    private DappBrowserFragment dappBrowserFragment;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -188,6 +189,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewModel.showAddToken(this);
             }
             break;
+            case android.R.id.home: {
+                dappBrowserFragment.homePressed();
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -273,30 +278,35 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewPager.setCurrentItem(DAPP_BROWSER);
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
+                enableDisplayHomeAsHome(true);
                 break;
             }
             case WALLET: {
                 viewPager.setCurrentItem(WALLET);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
+                enableDisplayHomeAsHome(false);
                 break;
             }
             case SETTINGS: {
                 viewPager.setCurrentItem(SETTINGS);
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
+                enableDisplayHomeAsHome(false);
                 break;
             }
             case TRANSACTIONS: {
                 viewPager.setCurrentItem(TRANSACTIONS);
                 setTitle(getString(R.string.toolbar_header_transactions));
                 selectNavigationItem(TRANSACTIONS);
+                enableDisplayHomeAsHome(false);
                 break;
             }
             default:
                 viewPager.setCurrentItem(WALLET);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
+                enableDisplayHomeAsHome(false);
                 break;
         }
     }
@@ -310,7 +320,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         public Fragment getItem(int position) {
             switch (position) {
                 case DAPP_BROWSER:
-                    return new DappBrowserFragment();
+                    dappBrowserFragment = new DappBrowserFragment();
+                    return dappBrowserFragment;
                 case WALLET:
                     return new WalletFragment();
                 case SETTINGS:

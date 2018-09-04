@@ -40,6 +40,7 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
+import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
@@ -318,6 +319,8 @@ public class DappBrowserViewModel extends BaseViewModel {
     public void addToBrowserHistory(Context context, String url)
     {
         String checkVal = url;
+        if (url.contains(DAPP_DEFAULT_URL)) return; // don't record the homepage
+
         checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
         ArrayList<String> history = getBrowserHistoryFromPrefs(context);
         for (String item : history)
@@ -347,7 +350,7 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     public String getLastUrl(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(C.DAPP_LASTURL_KEY, C.DAPP_DEFAULT_URL);
+                .getString(C.DAPP_LASTURL_KEY, DAPP_DEFAULT_URL);
     }
 
     public void setLastUrl(Context context, String url) {

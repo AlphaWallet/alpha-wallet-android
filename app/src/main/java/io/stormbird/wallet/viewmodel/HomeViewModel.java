@@ -4,6 +4,8 @@ import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -12,10 +14,17 @@ import android.os.Environment;
 
 import java.io.File;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Address;
+import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
@@ -36,6 +45,9 @@ public class HomeViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private CryptoFunctions cryptoFunctions;
+    private ParseMagicLink parser;
 
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
 
@@ -48,13 +60,15 @@ public class HomeViewModel extends BaseViewModel {
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             SettingsRouter settingsRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            FindDefaultWalletInteract findDefaultWalletInteract) {
         this.settingsRouter = settingsRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
+        this.findDefaultWalletInteract = findDefaultWalletInteract;
     }
 
     @Override
@@ -90,6 +104,48 @@ public class HomeViewModel extends BaseViewModel {
 
     public void showImportLink(Context context, String importData)
     {
+        disposable = findDefaultWalletInteract
+                .find().toObservable()
+                .filter(wallet -> checkWalletNotEqual(wallet, importData))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(wallet -> importLink(wallet, context, importData), this::onError);
+    }
+
+    private boolean checkWalletNotEqual(Wallet wallet, String importData)
+    {
+        boolean filterPass = false;
+
+        try
+        {
+            if (cryptoFunctions == null) cryptoFunctions = new CryptoFunctions();
+            if (parser == null) parser = new ParseMagicLink(cryptoFunctions);
+
+            MagicLinkData data = parser.parseUniversalLink(importData);
+            String linkAddress = parser.getOwnerKey(data);
+
+            if (Address.isAddress(data.contractAddress))
+            {
+                filterPass = !wallet.address.equals(linkAddress);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return filterPass;
+    }
+
+    private void importLink(Wallet wallet, Context context, String importData)
+    {
+        //valid link, remove from clipboard
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null)
+        {
+            ClipData clipData = ClipData.newPlainText("", "");
+            clipboard.setPrimaryClip(clipData);
+        }
         importTokenRouter.open(context, importData);
     }
 

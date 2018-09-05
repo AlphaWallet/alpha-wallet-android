@@ -804,7 +804,7 @@ public class TokenRepository implements TokenRepositoryType {
             String name = (String)response.get(0).getValue();
             if (assetDefinitionService.getNetworkId(address) > 0)
             {
-                name = name + " " + assetDefinitionService.getAssetDefinition(address).getTokenName(); //TODO: must use address
+                name = name + " " + assetDefinitionService.getAssetDefinition(address).getTokenName();
             }
             return name;
         } else {

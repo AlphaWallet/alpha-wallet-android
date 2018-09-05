@@ -487,6 +487,37 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
+    private void blankTicketExtra(View activity)
+    {
+        try
+        {
+            TextView textVenue = activity.findViewById(R.id.venue);
+            TextView textDate = activity.findViewById(R.id.date);
+            TextView textRange = activity.findViewById(R.id.tickettext);
+            TextView textCat = activity.findViewById(R.id.cattext);
+            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
+            LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
+            LinearLayout catLayout = activity.findViewById(R.id.catlayout);
+            LinearLayout dateLayout = activity.findViewById(R.id.datelayout);
+            LinearLayout bottomPart = activity.findViewById(R.id.bottom_part);
+
+            //textVenue.setVisibility(View.GONE);
+            textVenue.setText("");
+            textDate.setText("");
+            textRange.setText("");
+            textCat.setText("");
+            ticketDetails.setText("");
+            ticketLayout.setVisibility(View.GONE);
+            catLayout.setVisibility(View.GONE);
+            dateLayout.setVisibility(View.GONE);
+            bottomPart.setVisibility(View.GONE);
+        }
+        catch (Exception e)
+        {
+            Log.d("TICKET", e.getMessage());
+        }
+    }
+
     /**
      * This is a single method that populates any instance of graphic ticket anywhere
      *
@@ -519,14 +550,21 @@ public class Ticket extends Token implements Parcelable
             BigInteger firstTicket = range.tokenIds.get(0);
             NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(range.contractAddress, firstTicket);
 
-            String venueStr = nonFungibleToken.getAttribute("venue").text;
-            String nameStr = getTokenTitle(nonFungibleToken); //nonFungibleToken.getAttribute("category").text;
+            String nameStr = getTokenTitle(nonFungibleToken);
 
+            String venueStr = nonFungibleToken == null ? "" : nonFungibleToken.getAttribute("venue").text;
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
             name.setText(nameStr);
             amount.setText(seatCount);
             venue.setText(venueStr);
+
+            if (!assetService.hasDefinition(getAddress()))
+            {
+                //remove all info
+                blankTicketExtra(activity);
+                return;
+            }
 
             String countryA = nonFungibleToken.getAttribute("countryA").text;
             String countryB = nonFungibleToken.getAttribute("countryB").text;
@@ -598,10 +636,14 @@ public class Ticket extends Token implements Parcelable
 
     private String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
-        String tokenTitle = nonFungibleToken.getAttribute("category").text;
-        if (tokenTitle == null || tokenTitle.length() == 0)
+        String tokenTitle = getFullName();
+        if (nonFungibleToken != null)
         {
-            tokenTitle = getFullName();
+            tokenTitle = nonFungibleToken.getAttribute("category").text;
+            if (tokenTitle == null || tokenTitle.length() == 0)
+            {
+                tokenTitle = getFullName();
+            }
         }
 
         return tokenTitle;

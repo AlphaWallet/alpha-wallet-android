@@ -338,4 +338,9 @@
     <string name="dialog_sign_transaction_failed">Sign Transaction Failed</string>
     <string name="transaction_value">Transaction Value</string>
     <string name="dialog_title_sign_transaction">Sign Transaction</string>
+    <string name="action_view_bookmarks">View Bookmarks</string>
+    <string name="action_added">Bookmarked</string>
+    <string name="action_add_bookmark">Add Bookmark</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="visit">Visit</string>
 </resources>

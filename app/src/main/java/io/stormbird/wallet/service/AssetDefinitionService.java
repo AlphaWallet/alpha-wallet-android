@@ -14,20 +14,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Address;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -48,6 +51,8 @@ public class AssetDefinitionService
     private final OkHttpClient okHttpClient;
     private Map<String, TokenDefinition> assetDefinitions;
     private Map<Integer, List<String>> networkMappings;
+    private final static long HOUR = 1000*60*60;
+    private final static long RELOAD_THRESHOLD = 1;
 
     public AssetDefinitionService(OkHttpClient client, Context ctx)
     {
@@ -65,9 +70,10 @@ public class AssetDefinitionService
 
         try
         {
-            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
             assetDefinitions.clear();
             loadContracts(context.getFilesDir());
+            checkDownloadedFiles();
+            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
         }
         catch (IOException|SAXException e)
         {
@@ -349,8 +355,12 @@ public class AssetDefinitionService
                 String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
                 if (extension.equals("xml"))
                 {
-                    FileInputStream stream = new FileInputStream(f);
-                    parseFile(stream);
+                    String name = f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
+                    if (Address.isAddress(name))
+                    {
+                        FileInputStream stream = new FileInputStream(f);
+                        parseFile(stream);
+                    }
                 }
             }
         }
@@ -379,6 +389,55 @@ public class AssetDefinitionService
         {
             return getExternalFile(contractAddress);
         }
+    }
+
+    private List<File> getFileList(File directory)
+    {
+        File[] files = context.getFilesDir().listFiles();
+        return new ArrayList<File>(Arrays.asList(files));
+    }
+
+    private boolean isValidXML(File f)
+    {
+        int index = f.getName().lastIndexOf('.');
+        if (index > 0)
+        {
+            String extension = f.getName().substring(index + 1).toLowerCase();
+            String name = f.getName().substring(0, index).toLowerCase();
+            if (extension.equals("xml") && Address.isAddress(name))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkUpdateTime(File f)
+    {
+        long diffInHours = (System.currentTimeMillis() - f.lastModified()) / HOUR;
+        return diffInHours > RELOAD_THRESHOLD;
+    }
+
+    private String convertToAddress(File f)
+    {
+        return f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
+    }
+
+    /**
+     * check the downloaded XML files for updates when wallet restarts.
+     * TODO: API to query update date
+     */
+    private void checkDownloadedFiles()
+    {
+        Disposable d = Observable.fromIterable(getFileList(context.getFilesDir()))
+                .filter(this::isValidXML)
+                .filter(this::checkUpdateTime)
+                .map(this::convertToAddress)
+                .flatMap(this::fetchXMLFromServer)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleFile, this::onError);
     }
 
     /**

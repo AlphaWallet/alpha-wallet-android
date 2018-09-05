@@ -3,6 +3,7 @@ package io.stormbird.wallet.service;
 
 import android.content.Context;
 import android.os.Environment;
+import android.text.format.DateUtils;
 
 import org.xml.sax.SAXException;
 
@@ -16,10 +17,14 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -32,8 +37,12 @@ import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.FileData;
+import okhttp3.Cache;
+import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import retrofit2.Retrofit;
 
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 
@@ -427,35 +436,11 @@ public class AssetDefinitionService
     {
         Disposable d = Observable.fromIterable(getFileList(context.getFilesDir()))
                 .filter(this::isValidXML)
-                .flatMap(this::checkModifiedTime)
+                .flatMap(this::checkFileTime)
                 .flatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleFile, this::onError);
-    }
-
-    private Observable<String> checkModifiedTime(File localDefinition)
-    {
-        String address = convertToAddress(localDefinition);
-        String url = "https://repo.awallet.io/" + address;
-
-        //get the current file modified time
-        long fileTime = localDefinition.lastModified();
-
-        return getFileDataFromURL2(url, fileTime).toObservable()
-                .map(fileData -> checkFileTime(fileData, fileTime, address));
-    }
-
-    private String checkFileTime(FileData fileData, long fileTime, String address)
-    {
-        if (fileData.fileDate > fileTime)
-        {
-            return address;
-        }
-        else
-        {
-            return "";
-        }
     }
 
     /**
@@ -467,10 +452,6 @@ public class AssetDefinitionService
      */
     private File storeFile(String address, String result) throws IOException
     {
-//        File directory = new File(
-//                Environment.getExternalStorageDirectory()
-//                        + File.separator + ALPHAWALLET_DIR);
-
         String fName = address + ".xml";
 
         //Store received files in the internal storage area - no need to ask for permissions
@@ -498,79 +479,26 @@ public class AssetDefinitionService
         }
     }
 
-    public static Single<FileData> getFileDataFromURL(final String location, final long fileTime)
+    private Observable<String> checkFileTime(File localDefinition)
     {
-        return Single.fromCallable(() -> {
-            HttpURLConnection connection = null;
-            String stepLocation = location;
-            FileData fileData = new FileData();
-            for (;;) //crawl through the URL linkage until we get the base filename
-            {
-                URL url = new URL(stepLocation);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setIfModifiedSince(fileTime);
-                //connection.setInstanceFollowRedirects(false);
-                int test = connection.getResponseCode();
-                String redirectLocation = connection.getHeaderField("Location");
-                if (redirectLocation == null)
-                {
-                    int rCode = connection.getResponseCode();
-                    if (rCode == HttpURLConnection.HTTP_NOT_MODIFIED)
-                    {
-                        fileData.modified = false;
-                    }
-                    else
-                    {
-                        fileData.modified = true;
-                    }
-                    fileData.fileDate = connection.getIfModifiedSince();
-                    fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
-                    break;
-                }
-                stepLocation = redirectLocation;
-                connection.disconnect();
-            }
-            connection.disconnect();
-            return fileData;
-        });
-    }
-
-    public static Single<FileData> getFileDataFromURL2(final String location, final long fileTime)
-    {
-        return Single.fromCallable(() -> {
-            HttpURLConnection connection = null;
-            String stepLocation = location;
-            FileData fileData = new FileData();
-            URL url = new URL(stepLocation);
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-            conn.setIfModifiedSince( fileTime );
-            conn.connect();
+        return Observable.fromCallable(() -> {
+            String contractAddress = convertToAddress(localDefinition);
+            URL url = new URL("https://repo.awallet.io/" + contractAddress);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setIfModifiedSince( localDefinition.lastModified() );
 
             switch (conn.getResponseCode())
             {
                 case HttpURLConnection.HTTP_OK:
-                    System.out.print("has");
                     break;
 
                 case HttpURLConnection.HTTP_NOT_MODIFIED:
-                    System.out.print("not");
+                    contractAddress = "";
                     break;
             }
 
-            InputStream input = conn.getInputStream();
-            if( conn.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED )
-            {
-                fileData.modified = false;
-            }
-            else
-            {
-                fileData.modified = true;
-            }
-
-            fileData.fileDate = conn.getLastModified();
-            fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
             conn.disconnect();
-            return fileData;
+            return contractAddress;
         });
     }
 }

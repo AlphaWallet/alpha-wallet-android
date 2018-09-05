@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -153,11 +154,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.prepare();
         checkRoot();
         //check clipboard
-        String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
-        if (importData != null)
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null)
         {
-            //let's try to import the link
-            viewModel.showImportLink(this, importData);
+            CharSequence clipText = clipboard.getPrimaryClip().getItemAt(0).getText();
+            //String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
+            if (clipText != null && clipText.length() > 60 && clipText.length() < 300)
+            {
+                //let's try to import the link
+                viewModel.showImportLink(this, clipText.toString());
+            }
         }
     }
 

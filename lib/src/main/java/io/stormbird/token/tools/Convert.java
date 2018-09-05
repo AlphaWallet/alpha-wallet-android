@@ -1,6 +1,8 @@
 package io.stormbird.token.tools;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 /**
  * Ethereum unit conversion functions.
@@ -63,5 +65,13 @@ public final class Convert {
             }
             return Unit.valueOf(name);
         }
+    }
+
+    public static String getEthString(double ethPrice)
+    {
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.CEILING);
+        String formatted = df.format(ethPrice);
+        return formatted;
     }
 }

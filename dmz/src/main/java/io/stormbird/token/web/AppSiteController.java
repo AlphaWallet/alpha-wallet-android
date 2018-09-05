@@ -35,6 +35,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
 
+import static io.stormbird.token.tools.Convert.getEthString;
+
 
 @Controller
 @SpringBootApplication
@@ -101,7 +103,7 @@ public class AppSiteController {
 
         model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
-        // model.addAttribute("linkExp");
+        model.addAttribute("linkPrice", getEthString(data.price));
 
         try {
             updateContractInfo(model, data.contractAddress);
@@ -176,14 +178,17 @@ public class AppSiteController {
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
         SpringApplication.run(AppSiteController.class, args);
         parser.setCryptoInterface(cryptoFunctions);
+        repoDir = Paths.get("C:\\Users\\James\\StudioProjects\\alpha-wallet-android\\lib\\contracts");
         if (repoDir == null ) {
             System.err.println("Don't know where is the contract behaviour XML repository.");
             System.err.println("Try run with --repository.dir=/dir/to/repo");
             System.exit(255);
         }
 
-        try (Stream<Path> dirStream = Files.list(repoDir)) {
+        try (Stream<Path> dirStream = Files.walk(repoDir)) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+                    .filter(Files::isRegularFile)
+                    .filter(Files::isReadable)
                     .map(path -> getContractAddresses(path))
                     .flatMap(Collection::stream)
                     .collect(Collectors.toMap(

@@ -31,6 +31,7 @@ import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
+import io.stormbird.wallet.entity.FileData;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -51,8 +52,6 @@ public class AssetDefinitionService
     private final OkHttpClient okHttpClient;
     private Map<String, TokenDefinition> assetDefinitions;
     private Map<Integer, List<String>> networkMappings;
-    private final static long HOUR = 1000*60*60;
-    private final static long RELOAD_THRESHOLD = 1;
 
     public AssetDefinitionService(OkHttpClient client, Context ctx)
     {
@@ -276,6 +275,8 @@ public class AssetDefinitionService
     private Observable<String> fetchXMLFromServer(String address)
     {
         return Observable.fromCallable(() -> {
+            if (address.equals("")) return "0x";
+
             StringBuilder sb = new StringBuilder();
             sb.append("https://repo.awallet.io/");
             sb.append(address);
@@ -413,12 +414,6 @@ public class AssetDefinitionService
         return false;
     }
 
-    private boolean checkUpdateTime(File f)
-    {
-        long diffInHours = (System.currentTimeMillis() - f.lastModified()) / HOUR;
-        return diffInHours > RELOAD_THRESHOLD;
-    }
-
     private String convertToAddress(File f)
     {
         return f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
@@ -432,12 +427,35 @@ public class AssetDefinitionService
     {
         Disposable d = Observable.fromIterable(getFileList(context.getFilesDir()))
                 .filter(this::isValidXML)
-                .filter(this::checkUpdateTime)
-                .map(this::convertToAddress)
+                .flatMap(this::checkModifiedTime)
                 .flatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleFile, this::onError);
+    }
+
+    private Observable<String> checkModifiedTime(File localDefinition)
+    {
+        String address = convertToAddress(localDefinition);
+        String url = "https://repo.awallet.io/" + address;
+
+        //get the current file modified time
+        long fileTime = localDefinition.lastModified();
+
+        return getFileDataFromURL2(url, fileTime).toObservable()
+                .map(fileData -> checkFileTime(fileData, fileTime, address));
+    }
+
+    private String checkFileTime(FileData fileData, long fileTime, String address)
+    {
+        if (fileData.fileDate > fileTime)
+        {
+            return address;
+        }
+        else
+        {
+            return "";
+        }
     }
 
     /**
@@ -478,5 +496,81 @@ public class AssetDefinitionService
         {
             return 0;
         }
+    }
+
+    public static Single<FileData> getFileDataFromURL(final String location, final long fileTime)
+    {
+        return Single.fromCallable(() -> {
+            HttpURLConnection connection = null;
+            String stepLocation = location;
+            FileData fileData = new FileData();
+            for (;;) //crawl through the URL linkage until we get the base filename
+            {
+                URL url = new URL(stepLocation);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setIfModifiedSince(fileTime);
+                //connection.setInstanceFollowRedirects(false);
+                int test = connection.getResponseCode();
+                String redirectLocation = connection.getHeaderField("Location");
+                if (redirectLocation == null)
+                {
+                    int rCode = connection.getResponseCode();
+                    if (rCode == HttpURLConnection.HTTP_NOT_MODIFIED)
+                    {
+                        fileData.modified = false;
+                    }
+                    else
+                    {
+                        fileData.modified = true;
+                    }
+                    fileData.fileDate = connection.getIfModifiedSince();
+                    fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
+                    break;
+                }
+                stepLocation = redirectLocation;
+                connection.disconnect();
+            }
+            connection.disconnect();
+            return fileData;
+        });
+    }
+
+    public static Single<FileData> getFileDataFromURL2(final String location, final long fileTime)
+    {
+        return Single.fromCallable(() -> {
+            HttpURLConnection connection = null;
+            String stepLocation = location;
+            FileData fileData = new FileData();
+            URL url = new URL(stepLocation);
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            conn.setIfModifiedSince( fileTime );
+            conn.connect();
+
+            switch (conn.getResponseCode())
+            {
+                case HttpURLConnection.HTTP_OK:
+                    System.out.print("has");
+                    break;
+
+                case HttpURLConnection.HTTP_NOT_MODIFIED:
+                    System.out.print("not");
+                    break;
+            }
+
+            InputStream input = conn.getInputStream();
+            if( conn.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED )
+            {
+                fileData.modified = false;
+            }
+            else
+            {
+                fileData.modified = true;
+            }
+
+            fileData.fileDate = conn.getLastModified();
+            fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
+            conn.disconnect();
+            return fileData;
+        });
     }
 }

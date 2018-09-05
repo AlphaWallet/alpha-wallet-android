@@ -18,6 +18,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.FileData;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
@@ -35,6 +36,7 @@ import static io.stormbird.wallet.C.DOWNLOAD_READY;
 import static io.stormbird.wallet.C.HARD_CODED_KEY;
 import static io.stormbird.wallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.stormbird.wallet.C.PRE_LOADED_KEY;
+import static io.stormbird.wallet.service.AssetDefinitionService.getFileDataFromURL;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
 public class SplashViewModel extends ViewModel {
@@ -233,7 +235,7 @@ public class SplashViewModel extends ViewModel {
 
     private void checkWebsiteAPKFileData(long currentInstallDate, final Context baseContext)
     {
-        Disposable d = getFileDataFromURL(ALPHAWALLET_FILE_URL).toObservable()
+        Disposable d = getFileDataFromURL(ALPHAWALLET_FILE_URL, currentInstallDate).toObservable()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), this::onError);
@@ -248,44 +250,6 @@ public class SplashViewModel extends ViewModel {
             Intent intent = new Intent(DOWNLOAD_READY);
             intent.putExtra("Version", newVersion);
             baseContext.sendBroadcast(intent);
-        }
-    }
-
-    private Single<FileData> getFileDataFromURL(final String location)
-    {
-        return Single.fromCallable(() -> {
-            HttpURLConnection connection = null;
-            String stepLocation = location;
-            FileData fileData = new FileData();
-            for (;;) //crawl through the URL linkage until we get the base filename
-            {
-                URL url = new URL(stepLocation);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setInstanceFollowRedirects(false);
-                String redirectLocation = connection.getHeaderField("Location");
-                if (redirectLocation == null)
-                {
-                    fileData.fileDate = connection.getDate(); //long lastModified = connection.getLastModified();
-                    fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
-                    break;
-                }
-                stepLocation = redirectLocation;
-                connection.disconnect();
-            }
-            connection.disconnect();
-            return fileData;
-        });
-    }
-
-    class FileData
-    {
-        Long fileDate;
-        String fileName;
-
-        FileData()
-        {
-            fileDate = 0L;
-            fileName = "";
         }
     }
 }

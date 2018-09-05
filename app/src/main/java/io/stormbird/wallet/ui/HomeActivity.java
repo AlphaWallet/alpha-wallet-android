@@ -53,6 +53,7 @@ import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.DAPP_BROWSER;
+import static io.stormbird.wallet.widget.AWalletBottomNavigationView.MARKETPLACE;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
@@ -169,8 +170,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        switch (viewPager.getCurrentItem())
+        {
+            case DAPP_BROWSER:
+                if (dappBrowserFragment.getUrlIsBookmark())
+                {
+                    getMenuInflater().inflate(R.menu.menu_added, menu);
+                }
+                else
+                {
+                    getMenuInflater().inflate(R.menu.menu_add_bookmark, menu);
+                }
+                getMenuInflater().inflate(R.menu.menu_bookmarks, menu);
+                break;
+            default:
+                getMenuInflater().inflate(R.menu.menu_add, menu);
+                break;
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -191,6 +209,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             break;
             case android.R.id.home: {
                 dappBrowserFragment.homePressed();
+                return true;
+            }
+            case R.id.action_add_bookmark: {
+                dappBrowserFragment.addBookmark();
+                invalidateOptionsMenu();
+                return true;
+            }
+            case R.id.action_bookmarks: {
+                dappBrowserFragment.viewBookmarks();
+                return true;
+            }
+            case R.id.action_added: {
+                dappBrowserFragment.removeBookmark();
+                invalidateOptionsMenu();
                 return true;
             }
         }
@@ -227,6 +259,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case SETTINGS: {
                 showPage(SETTINGS);
+                return true;
+            }
+            case MARKETPLACE: {
                 return true;
             }
         }
@@ -279,6 +314,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
                 enableDisplayHomeAsHome(true);
+                invalidateOptionsMenu();
                 break;
             }
             case WALLET: {
@@ -286,6 +322,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);
+                invalidateOptionsMenu();
                 break;
             }
             case SETTINGS: {
@@ -293,6 +330,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
                 enableDisplayHomeAsHome(false);
+                invalidateOptionsMenu();
                 break;
             }
             case TRANSACTIONS: {
@@ -300,6 +338,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 setTitle(getString(R.string.toolbar_header_transactions));
                 selectNavigationItem(TRANSACTIONS);
                 enableDisplayHomeAsHome(false);
+                invalidateOptionsMenu();
                 break;
             }
             default:
@@ -307,6 +346,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);
+                invalidateOptionsMenu();
                 break;
         }
     }
@@ -376,6 +416,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             cDialog.dismiss();
         });
         cDialog.show();
+    }
+
+    @Override
+    public void resetToolbar()
+    {
+        invalidateOptionsMenu();
     }
 
     private void hideDialog()

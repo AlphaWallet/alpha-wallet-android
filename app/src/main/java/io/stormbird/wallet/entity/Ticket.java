@@ -18,7 +18,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -485,6 +487,37 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
+    private void blankTicketExtra(View activity)
+    {
+        try
+        {
+            TextView textVenue = activity.findViewById(R.id.venue);
+            TextView textDate = activity.findViewById(R.id.date);
+            TextView textRange = activity.findViewById(R.id.tickettext);
+            TextView textCat = activity.findViewById(R.id.cattext);
+            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
+            LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
+            LinearLayout catLayout = activity.findViewById(R.id.catlayout);
+            LinearLayout dateLayout = activity.findViewById(R.id.datelayout);
+            LinearLayout bottomPart = activity.findViewById(R.id.bottom_part);
+
+            //textVenue.setVisibility(View.GONE);
+            textVenue.setText("");
+            textDate.setText("");
+            textRange.setText("");
+            textCat.setText("");
+            ticketDetails.setText("");
+            ticketLayout.setVisibility(View.GONE);
+            catLayout.setVisibility(View.GONE);
+            dateLayout.setVisibility(View.GONE);
+            bottomPart.setVisibility(View.GONE);
+        }
+        catch (Exception e)
+        {
+            Log.d("TICKET", e.getMessage());
+        }
+    }
+
     /**
      * This is a single method that populates any instance of graphic ticket anywhere
      *
@@ -517,14 +550,21 @@ public class Ticket extends Token implements Parcelable
             BigInteger firstTicket = range.tokenIds.get(0);
             NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(range.contractAddress, firstTicket);
 
-            String venueStr = nonFungibleToken.getAttribute("venue").text;
-            String nameStr = getTokenTitle(nonFungibleToken); //nonFungibleToken.getAttribute("category").text;
+            String nameStr = getTokenTitle(nonFungibleToken);
 
+            String venueStr = nonFungibleToken == null ? "" : nonFungibleToken.getAttribute("venue").text;
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
             name.setText(nameStr);
             amount.setText(seatCount);
             venue.setText(venueStr);
+
+            if (!assetService.hasDefinition(getAddress()))
+            {
+                //remove all info
+                blankTicketExtra(activity);
+                return;
+            }
 
             String countryA = nonFungibleToken.getAttribute("countryA").text;
             String countryB = nonFungibleToken.getAttribute("countryB").text;
@@ -554,36 +594,56 @@ public class Ticket extends Token implements Parcelable
                             nonFungibleToken.getAttribute("locality").text
             );
 
+            long eventTime = nonFungibleToken.getAttribute("time").value.longValue();
+            String eventTimeStr = nonFungibleToken.getAttribute("time").text;
+
             try
             {
-                String eventTime = nonFungibleToken.getAttribute("time").text;
-
-                if (eventTime != null)
+                if (eventTimeStr != null)
                 {
-                    ZonedDateTime datetime = new ZonedDateTime(eventTime);
+                    ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
                     ticketDate.setText(datetime.format(date));
                     ticketTime.setText(datetime.format(time));
                 }
                 else
                 {
-                    Date current = new Date();
-                    ticketDate.setText(date.format(current));
-                    ticketTime.setText(time.format(current));
+                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
                 }
             }
-            catch (ParseException e)
+            catch (ParseException | IllegalArgumentException e)
             {
-                ticketDate.setText("N.A.");
+                setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
             }
+        }
+    }
+
+    private void setDateFromTokenID(TextView ticketDate, TextView ticketTime, long eventTime, DateFormat date, DateFormat time)
+    {
+        if (eventTime > 0)
+        {
+            Calendar calendar = GregorianCalendar.getInstance(); //UTC time
+            calendar.setTimeInMillis( eventTime*1000 );
+            date.setTimeZone(calendar.getTimeZone());
+            time.setTimeZone(calendar.getTimeZone());
+            ticketDate.setText(date.format(calendar.getTime()));
+            ticketTime.setText(time.format(calendar.getTime()));
+        }
+        else
+        {
+            ticketDate.setText("N.A.");
         }
     }
 
     private String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
-        String tokenTitle = nonFungibleToken.getAttribute("category").text;
-        if (tokenTitle == null || tokenTitle.length() == 0)
+        String tokenTitle = getFullName();
+        if (nonFungibleToken != null)
         {
-            tokenTitle = getFullName();
+            tokenTitle = nonFungibleToken.getAttribute("category").text;
+            if (tokenTitle == null || tokenTitle.length() == 0)
+            {
+                tokenTitle = getFullName();
+            }
         }
 
         return tokenTitle;

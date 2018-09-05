@@ -2,9 +2,11 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
+import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepository;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
+import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
@@ -21,14 +23,16 @@ class HomeModule {
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             SettingsRouter settingsRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            FindDefaultWalletInteract findDefaultWalletInteract) {
         return new HomeViewModelFactory(
                 localeRepository,
                 importTokenRouter,
                 externalBrowserRouter,
                 addTokenRouter,
                 settingsRouter,
-                assetDefinitionService);
+                assetDefinitionService,
+                findDefaultWalletInteract);
     }
 
     @Provides
@@ -54,4 +58,8 @@ class HomeModule {
     @Provides
     ImportTokenRouter providesImportTokenRouter() { return new ImportTokenRouter(); }
 
+    @Provides
+    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new FindDefaultWalletInteract(walletRepository);
+    }
 }

@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -58,10 +60,12 @@ import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.SelectNetworkDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
+import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getEthString;
 
 
@@ -93,7 +97,7 @@ public class DappBrowserFragment extends Fragment implements
         initView(view);
         initViewModel();
         setupAddressBar();
-        viewModel.prepare();
+        viewModel.prepare(getContext());
         URLReceiver = new URLLoadReceiver(getActivity(), this);
         return view;
     }
@@ -121,9 +125,7 @@ public class DappBrowserFragment extends Fragment implements
         });
 
         urlTv.setOnItemClickListener((parent, view, position, id) -> {
-            web3.loadUrl(Utils.formatUrl(adapter.getItem(position)));
-            web3.requestFocus();
-            dismissKeyboard();
+            loadUrl(adapter.getItem(position));
         });
 
         urlTv.setOnClickListener(v -> urlTv.showDropDown());
@@ -147,7 +149,7 @@ public class DappBrowserFragment extends Fragment implements
 
         // Default to last opened site
         if (web3.getUrl() == null) {
-            web3.loadUrl(Utils.formatUrl(viewModel.getLastUrl(getContext())));
+            loadUrl(viewModel.getLastUrl(getContext()));
         }
     }
 
@@ -387,6 +389,38 @@ public class DappBrowserFragment extends Fragment implements
         adapter.add(urlText);
         adapter.notifyDataSetChanged();
         dismissKeyboard();
+        getActivity().sendBroadcast(new Intent(RESET_TOOLBAR));
         return true;
+    }
+
+    public void addBookmark()
+    {
+        viewModel.addBookmark(getContext(), urlTv.getText().toString());
+    }
+
+    public void viewBookmarks()
+    {
+        List<String> bookmarks = viewModel.getBookmarks();
+        //display in popup
+        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), bookmarks.toArray(new String[bookmarks.size()]), urlTv.getText().toString());
+        dialog.setTitle(R.string.bookmarks);
+        dialog.setButtonText(R.string.visit);
+        dialog.setOnClickListener(v1 -> {
+            String url = dialog.getSelectedItem();
+            urlTv.setText(url);
+            loadUrl(url);
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    public void removeBookmark()
+    {
+        viewModel.removeBookmark(getContext(), urlTv.getText().toString());
+    }
+
+    public boolean getUrlIsBookmark()
+    {
+        return viewModel.getBookmarks().contains(urlTv.getText().toString());
     }
 }

@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.text.Editable;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -57,6 +58,7 @@ public class DappBrowserViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
 
     private double ethToUsd = 0;
+    private ArrayList<String> bookmarks;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -112,11 +114,18 @@ public class DappBrowserViewModel extends BaseViewModel {
         }
     }
 
-    public void prepare() {
+    public void prepare(Context context) {
         progress.postValue(true);
+        loadBookmarks(context);
+
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
+    }
+
+    private void loadBookmarks(Context context)
+    {
+        bookmarks = getBrowserBookmarksFromPrefs(context);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -316,6 +325,17 @@ public class DappBrowserViewModel extends BaseViewModel {
         return history;
     }
 
+    private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {
+        ArrayList<String> storedBookmarks;
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_BROWSER_BOOKMARKS, "");
+        if (!historyJson.isEmpty()) {
+            storedBookmarks = new Gson().fromJson(historyJson, new TypeToken<ArrayList<String>>(){}.getType());
+        } else {
+            storedBookmarks = new ArrayList<>();
+        }
+        return storedBookmarks;
+    }
+
     public void addToBrowserHistory(Context context, String url)
     {
         String checkVal = url;
@@ -348,6 +368,12 @@ public class DappBrowserViewModel extends BaseViewModel {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_HISTORY, historyJson).apply();
     }
 
+    private void writeBookmarks(Context context, ArrayList<String> bookmarks)
+    {
+        String historyJson = new Gson().toJson(bookmarks);
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_BOOKMARKS, historyJson).apply();
+    }
+
     public String getLastUrl(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(C.DAPP_LASTURL_KEY, DAPP_DEFAULT_URL);
@@ -356,5 +382,24 @@ public class DappBrowserViewModel extends BaseViewModel {
     public void setLastUrl(Context context, String url) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
+    }
+
+    public ArrayList<String> getBookmarks()
+    {
+        return bookmarks;
+    }
+
+    public void addBookmark(Context context, String url)
+    {
+        //add to list
+        bookmarks.add(url);
+        //store
+        writeBookmarks(context, bookmarks);
+    }
+
+    public void removeBookmark(Context context, String url)
+    {
+        if (bookmarks.contains(url)) bookmarks.remove(url);
+        writeBookmarks(context, bookmarks);
     }
 }

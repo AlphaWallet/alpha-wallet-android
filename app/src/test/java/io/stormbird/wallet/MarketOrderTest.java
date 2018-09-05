@@ -147,6 +147,12 @@ public class MarketOrderTest
             }
 
             @Override
+            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            {
+                return null;
+            }
+
+            @Override
             public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password) {
                 return null;
             }

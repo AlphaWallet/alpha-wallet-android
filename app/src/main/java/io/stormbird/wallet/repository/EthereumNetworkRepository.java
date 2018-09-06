@@ -131,7 +131,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		}
 	}
 
-	@Override
 	public void setDefaultNetworkInfo(NetworkInfo networkInfo) {
 		defaultNetwork = networkInfo;
 		preferences.setDefaultNetwork(defaultNetwork.name);

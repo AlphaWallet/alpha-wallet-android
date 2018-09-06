@@ -308,4 +308,10 @@
     <string name="ticket_not_valid">无效的Token</string>
     <string name="ticket_not_valid_body">在当前网络上此地址没有有效智能合约： 合同可能已经被终止，或者它可能位于不同的网络上。 可以尝试将网络改为“Ropsten（测试网络）”。</string>
     <string name="loading">正在导入</string>
+    <string name="label_contract">合同地址</string>
+    <string name="label_from">来源地址</string>
+    <string name="label_to">接收地址</string>
+    <string name="label_gas_limit">Gas限制</string>
+    <string name="label_gas_price">Gas价钱</string>
+    <string name="label_network_fee">Gas费用</string>
 </resources>

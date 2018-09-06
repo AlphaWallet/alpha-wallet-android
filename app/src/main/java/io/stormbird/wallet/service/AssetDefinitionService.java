@@ -98,7 +98,14 @@ public class AssetDefinitionService
     public NonFungibleToken getNonFungibleToken(String contractAddress, BigInteger v)
     {
         TokenDefinition definition = getAssetDefinition(contractAddress);
-        return new NonFungibleToken(v, definition);
+        if (definition != null)
+        {
+            return new NonFungibleToken(v, definition);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**

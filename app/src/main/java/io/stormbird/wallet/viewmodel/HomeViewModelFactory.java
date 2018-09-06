@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
@@ -19,6 +20,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final FindDefaultWalletInteract findDefaultWalletInteract;
 
     public HomeViewModelFactory(
             LocaleRepositoryType localeRepository,
@@ -26,13 +28,15 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             SettingsRouter settingsRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            FindDefaultWalletInteract findDefaultWalletInteract) {
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.addTokenRouter = addTokenRouter;
         this.settingsRouter = settingsRouter;
         this.assetDefinitionService = assetDefinitionService;
+        this.findDefaultWalletInteract = findDefaultWalletInteract;
     }
 
     @NonNull
@@ -40,10 +44,11 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new HomeViewModel(
                 localeRepository,
-        importTokenRouter,
-        externalBrowserRouter,
-        addTokenRouter,
-        settingsRouter,
-        assetDefinitionService);
+                importTokenRouter,
+                externalBrowserRouter,
+                addTokenRouter,
+                settingsRouter,
+                assetDefinitionService,
+                findDefaultWalletInteract);
     }
 }

@@ -281,10 +281,26 @@ public class AssetDefinitionService
         }
     }
 
+    /*SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            String dateFormat = format.format(new Date(fileTime));
+            conn.addRequestProperty("If-Modified-Since", dateFormat);
+*/
+
     private Observable<String> fetchXMLFromServer(String address)
     {
         return Observable.fromCallable(() -> {
             if (address.equals("")) return "0x";
+
+            //peek to see if this file exists
+            File existingFile = getXMLFile(address);
+            long fileTime = 0;
+            if (existingFile.exists())
+            {
+                fileTime = existingFile.lastModified();
+            }
+
+            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            String dateFormat = format.format(new Date(fileTime));
 
             StringBuilder sb = new StringBuilder();
             sb.append("https://repo.awallet.io/");
@@ -296,12 +312,13 @@ public class AssetDefinitionService
                 Request request = new Request.Builder()
                         .url(sb.toString())
                         .get()
+                        .addHeader("If-Modified-Since", dateFormat)
                         .build();
 
                 okhttp3.Response response = okHttpClient.newCall(request).execute();
 
                 String xmlBody = response.body().string();
-                if (xmlBody != null && xmlBody.length() > 10)
+                if (response.code() == HttpURLConnection.HTTP_OK && xmlBody != null && xmlBody.length() > 10)
                 {
                     storeFile(address, xmlBody);
                     result = address;
@@ -436,7 +453,7 @@ public class AssetDefinitionService
     {
         Disposable d = Observable.fromIterable(getFileList(context.getFilesDir()))
                 .filter(this::isValidXML)
-                .flatMap(this::checkFileTime)
+                .map(this::convertToAddress)
                 .flatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -24,7 +24,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         return toolbar;
     }
 
-    protected void setTitle(String title) {
+    protected void setTitle(String title)
+    {
         ActionBar actionBar = getSupportActionBar();
         TextView toolbarTitle = findViewById(R.id.toolbar_title);
         if (toolbarTitle != null) {
@@ -46,6 +47,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    protected void enableDisplayHomeAsHome(boolean active) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(active);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_action_home);
         }
     }
 

@@ -54,6 +54,7 @@ public class SelectNetworkDialog extends Dialog {
 
         listView = findViewById(R.id.dialog_list);
         button = findViewById(R.id.dialog_button);
+        titleText = findViewById(R.id.dialog_main_text);
 
         ArrayList<NetworkItem> list = new ArrayList<>();
 
@@ -85,6 +86,10 @@ public class SelectNetworkDialog extends Dialog {
     public void setTitle(int resId) {
         titleText.setVisibility(View.VISIBLE);
         titleText.setText(context.getResources().getString(resId));
+    }
+
+    public void setButtonText(int resId) {
+        button.setText(context.getResources().getString(resId));
     }
 
     @Override

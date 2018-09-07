@@ -456,7 +456,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             //try clipboard data
             ClipboardManager clipboard = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard != null)
+            if (clipboard != null && clipboard.getPrimaryClip() != null)
             {
                 CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
                 //see if text is a magic link

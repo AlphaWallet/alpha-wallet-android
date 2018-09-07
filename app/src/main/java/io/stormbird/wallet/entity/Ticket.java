@@ -652,7 +652,7 @@ public class Ticket extends Token implements Parcelable
     public String getTokenName(AssetDefinitionService assetService)
     {
         //see if this token is covered by any contract
-        int networkId = assetService.getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
+        int networkId = assetService.getNetworkId(getAddress());
         if (networkId >= 1)
         {
             return assetService.getAssetDefinition(getAddress()).getTokenName();
@@ -707,7 +707,7 @@ public class Ticket extends Token implements Parcelable
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        int networkId = assetService.getNetworkId(getAddress());// getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
+        int networkId = assetService.getNetworkId(getAddress());
         isMatchedInXML = networkId >= 1;
     }
 

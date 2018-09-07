@@ -18,6 +18,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.FileData;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
@@ -239,18 +240,6 @@ public class SplashViewModel extends ViewModel {
                 .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), this::onError);
     }
 
-    private void onUpdate(FileData data, long currentInstallDate, Context baseContext)
-    {
-        //if needs update can we spring open a dialogue box from here?
-        if (data.fileDate > currentInstallDate)
-        {
-            String newVersion = stripFilename(data.fileName);
-            Intent intent = new Intent(DOWNLOAD_READY);
-            intent.putExtra("Version", newVersion);
-            baseContext.sendBroadcast(intent);
-        }
-    }
-
     private Single<FileData> getFileDataFromURL(final String location)
     {
         return Single.fromCallable(() -> {
@@ -265,7 +254,7 @@ public class SplashViewModel extends ViewModel {
                 String redirectLocation = connection.getHeaderField("Location");
                 if (redirectLocation == null)
                 {
-                    fileData.fileDate = connection.getLastModified();//connection.getDate(); //long lastModified = connection.getLastModified();
+                    fileData.fileDate = connection.getLastModified();
                     fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
                     break;
                 }
@@ -277,15 +266,15 @@ public class SplashViewModel extends ViewModel {
         });
     }
 
-    class FileData
+    private void onUpdate(FileData data, long currentInstallDate, Context baseContext)
     {
-        Long fileDate;
-        String fileName;
-
-        FileData()
+        //if needs update can we spring open a dialogue box from here?
+        if (data.fileDate > currentInstallDate)
         {
-            fileDate = 0L;
-            fileName = "";
+            String newVersion = stripFilename(data.fileName);
+            Intent intent = new Intent(DOWNLOAD_READY);
+            intent.putExtra("Version", newVersion);
+            baseContext.sendBroadcast(intent);
         }
     }
 }

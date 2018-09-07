@@ -3,6 +3,7 @@ package io.stormbird.wallet.service;
 
 import android.content.Context;
 import android.os.Environment;
+import android.text.format.DateUtils;
 
 import org.xml.sax.SAXException;
 
@@ -14,22 +15,34 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Address;
+import io.stormbird.wallet.entity.FileData;
+import okhttp3.Cache;
+import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import retrofit2.Retrofit;
 
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 
@@ -65,9 +78,10 @@ public class AssetDefinitionService
 
         try
         {
-            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
             assetDefinitions.clear();
             loadContracts(context.getFilesDir());
+            checkDownloadedFiles();
+            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
         }
         catch (IOException|SAXException e)
         {
@@ -274,9 +288,27 @@ public class AssetDefinitionService
         }
     }
 
+    /*SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            String dateFormat = format.format(new Date(fileTime));
+            conn.addRequestProperty("If-Modified-Since", dateFormat);
+*/
+
     private Observable<String> fetchXMLFromServer(String address)
     {
         return Observable.fromCallable(() -> {
+            if (address.equals("")) return "0x";
+
+            //peek to see if this file exists
+            File existingFile = getXMLFile(address);
+            long fileTime = 0;
+            if (existingFile.exists())
+            {
+                fileTime = existingFile.lastModified();
+            }
+
+            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            String dateFormat = format.format(new Date(fileTime));
+
             StringBuilder sb = new StringBuilder();
             sb.append("https://repo.awallet.io/");
             sb.append(address);
@@ -287,12 +319,13 @@ public class AssetDefinitionService
                 Request request = new Request.Builder()
                         .url(sb.toString())
                         .get()
+                        .addHeader("If-Modified-Since", dateFormat)
                         .build();
 
                 okhttp3.Response response = okHttpClient.newCall(request).execute();
 
                 String xmlBody = response.body().string();
-                if (xmlBody != null && xmlBody.length() > 10)
+                if (response.code() == HttpURLConnection.HTTP_OK && xmlBody != null && xmlBody.length() > 10)
                 {
                     storeFile(address, xmlBody);
                     result = address;
@@ -356,8 +389,12 @@ public class AssetDefinitionService
                 String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
                 if (extension.equals("xml"))
                 {
-                    FileInputStream stream = new FileInputStream(f);
-                    parseFile(stream);
+                    String name = f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
+                    if (Address.isAddress(name))
+                    {
+                        FileInputStream stream = new FileInputStream(f);
+                        parseFile(stream);
+                    }
                 }
             }
         }
@@ -388,6 +425,48 @@ public class AssetDefinitionService
         }
     }
 
+    private List<File> getFileList(File directory)
+    {
+        File[] files = context.getFilesDir().listFiles();
+        return new ArrayList<File>(Arrays.asList(files));
+    }
+
+    private boolean isValidXML(File f)
+    {
+        int index = f.getName().lastIndexOf('.');
+        if (index > 0)
+        {
+            String extension = f.getName().substring(index + 1).toLowerCase();
+            String name = f.getName().substring(0, index).toLowerCase();
+            if (extension.equals("xml") && Address.isAddress(name))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String convertToAddress(File f)
+    {
+        return f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
+    }
+
+    /**
+     * check the downloaded XML files for updates when wallet restarts.
+     * TODO: API to query update date
+     */
+    private void checkDownloadedFiles()
+    {
+        Disposable d = Observable.fromIterable(getFileList(context.getFilesDir()))
+                .filter(this::isValidXML)
+                .map(this::convertToAddress)
+                .flatMap(this::fetchXMLFromServer)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleFile, this::onError);
+    }
+
     /**
      * Use internal directory to store contracts fetched from the server
      * @param address
@@ -397,10 +476,6 @@ public class AssetDefinitionService
      */
     private File storeFile(String address, String result) throws IOException
     {
-//        File directory = new File(
-//                Environment.getExternalStorageDirectory()
-//                        + File.separator + ALPHAWALLET_DIR);
-
         String fName = address + ".xml";
 
         //Store received files in the internal storage area - no need to ask for permissions
@@ -426,5 +501,28 @@ public class AssetDefinitionService
         {
             return 0;
         }
+    }
+
+    private Observable<String> checkFileTime(File localDefinition)
+    {
+        return Observable.fromCallable(() -> {
+            String contractAddress = convertToAddress(localDefinition);
+            URL url = new URL("https://repo.awallet.io/" + contractAddress);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setIfModifiedSince( localDefinition.lastModified() );
+
+            switch (conn.getResponseCode())
+            {
+                case HttpURLConnection.HTTP_OK:
+                    break;
+
+                case HttpURLConnection.HTTP_NOT_MODIFIED:
+                    contractAddress = "";
+                    break;
+            }
+
+            conn.disconnect();
+            return contractAddress;
+        });
     }
 }

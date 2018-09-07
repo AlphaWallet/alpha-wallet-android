@@ -33,6 +33,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
@@ -81,7 +82,7 @@ public class AssetDefinitionService
             assetDefinitions.clear();
             loadContracts(context.getFilesDir());
             checkDownloadedFiles();
-            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
+            //assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
         }
         catch (IOException|SAXException e)
         {
@@ -168,9 +169,8 @@ public class AssetDefinitionService
             else
             {
                 assetDef = loadTokenDefinition(correctedAddress);
+                assetDefinitions.put(address.toLowerCase(), assetDef);
             }
-
-            assetDefinitions.put(address.toLowerCase(), assetDef);
         }
 
         return assetDef; // if nothing found use default
@@ -524,5 +524,18 @@ public class AssetDefinitionService
             conn.disconnect();
             return contractAddress;
         });
+    }
+
+    public String getFeemasterAPI(String address)
+    {
+        TokenDefinition td = getAssetDefinition(address);
+        if (td != null)
+        {
+            return td.getFeemasterAPI();
+        }
+        else
+        {
+            return null;
+        }
     }
 }

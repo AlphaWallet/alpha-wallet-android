@@ -195,7 +195,8 @@ public class AssetDefinitionService
 
         if (definition != null && definition.addresses.containsKey(contractAddress))
         {
-            return definition.getKeyName();
+            String issuer = definition.getKeyName();
+            return (issuer == null || issuer.length() == 0) ? context.getString(R.string.stormbird) : issuer;
         }
         else
         {

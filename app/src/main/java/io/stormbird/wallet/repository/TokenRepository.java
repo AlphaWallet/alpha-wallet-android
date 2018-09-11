@@ -500,6 +500,7 @@ public class TokenRepository implements TokenRepositoryType {
                 List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
+                TokenInfo tInfo = token.tokenInfo;
                 if (token.tokenInfo.isStormbird)
                 {
                     Ticket t = (Ticket) token;
@@ -509,6 +510,13 @@ public class TokenRepository implements TokenRepositoryType {
                 else
                 {
                     balance = getBalance(wallet, token.tokenInfo);
+                    if (balance.equals(BigDecimal.valueOf(-1)))
+                    {
+                        balance = BigDecimal.ZERO;
+                        //array balance, assume ERC875
+                        tInfo = changeToERC875Token(token);
+                        balanceArray = new ArrayList<>(Arrays.asList(BigInteger.ZERO));
+                    }
                 }
 
                   //This code, together with an account with many tokens on it thrashes the Token view update
@@ -517,7 +525,7 @@ public class TokenRepository implements TokenRepositoryType {
 //                    throw new BadContract();
 //                }
 
-                Token updated = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
+                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
                 return updated;
             }
@@ -546,6 +554,7 @@ public class TokenRepository implements TokenRepositoryType {
             BigDecimal balance = null;
             List<BigInteger> balanceArray = null;
             List<Integer> burnArray = null;
+            TokenInfo tInfo = token.tokenInfo;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
                     if (token.tokenInfo.isStormbird)
@@ -556,13 +565,24 @@ public class TokenRepository implements TokenRepositoryType {
                     else
                     {
                         balance = getBalance(wallet, token.tokenInfo);
+                        if (balance.equals(BigDecimal.valueOf(-1)))
+                        {
+                            balance = BigDecimal.ZERO;
+                            tInfo = changeToERC875Token(token);
+                            balanceArray = new ArrayList<>(Arrays.asList(BigInteger.ZERO));
+                        }
                     }
-                    token = tFactory.createToken(token.tokenInfo, balance, balanceArray, burnArray, now);
+                    token = tFactory.createToken(tInfo, balance, balanceArray, burnArray, now);
                     localSource.updateTokenBalance(network, wallet, token);
                 } catch (Throwable th) { /* Quietly */ }
             }
             return token;
         });
+    }
+
+    private TokenInfo changeToERC875Token(Token token)
+    {
+        return new TokenInfo(token.tokenInfo.address, token.tokenInfo.name, token.tokenInfo.symbol, token.tokenInfo.decimals, true, true);
     }
 
     private SingleTransformer<Token[], Token[]> attachEthereum(NetworkInfo network, Wallet wallet)
@@ -676,13 +696,46 @@ public class TokenRepository implements TokenRepositoryType {
         Function function = balanceOf(wallet.address);
         String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
 
-        if (responseValue == null) return null;
+        if (responseValue == null) return BigDecimal.ZERO;
 
         List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
         if (response.size() == 1) {
-            return new BigDecimal(((Uint256) response.get(0)).getValue());
+            BigDecimal retVal = new BigDecimal(((Uint256) response.get(0)).getValue());
+            if (retVal.equals(BigDecimal.valueOf(32)))
+            {
+                return checkValue(retVal, wallet, responseValue);
+            }
+            else
+            {
+                return retVal;
+            }
         } else {
-            return null;
+            return BigDecimal.ZERO;
+        }
+    }
+
+    /**
+     * This function checks for suspicious contracts. If the value of tokens is 32, this could be an array return.
+     * Parsing the returned value with DynamicArray, if it is an array spec (ie 0x02, then array size etc) then
+     * we can remove this token. However it would be better to display the token as a ticket if the array balance has elements.
+     * @param value
+     * @param wallet
+     * @param responseValue
+     * @return
+     */
+    private BigDecimal checkValue(BigDecimal value, Wallet wallet, String responseValue)
+    {
+        org.web3j.abi.datatypes.Function functionCheck = balanceOfArray(wallet.address);
+        List<Type> values = FunctionReturnDecoder.decode(responseValue, functionCheck.getOutputParameters());
+        //is it an array?
+        if (values.isEmpty()) return value;
+        else if (values.size() > 0)
+        {
+            return BigDecimal.valueOf(-1);
+        }
+        else
+        {
+            return value;
         }
     }
 

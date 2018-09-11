@@ -426,6 +426,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setName(token.tokenInfo.name);
                     realmToken.setSymbol(token.tokenInfo.symbol);
                     realmToken.setDecimals(token.tokenInfo.decimals);
+                    realmToken.setStormbird(token.tokenInfo.isStormbird);
                 }
                 realmToken.setNullCheckCount(0);
                 realm.commitTransaction();

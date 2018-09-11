@@ -158,7 +158,7 @@ public class AppSiteController {
             sides += " - " + token.getAttribute("countryB").text;
             model.addAttribute("ticketSides", sides);
             model.addAttribute("ticketDate",
-                    new ZonedDateTime(token.getAttribute("time").text).format(dateFormat));
+                    new ZonedDateTime(token.getAttribute("time")).format(dateFormat));
             model.addAttribute("ticketMatch", token.getAttribute("match").text);
             model.addAttribute("ticketCategory", token.getAttribute("category").text);
             break; // we only need 1 token's info. rest assumed to be the same
@@ -178,7 +178,7 @@ public class AppSiteController {
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
         SpringApplication.run(AppSiteController.class, args);
         parser.setCryptoInterface(cryptoFunctions);
-        repoDir = Paths.get("C:\\Users\\James\\StudioProjects\\alpha-wallet-android\\lib\\contracts");
+
         if (repoDir == null ) {
             System.err.println("Don't know where is the contract behaviour XML repository.");
             System.err.println("Try run with --repository.dir=/dir/to/repo");

@@ -28,8 +28,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.stormbird.token.entity.BadContract;
+import okhttp3.OkHttpClient;
 import rx.schedulers.Schedulers;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -45,7 +47,12 @@ public class TransactionHandler
 
     public TransactionHandler()
     {
-        mWeb3 = Web3j.build(new HttpService(MAIN_NODEURL));
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(20, TimeUnit.SECONDS);
+        builder.readTimeout(20, TimeUnit.SECONDS);
+
+        HttpService service = new HttpService(MAIN_NODEURL, builder.build(), false);
+        mWeb3 = Web3j.build(service);
 
         try
         {

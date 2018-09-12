@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,6 +78,7 @@ public class DappBrowserFragment extends Fragment implements
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
     private DappBrowserViewModel viewModel;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
     private Web3View web3;
     private AutoCompleteTextView urlTv;
     private ProgressBar progressBar;
@@ -105,6 +106,8 @@ public class DappBrowserFragment extends Fragment implements
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> web3.reload());
     }
 
     private void setupAddressBar() {
@@ -169,9 +172,11 @@ public class DappBrowserFragment extends Fragment implements
             public void onProgressChanged(WebView webview, int newProgress) {
                 if (newProgress == 100) {
                     progressBar.setVisibility(View.GONE);
+                    swipeRefreshLayout.setRefreshing(false);
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(newProgress);
+                    swipeRefreshLayout.setRefreshing(true);
                 }
             }
 

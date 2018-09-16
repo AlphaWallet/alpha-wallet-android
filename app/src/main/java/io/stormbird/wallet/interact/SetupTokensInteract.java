@@ -90,7 +90,7 @@ public class SetupTokensInteract {
             {
                 functionName = CONTRACT_CONSTRUCTOR;
             }
-            else if (data.functionData != null)
+            else if (data != null && data.functionData != null)
             {
                 functionName = data.functionData.functionFullName;
             }
@@ -121,7 +121,7 @@ public class SetupTokensInteract {
                     ct.interpretTransferFrom(walletAddr, data);
                     break;
                 case "transfer(address,uint16[])":
-                    ct.interpretTransfer(walletAddr, data);
+                    if (ct != null) ct.interpretTransfer(walletAddr, data);
                     break;
                 case "transfer(address,uint256)": //ERC20 transfer
                     op.from = thisTrans.from;
@@ -162,7 +162,7 @@ public class SetupTokensInteract {
                     ct.setOperation(R.string.ticket_invalid_op);
                     break;
                 default:
-                    ct.setOperation(R.string.ticket_invalid_op);
+                    if (ct != null) ct.setOperation(R.string.ticket_invalid_op);
                     break;
             }
 

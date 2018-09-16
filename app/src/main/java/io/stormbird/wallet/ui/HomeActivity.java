@@ -94,6 +94,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         toolbar();
 
+        dappBrowserFragment = new DappBrowserFragment();
+        settingsFragment = new NewSettingsFragment();
         viewPager = findViewById(R.id.view_pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -378,12 +380,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         public Fragment getItem(int position) {
             switch (position) {
                 case DAPP_BROWSER:
-                    dappBrowserFragment = new DappBrowserFragment();
+                    if (dappBrowserFragment == null) dappBrowserFragment = new DappBrowserFragment();
                     return dappBrowserFragment;
                 case WALLET:
                     return new WalletFragment();
                 case SETTINGS:
-                    settingsFragment = new NewSettingsFragment();
+                    if (settingsFragment == null) settingsFragment = new NewSettingsFragment();
                     return settingsFragment;
                 case TRANSACTIONS:
                     return new TransactionsFragment();

@@ -64,6 +64,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private TextView priceETH;
     private TextView priceUSD;
+    private TextView priceUSDLabel;
     private TextView importTxt;
 
     private AppCompatRadioButton verified;
@@ -90,8 +91,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         systemView = findViewById(R.id.system_view);
         priceETH = findViewById(R.id.textImportPrice);
         priceUSD = findViewById(R.id.textImportPriceUSD);
+        priceUSDLabel = findViewById(R.id.fiat_price_txt);
         priceETH.setVisibility(View.GONE);
         priceUSD.setVisibility(View.GONE);
+        priceUSDLabel.setVisibility(View.GONE);
 
         importTxt = findViewById(R.id.textImport);
         costLayout = findViewById(R.id.cost_layout);
@@ -131,7 +134,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void checkContractNetwork(String contractAddress)
     {
-        int checkNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition(contractAddress).getNetworkFromContract(contractAddress);
+        int checkNetworkId = viewModel.getAssetDefinitionService().getNetworkId(contractAddress);
         if (checkNetworkId > 0)
         {
             viewModel.switchNetwork(checkNetworkId);
@@ -245,9 +248,19 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         if (order.price == 0)
         {
-            priceETH.setText(R.string.free_import);
+            String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(importTokens.contractAddress);
+            if (feemasterServer != null)
+            {
+                priceETH.setText(R.string.free_import);
+            }
+            else
+            {
+                priceETH.setText(R.string.free_import_with_gas);
+            }
+
             priceETH.setVisibility(View.VISIBLE);
             priceUSD.setVisibility(View.GONE);
+            priceUSDLabel.setVisibility(View.GONE);
         }
         else
         {
@@ -255,6 +268,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             priceUSD.setText(priceUsd);
             priceETH.setVisibility(View.VISIBLE);
             priceUSD.setVisibility(View.VISIBLE);
+            priceUSDLabel.setVisibility(View.VISIBLE);
             Button importTickets = findViewById(R.id.import_ticket);
             importTickets.setText(R.string.action_purchase);
         }
@@ -271,7 +285,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractNetworkId = viewModel.getAssetDefinitionService().getAssetDefinition(ticket.getAddress()).getNetworkFromContract(ticket.getAddress());
+        int contractNetworkId = viewModel.getAssetDefinitionService().getNetworkId(ticket.getAddress());
         if (contractNetworkId == networkId)
         {
             verified.setVisibility(View.VISIBLE);
@@ -402,13 +416,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     {
                         confirmPurchaseDialog();
                     }
-                    else {
+                    else
+                    {
                         onProgress(true);
                         Ticket t = viewModel.getImportToken();
-                        int checkNetworkId = viewModel.getAssetDefinition(t.getAddress()).getNetworkFromContract(t.getAddress());
-                        if (checkNetworkId > 0)
+                        String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(t.getAddress());
+                        if (feemasterServer != null)
                         {
-                            viewModel.importThroughFeemaster(viewModel.getAssetDefinition(t.getAddress()).getFeemasterAPI());
+                            viewModel.importThroughFeemaster(feemasterServer);
                         }
                         else
                         {
@@ -441,7 +456,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             //try clipboard data
             ClipboardManager clipboard = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard != null)
+            if (clipboard != null && clipboard.getPrimaryClip() != null)
             {
                 CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
                 //see if text is a magic link

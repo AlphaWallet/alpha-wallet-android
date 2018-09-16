@@ -311,7 +311,9 @@ public class TokenDefinition {
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = ((Element) nNode);
                 if (eElement.getTagName().equals("address")) {
-                    Integer networkId = Integer.parseInt(eElement.getAttribute("network"));
+                    String networkElement = eElement.getAttribute("network");
+                    if (networkElement.length() < 1) networkElement = "1"; //default to mainnet
+                    Integer networkId = Integer.parseInt(networkElement);
                     addresses.put(nNode.getTextContent().toLowerCase(), networkId);
                 }
                 /* if there is no token name in <contract> this breaks;

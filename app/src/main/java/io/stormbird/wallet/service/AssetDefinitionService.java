@@ -308,6 +308,8 @@ public class AssetDefinitionService
             sb.append(address);
             String result = null;
 
+            okhttp3.Response response = null;
+
             try
             {
                 Request request = new Request.Builder()
@@ -316,7 +318,7 @@ public class AssetDefinitionService
                         .addHeader("If-Modified-Since", dateFormat)
                         .build();
 
-                okhttp3.Response response = okHttpClient.newCall(request).execute();
+                response = okHttpClient.newCall(request).execute();
 
                 String xmlBody = response.body().string();
 
@@ -333,6 +335,10 @@ public class AssetDefinitionService
             catch (Exception e)
             {
                 e.printStackTrace();
+            }
+            finally
+            {
+                if (response != null) response.body().close();
             }
 
             assetChecked.put(address, System.currentTimeMillis());
@@ -534,5 +540,11 @@ public class AssetDefinitionService
         {
             return null;
         }
+    }
+
+    //when user reloads the tokens we should also check XML for any files
+    public void clearCheckTimes()
+    {
+        assetChecked.clear();
     }
 }

@@ -135,6 +135,12 @@ public class WalletViewModel extends BaseViewModel {
         fetchTokens();
     }
 
+    public void reloadTokens()
+    {
+        assetDefinitionService.clearCheckTimes();
+        fetchTokens();
+    }
+
     public void fetchTokens()
     {
         if (updateTokens != null && !updateTokens.isDisposed())

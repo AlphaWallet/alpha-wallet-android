@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.stormbird.wallet.entity.EtherscanTransaction;
@@ -101,10 +102,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					}
 				}
 			}
+			catch (JSONException e)
+			{
+				//silent fail
+			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				// Do not try the Trust API - this often returns malformed transactions.
 			}
 
 			return result.toArray(new Transaction[result.size()]);

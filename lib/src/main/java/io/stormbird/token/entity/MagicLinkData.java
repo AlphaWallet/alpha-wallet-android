@@ -18,6 +18,7 @@ public class MagicLinkData
     public byte[] message;
     public String ownerAddress;
     public String contractName;
+    public int contractType;
 
     public List<BigInteger> balanceInfo = null;
 

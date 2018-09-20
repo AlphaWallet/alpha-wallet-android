@@ -59,7 +59,7 @@ public class ZonedDateTime {
     private void initZonedTime(String time) throws ParseException, IllegalArgumentException
     {
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMddHHmmssZZZZ");
-        Pattern p = Pattern.compile("(\\+\\d{4})");
+        Pattern p = Pattern.compile("(\\+\\d{4}|\\-\\d{4})");
         Matcher m = p.matcher(time);
         if (m.find()) {
             this.timezone = TimeZone.getTimeZone("GMT"+m.group(1));

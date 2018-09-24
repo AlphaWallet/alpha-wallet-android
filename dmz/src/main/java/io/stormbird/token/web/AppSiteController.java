@@ -159,7 +159,7 @@ public class AppSiteController {
             sides += " - " + token.getAttribute("countryB").text;
             model.addAttribute("ticketSides", sides);
             model.addAttribute("ticketDate",
-                    new ZonedDateTime(token.getAttribute("time").text).format(dateFormat));
+                    new ZonedDateTime(token.getAttribute("time")).format(dateFormat));
             model.addAttribute("ticketMatch", token.getAttribute("match").text);
             model.addAttribute("ticketCategory", token.getAttribute("category").text);
             break; // we only need 1 token's info. rest assumed to be the same

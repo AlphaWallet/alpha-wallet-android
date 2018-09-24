@@ -114,6 +114,19 @@ public class ParseMagicLink
         {
             ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
+
+            data.contractType = ds.readByte();
+
+            switch (data.contractType)
+            {
+                case 0x00:
+                    data.contractType = 1;
+                    ds.reset();
+                    break;
+                default:
+                    break;
+            }
+
             szabo = ds.toUnsignedLong(ds.readInt());
             data.expiry = ds.toUnsignedLong(ds.readInt());
             data.priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
@@ -216,12 +229,17 @@ public class ParseMagicLink
      * @param expiry Unsigned UNIX timestamp of offer expiry
      * @return First part of Universal Link (requires signature of trade bytes to be added)
      */
-    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+    public static byte[] generateLeadingLinkBytes(byte type, int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
     {
         try
         {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
+
+            if (type > 0)
+            {
+                wb.writeByte(type);
+            }
 
             if (priceWei.compareTo(maxPrice) > 0) {
                 throw new SalesOrderMalformed("Order's price too high to be used in a link");
@@ -241,6 +259,11 @@ public class ParseMagicLink
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+    {
+        return generateLeadingLinkBytes((byte)0x00, ticketSendIndexList, contractAddress, priceWei, expiry);
     }
 
     public byte[] getTradeBytes(int[] ticketSendIndexList, String contractAddress, String ethPrice, long expiry)

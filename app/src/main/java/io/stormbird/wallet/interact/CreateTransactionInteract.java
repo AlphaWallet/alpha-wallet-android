@@ -61,4 +61,15 @@ public class CreateTransactionInteract
                                 .subscribeOn(Schedulers.computation())
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
+
+    public Single<String> create(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data)
+    {
+        return passwordStore.getPassword(from)
+                .flatMap(password ->
+                                 transactionRepository.createTransaction(from, gasPrice, gasLimit, data, password)
+                                         .subscribeOn(Schedulers.computation())
+                                         .observeOn(AndroidSchedulers.mainThread()));
+    }
+
+
 }

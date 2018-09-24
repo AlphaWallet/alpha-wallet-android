@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.stormbird.token.entity.NonFungibleToken;
+
 /*
  * by Weiwu, 2018. Modeled after Java8's ZonedDateTime, intended to be
  * replaced by Java8's ZonedDateTime as soon as Android 8.0 gets popular
@@ -37,11 +40,26 @@ public class ZonedDateTime {
         this.timezone = timezone;
     }
 
-    /* Creating ZonedDateTime from GeneralizedTime */
-    public ZonedDateTime(String time) throws ParseException, IllegalArgumentException
+    public ZonedDateTime(NonFungibleToken.Attribute timeAttr) throws ParseException, IllegalArgumentException
+    {
+        String eventTimeText = timeAttr.text;
+        if (eventTimeText != null)
+        {
+            //there was a specific timezone set in the XML definition file, use this
+            initZonedTime(eventTimeText);
+        }
+        else
+        {
+            //No timezone specified, assume time in GMT
+            this.timezone = TimeZone.getTimeZone("GMT");
+            time = timeAttr.value.longValue()*1000;
+        }
+    }
+
+    private void initZonedTime(String time) throws ParseException, IllegalArgumentException
     {
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyyMMddHHmmssZZZZ");
-        Pattern p = Pattern.compile("(\\+\\d{4})");
+        Pattern p = Pattern.compile("(\\+\\d{4}|\\-\\d{4})");
         Matcher m = p.matcher(time);
         if (m.find()) {
             this.timezone = TimeZone.getTimeZone("GMT"+m.group(1));
@@ -55,6 +73,12 @@ public class ZonedDateTime {
 
 //        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
 //        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
+    }
+
+    /* Creating ZonedDateTime from GeneralizedTime */
+    public ZonedDateTime(String time) throws ParseException, IllegalArgumentException
+    {
+        initZonedTime(time);
     }
 
     /* EVERY FUNCTION BELOW ARE SET OUT IN JAVA8 */

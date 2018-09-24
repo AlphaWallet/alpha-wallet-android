@@ -57,7 +57,7 @@
         android:layout_below="@id/dialog_view"
         android:layout_gravity="center_horizontal"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/background_round_primary"
+        android:background="@drawable/selector_settings_item_reverse"
         android:layout_marginTop="20dp"
         android:fontFamily="@font/font_regular"
         android:paddingBottom="10dp"

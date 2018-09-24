@@ -129,7 +129,8 @@
 
         <activity
             android:name="io.stormbird.wallet.ui.HomeActivity"
-            android:label="@string/toolbar_header_wallet" />
+            android:label="@string/toolbar_header_wallet"
+            android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name="io.stormbird.wallet.ui.ImportTokenActivity"

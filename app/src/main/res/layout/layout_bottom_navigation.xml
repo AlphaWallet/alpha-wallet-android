@@ -6,12 +6,12 @@
     android:background="@color/white">
 
     <ImageView
-        android:id="@+id/nav_marketplace"
+        android:id="@+id/nav_browser"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="1"
-        android:src="@drawable/ic_market" />
+        android:src="@drawable/ic_browser" />
 
     <ImageView
         android:id="@+id/nav_wallet"

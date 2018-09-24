@@ -1,24 +1,12 @@
 package io.stormbird.wallet.service;
 
-import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import io.stormbird.wallet.entity.EtherscanTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionsCallback;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,14 +16,15 @@ import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.EtherscanTransaction;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -54,21 +43,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			EthereumNetworkRepositoryType networkRepository) {
 		this.httpClient = httpClient;
 		this.gson = gson;
-
-//		networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
-//		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-//		onNetworkChanged(networkInfo);
 	}
-
-//	private void buildApiClient(String baseUrl) {
-//		apiClient = new Retrofit.Builder()
-//				.baseUrl(baseUrl)
-//				.client(httpClient)
-//				.addConverterFactory(GsonConverterFactory.create(gson))
-//				.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//				.build()
-//				.create(ApiClient.class);
-//	}
 
 	@Override
 	public Observable<Transaction[]> fetchTransactions(String address) {
@@ -203,10 +178,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 
 		return result;
 	}
-
-//    private void onNetworkChanged(NetworkInfo networkInfo) {
-//		buildApiClient(networkInfo.backendUrl);
-//	}
 
 	private static @NonNull <T> ApiErrorOperator<T> apiError() {
 		return new ApiErrorOperator<>();

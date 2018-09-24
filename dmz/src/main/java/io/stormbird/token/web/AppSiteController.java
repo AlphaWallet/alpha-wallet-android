@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -178,12 +179,6 @@ public class AppSiteController {
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
         SpringApplication.run(AppSiteController.class, args);
         parser.setCryptoInterface(cryptoFunctions);
-        repoDir = Paths.get("C:\\Users\\James\\StudioProjects\\alpha-wallet-android\\lib\\contracts");
-        if (repoDir == null ) {
-            System.err.println("Don't know where is the contract behaviour XML repository.");
-            System.err.println("Try run with --repository.dir=/dir/to/repo");
-            System.exit(255);
-        }
 
         try (Stream<Path> dirStream = Files.walk(repoDir)) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
@@ -194,14 +189,29 @@ public class AppSiteController {
                     .collect(Collectors.toMap(
                             entry -> entry.getKey().toLowerCase(),
                             entry -> new File(entry.getValue())));
+            assert addresses != null : "Can't read all XML files";
+        } catch (NullPointerException e) {
+            System.err.println("repository.dir property is not defined in application.properties");
+            System.err.println("Please edit your local copy of application.properties, or");
+            System.err.println("try run with --repository.dir=/dir/to/repo");
+            System.exit(255);
+        } catch (NoSuchFileException e) {
+            System.err.println("repository.dir property is defined with a non-existing dir: " + repoDir.toString());
+            System.err.println("Please edit your local copy of application.properties, or");
+            System.err.println("try run with --repository.dir=/dir/to/repo");
+            System.exit(255);
+        } catch (AssertionError e) {
+            System.err.println("Can't read all the XML files in repository.dir: " + repoDir.toString());
+            System.exit(254);
         }
 
-        if (addresses == null || addresses.size() == 0) {
-            System.err.println("No Contract XML found. Bailing out.");
-            System.exit(255);
+        if (addresses.size() == 0) { // if no XML file is found
+            // the server still can run and wait for someone to dump an XML, but let's assume it's a mistake
+            System.err.println("No valid contract XML found in " + repoDir.toString() + ", cowardly not continuing.");
         } else {
-            System.out.println("Recognising the following contracts:");
-            addresses.forEach((addr, xml) -> System.out.println(addr));
+            // the list should be reprinted whenever a new file is added.
+            System.out.println("Serving an XML repo with the following contracts:");
+            addresses.forEach((addr, xml) -> System.out.println(addr + ":" + xml.getPath()));
         }
 	}
 

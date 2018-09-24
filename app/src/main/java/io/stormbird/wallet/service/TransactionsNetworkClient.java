@@ -55,20 +55,20 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		this.httpClient = httpClient;
 		this.gson = gson;
 
-		networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		onNetworkChanged(networkInfo);
+//		networkRepository.addOnChangeDefaultNetwork(this::onNetworkChanged);
+//		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+//		onNetworkChanged(networkInfo);
 	}
 
-	private void buildApiClient(String baseUrl) {
-		apiClient = new Retrofit.Builder()
-				.baseUrl(baseUrl)
-				.client(httpClient)
-				.addConverterFactory(GsonConverterFactory.create(gson))
-				.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-				.build()
-				.create(ApiClient.class);
-	}
+//	private void buildApiClient(String baseUrl) {
+//		apiClient = new Retrofit.Builder()
+//				.baseUrl(baseUrl)
+//				.client(httpClient)
+//				.addConverterFactory(GsonConverterFactory.create(gson))
+//				.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//				.build()
+//				.create(ApiClient.class);
+//	}
 
 	@Override
 	public Observable<Transaction[]> fetchTransactions(String address) {
@@ -204,9 +204,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		return result;
 	}
 
-    private void onNetworkChanged(NetworkInfo networkInfo) {
-		buildApiClient(networkInfo.backendUrl);
-	}
+//    private void onNetworkChanged(NetworkInfo networkInfo) {
+//		buildApiClient(networkInfo.backendUrl);
+//	}
 
 	private static @NonNull <T> ApiErrorOperator<T> apiError() {
 		return new ApiErrorOperator<>();

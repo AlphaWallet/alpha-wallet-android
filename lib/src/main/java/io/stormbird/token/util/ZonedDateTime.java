@@ -65,7 +65,7 @@ public class ZonedDateTime {
             this.timezone = TimeZone.getTimeZone("GMT"+m.group(1));
             isoFormat.setTimeZone(this.timezone);
         }else{
-            throw new IllegalArgumentException("not Generlized Time");
+            throw new IllegalArgumentException("not Generalised Time");
         }
 
         Date date = isoFormat.parse(time);

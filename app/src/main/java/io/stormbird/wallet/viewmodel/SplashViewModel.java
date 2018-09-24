@@ -250,6 +250,7 @@ public class SplashViewModel extends ViewModel {
             {
                 URL url = new URL(stepLocation);
                 connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(2000);
                 connection.setInstanceFollowRedirects(false);
                 String redirectLocation = connection.getHeaderField("Location");
                 if (redirectLocation == null)

@@ -23,15 +23,15 @@ android {
     buildToolsVersion '27.0.3'
     sourceSets {
         main {
-            assets.srcDirs = ['../lib/contracts']
+            //assets.srcDirs = ['../lib/contracts']
         }
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 15
-        versionName "1.0.9"
+        versionCode 17
+        versionName "1.0.11"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true

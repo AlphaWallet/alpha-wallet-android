@@ -181,6 +181,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (viewPager.getCurrentItem())
         {
             case DAPP_BROWSER:
+                if (dappBrowserFragment == null) dappBrowserFragment = new DappBrowserFragment();
                 if (dappBrowserFragment.getUrlIsBookmark())
                 {
                     getMenuInflater().inflate(R.menu.menu_added, menu);

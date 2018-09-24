@@ -56,8 +56,17 @@ public class ZonedDateTimeTest {
         assertEquals(3, timeInMoscow2.getHour());
         assertEquals(1, timeInMoscow2.getMinute());
 
-        ZonedDateTime timeInMoscow3 = new ZonedDateTime("19700101030101-0300");
-        assertEquals("1970-01-01T03:01-03:00", timeInMoscow3.toString());
-    }
+        ZonedDateTime timeInAzores = new ZonedDateTime("19700101030000-0100");
+        //assertEquals("1970-01-01T03:00-01:00", timeInAzores.toString()); //TODO: ZonedDatTime.toString isn't implemented - needs to explicitly overloaded for this test to work
+        assertEquals(14400, timeInAzores.toEpochSecond()); //this time is relatively 4 hrs from Moscow
+        assertEquals(3, timeInAzores.getHour());
+        assertEquals(0, timeInAzores.getMinute());
 
+        // ADDING MORE TESTS: READ VERY CAREFULLY
+        //
+        // IF YOU ADD MORE TESTS HERE, AND YOU USE 'assertEquals("1970 ...", timeInTimbuktu.toString());'
+        // THEN THE TEST _WILL FAIL_. IF YOU WANT TO USE THIS NOTATION THEN PLEASE ADD A toString() OVERRIDE.
+        // NEXT PERSON WHO DOES THIS WITHOUT WRITING THE OVERRIDE WILL GET USED FOR BOXING PRACTICE IN LIU OF BOB
+        // PHILLIP WILL REVOKE YOUR LOVE TOKENS AND NOT ISSUE YOU ANY MORE. AND HE'LL TURN HIS BACK ON YOU.
+    }
 }

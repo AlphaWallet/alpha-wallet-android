@@ -68,7 +68,7 @@ public class AppSiteController {
 
     @GetMapping("/")
     public RedirectView home(RedirectAttributes attributes){
-        return new RedirectView("https://awallet.io");
+        return new RedirectView("http://alphawallet.io");
     }
 
     @GetMapping(value = "/{UniversalLink}")

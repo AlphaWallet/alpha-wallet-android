@@ -1,12 +1,12 @@
-The DMZ server is a web service for all services that doesn't have
+The DMZ server is a web service for all services that don't have
 confidential data (e.g. private keys).
 
-It currently does:
+It currently functions:
 
 - as a landing page for Universal Link, it displays the content of an
   Universal Link, as well as showing if it is already used.
 
-- serving as XML repository server.
+- as the XML repository server.
 
 ## Universal link ##
 

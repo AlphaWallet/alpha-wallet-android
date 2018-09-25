@@ -314,7 +314,8 @@ public class DappBrowserViewModel extends BaseViewModel {
                                                     transaction.leafPosition);
     }
 
-    public ArrayList<String> getBrowserHistoryFromPrefs(Context context) {
+    public ArrayList<String> getBrowserHistoryFromPrefs(Context context)
+    {
         ArrayList<String> history;
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_BROWSER_HISTORY, "");
         if (!historyJson.isEmpty()) {
@@ -338,10 +339,9 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     public void addToBrowserHistory(Context context, String url)
     {
-        String checkVal = url;
-        if (url.contains(DAPP_DEFAULT_URL)) return; // don't record the homepage
+        if (url.contains(DAPP_DEFAULT_URL) || context == null) return; // don't record the homepage
 
-        checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
+        String checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
         ArrayList<String> history = getBrowserHistoryFromPrefs(context);
         for (String item : history)
         {

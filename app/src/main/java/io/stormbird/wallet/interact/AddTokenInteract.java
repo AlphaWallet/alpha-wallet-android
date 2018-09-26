@@ -1,5 +1,6 @@
 package io.stormbird.wallet.interact;
 
+import io.reactivex.Single;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
@@ -27,6 +28,13 @@ public class AddTokenInteract {
                 .flatMap(wallet -> tokenRepository
                         .addToken(wallet, tokenInfo))
                 .toObservable();
+    }
+
+    public Single<Token> addS(TokenInfo tokenInfo) {
+        return walletRepository
+                    .getDefaultWallet()
+                    .flatMap(wallet -> tokenRepository
+                            .addToken(wallet, tokenInfo));
     }
 
     public Observable<Token> add(TokenInfo tokenInfo, Wallet wallet) {

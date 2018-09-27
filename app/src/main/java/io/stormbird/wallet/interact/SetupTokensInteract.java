@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.TokenTransaction;
@@ -29,6 +30,7 @@ import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.service.TokensService;
 
 public class SetupTokensInteract {
 
@@ -324,10 +326,10 @@ public class SetupTokensInteract {
     /**
      * Parse all transactions not associated with known tokens and pick up unknown contracts
      * @param transactions
-     * @param tokenMap
+     * @param tokensService
      * @return
      */
-    public Observable<Transaction[]> processRemainingTransactions(Transaction[] transactions, Map<String, Token> tokenMap)
+    public Observable<Transaction[]> processRemainingTransactions(Transaction[] transactions, TokensService tokensService)
     {
         return Observable.fromCallable(() -> {
             List<Transaction> processedTxList = new ArrayList<>();
@@ -339,7 +341,7 @@ public class SetupTokensInteract {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
                     if (t.isConstructor || (data != null && data.functionData != null))
                     {
-                        Token localToken = tokenMap.get(t.to);
+                        Token localToken = tokensService.getToken(t.to);
                         if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);
                         t = parseTransaction(localToken, t, data);
                     }
@@ -356,14 +358,14 @@ public class SetupTokensInteract {
         return tokenRepository.update(address);
     }
 
-    public void setupUnknownList(Map<String, Token> tokenMap, List<String> xmlContractAddresses)
+    public void setupUnknownList(TokensService tokensService, List<String> xmlContractAddresses)
     {
         unknownContracts.clear();
         if (xmlContractAddresses != null)
         {
             for (String address : xmlContractAddresses)
             {
-                if (tokenMap.get(address) == null) unknownContracts.add(address);
+                if (tokensService.getToken(address) == null) unknownContracts.add(address);
             }
         }
     }
@@ -405,5 +407,11 @@ public class SetupTokensInteract {
             Log.d(TAG, "Re Processing " + processedTxList.size() + " : " + token.getFullName());
             return processedTxList.toArray(new Transaction[processedTxList.size()]);
         });
+    }
+
+    public Token terminateToken(Token token, Wallet wallet, NetworkInfo network)
+    {
+        tokenRepository.terminateToken(token, wallet, network);
+        return token;
     }
 }

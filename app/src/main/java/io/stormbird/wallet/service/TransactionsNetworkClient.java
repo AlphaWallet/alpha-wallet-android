@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -76,10 +77,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					}
 				}
 			}
+			catch (JSONException e)
+			{
+				//silent fail
+			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				// Do not try the Trust API - this often returns malformed transactions.
 			}
 
 			return result.toArray(new Transaction[result.size()]);

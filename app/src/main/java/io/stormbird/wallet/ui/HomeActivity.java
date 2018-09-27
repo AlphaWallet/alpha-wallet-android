@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -93,6 +94,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         toolbar();
 
+        dappBrowserFragment = new DappBrowserFragment();
+        settingsFragment = new NewSettingsFragment();
         viewPager = findViewById(R.id.view_pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -155,15 +158,26 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         checkRoot();
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null)
+        try
         {
-            CharSequence clipText = clipboard.getPrimaryClip().getItemAt(0).getText();
-            //String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
-            if (clipText != null && clipText.length() > 60 && clipText.length() < 300)
+            if (clipboard != null && clipboard.getPrimaryClip() != null)
             {
-                //let's try to import the link
-                viewModel.showImportLink(this, clipText.toString());
+                ClipData.Item clipItem = clipboard.getPrimaryClip().getItemAt(0);
+                if (clipItem != null)
+                {
+                    CharSequence clipText = clipItem.getText();
+                    //String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
+                    if (clipText != null && clipText.length() > 60 && clipText.length() < 300)
+                    {
+                        //let's try to import the link
+                        viewModel.showImportLink(this, clipText.toString());
+                    }
+                }
             }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -366,12 +380,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         public Fragment getItem(int position) {
             switch (position) {
                 case DAPP_BROWSER:
-                    dappBrowserFragment = new DappBrowserFragment();
+                    if (dappBrowserFragment == null) dappBrowserFragment = new DappBrowserFragment();
                     return dappBrowserFragment;
                 case WALLET:
                     return new WalletFragment();
                 case SETTINGS:
-                    settingsFragment = new NewSettingsFragment();
+                    if (settingsFragment == null) settingsFragment = new NewSettingsFragment();
                     return settingsFragment;
                 case TRANSACTIONS:
                     return new TransactionsFragment();

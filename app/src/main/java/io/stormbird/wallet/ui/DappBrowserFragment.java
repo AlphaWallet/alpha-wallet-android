@@ -102,6 +102,13 @@ public class DappBrowserFragment extends Fragment implements
         return view;
     }
 
+    @Override
+    public void onDestroy()
+    {
+        getContext().unregisterReceiver(URLReceiver);
+        super.onDestroy();
+    }
+
     private void initView(View view) {
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);

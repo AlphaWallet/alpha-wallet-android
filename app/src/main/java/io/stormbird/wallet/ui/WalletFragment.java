@@ -101,7 +101,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
 
-        refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
+        refreshLayout.setOnRefreshListener(viewModel::reloadTokens);
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
 

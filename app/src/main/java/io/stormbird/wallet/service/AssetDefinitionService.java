@@ -33,6 +33,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
@@ -56,24 +57,24 @@ import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 public class AssetDefinitionService
 {
     private static final String XML_EXT = "xml";
-    private TokenDefinition assetDefinition;
     private final Context context;
     private final OkHttpClient okHttpClient;
     private Map<String, TokenDefinition> assetDefinitions;
     private Map<Integer, List<String>> networkMappings;
+    private Map<String, Long> assetChecked;
 
     public AssetDefinitionService(OkHttpClient client, Context ctx)
     {
         context = ctx;
         okHttpClient = client;
         networkMappings = new HashMap<>();
+        assetChecked = new HashMap<>();
 
         loadLocalContracts();
     }
 
     private void loadLocalContracts()
     {
-        assetDefinition = null;
         assetDefinitions = new HashMap<>();
 
         try
@@ -81,7 +82,6 @@ public class AssetDefinitionService
             assetDefinitions.clear();
             loadContracts(context.getFilesDir());
             checkDownloadedFiles();
-            assetDefinition = parseFile(context.getResources().getAssets().open("TicketingContract.xml"));
         }
         catch (IOException|SAXException e)
         {
@@ -132,14 +132,7 @@ public class AssetDefinitionService
     public boolean hasDefinition(String contractAddress)
     {
         TokenDefinition d = getAssetDefinition(contractAddress.toLowerCase());
-        if (d != assetDefinition)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return d != null;
     }
 
     /**
@@ -163,14 +156,12 @@ public class AssetDefinitionService
             if (xmlFile == null)
             {
                 loadScriptFromServer(correctedAddress); //this will complete asynchronously, and display will be updated
-                assetDef = assetDefinition;
             }
             else
             {
                 assetDef = loadTokenDefinition(correctedAddress);
+                assetDefinitions.put(address.toLowerCase(), assetDef);
             }
-
-            assetDefinitions.put(address.toLowerCase(), assetDef);
         }
 
         return assetDef; // if nothing found use default
@@ -204,7 +195,8 @@ public class AssetDefinitionService
 
         if (definition != null && definition.addresses.containsKey(contractAddress))
         {
-            return definition.getKeyName();
+            String issuer = definition.getKeyName();
+            return (issuer == null || issuer.length() == 0) ? context.getString(R.string.stormbird) : issuer;
         }
         else
         {
@@ -214,10 +206,14 @@ public class AssetDefinitionService
 
     private void loadScriptFromServer(String correctedAddress)
     {
-        Disposable d = fetchXMLFromServer(correctedAddress)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFile, this::onError);
+        //first check the last time we tried this session
+        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
+        {
+            Disposable d = fetchXMLFromServer(correctedAddress)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::handleFile, this::onError);
+        }
     }
 
     private void onError(Throwable throwable)
@@ -241,8 +237,6 @@ public class AssetDefinitionService
         {
             e.printStackTrace();
         }
-
-        if (definition == null) definition = assetDefinition;
 
         return definition;
     }
@@ -301,7 +295,7 @@ public class AssetDefinitionService
             //peek to see if this file exists
             File existingFile = getXMLFile(address);
             long fileTime = 0;
-            if (existingFile.exists())
+            if (existingFile != null && existingFile.exists())
             {
                 fileTime = existingFile.lastModified();
             }
@@ -314,6 +308,8 @@ public class AssetDefinitionService
             sb.append(address);
             String result = null;
 
+            okhttp3.Response response = null;
+
             try
             {
                 Request request = new Request.Builder()
@@ -322,9 +318,10 @@ public class AssetDefinitionService
                         .addHeader("If-Modified-Since", dateFormat)
                         .build();
 
-                okhttp3.Response response = okHttpClient.newCall(request).execute();
+                response = okHttpClient.newCall(request).execute();
 
                 String xmlBody = response.body().string();
+
                 if (response.code() == HttpURLConnection.HTTP_OK && xmlBody != null && xmlBody.length() > 10)
                 {
                     storeFile(address, xmlBody);
@@ -339,6 +336,12 @@ public class AssetDefinitionService
             {
                 e.printStackTrace();
             }
+            finally
+            {
+                if (response != null) response.body().close();
+            }
+
+            assetChecked.put(address, System.currentTimeMillis());
 
             return result;
         });
@@ -524,5 +527,24 @@ public class AssetDefinitionService
             conn.disconnect();
             return contractAddress;
         });
+    }
+
+    public String getFeemasterAPI(String address)
+    {
+        TokenDefinition td = getAssetDefinition(address);
+        if (td != null)
+        {
+            return td.getFeemasterAPI();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    //when user reloads the tokens we should also check XML for any files
+    public void clearCheckTimes()
+    {
+        assetChecked.clear();
     }
 }

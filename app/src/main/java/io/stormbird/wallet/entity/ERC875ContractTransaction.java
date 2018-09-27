@@ -71,12 +71,17 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         type = in.readInt();
         otherParty = in.readString();
         //operationDisplayName = in.readString();
-        Object[] readObjArray = in.readArray(Object.class.getClassLoader());
+        int arrayCount = in.readInt();
         indices = new ArrayList<>();
-        for (Object o : readObjArray)
+        if (arrayCount > 0)
         {
-            Integer val = (Integer)o;
-            indices.add(val);
+            Object[] readObjArray = in.readArray(Object.class.getClassLoader());
+
+            for (Object o : readObjArray)
+            {
+                Integer val = (Integer) o;
+                indices.add(val);
+            }
         }
     }
 
@@ -108,10 +113,15 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         parcel.writeInt(operation);
         parcel.writeInt(type);
         parcel.writeString(otherParty);
-        //parcel.writeString(operationDisplayName);
+
         if (indices != null)
         {
+            parcel.writeInt(indices.size());
             parcel.writeArray(indices.toArray());
+        }
+        else
+        {
+            parcel.writeInt(0);
         }
     }
 

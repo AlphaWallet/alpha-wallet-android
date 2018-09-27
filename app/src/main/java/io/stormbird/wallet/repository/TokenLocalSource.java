@@ -29,4 +29,6 @@ public interface TokenLocalSource {
     Observable<List<Token>> fetchEnabledTokensSequentialList(NetworkInfo networkInfo, Wallet wallet);
     Completable saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers);
     Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens);
+
+    void setTokenTerminated(NetworkInfo network, Wallet wallet, Token token);
 }

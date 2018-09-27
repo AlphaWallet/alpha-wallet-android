@@ -16,6 +16,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
@@ -29,6 +30,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
 
     public WalletViewModelFactory(/*FindDefaultNetworkInteract findDefaultNetworkInteract,*/
                                   FetchTokensInteract fetchTokensInteract,
@@ -41,7 +43,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   GetDefaultWalletBalance getDefaultWalletBalance,
                                   AddTokenInteract addTokenInteract,
                                   SetupTokensInteract setupTokensInteract,
-                                  AssetDefinitionService assetDefinitionService) {
+                                  AssetDefinitionService assetDefinitionService,
+                                  TokensService tokensService) {
         //this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -54,6 +57,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
 
     }
 
@@ -72,6 +76,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 getDefaultWalletBalance,
                 addTokenInteract,
                 setupTokensInteract,
-                assetDefinitionService);
+                assetDefinitionService,
+                tokensService);
     }
 }

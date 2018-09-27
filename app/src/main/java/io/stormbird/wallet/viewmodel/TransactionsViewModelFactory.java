@@ -21,6 +21,7 @@ import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.router.WalletRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 
@@ -34,6 +35,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final ExternalBrowserRouter externalBrowserRouter;
     private final HomeRouter homeRouter;
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -45,7 +47,8 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             TransactionDetailRouter transactionDetailRouter,
             ExternalBrowserRouter externalBrowserRouter,
             HomeRouter homeRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -56,6 +59,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
     }
 
     @NonNull
@@ -71,6 +75,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 transactionDetailRouter,
                 externalBrowserRouter,
                 homeRouter,
-                assetDefinitionService);
+                assetDefinitionService,
+                tokensService);
     }
 }

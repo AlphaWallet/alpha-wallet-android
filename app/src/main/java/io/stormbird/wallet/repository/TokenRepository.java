@@ -427,6 +427,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public void terminateToken(Token token, Wallet wallet, NetworkInfo network)
+    {
+        localSource.setTokenTerminated(network, wallet, token);
+    }
+
+    @Override
     public Single<TokenInfo[]> update(String[] address)
     {
         return setupTokensFromLocal(address);

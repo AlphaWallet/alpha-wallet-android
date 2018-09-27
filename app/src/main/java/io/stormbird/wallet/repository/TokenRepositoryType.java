@@ -42,4 +42,6 @@ public interface TokenRepositoryType {
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
     Single<Ticker> getEthTicker();
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
+
+    void terminateToken(Token token, Wallet wallet, NetworkInfo network);
 }

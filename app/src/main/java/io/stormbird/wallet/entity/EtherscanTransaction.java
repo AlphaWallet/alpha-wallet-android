@@ -41,7 +41,6 @@ public class EtherscanTransaction
     String cumulativeGasUsed;
     String gasUsed;
     int confirmations;
-    public boolean internal = false;
 
     private static TransactionDecoder decoder = null;
     private static ParseMagicLink parser = null;
@@ -50,41 +49,14 @@ public class EtherscanTransaction
     {
         boolean isConstructor = false;
         TransactionOperation[] o;
-        // Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction.
-        /* 'operations' member is used in a lot of places. However,
-	 * I'd say a good refactor will sort this out, I think Scoff &
-	 * co had to make the unwieldy nested class set there to read
-	 * in data from their server. 'Operations' should really hold
-	 * an object that defines the transaction. You should have an
-	 * object for each type of contract - ERC20/875 etc. The
-	 * places where operations is used then can be moved inside
-	 * these classes. We don't use his transaction server now
-	 * anyway.
-         */
 
-        if (internal)
-        {
-            o = new TransactionOperation[1];
-            TransactionOperation op = new TransactionOperation();
-            ERC875ContractTransaction ct = new ERC875ContractTransaction();
-            o[0] = op;
-            op.contract = ct;
-            ct.address = contractAddress;
-            op.from = contractAddress;
-            ct.type = 2; // indicate that we need to load the contract
-            ct.operation = R.string.ticket_receive_from_magiclink;
-
-            //fix up the received params to make parsing simple
-            from = to;
-            to = contractAddress;
-        }
-        else if (contractAddress.length() > 0)
+        if (contractAddress.length() > 0)
         {
             to = contractAddress;
             //add a constructor here
             o = generateERC875Op();
             TransactionContract ct = o[0].contract;
-            ct.setOperation(R.string.ticket_contract_constructor);
+            ct.setOperation(TransactionType.CONSTRUCTOR);// R.string.ticket_contract_constructor);
             ct.address = contractAddress;
             ct.setType(-5);// indicate that we need to load the contract
             isConstructor = true;
@@ -112,15 +84,18 @@ public class EtherscanTransaction
                     {
                         case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
                             o = processTrade(f);
+                            setName(o, TransactionType.MAGICLINK_TRANSFER);
                             break;
                         case "transferFrom(address,address,uint16[])":
                             o = generateERC875Op();
                             o[0].contract.setIndicies(f.paramValues);
+                            setName(o, TransactionType.TRANSFER_TO);
                             break;
                         case "transfer(address,uint16[])":
                             o = generateERC875Op();
                             o[0].contract.setOtherParty(from);
                             o[0].contract.setIndicies(f.paramValues);
+                            setName(o, TransactionType.TRANSFER_TO);
                             break;
                         case "transfer(address,uint256)":
                             o = generateERC20Op();
@@ -129,6 +104,7 @@ public class EtherscanTransaction
                             op.to = f.getFirstAddress();
                             op.transactionId = hash;
                             op.value = String.valueOf(f.getFirstValue());
+                            setName(o, TransactionType.TRANSFER_TO);
                             break;
                         case "loadNewTickets(bytes32[])":
                             o = generateERC875Op();
@@ -136,6 +112,7 @@ public class EtherscanTransaction
                             op.from = from;
                             op.transactionId = hash;
                             op.value = String.valueOf(f.paramValues.size());
+                            setName(o, TransactionType.LOAD_NEW_TOKENS);
                             break;
                         case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
                             o = processPassTo(f);
@@ -145,14 +122,16 @@ public class EtherscanTransaction
                             op.transactionId = hash;
                             //value in what?
                             op.value = String.valueOf(f.getFirstValue());
+                            setName(o, TransactionType.PASS_TO);
                             break;
                         case "endContract()":
                             o = generateERC875Op();
                             op = o[0];
                             ct = op.contract;
-                            ct.setOperation(R.string.ticket_terminate_contract);
+                            ct.setOperation(TransactionType.TERMINATE_CONTRACT);
                             ct.name = to;
                             ct.setType(-2);
+                            setName(o, TransactionType.TERMINATE_CONTRACT);
                             break;
                         default:
                             break;
@@ -232,5 +211,18 @@ public class EtherscanTransaction
         }
 
         return o;
+    }
+
+    private void setName(TransactionOperation[] o, TransactionType name)
+    {
+        if (o.length > 0 && o[0] != null)
+        {
+            TransactionOperation op = o[0];
+            TransactionContract ct = op.contract;
+            if (ct instanceof ERC875ContractTransaction)
+            {
+                ((ERC875ContractTransaction) ct).operation = name;
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui;
 
+import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -140,9 +141,17 @@ public class DappBrowserFragment extends Fragment implements
         urlTv.setOnClickListener(v -> urlTv.showDropDown());
     }
 
-    private void dismissKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(urlTv.getWindowToken(), 0);
+    private void dismissKeyboard()
+    {
+        try
+        {
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(urlTv.getWindowToken(), 0);
+        }
+        catch (NullPointerException e)
+        {
+            System.out.println("Pre - init");
+        }
     }
 
     private void initViewModel() {
@@ -400,7 +409,11 @@ public class DappBrowserFragment extends Fragment implements
         adapter.add(urlText);
         adapter.notifyDataSetChanged();
         dismissKeyboard();
-        getActivity().sendBroadcast(new Intent(RESET_TOOLBAR));
+        Activity current = getActivity();
+        if (current != null)
+        {
+            current.sendBroadcast(new Intent(RESET_TOOLBAR));
+        }
         return true;
     }
 
@@ -413,6 +426,7 @@ public class DappBrowserFragment extends Fragment implements
     {
         List<String> bookmarks = viewModel.getBookmarks();
         //display in popup
+        if (getActivity() == null) return;
         SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), bookmarks.toArray(new String[bookmarks.size()]), urlTv.getText().toString());
         dialog.setTitle(R.string.bookmarks);
         dialog.setButtonText(R.string.visit);
@@ -432,6 +446,6 @@ public class DappBrowserFragment extends Fragment implements
 
     public boolean getUrlIsBookmark()
     {
-        return viewModel.getBookmarks().contains(urlTv.getText().toString());
+        return viewModel != null && urlTv != null && viewModel.getBookmarks().contains(urlTv.getText().toString());
     }
 }

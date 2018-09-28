@@ -439,6 +439,6 @@ public class DappBrowserFragment extends Fragment implements
 
     public boolean getUrlIsBookmark()
     {
-        return viewModel.getBookmarks().contains(urlTv.getText().toString());
+        return viewModel != null && urlTv != null && viewModel.getBookmarks().contains(urlTv.getText().toString());
     }
 }

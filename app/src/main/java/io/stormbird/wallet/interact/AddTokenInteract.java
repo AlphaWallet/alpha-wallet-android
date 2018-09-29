@@ -30,6 +30,11 @@ public class AddTokenInteract {
                 .toObservable();
     }
 
+    /**
+     * Add Token to respository process which is a single not an observable
+     * @param tokenInfo
+     * @return
+     */
     public Single<Token> addS(TokenInfo tokenInfo) {
         return walletRepository
                     .getDefaultWallet()

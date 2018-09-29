@@ -216,14 +216,6 @@ public class TransactionsViewModel extends BaseViewModel
             txMap.put(tx.hash, tx);
             if (Long.valueOf(tx.blockNumber) > lastBlock) lastBlock = Long.valueOf(tx.blockNumber);
         }
-
-//        if (refreshCache)
-//        {
-//            lastBlock = 0;
-//            txArray = new Transaction[0];
-//            txMap.clear();
-//            refreshCache = false;
-//        }
     }
 
     /**

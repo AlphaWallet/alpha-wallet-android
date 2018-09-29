@@ -39,7 +39,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 
-import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 
 public class TransactionsViewModel extends BaseViewModel

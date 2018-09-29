@@ -29,6 +29,8 @@ public class TransactionDecoder
 {
     TransactionInput thisData;
 
+    private static List<String> endContractSignatures = new ArrayList<>();
+
     private int parseIndex;
     private Map<String, FunctionData> functionList;
 
@@ -201,7 +203,6 @@ public class TransactionDecoder
         }
     }
 
-
     private void setupKnownFunctions()
     {
         functionList = new HashMap<>();
@@ -217,6 +218,8 @@ public class TransactionDecoder
         addContractCreation();
     }
 
+    /* NB: this doesn't always work. Instead we read the construction event from Etherscan
+     */
     private void addContractCreation()
     {
         FunctionData data = new FunctionData();
@@ -237,18 +240,22 @@ public class TransactionDecoder
             "approve(address,uint256)",
             "loadNewTickets(bytes32[])",
             "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)",
-            "endContract()"
+            "endContract()",
+            "selfdestruct()",
+            "kill()"
             };
 
     static final boolean[] HAS_SIG = {
-            false,
-            false,
+            false,  //transferFrom
+            false,  //transfer
             true,
             false,
             false,
             false,
-            false,
-            true,
+            false, //loadNewTickets
+            true,  //passTo
+            false, //endContract
+            false,  //selfdestruct()
             false
     };
 
@@ -257,15 +264,17 @@ public class TransactionDecoder
     static final int CREATION = 3;
 
     static final int[] CONTRACT_TYPE = {
+            ERC875,  //transferFrom
             ERC875,
             ERC875,
-            ERC875,
+            ERC20,   //transferFrom
             ERC20,
             ERC20,
-            ERC20,
             ERC875,
             ERC875,
-            CREATION
+            CREATION, //endContract
+            CREATION, //selfdestruct
+            CREATION  //kill
     };
 
     private FunctionData getArgs(String methodSig)
@@ -330,10 +339,37 @@ public class TransactionDecoder
         return indices;
     }
 
-    private String buildMethodId(String methodSignature) {
+    private static String buildMethodId(String methodSignature) {
         byte[] input = methodSignature.getBytes();
         byte[] hash = Hash.sha3(input);
         return Numeric.toHexString(hash).substring(0, 10);
+    }
+
+    public static boolean isEndContract(String input)
+    {
+        if (input == null || input.length() != 10)
+        {
+            return false;
+        }
+
+        if (endContractSignatures.size() == 0)
+        {
+            buildEndContractSigs();
+        }
+
+        for (String sig : endContractSignatures)
+        {
+            if (input.equals(sig)) return true;
+        }
+
+        return false;
+    }
+
+    private static void buildEndContractSigs()
+    {
+        endContractSignatures.add(buildMethodId("endContract()"));
+        endContractSignatures.add(buildMethodId("selfdestruct()"));
+        endContractSignatures.add(buildMethodId("kill()"));
     }
 }
 

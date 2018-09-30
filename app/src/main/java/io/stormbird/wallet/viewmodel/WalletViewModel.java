@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -34,10 +35,12 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
-public class WalletViewModel extends BaseViewModel {
+public class WalletViewModel extends BaseViewModel
+{
     private static final long GET_BALANCE_INTERVAL = 10;
 
     //    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -63,6 +66,7 @@ public class WalletViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
@@ -71,6 +75,8 @@ public class WalletViewModel extends BaseViewModel {
     private Disposable fetchTokenBalanceDisposable;
     @Nullable
     private Disposable updateTokens;
+    @Nullable
+    private Disposable checkTokensDisposable;
 
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
@@ -83,7 +89,9 @@ public class WalletViewModel extends BaseViewModel {
             GetDefaultWalletBalance getDefaultWalletBalance,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TokensService tokensService)
+    {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -95,6 +103,7 @@ public class WalletViewModel extends BaseViewModel {
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
     }
 
     public LiveData<Token[]> tokens() {
@@ -123,6 +132,7 @@ public class WalletViewModel extends BaseViewModel {
     public void abortAndRestart()
     {
         defaultWallet.setValue(null);
+        tokensService.clearTokens();
         if (updateTokens != null && !updateTokens.isDisposed())
         {
             updateTokens.dispose();
@@ -148,17 +158,17 @@ public class WalletViewModel extends BaseViewModel {
             updateTokens.dispose();
         }
 
-        updateTokens = Observable.interval(0, GET_BALANCE_INTERVAL*5, TimeUnit.SECONDS)
-                .doOnNext(l -> getWallet()
-                        .flatMap(fetchTokensInteract::fetchStoredWithEth)
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable)).subscribe();
+        updateTokens = getWallet()
+                .flatMap(fetchTokensInteract::fetchStoredWithEth)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 
     private void onTokens(Token[] tokens)
     {
         tokenCache = tokens;
+        tokensService.addTokens(tokens);
     }
 
     private void onFetchTokensCompletable()
@@ -175,13 +185,31 @@ public class WalletViewModel extends BaseViewModel {
         {
             updateTokenBalances();
         }
+
+        // Check contracts that returned a null but we didn't see them destroyed yet.
+        // Sometimes the network times out or some other issue.
+        checkTokensDisposable = Observable.fromCallable(tokensService::getAllTokens)
+                .flatMapIterable(token -> token)
+                .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
+                .flatMap(token-> fetchTokensInteract.getTokenInfo(token.getAddress()))
+                .filter(tokenInfo -> (tokenInfo.name != null))
+                .subscribeOn(Schedulers.io())
+                .subscribe(addTokenInteract::addS, this::tkError,
+                           () -> { if (checkTokensDisposable != null) checkTokensDisposable.dispose(); });
+    }
+
+    private void tkError(Throwable throwable)
+    {
+        if (checkTokensDisposable != null) checkTokensDisposable.dispose();
     }
 
     private void updateTokenBalances()
     {
         fetchTokenBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> getWallet()
-                        .flatMap(fetchTokensInteract::fetchSequential)
+                .doOnNext(l -> Observable.fromCallable(tokensService::getAllTokens)
+                        .flatMapIterable(token -> token)
+                        .filter(token -> (token.tokenInfo.name != null && !token.isTerminated()))
+                        .map(fetchTokensInteract::updateDefaultBalance)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();
@@ -190,8 +218,7 @@ public class WalletViewModel extends BaseViewModel {
     private void onTokenBalanceUpdate(Token token)
     {
         tokenUpdate.postValue(token);
-        //TODO: Calculate total value including token value received from token tickers
-        //TODO: Then display the total value of everything at the top of the list in a special holder
+        tokensService.addToken(token);
     }
 
     private void onFetchTokensBalanceCompletable()

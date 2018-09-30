@@ -88,9 +88,9 @@ public class TransactionContract implements Parcelable {
 
     }
 
-    public void setOperation(int operation)
+    public void setOperation(TransactionType operation)
     {
-        if (operation == R.string.ticket_invalid_op)
+        if (operation == TransactionType.INVALID_OPERATION)
         {
             badTransaction = true;
         }

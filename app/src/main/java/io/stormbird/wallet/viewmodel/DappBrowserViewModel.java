@@ -338,10 +338,9 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     public void addToBrowserHistory(Context context, String url)
     {
-        String checkVal = url;
-        if (url.contains(DAPP_DEFAULT_URL)) return; // don't record the homepage
+        if (url.contains(DAPP_DEFAULT_URL) || context == null) return; // don't record the homepage
 
-        checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
+        String checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
         ArrayList<String> history = getBrowserHistoryFromPrefs(context);
         for (String item : history)
         {

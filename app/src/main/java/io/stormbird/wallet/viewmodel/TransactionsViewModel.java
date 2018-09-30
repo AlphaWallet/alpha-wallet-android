@@ -14,9 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.TransactionContract;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
@@ -204,6 +207,16 @@ public class TransactionsViewModel extends BaseViewModel
         {
             txMap.put(tx.hash, tx);
             if (Long.valueOf(tx.blockNumber) > lastBlock) lastBlock = Long.valueOf(tx.blockNumber);
+            //this code fixes values in case user rolls back version
+            if (tx.operations != null && tx.operations.length > 0 && tx.operations[0] != null)
+            {
+                TransactionContract ct = tx.operations[0].contract;
+                if (ct instanceof ERC875ContractTransaction && ((ERC875ContractTransaction)ct).operation > 0 && ((ERC875ContractTransaction)ct).operation < 30)
+                {
+                    refreshCache = true;
+                    break;
+                }
+            }
         }
 
         if (refreshCache)

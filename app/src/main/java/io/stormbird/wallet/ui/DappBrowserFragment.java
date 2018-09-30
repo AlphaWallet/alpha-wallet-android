@@ -106,7 +106,7 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onDestroy()
     {
-        getContext().unregisterReceiver(URLReceiver);
+        if (getContext() != null) getContext().unregisterReceiver(URLReceiver);
         super.onDestroy();
     }
 
@@ -345,7 +345,7 @@ public class DappBrowserFragment extends Fragment implements
             dialog.dismiss();
             //popup transaction wait dialog
             onProgress();
-            viewModel.signTransaction(transaction, dAppFunction, url);
+            viewModel.signTransaction(cTrans, dAppFunction, url);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(cTrans);

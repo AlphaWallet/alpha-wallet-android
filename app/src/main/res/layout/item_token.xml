@@ -135,6 +135,7 @@
         android:background="@color/super_light_grey" />
 
     <LinearLayout
+        android:id="@+id/layout_value_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">

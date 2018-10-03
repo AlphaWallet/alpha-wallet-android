@@ -488,4 +488,5 @@
     <string name="action_add_bookmark">Add Bookmark</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="visit">Visit</string>
+    <string name="erc721">ERC721</string>
 </resources>

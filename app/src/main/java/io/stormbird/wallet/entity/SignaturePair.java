@@ -160,7 +160,7 @@ public class SignaturePair
             System.arraycopy(signature, 0, sigCopy, offset, 65-offset);
             for (int i = 0; i < offset; i++)
             {
-                sigCopy[0] = 0;
+                sigCopy[i] = 0;
             }
             signature = sigCopy;
         }

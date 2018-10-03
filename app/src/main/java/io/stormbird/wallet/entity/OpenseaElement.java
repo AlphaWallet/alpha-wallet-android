@@ -12,12 +12,13 @@ import java.util.Map;
  */
 public class OpenseaElement implements Parcelable
 {
-    long tokenId;
-    String imageFileName;
-    String assetName;
-    String description;
+    public long tokenId;
+    public String imageFileName;
+    public String imageURL;
+    public String assetName;
+    public String description;
 
-    Map<String, ERC721Attribute> attributes = new HashMap<String, ERC721Attribute>();
+    public  Map<String, ERC721Attribute> attributes = new HashMap<String, ERC721Attribute>();
 
     public OpenseaElement()
     {
@@ -35,6 +36,7 @@ public class OpenseaElement implements Parcelable
     {
         dest.writeLong(tokenId);
         dest.writeString(imageFileName);
+        dest.writeString(imageURL);
         dest.writeString(assetName);
         dest.writeString(description);
         dest.writeInt(attributes.size());
@@ -50,6 +52,7 @@ public class OpenseaElement implements Parcelable
         attributes.clear();
         tokenId = in.readLong();
         imageFileName = in.readString();
+        imageURL = in.readString();
         assetName = in.readString();
         description = in.readString();
         int size = in.readInt();

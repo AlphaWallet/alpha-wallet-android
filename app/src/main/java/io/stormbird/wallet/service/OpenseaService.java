@@ -2,14 +2,13 @@ package io.stormbird.wallet.service;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.util.Log;
 
 import com.caverock.androidsvg.SVG;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -20,15 +19,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.stormbird.wallet.entity.DownloadLink;
+import io.stormbird.wallet.entity.ERC721Attribute;
+import io.stormbird.wallet.entity.ERC721Token;
+import io.stormbird.wallet.entity.OpenseaElement;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenInfo;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -61,6 +69,80 @@ public class OpenseaService
     /*
     https://api.opensea.io/api/v1/assets/?owner=0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63&order_by=current_price&order_direction=asc
      */
+
+    public Single<Token[]> getTokens(String address)
+    {
+        return queryBalance(address)
+                .map(this::gotOpenseaTokens);
+    }
+
+    private Token[] gotOpenseaTokens(JSONObject object)
+    {
+        Map<String, Token> foundTokens = new HashMap<>();
+
+        try
+        {
+            JSONArray assets = object.getJSONArray("assets");
+            for (int i = 0; i < assets.length(); i++)
+            {
+                JSONObject kitty = assets.getJSONObject(i);
+
+                JSONObject assetContract = kitty.getJSONObject("asset_contract");
+                String tokenAddr = assetContract.getString("address");
+
+                Token token = foundTokens.get(tokenAddr);
+
+                if (token == null)
+                {
+                    String tokenName = assetContract.getString("name");
+                    String tokenSymbol = assetContract.getString("symbol");
+                    String schema = assetContract.getString("schema_name");
+
+                    TokenInfo tInfo = new TokenInfo(tokenAddr, tokenName, tokenSymbol, 0, true);
+                    switch (schema)
+                    {
+                        case "ERC721":
+                            token = new ERC721Token(tInfo, null, System.currentTimeMillis());
+                            break;
+                        default:
+                            token = new Token(tInfo, BigDecimal.ZERO, System.currentTimeMillis());
+                            break;
+                    }
+                    foundTokens.put(tokenAddr, token);
+                }
+
+                OpenseaElement element = new OpenseaElement();
+                element.tokenId = kitty.getInt("token_id");
+                element.description = kitty.getString("description");
+                element.assetName = kitty.getString("name");
+                element.imageURL = kitty.getString("image_url");
+                element.imageFileName = null;
+
+                JSONArray traits = kitty.getJSONArray("traits");
+                for (int j = 0; j < traits.length(); j++)
+                {
+                    JSONObject trait = traits.getJSONObject(j);
+                    String type_value = trait.getString("trait_type");
+                    String value = trait.getString("value");
+                    String display_type = trait.getString("display_type");
+                    ERC721Attribute attr = new ERC721Attribute(display_type, value);
+                    element.attributes.put(type_value, attr);
+                }
+
+                if (token instanceof ERC721Token)
+                {
+                    ((ERC721Token)token).tokenBalance.add(element);
+                }
+            }
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        return foundTokens.values().toArray(new Token[foundTokens.size()]);
+    }
+
     public Single<JSONObject> queryBalance(String address)
     {
         return Single.fromCallable(() -> {

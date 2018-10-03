@@ -64,7 +64,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private SystemView systemView;
     private TransactionsAdapter adapter;
-    private HomeActivity homeActivity; //TODO: Have a central storage for tokens shared between views. Also need mutables for completion waits
     private Dialog dialog;
 
     private boolean isVisible = false;
@@ -79,7 +78,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
 
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory).get(TransactionsViewModel.class);
-        homeActivity = (HomeActivity) getActivity();
 
         adapter = new TransactionsAdapter(this::onTransactionClick);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
@@ -134,6 +132,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onResume() {
         super.onResume();
         viewModel.setVisibility(isVisible);
+        viewModel.abortAndRestart(true);
         viewModel.prepare();
     }
 
@@ -167,7 +166,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onDestroy()
     {
         super.onDestroy();
-        getContext().unregisterReceiver(tokenReceiver);
+        if (getContext() != null) getContext().unregisterReceiver(tokenReceiver);
     }
 
     private void onDefaultWallet(Wallet wallet)
@@ -207,7 +206,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         if (wallet == null) {
             Toast.makeText(getContext(), getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
                     .show();
-        } else {
+        } else if (getContext() != null) {
             BottomSheetDialog dialog = new BottomSheetDialog(getContext());
             DepositView view = new DepositView(getContext(), wallet);
             view.setOnDepositClickListener(this::onDepositClick);
@@ -225,8 +224,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void resetTokens()
     {
         //first abort the current operation
-        viewModel.abortAndRestart(true);
+        //viewModel.abortAndRestart(true);
         adapter.clear();
+        list.setAdapter(adapter);
     }
 
     @Override

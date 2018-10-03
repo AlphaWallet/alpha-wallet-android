@@ -19,7 +19,7 @@ import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TY
 public class ERC875ContractTransaction extends TransactionContract implements Parcelable {
     public String balance;
     public String symbol;
-    public int operation;
+    public TransactionType operation;
     public String otherParty;
     public List<Integer> indices;
     public int type;
@@ -36,7 +36,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         name = "";
         balance = "";
         symbol = "";
-        operation = 0;
+        operation = TransactionType.UNKNOWN;
         otherParty = "";
         //operationDisplayName = "";
         indices = null;
@@ -67,7 +67,9 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         name = in.readString();
         balance = in.readString();
         symbol = in.readString();
-        operation = in.readInt();
+        int typeCode = in.readInt();
+        if (typeCode >= TransactionType.ILLEGAL_VALUE.ordinal()) typeCode = TransactionType.ILLEGAL_VALUE.ordinal();
+        operation = TransactionType.values()[typeCode];
         type = in.readInt();
         otherParty = in.readString();
         //operationDisplayName = in.readString();
@@ -110,7 +112,8 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         parcel.writeString(name);
         parcel.writeString(balance);
         parcel.writeString(symbol);
-        parcel.writeInt(operation);
+        int opWrite = operation.ordinal();
+        parcel.writeInt(opWrite);
         parcel.writeInt(type);
         parcel.writeString(otherParty);
 
@@ -162,13 +165,13 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
             if (otherParty.equals(walletAddr))
             {
                 //transfered out of our wallet via magic link
-                operation = R.string.ticket_magiclink_transfer;
+                operation = TransactionType.MAGICLINK_TRANSFER;// R.string.ticket_magiclink_transfer;
                 type = -1;
             }
             else
             {
                 //received ticket from a magic link
-                operation = R.string.ticket_magiclink_pickup;
+                operation = TransactionType.MAGICLINK_PICKUP;// R.string.ticket_magiclink_pickup;
                 type = 1;
             }
         }
@@ -177,13 +180,13 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
             if (otherParty.equals(walletAddr))
             {
                 //we received ether from magiclink sale
-                operation = R.string.ticket_magiclink_sale;
+                operation = TransactionType.MAGICLINK_SALE;// R.string.ticket_magiclink_sale;
                 type = -1;
             }
             else
             {
                 //we purchased a ticket from a magiclink
-                operation = R.string.ticket_magiclink_purchase;
+                operation = TransactionType.MAGICLINK_PURCHASE;// R.string.ticket_magiclink_purchase;
                 type = 1;
             }
         }
@@ -192,11 +195,11 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     @Override
     public void interpretTransferFrom(String walletAddr, TransactionInput data)
     {
-        operation = R.string.ticket_redeem;
+        operation = TransactionType.REDEEM;//R.string.ticket_redeem;
         if (!data.containsAddress(walletAddr))
         {
             //this must be an admin redeem
-            operation = R.string.ticket_admin_redeem;
+            operation = TransactionType.ADMIN_REDEEM;// R.string.ticket_admin_redeem;
         }
         //one of our tickets was burned
         type = -1; //redeem
@@ -209,12 +212,12 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         //if addresses contains our address then it must be a recieve
         if (data.containsAddress(walletAddr))
         {
-            operation = R.string.ticket_receive_from;
+            operation = TransactionType.RECEIVE_FROM;// R.string.ticket_receive_from;
             type = 1; //buy/receive
         }
         else
         {
-            operation = R.string.ticket_transfer_to;
+            operation = TransactionType.TRANSFER_TO;// R.string.ticket_transfer_to;
             type = -1; //sell
             otherParty = data.getFirstAddress();
         }
@@ -227,7 +230,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     }
 
     @Override
-    public void setOperation(int operation)
+    public void setOperation(TransactionType operation)
     {
         super.setOperation(operation);
         this.operation = operation;
@@ -245,14 +248,14 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         if (data.containsAddress(walletAddr))
         {
             //we received a ticket from magiclink with transfer paid by server
-            operation = R.string.ticket_pass_from;
+            operation = TransactionType.PASS_FROM;// R.string.ticket_pass_from;
             type = 1;
         }
         else
         {
             //we had a ticket transferred out of our wallet paid for by server.
             //This will not show up unless we ecrecover the address.
-            operation = R.string.ticket_pass_to;
+            operation = TransactionType.PASS_TO;//R.string.ticket_pass_to;
             type = -1;
         }
     }

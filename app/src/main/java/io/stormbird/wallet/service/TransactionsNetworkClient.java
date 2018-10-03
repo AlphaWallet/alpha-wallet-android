@@ -90,33 +90,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		}).subscribeOn(Schedulers.io());
 	}
 
-	@Override
-	public Observable<Transaction[]> fetchContractTransactions(String address, String feemaster)
-	{
-		return Observable.fromCallable(() -> {
-			List<Transaction> result = new ArrayList<>();
-			try
-			{
-				String response = readContractTransactions(address, feemaster);
-
-				Gson reader = new Gson();
-				JSONArray stateData = new JSONArray(response);
-				EtherscanTransaction[] txs = reader.fromJson(stateData.toString(), EtherscanTransaction[].class);
-				for (EtherscanTransaction etx : txs)
-				{
-					etx.internal = true;
-					result.add(etx.createTransaction());
-				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-
-			return result.toArray(new Transaction[result.size()]);
-		}).subscribeOn(Schedulers.io());
-	}
-
     private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock)
     {
         okhttp3.Response response = null;

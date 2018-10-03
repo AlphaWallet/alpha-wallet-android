@@ -153,11 +153,15 @@ public class SignaturePair
         //Now convert sig back to Byte
         signature = sigBi.toByteArray();
 
-        if (signature.length == 64)
+        if (signature.length < 65)
         {
+            int offset = 65 - signature.length;
             byte[] sigCopy = new byte[65];
-            System.arraycopy(signature, 0, sigCopy, 1, 64);
-            sigCopy[0] = 0;
+            System.arraycopy(signature, 0, sigCopy, offset, 65-offset);
+            for (int i = 0; i < offset; i++)
+            {
+                sigCopy[0] = 0;
+            }
             signature = sigCopy;
         }
         else if (signature.length > 65)

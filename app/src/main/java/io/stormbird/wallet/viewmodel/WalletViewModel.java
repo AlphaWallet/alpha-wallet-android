@@ -34,6 +34,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -63,6 +64,7 @@ public class WalletViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final AssetDefinitionService assetDefinitionService;
+    private final OpenseaService openseaService;
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
@@ -83,7 +85,8 @@ public class WalletViewModel extends BaseViewModel {
             GetDefaultWalletBalance getDefaultWalletBalance,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            OpenseaService openseaService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -95,6 +98,7 @@ public class WalletViewModel extends BaseViewModel {
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.openseaService = openseaService;
     }
 
     public LiveData<Token[]> tokens() {

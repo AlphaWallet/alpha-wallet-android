@@ -12,6 +12,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -44,6 +45,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView textAppreciationSub;
     public final TextView contractType;
     public final View contractSeparator;
+    public final LinearLayout layoutValueDetails;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
     public Token token;
@@ -65,6 +67,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         textAppreciationSub = findViewById(R.id.text_appreciation_sub);
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
+        layoutValueDetails = findViewById(R.id.layout_value_details);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
     }

@@ -12,6 +12,21 @@ public class ERC721Attribute implements Parcelable
     ValueType type;
     String attributeValue;
 
+    public ERC721Attribute(String valueType, String attributeValue)
+    {
+        switch (valueType)
+        {
+            case "number":
+                type = ValueType.INTEGER;
+                break;
+            default:
+                type = ValueType.STRING;
+                break;
+        }
+
+        this.attributeValue = attributeValue;
+    }
+
     protected ERC721Attribute(Parcel in)
     {
         int typeVal = in.readInt();

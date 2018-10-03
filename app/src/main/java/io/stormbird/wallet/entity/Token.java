@@ -60,6 +60,11 @@ public class Token implements Parcelable
         else return false;
     }
 
+    public boolean independentUpdate()
+    {
+        return false;
+    }
+
     public String getFullBalance() {
         return getStringBalance();
     }

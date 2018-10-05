@@ -115,8 +115,10 @@
 
                         <ImageView
                             android:id="@+id/image_view"
-                            android:layout_width="125dp"
-                            android:layout_height="wrap_content" />
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:paddingBottom="15dp"
+                            android:paddingTop="15dp" />
                     </LinearLayout>
 
                 </LinearLayout>

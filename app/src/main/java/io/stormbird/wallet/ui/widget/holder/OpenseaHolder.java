@@ -1,19 +1,18 @@
 package io.stormbird.wallet.ui.widget.holder;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import com.bumptech.glide.Glide;
+
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.OpenseaElement;
-import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.OpenseaService;
 
 /**
@@ -24,7 +23,10 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
 
     public static final int VIEW_TYPE = 1302;
 
-    private final TextView title;
+    private final TextView titleText;
+    private final ImageView image;
+    private final TextView statusText;
+    private final LinearLayout layoutDetails;
     private final OpenseaService openseaService;
 
     @Nullable
@@ -32,7 +34,10 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
 
     public OpenseaHolder(int resId, ViewGroup parent, OpenseaService service) {
         super(resId, parent);
-        title = findViewById(R.id.name);
+        titleText = findViewById(R.id.name);
+        image = findViewById(R.id.image_view);
+        statusText = findViewById(R.id.status);
+        layoutDetails = findViewById(R.id.layout_details);
         openseaService = service;
     }
 
@@ -49,24 +54,11 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
         {
             assetName = "ID# " + String.valueOf(element.tokenId);
         }
-        title.setText(assetName);
+        titleText.setText(assetName);
 
         //now add the graphic
-        queryService = openseaService.fetchBitmap(element.imageURL, 200)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotBitmap, this::bitmapError);
-    }
-
-    private void bitmapError(Throwable throwable)
-    {
-        throwable.printStackTrace();
-    }
-
-    private void gotBitmap(Bitmap object)
-    {
-        queryService.dispose();
-        ImageView iv = findViewById(R.id.image_view);
-        iv.setImageBitmap(object);
+        Glide.with(getContext())
+            .load(element.imageURL)
+            .into(image);
     }
 }

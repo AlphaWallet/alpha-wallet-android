@@ -1,11 +1,7 @@
 package io.stormbird.wallet.service;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.util.Log;
-
-import com.caverock.androidsvg.SVG;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +10,6 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,9 +18,7 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -115,7 +108,7 @@ public class OpenseaService
                 element.tokenId = kitty.getInt("token_id");
                 element.description = kitty.getString("description");
                 element.assetName = kitty.getString("name");
-                element.imageURL = kitty.getString("image_url");
+                element.imageURL = kitty.getString("image_preview_url");
                 element.imageFileName = null;
 
                 JSONArray traits = kitty.getJSONArray("traits");
@@ -186,39 +179,39 @@ public class OpenseaService
         });
     }
 
-    private static Bitmap getBitmap(SVG svg, int width)
-    {
-        float aspectRatio = svg.getDocumentAspectRatio();
-        int height = (int)((float)width / aspectRatio);
-        Bitmap bitmap = Bitmap.createBitmap(width,
-                                            height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        // Clear background to white
-        canvas.drawRGB(255, 255, 255);
-        svg.renderToCanvas(canvas);
-        return bitmap;
-    }
+//    private static Bitmap getBitmap(SVG svg, int width)
+//    {
+//        float aspectRatio = svg.getDocumentAspectRatio();
+//        int height = (int)((float)width / aspectRatio);
+//        Bitmap bitmap = Bitmap.createBitmap(width,
+//                                            height, Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(bitmap);
+//        // Clear background to white
+//        canvas.drawRGB(255, 255, 255);
+//        svg.renderToCanvas(canvas);
+//        return bitmap;
+//    }
 
-    public Single<Bitmap> fetchBitmap(String strURL, int width)
-    {
-        return Single.fromCallable(() -> {
-            File bitmapFile = getLocalFile(strURL);
-            if (!bitmapFile.exists())
-            {
-                fetchFile(strURL).blockingGet();
-                if (!bitmapFile.exists()) return Bitmap.createBitmap(5, 5, Bitmap.Config.ALPHA_8);
-            }
-
-            System.out.println(bitmapFile.length());
-            FileInputStream fis = new FileInputStream(bitmapFile);
-            SVG svg = SVG.getFromInputStream(fis);
-
-            //convert file to bitmap
-            Bitmap convert = getBitmap(svg, width);
-
-            return convert;
-        });
-    }
+//    public Single<Bitmap> fetchBitmap(String strURL, int width)
+//    {
+//        return Single.fromCallable(() -> {
+//            File bitmapFile = getLocalFile(strURL);
+//            if (!bitmapFile.exists())
+//            {
+//                fetchFile(strURL).blockingGet();
+//                if (!bitmapFile.exists()) return Bitmap.createBitmap(5, 5, Bitmap.Config.ALPHA_8);
+//            }
+//
+//            System.out.println(bitmapFile.length());
+//            FileInputStream fis = new FileInputStream(bitmapFile);
+//            SVG svg = SVG.getFromInputStream(fis);
+//
+//            //convert file to bitmap
+//            Bitmap convert = getBitmap(svg, width);
+//
+//            return convert;
+//        });
+//    }
 
     public Single<String> fetchFile(String strURL)
     {

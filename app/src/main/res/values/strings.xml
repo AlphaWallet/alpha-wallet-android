@@ -489,4 +489,6 @@
     <string name="bookmarks">Bookmarks</string>
     <string name="visit">Visit</string>
     <string name="erc721">ERC721</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_incomplete_data">Incomplete Data</string>
 </resources>

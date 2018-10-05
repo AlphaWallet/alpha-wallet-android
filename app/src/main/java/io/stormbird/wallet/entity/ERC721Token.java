@@ -1,5 +1,6 @@
 package io.stormbird.wallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
@@ -13,6 +14,7 @@ import java.util.List;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
+import io.stormbird.wallet.viewmodel.BaseViewModel;
 
 /**
  * Created by James on 3/10/2018.
@@ -103,5 +105,11 @@ public class ERC721Token extends Token implements Parcelable
 
         holder.balanceEth.setVisibility(View.VISIBLE);
         holder.arrayBalance.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void clickReact(BaseViewModel viewModel, Context context)
+    {
+        viewModel.showRedeemToken(context, this);
     }
 }

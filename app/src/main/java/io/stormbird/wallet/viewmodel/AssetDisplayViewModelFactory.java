@@ -15,6 +15,7 @@ import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 
 /**
  * Created by James on 22/01/2018.
@@ -33,6 +34,7 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     private final HomeRouter homeRouter;
     private final MyAddressRouter myAddressRouter;
     private final AssetDefinitionService assetDefinitionService;
+    private final OpenseaService openseaService;
 
     public AssetDisplayViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
@@ -45,7 +47,8 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter,
             MyAddressRouter myAddressRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            OpenseaService openseaService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -57,11 +60,12 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
         this.homeRouter = homeRouter;
         this.myAddressRouter = myAddressRouter;
         this.assetDefinitionService = assetDefinitionService;
+        this.openseaService = openseaService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService);
+        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
     }
 }

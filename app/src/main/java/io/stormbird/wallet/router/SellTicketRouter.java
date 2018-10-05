@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.SellTicketActivity;
 
 import static io.stormbird.wallet.C.Key.TICKET;
@@ -14,9 +15,9 @@ import static io.stormbird.wallet.C.Key.TICKET;
 
 public class SellTicketRouter
 {
-    public void open(Context context, Ticket ticket) {
+    public void open(Context context, Token token) {
         Intent intent = new Intent(context, SellTicketActivity.class);
-        intent.putExtra(TICKET, ticket);
+        intent.putExtra(TICKET, token);
         //intent.putExtra(TICKET_RANGE, range);
         context.startActivity(intent);
     }

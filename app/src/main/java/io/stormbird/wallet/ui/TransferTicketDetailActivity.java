@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
@@ -151,7 +152,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService());
+        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -173,6 +174,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             }
 
             @Override
+            @SuppressLint("StringFormatInvalid")
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 validUntil.setText(getString(R.string.link_valid_until, s.toString(), expiryTimeEditText.getText().toString()));
             }
@@ -190,6 +192,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
             }
 
+            @SuppressLint("StringFormatInvalid")
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 validUntil.setText(getString(R.string.link_valid_until, expiryDateEditText.getText().toString(), s.toString()));

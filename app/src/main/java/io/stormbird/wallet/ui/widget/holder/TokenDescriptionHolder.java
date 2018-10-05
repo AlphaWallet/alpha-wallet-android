@@ -27,7 +27,7 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
     private final TextView issuerName;
     private final String issuer;
 
-    public TokenDescriptionHolder(int resId, ViewGroup parent, Ticket t, AssetDefinitionService service) {
+    public TokenDescriptionHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService service) {
         super(resId, parent);
         title = findViewById(R.id.name);
         count = findViewById(R.id.amount);

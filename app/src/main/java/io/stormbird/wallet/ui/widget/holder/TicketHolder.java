@@ -10,6 +10,7 @@ import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 
 /**
  * Created by James on 9/02/2018.

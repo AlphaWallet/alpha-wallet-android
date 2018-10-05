@@ -9,8 +9,8 @@ import android.os.Parcelable;
  */
 public class ERC721Attribute implements Parcelable
 {
-    ValueType type;
-    String attributeValue;
+    public final ValueType type;
+    public final String attributeValue;
 
     public ERC721Attribute(String valueType, String attributeValue)
     {

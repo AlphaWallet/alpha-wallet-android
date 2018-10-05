@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
@@ -46,7 +47,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
     private FinishReceiver finishReceiver;
 
-    private Ticket ticket;
+    private Token token;
     private TicketAdapter adapter;
     private String balance = null;
     private String burnList = null;
@@ -56,7 +57,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     {
         AndroidInjection.inject(this);
 
-        ticket = getIntent().getParcelableExtra(TICKET);
+        token = getIntent().getParcelableExtra(TICKET);
 
         super.onCreate(savedInstanceState);
 
@@ -64,7 +65,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         toolbar();
 
         setTitle(getString(R.string.title_show_tickets));
-        TokenInfo info = ticket.tokenInfo;
+        TokenInfo info = token.tokenInfo;
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -80,7 +81,12 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
 
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
+        adapter = new TicketAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
+        if (token instanceof ERC721Token)
+        {
+            adapter.setERC721Contract(token);
+        }
+
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);
@@ -96,7 +102,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare(token);
     }
 
     @Override
@@ -108,15 +114,18 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
 
     private void onTokenUpdate(Token t)
     {
-        ticket = (Ticket)t;
-        if (!ticket.getBurnListStr().equals(burnList) || !ticket.getFullBalance().equals(balance))
+        if (t instanceof Ticket)
         {
-            adapter.setTicket(ticket);
-            RecyclerView list = findViewById(R.id.listTickets);
-            list.setAdapter(null);
-            list.setAdapter(adapter);
-            balance = ticket.getFullBalance();
-            burnList = ticket.getBurnListStr();
+            token = t;
+            if (!token.getBurnListStr().equals(burnList) || !t.getFullBalance().equals(balance))
+            {
+                adapter.setToken(token);
+                RecyclerView list = findViewById(R.id.listTickets);
+                list.setAdapter(null);
+                list.setAdapter(adapter);
+                balance = token.getFullBalance();
+                burnList = token.getBurnListStr();
+            }
         }
     }
 
@@ -129,7 +138,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_qr) {
-            viewModel.showContractInfo(this, ticket.getAddress());
+            viewModel.showContractInfo(this, token.getAddress());
         }
         return super.onOptionsItemSelected(item);
     }
@@ -141,17 +150,17 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         {
             case R.id.button_use:
             {
-                viewModel.selectAssetIdsToRedeem(this, ticket);
+                viewModel.selectAssetIdsToRedeem(this, token);
             }
             break;
             case R.id.button_sell:
             {
-                viewModel.sellTicketRouter(this, ticket);// showSalesOrder(this, ticket);
+                viewModel.sellTicketRouter(this, token);// showSalesOrder(this, ticket);
             }
             break;
             case R.id.button_transfer:
             {
-                viewModel.showTransferToken(this, ticket);
+                viewModel.showTransferToken(this, token);
             }
             break;
         }

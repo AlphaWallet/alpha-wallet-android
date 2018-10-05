@@ -43,7 +43,7 @@ public class TicketSaleAdapter extends TicketAdapter {
 
     /* Context ctx is used to initialise assetDefinition in the super class */
     public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t, AssetDefinitionService assetService) {
-        super(onTicketIdClickListener, t, assetService);
+        super(onTicketIdClickListener, t, assetService, null);
         onTokenCheckListener = this::onTokenCheck;
         selectedTicketRange = null;
     }
@@ -53,12 +53,12 @@ public class TicketSaleAdapter extends TicketAdapter {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
-                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, ticket, assetService);
+                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 holder = tokenHolder;
             } break;
             case TicketSaleHolder.VIEW_TYPE: {
-                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, ticket, assetService);
+                TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, token, assetService);
                 tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
                 tokenHolder.setOnTokenCheckListener(onTokenCheckListener);
                 holder = tokenHolder;
@@ -67,7 +67,7 @@ public class TicketSaleAdapter extends TicketAdapter {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
             } break;
             case TokenDescriptionHolder.VIEW_TYPE: {
-                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, ticket, assetService);
+                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService);
             } break;
             case SalesOrderHeaderHolder.VIEW_TYPE: {
                 holder = new SalesOrderHeaderHolder(R.layout.item_redeem_ticket, parent);

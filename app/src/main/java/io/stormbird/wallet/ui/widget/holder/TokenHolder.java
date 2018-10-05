@@ -153,7 +153,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         int valColor;
         if (appreciation.compareTo(BigDecimal.ZERO) >= 0)
         {
-            valColor = ContextCompat.getColor(getContext(), R.color.black);
+            valColor = ContextCompat.getColor(getContext(), R.color.light_gray);
             textAppreciationSub.setText(R.string.appreciation);
             textAppreciationSub.setTextColor(valColor);
         }

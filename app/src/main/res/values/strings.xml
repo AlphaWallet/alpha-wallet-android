@@ -491,4 +491,6 @@
     <string name="erc721">ERC721</string>
     <string name="status_pending">Pending</string>
     <string name="status_incomplete_data">Incomplete Data</string>
+    <string name="status_pending_with_qty">%1$s Pending</string>
+    <string name="status_incomplete_data_with_qty">%1$s Incomplete Data</string>
 </resources>

@@ -9,10 +9,10 @@
     android:background="@drawable/background_marketplace_event"
     android:clickable="true"
     android:orientation="vertical"
+    android:paddingBottom="20dp"
     android:paddingLeft="23dp"
     android:paddingRight="23dp"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp">
+    android:paddingTop="20dp">
 
     <ImageView
         android:id="@+id/icon"
@@ -22,6 +22,48 @@
         android:contentDescription="@string/empty"
         android:src="@mipmap/token_logo"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/layout_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/status_pending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="7dp"
+            android:background="@drawable/background_status_pending"
+            android:fontFamily="@font/font_bold"
+            android:paddingBottom="4dp"
+            android:paddingLeft="13dp"
+            android:paddingRight="13dp"
+            android:paddingTop="4dp"
+            android:text="@string/status_pending"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="9sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/status_incomplete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_status_incomplete"
+            android:fontFamily="@font/font_bold"
+            android:paddingBottom="4dp"
+            android:paddingLeft="13dp"
+            android:paddingRight="13dp"
+            android:paddingTop="4dp"
+            android:text="@string/status_incomplete_data"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="9sp"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -96,8 +138,8 @@
             android:id="@+id/issuer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
             android:layout_marginLeft="2dp"
+            android:fontFamily="@font/font_semibold"
             android:text="@string/ethereum"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />

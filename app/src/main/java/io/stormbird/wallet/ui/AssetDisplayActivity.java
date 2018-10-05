@@ -9,7 +9,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.FinishReceiver;
@@ -21,11 +26,6 @@ import io.stormbird.wallet.viewmodel.AssetDisplayViewModel;
 import io.stormbird.wallet.viewmodel.AssetDisplayViewModelFactory;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
-import io.stormbird.token.entity.TicketRange;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 
@@ -44,9 +44,8 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private SystemView systemView;
     private ProgressView progressView;
     private RecyclerView list;
-
+    private TextView tokenTitle;
     private FinishReceiver finishReceiver;
-
     private Token token;
     private TicketAdapter adapter;
     private String balance = null;
@@ -71,6 +70,11 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
+
+        tokenTitle = findViewById(R.id.title);
+
+        //TODO: Get proper token count
+        tokenTitle.setText(String.format("%s %s", token.getFullBalance(), token.getFullName()));
 
         list = findViewById(R.id.listTickets);
 

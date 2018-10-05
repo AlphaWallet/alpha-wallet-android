@@ -82,6 +82,10 @@ public class OpenseaService
 
         try
         {
+            if (!object.has("assets"))
+            {
+                return new Token[0];
+            }
             JSONArray assets = object.getJSONArray("assets");
             for (int i = 0; i < assets.length(); i++)
             {
@@ -150,7 +154,7 @@ public class OpenseaService
             sb.append("https://api.opensea.io/api/v1/assets/?owner=");
             sb.append(address);
             sb.append("&order_by=current_price&order_direction=asc");
-            JSONObject result = null;
+            JSONObject result = new JSONObject("{ \"estimated_count\": 0 }");
 
             try
             {
@@ -231,7 +235,7 @@ public class OpenseaService
             {
                 targetFile = getLocalFile(strURL);
                 //already have it locally?
-                if (targetFile.exists()) return targetFile.getName();
+                if (targetFile.exists()) return strURL;
 
                 DownloadLink dl = obtainFileConnection(strURL);
 

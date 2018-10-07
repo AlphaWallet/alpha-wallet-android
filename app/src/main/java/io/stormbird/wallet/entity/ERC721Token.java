@@ -112,4 +112,10 @@ public class ERC721Token extends Token implements Parcelable
     {
         viewModel.showRedeemToken(context, this);
     }
+
+    @Override
+    public String getFullBalance()
+    {
+        return String.valueOf(tokenBalance.size());
+    }
 }

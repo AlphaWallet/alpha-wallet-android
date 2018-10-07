@@ -88,21 +88,12 @@ public class TicketAdapter extends TokensAdapter {
         if (!(token instanceof ERC721Token)) return;
         items.beginBatchedUpdates();
         items.clear();
+        int weight = 1; //use the same order we receive from OpenSea
+
         // populate the ERC721 items
         for (OpenseaElement element : ((ERC721Token)token).tokenBalance)
         {
-            int weight = 0;
-            if (element.attributes.containsKey("generation"))
-            {
-                ERC721Attribute attr = element.attributes.get("generation");
-                weight = 100 - Integer.valueOf(attr.attributeValue);
-            }
-            else
-            {
-                weight = (int)element.tokenId;
-            }
-
-            items.add(new OpenseaSortedItem(element, weight));
+            items.add(new OpenseaSortedItem(element, weight++));
         }
         items.endBatchedUpdates();
     }

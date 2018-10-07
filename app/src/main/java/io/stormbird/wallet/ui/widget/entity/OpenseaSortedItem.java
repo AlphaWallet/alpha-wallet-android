@@ -26,6 +26,7 @@ public class OpenseaSortedItem extends SortedItem<OpenseaElement>
 
     @Override
     public boolean areItemsTheSame(SortedItem other) {
-        return other.viewType == viewType;
+        return (other.viewType == viewType
+                && ((OpenseaSortedItem) other).value.tokenId == value.tokenId);
     }
 }

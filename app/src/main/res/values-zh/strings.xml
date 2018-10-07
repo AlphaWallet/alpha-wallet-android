@@ -232,7 +232,7 @@
     <string name="share_universal_link">分享MagicLink链接</string>
     <string name="select_option_to_transfer">选择转让方式</string>
     <string name="hint_input_eth_amount">0.00</string>
-    <string name="label_my_address">我的地址s</string>
+    <string name="label_my_address">我的地址</string>
     <string name="action_copy_alt">复制</string>
     <string name="set_universal_link_expiry">设置MagicLink链接过期时间:</string>
     <string name="tickets_selected">%1s %2s 选中</string>
@@ -314,4 +314,23 @@
     <string name="label_gas_limit">Gas限制</string>
     <string name="label_gas_price">Gas价钱</string>
     <string name="label_network_fee">Gas费用</string>
+    <string name="message_to_sign">消息</string>
+    <string name="signer_address">签署人地址</string>
+    <string name="requester_url">请求链接</string>
+    <string name="dialog_title_sign_message">签署消息</string>
+    <string name="dialog_reject">拒绝</string>
+    <string name="dialog_approve">同意</string>
+    <string name="popup_verification_success">验证成功</string>
+    <string name="popup_verification_failed">验证失败</string>
+    <string name="dialog_sign_transaction_success">签署交易成功</string>
+    <string name="dialog_sign_transaction_failed">签署交易失败</string>
+    <string name="transaction_value">交易价格</string>
+    <string name="dialog_title_sign_transaction">签署交易</string>
+    <string name="action_view_bookmarks">查看书签</string>
+    <string name="action_added">已加入书签</string>
+    <string name="action_add_bookmark">添加书签</string>
+    <string name="bookmarks">书签夹</string>
+    <string name="visit">访问</string>
+    <string name="free_import_with_gas">免费导入(免除 gas 费用)</string>
+    <string name="toolbar_header_browser">DApp 浏览器</string>
 </resources>

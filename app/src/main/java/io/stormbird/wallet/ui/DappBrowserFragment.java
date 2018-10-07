@@ -102,6 +102,13 @@ public class DappBrowserFragment extends Fragment implements
         return view;
     }
 
+    @Override
+    public void onDestroy()
+    {
+        if (getContext() != null) getContext().unregisterReceiver(URLReceiver);
+        super.onDestroy();
+    }
+
     private void initView(View view) {
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);
@@ -133,7 +140,8 @@ public class DappBrowserFragment extends Fragment implements
         urlTv.setOnClickListener(v -> urlTv.showDropDown());
     }
 
-    private void dismissKeyboard() {
+    private void dismissKeyboard()
+    {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(urlTv.getWindowToken(), 0);
     }
@@ -329,7 +337,7 @@ public class DappBrowserFragment extends Fragment implements
             dialog.dismiss();
             //popup transaction wait dialog
             onProgress();
-            viewModel.signTransaction(transaction, dAppFunction, url);
+            viewModel.signTransaction(cTrans, dAppFunction, url);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(cTrans);

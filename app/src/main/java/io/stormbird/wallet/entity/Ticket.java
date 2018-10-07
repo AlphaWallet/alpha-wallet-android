@@ -528,7 +528,7 @@ public class Ticket extends Token implements Parcelable
      */
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx)
     {
-        DateFormat date = android.text.format.DateFormat.getLongDateFormat(ctx);
+        DateFormat date = android.text.format.DateFormat.getMediumDateFormat(ctx);
         DateFormat time = android.text.format.DateFormat.getTimeFormat(ctx);
 
         TextView amount = activity.findViewById(R.id.amount);
@@ -575,6 +575,7 @@ public class Ticket extends Token implements Parcelable
             }
             else
             {
+                ticketLayout.setVisibility(View.VISIBLE);
                 ticketRange.setText(countryA + "-" + countryB);
             }
 
@@ -586,6 +587,7 @@ public class Ticket extends Token implements Parcelable
             }
             else
             {
+                catLayout.setVisibility(View.VISIBLE);
                 cat.setText("M" + catTxt);
             }
 
@@ -652,7 +654,7 @@ public class Ticket extends Token implements Parcelable
     public String getTokenName(AssetDefinitionService assetService)
     {
         //see if this token is covered by any contract
-        int networkId = assetService.getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
+        int networkId = assetService.getNetworkId(getAddress());
         if (networkId >= 1)
         {
             return assetService.getAssetDefinition(getAddress()).getTokenName();
@@ -707,7 +709,7 @@ public class Ticket extends Token implements Parcelable
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        int networkId = assetService.getNetworkId(getAddress());// getAssetDefinition(getAddress()).getNetworkFromContract(getAddress());
+        int networkId = assetService.getNetworkId(getAddress());
         isMatchedInXML = networkId >= 1;
     }
 

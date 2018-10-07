@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import io.reactivex.disposables.CompositeDisposable;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SubscribeWrapper;
 import io.stormbird.wallet.entity.Ticker;
@@ -43,6 +44,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -80,6 +82,7 @@ public class TokenRepository implements TokenRepositoryType {
     private Web3j web3j;
     private boolean useBackupNode = false;
     private NetworkInfo network;
+    private Disposable disposable;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -100,32 +103,36 @@ public class TokenRepository implements TokenRepositoryType {
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
-    private void buildWeb3jClient(NetworkInfo defaultNetwork) {
+    private void buildWeb3jClient(NetworkInfo defaultNetwork)
+    {
         network = defaultNetwork;
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
         web3j = Web3jFactory.build(publicNodeService);
         ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
-        Disposable d = getWorkHash()
+        disposable = getIsSyncing()
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::receiveWork, this::checkFail);
+                .subscribe(this::receiveSyncing, this::checkFail);
     }
 
-    private void receiveWork(BigInteger s)
+    private void receiveSyncing(Boolean b)
     {
-        //have a valid connection, no need to use infura
-        if (s == null || s.equals(BigInteger.ZERO))
+        //have a valid connection and node is done syncing, no need to use infura
+        if (b == null || b)
         {
             useBackupNode = true;
             switchToBackupNode();
         }
+
+        disposable.dispose();
     }
 
     private void checkFail(Throwable failMsg)
     {
         useBackupNode = true;
         switchToBackupNode();
+        disposable.dispose();
     }
 
     private void switchToBackupNode()
@@ -135,12 +142,12 @@ public class TokenRepository implements TokenRepositoryType {
         ethereumNetworkRepository.setActiveRPC(network.backupNodeUrl);
     }
 
-    private Single<BigInteger> getWorkHash()
+    private Single<Boolean> getIsSyncing()
     {
         return Single.fromCallable(() -> {
-            EthBlockNumber work = web3j.ethBlockNumber()
+            EthSyncing status = web3j.ethSyncing()
                     .send();
-            return work.getBlockNumber();
+            return status.isSyncing();
         });
     }
 
@@ -1021,8 +1028,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static byte[] createTicketTransferData(String to, String indexListStr) {
         //params are: Address, List<Uint16> of ticket indicies
-        Ticket t = new Ticket(null, "0", "0", 0);
-        //List ticketIndicies = t.stringDecimalToBigIntegerList(indexListStr);
         List ticketIndicies = Observable.fromArray(indexListStr.split(","))
                 .map(s -> new BigInteger(s.trim())).toList().blockingGet();
         Function function = getTransferFunction(to, ticketIndicies);

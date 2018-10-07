@@ -1,31 +1,12 @@
-The DMZ server is a web service for all services that doesn't have confidential data (e.g. private keys).
+The DMZ server is a web service for all services that don't have
+confidential data (e.g. private keys).
 
-It currently does:
+It currently functions:
 
-- serving as XML repository server.
+- as a landing page for Universal Link, it displays the content of an
+  Universal Link, as well as showing if it is already used.
 
-- as a landing page for Universal Link, it displays the content of an Universal Link, as well as showing if it is already used. 
-
-## XML repository ##
-
-It can be accessed like this:
-
-https://repo.awallet.io/0xA66A3F08068174e8F005112A8b2c7A507a822335
-
-Much of it is in the contracts/README.md where the client behaviour is specifie because it is easier to look at the server and client behaviour together.
-
-Since this repo server uses the XML repository as a git-subtree, here are the commands how to update the git-subtree:
-
-Setup (one time only):
-
-    $ git remote add -f contracts git@github.com:alpha-wallet/contracts.git
-
-Update (when the contract xml file gets updated):
-
-    $ git fetch contracts
-    $ git subtree pull --prefix contracts/ contracts master --squash
-
-The command has to be performed while on the root directory of the git repository.
+- as the XML repository server.
 
 ## Universal link ##
 

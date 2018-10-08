@@ -111,6 +111,7 @@ dependencies {
     implementation "com.android.support:design:$project.supportVersion"
     implementation "com.android.support:support-vector-drawable:$project.supportVersion"
     implementation "com.android.support:recyclerview-v7:$project.supportVersion"
+    implementation "com.android.support:gridlayout-v7:$project.supportVersion"
     implementation 'com.android.support:multidex:1.0.3'
 
     // Bar code scanning

@@ -6,8 +6,6 @@ import android.os.Parcelable;
 import android.view.View;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +87,7 @@ public class ERC721Token extends Token implements Parcelable
         int balance = 0;
         for (OpenseaElement element : tokenBalance)
         {
-            if (element.attributes.size() > 0 && element.imageURL != null && element.tokenId > 0)
+            if (element.traits.size() > 0 && element.imageUrl != null && element.tokenId > 0)
             {
                 balance++;
             }

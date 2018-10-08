@@ -80,11 +80,11 @@ public class OpenseaService
                 return new Token[0];
             }
             JSONArray assets = object.getJSONArray("assets");
+
             for (int i = 0; i < assets.length(); i++)
             {
-                JSONObject kitty = assets.getJSONObject(i);
-
-                JSONObject assetContract = kitty.getJSONObject("asset_contract");
+                JSONObject asset = assets.getJSONObject(i);
+                JSONObject assetContract = asset.getJSONObject("asset_contract");
                 String tokenAddr = assetContract.getString("address");
 
                 Token token = foundTokens.get(tokenAddr);
@@ -109,13 +109,14 @@ public class OpenseaService
                 }
 
                 OpenseaElement element = new OpenseaElement();
-                element.tokenId = kitty.getInt("token_id");
-                element.description = kitty.getString("description");
-                element.assetName = kitty.getString("name");
-                element.imageURL = kitty.getString("image_preview_url");
-                element.imageFileName = null;
+                element.tokenId = asset.getInt("token_id");
+                element.description = asset.getString("description");
+                element.name = asset.getString("name");
+                element.imageUrl = asset.getString("image_preview_url");
+                element.externalLink = asset.getString("external_link");
+                element.backgroundColor = asset.getString("background_color");
 
-                JSONArray traits = kitty.getJSONArray("traits");
+                JSONArray traits = asset.getJSONArray("traits");
                 for (int j = 0; j < traits.length(); j++)
                 {
                     JSONObject trait = traits.getJSONObject(j);
@@ -123,7 +124,7 @@ public class OpenseaService
                     String value = trait.getString("value");
                     String display_type = trait.getString("display_type");
                     ERC721Attribute attr = new ERC721Attribute(display_type, value);
-                    element.attributes.put(type_value, attr);
+                    element.traits.put(type_value, attr);
                 }
 
                 if (token instanceof ERC721Token)

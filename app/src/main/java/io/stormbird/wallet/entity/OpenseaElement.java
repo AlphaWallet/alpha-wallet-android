@@ -13,54 +13,56 @@ import java.util.Map;
 public class OpenseaElement implements Parcelable
 {
     public long tokenId;
-    public String imageFileName;
-    public String imageURL;
-    public String assetName;
+    public String imageUrl;
+    public String name;
     public String description;
-
-    public  Map<String, ERC721Attribute> attributes = new HashMap<String, ERC721Attribute>();
+    public String externalLink;
+    public String backgroundColor;
+    public  Map<String, ERC721Attribute> traits = new HashMap<String, ERC721Attribute>();
 
     public OpenseaElement()
     {
-        attributes.clear();
+        traits.clear();
     }
 
     @Override
     public int describeContents()
     {
-        return attributes.size();
+        return traits.size();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
         dest.writeLong(tokenId);
-        dest.writeString(imageFileName);
-        dest.writeString(imageURL);
-        dest.writeString(assetName);
+        dest.writeString(imageUrl);
+        dest.writeString(name);
         dest.writeString(description);
-        dest.writeInt(attributes.size());
-        for (String key : attributes.keySet())
+        dest.writeString(externalLink);
+        dest.writeString(backgroundColor);
+        dest.writeInt(traits.size());
+        for (String key : traits.keySet())
         {
             dest.writeString(key);
-            dest.writeParcelable(attributes.get(key), flags);
+            dest.writeParcelable(traits.get(key), flags);
         }
     }
 
     private OpenseaElement(Parcel in)
     {
-        attributes.clear();
+        traits.clear();
         tokenId = in.readLong();
-        imageFileName = in.readString();
-        imageURL = in.readString();
-        assetName = in.readString();
+        imageUrl = in.readString();
+        name = in.readString();
         description = in.readString();
+        externalLink = in.readString();
+        backgroundColor = in.readString();
         int size = in.readInt();
         for (int i = 0; i < size; i++)
         {
             String key = in.readString();
             ERC721Attribute attr = in.readParcelable(ERC721Attribute.class.getClassLoader());
-            attributes.put(key, attr);
+            traits.put(key, attr);
         }
     }
 

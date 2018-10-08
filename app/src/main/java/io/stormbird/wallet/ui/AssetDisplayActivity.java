@@ -72,8 +72,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         progressView.hide();
 
         tokenTitle = findViewById(R.id.title);
-
-        //TODO: Get proper token count
         tokenTitle.setText(String.format("%s %s", token.getFullBalance(), token.getFullName()));
 
         list = findViewById(R.id.listTickets);

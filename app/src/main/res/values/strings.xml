@@ -493,4 +493,7 @@
     <string name="status_incomplete_data">Incomplete Data</string>
     <string name="status_pending_with_qty">%1$s Pending</string>
     <string name="status_incomplete_data_with_qty">%1$s Incomplete Data</string>
+    <string name="token_details">Token Details</string>
+    <string name="label_cattributes">Cattributes</string>
+    <string name="label_traits">Traits</string>
 </resources>

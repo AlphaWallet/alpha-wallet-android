@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui.widget.holder;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,8 +15,11 @@ import com.bumptech.glide.Glide;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Attribute;
 import io.stormbird.wallet.entity.OpenseaElement;
 import io.stormbird.wallet.service.OpenseaService;
+import io.stormbird.wallet.ui.TokenDetailActivity;
+import io.stormbird.wallet.util.KittyUtils;
 
 /**
  * Created by James on 3/10/2018.
@@ -27,6 +31,8 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
 
     private final TextView titleText;
     private final ImageView image;
+    private final TextView generation;
+    private final TextView cooldown;
     private final TextView statusText;
     private final LinearLayout layoutDetails;
     private final OpenseaService openseaService;
@@ -38,6 +44,8 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
         super(resId, parent);
         titleText = findViewById(R.id.name);
         image = findViewById(R.id.image_view);
+        generation = findViewById(R.id.generation);
+        cooldown = findViewById(R.id.cooldown);
         statusText = findViewById(R.id.status);
         layoutDetails = findViewById(R.id.layout_details);
         openseaService = service;
@@ -48,9 +56,9 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
     {
         //for now add title and ERC721 graphic
         String assetName;
-        if (element.assetName != null && !element.assetName.equals("null"))
+        if (element.name != null && !element.name.equals("null"))
         {
-            assetName = element.assetName;
+            assetName = element.name;
         }
         else
         {
@@ -58,10 +66,26 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
         }
         titleText.setText(assetName);
 
+        ERC721Attribute gen = element.traits.get("generation");
+        if (gen != null) {
+            generation.setText(String.format("Gen %s", gen.attributeValue));
+        }
+
+        ERC721Attribute cooldownIndex = element.traits.get("cooldown_index");
+        if (cooldownIndex != null) {
+            cooldown.setText(String.format("%s Cooldown", KittyUtils.parseCooldownIndex(cooldownIndex.attributeValue)));
+        }
+
         //now add the graphic
         Glide.with(getContext())
-            .load(element.imageURL)
+            .load(element.imageUrl)
             .into(image);
+
+        image.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), TokenDetailActivity.class);
+            intent.putExtra("element", element);
+            getContext().startActivity(intent);
+        });
     }
 
     private void setStatus(C.TokenStatus status) {

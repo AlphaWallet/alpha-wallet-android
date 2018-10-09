@@ -3,6 +3,8 @@ package io.stormbird.wallet.service;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,11 +27,10 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.stormbird.wallet.entity.DownloadLink;
-import io.stormbird.wallet.entity.ERC721Attribute;
 import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.OpenseaElement;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
+import io.stormbird.wallet.entity.opensea.Asset;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -76,18 +77,15 @@ public class OpenseaService {
             JSONArray assets = object.getJSONArray("assets");
 
             for (int i = 0; i < assets.length(); i++) {
-                JSONObject asset = assets.getJSONObject(i);
-                JSONObject assetContract = asset.getJSONObject("asset_contract");
-                String tokenAddr = assetContract.getString("address");
+                Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
 
-                Token token = foundTokens.get(tokenAddr);
-
+                Token token = foundTokens.get(asset.getAssetContract().getAddress());
                 if (token == null) {
-                    String tokenName = assetContract.getString("name");
-                    String tokenSymbol = assetContract.getString("symbol");
-                    String schema = assetContract.getString("schema_name");
+                    String tokenName = asset.getAssetContract().getName();
+                    String tokenSymbol = asset.getAssetContract().getSymbol();
+                    String schema = asset.getAssetContract().getSchemaName();
 
-                    TokenInfo tInfo = new TokenInfo(tokenAddr, tokenName, tokenSymbol, 0, true);
+                    TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
                     switch (schema) {
                         case "ERC721":
                             token = new ERC721Token(tInfo, null, System.currentTimeMillis());
@@ -96,28 +94,11 @@ public class OpenseaService {
                             token = new Token(tInfo, BigDecimal.ZERO, System.currentTimeMillis());
                             break;
                     }
-                    foundTokens.put(tokenAddr, token);
-                }
-
-                OpenseaElement element = new OpenseaElement();
-                element.tokenId = asset.getInt("token_id");
-                element.description = asset.getString("description");
-                element.name = asset.getString("name");
-                element.imageUrl = asset.getString("image_preview_url");
-                element.externalLink = asset.getString("external_link");
-                element.backgroundColor = asset.getString("background_color");
-
-                JSONArray traits = asset.getJSONArray("traits");
-                for (int j = 0; j < traits.length(); j++) {
-                    JSONObject trait = traits.getJSONObject(j);
-                    String type_value = trait.getString("trait_type");
-                    String value = trait.getString("value");
-                    ERC721Attribute attr = new ERC721Attribute(type_value, value);
-                    element.traits.add(attr);
+                    foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
 
                 if (token instanceof ERC721Token) {
-                    ((ERC721Token) token).tokenBalance.add(element);
+                    ((ERC721Token) token).tokenBalance.add(asset);
                 }
             }
         } catch (JSONException e) {

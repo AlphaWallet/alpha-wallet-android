@@ -2,18 +2,22 @@ package io.stormbird.wallet.ui.widget.adapter;
 
 import android.view.ViewGroup;
 
-import io.stormbird.token.tools.TokenDefinition;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC721Attribute;
 import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.OpenseaElement;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
-import io.stormbird.wallet.ui.widget.entity.OpenseaSortedItem;
+import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
@@ -21,12 +25,6 @@ import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
 import io.stormbird.wallet.ui.widget.holder.TicketHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.TicketRange;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by James on 9/02/2018.
@@ -91,9 +89,9 @@ public class TicketAdapter extends TokensAdapter {
         int weight = 1; //use the same order we receive from OpenSea
 
         // populate the ERC721 items
-        for (OpenseaElement element : ((ERC721Token)token).tokenBalance)
+        for (Asset asset : ((ERC721Token)token).tokenBalance)
         {
-            items.add(new OpenseaSortedItem(element, weight++));
+            items.add(new AssetSortedItem(asset, weight++));
         }
         items.endBatchedUpdates();
     }

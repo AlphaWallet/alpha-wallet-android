@@ -11,6 +11,7 @@ import java.util.List;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
@@ -20,9 +21,9 @@ import io.stormbird.wallet.viewmodel.BaseViewModel;
  */
 public class ERC721Token extends Token implements Parcelable
 {
-    public List<OpenseaElement> tokenBalance;
+    public List<Asset> tokenBalance;
 
-    public ERC721Token(TokenInfo tokenInfo, List<OpenseaElement> balanceList, long blancaTime) {
+    public ERC721Token(TokenInfo tokenInfo, List<Asset> balanceList, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         if (balanceList != null)
         {
@@ -41,8 +42,8 @@ public class ERC721Token extends Token implements Parcelable
         int size = in.readInt();
         for (; size > 0; size--)
         {
-            OpenseaElement element = in.readParcelable(OpenseaElement.class.getClassLoader());
-            tokenBalance.add(element);
+            Asset asset = in.readParcelable(Asset.class.getClassLoader());
+            tokenBalance.add(asset);
         }
     }
 
@@ -62,9 +63,9 @@ public class ERC721Token extends Token implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(tokenBalance.size());
-        for (OpenseaElement element : tokenBalance)
+        for (Asset asset : tokenBalance)
         {
-            dest.writeParcelable(element, flags);
+            dest.writeParcelable(asset, flags);
         }
     }
 
@@ -85,9 +86,9 @@ public class ERC721Token extends Token implements Parcelable
     {
         //721 Balance
         int balance = 0;
-        for (OpenseaElement element : tokenBalance)
+        for (Asset asset : tokenBalance)
         {
-            if (element.traits.size() > 0 && element.imageUrl != null && element.tokenId > 0)
+            if (asset.getTraits().size() > 0 && asset.getImageUrl() != null && Long.parseLong(asset.getTokenId()) > 0)
             {
                 balance++;
             }

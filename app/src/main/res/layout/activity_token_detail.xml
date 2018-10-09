@@ -146,7 +146,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/label_traits"
+                    android:id="@+id/label_attributes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/layout_name_desc"
@@ -155,14 +155,14 @@
                     android:fontFamily="@font/font_bold"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp"
-                    android:text="@string/label_traits"
+                    android:text="@string/label_attributes"
                     android:textColor="@color/text_dark_gray" />
 
                 <android.support.v7.widget.GridLayout
                     android:id="@+id/grid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/label_traits"
+                    android:layout_below="@id/label_attributes"
                     app:columnCount="2">
 
                 </android.support.v7.widget.GridLayout>

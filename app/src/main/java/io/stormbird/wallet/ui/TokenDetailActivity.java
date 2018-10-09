@@ -17,9 +17,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC721Attribute;
-import io.stormbird.wallet.entity.OpenseaElement;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.opensea.Asset;
+import io.stormbird.wallet.entity.opensea.Trait;
 import io.stormbird.wallet.util.KittyUtils;
 
 public class TokenDetailActivity extends BaseActivity {
@@ -32,6 +32,7 @@ public class TokenDetailActivity extends BaseActivity {
     private TextView generation;
     private TextView cooldown;
     private TextView openExternal;
+    private TextView labelAttributes;
     private GridLayout grid;
 
     private void initViews() {
@@ -44,6 +45,7 @@ public class TokenDetailActivity extends BaseActivity {
         generation = findViewById(R.id.generation);
         cooldown = findViewById(R.id.cooldown);
         openExternal = findViewById(R.id.open_external);
+        labelAttributes = findViewById(R.id.label_attributes);
         grid = findViewById(R.id.grid);
         grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
         grid.setUseDefaultMargins(false);
@@ -58,25 +60,30 @@ public class TokenDetailActivity extends BaseActivity {
         setTitle(R.string.empty);
 
         if (getIntent() != null) {
-            OpenseaElement element = getIntent().getExtras().getParcelable("element");
+            Asset asset = getIntent().getExtras().getParcelable("asset");
             Token token = getIntent().getExtras().getParcelable("token");
             title.setText(String.format("%s %s", token.getFullBalance(), token.getFullName()));
-            setupPage(element);
+            setupPage(asset);
         } else {
             finish();
         }
     }
 
-    private void setupPage(OpenseaElement element) {
-        setImage(element);
-        setDetails(element);
-        setNameAndDesc(element);
-        setExternalLink(element);
-        setTraits(element);
+    private void setupPage(Asset asset) {
+        setImage(asset);
+        setDetails(asset);
+        setNameAndDesc(asset);
+        setExternalLink(asset);
+        setTraits(asset);
     }
 
-    private void setTraits(OpenseaElement element) {
-        for (ERC721Attribute trait : element.traits) {
+    private void setTraits(Asset asset) {
+        if (asset.getAssetContract().getName().equals("CryptoKitties")) {
+            labelAttributes.setText(R.string.label_cattributes);
+        } else {
+            labelAttributes.setText(R.string.label_attributes);
+        }
+        for (Trait trait : asset.getTraits()) {
             View attributeView = View.inflate(this, R.layout.item_attribute, null);
             TextView traitType = attributeView.findViewById(R.id.trait);
             TextView traitValue = attributeView.findViewById(R.id.value);
@@ -90,60 +97,66 @@ public class TokenDetailActivity extends BaseActivity {
         }
     }
 
-    private void setExternalLink(OpenseaElement element) {
-        openExternal.setText("Open on ");
+    private void setExternalLink(Asset asset) {
+        openExternal.setText(getString(R.string.open_on_external_link,
+                asset.getAssetContract().getName()));
+
         openExternal.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(element.externalLink));
+            intent.setData(Uri.parse(asset.getExternalLink()));
             startActivity(intent);
         });
     }
 
-    private void setNameAndDesc(OpenseaElement element) {
-        if (element.name != null && !element.name.equals("null")) {
-            name.setText(element.name);
+    private void setNameAndDesc(Asset asset) {
+        if (asset.getName() != null && !asset.getName().equals("null")) {
+            name.setText(asset.getName());
         } else {
-            name.setText(String.format("ID# %s", String.valueOf(element.tokenId)));
+            name.setText(String.format("ID# %s", asset.getTokenId()));
         }
-        desc.setText(element.description);
+        desc.setText(asset.getDescription());
     }
 
-    private void setDetails(OpenseaElement element) {
-        id.setText(String.valueOf(element.tokenId));
-        if (element.getTraitFromType("generation") != null) {
+    private void setDetails(Asset asset) {
+        id.setText(asset.getTokenId());
+        if (asset.getTraitFromType("generation") != null) {
             generation.setText(String.format("Gen %s",
-                    element.getTraitFromType("generation").getValue()));
+                    asset.getTraitFromType("generation").getValue()));
+        } else if (asset.getTraitFromType("gen") != null){
+            generation.setText(String.format("Gen %s",
+                    asset.getTraitFromType("gen").getValue()));
         } else {
             generation.setVisibility(View.GONE);
         }
-        if (element.getTraitFromType("cooldown_index") != null) {
+        
+        if (asset.getTraitFromType("cooldown_index") != null) {
             cooldown.setText(String.format("%s Cooldown",
-                    KittyUtils.parseCooldownIndex(element.getTraitFromType("cooldown_index").getValue())));
-        } else if (element.getTraitFromType("cooldown") != null) { // Non-CK
+                    KittyUtils.parseCooldownIndex(
+                            asset.getTraitFromType("cooldown_index").getValue())));
+        } else if (asset.getTraitFromType("cooldown") != null) { // Non-CK
             cooldown.setText(String.format("%s Cooldown",
-                    element.getTraitFromType("cooldown").getValue()));
+                    asset.getTraitFromType("cooldown").getValue()));
         } else {
             cooldown.setVisibility(View.GONE);
         }
     }
 
-    private void setImage(OpenseaElement element) {
+    private void setImage(Asset asset) {
         layoutImage.setBackgroundResource(R.drawable.background_round_default);
         GradientDrawable drawable = (GradientDrawable) layoutImage.getBackground();
 
-        if (element.backgroundColor != null && !element.backgroundColor.equals("null")) {
-            int color = Color.parseColor("#" + element.backgroundColor);
+        if (asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null")) {
+            int color = Color.parseColor("#" + asset.getBackgroundColor());
             drawable.setColor(color);
         }
 
         Glide.with(this)
-                .load(element.imageUrl)
+                .load(asset.getImagePreviewUrl())
                 .into(image);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

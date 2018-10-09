@@ -12,20 +12,18 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.OpenseaElement;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.TokenDetailActivity;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.util.KittyUtils;
 
 /**
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
+public class OpenseaHolder extends BinderViewHolder<Asset> {
     public static final int VIEW_TYPE = 1302;
     private final Token token;
     private final TextView titleText;
@@ -47,39 +45,43 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
     }
 
     @Override
-    public void bind(@Nullable OpenseaElement element, @NonNull Bundle addition) {
+    public void bind(@Nullable Asset asset, @NonNull Bundle addition) {
         String assetName;
-        if (element.name != null && !element.name.equals("null")) {
-            assetName = element.name;
+        if (asset.getName() != null && !asset.getName().equals("null")) {
+            assetName = asset.getName();
         } else {
-            assetName = "ID# " + String.valueOf(element.tokenId);
+            assetName = "ID# " + String.valueOf(asset.getTokenId());
         }
         titleText.setText(assetName);
 
-        if (element.getTraitFromType("generation") != null) {
+        if (asset.getTraitFromType("generation") != null) {
             generation.setText(String.format("Gen %s",
-                    element.getTraitFromType("generation").getValue()));
+                    asset.getTraitFromType("generation").getValue()));
+        } else if (asset.getTraitFromType("gen") != null){
+            generation.setText(String.format("Gen %s",
+                    asset.getTraitFromType("gen").getValue()));
         } else {
             generation.setVisibility(View.GONE);
         }
 
-        if (element.getTraitFromType("cooldown_index") != null) {
+        if (asset.getTraitFromType("cooldown_index") != null) {
             cooldown.setText(String.format("%s Cooldown",
-                    KittyUtils.parseCooldownIndex(element.getTraitFromType("cooldown_index").getValue())));
-        } else if (element.getTraitFromType("cooldown") != null) { // Non-CK
+                    KittyUtils.parseCooldownIndex(
+                            asset.getTraitFromType("cooldown_index").getValue())));
+        } else if (asset.getTraitFromType("cooldown") != null) { // Non-CK
             cooldown.setText(String.format("%s Cooldown",
-                    element.getTraitFromType("cooldown").getValue()));
+                    asset.getTraitFromType("cooldown").getValue()));
         } else {
             cooldown.setVisibility(View.GONE);
         }
 
         Glide.with(getContext())
-                .load(element.imageUrl)
+                .load(asset.getImagePreviewUrl())
                 .into(image);
 
         layoutToken.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), TokenDetailActivity.class);
-            intent.putExtra("element", element);
+            intent.putExtra("asset", asset);
             intent.putExtra("token", token);
             getContext().startActivity(intent);
         });

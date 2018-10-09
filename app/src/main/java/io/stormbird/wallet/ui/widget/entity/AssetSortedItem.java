@@ -1,15 +1,15 @@
 package io.stormbird.wallet.ui.widget.entity;
 
-import io.stormbird.wallet.entity.OpenseaElement;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
 
 /**
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class OpenseaSortedItem extends SortedItem<OpenseaElement>
+public class AssetSortedItem extends SortedItem<Asset>
 {
-    public OpenseaSortedItem(OpenseaElement value, int weight) {
+    public AssetSortedItem(Asset value, int weight) {
         super(OpenseaHolder.VIEW_TYPE, value, weight);
     }
 
@@ -21,12 +21,12 @@ public class OpenseaSortedItem extends SortedItem<OpenseaElement>
     @Override
     public boolean areContentsTheSame(SortedItem newItem) {
         return (newItem.viewType == viewType
-                && ((OpenseaSortedItem) newItem).value.tokenId == value.tokenId);
+                && ((AssetSortedItem) newItem).value.getTokenId().equals(value.getTokenId()));
     }
 
     @Override
     public boolean areItemsTheSame(SortedItem other) {
         return (other.viewType == viewType
-                && ((OpenseaSortedItem) other).value.tokenId == value.tokenId);
+                && ((AssetSortedItem) other).value.getTokenId().equals(value.getTokenId()));
     }
 }

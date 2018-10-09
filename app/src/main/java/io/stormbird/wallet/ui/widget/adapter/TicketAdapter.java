@@ -76,7 +76,7 @@ public class TicketAdapter extends TokensAdapter {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService);
             } break;
             case OpenseaHolder.VIEW_TYPE: {
-                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, openseaService);
+                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token);
             } break;
         }
 

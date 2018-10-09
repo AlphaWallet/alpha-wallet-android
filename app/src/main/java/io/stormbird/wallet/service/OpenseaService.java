@@ -38,8 +38,7 @@ import okhttp3.Request;
  * Stormbird in Singapore
  */
 
-public class OpenseaService
-{
+public class OpenseaService {
     private static OkHttpClient httpClient;
     private static Map<String, Long> balanceAccess = new ConcurrentHashMap<>();
     private Context context;
@@ -47,8 +46,7 @@ public class OpenseaService
     //TODO: remove old files not accessed for some time
     //      On service creation, check files for old files and delete
 
-    public OpenseaService(Context ctx)
-    {
+    public OpenseaService(Context ctx) {
         context = ctx;
         balanceAccess.clear();
         httpClient = new OkHttpClient.Builder()
@@ -63,41 +61,34 @@ public class OpenseaService
     https://api.opensea.io/api/v1/assets/?owner=0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63&order_by=current_price&order_direction=asc
      */
 
-    public Single<Token[]> getTokens(String address)
-    {
+    public Single<Token[]> getTokens(String address) {
         return queryBalance(address)
                 .map(this::gotOpenseaTokens);
     }
 
-    private Token[] gotOpenseaTokens(JSONObject object)
-    {
+    private Token[] gotOpenseaTokens(JSONObject object) {
         Map<String, Token> foundTokens = new HashMap<>();
 
-        try
-        {
-            if (!object.has("assets"))
-            {
+        try {
+            if (!object.has("assets")) {
                 return new Token[0];
             }
             JSONArray assets = object.getJSONArray("assets");
 
-            for (int i = 0; i < assets.length(); i++)
-            {
+            for (int i = 0; i < assets.length(); i++) {
                 JSONObject asset = assets.getJSONObject(i);
                 JSONObject assetContract = asset.getJSONObject("asset_contract");
                 String tokenAddr = assetContract.getString("address");
 
                 Token token = foundTokens.get(tokenAddr);
 
-                if (token == null)
-                {
+                if (token == null) {
                     String tokenName = assetContract.getString("name");
                     String tokenSymbol = assetContract.getString("symbol");
                     String schema = assetContract.getString("schema_name");
 
                     TokenInfo tInfo = new TokenInfo(tokenAddr, tokenName, tokenSymbol, 0, true);
-                    switch (schema)
-                    {
+                    switch (schema) {
                         case "ERC721":
                             token = new ERC721Token(tInfo, null, System.currentTimeMillis());
                             break;
@@ -117,32 +108,26 @@ public class OpenseaService
                 element.backgroundColor = asset.getString("background_color");
 
                 JSONArray traits = asset.getJSONArray("traits");
-                for (int j = 0; j < traits.length(); j++)
-                {
+                for (int j = 0; j < traits.length(); j++) {
                     JSONObject trait = traits.getJSONObject(j);
                     String type_value = trait.getString("trait_type");
                     String value = trait.getString("value");
-                    String display_type = trait.getString("display_type");
-                    ERC721Attribute attr = new ERC721Attribute(display_type, value);
-                    element.traits.put(type_value, attr);
+                    ERC721Attribute attr = new ERC721Attribute(type_value, value);
+                    element.traits.add(attr);
                 }
 
-                if (token instanceof ERC721Token)
-                {
-                    ((ERC721Token)token).tokenBalance.add(element);
+                if (token instanceof ERC721Token) {
+                    ((ERC721Token) token).tokenBalance.add(element);
                 }
             }
-        }
-        catch (JSONException e)
-        {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return foundTokens.values().toArray(new Token[foundTokens.size()]);
     }
 
-    public Single<JSONObject> queryBalance(String address)
-    {
+    public Single<JSONObject> queryBalance(String address) {
         return Single.fromCallable(() -> {
             StringBuilder sb = new StringBuilder();
             sb.append("https://api.opensea.io/api/v1/assets/?owner=");
@@ -150,13 +135,10 @@ public class OpenseaService
             sb.append("&order_by=current_price&order_direction=asc");
             JSONObject result = new JSONObject("{ \"estimated_count\": 0 }");
 
-            try
-            {
-                if (balanceAccess.containsKey(address))
-                {
+            try {
+                if (balanceAccess.containsKey(address)) {
                     long lastAccess = balanceAccess.get(address);
-                    if (lastAccess > 0 && (System.currentTimeMillis() - lastAccess) < 1000 * 30)
-                    {
+                    if (lastAccess > 0 && (System.currentTimeMillis() - lastAccess) < 1000 * 30) {
                         Log.d("OPENSEA", "Polling Opensea very frequently: " + (System.currentTimeMillis() - lastAccess));
                     }
                 }
@@ -170,13 +152,10 @@ public class OpenseaService
                 String jsonResult = response.body().string();
                 balanceAccess.put(address, System.currentTimeMillis());
 
-                if (jsonResult != null && jsonResult.length() > 10)
-                {
+                if (jsonResult != null && jsonResult.length() > 10) {
                     result = new JSONObject(jsonResult);
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -218,15 +197,13 @@ public class OpenseaService
 //        });
 //    }
 
-    public Single<String> fetchFile(String strURL)
-    {
+    public Single<String> fetchFile(String strURL) {
         return Single.fromCallable(() -> {
             byte[] largebuffer = new byte[65536];
             String errorFile = "error";
             String returnValue = errorFile;
             File targetFile;
-            try
-            {
+            try {
                 targetFile = getLocalFile(strURL);
                 //already have it locally?
                 if (targetFile.exists()) return strURL;
@@ -242,8 +219,7 @@ public class OpenseaService
                 InputStream in = new BufferedInputStream(dl.fileURL.openStream());
 
                 //now, read through the input buffer and write the contents to the file
-                while ((bufferLength = in.read(largebuffer)) > 0)
-                {
+                while ((bufferLength = in.read(largebuffer)) > 0) {
                     //add the data in the buffer to the file in the file output stream (the file on the sd card
                     os.write(largebuffer, 0, bufferLength);
                 }
@@ -253,19 +229,13 @@ public class OpenseaService
                 os.close();
                 fos.close();
                 in.close();
-            }
-            catch (MalformedURLException e)
-            {
+            } catch (MalformedURLException e) {
                 returnValue = errorFile;
                 e.printStackTrace();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 returnValue = errorFile;
                 e.printStackTrace();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 returnValue = errorFile;
                 e.printStackTrace();
             }
@@ -274,8 +244,7 @@ public class OpenseaService
         });
     }
 
-    private DownloadLink obtainFileConnection(String strURL) throws IOException
-    {
+    private DownloadLink obtainFileConnection(String strURL) throws IOException {
         URL fileAddr = new URL(strURL);
         //create the new connection
         HttpURLConnection urlConnection = (HttpURLConnection) fileAddr.openConnection();
@@ -295,8 +264,7 @@ public class OpenseaService
         return dl;
     }
 
-    private File getLocalFile(String strURL)
-    {
+    private File getLocalFile(String strURL) {
         int slashIndex = strURL.lastIndexOf('/');
         int secondSlashIndex = strURL.lastIndexOf('/', slashIndex - 1);
         if (secondSlashIndex < 0) secondSlashIndex = slashIndex;
@@ -307,8 +275,7 @@ public class OpenseaService
         File file = new File(context.getFilesDir(), name);
 
         //touch the file
-        if (file.exists())
-        {
+        if (file.exists()) {
             file.setLastModified(System.currentTimeMillis());
         }
 

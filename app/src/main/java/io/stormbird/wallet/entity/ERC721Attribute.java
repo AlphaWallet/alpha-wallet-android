@@ -7,64 +7,89 @@ import android.os.Parcelable;
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class ERC721Attribute implements Parcelable
-{
-    public final ValueType type;
-    public final String attributeValue;
+public class ERC721Attribute implements Parcelable {
+    private String traitType;
+    private String value;
+    private String displayType;
+    private String maxValue;
+    private long traitCount;
 
-    public ERC721Attribute(String valueType, String attributeValue)
-    {
-        switch (valueType)
-        {
-            case "number":
-                type = ValueType.INTEGER;
-                break;
-            default:
-                type = ValueType.STRING;
-                break;
-        }
-
-        this.attributeValue = attributeValue;
+    public String getTraitType() {
+        return traitType;
     }
 
-    protected ERC721Attribute(Parcel in)
-    {
-        int typeVal = in.readInt();
-        type = ValueType.values()[typeVal];
-        attributeValue = in.readString();
+    public void setTraitType(String traitType) {
+        this.traitType = traitType;
     }
 
-    public static final Creator<ERC721Attribute> CREATOR = new Creator<ERC721Attribute>()
-    {
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getDisplayType() {
+        return displayType;
+    }
+
+    public void setDisplayType(String displayType) {
+        this.displayType = displayType;
+    }
+
+    public String getMaxValue() {
+        return maxValue;
+    }
+
+    public void setMaxValue(String maxValue) {
+        this.maxValue = maxValue;
+    }
+
+    public long getTraitCount() {
+        return traitCount;
+    }
+
+    public void setTraitCount(long traitCount) {
+        this.traitCount = traitCount;
+    }
+
+    public ERC721Attribute(String traitType, String value) {
+        this.traitType = traitType;
+        this.value = value;
+    }
+
+    protected ERC721Attribute(Parcel in) {
+        traitType = in.readString();
+        value = in.readString();
+        displayType = in.readString();
+        maxValue = in.readString();
+        traitCount = in.readLong();
+    }
+
+    public static final Creator<ERC721Attribute> CREATOR = new Creator<ERC721Attribute>() {
         @Override
-        public ERC721Attribute createFromParcel(Parcel in)
-        {
+        public ERC721Attribute createFromParcel(Parcel in) {
             return new ERC721Attribute(in);
         }
 
         @Override
-        public ERC721Attribute[] newArray(int size)
-        {
+        public ERC721Attribute[] newArray(int size) {
             return new ERC721Attribute[size];
         }
     };
 
     @Override
-    public int describeContents()
-    {
+    public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags)
-    {
-        dest.writeInt(type.ordinal());
-        dest.writeString(attributeValue);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(traitType);
+        dest.writeString(value);
+        dest.writeString(displayType);
+        dest.writeString(maxValue);
+        dest.writeLong(traitCount);
     }
-
-    public enum ValueType
-    {
-       INTEGER,
-       STRING
-    };
 }

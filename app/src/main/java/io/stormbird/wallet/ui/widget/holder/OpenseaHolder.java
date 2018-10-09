@@ -15,8 +15,8 @@ import com.bumptech.glide.Glide;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC721Attribute;
 import io.stormbird.wallet.entity.OpenseaElement;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.TokenDetailActivity;
 import io.stormbird.wallet.util.KittyUtils;
@@ -26,64 +26,61 @@ import io.stormbird.wallet.util.KittyUtils;
  * Stormbird in Singapore
  */
 public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
-
     public static final int VIEW_TYPE = 1302;
-
+    private final Token token;
     private final TextView titleText;
     private final ImageView image;
     private final TextView generation;
     private final TextView cooldown;
     private final TextView statusText;
-    private final LinearLayout layoutDetails;
-    private final OpenseaService openseaService;
+    private final LinearLayout layoutToken;
 
-    @Nullable
-    private Disposable queryService;
-
-    public OpenseaHolder(int resId, ViewGroup parent, OpenseaService service) {
+    public OpenseaHolder(int resId, ViewGroup parent, Token token) {
         super(resId, parent);
         titleText = findViewById(R.id.name);
         image = findViewById(R.id.image_view);
         generation = findViewById(R.id.generation);
         cooldown = findViewById(R.id.cooldown);
         statusText = findViewById(R.id.status);
-        layoutDetails = findViewById(R.id.layout_details);
-        openseaService = service;
+        layoutToken = findViewById(R.id.layout_token);
+        this.token = token;
     }
 
     @Override
-    public void bind(@Nullable OpenseaElement element, @NonNull Bundle addition)
-    {
-        //for now add title and ERC721 graphic
+    public void bind(@Nullable OpenseaElement element, @NonNull Bundle addition) {
         String assetName;
-        if (element.name != null && !element.name.equals("null"))
-        {
+        if (element.name != null && !element.name.equals("null")) {
             assetName = element.name;
-        }
-        else
-        {
+        } else {
             assetName = "ID# " + String.valueOf(element.tokenId);
         }
         titleText.setText(assetName);
 
-        ERC721Attribute gen = element.traits.get("generation");
-        if (gen != null) {
-            generation.setText(String.format("Gen %s", gen.attributeValue));
+        if (element.getTraitFromType("generation") != null) {
+            generation.setText(String.format("Gen %s",
+                    element.getTraitFromType("generation").getValue()));
+        } else {
+            generation.setVisibility(View.GONE);
         }
 
-        ERC721Attribute cooldownIndex = element.traits.get("cooldown_index");
-        if (cooldownIndex != null) {
-            cooldown.setText(String.format("%s Cooldown", KittyUtils.parseCooldownIndex(cooldownIndex.attributeValue)));
+        if (element.getTraitFromType("cooldown_index") != null) {
+            cooldown.setText(String.format("%s Cooldown",
+                    KittyUtils.parseCooldownIndex(element.getTraitFromType("cooldown_index").getValue())));
+        } else if (element.getTraitFromType("cooldown") != null) { // Non-CK
+            cooldown.setText(String.format("%s Cooldown",
+                    element.getTraitFromType("cooldown").getValue()));
+        } else {
+            cooldown.setVisibility(View.GONE);
         }
 
-        //now add the graphic
         Glide.with(getContext())
-            .load(element.imageUrl)
-            .into(image);
+                .load(element.imageUrl)
+                .into(image);
 
-        image.setOnClickListener(v -> {
+        layoutToken.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), TokenDetailActivity.class);
             intent.putExtra("element", element);
+            intent.putExtra("token", token);
             getContext().startActivity(intent);
         });
     }
@@ -93,7 +90,7 @@ public class OpenseaHolder extends BinderViewHolder<OpenseaElement> {
             statusText.setVisibility(View.VISIBLE);
             statusText.setBackgroundResource(R.drawable.background_status_pending);
             statusText.setText(R.string.status_pending);
-        } else if (status == C.TokenStatus.INCOMPLETE){
+        } else if (status == C.TokenStatus.INCOMPLETE) {
             statusText.setVisibility(View.VISIBLE);
             statusText.setBackgroundResource(R.drawable.background_status_incomplete);
             statusText.setText(R.string.status_incomplete_data);

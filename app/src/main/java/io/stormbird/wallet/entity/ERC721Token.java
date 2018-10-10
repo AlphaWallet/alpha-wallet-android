@@ -85,14 +85,7 @@ public class ERC721Token extends Token implements Parcelable
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
         //721 Balance
-        int balance = 0;
-        for (Asset asset : tokenBalance)
-        {
-            if (asset.getTraits().size() > 0 && asset.getImageUrl() != null && Long.parseLong(asset.getTokenId()) > 0)
-            {
-                balance++;
-            }
-        }
+        int balance = tokenBalance.size();
 
         holder.balanceEth.setText(String.valueOf(balance));
         holder.issuer.setText(R.string.ethereum);

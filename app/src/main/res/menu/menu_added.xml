@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_added"
-        android:icon="@drawable/ic_action_star"
-        android:orderInCategory="20"
+        android:icon="@drawable/ic_dapp_bookmarked"
+        android:orderInCategory="10"
         android:title="@string/action_added"
-        app:showAsAction="always"
-        />
+        app:showAsAction="withText" />
 </menu>

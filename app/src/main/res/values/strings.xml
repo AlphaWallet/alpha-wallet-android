@@ -497,4 +497,5 @@
     <string name="label_cattributes">Cattributes</string>
     <string name="label_attributes">Attributes</string>
     <string name="open_on_external_link">Open on %1$s</string>
+    <string name="action_reload">Reload</string>
 </resources>

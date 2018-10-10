@@ -34,6 +34,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.lang.reflect.Method;
 
 import javax.inject.Inject;
 
@@ -245,6 +246,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 dappBrowserFragment.removeBookmark();
                 invalidateOptionsMenu();
                 return true;
+            }
+            case R.id.action_reload: {
+                dappBrowserFragment.reloadPage();
+                return true;
+            }
+            case R.id.action_share: {
+                dappBrowserFragment.share();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -561,5 +569,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
+        if (menu != null) {
+            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
+                try {
+                    Method m = menu.getClass().getDeclaredMethod(
+                            "setOptionalIconsVisible", Boolean.TYPE);
+                    m.setAccessible(true);
+                    m.invoke(menu, true);
+                } catch (Exception e) {
+                    Log.e(getClass().getSimpleName(), "onMenuOpened...unable to set icons for overflow menu", e);
+                }
+            }
+        }
+        return super.onPrepareOptionsPanel(view, menu);
     }
 }

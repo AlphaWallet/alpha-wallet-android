@@ -448,4 +448,18 @@ public class DappBrowserFragment extends Fragment implements
     {
         return viewModel != null && urlTv != null && viewModel.getBookmarks().contains(urlTv.getText().toString());
     }
+
+    public void reloadPage() {
+        web3.reload();
+    }
+
+    public void share() {
+        if (web3.getUrl() != null) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, web3.getUrl());
+            intent.setType("text/plain");
+            startActivity(intent);
+        }
+    }
 }

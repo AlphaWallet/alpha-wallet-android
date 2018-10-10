@@ -78,34 +78,42 @@ public class TokenDetailActivity extends BaseActivity {
     }
 
     private void setTraits(Asset asset) {
-        if (asset.getAssetContract().getName().equals("CryptoKitties")) {
-            labelAttributes.setText(R.string.label_cattributes);
+        if (asset.getTraits() != null && !asset.getTraits().isEmpty()) {
+            if (asset.getAssetContract().getName().equals("CryptoKitties")) {
+                labelAttributes.setText(R.string.label_cattributes);
+            } else {
+                labelAttributes.setText(R.string.label_attributes);
+            }
+            for (Trait trait : asset.getTraits()) {
+                View attributeView = View.inflate(this, R.layout.item_attribute, null);
+                TextView traitType = attributeView.findViewById(R.id.trait);
+                TextView traitValue = attributeView.findViewById(R.id.value);
+                GridLayout.LayoutParams params = new GridLayout.LayoutParams(
+                        GridLayout.spec(GridLayout.UNDEFINED, 1f),
+                        GridLayout.spec(GridLayout.UNDEFINED, 1f));
+                attributeView.setLayoutParams(params);
+                traitType.setText(trait.getTraitType());
+                traitValue.setText(trait.getValue());
+                grid.addView(attributeView);
+            }
         } else {
-            labelAttributes.setText(R.string.label_attributes);
-        }
-        for (Trait trait : asset.getTraits()) {
-            View attributeView = View.inflate(this, R.layout.item_attribute, null);
-            TextView traitType = attributeView.findViewById(R.id.trait);
-            TextView traitValue = attributeView.findViewById(R.id.value);
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams(
-                    GridLayout.spec(GridLayout.UNDEFINED, 1f),
-                    GridLayout.spec(GridLayout.UNDEFINED, 1f));
-            attributeView.setLayoutParams(params);
-            traitType.setText(trait.getTraitType());
-            traitValue.setText(trait.getValue());
-            grid.addView(attributeView);
+            labelAttributes.setVisibility(View.GONE);
         }
     }
 
     private void setExternalLink(Asset asset) {
-        openExternal.setText(getString(R.string.open_on_external_link,
-                asset.getAssetContract().getName()));
+        if (asset.getExternalLink() != null && !asset.getExternalLink().equals("null")) {
+            openExternal.setText(getString(R.string.open_on_external_link,
+                    asset.getAssetContract().getName()));
 
-        openExternal.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(asset.getExternalLink()));
-            startActivity(intent);
-        });
+            openExternal.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(asset.getExternalLink()));
+                startActivity(intent);
+            });
+        } else {
+            openExternal.setVisibility(View.GONE);
+        }
     }
 
     private void setNameAndDesc(Asset asset) {
@@ -122,13 +130,13 @@ public class TokenDetailActivity extends BaseActivity {
         if (asset.getTraitFromType("generation") != null) {
             generation.setText(String.format("Gen %s",
                     asset.getTraitFromType("generation").getValue()));
-        } else if (asset.getTraitFromType("gen") != null){
+        } else if (asset.getTraitFromType("gen") != null) {
             generation.setText(String.format("Gen %s",
                     asset.getTraitFromType("gen").getValue()));
         } else {
             generation.setVisibility(View.GONE);
         }
-        
+
         if (asset.getTraitFromType("cooldown_index") != null) {
             cooldown.setText(String.format("%s Cooldown",
                     KittyUtils.parseCooldownIndex(

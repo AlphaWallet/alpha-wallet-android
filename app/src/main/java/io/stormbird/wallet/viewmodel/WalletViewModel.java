@@ -341,13 +341,16 @@ public class WalletViewModel extends BaseViewModel
 
     private void onDefaultWallet(Wallet wallet) {
         // TODO: REMOVE THIS ONCE ERC721 TESTING IS OVER
-        Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
+        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
+        Wallet tester = new Wallet("0x07b99b5a4093be2c4465d55fcaad50a3cb61447a"); //account containing kitties
         defaultWallet.setValue(tester);
     }
 
     public Observable<Wallet> getWallet()
     {
-        Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
+        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
+        Wallet tester = new Wallet("0x07b99b5a4093be2c4465d55fcaad50a3cb61447a"); //account containing kitties
+
         //defaultWallet.setValue(tester);
         return Observable.fromCallable(() -> tester);
 

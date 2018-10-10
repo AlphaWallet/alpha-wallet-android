@@ -62,7 +62,7 @@ public class TokenDetailActivity extends BaseActivity {
         if (getIntent() != null) {
             Asset asset = getIntent().getExtras().getParcelable("asset");
             Token token = getIntent().getExtras().getParcelable("token");
-            title.setText(String.format("%s %s", token.getFullBalance(), token.getFullName()));
+            title.setText(String.format("%s %s", "1", token.getFullName()));
             setupPage(asset);
         } else {
             finish();

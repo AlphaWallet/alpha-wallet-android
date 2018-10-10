@@ -156,6 +156,8 @@ public class TokenDetailActivity extends BaseActivity {
         if (asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null")) {
             int color = Color.parseColor("#" + asset.getBackgroundColor());
             drawable.setColor(color);
+        } else {
+            drawable.setColor(getResources().getColor(R.color.transparent));
         }
 
         Glide.with(this)

@@ -67,41 +67,57 @@ public class OpenseaService {
                 .map(this::gotOpenseaTokens);
     }
 
-    private Token[] gotOpenseaTokens(JSONObject object) {
+    private Token[] gotOpenseaTokens(JSONObject object)
+    {
         Map<String, Token> foundTokens = new HashMap<>();
 
-        try {
-            if (!object.has("assets")) {
+        try
+        {
+            if (!object.has("assets"))
+            {
                 return new Token[0];
             }
             JSONArray assets = object.getJSONArray("assets");
 
-            for (int i = 0; i < assets.length(); i++) {
+            for (int i = 0; i < assets.length(); i++)
+            {
                 Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
 
                 Token token = foundTokens.get(asset.getAssetContract().getAddress());
-                if (token == null) {
+                if (token == null)
+                {
                     String tokenName = asset.getAssetContract().getName();
                     String tokenSymbol = asset.getAssetContract().getSymbol();
                     String schema = asset.getAssetContract().getSchemaName();
 
-                    TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
-                    switch (schema) {
-                        case "ERC721":
-                            token = new ERC721Token(tInfo, null, System.currentTimeMillis());
-                            break;
-                        default:
-                            token = new Token(tInfo, BigDecimal.ZERO, System.currentTimeMillis());
-                            break;
+                    if (schema != null)
+                    {
+                        switch (schema)
+                        {
+                            case "ERC721":
+                                TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
+                                token = new ERC721Token(tInfo, null, System.currentTimeMillis());
+                                foundTokens.put(asset.getAssetContract().getAddress(), token);
+                                break;
+                            default:
+                                token = null;
+                                break;
+                        }
                     }
-                    foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
 
-                if (token instanceof ERC721Token) {
+                if (token != null)
+                {
                     ((ERC721Token) token).tokenBalance.add(asset);
                 }
             }
-        } catch (JSONException e) {
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 

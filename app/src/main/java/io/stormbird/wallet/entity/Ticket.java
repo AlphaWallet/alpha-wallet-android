@@ -392,6 +392,7 @@ public class Ticket extends Token implements Parcelable
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();
+        List<BigInteger> inventoryCopy = new ArrayList<BigInteger>(balanceArray);
 
         try
         {
@@ -404,9 +405,10 @@ public class Ticket extends Token implements Parcelable
 
                 if (thisId.compareTo(BigInteger.ZERO) != 0)
                 {
-                    int index = balanceArray.indexOf(thisId);
+                    int index = inventoryCopy.indexOf(thisId);
                     if (index > -1)
                     {
+                        inventoryCopy.set(index, BigInteger.ZERO);
                         if (!idList.contains(index))
                         {   //just make sure they didn't already add this one
                             idList.add(index);

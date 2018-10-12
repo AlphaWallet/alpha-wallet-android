@@ -6,11 +6,16 @@ buildscript {
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.fabric.io/public' }
         google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
         classpath "io.realm:realm-gradle-plugin:4.4.0"
+        classpath 'com.google.gms:google-services:4.1.0'
+
+        // Add dependency
+        classpath 'io.fabric.tools:gradle:1.25.4'
     }
 }
 
@@ -21,9 +26,8 @@ allprojects {
         mavenCentral()
         maven { url 'https://jitpack.io' }
         // needed for pincode Lollipin
-        maven {
-            url "https://github.com/omadahealth/omada-nexus/raw/master/release"
-        }
+        maven { url "https://github.com/omadahealth/omada-nexus/raw/master/release" }
+        maven { url 'https://maven.google.com/' }
     }
 }
 

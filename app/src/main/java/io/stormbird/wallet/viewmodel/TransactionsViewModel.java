@@ -211,6 +211,8 @@ public class TransactionsViewModel extends BaseViewModel
             if (tx.operations != null && tx.operations.length > 0 && tx.operations[0] != null)
             {
                 TransactionContract ct = tx.operations[0].contract;
+                // weiwu: james said this is his private tur for now and all references to a fixed number for operation will be fixed no late than Nov 2018
+                // FIXME: there shouldn't be a magic number 30, why not 32 or 32768?
                 if (ct instanceof ERC875ContractTransaction && ((ERC875ContractTransaction)ct).operation > 0 && ((ERC875ContractTransaction)ct).operation < 30)
                 {
                     refreshCache = true;

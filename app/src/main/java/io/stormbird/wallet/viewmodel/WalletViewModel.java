@@ -178,7 +178,10 @@ public class WalletViewModel extends BaseViewModel
         tokens.postValue(tokenCache);
 
         updateTokens.dispose();
-        updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
+        //updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
+        //ERC721 Testing
+        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
+        updateTokens = openseaService.getTokens("0x07b99b5a4093be2c4465d55fcaad50a3cb61447a")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotOpenseaTokens, this::onError);
@@ -340,28 +343,19 @@ public class WalletViewModel extends BaseViewModel
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        // TODO: REMOVE THIS ONCE ERC721 TESTING IS OVER
-        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
-        Wallet tester = new Wallet("0x07b99b5a4093be2c4465d55fcaad50a3cb61447a"); //account containing kitties
-        defaultWallet.setValue(tester);
+        defaultWallet.setValue(wallet);
     }
 
     public Observable<Wallet> getWallet()
     {
-        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
-        Wallet tester = new Wallet("0x07b99b5a4093be2c4465d55fcaad50a3cb61447a"); //account containing kitties
-
-        //defaultWallet.setValue(tester);
-        return Observable.fromCallable(() -> tester);
-
-//        if (defaultWallet().getValue() != null)
-//        {
-//            return Observable.fromCallable(() -> defaultWallet().getValue());
-//        }
-//        else
-//            return findDefaultNetworkInteract.find()
-//                    .flatMap(networkInfo -> findDefaultWalletInteract
-//                            .find()).toObservable();
+        if (defaultWallet().getValue() != null)
+        {
+            return Observable.fromCallable(() -> defaultWallet().getValue());
+        }
+        else
+            return findDefaultNetworkInteract.find()
+                    .flatMap(networkInfo -> findDefaultWalletInteract
+                            .find()).toObservable();
     }
 
     public void setVisibility(boolean visibility) {

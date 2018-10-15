@@ -1128,10 +1128,7 @@ public class TokenRepository implements TokenRepositoryType {
                             true,
                             isStormbird);
 
-                    if (result.name != null && result.name.length() > 0)
-                    {
-                        tokenList.add(result);
-                    }
+                    tokenList.add(result);
                 }
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }

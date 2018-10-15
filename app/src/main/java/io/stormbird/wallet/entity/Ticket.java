@@ -168,7 +168,7 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public int getTicketCount()
-    {git a
+    {
         int count = 0;
         if (balanceArray != null)
         {

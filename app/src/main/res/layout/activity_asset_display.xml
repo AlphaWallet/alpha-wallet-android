@@ -18,48 +18,17 @@
             android:id="@+id/progress_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
             tools:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/layout_token_details"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="23dp"
-            android:layout_marginTop="33dp"
-            android:orientation="vertical"
-            android:paddingLeft="33dp"
-            android:paddingRight="15dp">
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_light"
-                android:textColor="@color/text_black"
-                android:textSize="21sp"
-                android:visibility="visible" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/ethereum_blockchain"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="11sp" />
-        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_token_details"
             android:layout_marginBottom="?actionBarSize"
-            android:animateLayoutChanges="true"
             android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:paddingRight="15dp"
+            android:animateLayoutChanges="true">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/listTickets"

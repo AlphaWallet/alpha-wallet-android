@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.text.format.DateUtils;
 
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -398,7 +399,7 @@ public class AssetDefinitionService
                         FileInputStream stream = new FileInputStream(f);
                         parseFile(stream);
                     }
-                    catch (Exception e)
+                    catch (SAXParseException e)
                     {
                         e.printStackTrace();
                     }

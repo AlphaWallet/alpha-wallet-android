@@ -106,6 +106,12 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
+    public int getTicketCount()
+    {
+        return tokenBalance.size();
+    }
+
+    @Override
     public String getFullBalance()
     {
         return String.valueOf(tokenBalance.size());

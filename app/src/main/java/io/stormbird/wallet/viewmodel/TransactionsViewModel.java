@@ -43,6 +43,7 @@ import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 public class TransactionsViewModel extends BaseViewModel
 {
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
+    private static final int  MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE = 20;
     private static final String TAG = "TVM";
 
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
@@ -331,12 +332,11 @@ public class TransactionsViewModel extends BaseViewModel
         }
     }
 
-    //Don't process more than 10 strings per cycle
     private List<String> limitToChunk(List<String> strings)
     {
-        if (strings.size() > 10)
+        if (strings.size() > MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE)
         {
-            strings = strings.subList(0,10);
+            strings = strings.subList(0, MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE);
             immediateCycleStart = true;
         }
         return strings;

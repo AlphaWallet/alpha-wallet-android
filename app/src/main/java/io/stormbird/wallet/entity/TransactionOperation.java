@@ -3,6 +3,9 @@ package io.stormbird.wallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/* weiwu: I think this is what intended:
+   a transaction is a single unit of logic or work, sometimes made up of multiple operations.
+ */
 public class TransactionOperation implements Parcelable {
     public String transactionId;
     public String viewType;

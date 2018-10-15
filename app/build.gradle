@@ -1,12 +1,23 @@
+// WARNING WARNING WARNING
+// don't add any additional things here without first search "China" in this file
+
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
+        // needed for pincode Lollipin
+        maven {
+            url "https://github.com/omadahealth/omada-nexus/raw/master/release"
+        }
     }
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.25.1'
     }
 }
+
+// WARNING WARNING WARNING
+// DON'T add any plugins that is Google Play Service or uses Google Play Service
+// Search China in this file for the reason
 apply plugin: 'com.android.application'
 //apply plugin: 'io.fabric'
 apply plugin: 'realm-android'
@@ -89,9 +100,9 @@ dependencies {
 
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  
     // WARNING!  Don't add depdency on Google Play Services without consulting
-    // WARNING!  The Chinese marketing team.
-    // WARNING!  Many Chinese Android phones kill any app that users google gms
-    // WARNING!  on site, like immune systems cleansing infections.
+    // WARNING!  The China marketing team
+    // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
+    // WARNING!  users google gms summarily, like immune systems cleansing infections
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING! 
 
     // Etherium client
@@ -161,3 +172,6 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':tn')
 }
+
+// WARNING WARNING WARNING
+// don't add any additional things here without first search "China" in this file

@@ -1,3 +1,4 @@
+//noinspection GradleDependency
 // WARNING WARNING WARNING
 // don't add any additional things here without first search "China" in this file
 
@@ -7,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.25.1'
+        classpath 'io.fabric.tools:gradle:1.25.4'
     }
 }
 
@@ -15,7 +16,7 @@ buildscript {
 // DON'T add any plugins that is Google Play Service or uses Google Play Service
 // Search China in this file for the reason
 apply plugin: 'com.android.application'
-//apply plugin: 'io.fabric'
+apply plugin: 'io.fabric'
 apply plugin: 'realm-android'
 
 repositories {
@@ -157,12 +158,9 @@ dependencies {
     })
 
     // Fabric
-//    implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
-//        transitive = true
-//    }
-//    implementation('com.crashlytics.sdk.android:answers:1.4.1@aar') {
-//        transitive = true
-//    }
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.5@aar') {
+        transitive = true
+    }
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

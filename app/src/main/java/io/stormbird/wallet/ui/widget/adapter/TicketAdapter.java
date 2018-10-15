@@ -86,6 +86,7 @@ public class TicketAdapter extends TokensAdapter {
         if (!(token instanceof ERC721Token)) return;
         items.beginBatchedUpdates();
         items.clear();
+        items.add(new TokenBalanceSortedItem(token));
         int weight = 1; //use the same order we receive from OpenSea
 
         // populate the ERC721 items

@@ -168,11 +168,14 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public int getTicketCount()
-    {
+    {git a
         int count = 0;
-        for (BigInteger id : balanceArray)
+        if (balanceArray != null)
         {
-            if (id.compareTo(BigInteger.ZERO) != 0) count++;
+            for (BigInteger id : balanceArray)
+            {
+                if (id.compareTo(BigInteger.ZERO) != 0) count++;
+            }
         }
         return count;
     }

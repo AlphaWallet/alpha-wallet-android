@@ -579,6 +579,22 @@ public class TokensRealmSource implements TokenLocalSource {
         return result;
     }
 
+    private void createBlankToken(Realm realm, Token token)
+    {
+        RealmToken realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
+        realmToken.setName(token.tokenInfo.name);
+        realmToken.setSymbol(token.tokenInfo.symbol);
+        realmToken.setDecimals(0);
+        realmToken.setUpdatedTime(-1);
+        realmToken.setAddedTime(-1);
+        realmToken.setEnabled(true);
+        realmToken.setBurnList("");
+
+        if (token instanceof Ticket) {
+            realmToken.setStormbird(true);
+        }
+    }
+
     @Override
     public void setTokenTerminated(NetworkInfo network, Wallet wallet, Token token)
     {
@@ -592,7 +608,14 @@ public class TokensRealmSource implements TokenLocalSource {
 
             TransactionsRealmCache.addRealm();
             realm.beginTransaction();
-            token.setIsTerminated(realmToken);
+            if (realmToken == null)
+            {
+                createBlankToken(realm, token);
+            }
+            else
+            {
+                token.setIsTerminated(realmToken);
+            }
             realm.commitTransaction();
         }
         catch (Exception ex)

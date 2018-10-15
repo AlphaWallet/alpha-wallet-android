@@ -207,7 +207,7 @@ public class TransactionsViewModel extends BaseViewModel
         {
             txMap.put(tx.hash, tx);
             if (Long.valueOf(tx.blockNumber) > lastBlock) lastBlock = Long.valueOf(tx.blockNumber);
-            //this code fixes values in case user rolls back version
+            //this code fixes values in case user rolls back the version of their αWallet app
             if (tx.operations != null && tx.operations.length > 0 && tx.operations[0] != null)
             {
                 TransactionContract ct = tx.operations[0].contract;

@@ -44,7 +44,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private SystemView systemView;
     private ProgressView progressView;
     private RecyclerView list;
-    private TextView tokenTitle;
     private FinishReceiver finishReceiver;
     private Token token;
     private TicketAdapter adapter;
@@ -70,10 +69,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
-
-        tokenTitle = findViewById(R.id.title);
-        tokenTitle.setText(String.format("%s %s", token.getFullBalance(), token.getFullName()));
-
+        
         list = findViewById(R.id.listTickets);
 
         viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)

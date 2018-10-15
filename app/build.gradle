@@ -4,10 +4,6 @@
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
-        // needed for pincode Lollipin
-        maven {
-            url "https://github.com/omadahealth/omada-nexus/raw/master/release"
-        }
     }
 
     dependencies {

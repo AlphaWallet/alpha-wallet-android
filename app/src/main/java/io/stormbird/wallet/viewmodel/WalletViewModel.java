@@ -168,12 +168,14 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokens(Token[] tokens)
     {
-        tokenCache = tokens;
         tokensService.addTokens(tokens);
     }
 
     private void fetchFromOpensea()
     {
+        List<Token> serviceList = tokensService.getAllTokens();
+        tokenCache = serviceList.toArray(new Token[serviceList.size()]);
+
         progress.postValue(false);
         tokens.postValue(tokenCache);
 

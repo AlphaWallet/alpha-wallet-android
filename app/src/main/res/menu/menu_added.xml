@@ -6,5 +6,5 @@
         android:icon="@drawable/ic_dapp_bookmarked"
         android:orderInCategory="10"
         android:title="@string/action_added"
-        app:showAsAction="withText" />
+        app:showAsAction="always" />
 </menu>

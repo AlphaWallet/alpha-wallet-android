@@ -10,6 +10,7 @@ import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
@@ -19,6 +20,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final ConfirmationRouter confirmationRouter;
 
     public DappBrowserViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -26,13 +28,15 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchGasSettingsInteract fetchGasSettingsInteract,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTokensInteract fetchTokensInteract,
+            ConfirmationRouter confirmationRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.confirmationRouter = confirmationRouter;
     }
 
     @NonNull
@@ -44,6 +48,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
                 assetDefinitionService,
                 createTransactionInteract,
                 fetchGasSettingsInteract,
-                fetchTokensInteract);
+                fetchTokensInteract,
+                confirmationRouter);
     }
 }

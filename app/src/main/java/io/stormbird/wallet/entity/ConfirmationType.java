@@ -9,5 +9,6 @@ public enum ConfirmationType
     ETH,
     ERC20,
     ERC875,
-    MARKET
+    MARKET,
+    WEB3TRANSACTION
 }

@@ -287,68 +287,9 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     @Override
-    public void onSignTransaction(Web3Transaction transaction, String url) {
-
-        DAppFunction dAppFunction = new DAppFunction() {
-            @Override
-            public void DAppError(Throwable error, Message<String> message) {
-                web3.onSignCancel(message);
-                resultDialog.dismiss();
-
-                resultDialog = new AWalletAlertDialog(getActivity());
-                resultDialog.setTitle(getString(R.string.dialog_sign_transaction_failed));
-                resultDialog.setIcon(AWalletAlertDialog.ERROR);
-                resultDialog.setMessage(error.getMessage());
-                resultDialog.setButtonText(R.string.dialog_ok);
-                resultDialog.show();
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Message<String> message) {
-                String txHash = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.value);
-                web3.onSignTransactionSuccessful(transaction, txHash);
-                resultDialog.dismiss();
-
-                resultDialog = new AWalletAlertDialog(getActivity());
-                resultDialog.setTitle(getString(R.string.dialog_sign_transaction_success));
-                resultDialog.setIcon(AWalletAlertDialog.SUCCESS);
-                resultDialog.setMessage(txHash);
-                resultDialog.setButtonText(R.string.dialog_ok);
-                resultDialog.show();
-            }
-        };
-
+    public void onSignTransaction(Web3Transaction transaction, String url)
+    {
         viewModel.openConfirmation(getContext(), transaction, url);
-
-//        dialog = new SignMessageDialog(getActivity());
-//        dialog.setRequester(url);
-//        dialog.setMessage("Transaction");
-//        dialog.setAddress(wallet.address);
-//        //calculate value of eth + gas
-//        Web3Transaction cTrans = viewModel.doGasSettings(transaction);
-//
-//        BigInteger gasPrice = cTrans.gasPrice.multiply(cTrans.gasLimit); // TODO: Use web3 estimate gas
-//        BigInteger value = cTrans.value.add(gasPrice);
-//        BigDecimal eth = BalanceUtils.weiToEth(new BigDecimal(value));
-//
-//        String ethPrice = getEthString(eth.doubleValue()) + " " + ETH_SYMBOL;
-//        String usdPrice = viewModel.getUSDValue(eth.doubleValue());
-//        dialog.setValue(ethPrice, usdPrice, viewModel.getNetworkName());
-//        dialog.setOnApproveListener(v -> {
-//            dialog.dismiss();
-//            //popup transaction wait dialog
-//            onProgress();
-//            viewModel.signTransaction(cTrans, dAppFunction, url);
-//        });
-//        dialog.setOnRejectListener(v -> {
-//            web3.onSignCancel(cTrans);
-//            dialog.dismiss();
-//        });
-//        dialog.show();
-
-        //Toast.makeText(getActivity(), str, Toast.LENGTH_LONG).show();
-        //web3.onSignCancel(transaction);
     }
 
     @Override

@@ -201,7 +201,6 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
     {
-        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
         tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
@@ -212,9 +211,10 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         tokenHolder.contractType.setText(R.string.erc875);
 
-        //The supplimentary information now doesn't show anything meaningful, no need to display the empty data
-        tokenHolder.balanceEth.setVisibility(View.VISIBLE);
-        tokenHolder.arrayBalance.setVisibility(View.GONE);
+        //tokenHolder.text24HoursSub.setText(R.string.burned);
+        //tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
+        //tokenHolder.textAppreciationSub.setText(R.string.marketplace);
+        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
 

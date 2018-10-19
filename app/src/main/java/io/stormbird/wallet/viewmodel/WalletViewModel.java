@@ -188,20 +188,26 @@ public class WalletViewModel extends BaseViewModel
         //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties 0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63
 
         updateTokens = getNetwork()
-                .filter(network -> network.isMainNetwork)
                 .subscribe(this::gotNetwork, this::onError);
     }
 
     private void gotNetwork(NetworkInfo networkInfo)
     {
         if (updateTokens != null) updateTokens.dispose();
-        updateTokens = getWallet(null)
-                .flatMap(wallet -> openseaService.getTokens(wallet.address))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotOpenseaTokens, this::onError);
+        if (networkInfo.isMainNetwork)
+        {
+            updateTokens = getWallet(null)
+                    .flatMap(wallet -> openseaService.getTokens(wallet.address))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::gotOpenseaTokens, this::onError);
+        }
+        else
+        {
+            onFetchTokensCompletable();
+        }
     }
-    
+
     private void gotOpenseaTokens(Token[] tokens)
     {
         if (updateTokens != null) updateTokens.dispose();

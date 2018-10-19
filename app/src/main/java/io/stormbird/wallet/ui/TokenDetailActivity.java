@@ -59,7 +59,7 @@ public class TokenDetailActivity extends BaseActivity {
         toolbar();
         setTitle(R.string.empty);
 
-        if (getIntent() != null) {
+        if (getIntent() != null && getIntent().getExtras() != null) {
             Asset asset = getIntent().getExtras().getParcelable("asset");
             Token token = getIntent().getExtras().getParcelable("token");
             title.setText(String.format("%s %s", "1", token.getFullName()));
@@ -107,8 +107,9 @@ public class TokenDetailActivity extends BaseActivity {
                     asset.getAssetContract().getName()));
 
             openExternal.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(asset.getExternalLink()));
+                Intent intent = new Intent(TokenDetailActivity.this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("url", asset.getExternalLink());
                 startActivity(intent);
             });
         } else {

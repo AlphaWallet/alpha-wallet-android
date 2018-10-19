@@ -144,6 +144,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel.loadExternalXMLContracts();
         downloadReceiver = new DownloadReceiver(this, this);
+
+        if (getIntent() != null && getIntent().getStringExtra("url") != null) {
+            String url = getIntent().getStringExtra("url");
+
+            if (dappBrowserFragment == null) {
+                dappBrowserFragment = new DappBrowserFragment();
+            }
+            Bundle bundle = new Bundle();
+            bundle.putString("url", url);
+            dappBrowserFragment.setArguments(bundle);
+            showPage(DAPP_BROWSER);
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -488,7 +500,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
         {
             //check permission is granted

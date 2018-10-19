@@ -100,6 +100,12 @@ public class DappBrowserFragment extends Fragment implements
         setupAddressBar();
         viewModel.prepare(getContext());
         URLReceiver = new URLLoadReceiver(getActivity(), this);
+
+        // Load url from a link within the app
+        if (getArguments() != null && getArguments().getString("url") != null) {
+            String url = getArguments().getString("url");
+            loadUrl(url);
+        }
         return view;
     }
 
@@ -403,6 +409,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
+        urlTv.setText(urlText);
         web3.loadUrl(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);

@@ -182,8 +182,9 @@ public class WalletViewModel extends BaseViewModel
         updateTokens.dispose();
         //updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
         //ERC721 Testing
-        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties
-        updateTokens = openseaService.getTokens("0x07b99b5a4093be2c4465d55fcaad50a3cb61447a")
+        //0x07b99b5a4093be2c4465d55fcaad50a3cb61447a
+        //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties 0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63
+        updateTokens = openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotOpenseaTokens, this::onError);

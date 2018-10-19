@@ -160,7 +160,8 @@ public class WalletViewModel extends BaseViewModel
             updateTokens.dispose();
         }
 
-        updateTokens = getWallet().toObservable()
+        updateTokens = getWallet(null).toObservable()
+                .filter(wallet -> wallet.address != null)
                 .flatMap(fetchTokensInteract::fetchStoredWithEth)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -174,7 +175,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void fetchFromOpensea()
     {
-        List<Token> serviceList = tokensService.getAllTokens();
+        List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[serviceList.size()]);
 
         progress.postValue(false);
@@ -185,13 +186,22 @@ public class WalletViewModel extends BaseViewModel
         //ERC721 Testing
         //0x07b99b5a4093be2c4465d55fcaad50a3cb61447a
         //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties 0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63
-        updateTokens = getWallet()
+
+        updateTokens = getNetwork()
+                .filter(network -> network.isMainNetwork)
+                .subscribe(this::gotNetwork, this::onError);
+    }
+
+    private void gotNetwork(NetworkInfo networkInfo)
+    {
+        if (updateTokens != null) updateTokens.dispose();
+        updateTokens = getWallet(null)
                 .flatMap(wallet -> openseaService.getTokens(wallet.address))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotOpenseaTokens, this::onError);
     }
-
+    
     private void gotOpenseaTokens(Token[] tokens)
     {
         if (updateTokens != null) updateTokens.dispose();
@@ -201,7 +211,7 @@ public class WalletViewModel extends BaseViewModel
             tokensService.addToken(t);
         }
 
-        List<Token> serviceList = tokensService.getAllTokens();
+        List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[serviceList.size()]);
         onFetchTokensCompletable();
     }
@@ -351,16 +361,28 @@ public class WalletViewModel extends BaseViewModel
         defaultWallet.setValue(wallet);
     }
 
-    public Single<Wallet> getWallet()
+    public Single<NetworkInfo> getNetwork()
+    {
+        if (defaultNetwork().getValue() != null)
+        {
+            return Single.fromCallable(() -> defaultNetwork().getValue());
+        }
+        else
+        {
+            return findDefaultNetworkInteract.find();
+        }
+    }
+
+    private Single<Wallet> getWallet(NetworkInfo networkInfo)
     {
         if (defaultWallet().getValue() != null)
         {
             return Single.fromCallable(() -> defaultWallet().getValue());
         }
         else
-            return findDefaultNetworkInteract.find()
-                    .flatMap(networkInfo -> findDefaultWalletInteract
-                            .find());
+        {
+            return findDefaultWalletInteract.find();
+        }
     }
 
     public void setVisibility(boolean visibility) {

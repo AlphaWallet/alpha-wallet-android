@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -83,15 +84,18 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         if (token instanceof ERC721Token)
         {
             adapter.setERC721Contract(token);
+            findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+        }
+        else
+        {
+            findViewById(R.id.button_use).setOnClickListener(this);
+            findViewById(R.id.button_sell).setOnClickListener(this);
+            findViewById(R.id.button_transfer).setOnClickListener(this);
         }
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);
-
-        findViewById(R.id.button_use).setOnClickListener(this);
-        findViewById(R.id.button_sell).setOnClickListener(this);
-        findViewById(R.id.button_transfer).setOnClickListener(this);
 
         finishReceiver = new FinishReceiver(this);
     }

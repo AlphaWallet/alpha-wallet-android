@@ -212,10 +212,10 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         tokenHolder.contractType.setText(R.string.erc875);
 
-        tokenHolder.text24HoursSub.setText(R.string.burned);
-        tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
-        tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
+        //The supplimentary information now doesn't show anything meaningful, no need to display the empty data
+        tokenHolder.balanceEth.setVisibility(View.VISIBLE);
+        tokenHolder.arrayBalance.setVisibility(View.GONE);
+        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
 
     public String populateRange(TicketRange range)

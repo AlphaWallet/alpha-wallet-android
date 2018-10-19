@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -159,7 +160,7 @@ public class WalletViewModel extends BaseViewModel
             updateTokens.dispose();
         }
 
-        updateTokens = getWallet()
+        updateTokens = getWallet().toObservable()
                 .flatMap(fetchTokensInteract::fetchStoredWithEth)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -179,12 +180,13 @@ public class WalletViewModel extends BaseViewModel
         progress.postValue(false);
         tokens.postValue(tokenCache);
 
-        updateTokens.dispose();
+        if (updateTokens != null) updateTokens.dispose();
         //updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
         //ERC721 Testing
         //0x07b99b5a4093be2c4465d55fcaad50a3cb61447a
         //Wallet tester = new Wallet("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"); //account containing kitties 0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63
-        updateTokens = openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
+        updateTokens = getWallet()
+                .flatMap(wallet -> openseaService.getTokens(wallet.address))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotOpenseaTokens, this::onError);
@@ -192,7 +194,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void gotOpenseaTokens(Token[] tokens)
     {
-        updateTokens.dispose();
+        if (updateTokens != null) updateTokens.dispose();
 
         for (Token t : tokens)
         {
@@ -349,16 +351,16 @@ public class WalletViewModel extends BaseViewModel
         defaultWallet.setValue(wallet);
     }
 
-    public Observable<Wallet> getWallet()
+    public Single<Wallet> getWallet()
     {
         if (defaultWallet().getValue() != null)
         {
-            return Observable.fromCallable(() -> defaultWallet().getValue());
+            return Single.fromCallable(() -> defaultWallet().getValue());
         }
         else
             return findDefaultNetworkInteract.find()
                     .flatMap(networkInfo -> findDefaultWalletInteract
-                            .find()).toObservable();
+                            .find());
     }
 
     public void setVisibility(boolean visibility) {

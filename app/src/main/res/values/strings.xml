@@ -199,7 +199,7 @@
     <string name="settings_logout">Log Out</string>
     <string name="title_redeem_token">Redeem Asset</string>
     <string name="title_redeem">Redeem Ticket</string>
-    <string name="title_show_tickets">Ticket Operations</string>
+    <string name="title_show_tickets">Token Inventory</string>
     <string name="quantity_to_redeem">Quantity to Redeem</string>
     <string name="waiting_for_blockchain">Waiting for blockchain …</string>
     <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>

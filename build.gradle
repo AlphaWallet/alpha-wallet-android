@@ -2,15 +2,22 @@
 
 buildscript {
     repositories {
+        // don't add anything here until you read to the bottom of this bracket
         google()
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
         google()
+	// WARNING WARNING WARNING
+	// you are about to add here a repository which provides some library for the Android app
+	// don't do that. add that repository to app/build.gradle
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
         classpath "io.realm:realm-gradle-plugin:4.4.0"
+	// WARNING WARNING WARNING
+	// you are about to add here a dependency to be used in the Android app
+	// don't do that. add that dependency to app/build.gradle
     }
 }
 
@@ -20,13 +27,16 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        // needed for pincode Lollipin
-        maven {
-            url "https://github.com/omadahealth/omada-nexus/raw/master/release"
-        }
+	// WARNING WARNING WARNING
+	// you are about to add here a repository which provides some library for the Android app
+	// don't do that. add that repository to app/build.gradle
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// WARNING WARNING WARNING
+// you are about to add here a plugin that is only related to the Android app
+// don't do that. add that repository to app/build.gradle

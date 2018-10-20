@@ -59,6 +59,7 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
+    private GasSettings internalGasSettings = null;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -147,6 +148,7 @@ public class DappBrowserViewModel extends BaseViewModel {
 
     private void onGasSettings(GasSettings gasSettings) {
         this.gasSettings.postValue(gasSettings);
+        internalGasSettings = gasSettings;
 
         disposable = fetchTokensInteract.getEthereumTicker()
                 .subscribeOn(Schedulers.io())
@@ -297,11 +299,11 @@ public class DappBrowserViewModel extends BaseViewModel {
         BigInteger gasPrice = transaction.gasPrice;
         if (gasLimit.equals(BigInteger.ZERO))
         {
-            gasLimit = gasSettings.getValue().gasLimit;
+            gasLimit = internalGasSettings.gasLimit;
         }
         if (gasPrice.equals(BigInteger.ZERO))
         {
-            gasPrice = gasSettings.getValue().gasPrice;
+            gasPrice = internalGasSettings.gasPrice;
         }
 
         return new Web3Transaction(transaction.recipient,

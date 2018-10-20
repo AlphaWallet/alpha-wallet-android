@@ -14,6 +14,7 @@ import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.TransactionLookup;
 import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 
@@ -124,12 +125,9 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
                 break;
         }
 
-        if (ct.operation == 0)
-        {
-            ct.operation = R.string.ticket_invalid_op;
-        }
+        String operationName = getString(TransactionLookup.typeToName(ct.operation));
 
-        type.setText(getString(ct.operation));
+        type.setText(operationName);
         address.setText(ct.name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
         String ticketMove = "";
@@ -142,19 +140,19 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
 
         switch (ct.operation)
         {
-            case R.string.ticket_magiclink_transfer: //transfered out of our wallet via magic link (0 value)
-            case R.string.ticket_magiclink_pickup: //received ticket from a magic link
+            case MAGICLINK_TRANSFER: //transfered out of our wallet via magic link (0 value)
+            case MAGICLINK_PICKUP: //received ticket from a magic link
                 break;
-            case R.string.ticket_magiclink_sale: //we received ether from magiclink sale
+            case MAGICLINK_SALE: //we received ether from magiclink sale
                 supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
-            case R.string.ticket_magiclink_purchase: //we purchased a ticket from a magiclink
+            case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
                 supplimentalTxt = "-" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
-            case R.string.ticket_receive_from_magiclink:
+            case RECEIVE_FROM:
                 supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
-            case R.string.ticket_load_new_tickets:
+            case LOAD_NEW_TOKENS:
                 ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
                 break;
             default:

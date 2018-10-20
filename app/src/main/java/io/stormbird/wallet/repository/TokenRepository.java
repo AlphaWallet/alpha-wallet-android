@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import io.reactivex.disposables.CompositeDisposable;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SubscribeWrapper;
 import io.stormbird.wallet.entity.Ticker;
@@ -43,6 +44,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -80,6 +82,7 @@ public class TokenRepository implements TokenRepositoryType {
     private Web3j web3j;
     private boolean useBackupNode = false;
     private NetworkInfo network;
+    private Disposable disposable;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -100,32 +103,36 @@ public class TokenRepository implements TokenRepositoryType {
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
-    private void buildWeb3jClient(NetworkInfo defaultNetwork) {
+    private void buildWeb3jClient(NetworkInfo defaultNetwork)
+    {
         network = defaultNetwork;
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
         web3j = Web3jFactory.build(publicNodeService);
         ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
-        Disposable d = getWorkHash()
+        disposable = getIsSyncing()
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::receiveWork, this::checkFail);
+                .subscribe(this::receiveSyncing, this::checkFail);
     }
 
-    private void receiveWork(BigInteger s)
+    private void receiveSyncing(Boolean b)
     {
-        //have a valid connection, no need to use infura
-        if (s == null || s.equals(BigInteger.ZERO))
+        //have a valid connection and node is done syncing, no need to use infura
+        if (b == null || b)
         {
             useBackupNode = true;
             switchToBackupNode();
         }
+
+        disposable.dispose();
     }
 
     private void checkFail(Throwable failMsg)
     {
         useBackupNode = true;
         switchToBackupNode();
+        disposable.dispose();
     }
 
     private void switchToBackupNode()
@@ -135,12 +142,12 @@ public class TokenRepository implements TokenRepositoryType {
         ethereumNetworkRepository.setActiveRPC(network.backupNodeUrl);
     }
 
-    private Single<BigInteger> getWorkHash()
+    private Single<Boolean> getIsSyncing()
     {
         return Single.fromCallable(() -> {
-            EthBlockNumber work = web3j.ethBlockNumber()
+            EthSyncing status = web3j.ethSyncing()
                     .send();
-            return work.getBlockNumber();
+            return status.isSyncing();
         });
     }
 
@@ -304,6 +311,16 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    @Override
+    public Observable<Token> fetchActiveDefaultTokenBalance(Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        return walletRepository.getDefaultWallet()
+                .flatMap(wallet -> updateBalance(network, wallet, token))
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
+
     private Observable<Token> fetchBalance(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -417,6 +434,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public void terminateToken(Token token, Wallet wallet, NetworkInfo network)
+    {
+        localSource.setTokenTerminated(network, wallet, token);
+    }
+
+    @Override
     public Single<TokenInfo[]> update(String[] address)
     {
         return setupTokensFromLocal(address);
@@ -489,14 +512,15 @@ public class TokenRepository implements TokenRepositoryType {
      * @return
      */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
+        if (token.isEthereum())
+        {
+            return attachEth(network, wallet);
+        }
+        else
         return Single.fromCallable(() -> {
             TokenFactory tFactory = new TokenFactory();
             try
             {
-                if (token.isEthereum())
-                {
-                    return token; //already have the balance for ETH
-                }
                 List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
@@ -757,7 +781,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     public rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
     {
-        rx.Subscription sub = null;
         if (!useBackupNode)
         {
             final Event event = new Event("TransferFrom",

@@ -311,6 +311,16 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    @Override
+    public Observable<Token> fetchActiveDefaultTokenBalance(Token token)
+    {
+        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+        return walletRepository.getDefaultWallet()
+                .flatMap(wallet -> updateBalance(network, wallet, token))
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
+
     private Observable<Token> fetchBalance(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
@@ -424,6 +434,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public void terminateToken(Token token, Wallet wallet, NetworkInfo network)
+    {
+        localSource.setTokenTerminated(network, wallet, token);
+    }
+
+    @Override
     public Single<TokenInfo[]> update(String[] address)
     {
         return setupTokensFromLocal(address);
@@ -496,14 +512,15 @@ public class TokenRepository implements TokenRepositoryType {
      * @return
      */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
+        if (token.isEthereum())
+        {
+            return attachEth(network, wallet);
+        }
+        else
         return Single.fromCallable(() -> {
             TokenFactory tFactory = new TokenFactory();
             try
             {
-                if (token.isEthereum())
-                {
-                    return token; //already have the balance for ETH
-                }
                 List<BigInteger> balanceArray = null;
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
@@ -764,7 +781,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     public rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
     {
-        rx.Subscription sub = null;
         if (!useBackupNode)
         {
             final Event event = new Event("TransferFrom",

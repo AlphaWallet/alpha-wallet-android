@@ -13,6 +13,7 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionContract;
 import io.stormbird.wallet.entity.TransactionOperation;
+import io.stormbird.wallet.entity.TransactionType;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.entity.RealmTransaction;
 import io.stormbird.wallet.repository.entity.RealmTransactionContract;
@@ -264,7 +265,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     realmContract.setType(ct.type);
                     realmContract.setIndices(ct.getIndicesString());
                     realmContract.setContractType(ERC875_CONTRACT_TYPE);
-                    realmContract.setOperation(ct.operation);
+                    realmContract.setOperation(ct.operation.ordinal());
                     realmContract.setOtherParty(ct.otherParty);
                     break;
                 case NORMAL_CONTRACT_TYPE:
@@ -321,7 +322,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     realmContract.setType(ct.type);
                     realmContract.setIndices(ct.getIndicesString());
                     realmContract.setContractType(ERC875_CONTRACT_TYPE);
-                    realmContract.setOperation(ct.operation);
+                    realmContract.setOperation(ct.operation.ordinal());
                     realmContract.setOtherParty(ct.otherParty);
                     break;
                 case NORMAL_CONTRACT_TYPE:
@@ -370,7 +371,9 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     operation.contract = new ERC875ContractTransaction();
                     ((ERC875ContractTransaction)operation.contract).balance = rawOperation.getContract().getBalance();
                     ((ERC875ContractTransaction)operation.contract).setIndicesFromString(rawOperation.getContract().getIndices());
-                    ((ERC875ContractTransaction)operation.contract).operation = rawOperation.getContract().getOperation();
+                    int operationId = rawOperation.getContract().getOperation();
+                    if (operationId >= TransactionType.ILLEGAL_VALUE.ordinal()) operationId = TransactionType.ILLEGAL_VALUE.ordinal();
+                    ((ERC875ContractTransaction)operation.contract).operation = TransactionType.values()[operationId];
                     ((ERC875ContractTransaction)operation.contract).otherParty = rawOperation.getContract().getOtherParty();
                     ((ERC875ContractTransaction)operation.contract).type = rawOperation.getContract().getType();
                     break;

@@ -49,13 +49,6 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Transaction[]> fetchInternalTransactions(Wallet wallet, String feemaster) {
-        return transactionRepository
-                .fetchInternalTransactionsNetwork(wallet, feemaster)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
     {
         return transactionRepository.storeTransactions(networkInfo, wallet, txList);

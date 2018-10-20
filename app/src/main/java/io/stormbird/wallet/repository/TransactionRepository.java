@@ -76,12 +76,6 @@ public class TransactionRepository implements TransactionRepositoryType {
     }
 
 	@Override
-	public Observable<Transaction[]> fetchInternalTransactionsNetwork(Wallet wallet, String feemaster)
-	{
-		return blockExplorerClient.fetchContractTransactions(wallet.address, feemaster);
-	}
-
-	@Override
 	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 		return fetchFromNetwork(networkInfo, wallet, lastBlock)

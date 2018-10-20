@@ -6,6 +6,7 @@ import io.stormbird.wallet.entity.OrderContractAddressPair;
 import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 
@@ -38,6 +39,10 @@ public class FetchTokensInteract {
         return tokenRepository.fetchActive(wallet.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<TokenInfo> getTokenInfo(String address) {
+        return tokenRepository.update(address);
     }
 
     private Map<String, Token> tokensToMap(Token[] tokenArray) {
@@ -107,6 +112,12 @@ public class FetchTokensInteract {
         return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Token updateDefaultBalance(Token token)
+    {
+        return tokenRepository.fetchActiveDefaultTokenBalance(token)
+                .subscribeOn(Schedulers.io()).blockingSingle();
     }
 
     public Observable<OrderContractAddressPair> updateBalancePair(Token token, MagicLinkData order)

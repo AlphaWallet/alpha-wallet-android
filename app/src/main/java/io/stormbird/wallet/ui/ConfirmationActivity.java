@@ -35,10 +35,14 @@ import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModel;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.token.entity.TicketRange;
 
+import static io.stormbird.token.tools.Convert.getEthString;
+import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
 
 public class ConfirmationActivity extends BaseActivity {
     AWalletAlertDialog dialog;
@@ -60,15 +64,21 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView networkFeeText;
     private TextView contractAddrText;
     private TextView contractAddrLabel;
+    private TextView websiteLabel;
+    private TextView websiteText;
     private Button sendButton;
+    private TextView title;
 
-    private BigInteger amount;
+    private BigDecimal amount;
     private int decimals;
     private String contractAddress;
     private String amountStr;
 
     private ConfirmationType confirmationType;
     private boolean tokenTransfer;
+    private Web3Transaction transaction;
+    private boolean isMainNet;
+    private String networkName;
 
     private List<TicketRange> salesOrderRange = null;
 
@@ -79,10 +89,10 @@ public class ConfirmationActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_confirm);
+        transaction = null;
         toolbar();
 
         setTitle("");
-
         fromAddressText = findViewById(R.id.text_from);
         toAddressText = findViewById(R.id.text_to);
         valueText = findViewById(R.id.text_value);
@@ -92,11 +102,17 @@ public class ConfirmationActivity extends BaseActivity {
         sendButton = findViewById(R.id.send_button);
         contractAddrText = findViewById(R.id.text_contract);
         contractAddrLabel = findViewById(R.id.label_contract);
+        websiteLabel = findViewById(R.id.label_website);
+        websiteText = findViewById(R.id.text_website);
+        title = findViewById(R.id.title_confirm);
         sendButton.setOnClickListener(view -> onSend());
+
+        transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
+
         amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
@@ -104,18 +120,18 @@ public class ConfirmationActivity extends BaseActivity {
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         String amountString;
 
-        amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
 
         switch (confirmationType) {
             case ETH:
-                amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
                 tokenTransfer = false;
                 break;
             case ERC20:
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
-                amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
                 tokenTransfer = true;
                 break;
             case ERC875:
@@ -130,8 +146,31 @@ public class ConfirmationActivity extends BaseActivity {
                 toAddress = "Stormbird market";
                 tokenTransfer = false;
                 break;
+            case WEB3TRANSACTION:
+                title.setText(R.string.confirm_dapp_transaction);
+                if (transaction.contract != null)
+                {
+                    contractAddrText.setVisibility(View.VISIBLE);
+                    contractAddrLabel.setVisibility(View.VISIBLE);
+                    contractAddrText.setText(transaction.contract.toString());
+                }
+                String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
+                isMainNet = getIntent().getBooleanExtra(C.EXTRA_NETWORK_MAINNET, false);
+                toAddress = transaction.recipient.toString();
+                if (urlRequester != null)
+                {
+                    websiteLabel.setVisibility(View.VISIBLE);
+                    websiteText.setVisibility(View.VISIBLE);
+                    websiteText.setText(urlRequester);
+                }
+
+                BigDecimal ethAmount = Convert.fromWei(transaction.value.toString(10), Convert.Unit.ETHER);
+                amountString = getEthString(ethAmount.doubleValue()) + " " + ETH_SYMBOL;
+                //handle web3 transaction signing
+                break;
             default:
-                amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
                 tokenTransfer = false;
                 break;
         }
@@ -208,7 +247,7 @@ public class ConfirmationActivity extends BaseActivity {
                 viewModel.createTransaction(
                         fromAddressText.getText().toString(),
                         toAddressText.getText().toString(),
-                        amount,
+                        amount.toBigInteger(),
                         gasSettings.gasPrice,
                         gasSettings.gasLimit);
                 break;
@@ -218,7 +257,7 @@ public class ConfirmationActivity extends BaseActivity {
                         fromAddressText.getText().toString(),
                         toAddressText.getText().toString(),
                         contractAddress,
-                        amount,
+                        amount.toBigInteger(),
                         gasSettings.gasPrice,
                         gasSettings.gasLimit);
                 break;
@@ -274,9 +313,22 @@ public class ConfirmationActivity extends BaseActivity {
         gasPriceText.setText(gasPrice);
         gasLimitText.setText(gasSettings.gasLimit.toString());
 
-        String networkFee = BalanceUtils.weiToEth(new BigDecimal(gasSettings
-                .gasPrice.multiply(gasSettings.gasLimit))).toPlainString() + " " + C.ETH_SYMBOL;
+        BigDecimal networkFeeBD = new BigDecimal(gasSettings
+                                                         .gasPrice.multiply(gasSettings.gasLimit));
+
+        String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + C.ETH_SYMBOL;
         networkFeeText.setText(networkFee);
+
+        if (confirmationType == WEB3TRANSACTION)
+        {
+            //update amount
+            BigDecimal ethValueBD = amount.add(networkFeeBD);
+
+            //convert to ETH
+            ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
+            String valueUpdate = getEthString(ethValueBD.doubleValue()) + " " + ETH_SYMBOL;
+            valueText.setText(valueUpdate);
+        }
     }
 
     private void onError(ErrorEnvelope error) {

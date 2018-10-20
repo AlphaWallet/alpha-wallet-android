@@ -13,6 +13,7 @@ import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
 
@@ -25,20 +26,27 @@ public class DappBrowserModule {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchGasSettingsInteract fetchGasSettingsInteract,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTokensInteract fetchTokensInteract,
+            ConfirmationRouter confirmationRouter) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
                 fetchGasSettingsInteract,
-                fetchTokensInteract);
+                fetchTokensInteract,
+                confirmationRouter);
     }
 
     @Provides
     FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
             EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
         return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
+    }
+
+    @Provides
+    ConfirmationRouter provideConfirmationRouter() {
+        return new ConfirmationRouter();
     }
 
     @Provides

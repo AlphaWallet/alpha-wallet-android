@@ -116,10 +116,6 @@ public class FetchTokensInteract {
 
     public Token updateDefaultBalance(Token token)
     {
-        if (token.getAddress().contains("0x71bd"))
-        {
-            System.out.print("yolexx");
-        }
         return tokenRepository.fetchActiveDefaultTokenBalance(token)
                 .subscribeOn(Schedulers.io()).blockingSingle();
     }

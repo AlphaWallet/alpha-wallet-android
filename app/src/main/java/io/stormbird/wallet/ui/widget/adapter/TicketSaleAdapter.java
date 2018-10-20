@@ -125,7 +125,11 @@ public class TicketSaleAdapter extends TicketAdapter {
         for (int i = 0; i < sortedList.size(); i++)
         {
             TicketRangeElement e = sortedList.get(i);
-            if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
+            if (currentRange != null && e.id.equals(currentRange.tokenIds.get(0)))
+            {
+                currentRange.tokenIds.add(e.id);
+            }
+            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 items.add(new TicketSaleSortedItem(currentRange, 10 + i));

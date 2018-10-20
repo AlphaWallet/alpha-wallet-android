@@ -49,34 +49,6 @@ public class EtherscanTransaction
     {
         boolean isConstructor = false;
         TransactionOperation[] o;
-        //        // Parse internal transaction - this is a RECEIVE_FROM_MAGICLINK transaction.
-        //        /* 'operations' member is used in a lot of places. However,
-        //
-        //	 * I'd say a good refactor will sort this out, I think Scoff &
-        //	 * co had to make the unwieldy nested class set there to read
-        //	 * in data from their server. 'Operations' should really hold
-        //	 * an object that defines the transaction. You should have an
-        //	 * object for each type of contract - ERC20/875 etc. The
-        //	 * places where operations is used then can be moved inside
-        //	 * these classes. We don't use his transaction server now
-        //	 * anyway. - james
-        //	 *
-        //	 * I think Operations are intended in the context of transactional database.
-        //	 * This part needs review once there is a transactional framework in Ethereum.
-        //	 * - weiwu
-        //         */
-        //
-        //        if (internal)
-        //        {
-        //            o = new TransactionOperation[1];
-        //            TransactionOperation op = new TransactionOperation();
-        //            ERC875ContractTransaction ct = new ERC875ContractTransaction();
-        //            o[0] = op;
-        //            op.contract = ct;
-        //            ct.address = contractAddress;
-        //            op.from = contractAddress;
-        //            ct.type = 2; // indicate that we need to load the contract
-        //            ct.operation = R.string.ticket_receive_from_magiclink;
 
         if (contractAddress.length() > 0)
         {

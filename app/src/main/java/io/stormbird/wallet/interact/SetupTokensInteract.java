@@ -342,7 +342,7 @@ public class SetupTokensInteract {
             //process the remaining transactions
             for (Transaction t : transactions)
             {
-                if (t.input != null && t.input.length() > 20)
+                if (t.input != null)
                 {
                     TransactionInput data = transactionDecoder.decodeInput(t.input);
                     if (t.isConstructor || (data != null && data.functionData != null))

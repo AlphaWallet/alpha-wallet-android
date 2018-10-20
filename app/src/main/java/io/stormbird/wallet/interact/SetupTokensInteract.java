@@ -364,6 +364,11 @@ public class SetupTokensInteract {
         return tokenRepository.update(address);
     }
 
+    public Observable<TokenInfo[]> addTokens(List<String> addresses)
+    {
+        return tokenRepository.update(addresses.toArray(new String[addresses.size()]) ).toObservable();
+    }
+
     public void setupUnknownList(TokensService tokensService, List<String> xmlContractAddresses)
     {
         unknownContracts.clear();

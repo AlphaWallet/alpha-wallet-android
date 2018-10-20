@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionContract;
 import io.stormbird.wallet.entity.TransactionType;
@@ -42,6 +43,7 @@ import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 public class TransactionsViewModel extends BaseViewModel
 {
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
+    private static final int  MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE = 20;
     private static final String TAG = "TVM";
 
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
@@ -76,6 +78,8 @@ public class TransactionsViewModel extends BaseViewModel
     private int transactionCount;
     private long lastBlock = 0;
     private boolean restoreRequired = false;
+    private boolean immediateCycleStart = false;//this is used to flag the need to start a new cycle,
+                                                // usually only seen when importing a new wallet with a lot of transactions on it
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -307,22 +311,18 @@ public class TransactionsViewModel extends BaseViewModel
     //if we find unknown tokens fetch them and add to the token watch list
     private void siftUnknownTransactions()
     {
+        immediateCycleStart = false;
         //add in the XML contract address to list of unknowns to fetch if we don't have it already
         setupTokensInteract.setupUnknownList(tokensService, assetDefinitionService.getAllContracts(network.getValue().chainId));
 
-        fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[0]), tokensService) //patches tx's and returns unknown contracts
+        fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[txMap.size()]), tokensService) //patches tx's and returns unknown contracts
                 .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store patched TX
                 .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
-                .flatMapIterable(address -> address) //change to a sequential stream
-                .map(address -> setupTokensInteract.addToken(address).blockingLast()) //fetch token info
-                .filter(tokenInfo -> tokenInfo.name != null)
-                .map(tokenInfo -> addTokenInteract.add(tokenInfo).blockingLast()) //add to cached tokens
-                .map(tokensService::addToken)
-                .flatMap(token -> setupTokensInteract.reProcessTokens(token, txMap, tokensService)) //run through transactions now we have the new token
-                .flatMap(this::removeFromMap) //remove the handled transactions from the map (so we don't need to scan these transactions again)
-                .map(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).blockingGet()) //store newly fixed up transactions
+                .map(this::limitToChunk)
+                .flatMap(setupTokensInteract::addTokens) //fetch tokenInfo
+                .flatMap(addTokenInteract::add) //add to database
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::updateDisplay, this::onError, this::storeUnprocessedTx); //update the screen with any updated transactions
+                .subscribe(this::updateTransactions, this::onError, this::storeUnprocessedTx);
 
         if (transactionCount == 0)
         {
@@ -330,6 +330,21 @@ public class TransactionsViewModel extends BaseViewModel
             progress.postValue(false);
             showEmpty.postValue(true);
         }
+    }
+
+    private List<String> limitToChunk(List<String> strings)
+    {
+        if (strings.size() > MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE)
+        {
+            strings = strings.subList(0, MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE);
+            immediateCycleStart = true;
+        }
+        return strings;
+    }
+
+    private void updateTransactions(Token[] tokens)
+    {
+        tokensService.addTokens(tokens); //add tokens to the token map in the service
     }
 
     //update the display for newly fetched tokens
@@ -402,7 +417,14 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void checkIfRegularUpdateNeeded()
     {
-        if (!isVisible)
+        if (immediateCycleStart)
+        {
+            handler.removeCallbacks(startFetchTransactionsTask);
+            handler.postDelayed(
+                    startFetchTransactionsTask,
+                    100);
+        }
+        else if (!isVisible)
         {
             //no longer any need to refresh
             Log.d(TAG, "Finish");
@@ -493,7 +515,7 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void wipeTerminationList()
     {
-        handleTerminatedContracts.dispose();
+        if (handleTerminatedContracts != null && !handleTerminatedContracts.isDisposed()) handleTerminatedContracts.dispose();
         tokensService.clearTerminationList();
     }
 

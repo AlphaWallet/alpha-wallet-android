@@ -555,7 +555,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (BadContract e)
             {
-                //this doesn't mean the token is dead. Just try again
+                //this doesn't mean the token is dead. Just try again, but set the balance to zero for now
                 //did we previously have a balance?
                 return token;
 //                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
@@ -770,7 +770,7 @@ public class TokenRepository implements TokenRepositoryType {
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            if (indices == null) throw new BadContract();
+            if (indices == null) return result; // return empty array
             for (Bytes32 val : indices)
             {
                 result.add(getCorrectedValue(val, temp));

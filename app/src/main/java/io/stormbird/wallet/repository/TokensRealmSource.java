@@ -46,11 +46,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return Completable.fromAction(() -> {
             Date now = new Date();
             for (Token token : items) {
-                if (token.tokenInfo.name == null || token.tokenInfo.name.equals(EXPIRED_CONTRACT) || token.tokenInfo.symbol == null)
-                {
-                    Log.d(TAG, "Attempting to store invalid contract: " + token.getAddress());
-                }
-                else
+                if (token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT) && token.tokenInfo.symbol != null)
                 {
                     saveToken(networkInfo, wallet, token, now);
                 }
@@ -63,11 +59,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return Single.fromCallable(() -> {
             Date now = new Date();
             for (Token token : items) {
-                if (token.tokenInfo.name == null || token.tokenInfo.name.equals(EXPIRED_CONTRACT))
-                {
-                    Log.d(TAG, "Attempting to store invalid contract: " + token.getAddress());
-                }
-                else
+                if (token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT)) //only store a contract with valid name
                 {
                     saveToken(networkInfo, wallet, token, now);
                 }

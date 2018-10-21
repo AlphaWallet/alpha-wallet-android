@@ -37,6 +37,7 @@ import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
@@ -56,6 +57,7 @@ public class DappBrowserViewModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final ConfirmationRouter confirmationRouter;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
@@ -67,13 +69,15 @@ public class DappBrowserViewModel extends BaseViewModel {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchGasSettingsInteract fetchGasSettingsInteract,
-            FetchTokensInteract fetchTokensInteract) {
+            FetchTokensInteract fetchTokensInteract,
+            ConfirmationRouter confirmationRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.confirmationRouter = confirmationRouter;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -291,6 +295,13 @@ public class DappBrowserViewModel extends BaseViewModel {
             //TODO: Format balance text
             return balance;
         }
+    }
+
+    public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL)
+    {
+        String networkName = defaultNetwork.getValue().name;
+        boolean mainNet = defaultNetwork.getValue().isMainNetwork;
+        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL);
     }
 
     public Web3Transaction doGasSettings(Web3Transaction transaction)

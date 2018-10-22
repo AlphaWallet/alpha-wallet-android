@@ -219,6 +219,9 @@ public class Token implements Parcelable
             holder.fillCurrency(ethBalance, ticker);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
         }
+
+        holder.balanceEth.setVisibility(View.VISIBLE);
+        holder.arrayBalance.setVisibility(View.GONE);
     }
 
     public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)

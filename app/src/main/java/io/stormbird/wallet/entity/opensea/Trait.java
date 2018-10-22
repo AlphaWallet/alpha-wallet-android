@@ -12,23 +12,14 @@ public class Trait implements Parcelable {
     @SerializedName("trait_type")
     @Expose
     private String traitType;
+
     @SerializedName("value")
     @Expose
     private String value;
-    @SerializedName("display_type")
-    @Expose
-    private Object displayType;
-    @SerializedName("max_value")
-    @Expose
-    private Object maxValue;
-    @SerializedName("trait_count")
-    @Expose
-    private long traitCount;
 
     protected Trait(Parcel in) {
         traitType = in.readString();
         value = in.readString();
-        traitCount = in.readLong();
     }
 
     public static final Creator<Trait> CREATOR = new Creator<Trait>() {
@@ -69,45 +60,6 @@ public class Trait implements Parcelable {
         return this;
     }
 
-    public Object getDisplayType() {
-        return displayType;
-    }
-
-    public void setDisplayType(Object displayType) {
-        this.displayType = displayType;
-    }
-
-    public Trait withDisplayType(Object displayType) {
-        this.displayType = displayType;
-        return this;
-    }
-
-    public Object getMaxValue() {
-        return maxValue;
-    }
-
-    public void setMaxValue(Object maxValue) {
-        this.maxValue = maxValue;
-    }
-
-    public Trait withMaxValue(Object maxValue) {
-        this.maxValue = maxValue;
-        return this;
-    }
-
-    public long getTraitCount() {
-        return traitCount;
-    }
-
-    public void setTraitCount(long traitCount) {
-        this.traitCount = traitCount;
-    }
-
-    public Trait withTraitCount(long traitCount) {
-        this.traitCount = traitCount;
-        return this;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -117,6 +69,5 @@ public class Trait implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(traitType);
         dest.writeString(value);
-        dest.writeLong(traitCount);
     }
 }

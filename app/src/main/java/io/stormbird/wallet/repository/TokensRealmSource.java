@@ -69,6 +69,18 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Single<Integer> saveERC721Tokens(NetworkInfo networkInfo, Wallet wallet, Token[] tokens)
+    {
+        return Single.fromCallable(() -> {
+            Date now = new Date();
+            for (Token token : tokens) {
+                saveERC721Token(networkInfo, wallet, token, now);
+            }
+            return tokens.length;
+        });
+    }
+
+    @Override
     public Single<Token> saveToken(NetworkInfo networkInfo, Wallet wallet, Token token) {
         return Single.fromCallable(() -> {
             Date now = new Date();
@@ -520,6 +532,63 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 //realmToken.setBalance(token.getFullBalance());
             }
+        } catch (Exception ex) {
+            if (realm != null && realm.isInTransaction()) {
+                realm.cancelTransaction();
+            }
+        } finally {
+            if (realm != null) {
+                realm.close();
+            }
+        }
+    }
+
+    private void saveERC721Token(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime)
+    {
+        Realm realm = null;
+        try {
+            realm = realmManager.getRealmInstance(networkInfo, wallet);
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", token.tokenInfo.address)
+                    .findFirst();
+
+//            if (realmToken == null)
+//            {
+//                TransactionsRealmCache.addRealm();
+//                realm.beginTransaction();
+//                Log.d(TAG, "Save New ERC721 Token: " + token.getFullName() + " :" + token.tokenInfo.address);
+//                realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
+//                realmToken.setName(token.tokenInfo.name);
+//                realmToken.setSymbol(token.tokenInfo.symbol);
+//                realmToken.setDecimals(token.tokenInfo.decimals);
+//                realmToken.setAddedTime(currentTime.getTime());
+//                realmToken.setEnabled(true);
+//                realmToken.setBurnList("");
+//
+//                if (token instanceof Ticket) {
+//                    realmToken.setStormbird(true);
+//                }
+//                realm.commitTransaction();
+//                TransactionsRealmCache.subRealm();
+//            }
+//            else
+//            {
+//                Log.d(TAG, "Update Token: " + token.getFullName());
+//                if (!token.tokenInfo.name.equals(realmToken.getName()) || !token.tokenInfo.symbol.equals(realmToken.getSymbol()))
+//                {
+//                    //has token changed?
+//                    TransactionsRealmCache.addRealm();
+//                    realm.beginTransaction();
+//                    realmToken.setName(token.tokenInfo.name);
+//                    realmToken.setSymbol(token.tokenInfo.symbol);
+//                    realmToken.setDecimals(token.tokenInfo.decimals);
+//                    realmToken.setAddedTime(currentTime.getTime());
+//                    realmToken.setEnabled(true);
+//                    realm.commitTransaction();
+//                    TransactionsRealmCache.subRealm();
+//                }
+//                //realmToken.setBalance(token.getFullBalance());
+//            }
         } catch (Exception ex) {
             if (realm != null && realm.isInTransaction()) {
                 realm.cancelTransaction();

@@ -31,4 +31,6 @@ public interface TokenLocalSource {
     Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens);
 
     void setTokenTerminated(NetworkInfo network, Wallet wallet, Token token);
+
+    Single<Integer> saveERC721Tokens(NetworkInfo defaultNetwork, Wallet wallet, Token[] tokens);
 }

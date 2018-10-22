@@ -406,6 +406,15 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<Integer> addERC721(Wallet wallet, Token[] tokens)
+    {
+        return localSource.saveERC721Tokens(
+                ethereumNetworkRepository.getDefaultNetwork(),
+                wallet,
+                tokens);
+    }
+
+    @Override
     public Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos)
     {
         TokenFactory tf = new TokenFactory();

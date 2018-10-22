@@ -114,14 +114,17 @@ public class AssetDisplayViewModel extends BaseViewModel
         return openseaService;
     }
 
-    public void fetchCurrentTicketBalance() {
+    private void fetchCurrentTicketBalance() {
         if (getBalanceDisposable != null) getBalanceDisposable.dispose();
-        getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .fetchSingle(defaultWallet.getValue(), ticket().getValue())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onToken, this::onError, this::finishTokenFetch)).subscribe();
+        if (ticket().getValue() != null && !ticket().getValue().independentUpdate())
+        {
+            getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> fetchTokensInteract
+                            .fetchSingle(defaultWallet.getValue(), ticket().getValue())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::onToken, this::onError, this::finishTokenFetch)).subscribe();
+        }
     }
 
     private void finishTokenFetch()

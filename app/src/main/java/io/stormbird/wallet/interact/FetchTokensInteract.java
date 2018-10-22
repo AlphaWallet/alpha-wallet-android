@@ -69,8 +69,8 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token[]> fetchStoredWithEth(Wallet wallet) {
-        return tokenRepository.fetchActiveStoredPlusEth(wallet.address)
+    public Observable<Token[]> fetchStoredWithEth(NetworkInfo network, Wallet wallet) {
+        return tokenRepository.fetchActiveStoredPlusEth(network, wallet.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -117,6 +117,12 @@ public class FetchTokensInteract {
     public Token updateDefaultBalance(Token token)
     {
         return tokenRepository.fetchActiveDefaultTokenBalance(token)
+                .subscribeOn(Schedulers.io()).blockingSingle();
+    }
+
+    public Token updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)
+    {
+        return tokenRepository.fetchActiveTokenBalance(token, network, wallet)
                 .subscribeOn(Schedulers.io()).blockingSingle();
     }
 

@@ -163,7 +163,6 @@ public class WalletViewModel extends BaseViewModel
 
     public void fetchTokens()
     {
-        tokensService.clearTokens();
         if (updateTokens != null && !updateTokens.isDisposed())
         {
             updateTokens.dispose();

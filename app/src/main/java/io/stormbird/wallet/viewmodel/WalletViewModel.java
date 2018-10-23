@@ -225,11 +225,11 @@ public class WalletViewModel extends BaseViewModel
         }
 
         //store these tokens
-//        updateTokens = getWallet(null).toObservable()
-//                .flatMap(accountData -> addTokenInteract.addERC721(accountData.wallet, tokens))
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::storedTokens, this::onError);
+        updateTokens = getWallet(null).toObservable()
+                .flatMap(accountData -> addTokenInteract.addERC721(accountData.wallet, tokens))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::storedTokens, this::onError);
 
         List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[serviceList.size()]);

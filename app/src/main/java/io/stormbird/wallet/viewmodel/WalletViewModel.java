@@ -134,7 +134,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     //we changed wallets or network, ensure we clean up before displaying new data
-    public void abortAndRestart()
+    public void clearProcess()
     {
         defaultWallet.setValue(null);
         tokensService.clearTokens();
@@ -377,6 +377,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     public void prepare() {
+        clearProcess();
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()

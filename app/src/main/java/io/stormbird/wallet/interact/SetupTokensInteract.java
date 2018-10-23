@@ -307,10 +307,13 @@ public class SetupTokensInteract {
     {
         return Observable.fromCallable(() -> {
             List<Transaction> processedTransactions = new ArrayList<Transaction>();
+            Token token = null;
+            long highestBlock = 0;
             try {
                 for (TokenTransaction thisTokenTrans : txList) {
                     Transaction thisTrans = thisTokenTrans.transaction;
                     TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
+                    token = thisTokenTrans.token;
 
                     if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
                         Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data, tokensService);
@@ -319,12 +322,25 @@ public class SetupTokensInteract {
                             processedTransactions.add(newTx);
                         }
                     }
+                    try
+                    {
+                        long blockNumber = Long.valueOf(thisTrans.blockNumber);
+                        if (blockNumber > highestBlock)
+                        {
+                            highestBlock = blockNumber;
+                        }
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        //silent fail
+                    }
                 }
                 //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
+            if (highestBlock > 0) tokensService.tokenContractUpdated(token, highestBlock);
             return processedTransactions.toArray(new Transaction[processedTransactions.size()]);
         });
     }

@@ -210,24 +210,6 @@ public class TransactionsViewModel extends BaseViewModel
     private void onTransactions(Transaction[] transactions) {
         Log.d(TAG, "Found " + transactions.length + " Cached transactions");
         txArray = transactions;
-
-        for (Transaction tx : txArray)
-        {
-            txMap.put(tx.hash, tx);
-            if (Long.valueOf(tx.blockNumber) > lastBlock) lastBlock = Long.valueOf(tx.blockNumber);
-            //this code fixes values in case user rolls back the version of their αWallet app
-            if (tx.operations != null && tx.operations.length > 0 && tx.operations[0] != null)
-            {
-                TransactionContract ct = tx.operations[0].contract;
-                // weiwu: james said this is his private tur for now and all references to a fixed number for operation will be fixed no late than Nov 2018
-                // FIXME: there shouldn't be a magic number 30, why not 32 or 32768?
-                if (ct instanceof ERC875ContractTransaction && ((ERC875ContractTransaction)ct).operation > 0 && ((ERC875ContractTransaction)ct).operation < 30)
-                {
-                    refreshCache = true;
-                    break;
-                }
-            }
-        }
     }
 
     /**
@@ -313,7 +295,7 @@ public class TransactionsViewModel extends BaseViewModel
                 .filter(token -> !token.isEthereum())
                 .filter(token -> !token.isTerminated())
                 .map(this::addTokenToChecklist)
-                .map(token -> fetchTransactionsInteract.fetch(new Wallet(token.tokenInfo.address), token)) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                .map(token -> fetchTransactionsInteract.fetch(new Wallet(token.tokenInfo.address), token, tokensService.getLastBlock(token))) //single that fetches all the tx's from etherscan for each token from fetchSequential
                 .map(tokenTransactions -> setupTokensInteract.processTokenTransactions(defaultWallet().getValue(), tokenTransactions.blockingLast(), tokensService)) //process these into a map
                 .map(transactions -> fetchTransactionsInteract.storeTransactionsObservable(network.getValue(), wallet.getValue(), transactions.blockingLast()))
                 .map(transactions -> removeFromMapTx(transactions.blockingLast()))

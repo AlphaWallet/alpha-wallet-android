@@ -11,6 +11,7 @@ public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
+    private Map<String, Long> updateMap = new ConcurrentHashMap<>();
 
     public TokensService() {
 
@@ -73,6 +74,22 @@ public class TokensService
         for (Token t : tokens)
         {
             tokenMap.put(t.getAddress(), t);
+        }
+    }
+
+    public void tokenContractUpdated(Token token, long blockNumber)
+    {
+        updateMap.put(token.getAddress(), blockNumber);
+    }
+    public long getLastBlock(Token token)
+    {
+        if (updateMap.get(token.getAddress()) != null)
+        {
+            return updateMap.get(token.getAddress());
+        }
+        else
+        {
+            return 0;
         }
     }
 }

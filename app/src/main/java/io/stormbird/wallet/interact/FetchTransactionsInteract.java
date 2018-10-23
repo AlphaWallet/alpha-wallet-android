@@ -36,9 +36,9 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<TokenTransaction[]> fetch(Wallet wallet, Token t) {
+    public Observable<TokenTransaction[]> fetch(Wallet wallet, Token t, long lastBlock) {
         return transactionRepository
-                .fetchTokenTransaction(wallet, t)
+                .fetchTokenTransaction(wallet, t, lastBlock)
                 .subscribeOn(Schedulers.io());
     }
 

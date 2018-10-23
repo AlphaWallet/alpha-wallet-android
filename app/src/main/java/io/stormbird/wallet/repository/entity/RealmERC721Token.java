@@ -1,7 +1,13 @@
 package io.stormbird.wallet.repository.entity;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
+import io.stormbird.wallet.entity.opensea.Asset;
 
 /**
  * Created by James on 22/10/2018.
@@ -15,7 +21,8 @@ public class RealmERC721Token extends RealmObject
     private String symbol;
     private long addedTime;
     private long updatedTime;
-    private long balanceLength;
+    private String tokenIdList;
+    private String schemaName;
 
     public String getSymbol() {
         return symbol;
@@ -57,11 +64,34 @@ public class RealmERC721Token extends RealmObject
         this.updatedTime = updatedTime;
     }
 
-    public long getBalance() {
-        return balanceLength;
+    public List<String> getTokenIdList()
+    {
+        String[] list = tokenIdList.split(",");
+        List<String> tokens = new ArrayList<>();
+        Collections.addAll(tokens, list);
+        return tokens;
     }
 
-    public void setBalanceLength(long balance) {
-        this.balanceLength = balance;
+    public void setTokenIdList(List<Asset> balance) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Asset asset : balance)
+        {
+            if (!first) sb.append(",");
+            sb.append(asset.getTokenId());
+            first = false;
+        }
+
+        this.tokenIdList = sb.toString();
+    }
+
+    public String getSchemaName()
+    {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName)
+    {
+        this.schemaName = schemaName;
     }
 }

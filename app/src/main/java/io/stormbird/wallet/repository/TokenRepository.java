@@ -171,6 +171,7 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
                 .compose(attachEthereumStored(network, wallet)) //add cached eth balance
+                .compose(attachERC721Tokens(wallet))
                 .toObservable();
     }
 
@@ -221,6 +222,11 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    private Single<Token[]> fetchERC721Tokens(Wallet wallet)
+    {
+        return localSource.fetchERC721Tokens(wallet);
+    }
+
     private Observable<List<Token>> fetchStoredEnabledTokensList(NetworkInfo network, Wallet wallet) {
         return localSource
                 .fetchEnabledTokensSequentialList(network, wallet);
@@ -232,6 +238,19 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
                 .toObservable();
+    }
+
+    private SingleTransformer<Token[], Token[]> attachERC721Tokens(Wallet wallet)
+    {
+        return upstream -> Single.zip(
+                upstream, fetchERC721Tokens(wallet),
+                (tokens, ERC721Tokens) ->
+                {
+                    List<Token> result = new ArrayList<>();
+                    result.addAll(Arrays.asList(ERC721Tokens));
+                    result.addAll(Arrays.asList(tokens));
+                    return result.toArray(new Token[result.size()]);
+                });
     }
 
     private SingleTransformer<Token[], Token[]> attachEthereumStored(NetworkInfo network, Wallet wallet)

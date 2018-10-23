@@ -32,6 +32,14 @@ public class AssetContract implements Parcelable {
         schemaName = in.readString();
     }
 
+    public AssetContract(String address, String name, String symbol, String schemaName)
+    {
+        this.address = address;
+        this.name = name;
+        this.symbol = symbol;
+        this.schemaName = schemaName;
+    }
+
     public static final Creator<AssetContract> CREATOR = new Creator<AssetContract>() {
         @Override
         public AssetContract createFromParcel(Parcel in) {

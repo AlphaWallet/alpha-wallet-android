@@ -64,10 +64,10 @@ public class OpenseaService {
 
     public Single<Token[]> getTokens(String address) {
         return queryBalance(address)
-                .map(this::gotOpenseaTokens);
+                .map(json -> gotOpenseaTokens(json, address));
     }
 
-    private Token[] gotOpenseaTokens(JSONObject object)
+    private Token[] gotOpenseaTokens(JSONObject object, String address)
     {
         Map<String, Token> foundTokens = new HashMap<>();
 
@@ -97,6 +97,7 @@ public class OpenseaService {
                             case "ERC721":
                                 TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
                                 token = new ERC721Token(tInfo, null, System.currentTimeMillis());
+                                token.setTokenWallet(address);
                                 foundTokens.put(asset.getAssetContract().getAddress(), token);
                                 break;
                             default:

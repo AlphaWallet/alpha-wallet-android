@@ -34,6 +34,8 @@ public class Token implements Parcelable
     public boolean balanceIsLive = false;
     public boolean isERC20 = false; //TODO: when we see ERC20 functions in transaction decoder switch this on
     private boolean isEth = false;
+    private String tokenWallet;
+    private short tokenNetwork;
 
     public TokenTicker ticker;
 
@@ -324,5 +326,25 @@ public class Token implements Parcelable
     public boolean isBad()
     {
         return tokenInfo.name == null || tokenInfo.name.length() < 2;
+    }
+
+    public boolean checkTokenWallet(String address)
+    {
+        return tokenWallet.equals(address);
+    }
+
+    public boolean checkTokenNetwork(int currentNetwork)// setTokenWallet(String tokenWallet)
+    {
+        return tokenNetwork == currentNetwork;
+    }
+
+    public void setTokenWallet(String address)
+    {
+        this.tokenWallet = address;
+    }
+
+    public void setTokenNetwork(int tokenNetwork)
+    {
+        this.tokenNetwork = (short)tokenNetwork;
     }
 }

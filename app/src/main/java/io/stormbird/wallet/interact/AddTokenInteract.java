@@ -60,9 +60,8 @@ public class AddTokenInteract {
 //                        .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Integer> addERC721(Wallet wallet, Token[] tokens)
+    public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
     {
-        return tokenRepository.addERC721(wallet, tokens)
-                .toObservable();
+        return tokenRepository.addERC721(wallet, tokens);
     }
 }

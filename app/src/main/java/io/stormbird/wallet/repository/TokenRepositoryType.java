@@ -47,5 +47,5 @@ public interface TokenRepositoryType {
 
     void terminateToken(Token token, Wallet wallet, NetworkInfo network);
 
-    Single<Integer> addERC721(Wallet wallet, Token[] tokens);
+    Single<Token[]> addERC721(Wallet wallet, Token[] tokens);
 }

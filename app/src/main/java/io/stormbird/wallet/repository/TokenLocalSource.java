@@ -33,5 +33,5 @@ public interface TokenLocalSource {
 
     void setTokenTerminated(NetworkInfo network, Wallet wallet, Token token);
 
-    Single<Integer> saveERC721Tokens(NetworkInfo defaultNetwork, Wallet wallet, Token[] tokens);
+    Single<Token[]> saveERC721Tokens(NetworkInfo defaultNetwork, Wallet wallet, Token[] tokens);
 }

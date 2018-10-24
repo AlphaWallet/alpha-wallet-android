@@ -34,6 +34,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.lang.reflect.Method;
 
 import javax.inject.Inject;
 
@@ -143,6 +144,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel.loadExternalXMLContracts();
         downloadReceiver = new DownloadReceiver(this, this);
+
+        if (getIntent() != null && getIntent().getStringExtra("url") != null) {
+            String url = getIntent().getStringExtra("url");
+
+            if (dappBrowserFragment == null) {
+                dappBrowserFragment = new DappBrowserFragment();
+            }
+            Bundle bundle = new Bundle();
+            bundle.putString("url", url);
+            dappBrowserFragment.setArguments(bundle);
+            showPage(DAPP_BROWSER);
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -245,6 +258,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 dappBrowserFragment.removeBookmark();
                 invalidateOptionsMenu();
                 return true;
+            }
+            case R.id.action_reload: {
+                dappBrowserFragment.reloadPage();
+                return true;
+            }
+            case R.id.action_share: {
+                dappBrowserFragment.share();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -480,7 +500,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
         {
             //check permission is granted
@@ -561,5 +580,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
+        if (menu != null) {
+            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
+                try {
+                    Method m = menu.getClass().getDeclaredMethod(
+                            "setOptionalIconsVisible", Boolean.TYPE);
+                    m.setAccessible(true);
+                    m.invoke(menu, true);
+                } catch (Exception e) {
+                    Log.e(getClass().getSimpleName(), "onMenuOpened...unable to set icons for overflow menu", e);
+                }
+            }
+        }
+        return super.onPrepareOptionsPanel(view, menu);
     }
 }

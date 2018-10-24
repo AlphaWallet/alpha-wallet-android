@@ -29,6 +29,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.AssetDisplayActivity;
 
 /**
@@ -48,6 +49,7 @@ public class AssetDisplayViewModel extends BaseViewModel
     private final SellTicketRouter sellTicketRouter;
     private final MyAddressRouter myAddressRouter;
     private final AssetDefinitionService assetDefinitionService;
+    private final OpenseaService openseaService;
     
     private final HomeRouter homeRouter;
     private Token refreshToken;
@@ -70,7 +72,8 @@ public class AssetDisplayViewModel extends BaseViewModel
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter,
             MyAddressRouter myAddressRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            OpenseaService openseaService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.myTokensRouter = myTokensRouter;
@@ -81,6 +84,7 @@ public class AssetDisplayViewModel extends BaseViewModel
         this.homeRouter = homeRouter;
         this.myAddressRouter = myAddressRouter;
         this.assetDefinitionService = assetDefinitionService;
+        this.openseaService = openseaService;
     }
 
     @Override
@@ -98,21 +102,29 @@ public class AssetDisplayViewModel extends BaseViewModel
         return ticket;
     }
 
-    public void selectAssetIdsToRedeem(Context context, Ticket token) {
+    public void selectAssetIdsToRedeem(Context context, Token token) {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
         redeemAssetSelectRouter.open(context, token);
     }
 
-    public void fetchCurrentTicketBalance() {
+    public OpenseaService getOpenseaService()
+    {
+        return openseaService;
+    }
+
+    private void fetchCurrentTicketBalance() {
         if (getBalanceDisposable != null) getBalanceDisposable.dispose();
-        getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .fetchSingle(defaultWallet.getValue(), ticket().getValue())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onToken, this::onError, this::finishTokenFetch)).subscribe();
+        if (ticket().getValue() != null && !ticket().getValue().independentUpdate())
+        {
+            getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> fetchTokensInteract
+                            .fetchSingle(defaultWallet.getValue(), ticket().getValue())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::onToken, this::onError, this::finishTokenFetch)).subscribe();
+        }
     }
 
     private void finishTokenFetch()
@@ -145,7 +157,7 @@ public class AssetDisplayViewModel extends BaseViewModel
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void showTransferToken(Context context, Ticket ticket) {
+    public void showTransferToken(Context context, Token ticket) {
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
@@ -157,8 +169,8 @@ public class AssetDisplayViewModel extends BaseViewModel
         myAddressRouter.open(ctx, address);
     }
 
-    public void sellTicketRouter(Context ctx, Ticket ticket) {
-        sellTicketRouter.open(ctx, ticket);
+    public void sellTicketRouter(Context ctx, Token token) {
+        sellTicketRouter.open(ctx, token);
     }
 
     public void showTransferToken(Context context, Ticket ticket, TicketRange range) {

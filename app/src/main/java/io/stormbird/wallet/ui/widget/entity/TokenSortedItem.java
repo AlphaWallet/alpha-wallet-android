@@ -28,12 +28,14 @@ public class TokenSortedItem extends SortedItem<Token> {
             else if (oldToken.ticker == null && newToken.ticker != null) return false;
 
             //Had a redeem
-            if (oldToken instanceof Ticket)
+            if (oldToken instanceof Ticket && newToken instanceof Ticket)
             {
                 Ticket oTick = (Ticket) oldToken;
                 Ticket nTick = (Ticket) newToken;
-                if (!oTick.getBurnList().equals(nTick.getBurnList())) return false;
-                else return oTick.isMatchedInXML() == nTick.isMatchedInXML();
+                if (oTick.getBurnList() == null && nTick.getBurnList() != null) return false;
+                if (oTick.getBurnList() != null && nTick.getBurnList() == null) return false;
+
+                return (oTick.getBurnList().equals(nTick.getBurnList())) && oTick.isMatchedInXML() == nTick.isMatchedInXML();
             }
 
             //TODO: balance value gone stale

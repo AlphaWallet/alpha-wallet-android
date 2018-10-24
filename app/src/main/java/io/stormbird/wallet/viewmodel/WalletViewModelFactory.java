@@ -16,6 +16,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.service.TokensService;
 
 public class WalletViewModelFactory implements ViewModelProvider.Factory {
@@ -30,6 +31,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final OpenseaService openseaService;
     private final TokensService tokensService;
 
     public WalletViewModelFactory(/*FindDefaultNetworkInteract findDefaultNetworkInteract,*/
@@ -44,7 +46,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   AddTokenInteract addTokenInteract,
                                   SetupTokensInteract setupTokensInteract,
                                   AssetDefinitionService assetDefinitionService,
-                                  TokensService tokensService) {
+                                  TokensService tokensService,
+                                  OpenseaService openseaService) {
         //this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -57,8 +60,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.openseaService = openseaService;
         this.tokensService = tokensService;
-
     }
 
     @NonNull
@@ -77,6 +80,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 addTokenInteract,
                 setupTokensInteract,
                 assetDefinitionService,
-                tokensService);
+                tokensService,
+                openseaService);
     }
 }

@@ -14,6 +14,7 @@ import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.viewmodel.AssetDisplayViewModelFactory;
 
 import dagger.Module;
@@ -37,9 +38,10 @@ public class AssetDisplayModule {
             SellTicketRouter sellTicketRouter,
             HomeRouter homeRouter,
             MyAddressRouter myAddressRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            OpenseaService openseaService) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
     }
 
     @Provides

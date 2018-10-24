@@ -199,7 +199,7 @@
     <string name="settings_logout">Log Out</string>
     <string name="title_redeem_token">Redeem Asset</string>
     <string name="title_redeem">Redeem Ticket</string>
-    <string name="title_show_tickets">Ticket Operations</string>
+    <string name="title_show_tickets">Token Inventory</string>
     <string name="quantity_to_redeem">Quantity to Redeem</string>
     <string name="waiting_for_blockchain">Waiting for blockchain …</string>
     <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
@@ -488,5 +488,16 @@
     <string name="action_add_bookmark">Add Bookmark</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="visit">Visit</string>
+    <string name="erc721">ERC721</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_incomplete_data">Incomplete Data</string>
+    <string name="status_pending_with_qty">%1$s Pending</string>
+    <string name="status_incomplete_data_with_qty">%1$s Incomplete Data</string>
+    <string name="token_details">Token Details</string>
+    <string name="label_cattributes">Cattributes</string>
+    <string name="label_attributes">Attributes</string>
+    <string name="open_on_external_link">Open on %1$s</string>
+    <string name="action_reload">Reload</string>
+    <string name="free_import_with_gas">Free Import (with gas fee)</string>
     <string name="confirm_dapp_transaction">Confirm DApp transaction"</string>
 </resources>

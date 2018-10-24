@@ -2,6 +2,8 @@ package io.stormbird.wallet.entity;
 
 import android.text.TextUtils;
 
+import io.stormbird.wallet.entity.opensea.Asset;
+import io.stormbird.wallet.repository.entity.RealmERC721Token;
 import io.stormbird.wallet.repository.entity.RealmToken;
 
 import java.math.BigDecimal;
@@ -105,5 +107,11 @@ public class TokenFactory
     {
         return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
                 realmItem.getDecimals(), true, realmItem.isStormbird());
+    }
+
+    public Token createERC721Token(RealmERC721Token realmItem, List<Asset> assets, long updateTime)
+    {
+        TokenInfo tf = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(), 0, true);
+        return new ERC721Token(tf, assets, updateTime);
     }
 }

@@ -9,17 +9,61 @@
     android:background="@drawable/background_marketplace_event"
     android:clickable="true"
     android:orientation="vertical"
-    android:padding="15dp">
+    android:paddingBottom="20dp"
+    android:paddingLeft="23dp"
+    android:paddingRight="23dp"
+    android:paddingTop="20dp">
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/big_margin"
         android:contentDescription="@string/empty"
         android:src="@mipmap/token_logo"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/layout_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/status_pending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="7dp"
+            android:background="@drawable/background_status_pending"
+            android:fontFamily="@font/font_bold"
+            android:paddingBottom="4dp"
+            android:paddingLeft="13dp"
+            android:paddingRight="13dp"
+            android:paddingTop="4dp"
+            android:text="@string/status_pending"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="9sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/status_incomplete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_status_incomplete"
+            android:fontFamily="@font/font_bold"
+            android:paddingBottom="4dp"
+            android:paddingLeft="13dp"
+            android:paddingRight="13dp"
+            android:paddingTop="4dp"
+            android:text="@string/status_incomplete_data"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="9sp"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,8 +75,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
-            android:textColor="@color/text_black"
             android:fontFamily="@font/font_light"
+            android:textColor="@color/text_black"
             android:textSize="21sp"
             tools:text="8888888" />
 
@@ -41,8 +85,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
-            android:textColor="@color/text_black"
             android:fontFamily="@font/font_light"
+            android:textColor="@color/text_black"
             android:textSize="21sp"
             android:visibility="gone"
             tools:text="" />
@@ -52,15 +96,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_light"
-            android:textColor="@color/text_black"
             android:text="@string/ethereum"
+            android:textColor="@color/text_black"
             android:textSize="21sp" />
-
-        <!--<TextView-->
-            <!--android:id="@+id/balance_currency"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--tools:text="$8888888" />-->
 
     </LinearLayout>
 
@@ -68,7 +106,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -100,6 +138,7 @@
             android:id="@+id/issuer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
             android:fontFamily="@font/font_semibold"
             android:text="@string/ethereum"
             android:textColor="@color/colorPrimaryDark"
@@ -112,9 +151,9 @@
             android:layout_marginBottom="2dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:visibility="gone"
             android:layout_marginTop="2dp"
-            android:background="@color/colorPrimaryDark" />
+            android:background="@color/colorPrimaryDark"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/contract_type"
@@ -123,21 +162,18 @@
             android:fontFamily="@font/font_semibold"
             android:text="@string/erc20"
             android:textColor="@color/colorPrimaryDark"
-            android:visibility="gone"
-            android:textSize="11sp" />
+            android:textSize="11sp"
+            android:visibility="gone" />
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/super_light_grey" />
-
     <LinearLayout
+        android:id="@+id/layout_value_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginTop="20dp"
+        android:background="@drawable/background_top_border"
+        android:orientation="horizontal"
+        android:paddingTop="20dp">
 
         <LinearLayout
             android:id="@+id/layout_24_hrs"
@@ -158,13 +194,13 @@
             <TextView
                 android:id="@+id/text_24_hrs_sub"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_regular"
-                android:textColor="@color/light_gray"
+                android:text="@string/twenty_four_hours"
                 android:textAllCaps="true"
-                android:textSize="11sp"
-                android:layout_height="wrap_content"
-                android:text="@string/twenty_four_hours" />
+                android:textColor="@color/light_gray"
+                android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -186,13 +222,13 @@
             <TextView
                 android:id="@+id/text_appreciation_sub"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_regular"
-                android:textColor="@color/light_gray"
+                android:text="@string/appreciation"
                 android:textAllCaps="true"
-                android:textSize="11sp"
-                android:layout_height="wrap_content"
-                android:text="@string/appreciation" />
+                android:textColor="@color/light_gray"
+                android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -213,13 +249,13 @@
 
             <TextView
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_regular"
-                android:textColor="@color/light_gray"
+                android:text="@string/usd_value"
                 android:textAllCaps="true"
-                android:textSize="11sp"
-                android:layout_height="wrap_content"
-                android:text="@string/usd_value" />
+                android:textColor="@color/light_gray"
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

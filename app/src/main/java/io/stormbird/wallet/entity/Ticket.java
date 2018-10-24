@@ -170,9 +170,12 @@ public class Ticket extends Token implements Parcelable
     public int getTicketCount()
     {
         int count = 0;
-        for (BigInteger id : balanceArray)
+        if (balanceArray != null)
         {
-            if (id.compareTo(BigInteger.ZERO) != 0) count++;
+            for (BigInteger id : balanceArray)
+            {
+                if (id.compareTo(BigInteger.ZERO) != 0) count++;
+            }
         }
         return count;
     }
@@ -198,7 +201,6 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
     {
-        tokenHolder.fillIcon(null, R.mipmap.ic_alpha);
         tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
@@ -209,10 +211,11 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         tokenHolder.contractType.setText(R.string.erc875);
 
-        tokenHolder.text24HoursSub.setText(R.string.burned);
-        tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
-        tokenHolder.textAppreciationSub.setText(R.string.marketplace);
+        //tokenHolder.text24HoursSub.setText(R.string.burned);
+        //tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
+        //tokenHolder.textAppreciationSub.setText(R.string.marketplace);
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
+        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
 
     public String populateRange(TicketRange range)
@@ -392,6 +395,7 @@ public class Ticket extends Token implements Parcelable
     {
         //read given indicies and convert into internal format, error checking to ensure
         List<Integer> idList = new ArrayList<>();
+        List<BigInteger> inventoryCopy = new ArrayList<BigInteger>(balanceArray);
 
         try
         {
@@ -404,9 +408,10 @@ public class Ticket extends Token implements Parcelable
 
                 if (thisId.compareTo(BigInteger.ZERO) != 0)
                 {
-                    int index = balanceArray.indexOf(thisId);
+                    int index = inventoryCopy.indexOf(thisId);
                     if (index > -1)
                     {
+                        inventoryCopy.set(index, BigInteger.ZERO);
                         if (!idList.contains(index))
                         {   //just make sure they didn't already add this one
                             idList.add(index);

@@ -2,6 +2,7 @@ package io.stormbird.wallet.repository;
 
 import org.web3j.protocol.core.methods.response.Transaction;
 
+import io.reactivex.SingleSource;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SubscribeWrapper;
 import io.stormbird.wallet.entity.Ticker;
@@ -24,13 +25,14 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchActive(String walletAddress);
     Observable<Token[]> fetchActiveCache(String walletAddress);
     Observable<Token[]> fetchActiveStored(String walletAddress);
-    Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
+    Observable<Token[]> fetchActiveStoredPlusEth(NetworkInfo network, String walletAddress);
     Observable<Token> fetchActiveStoredSequential(String walletAddress);
     Observable<Token> fetchActiveStoredSequentialNoEth(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
     Observable<Token> fetchCachedSingleToken(String walletAddress, String tokenAddress);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
     Observable<Token> fetchActiveDefaultTokenBalance(Token token);
+    Observable<Token> fetchActiveTokenBalance(Token token, NetworkInfo network, Wallet wallet);
     Observable<Token[]> fetchAll(String walletAddress);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address);
@@ -44,4 +46,6 @@ public interface TokenRepositoryType {
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
 
     void terminateToken(Token token, Wallet wallet, NetworkInfo network);
+
+    Single<Token[]> addERC721(Wallet wallet, Token[] tokens);
 }

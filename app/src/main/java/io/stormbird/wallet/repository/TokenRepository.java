@@ -167,11 +167,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress) {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
+    public Observable<Token[]> fetchActiveStoredPlusEth(NetworkInfo network, String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
                 .compose(attachEthereumStored(network, wallet)) //add cached eth balance
+                .compose(attachERC721Tokens(wallet))
                 .toObservable();
     }
 
@@ -222,6 +222,11 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    private Single<Token[]> fetchERC721Tokens(Wallet wallet)
+    {
+        return localSource.fetchERC721Tokens(wallet);
+    }
+
     private Observable<List<Token>> fetchStoredEnabledTokensList(NetworkInfo network, Wallet wallet) {
         return localSource
                 .fetchEnabledTokensSequentialList(network, wallet);
@@ -233,6 +238,19 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(network, wallet) // fetch tokens from cache
                 .toObservable();
+    }
+
+    private SingleTransformer<Token[], Token[]> attachERC721Tokens(Wallet wallet)
+    {
+        return upstream -> Single.zip(
+                upstream, fetchERC721Tokens(wallet),
+                (tokens, ERC721Tokens) ->
+                {
+                    List<Token> result = new ArrayList<>();
+                    result.addAll(Arrays.asList(ERC721Tokens));
+                    result.addAll(Arrays.asList(tokens));
+                    return result.toArray(new Token[result.size()]);
+                });
     }
 
     private SingleTransformer<Token[], Token[]> attachEthereumStored(NetworkInfo network, Wallet wallet)
@@ -268,6 +286,8 @@ public class TokenRepository implements TokenRepositoryType {
                 TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
                 BigDecimal balance = BigDecimal.ZERO;
                 eth = new Token(info, balance, System.currentTimeMillis());
+                eth.setTokenNetwork(network.chainId);
+                eth.setTokenWallet(wallet.address);
             }
             eth.setIsEthereum();
             return eth;
@@ -317,6 +337,14 @@ public class TokenRepository implements TokenRepositoryType {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         return walletRepository.getDefaultWallet()
                 .flatMap(wallet -> updateBalance(network, wallet, token))
+                .observeOn(Schedulers.newThread())
+                .toObservable();
+    }
+
+    @Override
+    public Observable<Token> fetchActiveTokenBalance(Token token, NetworkInfo network, Wallet wallet)
+    {
+        return updateBalance(network, wallet, token)
                 .observeOn(Schedulers.newThread())
                 .toObservable();
     }
@@ -396,6 +424,15 @@ public class TokenRepository implements TokenRepositoryType {
                     ethereumNetworkRepository.getDefaultNetwork(),
                     wallet,
                     newToken);
+    }
+
+    @Override
+    public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
+    {
+        return localSource.saveERC721Tokens(
+                ethereumNetworkRepository.getDefaultNetwork(),
+                wallet,
+                tokens);
     }
 
     @Override
@@ -551,11 +588,13 @@ public class TokenRepository implements TokenRepositoryType {
 
                 Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
+                updated.setTokenWallet(wallet.address);
+                updated.setTokenNetwork(network.chainId);
                 return updated;
             }
             catch (BadContract e)
             {
-                //this doesn't mean the token is dead. Just try again
+                //this doesn't mean the token is dead. Just try again, but set the balance to zero for now
                 //did we previously have a balance?
                 return token;
 //                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
@@ -671,6 +710,8 @@ public class TokenRepository implements TokenRepositoryType {
                     TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
                     Token eth = new Token(info, balance, System.currentTimeMillis());
                     eth.setIsEthereum();
+                    eth.setTokenNetwork(network.chainId);
+                    eth.setTokenWallet(wallet.address);
                     //store token and balance
                     localSource.updateTokenBalance(network, wallet, eth);
                     return eth;
@@ -770,7 +811,7 @@ public class TokenRepository implements TokenRepositoryType {
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            if (indices == null) throw new BadContract();
+            if (indices == null) return result; // return empty array
             for (Bytes32 val : indices)
             {
                 result.add(getCorrectedValue(val, temp));
@@ -1128,10 +1169,7 @@ public class TokenRepository implements TokenRepositoryType {
                             true,
                             isStormbird);
 
-                    if (result.name != null && result.name.length() > 0)
-                    {
-                        tokenList.add(result);
-                    }
+                    tokenList.add(result);
                 }
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }

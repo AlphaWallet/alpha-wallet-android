@@ -9,6 +9,8 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
+    <!--android:layout_marginBottom="?actionBarSize"-->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -22,22 +24,6 @@
             android:layout_alignParentEnd="true"
             tools:visibility="gone" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="?actionBarSize"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:animateLayoutChanges="true">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/listTickets"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="10.0sp" />
-        </RelativeLayout>
-
 
         <LinearLayout
             android:id="@+id/layoutButtons"
@@ -46,6 +32,7 @@
             android:layout_alignParentBottom="true"
             android:layout_gravity="center"
             android:background="@color/button_green"
+            android:visibility="visible"
             android:orientation="horizontal">
 
             <Button
@@ -100,6 +87,24 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
         </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/relative_listview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:layout_above="@id/layoutButtons"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:animateLayoutChanges="true">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/listTickets"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="10.0sp" />
+        </RelativeLayout>
 
     </RelativeLayout>
 

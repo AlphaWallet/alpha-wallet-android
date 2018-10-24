@@ -92,19 +92,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	 * @return
 	 */
 	@Override
-	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
+	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token, long lastBlock) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		if (token.isBad()) //dead Token, early return zero fields
-		{
-			return Observable.fromCallable(() -> new TokenTransaction[0]);
-		}
-		else
-		{
-			return fetchAllFromNetwork(networkInfo, wallet)
+
+		return fetchFromNetwork(networkInfo, wallet, lastBlock+1) //+1 because we already have the transactions in the last block
 					.observeOn(Schedulers.io())
 					.map(txs -> mapToTokenTransactions(txs, token))
 					.toObservable();
-		}
 	}
 
 //	@Override

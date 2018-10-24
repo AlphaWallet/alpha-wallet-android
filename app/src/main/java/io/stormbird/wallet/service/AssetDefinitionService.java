@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.text.format.DateUtils;
 
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -393,10 +394,14 @@ public class AssetDefinitionService
                 if (extension.equals("xml"))
                 {
                     String name = f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
-                    if (Address.isAddress(name))
+                    try
                     {
                         FileInputStream stream = new FileInputStream(f);
                         parseFile(stream);
+                    }
+                    catch (SAXParseException e)
+                    {
+                        e.printStackTrace();
                     }
                 }
             }

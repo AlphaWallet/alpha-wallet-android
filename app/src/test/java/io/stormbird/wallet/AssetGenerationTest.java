@@ -79,34 +79,91 @@ public class AssetGenerationTest
         final int ticketCount = 256;
         long startTime = 1525341600 ;
 
-        String venuePart = String.format("%02x", 255);
-        String localePart = String.format("%02x", 255);
-        String timeStr = String.format("%08x", startTime);
-        String match = String.format("%02x", 0);
-        String country = String.format("%06x", 0);
+        //String venuePart = String.format("%02x", 255);
+        //String localePart = String.format("%02x", 255);
+        //String timeStr = String.format("%08x", startTime);
+        //String match = String.format("%02x", 0);
+        //String country = String.format("%06x", 0);
 
+
+        String city = String.format("%02x", 1);
+        //String spacer = "FFFFFFFFFFFFFFFFFFFF";
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         boolean first = true;
 
-        for (int i = 1; i <= ticketCount; i++)
+        for (int i = 1; i < 8; i++)
         {
             if (!first) sb.append(",");
             first = false;
-            sb.append("\"");
-            //sb.append("\"0x00000000000000000000000000000000");
-            sb.append(localePart);  //2
-            sb.append(venuePart);   //2
-            sb.append(timeStr);     //8
-
-            String seatNumber = String.format("%04x", i);
-            sb.append(country);  //6
-            sb.append(country);  //6
-            sb.append(match);    //2
-            sb.append(match);    //2
-            sb.append(seatNumber);  //4
+            sb.append("\"0x");
+            String category = String.format("%02x", 1);
+            String number = String.format("%04x", 0);
+            sb.append(city);
+            sb.append(city);
+            sb.append(category);
+            sb.append(number);
             sb.append("\"");
         }
+        for (int i = 1; i < 8; i++)
+        {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"0x");
+            String category = String.format("%02x", 2);
+            String number = String.format("%04x", 0);
+            sb.append(city);
+            sb.append(city);
+            sb.append(category);
+            sb.append(number);
+            sb.append("\"");
+        }
+        for (int i = 1; i < 8; i++)
+        {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"0x");
+            String category = String.format("%02x", 3);
+            String number = String.format("%04x", 0);
+            sb.append(city);
+            sb.append(city);
+            sb.append(category);
+            sb.append(number);
+            sb.append("\"");
+        }
+        for (int i = 1; i < 10; i++)
+        {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"0x");
+            String category = String.format("%02x", 4);
+            String number = String.format("%04x", 0);
+            sb.append(city);
+            sb.append(city);
+            sb.append(category);
+            sb.append(number);
+            sb.append("\"");
+        }
+//
+//        for (int i = 1; i <= ticketCount; i++)
+//        {
+//            if (!first) sb.append(",");
+//            first = false;
+//            sb.append("\"0x");
+//            //sb.append("\"0x00000000000000000000000000000000");
+//            //sb.append(localePart);  //2
+//            //sb.append(venuePart);   //2
+//            //sb.append(timeStr);     //8
+//
+//            //String seatNumber = String.format("%04x", i);
+//            //sb.append(country);  //6
+//            //sb.append(country);  //6
+//            //sb.append(match);    //2
+//            //sb.append(match);    //2
+//            String category = String.format("%02", )
+//            sb.append();  //4
+//            sb.append("\"");
+//        }
         sb.append("]");
 
         System.out.println(sb.toString());

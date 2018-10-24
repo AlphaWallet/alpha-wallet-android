@@ -124,4 +124,8 @@ public abstract class C {
     public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
+
+    public enum TokenStatus {
+        DEFAULT, PENDING, INCOMPLETE
+    }
 }

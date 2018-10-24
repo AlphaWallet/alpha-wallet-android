@@ -1,7 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
 
-import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -21,7 +20,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.AddTokenInteract;
@@ -35,6 +33,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.service.TokensService;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
@@ -48,6 +47,8 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> checkTokens = new MutableLiveData<>();
+
+    private final MutableLiveData<String> checkAddr = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -66,6 +67,7 @@ public class WalletViewModel extends BaseViewModel
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final AssetDefinitionService assetDefinitionService;
+    private final OpenseaService openseaService;
     private final TokensService tokensService;
 
     private Token[] tokenCache = null;
@@ -90,7 +92,8 @@ public class WalletViewModel extends BaseViewModel
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService)
+            TokensService tokensService,
+            OpenseaService openseaService)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -103,6 +106,7 @@ public class WalletViewModel extends BaseViewModel
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.openseaService = openseaService;
         this.tokensService = tokensService;
     }
 
@@ -114,6 +118,7 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> endUpdate() { return checkTokens; }
+    public LiveData<String> checkAddr() { return checkAddr; }
 
     @Override
     protected void onCleared() {
@@ -129,9 +134,8 @@ public class WalletViewModel extends BaseViewModel
     }
 
     //we changed wallets or network, ensure we clean up before displaying new data
-    public void abortAndRestart()
+    public void clearProcess()
     {
-        defaultWallet.setValue(null);
         tokensService.clearTokens();
         if (updateTokens != null && !updateTokens.isDisposed())
         {
@@ -141,8 +145,6 @@ public class WalletViewModel extends BaseViewModel
         {
             fetchTokenBalanceDisposable.dispose();
         }
-
-        fetchTokens();
     }
 
     public void reloadTokens()
@@ -158,33 +160,86 @@ public class WalletViewModel extends BaseViewModel
             updateTokens.dispose();
         }
 
-        updateTokens = getWallet()
-                .flatMap(fetchTokensInteract::fetchStoredWithEth)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
+        if (defaultNetwork.getValue() != null && defaultWallet.getValue() != null)
+        {
+            updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultNetwork.getValue(), defaultWallet.getValue())
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokens, this::onError, this::fetchFromOpensea);
+        }
+        else
+        {
+            //called fetch tokens but don't have any wallet yet - view is not prepared
+            prepare();
+        }
     }
 
     private void onTokens(Token[] tokens)
     {
-        tokenCache = tokens;
         tokensService.addTokens(tokens);
+    }
+
+    private void fetchFromOpensea()
+    {
+        List<Token> serviceList = tokensService.getAllLiveTokens();
+        tokenCache = serviceList.toArray(new Token[serviceList.size()]);
+
+        progress.postValue(false);
+        tokens.postValue(tokenCache);
+
+        if (updateTokens != null) updateTokens.dispose();
+
+        if (defaultNetwork.getValue() != null && defaultNetwork.getValue().isMainNetwork)
+        {
+            updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
+                    //.flatMap(accountData -> openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::gotOpenseaTokens, this::onError);
+        }
+        else
+        {
+            onFetchTokensCompletable();
+        }
+    }
+
+    private void gotOpenseaTokens(Token[] tokens)
+    {
+        if (updateTokens != null) updateTokens.dispose();
+
+        for (Token t : tokens)
+        {
+            tokensService.addToken(t);
+        }
+
+        //store these tokens
+        updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokens)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::storedTokens, this::onError);
+
+        List<Token> serviceList = tokensService.getAllLiveTokens();
+        tokenCache = serviceList.toArray(new Token[serviceList.size()]);
+        onFetchTokensCompletable();
+    }
+
+    private void storedTokens(Token[] tokens)
+    {
+        //if (updateTokens != null && !updateTokens.isDisposed()) updateTokens.dispose();
     }
 
     private void onFetchTokensCompletable()
     {
         progress.postValue(false);
         tokens.postValue(tokenCache);
-        //test to see if we should continue to update
-        if (!isVisible && updateTokens != null)
+
+        if (updateTokens != null && !updateTokens.isDisposed())
         {
             updateTokens.dispose();
             updateTokens = null;
         }
-        else if (fetchTokenBalanceDisposable == null || fetchTokenBalanceDisposable.isDisposed())
-        {
-            updateTokenBalances();
-        }
+
+        updateTokenBalances();
 
         // Check contracts that returned a null but we didn't see them destroyed yet.
         // Sometimes the network times out or some other issue.
@@ -205,14 +260,25 @@ public class WalletViewModel extends BaseViewModel
 
     private void updateTokenBalances()
     {
-        fetchTokenBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> Observable.fromCallable(tokensService::getAllTokens)
-                        .flatMapIterable(token -> token)
-                        .filter(token -> (token.tokenInfo.name != null && !token.isTerminated()))
-                        .map(fetchTokensInteract::updateDefaultBalance)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();
+        if (fetchTokenBalanceDisposable != null && !fetchTokenBalanceDisposable.isDisposed())
+        {
+            fetchTokenBalanceDisposable.dispose();
+        }
+
+        NetworkInfo info = defaultNetwork.getValue();
+        Wallet wallet = defaultWallet.getValue();
+        if (info != null && wallet != null)
+        {
+            fetchTokenBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> Observable.fromCallable(tokensService::getAllTokens)
+                            .flatMapIterable(token -> token)
+                            .filter(token -> (token.tokenInfo.name != null && !token.isTerminated() && !token.independentUpdate()))
+                            .map(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))
+                            //.map(token -> fetchTokensInteract.updateDefaultBalance(token, info, testw))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();
+        }
     }
 
     private void onTokenBalanceUpdate(Token token)
@@ -299,6 +365,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     public void prepare() {
+        clearProcess();
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
@@ -307,25 +374,42 @@ public class WalletViewModel extends BaseViewModel
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
+        tokensService.setCurrentNetwork(networkInfo.chainId);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
     private void onDefaultWallet(Wallet wallet) {
+        tokensService.setCurrentAddress(wallet.address);
         defaultWallet.setValue(wallet);
     }
 
-    public Observable<Wallet> getWallet()
+    public Single<NetworkInfo> getNetwork()
+    {
+        if (defaultNetwork().getValue() != null)
+        {
+            return Single.fromCallable(() -> defaultNetwork().getValue());
+        }
+        else
+        {
+            return findDefaultNetworkInteract.find();
+        }
+    }
+
+    private Single<AccountData> getWallet(NetworkInfo networkInfo)
     {
         if (defaultWallet().getValue() != null)
         {
-            return Observable.fromCallable(() -> defaultWallet().getValue());
+            return Single.fromCallable(() -> {
+                return new AccountData(networkInfo, defaultWallet.getValue());
+            });
         }
         else
-            return findDefaultNetworkInteract.find()
-                    .flatMap(networkInfo -> findDefaultWalletInteract
-                            .find()).toObservable();
+        {
+            return findDefaultWalletInteract.find()
+                    .map(wallet -> new AccountData(networkInfo, wallet) );
+        }
     }
 
     public void setVisibility(boolean visibility) {
@@ -340,9 +424,11 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
+    //This needs to check with the service.
     public void setContractAddresses()
     {
         disposable = fetchAllContractAddresses()
+                .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
                 .flatMap(setupTokensInteract::addToken)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
@@ -369,5 +455,12 @@ public class WalletViewModel extends BaseViewModel
     private void finishedImport(Token token)
     {
         Log.d("WVM", "Added " + token.tokenInfo.name);
+    }
+
+    private class AccountData
+    {
+        AccountData(NetworkInfo network, Wallet wallet) { this.network = network; this.wallet = wallet; }
+        public NetworkInfo network;
+        public Wallet wallet;
     }
 }

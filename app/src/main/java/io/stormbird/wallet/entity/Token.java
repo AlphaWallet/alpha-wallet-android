@@ -34,6 +34,8 @@ public class Token implements Parcelable
     public boolean balanceIsLive = false;
     public boolean isERC20 = false; //TODO: when we see ERC20 functions in transaction decoder switch this on
     private boolean isEth = false;
+    private String tokenWallet;
+    private short tokenNetwork;
 
     public TokenTicker ticker;
 
@@ -58,6 +60,11 @@ public class Token implements Parcelable
     public boolean hasPositiveBalance() {
         if (balance != null) return !balance.equals(BigDecimal.ZERO);
         else return false;
+    }
+
+    public boolean independentUpdate()
+    {
+        return false;
     }
 
     public String getFullBalance() {
@@ -187,37 +194,32 @@ public class Token implements Parcelable
         holder.balanceEth.setText(value);
         holder.issuer.setText(R.string.ethereum);
 
-        if (ticker == null && tokenInfo.symbol.equals(ETH_SYMBOL))
+        if (isEthereum())
         {
             holder.textAppreciationSub.setText(R.string.appreciation);
             holder.icon.setVisibility(View.GONE);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
             holder.contractType.setVisibility(View.GONE);
             holder.contractSeparator.setVisibility(View.GONE);
-        }
-        else if (ticker == null)
-        {
-            holder.balanceCurrency.setText(EMPTY_BALANCE);
-            holder.fillIcon(null, R.mipmap.token_logo);
-            holder.text24Hours.setText(EMPTY_BALANCE);
-            holder.textAppreciation.setText(EMPTY_BALANCE);
-            holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.text24HoursSub.setText(R.string.twenty_four_hours);
-            if (isERC20)
-            {
-                holder.contractType.setVisibility(View.VISIBLE);
-                holder.contractSeparator.setVisibility(View.VISIBLE);
-                holder.contractType.setText(R.string.erc20);
-            }
+            holder.layoutValueDetails.setVisibility(View.VISIBLE);
         }
         else
         {
+            holder.contractType.setVisibility(View.VISIBLE);
+            holder.contractSeparator.setVisibility(View.VISIBLE);
+            holder.contractType.setText(R.string.erc20);
+            holder.layoutValueDetails.setVisibility(View.GONE);
+            //currently we don't collect the value of ERC20 tokens
+            //TODO: get ticker for ERC20 tokens
+        }
+
+        //populate ticker if we have it
+        if (ticker != null)
+        {
+            holder.layoutValueDetails.setVisibility(View.VISIBLE);
             holder.textAppreciationSub.setText(R.string.appreciation);
             holder.fillCurrency(ethBalance, ticker);
-            holder.fillIcon(ticker.image, R.mipmap.token_logo);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
-            holder.contractType.setVisibility(View.GONE);
-            holder.contractSeparator.setVisibility(View.GONE);
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
@@ -324,5 +326,25 @@ public class Token implements Parcelable
     public boolean isBad()
     {
         return tokenInfo.name == null || tokenInfo.name.length() < 2;
+    }
+
+    public boolean checkTokenWallet(String address)
+    {
+        return tokenWallet.equals(address);
+    }
+
+    public boolean checkTokenNetwork(int currentNetwork)// setTokenWallet(String tokenWallet)
+    {
+        return tokenNetwork == currentNetwork;
+    }
+
+    public void setTokenWallet(String address)
+    {
+        this.tokenWallet = address;
+    }
+
+    public void setTokenNetwork(int tokenNetwork)
+    {
+        this.tokenNetwork = (short)tokenNetwork;
     }
 }

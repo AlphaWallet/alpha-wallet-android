@@ -38,10 +38,9 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 17
-        versionName "1.0.11"
+        versionCode 19
+        versionName "1.0.13"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
 
         buildConfigField 'int', 'DB_VERSION', '4'
@@ -117,8 +116,9 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation "com.android.support:appcompat-v7:$project.supportVersion"
     implementation "com.android.support:design:$project.supportVersion"
-    implementation "com.android.support:support-vector-drawable:$project.supportVersion"
+    //implementation "com.android.support:support-vector-drawable:$project.supportVersion"
     implementation "com.android.support:recyclerview-v7:$project.supportVersion"
+    implementation "com.android.support:gridlayout-v7:$project.supportVersion"
     implementation 'com.android.support:multidex:1.0.3'
 
     // Bar code scanning
@@ -147,6 +147,10 @@ dependencies {
 
     // if you are not using support library, include this instead
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
+
+    // Image Loader
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
 
     // Tests
     testImplementation 'junit:junit:4.12'

@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -54,6 +55,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private WalletViewModel viewModel;
 
     private TokensReceiver tokenReceiver;
+    private TextView debugAddr;
 
     private SystemView systemView;
     private ProgressView progressView;
@@ -78,6 +80,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         progressView.setWhiteCircle();
 
         RecyclerView list = view.findViewById(R.id.list);
+        debugAddr = view.findViewById(R.id.debug_addr);
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -95,13 +98,15 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.endUpdate().observe(this, this::checkTokens);
+        viewModel.checkAddr().observe(this, this::updateTitle);
+        //viewModel.refreshTokens().observe(this, this::refreshTokens);
 
         adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
 
-        refreshLayout.setOnRefreshListener(viewModel::reloadTokens);
+        refreshLayout.setOnRefreshListener(this::refreshList);
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
 
@@ -110,6 +115,17 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         isVisible = true;
 
         return view;
+    }
+
+    private void refreshList()
+    {
+        adapter.setClear();
+        viewModel.reloadTokens();
+    }
+
+    private void updateTitle(String s)
+    {
+        debugAddr.setText(s);
     }
 
     private void checkTokens(Boolean dummy)
@@ -296,7 +312,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void resetTokens()
     {
         //first abort the current operation
-        viewModel.abortAndRestart();
+        viewModel.clearProcess();
         adapter.clear();
     }
 

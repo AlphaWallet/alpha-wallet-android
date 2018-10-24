@@ -100,6 +100,12 @@ public class DappBrowserFragment extends Fragment implements
         setupAddressBar();
         viewModel.prepare(getContext());
         URLReceiver = new URLLoadReceiver(getActivity(), this);
+
+        // Load url from a link within the app
+        if (getArguments() != null && getArguments().getString("url") != null) {
+            String url = getArguments().getString("url");
+            loadUrl(url);
+        }
         return view;
     }
 
@@ -346,6 +352,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
+        urlTv.setText(urlText);
         web3.loadUrl(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
@@ -390,5 +397,19 @@ public class DappBrowserFragment extends Fragment implements
     public boolean getUrlIsBookmark()
     {
         return viewModel != null && urlTv != null && viewModel.getBookmarks().contains(urlTv.getText().toString());
+    }
+
+    public void reloadPage() {
+        web3.reload();
+    }
+
+    public void share() {
+        if (web3.getUrl() != null) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, web3.getUrl());
+            intent.setType("text/plain");
+            startActivity(intent);
+        }
     }
 }

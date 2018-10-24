@@ -15,6 +15,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.WalletViewModelFactory;
 
@@ -36,7 +37,8 @@ public class WalletModule {
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            OpenseaService openseaService) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
@@ -49,7 +51,8 @@ public class WalletModule {
                 addTokenInteract,
                 setupTokensInteract,
                 assetDefinitionService,
-                tokensService);
+                tokensService,
+                openseaService);
     }
 
     @Provides

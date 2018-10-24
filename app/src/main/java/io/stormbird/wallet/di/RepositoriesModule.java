@@ -29,6 +29,7 @@ import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.GethKeystoreAccountService;
 import io.stormbird.wallet.service.ImportTokenService;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.service.RealmManager;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
@@ -163,6 +164,12 @@ public class RepositoriesModule {
 												 TransactionRepositoryType transactionRepository,
 												 PasswordStore passwordStore) {
 		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
+	}
+
+	@Singleton
+	@Provides
+	OpenseaService provideOpenseaService(Context ctx) {
+		return new OpenseaService(ctx);
 	}
 
 	@Singleton

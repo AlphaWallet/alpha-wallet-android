@@ -243,23 +243,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void populateTokens(Token[] tokens)
     {
-        items.beginBatchedUpdates();
-        if (!needsRefresh && filterType != FILTER_ALL)
-        {
-            needsRefresh = checkForInvalidTokenPresence();
-        }
-
         if (needsRefresh)
         {
             items.clear();
-            needsRefresh = false;
         }
+        items.beginBatchedUpdates();
 
         items.add(total);
 
         for (Token token : tokens)
         {
-            if (!token.isBad() && (token.isEthereum() || token.hasPositiveBalance()))
+            if (!token.isTerminated() && !token.isBad() && (token.isEthereum() || token.hasPositiveBalance()))
             {
                 Log.d(TAG,"ADDING: " + token.getFullName());
                 checkLiveToken(token);
@@ -288,38 +282,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
-    }
 
-    private boolean checkForInvalidTokenPresence()
-    {
-        boolean needsClean = false;
-        for (int i = 0; i < items.size(); i++)
+        if (needsRefresh)
         {
-            SortedItem item = items.get(i);
-            if (item.viewType == TokenHolder.VIEW_TYPE)
-            {
-                Token token = ((TokenSortedItem) item).value;
-                switch (filterType)
-                {
-                    case FILTER_ASSETS: //assets are ERC875 only
-                        if (token.isEthereum())
-                        {
-                            needsClean = true;
-                        }
-                        break;
-                    case FILTER_CURRENCY: //currency is Eth only
-                        if (!token.isEthereum())
-                        {
-                            needsClean = true;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+            needsRefresh = false;
+            notifyDataSetChanged();
         }
-
-        return needsClean;
     }
 
     private int calculateWeight(Token token)
@@ -404,7 +372,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void clear()
     {
+        items.beginBatchedUpdates();
         items.clear();
+        items.endBatchedUpdates();
         Log.d(TAG, "Cleared");
         notifyDataSetChanged();
         needsRefresh = true;
@@ -416,5 +386,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         {
             ((Ticket)t).checkIsMatchedInXML(assetService);
         }
+    }
+
+    public void setClear()
+    {
+        needsRefresh = true;
     }
 }

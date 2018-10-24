@@ -156,6 +156,10 @@
             android:name="io.stormbird.wallet.ui.zxing.QRScanningActivity"
             android:label="@string/qr_scanner" />
 
+        <activity
+            android:name="io.stormbird.wallet.ui.TokenDetailActivity"
+            android:label="@string/token_details"/>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

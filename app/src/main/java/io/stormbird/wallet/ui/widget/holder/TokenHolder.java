@@ -12,20 +12,19 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import io.stormbird.token.tools.TokenDefinition;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenTicker;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
@@ -43,7 +42,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView text24HoursSub;
     public final TextView textAppreciationSub;
     public final TextView contractType;
+    public final LinearLayout layoutStatus;
+    public final TextView textPending;
+    public final TextView textIncomplete;
     public final View contractSeparator;
+    public final LinearLayout layoutValueDetails;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
 
     public Token token;
@@ -65,6 +68,10 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         textAppreciationSub = findViewById(R.id.text_appreciation_sub);
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
+        layoutValueDetails = findViewById(R.id.layout_value_details);
+        layoutStatus = findViewById(R.id.layout_status);
+        textPending = findViewById(R.id.status_pending);
+        textIncomplete = findViewById(R.id.status_incomplete);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
     }
@@ -91,6 +98,30 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         } catch (Exception ex) {
             fillEmpty();
         }
+    }
+
+    private void setPending(int qty) {
+        layoutStatus.setVisibility(View.VISIBLE);
+        textPending.setVisibility(View.VISIBLE);
+        if (qty > 0) {
+            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
+        } else {
+            textPending.setVisibility(View.GONE);
+        }
+    }
+
+    private void setIncompleteData(int qty) {
+        layoutStatus.setVisibility(View.VISIBLE);
+        textIncomplete.setVisibility(View.VISIBLE);
+        if (qty > 0) {
+            textIncomplete.setText(getContext().getString(R.string.status_incomplete_data_with_qty, String.valueOf(qty)));
+        } else {
+            textIncomplete.setVisibility(View.GONE);
+        }
+    }
+
+    private void hideStatusBlocks() {
+        layoutStatus.setVisibility(View.GONE);
     }
 
     public void fillIcon(String imageUrl, int defaultResId) {
@@ -150,7 +181,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         int valColor;
         if (appreciation.compareTo(BigDecimal.ZERO) >= 0)
         {
-            valColor = ContextCompat.getColor(getContext(), R.color.black);
+            valColor = ContextCompat.getColor(getContext(), R.color.light_gray);
             textAppreciationSub.setText(R.string.appreciation);
             textAppreciationSub.setTextColor(valColor);
         }

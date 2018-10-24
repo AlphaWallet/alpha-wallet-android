@@ -36,6 +36,13 @@
         android:layout_alignParentEnd="true"
         tools:visibility="gone" />
 
+    <TextView
+        android:id="@+id/debug_addr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        />
+
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"

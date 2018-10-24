@@ -41,7 +41,6 @@ android {
         versionCode 19
         versionName "1.0.13"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
 
         buildConfigField 'int', 'DB_VERSION', '4'

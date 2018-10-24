@@ -33,6 +33,7 @@ public class ERC721Token extends Token implements Parcelable
         {
             tokenBalance = new ArrayList<>();
         }
+        setTokenNetwork(1); //current only have ERC721 on mainnet
     }
 
     private ERC721Token(Parcel in) {

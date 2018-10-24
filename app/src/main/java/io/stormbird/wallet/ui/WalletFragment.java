@@ -312,7 +312,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void resetTokens()
     {
         //first abort the current operation
-        viewModel.abortAndRestart();
+        viewModel.clearProcess();
         adapter.clear();
     }
 

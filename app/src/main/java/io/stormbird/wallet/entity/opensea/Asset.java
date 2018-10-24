@@ -54,6 +54,12 @@ public class Asset implements Parcelable {
         traits = in.createTypedArrayList(Trait.CREATOR);
     }
 
+    public Asset(String tokenId, AssetContract contract)
+    {
+        this.tokenId = tokenId;
+        this.assetContract = contract;
+    }
+
     public static final Creator<Asset> CREATOR = new Creator<Asset>() {
         @Override
         public Asset createFromParcel(Parcel in) {

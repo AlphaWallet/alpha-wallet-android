@@ -22,6 +22,12 @@ public class Trait implements Parcelable {
         value = in.readString();
     }
 
+    public Trait(String type, String val)
+    {
+        traitType = type;
+        value = val;
+    }
+
     public static final Creator<Trait> CREATOR = new Creator<Trait>() {
         @Override
         public Trait createFromParcel(Parcel in) {

@@ -59,4 +59,9 @@ public class AddTokenInteract {
 //                        .subscribeOn(Schedulers.io())
 //                        .observeOn(AndroidSchedulers.mainThread());
     }
+
+    public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
+    {
+        return tokenRepository.addERC721(wallet, tokens);
+    }
 }

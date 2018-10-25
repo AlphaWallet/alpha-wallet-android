@@ -1,6 +1,6 @@
 # AlphaWallet - Your gateway to blockchain technology
 
-[![Build Status](https://travis-ci.com/alpha-wallet/alpha-wallet.svg?branch=master)](https://travis-ci.com/alpha-wallet/alpha-wallet.svg?branch=master)
+[![Build Status](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master)](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master) 
 [![License](https://img.shields.io/badge/license-GPL3-green.svg?style=flat)](https://github.com/fastlane/fastlane/blob/master/LICENSE)
 
 [<img src=dmz/src/main/resources/static/images/googleplay.png height="88">](https://play.google.com/store/apps/details?id=io.stormbird.wallet&hl=en_US)

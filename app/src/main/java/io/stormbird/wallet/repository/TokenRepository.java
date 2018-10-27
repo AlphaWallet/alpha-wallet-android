@@ -568,7 +568,16 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     Ticket t = (Ticket) token;
                     balanceArray = getBalanceArray(wallet, t.tokenInfo);
-                    burnArray = t.getBurnList();
+                    if (balanceArray.size() == 1 && balanceArray.get(0).equals(BigInteger.valueOf(-1))) //when there's an index out of bounds fail - caused by trying to read ERC20 balance as an array
+                    {
+                        tInfo = changeToERC20Token(token);
+                        balance = BigDecimal.ZERO;
+                        balanceArray = new ArrayList<>();
+                    }
+                    else
+                    {
+                        burnArray = t.getBurnList();
+                    }
                 }
                 else
                 {
@@ -582,12 +591,6 @@ public class TokenRepository implements TokenRepositoryType {
                     }
                 }
 
-                  //This code, together with an account with many tokens on it thrashes the Token view update
-//                if (Math.random() > 0.5)
-//                {
-//                    throw new BadContract();
-//                }
-
                 Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);
@@ -596,12 +599,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (BadContract e)
             {
-                //this doesn't mean the token is dead. Just try again, but set the balance to zero for now
-                //did we previously have a balance?
                 return token;
-//                Token updated = tFactory.createToken(token.tokenInfo, BigDecimal.ZERO, new ArrayList<BigInteger>(), null, System.currentTimeMillis());
-//                localSource.updateTokenDestroyed(network, wallet, updated);
-//                return updated;
             }
             catch (Exception e)
             {
@@ -625,7 +623,15 @@ public class TokenRepository implements TokenRepositoryType {
                     if (token.tokenInfo.isStormbird)
                     {
                         balanceArray = getBalanceArray(wallet, token.tokenInfo);
-                        burnArray = ((Ticket)token).getBurnList();
+                        if (balanceArray.size() == 1 && balanceArray.get(0).equals(BigInteger.valueOf(-1)))
+                        {
+                            tInfo = changeToERC20Token(token);
+                            burnArray = null;
+                        }
+                        else
+                        {
+                            burnArray = ((Ticket) token).getBurnList();
+                        }
                     }
                     else
                     {
@@ -643,6 +649,15 @@ public class TokenRepository implements TokenRepositoryType {
             }
             return token;
         });
+    }
+
+    private TokenInfo changeToERC20Token(Token token)
+    {
+        return new TokenInfo(token.tokenInfo.address,
+                                        token.tokenInfo.name,
+                                        token.tokenInfo.symbol,
+                                        token.tokenInfo.decimals,
+                                        true, false);
     }
 
     private TokenInfo changeToERC875Token(Token token)
@@ -809,15 +824,23 @@ public class TokenRepository implements TokenRepositoryType {
     private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         List<BigInteger> result = new ArrayList<>();
         byte[] temp = new byte[16];
-        if (tokenInfo.isStormbird) //safety check
+        try
         {
-            org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            if (indices == null) return result; // return empty array
-            for (Bytes32 val : indices)
+            if (tokenInfo.isStormbird) //safety check
             {
-                result.add(getCorrectedValue(val, temp));
+                org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
+                List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+                if (indices == null) return result; // return empty array
+                for (Bytes32 val : indices)
+                {
+                    result.add(getCorrectedValue(val, temp));
+                }
             }
+        }
+        catch (StringIndexOutOfBoundsException e)
+        {
+            //This is probably caused by trying to read the ERC875 balance of an ERC20
+            result.add(BigInteger.valueOf(-1));
         }
         return result;
     }

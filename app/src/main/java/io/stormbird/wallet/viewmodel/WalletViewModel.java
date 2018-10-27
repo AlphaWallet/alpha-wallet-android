@@ -273,8 +273,7 @@ public class WalletViewModel extends BaseViewModel
                     .doOnNext(l -> Observable.fromCallable(tokensService::getAllTokens)
                             .flatMapIterable(token -> token)
                             .filter(token -> (token.tokenInfo.name != null && !token.isTerminated() && !token.independentUpdate()))
-                            .map(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))
-                            //.map(token -> fetchTokensInteract.updateDefaultBalance(token, info, testw))
+                            .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();
@@ -365,7 +364,6 @@ public class WalletViewModel extends BaseViewModel
     }
 
     public void prepare() {
-        clearProcess();
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
@@ -424,7 +422,6 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    //This needs to check with the service.
     public void setContractAddresses()
     {
         disposable = fetchAllContractAddresses()

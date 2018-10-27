@@ -418,6 +418,8 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo) {
         TokenFactory tf = new TokenFactory();
         Token newToken = tf.createToken(tokenInfo);
+        newToken.setTokenWallet(wallet.address);
+        newToken.setTokenNetwork(ethereumNetworkRepository.getDefaultNetwork().chainId);
         Log.d(TAG, "Create for store3: " + tokenInfo.name);
 
         return localSource.saveToken(

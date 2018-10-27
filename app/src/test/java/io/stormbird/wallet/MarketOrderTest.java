@@ -125,7 +125,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
+            public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token, long lastBlock) {
                 return null;
             }
 

@@ -81,7 +81,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
+            public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token, long lastBlock) {
                 return null;
             }
 

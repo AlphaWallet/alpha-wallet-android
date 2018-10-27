@@ -21,14 +21,13 @@ apply plugin: 'realm-android'
 
 repositories {
     maven {
-        url 'https://maven.fabric.io/public'
+        url 'https://maven.google.com'
     }
 }
 
-
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
     sourceSets {
         main {
             //assets.srcDirs = ['../lib/contracts']
@@ -37,9 +36,9 @@ android {
     defaultConfig {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
-        targetSdkVersion 27
-        versionCode 19
-        versionName "1.0.13"
+        targetSdkVersion 28
+        versionCode 20
+        versionName "1.0.14"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 
@@ -79,16 +78,16 @@ android {
 }
 
 project.ext {
-    retrofitVersion = "2.3.0"
-    okhttpVersion = "3.9.0"
-    picassoVersion = "2.5.2"
-    supportVersion = "27.1.1"
-    web3jVersion = "3.1.1-android"
-    gethVersion = "1.7.0"
-    gsonVersion = "2.8.2"
-    rxJavaVersion = "2.1.6"
-    rxAndroidVersion = "2.0.2"
-    daggerVersion = "2.15"
+    retrofitVersion = "2.4.0"
+    okhttpVersion = "3.11.0"
+    picassoVersion = "2.71828"
+    supportVersion = "28.0.0"
+    web3jVersion = "3.3.1-android"
+    gethVersion = "1.8.11"
+    gsonVersion = "2.8.5"
+    rxJavaVersion = "2.2.3"
+    rxAndroidVersion = "2.1.0"
+    daggerVersion = "2.18"
 }
 
 dependencies {
@@ -116,17 +115,17 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation "com.android.support:appcompat-v7:$project.supportVersion"
     implementation "com.android.support:design:$project.supportVersion"
-    //implementation "com.android.support:support-vector-drawable:$project.supportVersion"
+    implementation "com.android.support:support-vector-drawable:$project.supportVersion"
     implementation "com.android.support:recyclerview-v7:$project.supportVersion"
     implementation "com.android.support:gridlayout-v7:$project.supportVersion"
-    implementation 'com.android.support:multidex:1.0.3'
+    //implementation 'com.android.support:multidex-instrumentation:1.0.3'
 
     // Bar code scanning
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     implementation 'com.google.zxing:core:3.3.2'
 
     // Sugar
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
     //implementation 'com.journeyapps:zxing-android-embedded:3.5.0@aar'

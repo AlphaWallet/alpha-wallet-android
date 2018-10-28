@@ -293,10 +293,10 @@ public class TransactionsViewModel extends BaseViewModel
                 .filter(token -> !token.isEthereum())
                 .filter(token -> !token.isTerminated())
                 .map(this::addTokenToChecklist)
-                .map(token -> fetchTransactionsInteract.fetch(new Wallet(token.tokenInfo.address), token, tokensService.getLastBlock(token))) //single that fetches all the tx's from etherscan for each token from fetchSequential
-                .map(tokenTransactions -> setupTokensInteract.processTokenTransactions(defaultWallet().getValue(), tokenTransactions.blockingLast(), tokensService)) //process these into a map
-                .map(transactions -> fetchTransactionsInteract.storeTransactionsObservable(network.getValue(), wallet.getValue(), transactions.blockingLast()))
-                .map(transactions -> removeFromMapTx(transactions.blockingLast()))
+                .flatMap(token -> fetchTransactionsInteract.fetch(new Wallet(token.tokenInfo.address), token, tokensService.getLastBlock(token))) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                .flatMap(tokenTransactions -> setupTokensInteract.processTokenTransactions(defaultWallet().getValue(), tokenTransactions, tokensService)) //process these into a map
+                .flatMap(transactions -> fetchTransactionsInteract.storeTransactionsObservable(network.getValue(), wallet.getValue(), transactions))
+                .map(this::removeFromMapTx)
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(this::updateDisplay, this::onError, this::siftUnknownTransactions);
     }

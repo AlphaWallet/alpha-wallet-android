@@ -13,7 +13,7 @@ buildscript {
 	// don't do that. add that repository to app/build.gradle
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "io.realm:realm-gradle-plugin:4.4.0"
 	// WARNING WARNING WARNING
 	// you are about to add here a dependency to be used in the Android app

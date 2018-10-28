@@ -124,20 +124,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         layoutStatus.setVisibility(View.GONE);
     }
 
-    public void fillIcon(String imageUrl, int defaultResId) {
-        if (TextUtils.isEmpty(imageUrl)) {
-            icon.setImageResource(defaultResId);
-        } else {
-            Picasso.with(getContext())
-                    .load(imageUrl)
-                    .fit()
-                    .centerInside()
-                    .placeholder(defaultResId)
-                    .error(defaultResId)
-                    .into(icon);
-        }
-    }
-
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
                 ? EMPTY_BALANCE

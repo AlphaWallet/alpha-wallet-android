@@ -129,7 +129,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
                     nonce,
                     new Address(toAddress),
                     value,
-                    gasLimitBI,
+                    gasLimitBI.getInt64(),
                     gasPriceBI,
                     data);
 

@@ -120,10 +120,10 @@ public class FetchTokensInteract {
                 .subscribeOn(Schedulers.io()).blockingSingle();
     }
 
-    public Token updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)
+    public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)
     {
         return tokenRepository.fetchActiveTokenBalance(token, network, wallet)
-                .subscribeOn(Schedulers.io()).blockingSingle();
+                .subscribeOn(Schedulers.io());
     }
 
     public Observable<OrderContractAddressPair> updateBalancePair(Token token, MagicLinkData order)

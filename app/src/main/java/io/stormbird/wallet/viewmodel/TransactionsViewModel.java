@@ -567,4 +567,9 @@ public class TransactionsViewModel extends BaseViewModel
 
         return restoreRequired;
     }
+
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
 }

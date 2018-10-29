@@ -77,7 +77,7 @@ public class SetupTokensInteract {
      * @param data The transaction input parsed by the TransactionDecoder class
      * @return New transaction that has the interaction information added. This has to be re-created since the Contract data is final.
      */
-    private Transaction parseTransaction(Token token, Transaction thisTrans, TransactionInput data, TokensService tokensService)
+    /*private Transaction parseTransaction(Token token, Transaction thisTrans, TransactionInput data, TokensService tokensService)
     {
         Transaction newTransaction = thisTrans;
         try
@@ -246,7 +246,7 @@ public class SetupTokensInteract {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Is the user's wallet involved in this contract's transaction?
@@ -316,11 +316,7 @@ public class SetupTokensInteract {
                     token = thisTokenTrans.token;
 
                     if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
-                        Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data, tokensService);
-                        if (newTx != null)
-                        {
-                            processedTransactions.add(newTx);
-                        }
+                        processedTransactions.add(thisTrans);
                     }
                     try
                     {
@@ -335,7 +331,6 @@ public class SetupTokensInteract {
                         //silent fail
                     }
                 }
-                //System.out.println("After adding contract TX: " + String.valueOf(txMap.size()));
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -365,7 +360,6 @@ public class SetupTokensInteract {
                     {
                         Token localToken = tokensService.getToken(t.to);
                         if (localToken == null && !unknownContracts.contains(t.to)) unknownContracts.add(t.to);
-                        t = parseTransaction(localToken, t, data, tokensService);
                     }
                 }
                 processedTxList.add(t);
@@ -401,39 +395,6 @@ public class SetupTokensInteract {
     {
         Log.d(TAG, "New unknown size: " + unknownContracts.size());
         return unknownContracts;
-    }
-
-    /**
-     * Go back over the transactions list
-     * @param token
-     * @param txMap
-     * @return
-     */
-    public Observable<Transaction[]> reProcessTokens(Token token, Map<String, Transaction> txMap, TokensService tokensService)
-    {
-        Log.d(TAG, "Re Processing " + token.getFullName());
-        return Observable.fromCallable(() -> {
-            List<Transaction> processedTxList = new ArrayList<>();
-            if (token.getFullName() != null)
-            {
-                for (Transaction t : txMap.values())
-                {
-                    if (t.to != null && t.to.equals(token.getAddress()))
-                    {
-                        TransactionInput data = transactionDecoder.decodeInput(t.input);
-                        if (data != null && data.functionData != null)
-                        {
-                            t = parseTransaction(token, t, data, tokensService);
-                            processedTxList.add(t);
-                            if (t != null) txMap.remove(t.hash);
-                        }
-                    }
-                }
-            }
-
-            Log.d(TAG, "Re Processing " + processedTxList.size() + " : " + token.getFullName());
-            return processedTxList.toArray(new Transaction[processedTxList.size()]);
-        });
     }
 
     public Token terminateToken(Token token, Wallet wallet, NetworkInfo network)

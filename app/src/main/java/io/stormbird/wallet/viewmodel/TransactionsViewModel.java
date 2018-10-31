@@ -559,6 +559,6 @@ public class TransactionsViewModel extends BaseViewModel
             }
         }
 
-        return !restoreRequired;
+        return restoreRequired;
     }
 }

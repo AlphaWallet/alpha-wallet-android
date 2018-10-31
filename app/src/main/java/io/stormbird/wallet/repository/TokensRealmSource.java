@@ -578,36 +578,6 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void deleteAllERC721Tokens(Wallet wallet)
-    {
-        Realm realm = null;
-        try
-        {
-            realm = realmManager.getERC721RealmInstance(wallet);
-            RealmResults<RealmERC721Token> realmItems = realm.where(RealmERC721Token.class)
-                    .sort("addedTime", Sort.ASCENDING)
-                    .findAll();
-
-            if (realmItems.size() > 0)
-            {
-                realm.beginTransaction();
-                for (RealmERC721Token item : realmItems)
-                {
-                    item.deleteFromRealm();
-                }
-                realm.commitTransaction();
-            }
-        }
-        catch (Exception e)
-        {
-            //silent fail
-        }
-        finally
-        {
-            if (realm != null && !realm.isClosed()) realm.close();
-        }
-    }
-
     private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) throws Exception
     {
         ERC721Token e;

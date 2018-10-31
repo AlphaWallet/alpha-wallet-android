@@ -590,6 +590,7 @@ public class TokensRealmSource implements TokenLocalSource {
             return; //no storage here
         }
 
+        //initial check to ensure all assets in this class have the same contract
         AssetContract contract = null;
         String address = token.tokenInfo.address;
         for (Asset asset : e.tokenBalance)
@@ -610,7 +611,6 @@ public class TokensRealmSource implements TokenLocalSource {
             }
         }
 
-        //initial check to ensure all assets in this class have the same contract
         RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
                 .equalTo("address", address)
                 .findFirst();

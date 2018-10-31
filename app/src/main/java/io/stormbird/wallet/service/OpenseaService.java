@@ -90,21 +90,10 @@ public class OpenseaService {
                     String tokenSymbol = asset.getAssetContract().getSymbol();
                     String schema = asset.getAssetContract().getSchemaName();
 
-                    if (schema != null)
-                    {
-                        switch (schema)
-                        {
-                            case "ERC721":
-                                TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
-                                token = new ERC721Token(tInfo, null, System.currentTimeMillis());
-                                token.setTokenWallet(address);
-                                foundTokens.put(asset.getAssetContract().getAddress(), token);
-                                break;
-                            default:
-                                token = null;
-                                break;
-                        }
-                    }
+                    TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
+                    token = new ERC721Token(tInfo, null, System.currentTimeMillis());
+                    token.setTokenWallet(address);
+                    foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
 
                 if (token != null)

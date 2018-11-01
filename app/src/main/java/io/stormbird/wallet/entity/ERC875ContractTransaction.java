@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.stormbird.wallet.R;
 
+import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 
 /**
@@ -38,7 +39,6 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         symbol = "";
         operation = TransactionType.UNKNOWN;
         otherParty = "";
-        //operationDisplayName = "";
         indices = null;
     }
 
@@ -193,24 +193,31 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     }
 
     @Override
-    public void interpretTransferFrom(String walletAddr, TransactionInput data)
+    public void interpretTransferFrom(String walletAddr, Transaction trans)
     {
-        operation = TransactionType.REDEEM;//R.string.ticket_redeem;
-        if (!data.containsAddress(walletAddr))
+        if (trans.operations.length > 0 && trans.operations[0].to.equals(BURN_ADDRESS))
         {
-            //this must be an admin redeem
-            operation = TransactionType.ADMIN_REDEEM;// R.string.ticket_admin_redeem;
+            operation = TransactionType.REDEEM;
+            type = -1;
         }
-        //one of our tickets was burned
-        type = -1; //redeem
+        else if (otherParty.equals(walletAddr)) //otherparty in this case will be the first address, the previous owner of the token(s)
+        {
+            operation = TransactionType.TRANSFER_FROM;
+            type = -1;
+        }
+        else
+        {
+            operation = TransactionType.TRANSFER_TO;
+            type = 1; //redeem
+        }
     }
 
     @Override
-    public void interpretTransfer(String walletAddr, TransactionInput data)
+    public void interpretTransfer(String walletAddr)
     {
         //this could be transfer to or from
         //if addresses contains our address then it must be a recieve
-        if (data.containsAddress(walletAddr))
+        if (otherParty.equals(walletAddr))
         {
             operation = TransactionType.RECEIVE_FROM;// R.string.ticket_receive_from;
             type = 1; //buy/receive
@@ -219,7 +226,6 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         {
             operation = TransactionType.TRANSFER_TO;// R.string.ticket_transfer_to;
             type = -1; //sell
-            otherParty = data.getFirstAddress();
         }
     }
 
@@ -243,20 +249,23 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     }
 
     @Override
-    public void interpretPassTo(String walletAddr, TransactionInput data)
+    public void interpretPassTo(String walletAddr, Transaction transaction)
     {
-        if (data.containsAddress(walletAddr))
+        if (transaction.operations.length > 0)
         {
-            //we received a ticket from magiclink with transfer paid by server
-            operation = TransactionType.PASS_FROM;// R.string.ticket_pass_from;
-            type = 1;
-        }
-        else
-        {
-            //we had a ticket transferred out of our wallet paid for by server.
-            //This will not show up unless we ecrecover the address.
-            operation = TransactionType.PASS_TO;//R.string.ticket_pass_to;
-            type = -1;
+            if (transaction.operations[0].to.equals(walletAddr))
+            {
+                //we received a ticket from magiclink with transfer paid by server
+                operation = TransactionType.PASS_FROM;// R.string.ticket_pass_from;
+                type = 1;
+            }
+            else
+            {
+                //we had a ticket transferred out of our wallet paid for by server.
+                //This will not show up unless we ecrecover the address.
+                operation = TransactionType.PASS_TO;//R.string.ticket_pass_to;
+                type = -1;
+            }
         }
     }
 
@@ -267,6 +276,25 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         for (BigInteger index : indices)
         {
             this.indices.add(index.intValue());
+        }
+    }
+
+    public void completeSetup(String currentAddress, Transaction trans)
+    {
+        switch (operation)
+        {
+            case MAGICLINK_TRANSFER: //transferred out of our wallet via magic link (0 value)
+                interpretTradeData(currentAddress, trans);
+                break;
+            case TRANSFER_TO:
+                interpretTransfer(currentAddress);
+                break;
+            case PASS_TO:
+                interpretPassTo(currentAddress, trans);
+                break;
+            case TRANSFER_FROM:
+                interpretTransferFrom(currentAddress, trans);
+                break;
         }
     }
 }

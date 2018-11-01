@@ -6,8 +6,6 @@ import android.os.Parcelable;
 import java.math.BigInteger;
 import java.util.List;
 
-import io.stormbird.wallet.R;
-
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
 
 public class TransactionContract implements Parcelable {
@@ -73,12 +71,12 @@ public class TransactionContract implements Parcelable {
         //do nothing for ERC20
     }
 
-    public void interpretTransferFrom(String walletAddr, TransactionInput data)
+    public void interpretTransferFrom(String walletAddr, Transaction trans)
     {
 
     }
 
-    public void interpretTransfer(String walletAddr, TransactionInput data)
+    public void interpretTransfer(String walletAddr)
     {
 
     }
@@ -96,7 +94,12 @@ public class TransactionContract implements Parcelable {
         }
     }
 
-    public void interpretPassTo(String walletAddr, TransactionInput data)
+    public void completeSetup(String currentAddress, Transaction trans)
+    {
+
+    }
+
+    public void interpretPassTo(String walletAddr, Transaction transaction)
     {
 
     }

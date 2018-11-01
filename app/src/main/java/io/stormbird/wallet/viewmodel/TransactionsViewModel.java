@@ -74,8 +74,6 @@ public class TransactionsViewModel extends BaseViewModel
 
     private Handler handler = new Handler();
 
-    private final ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(5);
-
     private boolean isVisible = false;
     private Transaction[] txArray;
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
@@ -316,16 +314,23 @@ public class TransactionsViewModel extends BaseViewModel
                     .filter(token -> !token.isTerminated())
                     .map(this::addTokenToChecklist)
                     .flatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), useBlock, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
-                    .flatMap(transactions -> fetchTransactionsInteract.storeTransactionsObservable(network.getValue(), wallet.getValue(), transactions))
-                    .map(this::removeFromMapTx)
-                    .subscribeOn(Schedulers.from(threadPoolExecutor))
+                    .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe(this::updateTransactionMap, this::onError, this::siftUnknownTransactions);
+                    .subscribe(this::onContractTransactions, this::onError, this::siftUnknownTransactions);
         }
         else
         {
             siftUnknownTransactions();
         }
+    }
+
+    private void onContractTransactions(Transaction[] transactions)
+    {
+        disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions)
+                .map(this::removeFromMapTx)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(this::updateTransactionMap, this::onError);
     }
 
     private void updateTransactionMap(Transaction[] transactions)
@@ -366,7 +371,7 @@ public class TransactionsViewModel extends BaseViewModel
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
                 .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
                 .flatMap(addTokenInteract::add) //add to database
-                .subscribeOn(Schedulers.from(threadPoolExecutor))
+                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(this::updateTokenService, this::onError, this::scanForTerminatedTokens);
 
@@ -511,7 +516,8 @@ public class TransactionsViewModel extends BaseViewModel
         handleTerminatedContracts = Observable.fromCallable(tokensService::getTerminationList)
                 .flatMapIterable(address -> address)
                 .map(address -> setupTokensInteract.terminateToken(tokensService.getToken(address), defaultWallet().getValue(), defaultNetwork().getValue()))
-                .subscribeOn(Schedulers.from(threadPoolExecutor))
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
                 .subscribe(this::onTokenForTermination, this::onScanError, this::wipeTerminationList);
     }
 

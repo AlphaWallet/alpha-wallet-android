@@ -15,7 +15,6 @@ public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
-    private Map<String, Long> updateMap = new ConcurrentHashMap<>();
 
     private String currentAddress = null;
     private int currentNetwork = 0;
@@ -101,7 +100,6 @@ public class TokensService
         currentAddress = "";
         currentNetwork = 0;
         tokenMap.clear();
-        updateMap.clear();
     }
 
     public List<Token> getAllTokens()
@@ -161,27 +159,11 @@ public class TokensService
         });
     }
 
-    public void tokenContractUpdated(Token token, long blockNumber)
-    {
-        updateMap.put(token.getAddress(), blockNumber);
-    }
-
-    public long getLastBlock(Token token)
-    {
-        if (updateMap.get(token.getAddress()) != null)
-        {
-            return updateMap.get(token.getAddress());
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
     public void setCurrentAddress(String currentAddress)
     {
         this.currentAddress = currentAddress;
     }
+    public String getCurrentAddress() { return this.currentAddress; }
 
     public void setCurrentNetwork(int currentNetwork)
     {

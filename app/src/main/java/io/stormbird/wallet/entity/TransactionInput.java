@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
+
 /**
  * Created by James on 4/03/2018.
  *
@@ -54,9 +56,21 @@ public class TransactionInput
 
     public String getFirstAddress() {
         String address = "";
-        if (addresses.size() > 0) {
-            address = "0x" + addresses.get(0).substring(64 - 40);
+        if (addresses.size() > 0)
+        {
+            address = "0x" + addresses.get(0).substring(64 - ADDRESS_LENGTH_IN_HEX);
         }
+        return address;
+    }
+
+    public String getAddress(int index)
+    {
+        String address = "";
+        if (addresses.size() > index)
+        {
+            address = "0x" + addresses.get(index).substring(64 - ADDRESS_LENGTH_IN_HEX);
+        }
+
         return address;
     }
 

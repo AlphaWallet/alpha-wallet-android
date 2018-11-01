@@ -161,7 +161,19 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
 	{
-		return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
+		if (txList.length == 0)
+		{
+			return noTransations();
+		}
+		else
+		{
+			return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
+		}
+	}
+
+	private Single<Transaction[]> noTransations()
+	{
+		return Single.fromCallable(() -> new Transaction[0]);
 	}
 
 	/**

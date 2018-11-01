@@ -175,6 +175,16 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    @Override
+    public Single<BigInteger> fetchLatestBlockNumber()
+    {
+        return Single.fromCallable(() -> {
+            EthBlockNumber blk = web3j.ethBlockNumber()
+                    .send();
+            return blk.getBlockNumber();
+        });
+    }
+
     /**
      * Gives an observable that allows us to process each token as the balance is fetched
      *
@@ -265,16 +275,6 @@ public class TokenRepository implements TokenRepositoryType {
                     return result.toArray(new Token[result.size()]);
                 });
     }
-
-//    private Single<Token> attachCachedEth(NetworkInfo network, Wallet wallet) {
-//        return walletRepository.balanceInWei(wallet)
-//                .map(balance -> {
-//                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-//                    Token eth = new Token(info, balance, System.currentTimeMillis());
-//                    eth.setIsEthereum();
-//                    return eth;
-//                });
-//    }
 
     private Single<Token> attachCachedEth(NetworkInfo network, Wallet wallet)
     {

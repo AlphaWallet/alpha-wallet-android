@@ -347,4 +347,17 @@ public class Token implements Parcelable
     {
         this.tokenNetwork = (short)tokenNetwork;
     }
+
+    public void setInterfaceSpec(int b) { }
+    public boolean isOldSpec() { return false; }
+
+    public String getFunctionSignature(String function)
+    {
+        return "";
+    }
+
+    public boolean needsInterfaceSpecUpdate(RealmToken realmToken)
+    {
+        return false;
+    }
 }

@@ -48,6 +48,7 @@ public class TokenFactory
             String balances = realmItem.getBalance();
             String burnList = realmItem.getBurnList();
             thisToken = new Ticket(tokenInfo, balances, burnList, updateBlancaTime);
+            thisToken.setInterfaceSpec(realmItem.getTokenId());
         }
         else
         {

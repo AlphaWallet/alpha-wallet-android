@@ -12,6 +12,7 @@ import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 
 /**
  * Created by James on 21/02/2018.
@@ -27,6 +28,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     private FeeMasterService feeMasterService;
     private AssetDisplayRouter assetDisplayRouter;
     private AssetDefinitionService assetDefinitionService;
+    private TokensService tokensService;
 
     public TransferTicketDetailViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                                 FindDefaultWalletInteract findDefaultWalletInteract,
@@ -35,7 +37,8 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
                                                 TransferTicketDetailRouter transferTicketDetailRouter,
                                                 FeeMasterService feeMasterService,
                                                 AssetDisplayRouter assetDisplayRouter,
-                                                AssetDefinitionService assetDefinitionService) {
+                                                AssetDefinitionService assetDefinitionService,
+                                                TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -44,12 +47,13 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
         this.feeMasterService = feeMasterService;
         this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService);
+        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService, tokensService);
     }
 }
 

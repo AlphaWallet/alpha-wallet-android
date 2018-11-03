@@ -14,6 +14,7 @@ public class TokensService
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
     private Map<String, Long> updateMap = new ConcurrentHashMap<>();
+    private Map<String, Integer> interfaceSpecMap = new ConcurrentHashMap<>();
 
     private String currentAddress = null;
     private int currentNetwork = 0;
@@ -32,8 +33,32 @@ public class TokensService
         if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
         {
             tokenMap.put(t.getAddress(), t);
+            setSpec(t);
         }
+
         return t;
+    }
+
+    private void setSpec(Token t)
+    {
+        if (interfaceSpecMap.get(t.getAddress()) != null)
+        {
+            t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()));
+        }
+    }
+
+    public boolean hasOldSpec(String address)
+    {
+        Token token = tokenMap.get(address);
+        if (token != null && interfaceSpecMap.get(address) != null)
+        {
+            token.setInterfaceSpec(interfaceSpecMap.get(token.getAddress()));
+            return token.isOldSpec();
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public Token getToken(String addr)
@@ -46,6 +71,7 @@ public class TokensService
         currentAddress = "";
         currentNetwork = 0;
         tokenMap.clear();
+        updateMap.clear();
     }
 
     public List<Token> getAllTokens()
@@ -86,6 +112,7 @@ public class TokensService
             if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
             {
                 tokenMap.put(t.getAddress(), t);
+                setSpec(t);
             }
         }
     }
@@ -132,5 +159,16 @@ public class TokensService
     public void setCurrentNetwork(int currentNetwork)
     {
         this.currentNetwork = currentNetwork;
+    }
+
+    public void setInterfaceSpec(String address, int functionSpec)
+    {
+        interfaceSpecMap.put(address, functionSpec);
+
+        Token token = tokenMap.get(address);
+        if (token != null)
+        {
+            token.setInterfaceSpec(functionSpec);
+        }
     }
 }

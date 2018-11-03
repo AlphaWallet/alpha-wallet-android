@@ -7,9 +7,11 @@ import org.web3j.crypto.Sign;
 import java.math.BigInteger;
 import java.security.SignatureException;
 
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
 
+import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 import static io.stormbird.wallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
 import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
@@ -60,6 +62,16 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             ct.setType(-5);// indicate that we need to load the contract
             isConstructor = true;
+            boolean isUint16ERC875 = detectUint16Contract(input);
+            if (isUint16ERC875)
+            {
+                ct.decimals = 16;
+            }
+            else
+            {
+                ct.decimals = 256;
+            }
+            input = input.substring(0,20); // just record the first twenty bytes, no need to store the whole ctor
         }
         else
         {
@@ -224,5 +236,16 @@ public class EtherscanTransaction
                 ((ERC875ContractTransaction) ct).operation = name;
             }
         }
+    }
+
+
+    //TODO: This takes an EtherScan transaction once we apply the transactionview upgrades.
+    public static boolean detectUint16Contract(String input)
+    {
+        String transferFromSig = Numeric.cleanHexPrefix(buildMethodId("transfer(address,uint16[])"));
+        if (input.length() < 10) return false;
+
+        int index = input.indexOf(transferFromSig);
+        return index > 0;
     }
 }

@@ -8,13 +8,14 @@ import android.util.Log;
 
 import org.web3j.utils.Numeric;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.stormbird.wallet.R;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
@@ -28,9 +29,6 @@ import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.entity.TransactionType;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.service.TokensService;
 
 public class SetupTokensInteract {
@@ -314,6 +312,12 @@ public class SetupTokensInteract {
                     Transaction thisTrans = thisTokenTrans.transaction;
                     TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
                     token = thisTokenTrans.token;
+
+                    if (token != null && thisTrans.isConstructor && thisTrans.operations.length > 0)
+                    {
+                        token.setInterfaceSpec(thisTrans.operations[0].contract.decimals);
+                        tokensService.setInterfaceSpec(token.getAddress(), thisTrans.operations[0].contract.decimals);
+                    }
 
                     if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
                         Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data, tokensService);

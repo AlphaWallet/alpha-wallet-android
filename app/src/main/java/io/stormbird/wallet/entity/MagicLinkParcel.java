@@ -95,7 +95,7 @@ public class MagicLinkParcel implements Parcelable
         return 0;
     }
 
-    public static byte[] generateReverseTradeData(MagicLinkData order)
+    public static byte[] generateReverseTradeData(MagicLinkData order, Token token)
     {
         byte[] data = null;
         try
@@ -108,7 +108,7 @@ public class MagicLinkParcel implements Parcelable
             //convert to signature representation
             Sign.SignatureData sellerSig = sigFromByteArray(order.signature);
 
-            data = TokenRepository.createTrade(expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+            data = TokenRepository.createTrade(token, expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
         }
         catch (Exception e)
         {

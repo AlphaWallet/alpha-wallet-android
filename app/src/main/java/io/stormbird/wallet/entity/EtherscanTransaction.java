@@ -95,15 +95,18 @@ public class EtherscanTransaction
                     switch (f.functionData.functionFullName)
                     {
                         case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
+                        case "trade(uint256,uint256[],uint8,bytes32,bytes32)":
                             o = processTrade(f);
                             setName(o, TransactionType.MAGICLINK_TRANSFER);
                             break;
                         case "transferFrom(address,address,uint16[])":
+                        case "transferFrom(address,address,uint256[])":
                             o = generateERC875Op();
                             o[0].contract.setIndicies(f.paramValues);
                             setName(o, TransactionType.TRANSFER_TO);
                             break;
                         case "transfer(address,uint16[])":
+                        case "transfer(address,uint256[])":
                             o = generateERC875Op();
                             o[0].contract.setOtherParty(from);
                             o[0].contract.setIndicies(f.paramValues);
@@ -119,6 +122,7 @@ public class EtherscanTransaction
                             setName(o, TransactionType.TRANSFER_TO);
                             break;
                         case "loadNewTickets(bytes32[])":
+                        case "loadNewTickets(uint256[])":
                             o = generateERC875Op();
                             op = o[0];
                             op.from = from;
@@ -127,6 +131,7 @@ public class EtherscanTransaction
                             setName(o, TransactionType.LOAD_NEW_TOKENS);
                             break;
                         case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
+                        case "passTo(uint256,uint256[],uint8,bytes32,bytes32,address)":
                             o = processPassTo(f);
                             op = o[0];
                             op.from = from;

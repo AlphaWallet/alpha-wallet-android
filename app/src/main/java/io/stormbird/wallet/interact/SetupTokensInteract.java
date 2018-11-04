@@ -32,16 +32,10 @@ public class SetupTokensInteract {
 
     private final static String TAG = "STI";
     private final TokenRepositoryType tokenRepository;
-    private TransactionDecoder transactionDecoder = new TransactionDecoder();
-    private Map<String, Token> contractMap = new ConcurrentHashMap<>();
     private List<String> unknownContracts = new ArrayList<>();
 
     public static final String UNKNOWN_CONTRACT = "[Unknown Contract]";
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
-    public static final String INVALID_OPERATION = "[Invalid Operation]";
-    public static final String CONTRACT_CONSTRUCTOR = "Contract Creation";
-    public static final String RECEIVE_FROM_MAGICLINK = "Receive From MagicLink";
-
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -55,7 +49,6 @@ public class SetupTokensInteract {
 
     public void clearAll()
     {
-        contractMap.clear();
         unknownContracts.clear();
     }
 
@@ -77,11 +70,6 @@ public class SetupTokensInteract {
         }
 
         sb.append("};");
-    }
-
-    public void addTokenToMap(Token token)
-    {
-        contractMap.put(token.getAddress(), token);
     }
 
     /**

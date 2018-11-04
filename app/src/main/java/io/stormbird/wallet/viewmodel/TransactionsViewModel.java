@@ -312,7 +312,6 @@ public class TransactionsViewModel extends BaseViewModel
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
-                    .map(this::addTokenToChecklist)
                     .flatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), useBlock, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
@@ -336,12 +335,6 @@ public class TransactionsViewModel extends BaseViewModel
     private void updateTransactionMap(Transaction[] transactions)
     {
         txContractList.addAll(Arrays.asList(transactions));
-    }
-
-    private Token addTokenToChecklist(Token token)
-    {
-        setupTokensInteract.addTokenToMap(token);
-        return token;
     }
 
     //run through what remains in the map, see if there are any unknown tokens

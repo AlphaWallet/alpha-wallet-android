@@ -28,7 +28,6 @@ import java.math.RoundingMode;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
-import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
 public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
 

@@ -6,6 +6,7 @@ import android.arch.lifecycle.MutableLiveData;
 
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
@@ -13,6 +14,7 @@ import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -26,6 +28,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final MarketQueueService marketQueueService;
+    private final TokensService tokensService;
 
     private final GasSettingsRouter gasSettingsRouter;
 
@@ -35,12 +38,14 @@ public class ConfirmationViewModel extends BaseViewModel {
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
                                  CreateTransactionInteract createTransactionInteract,
                                  GasSettingsRouter gasSettingsRouter,
-                                 MarketQueueService marketQueueService) {
+                                 MarketQueueService marketQueueService,
+                                 TokensService tokensService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
         this.marketQueueService = marketQueueService;
+        this.tokensService = tokensService;
     }
 
     public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
@@ -60,9 +65,10 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
-        final byte[] data = TokenRepository.createTicketTransferData(to, ids);
+        Token token = tokensService.getToken(contractAddress);
+        final byte[] data = TokenRepository.createTicketTransferData(to, ids, token);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(new Wallet(from), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 

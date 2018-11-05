@@ -33,6 +33,7 @@ public class TransactionLookup
             typeMapping.put(TransactionType.ADMIN_REDEEM, R.string.ticket_admin_redeem);
             typeMapping.put(TransactionType.CONSTRUCTOR, R.string.ticket_contract_constructor);
             typeMapping.put(TransactionType.TERMINATE_CONTRACT, R.string.ticket_terminate_contract);
+            typeMapping.put(TransactionType.TRANSFER_FROM, R.string.ticket_transfer_from);
             typeMapping.put(TransactionType.UNKNOWN_FUNCTION, R.string.ticket_invalid_op);
         }
     }

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
@@ -35,6 +35,12 @@ public class TokensService
         {
             tokenMap.put(t.getAddress(), t);
         }
+        return t;
+    }
+
+    public Token addTokenUnchecked(Token t)
+    {
+        tokenMap.put(t.getAddress(), t);
         return t;
     }
 
@@ -140,7 +146,6 @@ public class TokensService
         }
     }
 
-
     public Observable<List<String>> reduceToUnknown(List<String> addrs)
     {
         return Observable.fromCallable(() -> {
@@ -182,5 +187,29 @@ public class TokensService
     public void setCurrentNetwork(int currentNetwork)
     {
         this.currentNetwork = currentNetwork;
+    }
+
+    public List<Token> getAllClass(Class<?> tokenClass)
+    {
+        List<Token> classTokens = new ArrayList<>();
+        for (Token t : tokenMap.values())
+        {
+            if (tokenClass.isInstance(t))
+            {
+                classTokens.add(t);
+            }
+        }
+        return classTokens;
+    }
+
+    public void clearBalanceOf(Class<?> tokenClass)
+    {
+        for (Token t : tokenMap.values())
+        {
+            if (tokenClass.isInstance(t))
+            {
+                ((ERC721Token)t).tokenBalance.clear();
+            }
+        }
     }
 }

@@ -80,8 +80,14 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         return Single.fromCallable(() -> {
             Date now = new Date();
-            for (Token token : tokens) {
-                saveERC721Token(networkInfo, wallet, token, now);
+            try (Realm realm = realmManager.getERC721RealmInstance(wallet))
+            {
+                realm.beginTransaction();
+                for (Token token : tokens)
+                {
+                    saveERC721Token(realm, wallet, token, now);
+                }
+                realm.commitTransaction();
             }
             return tokens;
         });
@@ -572,137 +578,119 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void saveERC721Token(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime)
+    private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) throws Exception
     {
         ERC721Token e;
         if (token instanceof ERC721Token)
         {
-            e = (ERC721Token)token;
+            e = (ERC721Token) token;
         }
         else
         {
             return; //no storage here
         }
 
-        Realm realm = null;
-        try {
-            //initial check to ensure all assets in this class have the same contract
-            String address = null;
-            AssetContract contract = null;
-            for (Asset asset : e.tokenBalance)
+        //initial check to ensure all assets in this class have the same contract
+        AssetContract contract = null;
+        String address = token.tokenInfo.address;
+        for (Asset asset : e.tokenBalance)
+        {
+            if (address != null)
             {
-                if (address != null)
+                contract = asset.getAssetContract();
+                if (!address.equals(asset.getAssetContract().getAddress()))
                 {
-                    if (!address.equals(asset.getAssetContract().getAddress()))
-                    {
-                        Log.d("TRS", "Addresses Don't match recording ERC721");
-                        return;
-                    }
+                    Log.d("TRS", "Addresses Don't match recording ERC721");
+                    return;
                 }
-                else
-                {
-                    address = asset.getAssetContract().getAddress();
-                    contract = asset.getAssetContract();
-                }
-            }
-
-            realm = realmManager.getERC721RealmInstance(wallet);
-            RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
-                    .equalTo("address", contract.getAddress())
-                    .findFirst();
-
-            if (realmToken == null)
-            {
-                //create new storage
-                TransactionsRealmCache.addRealm();
-                realm.beginTransaction();
-                Log.d(TAG, "Save New ERC721 Token: " + contract.getName() + " :" + contract.getAddress());
-                realmToken = realm.createObject(RealmERC721Token.class, contract.getAddress());
-                realmToken.setName(contract.getName());
-                realmToken.setSymbol(contract.getSymbol());
-                realmToken.setAddedTime(currentTime.getTime());
-                realmToken.setUpdatedTime(currentTime.getTime());
-                realmToken.setSchemaName(contract.getSchemaName());
-                realmToken.setTokenIdList(e.tokenBalance);
-                realm.commitTransaction();
-                TransactionsRealmCache.subRealm();
             }
             else
             {
-                //update balance if changed
-                List<String> tokenBalance = realmToken.getTokenIdList();
-                boolean needsUpdate = false;
-                if (tokenBalance.size() != e.tokenBalance.size())
-                {
-                    needsUpdate = true;
-                }
-                else
-                {
-                    for (int i = 0; i < tokenBalance.size(); i++)
-                    {
-                        if (!tokenBalance.get(i).equals(e.tokenBalance.get(i).getTokenId())) needsUpdate = true;
-                    }
-                }
-
-                if (needsUpdate)
-                {
-                    //balance changed, remove old assets
-                    realm.beginTransaction();
-                    deleteAssets(realm, e.tokenBalance, contract.getAddress());
-
-                    //update balance
-                    realmToken.setUpdatedTime(currentTime.getTime());
-                    realmToken.setTokenIdList(e.tokenBalance);
-                    realm.commitTransaction();
-                }
+                address = asset.getAssetContract().getAddress();
+                contract = asset.getAssetContract();
             }
+        }
 
-            //now create the assets inside this
-            for (Asset asset : e.tokenBalance)
+        RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
+                .equalTo("address", address)
+                .findFirst();
+
+        if (!token.hasPositiveBalance())
+        {
+            if (realmToken != null)
             {
-                RealmERC721Asset realmAsset = realm.where(RealmERC721Asset.class)
-                        .equalTo("tokenIdAddr", RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), contract.getAddress()))
-                        .findFirst();
-
-                if (realmAsset == null)
+                realmToken.deleteFromRealm();
+            }
+        }
+        else if (realmToken == null)
+        {
+            //create new storage
+            Log.d(TAG, "Save New ERC721 Token: " + token.tokenInfo.name + " :" + address);
+            realmToken = realm.createObject(RealmERC721Token.class, address);
+            realmToken.setName(contract.getName());
+            realmToken.setSymbol(contract.getSymbol());
+            realmToken.setAddedTime(currentTime.getTime());
+            realmToken.setUpdatedTime(currentTime.getTime());
+            realmToken.setSchemaName(contract.getSchemaName());
+            realmToken.setTokenIdList(e.tokenBalance);
+        }
+        else
+        {
+            //update balance if changed
+            List<String> tokenBalance = realmToken.getTokenIdList();
+            boolean needsUpdate = false;
+            if (tokenBalance.size() != e.tokenBalance.size())
+            {
+                needsUpdate = true;
+            }
+            else
+            {
+                for (int i = 0; i < tokenBalance.size(); i++)
                 {
-                    TransactionsRealmCache.addRealm();
-                    realm.beginTransaction();
+                    if (!tokenBalance.get(i).equals(e.tokenBalance.get(i).getTokenId()))
+                        needsUpdate = true;
+                }
+            }
 
-                    realmAsset = realm.createObject(RealmERC721Asset.class,
-                                                    RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), contract.getAddress()));
+            if (needsUpdate)
+            {
+                //balance changed, remove old assets
+                deleteAssets(realm, e.tokenBalance, contract.getAddress());
 
-                    realmAsset.setName(asset.getName());
-                    realmAsset.setDescription(asset.getDescription());
-                    realmAsset.setExternalLink(asset.getExternalLink());
+                //update balance
+                realmToken.setUpdatedTime(currentTime.getTime());
+                realmToken.setTokenIdList(e.tokenBalance);
+            }
+        }
+
+        //now create the assets inside this
+        for (Asset asset : e.tokenBalance)
+        {
+            RealmERC721Asset realmAsset = realm.where(RealmERC721Asset.class)
+                    .equalTo("tokenIdAddr", RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), contract.getAddress()))
+                    .findFirst();
+
+            if (realmAsset == null)
+            {
+                realmAsset = realm.createObject(RealmERC721Asset.class,
+                                                RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), contract.getAddress()));
+
+                realmAsset.setName(asset.getName());
+                realmAsset.setDescription(asset.getDescription());
+                realmAsset.setExternalLink(asset.getExternalLink());
+                realmAsset.setImagePreviewUrl(asset.getImagePreviewUrl());
+                realmAsset.setBackgroundColor(asset.getBackgroundColor());
+                realmAsset.setTraits(asset.getTraits());
+            }
+            else
+            {
+                //see if traits have changed
+                List<Trait> traits = realmAsset.getTraits();
+                if (traits.size() != asset.getTraits().size() || traitsDifferent(traits, asset.getTraits()))
+                {
                     realmAsset.setImagePreviewUrl(asset.getImagePreviewUrl());
-                    realmAsset.setBackgroundColor(asset.getBackgroundColor());
                     realmAsset.setTraits(asset.getTraits());
-
-                    realm.commitTransaction();
-                    TransactionsRealmCache.subRealm();
                 }
-                else
-                {
-                    //see if traits have changed
-                    List<Trait> traits = realmAsset.getTraits();
-                    if (traits.size() != asset.getTraits().size() || traitsDifferent(traits, asset.getTraits()))
-                    {
-                        realm.beginTransaction();
-                        realmAsset.setImagePreviewUrl(asset.getImagePreviewUrl());
-                        realmAsset.setTraits(asset.getTraits());
-                        realm.commitTransaction();
-                    }
-                }
-            }
-
-        } catch (Exception ex) {
-            if (realm != null && realm.isInTransaction()) {
-                realm.cancelTransaction();
-            }
-        } finally {
-            if (realm != null) {
-                realm.close();
             }
         }
     }

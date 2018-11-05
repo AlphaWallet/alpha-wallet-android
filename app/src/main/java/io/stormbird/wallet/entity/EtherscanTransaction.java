@@ -58,7 +58,7 @@ public class EtherscanTransaction
             TransactionContract ct = o[0].contract;
             ct.setOperation(TransactionType.CONSTRUCTOR);// R.string.ticket_contract_constructor);
             ct.address = contractAddress;
-            ct.setType(-5);// indicate that we need to load the contract
+            ct.setType(-3);// indicate that we need to load the contract
             isConstructor = true;
         }
         else
@@ -85,17 +85,20 @@ public class EtherscanTransaction
                         case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
                             o = processTrade(f);
                             setName(o, TransactionType.MAGICLINK_TRANSFER);
+                            o[0].contract.address = to;
                             break;
                         case "transferFrom(address,address,uint16[])":
                             o = generateERC875Op();
                             o[0].contract.setIndicies(f.paramValues);
                             setName(o, TransactionType.TRANSFER_TO);
+                            o[0].contract.address = to;
                             break;
                         case "transfer(address,uint16[])":
                             o = generateERC875Op();
                             o[0].contract.setOtherParty(from);
                             o[0].contract.setIndicies(f.paramValues);
                             setName(o, TransactionType.TRANSFER_TO);
+                            o[0].contract.address = to;
                             break;
                         case "transfer(address,uint256)":
                             o = generateERC20Op();
@@ -104,7 +107,21 @@ public class EtherscanTransaction
                             op.to = f.getFirstAddress();
                             op.transactionId = hash;
                             op.value = String.valueOf(f.getFirstValue());
+                            op.contract.address = to;
                             setName(o, TransactionType.TRANSFER_TO);
+                            break;
+                        case "transferFrom(address,address,uint256)":
+                            o = generateERC20Op();
+                            op = o[0];
+                            op.from = f.getFirstAddress();
+                            if (f.addresses.size() > 1)
+                            {
+                                op.to = f.addresses.get(1);
+                            }
+                            op.transactionId = hash;
+                            op.value = String.valueOf(f.getFirstValue());
+                            op.contract.address = to;
+                            setName(o, TransactionType.TRANSFER_FROM);
                             break;
                         case "loadNewTickets(bytes32[])":
                             o = generateERC875Op();
@@ -112,6 +129,7 @@ public class EtherscanTransaction
                             op.from = from;
                             op.transactionId = hash;
                             op.value = String.valueOf(f.paramValues.size());
+                            op.contract.address = to;
                             setName(o, TransactionType.LOAD_NEW_TOKENS);
                             break;
                         case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
@@ -122,6 +140,7 @@ public class EtherscanTransaction
                             op.transactionId = hash;
                             //value in what?
                             op.value = String.valueOf(f.getFirstValue());
+                            op.contract.address = to;
                             setName(o, TransactionType.PASS_TO);
                             break;
                         case "endContract()":
@@ -132,6 +151,7 @@ public class EtherscanTransaction
                             ct.name = to;
                             ct.setType(-2);
                             setName(o, TransactionType.TERMINATE_CONTRACT);
+                            ct.address = to;
                             break;
                         default:
                             break;

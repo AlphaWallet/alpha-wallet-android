@@ -432,6 +432,7 @@
     <string name="ticket_receive_from">Receive From</string>
     <string name="ticket_transfer_to">Transfer To</string>
     <string name="ticket_transfer">Transfer</string>
+    <string name="ticket_transfer_from">Transfer From</string>
     <string name="ticket_load_new_tickets">Load New Tickets</string>
     <string name="ticket_pass_from">Receive From Magiclink Free</string>
     <string name="ticket_pass_to">Magiclink Transfer</string>

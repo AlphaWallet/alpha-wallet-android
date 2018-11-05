@@ -50,6 +50,52 @@ public class TokensService
         else return null;
     }
 
+    public String getTokenName(String addr)
+    {
+        if (addr == null) return "[Unknown contract]";
+        String name = addr;
+        Token token = tokenMap.get(addr);
+        if (token != null)
+        {
+            if (token.isTerminated())
+            {
+                name = "[deleted contract]";
+            }
+            else if (!token.isBad())
+            {
+                name = token.getFullName();
+            }
+        }
+
+        return name;
+    }
+
+    public String getTokenSymbol(String addr)
+    {
+        String symbol = "TOK";
+        if (addr == null) return symbol;
+        Token token = tokenMap.get(addr);
+        if (token != null)
+        {
+            symbol = token.tokenInfo.symbol;
+        }
+
+        return symbol;
+    }
+
+    public int getTokenDecimals(String addr)
+    {
+        int decimals = ETHER_DECIMALS;
+        if (addr == null) return decimals;
+        Token token = tokenMap.get(addr);
+        if (token != null)
+        {
+            decimals = token.tokenInfo.decimals;
+        }
+
+        return decimals;
+    }
+
     public void clearTokens()
     {
         currentAddress = "";

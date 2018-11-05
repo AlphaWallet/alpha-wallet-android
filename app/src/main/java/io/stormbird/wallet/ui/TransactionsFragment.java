@@ -77,9 +77,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
 
-        viewModel = ViewModelProviders.of(this, transactionsViewModelFactory).get(TransactionsViewModel.class);
+        viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
+                .get(TransactionsViewModel.class);
 
-        adapter = new TransactionsAdapter(this::onTransactionClick);
+        adapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService());
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
 
@@ -92,8 +93,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
         systemView.showProgress(false);
 
-        viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
-                .get(TransactionsViewModel.class);
+
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);

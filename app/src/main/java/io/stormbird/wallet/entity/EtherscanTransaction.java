@@ -10,6 +10,7 @@ import java.security.SignatureException;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.service.TokensService;
 
 import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 import static io.stormbird.wallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
@@ -62,8 +63,8 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             ct.setType(-5);// indicate that we need to load the contract
             isConstructor = true;
-            boolean isUint16ERC875 = detectUint16Contract(input);
-            if (isUint16ERC875)
+            //TODO: We can detect ERC20, ERC875 and other Token contracts here
+            if (detectUint16Contract(input))
             {
                 ct.decimals = 16;
             }
@@ -71,7 +72,10 @@ public class EtherscanTransaction
             {
                 ct.decimals = 256;
             }
-            input = input.substring(0,20); // just record the first twenty bytes, no need to store the whole ctor
+
+            TokensService.setInterfaceSpec(contractAddress, ct.decimals);
+
+            input = "Constructor"; //Placeholder - don't consume storage for the constructor
         }
         else
         {
@@ -244,8 +248,7 @@ public class EtherscanTransaction
     }
 
 
-    //TODO: This takes an EtherScan transaction once we apply the transactionview upgrades.
-    public static boolean detectUint16Contract(String input)
+    private boolean detectUint16Contract(String input)
     {
         String transferFromSig = Numeric.cleanHexPrefix(buildMethodId("transfer(address,uint16[])"));
         if (input.length() < 10) return false;

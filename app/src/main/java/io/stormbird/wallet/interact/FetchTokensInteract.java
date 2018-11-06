@@ -114,12 +114,6 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Token updateDefaultBalance(Token token)
-    {
-        return tokenRepository.fetchActiveDefaultTokenBalance(token)
-                .subscribeOn(Schedulers.io()).blockingSingle();
-    }
-
     public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)
     {
         return tokenRepository.fetchActiveTokenBalance(token, network, wallet)

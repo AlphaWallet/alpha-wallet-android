@@ -7,9 +7,12 @@ import org.web3j.crypto.Sign;
 import java.math.BigInteger;
 import java.security.SignatureException;
 
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.service.TokensService;
 
+import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 import static io.stormbird.wallet.interact.SetupTokensInteract.CONTRACT_CONSTRUCTOR;
 import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
@@ -60,6 +63,19 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             ct.setType(-3);// indicate that we need to load the contract
             isConstructor = true;
+            //TODO: We can detect ERC20, ERC875 and other Token contracts here
+            if (detectUint16Contract(input))
+            {
+                ct.decimals = 16;
+            }
+            else
+            {
+                ct.decimals = 256;
+            }
+
+            TokensService.setInterfaceSpec(contractAddress, ct.decimals);
+
+            input = "Constructor"; //Placeholder - don't consume storage for the constructor
         }
         else
         {
@@ -83,17 +99,20 @@ public class EtherscanTransaction
                     switch (f.functionData.functionFullName)
                     {
                         case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
+                        case "trade(uint256,uint256[],uint8,bytes32,bytes32)":
                             o = processTrade(f);
                             setName(o, TransactionType.MAGICLINK_TRANSFER);
                             o[0].contract.address = to;
                             break;
                         case "transferFrom(address,address,uint16[])":
+                        case "transferFrom(address,address,uint256[])":
                             o = generateERC875Op();
                             o[0].contract.setIndicies(f.paramValues);
                             setName(o, TransactionType.TRANSFER_TO);
                             o[0].contract.address = to;
                             break;
                         case "transfer(address,uint16[])":
+                        case "transfer(address,uint256[])":
                             o = generateERC875Op();
                             o[0].contract.setOtherParty(from);
                             o[0].contract.setIndicies(f.paramValues);
@@ -124,6 +143,7 @@ public class EtherscanTransaction
                             setName(o, TransactionType.TRANSFER_FROM);
                             break;
                         case "loadNewTickets(bytes32[])":
+                        case "loadNewTickets(uint256[])":
                             o = generateERC875Op();
                             op = o[0];
                             op.from = from;
@@ -133,6 +153,7 @@ public class EtherscanTransaction
                             setName(o, TransactionType.LOAD_NEW_TOKENS);
                             break;
                         case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
+                        case "passTo(uint256,uint256[],uint8,bytes32,bytes32,address)":
                             o = processPassTo(f);
                             op = o[0];
                             op.from = from;
@@ -244,5 +265,15 @@ public class EtherscanTransaction
                 ((ERC875ContractTransaction) ct).operation = name;
             }
         }
+    }
+
+
+    private boolean detectUint16Contract(String input)
+    {
+        String transferFromSig = Numeric.cleanHexPrefix(buildMethodId("transfer(address,uint16[])"));
+        if (input.length() < 10) return false;
+
+        int index = input.indexOf(transferFromSig);
+        return index > 0;
     }
 }

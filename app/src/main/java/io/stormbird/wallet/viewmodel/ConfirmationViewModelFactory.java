@@ -9,6 +9,7 @@ import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 
 public class ConfirmationViewModelFactory implements ViewModelProvider.Factory {
 
@@ -17,22 +18,25 @@ public class ConfirmationViewModelFactory implements ViewModelProvider.Factory {
     private CreateTransactionInteract createTransactionInteract;
     private GasSettingsRouter gasSettingsRouter;
     private MarketQueueService marketQueueService;
+    private TokensService tokensService;
 
     public ConfirmationViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
                                         FetchGasSettingsInteract fetchGasSettingsInteract,
                                         CreateTransactionInteract createTransactionInteract,
                                         GasSettingsRouter gasSettingsRouter,
-                                        MarketQueueService marketQueueService) {
+                                        MarketQueueService marketQueueService,
+                                        TokensService tokensService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
         this.marketQueueService = marketQueueService;
+        this.tokensService = tokensService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ConfirmationViewModel(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter, marketQueueService);
+        return (T) new ConfirmationViewModel(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter, marketQueueService, tokensService);
     }
 }

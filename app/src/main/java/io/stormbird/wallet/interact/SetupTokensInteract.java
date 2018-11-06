@@ -8,13 +8,14 @@ import android.util.Log;
 
 import org.web3j.utils.Numeric;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.stormbird.wallet.R;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
@@ -28,9 +29,6 @@ import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.entity.TransactionType;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.service.TokensService;
 
 public class SetupTokensInteract {
@@ -155,7 +153,7 @@ public class SetupTokensInteract {
             catch (Exception e) {
                 e.printStackTrace();
             }
-            if (highestBlock > 0) tokensService.tokenContractUpdated(token, highestBlock);
+            if (highestBlock > 0) tokensService.setLatestBlock(token.getAddress(), highestBlock);
             return processedTransactions.toArray(new Transaction[processedTransactions.size()]);
         });
     }

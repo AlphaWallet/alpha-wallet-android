@@ -399,7 +399,7 @@ public class ImportTokenViewModel extends BaseViewModel
             initParser();
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             //ok let's try to drive this guy through
-            final byte[] tradeData = generateReverseTradeData(order);
+            final byte[] tradeData = generateReverseTradeData(order, importToken);
             Log.d(TAG, "Approx value of trade: " + order.price);
             //now push the transaction
             disposable = createTransactionInteract

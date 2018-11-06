@@ -240,6 +240,13 @@ public class TransactionDecoder
             "approve(address,uint256)",
             "loadNewTickets(bytes32[])",
             "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)",
+            //updated ERC875 function sigs
+            "transferFrom(address,address,uint256[])",
+            "transfer(address,uint256[])",
+            "trade(uint256,uint256[],uint8,bytes32,bytes32)",
+            "passTo(uint256,uint256[],uint8,bytes32,bytes32,address)",
+            "loadNewTickets(uint256[])",
+            //end updated ERC875 sigs
             "endContract()",
             "selfdestruct()",
             "kill()"
@@ -254,6 +261,11 @@ public class TransactionDecoder
             false,
             false, //loadNewTickets
             true,  //passTo
+            false, //updated transferFrom
+            false,
+            true, //updated trade
+            true, //updated passTo
+            false,
             false, //endContract
             false,  //selfdestruct()
             false
@@ -271,7 +283,12 @@ public class TransactionDecoder
             ERC20,
             ERC20,
             ERC875,
+            ERC875, //old loadnewtickets
+            ERC875, //updated transferFrom
             ERC875,
+            ERC875,
+            ERC875,
+            ERC875, //updated loadNewTickets
             CREATION, //endContract
             CREATION, //selfdestruct
             CREATION  //kill
@@ -339,7 +356,7 @@ public class TransactionDecoder
         return indices;
     }
 
-    private static String buildMethodId(String methodSignature) {
+    public static String buildMethodId(String methodSignature) {
         byte[] input = methodSignature.getBytes();
         byte[] hash = Hash.sha3(input);
         return Numeric.toHexString(hash).substring(0, 10);

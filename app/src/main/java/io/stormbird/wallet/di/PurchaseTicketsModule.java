@@ -9,6 +9,7 @@ import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.PurchaseTicketsViewModelFactory;
 
 import dagger.Module;
@@ -26,9 +27,10 @@ public class PurchaseTicketsModule
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             CreateTransactionInteract createTransactionInteract,
-            MarketQueueService marketQueueService) {
+            MarketQueueService marketQueueService,
+            TokensService tokensService) {
         return new PurchaseTicketsViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, marketQueueService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, marketQueueService, tokensService);
     }
 
     @Provides

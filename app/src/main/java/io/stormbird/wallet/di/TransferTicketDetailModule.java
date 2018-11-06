@@ -13,6 +13,7 @@ import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
 
 import dagger.Module;
@@ -34,9 +35,10 @@ public class TransferTicketDetailModule {
             TransferTicketDetailRouter transferTicketDetailRouter,
             FeeMasterService feeMasterService,
             AssetDisplayRouter assetDisplayRouter,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TokensService tokensService) {
         return new TransferTicketDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService, tokensService);
     }
 
     @Provides

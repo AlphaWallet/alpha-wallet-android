@@ -204,6 +204,7 @@ public class WalletsViewModel extends BaseViewModel
     private void updateList(Token token)
 	{
         walletBalances.put(token.getAddress(), token.balance);
+        updateBalance.postValue(walletBalances);
 	}
 
 	private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)

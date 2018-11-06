@@ -95,7 +95,10 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         for (Wallet wallet : wallets)
         {
-        	wallet.setWalletBalance(balances.get(wallet.address));
+        	if (balances.containsKey(wallet.address))
+			{
+				wallet.setWalletBalance(balances.get(wallet.address));
+			}
         }
         notifyDataSetChanged();
     }

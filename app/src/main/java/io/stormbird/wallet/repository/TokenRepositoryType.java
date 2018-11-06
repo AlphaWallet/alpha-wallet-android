@@ -40,6 +40,7 @@ public interface TokenRepositoryType {
     rx.Subscription memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
     rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo);
+    Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, int interfaceSpec);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
     Single<Ticker> getEthTicker();

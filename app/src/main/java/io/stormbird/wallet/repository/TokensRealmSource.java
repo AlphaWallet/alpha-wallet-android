@@ -431,10 +431,8 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token)
     {
-        Realm realm = null;
-        try
+        try (Realm realm = realmManager.getRealmInstance(network, wallet))
         {
-            realm = realmManager.getRealmInstance(network, wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", token.tokenInfo.address)
                     .findFirst();
@@ -461,6 +459,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setDecimals(token.tokenInfo.decimals);
                     realmToken.setStormbird(token.tokenInfo.isStormbird);
                 }
+                token.setRealmInterfaceSpec(realmToken);
                 realmToken.setNullCheckCount(0);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
@@ -469,17 +468,6 @@ public class TokensRealmSource implements TokenLocalSource {
         catch (Exception ex)
         {
             ex.printStackTrace();
-            if (realm != null && realm.isInTransaction())
-            {
-                realm.cancelTransaction();
-            }
-        }
-        finally
-        {
-            if (realm != null)
-            {
-                realm.close();
-            }
         }
     }
 
@@ -534,6 +522,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setSymbol(token.tokenInfo.symbol);
                 realmToken.setDecimals(token.tokenInfo.decimals);
                 realmToken.setAddedTime(currentTime.getTime());
+                token.setRealmInterfaceSpec(realmToken);
                 realmToken.setEnabled(true);
                 realmToken.setBurnList("");
 
@@ -546,7 +535,7 @@ public class TokensRealmSource implements TokenLocalSource {
             else
             {
                 Log.d(TAG, "Update Token: " + token.getFullName());
-                if (!token.tokenInfo.name.equals(realmToken.getName()) || !token.tokenInfo.symbol.equals(realmToken.getSymbol()))
+                if (token.checkRealmBalanceChange(realmToken))
                 {
                     //has token changed?
                     TransactionsRealmCache.addRealm();
@@ -555,6 +544,8 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setSymbol(token.tokenInfo.symbol);
                     realmToken.setDecimals(token.tokenInfo.decimals);
                     realmToken.setAddedTime(currentTime.getTime());
+                    token.setRealmInterfaceSpec(realmToken);
+                    token.setRealmBalance(realmToken);
                     realmToken.setEnabled(true);
                     realm.commitTransaction();
                     TransactionsRealmCache.subRealm();
@@ -843,6 +834,7 @@ public class TokensRealmSource implements TokenLocalSource {
         realmToken.setAddedTime(-1);
         realmToken.setEnabled(true);
         realmToken.setBurnList("");
+        realmToken.setInterfaceSpec(0);
 
         if (token instanceof Ticket) {
             realmToken.setStormbird(true);

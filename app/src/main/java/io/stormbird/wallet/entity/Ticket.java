@@ -201,6 +201,12 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
+    public void setRealmInterfaceSpec(RealmToken realmToken)
+    {
+        realmToken.setInterfaceSpec(interfaceSpec.ordinal());
+    }
+
+    @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showRedeemToken(context, this);
@@ -704,6 +710,22 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
+    @Override
+    public void setInterfaceSpecFromRealm(RealmToken realm)
+    {
+        this.interfaceSpec = InterfaceType.values()[realm.getInterfaceSpec()];
+    }
+
+    @Override
+    public void patchAuxData(Token token)
+    {
+        if (token instanceof Ticket)
+        {
+            this.interfaceSpec = InterfaceType.values()[((Ticket)token).interfaceOrdinal()];
+        }
+        super.patchAuxData(token);
+    }
+
     public Function getTradeFunction(BigInteger expiry, List<BigInteger> indices, int v, byte[] r, byte[] s)
     {
         return new Function(
@@ -757,16 +779,20 @@ public class Ticket extends Token implements Parcelable
         return dynArray;
     }
 
-    public boolean needsInterfaceSpecUpdate(RealmToken realmToken)
+    @Override
+    public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
-        int spec = 256;
-        if (interfaceSpec == InterfaceType.UsingUint16) spec = 16;
+        if (interfaceSpec.ordinal() != realmToken.getInterfaceSpec()) return true;
+        return super.checkRealmBalanceChange(realmToken);
+    }
 
-        return (realmToken.getTokenId() != spec);
+    public int interfaceOrdinal()
+    {
+        return interfaceSpec.ordinal();
     }
 
     private enum InterfaceType
     {
-        UsingUint16, UsingUint256
+        NotSpecified, UsingUint16, UsingUint256
     };
 }

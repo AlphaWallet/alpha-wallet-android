@@ -309,9 +309,15 @@ public class Token implements Parcelable
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
         if (tokenInfo.name != null && realmToken.getName() == null) return true; //signal to update database if correct name has been fetched (node timeout etc)
+        if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
         if (tokenInfo.isStormbird != realmToken.isStormbird()) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
+    }
+
+    public void setRealmInterfaceSpec(RealmToken realmToken)
+    {
+
     }
 
     public void setIsEthereum()
@@ -350,6 +356,10 @@ public class Token implements Parcelable
 
     public void setInterfaceSpec(int b) { }
     public boolean isOldSpec() { return false; }
+    public void setInterfaceSpecFromRealm(RealmToken ordinal)
+    {
+
+    }
 
     public String getFunctionSignature(String function)
     {
@@ -359,5 +369,10 @@ public class Token implements Parcelable
     public boolean needsInterfaceSpecUpdate(RealmToken realmToken)
     {
         return false;
+    }
+
+    public void patchAuxData(Token token)
+    {
+
     }
 }

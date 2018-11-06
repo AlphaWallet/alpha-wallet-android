@@ -124,6 +124,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 setAnimation(holder.itemView);
             }
             break;
+            default:
             // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
             case TotalBalanceHolder.VIEW_TYPE: {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
@@ -243,6 +244,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void populateTokens(Token[] tokens)
     {
+        int itemCount = items.size();
         if (needsRefresh)
         {
             items.clear();
@@ -282,6 +284,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
+
+        if (itemCount != items.size())
+        {
+            if (items.size() < itemCount)
+            {
+                needsRefresh = true;
+            }
+        }
 
         if (needsRefresh)
         {

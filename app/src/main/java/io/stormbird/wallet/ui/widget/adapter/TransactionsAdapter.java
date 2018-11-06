@@ -16,6 +16,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 import io.stormbird.wallet.ui.widget.entity.DateSortedItem;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
@@ -70,9 +71,11 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     private Wallet wallet;
     private NetworkInfo network;
     private Map<String, TransactionSortedItem> checkMap = new HashMap<>();
+    private final TokensService tokensService;
 
-    public TransactionsAdapter(OnTransactionClickListener onTransactionClickListener) {
+    public TransactionsAdapter(OnTransactionClickListener onTransactionClickListener, TokensService service) {
         this.onTransactionClickListener = onTransactionClickListener;
+        tokensService = service;
         setHasStableIds(true);
     }
 
@@ -82,7 +85,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE: {
                 TransactionHolder transactionHolder
-                        = new TransactionHolder(R.layout.item_transaction, parent);
+                        = new TransactionHolder(R.layout.item_transaction, parent, tokensService);
                 transactionHolder.setOnTransactionClickListener(onTransactionClickListener);
                 holder = transactionHolder;
             } break;

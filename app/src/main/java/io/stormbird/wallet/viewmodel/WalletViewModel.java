@@ -17,6 +17,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
@@ -183,8 +184,6 @@ public class WalletViewModel extends BaseViewModel
     {
         List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[serviceList.size()]);
-
-        progress.postValue(false);
         tokens.postValue(tokenCache);
 
         if (updateTokens != null) updateTokens.dispose();
@@ -192,7 +191,7 @@ public class WalletViewModel extends BaseViewModel
         if (defaultNetwork.getValue() != null && defaultNetwork.getValue().isMainNetwork)
         {
             updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
-                    //.flatMap(accountData -> openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"))
+                    //openseaService.getTokens("0x51A9f155405Ea594d881fE9c1f1eb38F003B0A57") //"0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::gotOpenseaTokens, this::onError);
@@ -207,19 +206,23 @@ public class WalletViewModel extends BaseViewModel
     {
         if (updateTokens != null) updateTokens.dispose();
 
+        tokensService.clearBalanceOf(ERC721Token.class);
+
         for (Token t : tokens)
         {
-            tokensService.addToken(t);
+            tokensService.addTokenUnchecked(t);
         }
 
+        List<Token> tokenList = tokensService.getAllClass(ERC721Token.class);
+
         //store these tokens
-        updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokens)
+        updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokenList.toArray(new Token[tokenList.size()]))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::storedTokens, this::onError);
 
-        List<Token> serviceList = tokensService.getAllLiveTokens();
-        tokenCache = serviceList.toArray(new Token[serviceList.size()]);
+        tokenList = tokensService.getAllLiveTokens();
+        tokenCache = tokenList.toArray(new Token[tokenList.size()]);
         onFetchTokensCompletable();
     }
 

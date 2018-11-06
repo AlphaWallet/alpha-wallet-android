@@ -10,10 +10,17 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collectors;
 
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
@@ -43,7 +50,6 @@ import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 public class TransactionsViewModel extends BaseViewModel
 {
     private static final long FETCH_TRANSACTIONS_INTERVAL = 12 * DateUtils.SECOND_IN_MILLIS;
-    private static final int  MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE = 20;
     private static final String TAG = "TVM";
 
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
@@ -71,6 +77,8 @@ public class TransactionsViewModel extends BaseViewModel
     private Disposable handleTerminatedContracts;
 
     private Handler handler = new Handler();
+
+    private final ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(5);
 
     private boolean isVisible = false;
     private Transaction[] txArray;
@@ -318,10 +326,9 @@ public class TransactionsViewModel extends BaseViewModel
         fetchTransactionDisposable = setupTokensInteract.processRemainingTransactions(txMap.values().toArray(new Transaction[txMap.size()]), tokensService) //patches tx's and returns unknown contracts
                 .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions).toObservable()) //store patched TX
                 .map(setupTokensInteract::getUnknownContracts) //emit a list of string addresses
-                .map(this::limitToChunk)
                 .flatMap(setupTokensInteract::addTokens) //fetch tokenInfo
                 .flatMap(addTokenInteract::add) //add to database
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.from(threadPoolExecutor))
                 .subscribe(this::updateTransactions, this::onError, this::storeUnprocessedTx);
 
         if (transactionCount == 0)
@@ -330,16 +337,6 @@ public class TransactionsViewModel extends BaseViewModel
             progress.postValue(false);
             showEmpty.postValue(true);
         }
-    }
-
-    private List<String> limitToChunk(List<String> strings)
-    {
-        if (strings.size() > MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE)
-        {
-            strings = strings.subList(0, MAX_TOKEN_CONTRACT_FETCH_PER_UPDATE_CYCLE);
-            immediateCycleStart = true;
-        }
-        return strings;
     }
 
     private void updateTransactions(Token[] tokens)
@@ -481,14 +478,11 @@ public class TransactionsViewModel extends BaseViewModel
     //start updating transactions
     public void startTransactionRefresh() {
         isVisible = true;
+
         if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
         {
             checkIfRegularUpdateNeeded();
         }
-        /*if (txArray != null)
-        {
-            this.transactions.postValue(txArray);
-        }*/
     }
 
     public void setVisibility(boolean visibility) {
@@ -504,7 +498,7 @@ public class TransactionsViewModel extends BaseViewModel
         handleTerminatedContracts = Observable.fromCallable(tokensService::getTerminationList)
                 .flatMapIterable(address -> address)
                 .map(address -> setupTokensInteract.terminateToken(tokensService.getToken(address), defaultWallet().getValue(), defaultNetwork().getValue()))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.from(threadPoolExecutor))
                 .subscribe(this::onTokenForTermination, this::onScanError, this::wipeTerminationList);
     }
 
@@ -566,5 +560,10 @@ public class TransactionsViewModel extends BaseViewModel
         }
 
         return restoreRequired;
+    }
+
+    public TokensService getTokensService()
+    {
+        return tokensService;
     }
 }

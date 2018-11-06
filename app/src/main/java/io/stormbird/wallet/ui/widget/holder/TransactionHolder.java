@@ -13,9 +13,12 @@ import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.TransactionContract;
 import io.stormbird.wallet.entity.TransactionLookup;
 import io.stormbird.wallet.entity.TransactionOperation;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 
 import java.math.BigDecimal;
@@ -40,12 +43,13 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     private final TextView value;
     private final ImageView typeIcon;
     private final TextView supplimental;
+    private final TokensService tokensService;
 
     private Transaction transaction;
     private String defaultAddress;
     private OnTransactionClickListener onTransactionClickListener;
 
-    public TransactionHolder(int resId, ViewGroup parent) {
+    public TransactionHolder(int resId, ViewGroup parent, TokensService service) {
         super(resId, parent);
 
         typeIcon = findViewById(R.id.type_icon);
@@ -53,6 +57,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
         supplimental = findViewById(R.id.supplimental);
+        tokensService = service;
 
         typeIcon.setColorFilter(
                 ContextCompat.getColor(getContext(), R.color.item_icon_tint),
@@ -89,9 +94,16 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
                  ETHER_DECIMALS, transaction.timeStamp);
         }
+        else if (operation.contract != null)
+        {
+            fillERC20(transaction);
+        }
         else {
-            fill(transaction.error, operation.from, operation.to, operation.contract.symbol, operation.value,
-                    operation.contract.decimals, transaction.timeStamp);
+            String symbol = tokensService.getTokenSymbol(operation.contract.address);
+            int decimals = tokensService.getTokenDecimals(operation.contract.address);
+
+            fill(transaction.error, operation.from, operation.to, symbol, operation.value,
+                    decimals, transaction.timeStamp);
         }
     }
 
@@ -100,6 +112,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         int colourResource;
         TransactionOperation operation = transaction.operations[0];
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        String name = tokensService.getTokenName(ct.address);
 
         switch (ct.type)
         {
@@ -128,7 +141,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         String operationName = getString(TransactionLookup.typeToName(ct.operation));
 
         type.setText(operationName);
-        address.setText(ct.name);
+        address.setText(name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
         String ticketMove = "";
         String supplimentalTxt = "";
@@ -140,7 +153,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
 
         switch (ct.operation)
         {
-            case MAGICLINK_TRANSFER: //transfered out of our wallet via magic link (0 value)
+            case MAGICLINK_TRANSFER: //transferred out of our wallet via magic link (0 value)
             case MAGICLINK_PICKUP: //received ticket from a magic link
                 break;
             case MAGICLINK_SALE: //we received ether from magiclink sale
@@ -150,7 +163,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
                 supplimentalTxt = "-" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
             case RECEIVE_FROM:
-                supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                supplimentalTxt = "";//"+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
             case LOAD_NEW_TOKENS:
                 ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
@@ -158,6 +171,8 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             default:
                 break;
         }
+
+        supplimental.setTextSize(12.0f);
 
         if (!trans.error.equals("0"))
         {
@@ -176,6 +191,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             layoutParams.setMarginStart(30);
             supplimental.setText(supplimentalTxt);
             supplimental.setVisibility(View.VISIBLE);
+            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
             value.setText(ticketMove);
 
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
@@ -202,6 +218,51 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         }
         address.setText(isSent ? to : from);
         value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
+
+        if (valueStr.equals("0")) {
+            valueStr = "0 " + symbol;
+        } else {
+            valueStr = (isSent ? "-" : "+") + getScaledValue(valueStr, decimals) + " " + symbol;
+        }
+
+        this.value.setText(valueStr);
+    }
+
+    private void fillERC20(
+            Transaction transaction)
+    {
+        TransactionOperation operation = transaction.operations[0];
+
+        String name = tokensService.getTokenName(operation.contract.address);
+        String symbol = tokensService.getTokenSymbol(operation.contract.address);
+        int decimals = tokensService.getTokenDecimals(operation.contract.address);
+
+        String from = operation.from;
+
+        String supplimentalTxt = "";
+
+        boolean isSent = from.toLowerCase().equals(defaultAddress);
+        type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
+        if (transaction.error == null || transaction.error.length() == 0) {
+            typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
+        } else if (!isSent) {
+            typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+            supplimentalTxt = getString(R.string.label_from) + " " + operation.from;
+        } else {
+            typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+            supplimentalTxt = getString(R.string.label_to) + " " + operation.to;
+        }
+        address.setText(name);
+        value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
+
+        if (supplimentalTxt.length() > 0)
+        {
+            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+            supplimental.setText(supplimentalTxt);
+            supplimental.setTextSize(10.0f);
+        }
+
+        String valueStr = operation.value;
 
         if (valueStr.equals("0")) {
             valueStr = "0 " + symbol;

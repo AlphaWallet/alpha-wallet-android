@@ -18,5 +18,6 @@ public enum TransactionType
     TERMINATE_CONTRACT,
     UNKNOWN_FUNCTION,
     INVALID_OPERATION,
+    TRANSFER_FROM,
     ILLEGAL_VALUE
 };

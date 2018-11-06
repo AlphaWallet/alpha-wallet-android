@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
+
+import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
 public class TokensService
 {
@@ -46,9 +48,62 @@ public class TokensService
         }
     }
 
+    public Token addTokenUnchecked(Token t)
+    {
+        tokenMap.put(t.getAddress(), t);
+        return t;
+    }
+
     public Token getToken(String addr)
     {
-        return tokenMap.get(addr);
+        if (addr != null) return tokenMap.get(addr);
+        else return null;
+    }
+
+    public String getTokenName(String addr)
+    {
+        if (addr == null) return "[Unknown contract]";
+        String name = addr;
+        Token token = tokenMap.get(addr);
+        if (token != null)
+        {
+            if (token.isTerminated())
+            {
+                name = "[deleted contract]";
+            }
+            else if (!token.isBad())
+            {
+                name = token.getFullName();
+            }
+        }
+
+        return name;
+    }
+
+    public String getTokenSymbol(String addr)
+    {
+        String symbol = "TOK";
+        if (addr == null) return symbol;
+        Token token = tokenMap.get(addr);
+        if (token != null)
+        {
+            symbol = token.tokenInfo.symbol;
+        }
+
+        return symbol;
+    }
+
+    public int getTokenDecimals(String addr)
+    {
+        int decimals = ETHER_DECIMALS;
+        if (addr == null) return decimals;
+        Token token = tokenMap.get(addr);
+        if (token != null)
+        {
+            decimals = token.tokenInfo.decimals;
+        }
+
+        return decimals;
     }
 
     public void clearTokens()
@@ -148,5 +203,29 @@ public class TokensService
     {
         if (updateMap.containsKey(address)) return updateMap.get(address);
         else return 0;
+    }
+
+    public List<Token> getAllClass(Class<?> tokenClass)
+    {
+        List<Token> classTokens = new ArrayList<>();
+        for (Token t : tokenMap.values())
+        {
+            if (tokenClass.isInstance(t))
+            {
+                classTokens.add(t);
+            }
+        }
+        return classTokens;
+    }
+
+    public void clearBalanceOf(Class<?> tokenClass)
+    {
+        for (Token t : tokenMap.values())
+        {
+            if (tokenClass.isInstance(t))
+            {
+                ((ERC721Token)t).tokenBalance.clear();
+            }
+        }
     }
 }

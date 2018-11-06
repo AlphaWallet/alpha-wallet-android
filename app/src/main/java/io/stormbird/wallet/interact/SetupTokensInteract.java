@@ -4,28 +4,21 @@ package io.stormbird.wallet.interact;
  * Created by James on 16/01/2018.
  */
 
-import android.util.Log;
-
-import org.web3j.utils.Numeric;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionDecoder;
-import io.stormbird.wallet.entity.TransactionInput;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.service.TokensService;
 
 public class SetupTokensInteract {
@@ -33,6 +26,7 @@ public class SetupTokensInteract {
     private final static String TAG = "STI";
     private final TokenRepositoryType tokenRepository;
     private List<String> unknownContracts = new ArrayList<>();
+    private TransactionDecoder transactionDecoder = new TransactionDecoder();
 
     public static final String UNKNOWN_CONTRACT = "[Unknown Contract]";
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";

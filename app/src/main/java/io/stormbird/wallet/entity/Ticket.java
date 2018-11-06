@@ -9,6 +9,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
@@ -18,8 +21,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +54,7 @@ public class Ticket extends Token implements Parcelable
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
+    private InterfaceType interfaceSpec = InterfaceType.UsingUint256;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -69,6 +74,8 @@ public class Ticket extends Token implements Parcelable
         burnIndices = new ArrayList<Integer>();
         int objSize = in.readInt();
         int burnSize = in.readInt();
+        int interfaceOrdinal = in.readInt();
+        interfaceSpec = InterfaceType.values()[interfaceOrdinal];
         if (objSize > 0)
         {
             Object[] readObjArray = in.readArray(Object.class.getClassLoader());
@@ -124,6 +131,7 @@ public class Ticket extends Token implements Parcelable
         super.writeToParcel(dest, flags);
         dest.writeInt(balanceArray.size());
         dest.writeInt(burnIndices.size());
+        dest.writeInt(interfaceSpec.ordinal());
         if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
         if (burnIndices.size() > 0) dest.writeArray(burnIndices.toArray());
     }
@@ -190,6 +198,12 @@ public class Ticket extends Token implements Parcelable
     public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
     {
         realmToken.setBurnList(integerListToString(burnList, false));
+    }
+
+    @Override
+    public void setRealmInterfaceSpec(RealmToken realmToken)
+    {
+        realmToken.setInterfaceSpec(interfaceSpec.ordinal());
     }
 
     @Override
@@ -670,48 +684,6 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
-//    public int getXMLTokenNetwork(BaseActivity activity)
-//    {
-//        TokenDefinition td = getTokenDefinition(activity);
-//        if (td != null) return td.getNetworkId();
-//        else return 1;
-//    }
-//
-//    public String getXMLContractAddress(BaseActivity activity, int networkId)
-//    {
-//        TokenDefinition td = getTokenDefinition(activity);
-//        if (td != null) return td.getContractAddress(networkId);
-//        else return "0x";
-//    }
-//
-//    public String getXMLTokenName()
-//    {
-//        TokenDefinition td = getTokenDefinition(activity);
-//        if (td != null) return td.
-//                getTokenName();
-//        else return "Generic Token";
-//    }
-
-//    private TokenDefinition getTokenDefinition(BaseActivity activity)
-//    {
-//        try
-//        {
-//            return new TokenDefinition(
-//                    activity.getResources().getAssets().open("TicketingContract.xml"),
-//                    activity.getResources().getConfiguration().locale);
-//        }
-//        catch (IOException e)
-//        {
-//            //react to file not found
-//            return null;
-//        }
-//        catch (SAXException e)
-//        {
-//            //react to interpretation exception
-//            return null;
-//        }
-//    }
-
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
         int networkId = assetService.getNetworkId(getAddress());
@@ -722,4 +694,105 @@ public class Ticket extends Token implements Parcelable
     {
         return isMatchedInXML;
     }
+
+    @Override
+    public void setInterfaceSpec(int data)
+    {
+        switch (data)
+        {
+            case 16:
+                this.interfaceSpec = InterfaceType.UsingUint16;
+                break;
+            case 256:
+            default:
+                this.interfaceSpec = InterfaceType.UsingUint256;
+                break;
+        }
+    }
+
+    @Override
+    public void setInterfaceSpecFromRealm(RealmToken realm)
+    {
+        this.interfaceSpec = InterfaceType.values()[realm.getInterfaceSpec()];
+    }
+
+    @Override
+    public void patchAuxData(Token token)
+    {
+        if (token instanceof Ticket)
+        {
+            this.interfaceSpec = InterfaceType.values()[((Ticket)token).interfaceOrdinal()];
+        }
+        super.patchAuxData(token);
+    }
+
+    public Function getTradeFunction(BigInteger expiry, List<BigInteger> indices, int v, byte[] r, byte[] s)
+    {
+        return new Function(
+                "trade",
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
+                                    getDynArray(indices),
+                                    new org.web3j.abi.datatypes.generated.Uint8(v),
+                                    new org.web3j.abi.datatypes.generated.Bytes32(r),
+                                    new org.web3j.abi.datatypes.generated.Bytes32(s)),
+                Collections.<TypeReference<?>>emptyList());
+    }
+
+    public Function getTransferFunction(String to, List<BigInteger> indices)
+    {
+        return new Function(
+                "transfer",
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(to),
+                                    getDynArray(indices)
+                                ),
+                Collections.<TypeReference<?>>emptyList());
+    }
+
+    public boolean isOldSpec()
+    {
+        switch (interfaceSpec)
+        {
+            case UsingUint16:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
+    {
+        org.web3j.abi.datatypes.DynamicArray dynArray;
+
+        switch (interfaceSpec)
+        {
+            case UsingUint16:
+                dynArray = new org.web3j.abi.datatypes.DynamicArray<>(
+                        org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint16.class));
+                break;
+            case UsingUint256:
+            default:
+                dynArray = new org.web3j.abi.datatypes.DynamicArray<>(
+                        org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
+                break;
+        }
+
+        return dynArray;
+    }
+
+    @Override
+    public boolean checkRealmBalanceChange(RealmToken realmToken)
+    {
+        if (interfaceSpec.ordinal() != realmToken.getInterfaceSpec()) return true;
+        return super.checkRealmBalanceChange(realmToken);
+    }
+
+    public int interfaceOrdinal()
+    {
+        return interfaceSpec.ordinal();
+    }
+
+    private enum InterfaceType
+    {
+        NotSpecified, UsingUint16, UsingUint256
+    };
 }

@@ -300,8 +300,6 @@ public class TransactionsViewModel extends BaseViewModel
         txArray = txMap.values().toArray(new Transaction[0]);
         transactionCount += txArray.length;
         txContractList.clear();
-
-        final long useBlock = latestBlock; //cache last value
         latestBlock = blockNumber.longValue();
 
         if (wallet.getValue() != null)
@@ -312,7 +310,7 @@ public class TransactionsViewModel extends BaseViewModel
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
-                    .flatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), useBlock, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                    .flatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .subscribe(this::onContractTransactions, this::onError, this::siftUnknownTransactions);
@@ -326,10 +324,22 @@ public class TransactionsViewModel extends BaseViewModel
     private void onContractTransactions(Transaction[] transactions)
     {
         disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions)
+                .map(this::setLatestBlock)
                 .map(this::removeFromMapTx)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(this::updateTransactionMap, this::onError);
+    }
+
+    private Transaction[] setLatestBlock(Transaction[] transactions)
+    {
+        for (Transaction tx : transactions)
+        {
+            tokensService.setLatestBlock(tx.to, latestBlock);
+            break;
+        }
+
+        return transactions;
     }
 
     private void updateTransactionMap(Transaction[] transactions)
@@ -363,7 +373,7 @@ public class TransactionsViewModel extends BaseViewModel
     {
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
                 .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
-                .flatMap(addTokenInteract::add) //add to database
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address))) //add to database
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(this::updateTokenService, this::onError, this::scanForTerminatedTokens);

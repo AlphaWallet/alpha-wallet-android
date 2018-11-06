@@ -15,7 +15,8 @@ public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
-
+    private static Map<String, Integer> interfaceSpecMap = new ConcurrentHashMap<>();
+    private Map<String, Long> updateMap = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private int currentNetwork = 0;
 
@@ -33,8 +34,18 @@ public class TokensService
         if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
         {
             tokenMap.put(t.getAddress(), t);
+            setSpec(t);
         }
+
         return t;
+    }
+
+    private void setSpec(Token t)
+    {
+        if (interfaceSpecMap.get(t.getAddress()) != null)
+        {
+            t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()));
+        }
     }
 
     public Token addTokenUnchecked(Token t)
@@ -140,6 +151,7 @@ public class TokensService
             if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
             {
                 tokenMap.put(t.getAddress(), t);
+                setSpec(t);
             }
         }
     }
@@ -168,6 +180,28 @@ public class TokensService
     public void setCurrentNetwork(int currentNetwork)
     {
         this.currentNetwork = currentNetwork;
+    }
+
+    public static void setInterfaceSpec(String address, int functionSpec)
+    {
+        interfaceSpecMap.put(address, functionSpec);
+    }
+
+    public int getInterfaceSpec(String address)
+    {
+        if (interfaceSpecMap.containsKey(address)) return interfaceSpecMap.get(address);
+        else return 0;
+    }
+
+    public void setLatestBlock(String address, long block)
+    {
+        updateMap.put(address, block);
+    }
+
+    public long getLatestBlock(String address)
+    {
+        if (updateMap.containsKey(address)) return updateMap.get(address);
+        else return 0;
     }
 
     public List<Token> getAllClass(Class<?> tokenClass)

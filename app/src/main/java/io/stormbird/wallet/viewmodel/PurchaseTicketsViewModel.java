@@ -6,12 +6,14 @@ import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 
 import static io.stormbird.wallet.entity.MagicLinkParcel.generateReverseTradeData;
 
@@ -35,15 +37,18 @@ public class PurchaseTicketsViewModel extends BaseViewModel
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final MarketQueueService marketQueueService;
+    private final TokensService tokensService;
 
     PurchaseTicketsViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                              FindDefaultWalletInteract findDefaultWalletInteract,
                              CreateTransactionInteract createTransactionInteract,
-                             MarketQueueService marketQueueService) {
+                             MarketQueueService marketQueueService,
+                             TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.marketQueueService = marketQueueService;
+        this.tokensService = tokensService;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -78,8 +83,9 @@ public class PurchaseTicketsViewModel extends BaseViewModel
 
     public void buyRange(MagicLinkParcel marketInstance)
     {
+        Token token = tokensService.getToken(marketInstance.magicLink.contractAddress);
         //ok let's try to drive this guy through
-        final byte[] tradeData = generateReverseTradeData(marketInstance.magicLink);
+        final byte[] tradeData = generateReverseTradeData(marketInstance.magicLink, token);
         //quick sanity check, dump price
         BigInteger milliWei = Convert.fromWei(marketInstance.magicLink.priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         double recreatePrice = milliWei.doubleValue() / 1000.0;

@@ -22,11 +22,11 @@ public class AddTokenInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<Token> add(TokenInfo tokenInfo) {
+    public Observable<Token> add(TokenInfo tokenInfo, int interfaceSpec) {
         return walletRepository
                 .getDefaultWallet()
                 .flatMap(wallet -> tokenRepository
-                        .addToken(wallet, tokenInfo))
+                        .addToken(wallet, tokenInfo, interfaceSpec))
                 .toObservable();
     }
 

@@ -423,6 +423,22 @@ public class TokenRepository implements TokenRepositoryType {
         Log.d(TAG, "Create for store3: " + tokenInfo.name);
 
         return localSource.saveToken(
+                ethereumNetworkRepository.getDefaultNetwork(),
+                wallet,
+                newToken);
+    }
+
+    @Override
+    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, int interfaceSpec)
+    {
+        TokenFactory tf = new TokenFactory();
+        Token newToken = tf.createToken(tokenInfo);
+        newToken.setTokenWallet(wallet.address);
+        newToken.setTokenNetwork(ethereumNetworkRepository.getDefaultNetwork().chainId);
+        newToken.setInterfaceSpec(interfaceSpec);
+        Log.d(TAG, "Create for store4: " + tokenInfo.name);
+
+        return localSource.saveToken(
                     ethereumNetworkRepository.getDefaultNetwork(),
                     wallet,
                     newToken);
@@ -592,6 +608,7 @@ public class TokenRepository implements TokenRepositoryType {
                 }
 
                 Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
+                updated.patchAuxData(token); //perform any updates we need here
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);
                 updated.setTokenNetwork(network.chainId);
@@ -1097,46 +1114,20 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
-    private static Function getTransferFunction(String to, List<BigInteger> ticketIndices)
-    {
-        Function function = new Function(
-                "transfer",
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(to),
-                        new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Uint16>(
-                                org.web3j.abi.Utils.typeMap(ticketIndices, org.web3j.abi.datatypes.generated.Uint16.class))),
-                Collections.<TypeReference<?>>emptyList());
-        return function;
-    }
-
-    public static byte[] createTicketTransferData(String to, String indexListStr) {
-        //params are: Address, List<Uint16> of ticket indicies
+    public static byte[] createTicketTransferData(String to, String indexListStr, Token token) {
         List ticketIndicies = Observable.fromArray(indexListStr.split(","))
                 .map(s -> new BigInteger(s.trim())).toList().blockingGet();
-        Function function = getTransferFunction(to, ticketIndicies);
+        Function function = ((Ticket)token).getTransferFunction(to, ticketIndicies);
 
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
-    public static byte[] createTrade(BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
+    public static byte[] createTrade(Token token, BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
     {
-        Function function = getTradeFunction(expiry, ticketIndices, v, r, s);
+        Function function = ((Ticket)token).getTradeFunction(expiry, ticketIndices, v, r, s);
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
-    }
-
-    private static Function getTradeFunction(BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
-    {
-        Function function = new Function(
-                "trade",
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
-                        new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Uint16>(
-                                org.web3j.abi.Utils.typeMap(ticketIndices, org.web3j.abi.datatypes.generated.Uint16.class)),
-                        new org.web3j.abi.datatypes.generated.Uint8(v),
-                        new org.web3j.abi.datatypes.generated.Bytes32(r),
-                        new org.web3j.abi.datatypes.generated.Bytes32(s)),
-                Collections.<TypeReference<?>>emptyList());
-        return function;
     }
 
     private Token[] mapToTokens(TokenInfo[] items) {

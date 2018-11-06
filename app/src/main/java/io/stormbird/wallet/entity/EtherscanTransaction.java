@@ -3,9 +3,15 @@ package io.stormbird.wallet.entity;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+
 import java.math.BigInteger;
+
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.service.TokensService;
+
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 
 /**
  * Created by James on 26/03/2018.
@@ -55,6 +61,19 @@ public class EtherscanTransaction
             ct.address = contractAddress;
             ct.setType(-3);// indicate that we need to load the contract
             isConstructor = true;
+            //TODO: We can detect ERC20, ERC875 and other Token contracts here
+            if (detectUint16Contract(input))
+            {
+                ct.decimals = 16;
+            }
+            else
+            {
+                ct.decimals = 256;
+            }
+
+            TokensService.setInterfaceSpec(contractAddress, ct.decimals);
+
+            input = "Constructor"; //Placeholder - don't consume storage for the constructor
         }
         else
         {
@@ -78,12 +97,14 @@ public class EtherscanTransaction
                     switch (f.functionData.functionFullName)
                     {
                         case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
+                        case "trade(uint256,uint256[],uint8,bytes32,bytes32)":
                             o = processTrade(f);
                             op = o[0];
                             setName(o, TransactionType.MAGICLINK_TRANSFER);
                             op.contract.address = to;
                             break;
                         case "transferFrom(address,address,uint16[])":
+                        case "transferFrom(address,address,uint256[])":
                             o = generateERC875Op();
                             op = o[0];
                             op.contract.setIndicies(f.paramValues);
@@ -101,6 +122,7 @@ public class EtherscanTransaction
                             op.to = f.getAddress(1);
                             break;
                         case "transfer(address,uint16[])":
+                        case "transfer(address,uint256[])":
                             o = generateERC875Op();
                             op = o[0];
                             op.contract.setOtherParty(f.getFirstAddress());
@@ -128,6 +150,7 @@ public class EtherscanTransaction
                             op.contract.setType(1);
                             break;
                         case "loadNewTickets(bytes32[])":
+                        case "loadNewTickets(uint256[])":
                             o = generateERC875Op();
                             op = o[0];
                             op.from = from;
@@ -137,6 +160,7 @@ public class EtherscanTransaction
                             op.contract.setType(1);
                             break;
                         case "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)":
+                        case "passTo(uint256,uint256[],uint8,bytes32,bytes32,address)":
                             o = processPassTo(f);
                             op = o[0];
                             op.from = from;
@@ -276,7 +300,17 @@ public class EtherscanTransaction
         if (data.containsAddress(walletAddr)) return true;
         if (trans.from.equalsIgnoreCase(walletAddr)) return true;
         if (trans.to.equalsIgnoreCase(walletAddr)) return true;
-        if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(walletAddr)) involved = true;
+        if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(walletAddr))
+            involved = true;
         return involved;
+    }
+
+    private boolean detectUint16Contract(String input)
+    {
+        String transferFromSig = Numeric.cleanHexPrefix(buildMethodId("transfer(address,uint16[])"));
+        if (input.length() < 10) return false;
+
+        int index = input.indexOf(transferFromSig);
+        return index > 0;
     }
 }

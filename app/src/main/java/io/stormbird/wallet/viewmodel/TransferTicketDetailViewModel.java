@@ -10,6 +10,7 @@ import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
@@ -21,6 +22,7 @@ import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.TransferTicketDetailActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -53,6 +55,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final FeeMasterService feeMasterService;
     private final AssetDisplayRouter assetDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -66,7 +69,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   TransferTicketDetailRouter transferTicketDetailRouter,
                                   FeeMasterService feeMasterService,
                                   AssetDisplayRouter assetDisplayRouter,
-                                  AssetDefinitionService assetDefinitionService) {
+                                  AssetDefinitionService assetDefinitionService,
+                                  TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -75,6 +79,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.feeMasterService = feeMasterService;
         this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -168,7 +173,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void createTicketTransfer(String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
-        final byte[] data = TokenRepository.createTicketTransferData(to, indexList);
+        Token token = tokensService.getToken(contractAddress);
+        final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
         disposable = createTransactionInteract
                 .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
                 .subscribe(this::onCreateTransaction, this::onError);

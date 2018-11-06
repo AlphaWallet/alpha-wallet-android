@@ -57,6 +57,8 @@ public class TokenFactory
             thisToken = new Token(tokenInfo, balance, updateBlancaTime);
         }
 
+        thisToken.setInterfaceSpecFromRealm(realmItem);
+
         return thisToken;
     }
 
@@ -78,6 +80,8 @@ public class TokenFactory
             BigDecimal balance = new BigDecimal(realmBalance);
             thisToken = new Token(tokenInfo, balance, updateBlancaTime);
         }
+
+        thisToken.setInterfaceSpecFromRealm(realmItem);
 
         return thisToken;
     }

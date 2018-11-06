@@ -13,9 +13,8 @@ public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
+    private static Map<String, Integer> interfaceSpecMap = new ConcurrentHashMap<>();
     private Map<String, Long> updateMap = new ConcurrentHashMap<>();
-    private Map<String, Integer> interfaceSpecMap = new ConcurrentHashMap<>();
-
     private String currentAddress = null;
     private int currentNetwork = 0;
 
@@ -44,20 +43,6 @@ public class TokensService
         if (interfaceSpecMap.get(t.getAddress()) != null)
         {
             t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()));
-        }
-    }
-
-    public boolean hasOldSpec(String address)
-    {
-        Token token = tokenMap.get(address);
-        if (token != null && interfaceSpecMap.get(address) != null)
-        {
-            token.setInterfaceSpec(interfaceSpecMap.get(token.getAddress()));
-            return token.isOldSpec();
-        }
-        else
-        {
-            return false;
         }
     }
 
@@ -117,11 +102,9 @@ public class TokensService
         }
     }
 
-
     public Observable<List<String>> reduceToUnknown(List<String> addrs)
     {
         return Observable.fromCallable(() -> {
-            List<String> addresses = new ArrayList<>();
             for (Token t : tokenMap.values())
             {
                 if (addrs.contains(t.getAddress()))
@@ -134,41 +117,36 @@ public class TokensService
         });
     }
 
-    public void tokenContractUpdated(Token token, long blockNumber)
-    {
-        updateMap.put(token.getAddress(), blockNumber);
-    }
-
-    public long getLastBlock(Token token)
-    {
-        if (updateMap.get(token.getAddress()) != null)
-        {
-            return updateMap.get(token.getAddress());
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
     public void setCurrentAddress(String currentAddress)
     {
         this.currentAddress = currentAddress;
     }
+    public String getCurrentAddress() { return this.currentAddress; }
 
     public void setCurrentNetwork(int currentNetwork)
     {
         this.currentNetwork = currentNetwork;
     }
 
-    public void setInterfaceSpec(String address, int functionSpec)
+    public static void setInterfaceSpec(String address, int functionSpec)
     {
         interfaceSpecMap.put(address, functionSpec);
+    }
 
-        Token token = tokenMap.get(address);
-        if (token != null)
-        {
-            token.setInterfaceSpec(functionSpec);
-        }
+    public int getInterfaceSpec(String address)
+    {
+        if (interfaceSpecMap.containsKey(address)) return interfaceSpecMap.get(address);
+        else return 0;
+    }
+
+    public void setLatestBlock(String address, long block)
+    {
+        updateMap.put(address, block);
+    }
+
+    public long getLatestBlock(String address)
+    {
+        if (updateMap.containsKey(address)) return updateMap.get(address);
+        else return 0;
     }
 }

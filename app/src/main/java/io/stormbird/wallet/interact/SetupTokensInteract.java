@@ -313,12 +313,6 @@ public class SetupTokensInteract {
                     TransactionInput data = transactionDecoder.decodeInput(thisTrans.input);
                     token = thisTokenTrans.token;
 
-                    if (token != null && thisTrans.isConstructor && thisTrans.operations.length > 0)
-                    {
-                        token.setInterfaceSpec(thisTrans.operations[0].contract.decimals);
-                        tokensService.setInterfaceSpec(token.getAddress(), thisTrans.operations[0].contract.decimals);
-                    }
-
                     if (walletInvolvedInTransaction(thisTrans, data, wallet)) {
                         Transaction newTx = parseTransaction(thisTokenTrans.token, thisTrans, data, tokensService);
                         if (newTx != null)
@@ -344,7 +338,7 @@ public class SetupTokensInteract {
             catch (Exception e) {
                 e.printStackTrace();
             }
-            if (highestBlock > 0) tokensService.tokenContractUpdated(token, highestBlock);
+            if (highestBlock > 0) tokensService.setLatestBlock(token.getAddress(), highestBlock);
             return processedTransactions.toArray(new Transaction[processedTransactions.size()]);
         });
     }

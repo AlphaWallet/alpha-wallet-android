@@ -133,14 +133,6 @@ public class SplashViewModel extends ViewModel {
         fetchWallets();
     }
 
-    //6. add hard coded contract
-    private void addContract(String address, String symbol, int decimals, String name) {
-        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, true);
-        addTokenInteract
-                .add(tokenInfo)
-                .subscribe(this::fetchWallets, this::onContractError); //directly call fetch wallets if successful
-    }
-
     private void fetchWallets(Token token)
     {
         fetchWallets();

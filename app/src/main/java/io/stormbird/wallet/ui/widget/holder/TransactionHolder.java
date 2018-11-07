@@ -29,7 +29,6 @@ import java.math.RoundingMode;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
-import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
 public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
 
@@ -143,20 +142,6 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
                 ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
                 break;
             case PASS_TO:
-                break;
-            case CONSTRUCTOR:
-                Token t = tokensService.getToken(ct.address);
-                if (t != null)
-                {
-                    if (t.isOldSpec())
-                    {
-                        supplimentalTxt = getString(R.string.erc875legacy);
-                    }
-                    else if (t instanceof Ticket)
-                    {
-                        supplimentalTxt = getString(R.string.erc875);
-                    }
-                }
                 break;
             default:
                 break;

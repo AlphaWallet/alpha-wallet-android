@@ -10,6 +10,7 @@ import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,26 +36,8 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token[]> fetchList(Wallet wallet) {
-        return tokenRepository.fetchActive(wallet.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Observable<TokenInfo> getTokenInfo(String address) {
         return tokenRepository.update(address);
-    }
-
-    private Map<String, Token> tokensToMap(Token[] tokenArray) {
-        Map<String, Token> tokenMap = new HashMap<>();
-        for (Token t : tokenArray) tokenMap.put(t.getAddress(), t);
-        return tokenMap;
-    }
-
-    public Observable<Token[]> fetchCache(Wallet wallet) {
-        return tokenRepository.fetchActiveCache(wallet.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Token[]> fetchStored(Wallet wallet) {
@@ -71,18 +54,6 @@ public class FetchTokensInteract {
 
     public Observable<Token[]> fetchStoredWithEth(NetworkInfo network, Wallet wallet) {
         return tokenRepository.fetchActiveStoredPlusEth(network, wallet.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public Observable<Token> fetchSequential(Wallet wallet) {
-        return tokenRepository.fetchActiveStoredSequential(wallet.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public Observable<Token> fetchSequentialNoEth(Wallet wallet) {
-        return tokenRepository.fetchActiveStoredSequentialNoEth(wallet.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -107,17 +78,9 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token> updateBalance(Wallet wallet, Token token)
+    public Single<BigInteger> getLatestBlock()
     {
-        return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public Token updateDefaultBalance(Token token)
-    {
-        return tokenRepository.fetchActiveDefaultTokenBalance(token)
-                .subscribeOn(Schedulers.io()).blockingSingle();
+        return tokenRepository.fetchLatestBlockNumber();
     }
 
     public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)

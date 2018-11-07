@@ -31,12 +31,8 @@ import retrofit2.http.Query;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
-    private static final int PAGE_LIMIT = 20;
-
     private final OkHttpClient httpClient;
 	private final Gson gson;
-
-    private ApiClient apiClient;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
@@ -47,16 +43,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchTransactions(String address) {
-		return apiClient
-				.fetchTransactions(address)
-				.lift(apiError())
-				.map(r -> r.docs)
-				.subscribeOn(Schedulers.io());
-	}
-
-	@Override
-	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock)
+	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress)
 	{
 		long lastBlockNumber = lastBlock + 1;
 		return Observable.fromCallable(() -> {
@@ -73,7 +60,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					EtherscanTransaction[] myTxs = reader.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-						result.add(etx.createTransaction());
+					    Transaction tx = etx.createTransaction(userAddress);
+					    if (tx != null)
+                        {
+                            result.add(tx);
+                        }
 					}
 				}
 			}
@@ -126,78 +117,4 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 
         return result;
     }
-
-	private String readContractTransactions(String address, String feemaster)
-	{
-		okhttp3.Response response = null;
-		String result = null;
-
-		StringBuilder sb = new StringBuilder();
-		sb.append(feemaster);
-		sb.append("internalTx?address=");
-		sb.append(address);
-
-		try
-		{
-			Request request = new Request.Builder()
-					.url(sb.toString())
-					.get()
-					.build();
-
-			response = httpClient.newCall(request).execute();
-
-			result = response.body().string();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-	private static @NonNull <T> ApiErrorOperator<T> apiError() {
-		return new ApiErrorOperator<>();
-	}
-
-	private interface ApiClient {
-		@GET("/transactions?limit=50")
-		Observable<Response<ApiClientResponse>> fetchTransactions(
-				@Query("address") String address);
-
-        @GET("/transactions")
-        Call<ApiClientResponse> fetchTransactions(
-                @Query("limit") int pageLimit,
-                @Query("page") int page,
-                @Query("address") String address);
-    }
-
-	private final static class ApiClientResponse {
-		Transaction[] docs;
-		int pages;
-	}
-
-	private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
-
-		@Override
-		public Observer<? super retrofit2.Response<T>> apply(Observer<? super T> observer) throws Exception {
-            return new DisposableObserver<Response<T>>() {
-                @Override
-                public void onNext(Response<T> response) {
-                    observer.onNext(response.body());
-                    observer.onComplete();
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    observer.onError(e);
-                }
-
-                @Override
-                public void onComplete() {
-                    observer.onComplete();
-                }
-            };
-		}
-	}
 }

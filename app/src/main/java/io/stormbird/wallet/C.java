@@ -22,6 +22,8 @@ public abstract class C {
     public static final String POA_SYMBOL = "POA";
     public static final String ETC_SYMBOL = "ETC";
 
+    public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
+
     public static final String GWEI_UNIT = "Gwei";
 
     public static final String MARKET_SALE = "market";

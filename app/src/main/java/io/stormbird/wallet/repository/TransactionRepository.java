@@ -2,7 +2,6 @@ package io.stormbird.wallet.repository;
 
 import android.util.Log;
 
-import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
@@ -17,19 +16,14 @@ import org.web3j.rlp.RlpType;
 import org.web3j.utils.Bytes;
 import org.web3j.utils.Numeric;
 
-import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenTransaction;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AccountKeystoreService;
@@ -65,83 +59,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.toObservable();
 	}
 
-    @Override
-	public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
-        NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-	    return Single.merge(
-	            fetchFromCache(networkInfo, wallet),
-	            fetchAndCacheFromNetwork(networkInfo, wallet))
-				.observeOn(Schedulers.newThread())
-                .toObservable();
-    }
-
 	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock) {
+	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromNetwork(networkInfo, wallet, lastBlock)
+		return fetchFromNetwork(networkInfo, wallet, lastBlock, userAddress)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
-	}
-
-	/**
-	 * Either fetches a list of network transactions for this token address,
-	 * or just a blank list is the token is dead
-	 * TODO: we should be using a map/reduce instead
-	 * @param wallet
-	 * @param token
-	 * @return
-	 */
-	@Override
-	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token, long lastBlock) {
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-
-		return fetchFromNetwork(networkInfo, wallet, lastBlock+1) //+1 because we already have the transactions in the last block
-					.observeOn(Schedulers.io())
-					.map(txs -> mapToTokenTransactions(txs, token))
-					.toObservable();
-	}
-
-//	@Override
-//	public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token) {
-//		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-//		return fetchFromCache(networkInfo, wallet)
-//				.mergeWith(fetchAndCacheFromNetwork(networkInfo, wallet))
-//					.observeOn(Schedulers.io())
-//					.map(txs -> mapToTokenTransactions(txs, token))
-//					.toObservable();
-//	}
-
-//	@Override
-//	public void fetchTransaction2(Wallet wallet, TransactionsCallback txCallback) {
-//		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-//
-//		Transaction lastTx = inDiskCache.findLast(networkInfo, wallet).blockingGet();
-//				blockExplorerClient
-//						.fetchTransactions2(wallet, lastTx, txCallback);
-//	}
-
-	private TokenTransaction[] mapToTokenTransactions(Transaction[] items, Token token)
-	{
-		TokenTransaction[] ttxList = new TokenTransaction[items.length];
-		for (int i = 0; i < items.length; i++) {
-			ttxList[i] = new TokenTransaction(token, items[i]);
-		}
-
-		return ttxList;
-	}
-
-	@Override
-	public Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash) {
-		return fetchTransaction(wallet)
-				.firstElement()
-                .flatMap(transactions -> {
-					for (Transaction transaction : transactions) {
-						if (transaction.hash.equals(transactionHash)) {
-							return Maybe.just(transaction);
-						}
-					}
-					return null;
-				});
 	}
 
 	@Override
@@ -231,34 +154,27 @@ public class TransactionRepository implements TransactionRepositoryType {
 	    return inDiskCache.fetchTransaction(networkInfo, wallet);
     }
 
-	private Single<Transaction[]> fetchAndCacheFromNetwork(NetworkInfo networkInfo, Wallet wallet) {
-        return inDiskCache
-                .findLast(networkInfo, wallet)
-                .flatMap(lastTransaction -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(networkInfo, wallet, Long.valueOf(lastTransaction.blockNumber))))
-                .onErrorResumeNext(throwable -> Single.fromObservable(blockExplorerClient
-                        .fetchLastTransactions(networkInfo, wallet, 0)))
-                .flatMapCompletable(transactions -> inDiskCache.putTransactions(networkInfo, wallet, transactions))
-                .andThen(inDiskCache.fetchTransaction(networkInfo, wallet))
-				.observeOn(Schedulers.io());
-    }
-
-	private Single<Transaction[]> fetchAllFromNetwork(NetworkInfo networkInfo, Wallet wallet)
-	{
-		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, 0))
-				.observeOn(Schedulers.io());
-	}
-
-	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, long lastBlock) {
-		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastBlock));
+	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastBlock, userAddress));
 	}
 
 	@Override
 	public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
 	{
-		return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
+		if (txList.length == 0)
+		{
+			return noTransations();
+		}
+		else
+		{
+			return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
+		}
 	}
 
+	private Single<Transaction[]> noTransations()
+	{
+		return Single.fromCallable(() -> new Transaction[0]);
+	}
 
 	/**
 	 * From Web3j to encode a constructor

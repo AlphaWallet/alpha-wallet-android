@@ -50,7 +50,7 @@ public class AddTokenViewModel extends BaseViewModel {
     public void save(String address, String symbol, int decimals, String name, boolean isStormBird) {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
         disposable = addTokenInteract
-                .add(tokenInfo)
+                .add(tokenInfo, 0)
                 .subscribe(this::onSaved, this::onError);
     }
 

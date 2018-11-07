@@ -29,7 +29,6 @@ import io.realm.RealmResults;
 
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
-import static io.stormbird.wallet.interact.SetupTokensInteract.INVALID_OPERATION;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
 

@@ -1,18 +1,13 @@
 package io.stormbird.wallet;
 
-import android.util.Log;
-
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -20,15 +15,10 @@ import javax.inject.Inject;
 import io.stormbird.wallet.entity.MessagePair;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SignaturePair;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenTransaction;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
-import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.stormbird.token.entity.SalesOrderMalformed;
@@ -70,23 +60,8 @@ public class QRSelectionTest
             }
 
             @Override
-            public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
-                return null;
-            }
-
-            @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock)
+            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress)
             {
-                return null;
-            }
-
-            @Override
-            public Observable<TokenTransaction[]> fetchTokenTransaction(Wallet wallet, Token token, long lastBlock) {
-                return null;
-            }
-
-            @Override
-            public Maybe<Transaction> findTransaction(Wallet wallet, String transactionHash) {
                 return null;
             }
 

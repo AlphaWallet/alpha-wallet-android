@@ -175,6 +175,16 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    @Override
+    public Single<BigInteger> fetchLatestBlockNumber()
+    {
+        return Single.fromCallable(() -> {
+            EthBlockNumber blk = web3j.ethBlockNumber()
+                    .send();
+            return blk.getBlockNumber();
+        });
+    }
+
     /**
      * Gives an observable that allows us to process each token as the balance is fetched
      *

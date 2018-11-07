@@ -13,11 +13,13 @@ import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
+import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionContract;
 import io.stormbird.wallet.entity.TransactionLookup;
 import io.stormbird.wallet.entity.TransactionOperation;
+import io.stormbird.wallet.entity.TransactionType;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 
@@ -27,7 +29,6 @@ import java.math.RoundingMode;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
-import static io.stormbird.wallet.interact.SetupTokensInteract.RECEIVE_FROM_MAGICLINK;
 
 public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
 
@@ -94,16 +95,9 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
                  ETHER_DECIMALS, transaction.timeStamp);
         }
-        else if (operation.contract != null)
+        else
         {
             fillERC20(transaction);
-        }
-        else {
-            String symbol = tokensService.getTokenSymbol(operation.contract.address);
-            int decimals = tokensService.getTokenDecimals(operation.contract.address);
-
-            fill(transaction.error, operation.from, operation.to, symbol, operation.value,
-                    decimals, transaction.timeStamp);
         }
     }
 
@@ -113,6 +107,45 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         TransactionOperation operation = transaction.operations[0];
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
         String name = tokensService.getTokenName(ct.address);
+
+        address.setText(name);
+        supplimental.setTextSize(12.0f);
+
+        String ticketMove = "";
+        String supplimentalTxt = "";
+
+        if (ct.indices != null && ct.indices.size() > 0)
+        {
+            ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
+        }
+
+        switch (ct.operation)
+        {
+            case MAGICLINK_TRANSFER: //transferred out of our wallet via magic link (0 value)
+                break;
+            case MAGICLINK_PICKUP: //received ticket from a magic link
+                break;
+            case TRANSFER_TO:
+                break;
+            case TRANSFER_FROM:
+                break;
+            case MAGICLINK_SALE: //we received ether from magiclink sale
+                supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                break;
+            case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
+                supplimentalTxt = "-" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                break;
+            case RECEIVE_FROM:
+                supplimentalTxt = "";//"+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                break;
+            case LOAD_NEW_TOKENS:
+                ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
+                break;
+            case PASS_TO:
+                break;
+            default:
+                break;
+        }
 
         switch (ct.type)
         {
@@ -141,38 +174,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         String operationName = getString(TransactionLookup.typeToName(ct.operation));
 
         type.setText(operationName);
-        address.setText(name);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
-        String ticketMove = "";
-        String supplimentalTxt = "";
-
-        if (ct.indices != null && ct.indices.size() > 0)
-        {
-            ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
-        }
-
-        switch (ct.operation)
-        {
-            case MAGICLINK_TRANSFER: //transferred out of our wallet via magic link (0 value)
-            case MAGICLINK_PICKUP: //received ticket from a magic link
-                break;
-            case MAGICLINK_SALE: //we received ether from magiclink sale
-                supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
-                supplimentalTxt = "-" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case RECEIVE_FROM:
-                supplimentalTxt = "";//"+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case LOAD_NEW_TOKENS:
-                ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
-                break;
-            default:
-                break;
-        }
-
-        supplimental.setTextSize(12.0f);
 
         if (!trans.error.equals("0"))
         {

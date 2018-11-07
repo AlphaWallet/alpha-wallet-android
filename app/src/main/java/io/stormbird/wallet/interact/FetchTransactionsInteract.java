@@ -1,14 +1,10 @@
 package io.stormbird.wallet.interact;
 
 import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenTransaction;
 import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionsCallback;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -29,22 +25,9 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Transaction[]> fetch(Wallet wallet) {
+    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, long lastBlock, String userAddress) {
         return transactionRepository
-                .fetchTransaction(wallet)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public Observable<TokenTransaction[]> fetch(Wallet wallet, Token t, long lastBlock) {
-        return transactionRepository
-                .fetchTokenTransaction(wallet, t, lastBlock)
-                .subscribeOn(Schedulers.io());
-    }
-
-    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, long lastBlock) {
-        return transactionRepository
-                .fetchNetworkTransaction(wallet, lastBlock)
+                .fetchNetworkTransaction(wallet, lastBlock, userAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -53,14 +36,4 @@ public class FetchTransactionsInteract {
     {
         return transactionRepository.storeTransactions(networkInfo, wallet, txList);
     }
-
-    public Observable<Transaction[]> storeTransactionsObservable(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
-    {
-        return transactionRepository.storeTransactions(networkInfo, wallet, txList).toObservable();
-    }
-
-//    public void fetchTx2(Wallet wallet, TransactionsCallback txCallback) {
-//        transactionRepository
-//                .fetchTransaction2(wallet, txCallback);
-//    }
 }

@@ -11,6 +11,7 @@ import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.TransferFromEventResponse;
 import io.stormbird.wallet.entity.Wallet;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -45,6 +46,7 @@ public interface TokenRepositoryType {
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
     Single<Ticker> getEthTicker();
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
+    Single<BigInteger> fetchLatestBlockNumber();
 
     void terminateToken(Token token, Wallet wallet, NetworkInfo network);
 

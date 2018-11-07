@@ -111,7 +111,6 @@ public class TokensService
         currentAddress = "";
         currentNetwork = 0;
         tokenMap.clear();
-        updateMap.clear();
     }
 
     public List<Token> getAllTokens()

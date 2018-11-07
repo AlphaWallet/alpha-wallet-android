@@ -72,11 +72,11 @@ public class HelpActivity extends BaseActivity {
             helpIntent();
         });
 
-        TextView textForceCrash = findViewById(R.id.test_crash);
-        textForceCrash.setOnClickListener(v -> {
-            Crashlytics.log("Test Crash Log");
-            Crashlytics.getInstance().crash();
-        });
+//        TextView textForceCrash = findViewById(R.id.test_crash);
+//        textForceCrash.setOnClickListener(v -> {
+//            Crashlytics.log("Test Crash Log");
+//            Crashlytics.getInstance().crash();
+//        });
     }
 
     private void helpIntent()

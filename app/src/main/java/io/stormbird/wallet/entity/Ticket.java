@@ -223,7 +223,14 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.issuer.setText(asset.getIssuerName(getAddress()));
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
-        tokenHolder.contractType.setText(R.string.erc875);
+        if (isOldSpec())
+        {
+            tokenHolder.contractType.setText(R.string.erc875legacy);
+        }
+        else
+        {
+            tokenHolder.contractType.setText(R.string.erc875);
+        }
 
         //tokenHolder.text24HoursSub.setText(R.string.burned);
         //tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));

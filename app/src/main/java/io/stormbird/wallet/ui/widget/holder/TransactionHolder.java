@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC875ContractTransaction;
+import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionContract;

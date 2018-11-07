@@ -78,11 +78,9 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token> updateBalance(Wallet wallet, Token token)
+    public Single<BigInteger> getLatestBlock()
     {
-        return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return tokenRepository.fetchLatestBlockNumber();
     }
 
     public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)

@@ -23,6 +23,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ConfirmationType;
@@ -272,6 +273,10 @@ public class ConfirmationActivity extends BaseActivity {
                         gasSettings.gasLimit);
                 break;
 
+            case WEB3TRANSACTION:
+                viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit);
+                break;
+
             case MARKET:
                 //price in eth
                 BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
@@ -333,13 +338,13 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onError(ErrorEnvelope error) {
         hideDialog();
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.error_transaction_failed)
-                .setMessage(error.message)
-                .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    // Do nothing
-                })
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(error.message);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
         dialog.show();
     }
 

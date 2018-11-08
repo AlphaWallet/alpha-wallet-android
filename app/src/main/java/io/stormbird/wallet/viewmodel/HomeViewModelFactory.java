@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -21,6 +22,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final FetchWalletsInteract fetchWalletsInteract;
 
     public HomeViewModelFactory(
             LocaleRepositoryType localeRepository,
@@ -29,7 +31,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             AddTokenRouter addTokenRouter,
             SettingsRouter settingsRouter,
             AssetDefinitionService assetDefinitionService,
-            FindDefaultWalletInteract findDefaultWalletInteract) {
+            FindDefaultWalletInteract findDefaultWalletInteract,
+            FetchWalletsInteract fetchWalletsInteract) {
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
         this.externalBrowserRouter = externalBrowserRouter;
@@ -37,6 +40,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.settingsRouter = settingsRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
     @NonNull
@@ -49,6 +53,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 addTokenRouter,
                 settingsRouter,
                 assetDefinitionService,
-                findDefaultWalletInteract);
+                findDefaultWalletInteract,
+                fetchWalletsInteract);
     }
 }

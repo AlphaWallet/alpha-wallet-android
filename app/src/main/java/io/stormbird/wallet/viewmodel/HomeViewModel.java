@@ -11,8 +11,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -24,6 +27,8 @@ import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletUpdate;
+import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -35,9 +40,12 @@ import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
 
 public class HomeViewModel extends BaseViewModel {
+    private final String TAG = "HVM";
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
+    private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
+    private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
 
     private final SettingsRouter settingsRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -46,6 +54,8 @@ public class HomeViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final FetchWalletsInteract fetchWalletsInteract;
+
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
@@ -61,7 +71,8 @@ public class HomeViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             SettingsRouter settingsRouter,
             AssetDefinitionService assetDefinitionService,
-            FindDefaultWalletInteract findDefaultWalletInteract) {
+            FindDefaultWalletInteract findDefaultWalletInteract,
+            FetchWalletsInteract fetchWalletsInteract) {
         this.settingsRouter = settingsRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
@@ -69,6 +80,7 @@ public class HomeViewModel extends BaseViewModel {
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
     @Override
@@ -92,6 +104,10 @@ public class HomeViewModel extends BaseViewModel {
     {
         return installIntent;
     }
+
+    public LiveData<Wallet[]> wallets() { return wallets; }
+
+    public LiveData<Long> lastENSScanBlock() { return lastENSScanBlock; }
 
     public void prepare() {
         progress.postValue(false);
@@ -218,5 +234,77 @@ public class HomeViewModel extends BaseViewModel {
         };
 
         ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
+
+    public void refreshWallets()
+    {
+        disposable = fetchWalletsInteract.loadWallets()
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(this::onWallets, this::onError);
+    }
+
+    private void onWallets(Wallet[] wallets)
+    {
+        //combine this with a fetch from account
+        Map<String, Wallet> walletBalances = new HashMap<>();
+        disposable = fetchWalletsInteract.fetch(walletBalances)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(w -> combine(w, wallets), this::onError);
+    }
+
+    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB)
+    {
+        Map<String, Wallet> join = new HashMap<String, Wallet>();
+        for (Wallet wallet : walletsFromFetch)
+        {
+            join.put(wallet.address, wallet);
+        }
+
+        for (Wallet wallet : walletsFromDB)
+        {
+            join.put(wallet.address, wallet);
+        }
+
+        wallets.postValue(join.values().toArray(new Wallet[0]));
+    }
+
+    public void checkENSNames(Wallet[] wallets, long lastBlockChecked)
+    {
+        if (wallets.length > 0)
+        {
+            disposable = fetchWalletsInteract.scanForNames(wallets, lastBlockChecked)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onENSScanResult, this::onError);
+        }
+    }
+
+    private void onENSScanResult(WalletUpdate update)
+    {
+        //check for any change
+        if (update.wallets.size() > 0)
+        {
+            disposable = fetchWalletsInteract.storeWallets(update.wallets.values().toArray(new Wallet[0]), true)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onWritten, this::onError);
+
+            for (Wallet w : wallets.getValue())
+            {
+                if (update.wallets.containsKey(w.address))
+                {
+                    w.ENSname = update.wallets.get(w.address).ENSname;
+                }
+            }
+        }
+
+        lastENSScanBlock.postValue(update.lastBlock);
+    }
+
+    private void onWritten(Integer wrote)
+    {
+        Log.d(TAG, "Wrote " + wrote + " Wallets");
     }
 }

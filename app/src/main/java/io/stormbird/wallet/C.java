@@ -86,15 +86,6 @@ public abstract class C {
     public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
     public static final boolean OVERRIDE_DEFAULT_NETWORK = false;  //use the default network given below
 
-    //Range of 3 test keys, they all have a little test eth pre-loaded on them
-    public static final String HARD_PRIVATE_KEY1 = "bddb287b00c8047587f4fbf3de731a30f9404aa3735ae5d1766550534cf939da"; //0xc9034FF4266b1690d2B579584e5c3259009eD13c
-    public static final String HARD_PRIVATE_KEY2 = "dcd6318be4fa8ab458b608804f06b8f25ccdab4f9d03c26fbbbe2b58e42f4df5"; //0x97e2bde4654Ca8Ea2cC30335Ea85eC1F9b10604A
-    public static final String HARD_PRIVATE_KEY3 = "fa41ce4f689c883584cfcf29cd2526c7f4de4dede260753b0234e475b216a733"; //0x93922cDaBAa26d50E7C6Cb19EE3bCd03462Ed334
-
-    //Pick which private key to pre-install
-    public static final String PRE_LOADED_KEY = HARD_PRIVATE_KEY3;
-    public static final String HARD_CONTRACT_ADDR = "0x0B6732BAECC0793E38A98934799ABD3C7DC3CF31";
-
     public static final String DEFAULT_NETWORK = ETHEREUM_NETWORK_NAME;
 
     public static final String TWITTER_PACKAGE_NAME = "com.twitter.android";
@@ -126,6 +117,8 @@ public abstract class C {
     public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
+
+    public static final String ENS_SCAN_BLOCK = "ens_check_block";
 
     public enum TokenStatus {
         DEFAULT, PENDING, INCOMPLETE

@@ -58,7 +58,7 @@ public class TransactionInput
         String address = "";
         if (addresses.size() > 0)
         {
-            address = "0x" + addresses.get(0).substring(64 - ADDRESS_LENGTH_IN_HEX);
+            address = addresses.get(0);
         }
         return address;
     }
@@ -68,7 +68,7 @@ public class TransactionInput
         String address = "";
         if (addresses.size() > index)
         {
-            address = "0x" + addresses.get(index).substring(64 - ADDRESS_LENGTH_IN_HEX);
+            address = addresses.get(index);
         }
 
         return address;

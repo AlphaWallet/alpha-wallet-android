@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.CREATION;
+import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.ERC20;
+import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.ERC875;
 import static io.stormbird.wallet.entity.TransactionDecoder.ReadState.ARGS;
 import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 
@@ -43,13 +46,12 @@ public class TransactionDecoder
     public TransactionDecoder()
     {
         setupKnownFunctions();
-        unknownFunction.functionName = "N/A";
-        unknownFunction.functionFullName = "N/A";
+        setupUnknownFunction();
     }
 
     public TransactionInput decodeInput(String input)
     {
-        int parseState = 0;
+        ParseStage parseState = ParseStage.PARSE_FUNCTION;
         parseIndex = 0;
         //1. check function
         thisData = new TransactionInput();
@@ -59,20 +61,20 @@ public class TransactionDecoder
             return thisData;
         }
 
-        boolean finishParsing = false;
-        int functionLength;
-
         try {
-            while (parseIndex < input.length() && !finishParsing) {
+            while (parseIndex < input.length() && !(parseState == ParseStage.FINISH)) {
                 switch (parseState) {
-                    case 0: //get function
+                    case PARSE_FUNCTION: //get function
                         parseState = setFunction(readBytes(input, 10), input.length());
                         break;
-                    case 1: //now get params
+                    case PARSE_ARGS: //now get params
                         parseState = getParams(input);
                         break;
-                    case 2:
-                        finishParsing = true;
+                    case FINISH:
+                        break;
+                    case ERROR:
+                        //Perform any future error handling here
+                        parseState = ParseStage.FINISH;
                         break;
                 }
 
@@ -87,7 +89,7 @@ public class TransactionDecoder
         return thisData;
     }
 
-    private int setFunction(String input, int length) throws Exception
+    private ParseStage setFunction(String input, int length) throws Exception
     {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
@@ -103,10 +105,10 @@ public class TransactionDecoder
         else
         {
             thisData.functionData = unknownFunction;
-            return 2;
+            return ParseStage.ERROR;
         }
 
-        return 1;
+        return ParseStage.PARSE_ARGS;
     }
 
     enum ReadState
@@ -115,7 +117,7 @@ public class TransactionDecoder
         SIGNATURE
     };
 
-    private int getParams(String input) throws Exception
+    private ParseStage getParams(String input) throws Exception
     {
         state = ARGS;
         BigInteger count;
@@ -182,10 +184,10 @@ public class TransactionDecoder
         }
         else
         {
-            return 2; //skip to end of read if there are no args in the spec
+            return ParseStage.FINISH; //skip to end of read if there are no args in the spec
         }
 
-        return 2;
+        return ParseStage.FINISH;
     }
 
     private void addArg(String input)
@@ -247,7 +249,7 @@ public class TransactionDecoder
     {
         FunctionData data = getArgs(methodSignature);
         data.hasSig = hasSig;
-        data.contractType = OTHER;
+        data.contractType = ContractType.OTHER;
         functionList.put(buildMethodId(methodSignature), data);
     }
 
@@ -291,12 +293,17 @@ public class TransactionDecoder
             false
     };
 
-    static final int ERC20 = 1;
-    static final int ERC875 = 2;
-    static final int CREATION = 3;
-    static final int OTHER = 4;
+    enum ContractType
+    {
+        ERC20, ERC875, CREATION, OTHER
+    }
 
-    static final int[] CONTRACT_TYPE = {
+    enum ParseStage
+    {
+        PARSE_FUNCTION, PARSE_ARGS, FINISH, ERROR
+    }
+
+    static final ContractType[] CONTRACT_TYPE = {
             ERC875,  //transferFrom
             ERC875,
             ERC875,
@@ -408,6 +415,12 @@ public class TransactionDecoder
         endContractSignatures.add(buildMethodId("endContract()"));
         endContractSignatures.add(buildMethodId("selfdestruct()"));
         endContractSignatures.add(buildMethodId("kill()"));
+    }
+
+    private void setupUnknownFunction()
+    {
+        unknownFunction.functionName = "N/A";
+        unknownFunction.functionFullName = "N/A";
     }
 }
 

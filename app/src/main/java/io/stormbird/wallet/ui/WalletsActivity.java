@@ -3,8 +3,10 @@ package io.stormbird.wallet.ui;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
@@ -17,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -26,7 +27,6 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -38,6 +38,7 @@ import io.stormbird.wallet.widget.BackupView;
 import io.stormbird.wallet.widget.BackupWarningView;
 import io.stormbird.wallet.widget.SystemView;
 
+import static io.stormbird.wallet.C.ENS_SCAN_BLOCK;
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
 import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
@@ -99,8 +100,24 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.exportWalletError().observe(this, this::onExportWalletError);
         viewModel.deleteWalletError().observe(this, this::onDeleteWalletError);
         viewModel.updateBalance().observe(this, this::onUpdatedBalance);
+        viewModel.namedWallets().observe(this, this::onNamedWallets);
+        viewModel.lastENSScanBlock().observe(this, this::onScanBlockReceived);
 
-        refreshLayout.setOnRefreshListener(viewModel::fetchWallets);
+        refreshLayout.setOnRefreshListener(this::onSwipeRefresh);
+    }
+
+    private void onSwipeRefresh()
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        long lastBlockChecked = pref.getLong(ENS_SCAN_BLOCK, 0);
+        viewModel.swipeRefreshWallets(lastBlockChecked);
+    }
+
+    private void onScanBlockReceived(long blockNumber)
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putLong(ENS_SCAN_BLOCK, blockNumber).apply();
     }
 
     private void onCreateWalletError(ErrorEnvelope errorEnvelope) {
@@ -171,6 +188,7 @@ public class WalletsActivity extends BaseActivity implements
                 viewModel.fetchWallets();
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
+                onScanBlockReceived(0); //reset scan block
                 //set as isSetDefault
 				Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
 				if (importedWallet != null)
@@ -238,9 +256,14 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.importWallet(this);
     }
 
-    private void onUpdatedBalance(Map<String, BigDecimal> balances)
+    private void onUpdatedBalance(Map<String, Wallet> balances)
     {
         adapter.updateWalletBalances(balances);
+    }
+
+    private void onNamedWallets(Map<String, String> walletNames)
+    {
+        adapter.updateWalletNames(walletNames);
     }
 
     private void onAddWallet() {

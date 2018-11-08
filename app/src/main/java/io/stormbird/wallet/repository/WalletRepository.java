@@ -1,7 +1,8 @@
 package io.stormbird.wallet.repository;
 
-import io.reactivex.SingleSource;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.service.AccountKeystoreService;
 
 import org.web3j.protocol.Web3jFactory;
@@ -9,42 +10,56 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
 public class WalletRepository implements WalletRepositoryType
 {
 	private final PreferenceRepositoryType preferenceRepositoryType;
 	private final AccountKeystoreService accountKeystoreService;
 	private final EthereumNetworkRepositoryType networkRepository;
+	private final TransactionsNetworkClientType blockExplorerClient;
+	private final WalletDataRealmSource walletDataRealmSource;
 
-    public WalletRepository(
+	private Map<String, Wallet> walletMap = new HashMap<String, Wallet>();
+
+	public WalletRepository(
 			PreferenceRepositoryType preferenceRepositoryType,
 			AccountKeystoreService accountKeystoreService,
-			EthereumNetworkRepositoryType networkRepository) {
+			EthereumNetworkRepositoryType networkRepository,
+			TransactionsNetworkClientType blockExplorerClient,
+			WalletDataRealmSource walletDataRealmSource) {
 		this.preferenceRepositoryType = preferenceRepositoryType;
 		this.accountKeystoreService = accountKeystoreService;
 		this.networkRepository = networkRepository;
+		this.blockExplorerClient = blockExplorerClient;
+		this.walletDataRealmSource = walletDataRealmSource;
 	}
 
 	@Override
-	public Single<Wallet[]> fetchWallets(Map<String, BigDecimal> walletBalances)
+	public Single<Wallet[]> fetchWallets(Map<String, Wallet> walletBalances)
 	{
 		return accountKeystoreService.fetchAccounts()
 				.flatMap(wallets -> addBalances(wallets, walletBalances));
 	}
 
-	private Single<Wallet[]> addBalances(Wallet[] wallets, Map<String, BigDecimal> walletBalances)
+	private Single<Wallet[]> addBalances(Wallet[] wallets, Map<String, Wallet> walletBalances)
 	{
 		return Single.fromCallable(() -> {
 			if (walletBalances != null)
 			{
 				for (Wallet w : wallets)
 				{
-					if (walletBalances.get(w.address) != null) w.setWalletBalance(walletBalances.get(w.address));
+					if (walletBalances.get(w.address) != null)
+					{
+						w.balance = walletBalances.get(w.address).balance;
+						w.ENSname = walletBalances.get(w.address).ENSname;
+					}
 				}
 			}
 			return wallets;
@@ -117,5 +132,53 @@ public class WalletRepository implements WalletRepositoryType
 				return BigDecimal.valueOf(-1);
 			}
 		}).subscribeOn(Schedulers.io());
+	}
+
+	@Override
+	public Single<Wallet[]> loadWallets()
+	{
+		return walletDataRealmSource.loadWallets()
+				.map(this::storeWalletsInMap);
+	}
+
+	@Override
+	public Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet)
+	{
+		return walletDataRealmSource.storeWallets(wallets, isMainNet);
+	}
+
+	private Wallet[] storeWalletsInMap(Wallet[] wallets)
+	{
+		for (Wallet wallet : wallets)
+		{
+			walletMap.put(wallet.address, wallet);
+		}
+
+		return wallets;
+	}
+
+	public Wallet getWallet(String address)
+	{
+		return walletMap.get(address);
+	}
+
+	@Override
+	public Map<String, Wallet> getWalletMap(NetworkInfo network)
+	{
+		if (!network.isMainNetwork)
+		{
+			Map<String, Wallet> notMainMap = new HashMap<String, Wallet>(walletMap);
+			for (Wallet wallet : notMainMap.values())
+			{
+				wallet.balance = "";
+			}
+		}
+		return walletMap;
+	}
+
+	@Override
+	public Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked)
+	{
+		return blockExplorerClient.scanENSTransactionsForWalletNames(wallets, lastBlockChecked);
 	}
 }

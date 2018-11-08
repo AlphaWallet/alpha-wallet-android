@@ -5,17 +5,15 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
@@ -23,6 +21,7 @@ import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
@@ -31,13 +30,15 @@ import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetDefaultWalletInteract;
-import io.stormbird.wallet.router.ImportWalletRouter;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.router.ImportWalletRouter;
 
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
 
 public class WalletsViewModel extends BaseViewModel
 {
+	private final static String TAG = "WVM";
+
 	private final CreateWalletInteract createWalletInteract;
 	private final SetDefaultWalletInteract setDefaultWalletInteract;
 	private final DeleteWalletInteract deleteWalletInteract;
@@ -57,10 +58,12 @@ public class WalletsViewModel extends BaseViewModel
 	private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
 	private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
 	private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
-	private final MutableLiveData<Map<String, BigDecimal>> updateBalance = new MutableLiveData<>();
+	private final MutableLiveData<Map<String, Wallet>> updateBalance = new MutableLiveData<>();
+	private final MutableLiveData<Map<String, String>> namedWallets = new MutableLiveData<>();
+	private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
 
 	private NetworkInfo currentNetwork;
-	private Map<String, BigDecimal> walletBalances = new HashMap<>();
+	private Map<String, Wallet> walletBalances = new HashMap<>();
 
 	WalletsViewModel(
 			CreateWalletInteract createWalletInteract,
@@ -93,6 +96,11 @@ public class WalletsViewModel extends BaseViewModel
 		return wallets;
 	}
 
+	public LiveData<Map<String, String>> namedWallets()
+	{
+		return namedWallets;
+	}
+
 	public LiveData<Wallet> defaultWallet()
 	{
 		return defaultWallet;
@@ -123,10 +131,12 @@ public class WalletsViewModel extends BaseViewModel
 		return deleteWalletError;
 	}
 
-	public LiveData<Map<String, BigDecimal>> updateBalance()
+	public LiveData<Map<String, Wallet>> updateBalance()
 	{
 		return updateBalance;
 	}
+
+	public LiveData<Long> lastENSScanBlock() { return lastENSScanBlock; }
 
 	public void setDefaultWallet(Wallet wallet)
 	{
@@ -152,7 +162,15 @@ public class WalletsViewModel extends BaseViewModel
 
 	private void onDefaultNetwork(NetworkInfo networkInfo)
 	{
-		currentNetwork = networkInfo;
+		if (currentNetwork == null || networkInfo.chainId != currentNetwork.chainId)
+		{
+			walletBalances.clear();
+			currentNetwork = networkInfo;
+		}
+		if (walletBalances.size() == 0)
+		{
+			walletBalances = fetchWalletsInteract.getWalletMap(networkInfo);
+		}
 		//now load the current wallets
 		disposable = fetchWalletsInteract
 				.fetch(walletBalances)
@@ -175,6 +193,21 @@ public class WalletsViewModel extends BaseViewModel
 	{
 		progress.postValue(false);
 		defaultWallet.postValue(wallet);
+	}
+
+	public void swipeRefreshWallets(long block)
+	{
+		if (walletBalances.size() == 0)
+		{
+			walletBalances = fetchWalletsInteract.getWalletMap(currentNetwork);
+		}
+		//check for updates
+		//check names first
+		disposable = fetchWalletsInteract.fetch(walletBalances)
+				.flatMap(wallets -> fetchWalletsInteract.scanForNames(wallets, block))
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(this::updateNames, this::onError);
 	}
 
 	public void fetchWallets()
@@ -208,31 +241,86 @@ public class WalletsViewModel extends BaseViewModel
 	 */
 	private void getWalletsBalance(Wallet[] wallets)
 	{
-		walletBalances.clear();
 		disposable = fetchWalletList(wallets)
 				.flatMapIterable(wallet -> wallet) //iterate through each wallet
+				.map(this::addWalletToMap)
 				.flatMap(wallet -> fetchTokensInteract.fetchEth(currentNetwork, wallet)) //fetch wallet balance
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this::updateList, this::onError, this::updateBalances);
 	}
 
+	private Wallet addWalletToMap(Wallet wallet)
+	{
+		if (!walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
+		return wallet;
+	}
+
 	private void updateBalances()
 	{
 		updateBalance.postValue(walletBalances);
+
+		//store
+		if (currentNetwork.isMainNetwork)
+		{
+			Wallet[] walletsFromUpdate = walletBalances.values().toArray(new Wallet[0]);
+			storeWallets(walletsFromUpdate);
+		}
+	}
+
+	private void updateNames(WalletUpdate update)
+	{
+		//update names for wallets
+		//got names?
+		for (Wallet w : update.wallets.values())
+		{
+			if (walletBalances.containsKey(w.address))
+			{
+				walletBalances.get(w.address).ENSname = w.ENSname;
+			}
+		}
+
+		Wallet[] walletsFromFetch = walletBalances.values().toArray(new Wallet[0]);
+
+		if (update.wallets.size() > 0)
+		{
+			wallets.postValue(walletsFromFetch);
+		}
+
+		lastENSScanBlock.postValue(update.lastBlock);
+
+		progress.postValue(false);
+
+		storeWallets(walletsFromFetch);
+	}
+
+	private void storeWallets(Wallet[] wallets)
+	{
+		//write wallets to DB
+		disposable = fetchWalletsInteract.storeWallets(wallets, currentNetwork.isMainNetwork)
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(this::onStored, this::onError);
+	}
+
+	private void onStored(Integer count)
+	{
+		Log.d(TAG, "Stored " + count + " Wallets");
 	}
 
 	private void updateList(Token token)
 	{
-		walletBalances.put(token.getAddress(), token.balance);
+		if (walletBalances.containsKey(token.getAddress()))
+		{
+			walletBalances.get(token.getAddress()).setWalletBalance(token.balance);
+		}
+
 		updateBalance.postValue(walletBalances);
 	}
 
 	private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)
 	{
-		return Observable.fromCallable(() -> {
-			return new ArrayList<>(Arrays.asList(wallets));
-		});
+		return Observable.fromCallable(() -> new ArrayList<>(Arrays.asList(wallets)));
 	}
 
 	private void onExportWalletError(Throwable throwable)

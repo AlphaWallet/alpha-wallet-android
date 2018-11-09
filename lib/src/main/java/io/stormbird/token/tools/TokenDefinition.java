@@ -238,7 +238,7 @@ public class TokenDefinition {
         }
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize(); // also good for parcel
-        NodeList nList = xml.getElementsByTagName("attribute-type");
+        NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "attribute-type");
         for (int i = 0; i < nList.getLength(); i++) {
             Node nNode = nList.item(i);
             AttributeType attr = new AttributeType((Element) nList.item(i));
@@ -316,7 +316,7 @@ public class TokenDefinition {
 
     private void extractFeatureTag(Document xml)
     {
-        NodeList nList = xml.getElementsByTagName("feature");
+        NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "feature");
         for (int i = 0; i < nList.getLength(); i++) {
             Element feature = (Element) nList.item(i);
             switch (feature.getAttribute("type")) {
@@ -335,7 +335,7 @@ public class TokenDefinition {
     private void extractContractTag(Document xml) {
         String nameDefault = null;
         String nameEnglish = null;
-        NodeList nList = xml.getElementsByTagName("contract");
+        NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "contract");
         /* we allow multiple contracts, e.g. for issuing asset and for
          * proxy usage. but for now we only deal with the first */
         Element contract = (Element) nList.item(0);

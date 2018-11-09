@@ -203,6 +203,7 @@ public class AppSiteController {
         if (addresses.size() == 0) { // if no XML file is found
             // the server still can run and wait for someone to dump an XML, but let's assume it's a mistake
             System.err.println("No valid contract XML found in " + repoDir.toString() + ", cowardly not continuing.");
+            System.exit(253);
         } else {
             // the list should be reprinted whenever a new file is added.
             System.out.println("Serving an XML repo with the following contracts:");

@@ -405,18 +405,20 @@ public class AssetDefinitionService
         {
             for (File f : files)
             {
-                String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
-                if (extension.equals("xml"))
+                if (f.getName().contains(".xml"))
                 {
-                    String name = f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
-                    try
+                    String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
+                    if (extension.equals("xml"))
                     {
-                        FileInputStream stream = new FileInputStream(f);
-                        parseFile(stream);
-                    }
-                    catch (SAXParseException e)
-                    {
-                        e.printStackTrace();
+                        try
+                        {
+                            FileInputStream stream = new FileInputStream(f);
+                            parseFile(stream);
+                        }
+                        catch (SAXParseException e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }

@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -230,6 +229,7 @@ public class TokenDefinition {
         DocumentBuilder dBuilder;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory.setNamespaceAware(true);
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             // TODO: if schema has problems (e.g. defined twice). Now, no schema, no exception.
@@ -237,7 +237,7 @@ public class TokenDefinition {
             return;
         }
         Document xml = dBuilder.parse(xmlAsset);
-        xml.getDocumentElement().normalize(); // also good for parcel
+        xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
         NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "attribute-type");
         for (int i = 0; i < nList.getLength(); i++) {
             Node nNode = nList.item(i);
@@ -260,7 +260,6 @@ public class TokenDefinition {
     private void extractSignedInfo(Document xml) {
         NodeList nList;
         nList = xml.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "KeyName");
-        nList = xml.getElementsByTagName("ds:KeyName"); // previous statement returns empty list, strange...
         if (nList.getLength() > 0) {
             this.keyName = ((Element) nList.item(0)).getTextContent();
         }
@@ -347,23 +346,13 @@ public class TokenDefinition {
          /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */
          /* TODO: select the contract of type "holding_contract" */
-        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = ((Element) nNode);
-                if (eElement.getTagName().equals("address")) {
-                    String networkElement = eElement.getAttribute("network");
-                    if (networkElement.length() < 1) networkElement = "1"; //default to mainnet
-                    Integer networkId = Integer.parseInt(networkElement);
-                    addresses.put(nNode.getTextContent().toLowerCase(), networkId);
-                }
-                /* if there is no token name in <contract> this breaks;
-                 * token name shouldn't be in <contract> anyway, re-design pending */
-                if (eElement.getTagName().equals("name")) {
-                    if (eElement.getAttribute("lang").equals(locale.getLanguage())) {
-                        tokenName = eElement.getTextContent();
-                    }
-                }
-            }
+        nList = contract.getElementsByTagNameNS("http://attestation.id/ns/tbml", "address");
+        for(int i=  0; i < nList.getLength(); i++){
+            Element address = (Element) nList.item(i);
+            String networkElement = address.getAttribute("network");
+            if (networkElement.length() < 1) networkElement = "1"; //default to mainnet
+            Integer networkId = Integer.parseInt(networkElement);
+            addresses.put(address.getTextContent().toLowerCase(), networkId);
         }
     }
 

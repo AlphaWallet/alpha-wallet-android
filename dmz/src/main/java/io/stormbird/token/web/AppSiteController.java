@@ -190,11 +190,6 @@ public class AppSiteController {
                             entry -> entry.getKey().toLowerCase(),
                             entry -> new File(entry.getValue())));
             assert addresses != null : "Can't read all XML files";
-        } catch (NullPointerException e) {
-            System.err.println("repository.dir property is not defined in application.properties");
-            System.err.println("Please edit your local copy of application.properties, or");
-            System.err.println("try run with --repository.dir=/dir/to/repo");
-            System.exit(255);
         } catch (NoSuchFileException e) {
             System.err.println("repository.dir property is defined with a non-existing dir: " + repoDir.toString());
             System.err.println("Please edit your local copy of application.properties, or");

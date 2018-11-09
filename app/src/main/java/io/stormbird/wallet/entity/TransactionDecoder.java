@@ -11,7 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.CREATION;
+import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.ERC20;
+import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.ERC875;
 import static io.stormbird.wallet.entity.TransactionDecoder.ReadState.ARGS;
+import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 
 /**
  * Created by James on 2/02/2018.
@@ -37,33 +41,40 @@ public class TransactionDecoder
     private ReadState state = ARGS;
     private int sigCount = 0;
 
+    private FunctionData unknownFunction = new FunctionData();
+
     public TransactionDecoder()
     {
         setupKnownFunctions();
+        setupUnknownFunction();
     }
 
     public TransactionInput decodeInput(String input)
     {
-        int parseState = 0;
+        ParseStage parseState = ParseStage.PARSE_FUNCTION;
         parseIndex = 0;
         //1. check function
         thisData = new TransactionInput();
-        if (input == null || input.length() < 10) return null;
-        boolean finishParsing = false;
+        if (input == null || input.length() < 10)
+        {
+            thisData.functionData = unknownFunction;
+            return thisData;
+        }
 
         try {
-            while (parseIndex < input.length() && !finishParsing) {
+            while (parseIndex < input.length() && !(parseState == ParseStage.FINISH)) {
                 switch (parseState) {
-                    case 0: //get function
-                        parseIndex += setFunction(readBytes(input, 10), input.length());
-                        parseState = 1;
+                    case PARSE_FUNCTION: //get function
+                        parseState = setFunction(readBytes(input, 10), input.length());
                         break;
-                    case 1: //now get params
-                        parseIndex += getParams(input);
-                        parseState = 2;
+                    case PARSE_ARGS: //now get params
+                        parseState = getParams(input);
                         break;
-                    case 2:
-                        finishParsing = true;
+                    case FINISH:
+                        break;
+                    case ERROR:
+                        //Perform any future error handling here
+                        parseState = ParseStage.FINISH;
                         break;
                 }
 
@@ -78,7 +89,7 @@ public class TransactionDecoder
         return thisData;
     }
 
-    public int setFunction(String input, int length) throws Exception
+    private ParseStage setFunction(String input, int length) throws Exception
     {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
@@ -93,11 +104,11 @@ public class TransactionDecoder
         }
         else
         {
-            //unknown
-            return length;
+            thisData.functionData = unknownFunction;
+            return ParseStage.ERROR;
         }
 
-        return input.length();
+        return ParseStage.PARSE_ARGS;
     }
 
     enum ReadState
@@ -106,19 +117,37 @@ public class TransactionDecoder
         SIGNATURE
     };
 
-    private int getParams(String input) throws Exception
+    private ParseStage getParams(String input) throws Exception
     {
         state = ARGS;
         BigInteger count;
+        StringBuilder sb = new StringBuilder();
         if (thisData.functionData != null && thisData.functionData.args != null)
         {
             for (String type : thisData.functionData.args)
             {
                 String argData = read256bits(input);
+                if (argData.equals("0")) break;
                 switch (type)
                 {
+                    case "string":
+                        count = new BigInteger(argData, 16);
+                        sb.setLength(0);
+                        argData = read256bits(input);
+                        if (count.intValue() > argData.length()) count = BigInteger.valueOf(argData.length());
+                        for (int index = 0; index < (count.intValue()*2); index += 2)
+                        {
+                            int v = Integer.parseInt(argData.substring(index, index+2), 16);
+                            char c = (char)v;
+                            sb.append(c);
+                        }
+                        thisData.miscData.add(sb.toString());
+                        break;
                     case "address":
-                        thisData.addresses.add(argData);
+                        if (argData.length() >= 64 - ADDRESS_LENGTH_IN_HEX)
+                        {
+                            thisData.addresses.add("0x" + argData.substring(64 - ADDRESS_LENGTH_IN_HEX));
+                        }
                         break;
                     case "bytes32":
                         addArg(argData);
@@ -155,10 +184,10 @@ public class TransactionDecoder
         }
         else
         {
-            return parseIndex; //skip to end of read if there are no args in the spec
+            return ParseStage.FINISH; //skip to end of read if there are no args in the spec
         }
 
-        return parseIndex;
+        return ParseStage.FINISH;
     }
 
     private void addArg(String input)
@@ -214,21 +243,14 @@ public class TransactionDecoder
             data.contractType = CONTRACT_TYPE[index];
             functionList.put(buildMethodId(methodSignature), data);
         }
-
-        addContractCreation();
     }
 
-    /* NB: this doesn't always work. Instead we read the construction event from Etherscan
-     */
-    private void addContractCreation()
+    public void addScanFunction(String methodSignature, boolean hasSig)
     {
-        FunctionData data = new FunctionData();
-        data.functionName = "Contract Creation";
-        data.args = null;
-        data.functionFullName = data.functionName;
-        data.hasSig = false;
-        data.contractType = CREATION;
-        functionList.put("0x60606040", data);
+        FunctionData data = getArgs(methodSignature);
+        data.hasSig = hasSig;
+        data.contractType = ContractType.OTHER;
+        functionList.put(buildMethodId(methodSignature), data);
     }
 
     static final String[] KNOWN_FUNCTIONS = {
@@ -271,11 +293,17 @@ public class TransactionDecoder
             false
     };
 
-    static final int ERC20 = 1;
-    static final int ERC875 = 2;
-    static final int CREATION = 3;
+    enum ContractType
+    {
+        ERC20, ERC875, CREATION, OTHER
+    }
 
-    static final int[] CONTRACT_TYPE = {
+    enum ParseStage
+    {
+        PARSE_FUNCTION, PARSE_ARGS, FINISH, ERROR
+    }
+
+    static final ContractType[] CONTRACT_TYPE = {
             ERC875,  //transferFrom
             ERC875,
             ERC875,
@@ -311,7 +339,7 @@ public class TransactionDecoder
         for (int i = 0; i < temp.size(); i++)//String arg : data.args)
         {
             String arg = temp.get(i);
-            if (arg.contains("[]"))
+            if (arg.contains("[]") || arg.equals("string"))
             {
                 //rearrange to end, no need to store this arg
                 data.args.add(arg);
@@ -387,6 +415,12 @@ public class TransactionDecoder
         endContractSignatures.add(buildMethodId("endContract()"));
         endContractSignatures.add(buildMethodId("selfdestruct()"));
         endContractSignatures.add(buildMethodId("kill()"));
+    }
+
+    private void setupUnknownFunction()
+    {
+        unknownFunction.functionName = "N/A";
+        unknownFunction.functionFullName = "N/A";
     }
 }
 

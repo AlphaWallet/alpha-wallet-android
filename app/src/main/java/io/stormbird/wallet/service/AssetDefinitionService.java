@@ -2,6 +2,9 @@ package io.stormbird.wallet.service;
 
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.text.format.DateUtils;
 
@@ -309,6 +312,13 @@ public class AssetDefinitionService
             sb.append(address);
             String result = null;
 
+            //prepare Android headers
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(
+                    context.getPackageName(), 0);
+            String appVersion = info.versionName;
+            String OSVersion = String.valueOf(Build.VERSION.RELEASE) ;
+
             okhttp3.Response response = null;
 
             try
@@ -316,6 +326,11 @@ public class AssetDefinitionService
                 Request request = new Request.Builder()
                         .url(sb.toString())
                         .get()
+                        .addHeader("Accept", "text/xml; charset=UTF-8")
+                        .addHeader("X-Client-Name", "AlphaWallet")
+                        .addHeader("X-Client-Version", appVersion)
+                        .addHeader("X-Platform-Name", "Android")
+                        .addHeader("X-Platform-Version", OSVersion)
                         .addHeader("If-Modified-Since", dateFormat)
                         .build();
 

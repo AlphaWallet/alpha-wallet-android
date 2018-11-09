@@ -454,6 +454,26 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<String> callAddressMethod(String method, byte[] resultHash, String address)
+    {
+        return Single.fromCallable(() -> {
+            org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
+            Wallet temp = new Wallet(null);
+            String responseValue = callSmartContractFunction(function, address, temp);
+
+            if (responseValue == null) return null;
+
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1) {
+                return (String)response.get(0).getValue();
+            } else {
+                return null;
+            }
+        });
+    }
+
+    @Override
     public Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos)
     {
         TokenFactory tf = new TokenFactory();
@@ -846,11 +866,11 @@ public class TokenRepository implements TokenRepositoryType {
             if (tokenInfo.isStormbird) //safety check
             {
                 org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-                List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+                List<Uint256> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
                 if (indices == null) return result; // return empty array
-                for (Bytes32 val : indices)
+                for (Uint256 val : indices)
                 {
-                    result.add(getCorrectedValue(val, temp));
+                    result.add(val.getValue());
                 }
             }
         }
@@ -1029,7 +1049,7 @@ public class TokenRepository implements TokenRepositoryType {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
-                Collections.singletonList(new TypeReference<DynamicArray<Bytes32>>() {}));
+                Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function nameOf() {
@@ -1066,6 +1086,14 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function("decimals",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
+    }
+
+    private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
+    {
+        return new org.web3j.abi.datatypes.Function(
+                method,
+                Collections.singletonList(new Bytes32(resultHash)),
+                Collections.singletonList(new TypeReference<Address>() {}));
     }
 
     private List callSmartContractFunctionArray(

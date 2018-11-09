@@ -46,6 +46,20 @@ public class RealmManager {
         return Realm.getInstance(config);
     }
 
+    public Realm getWalletDataRealmInstance() {
+        String name = "WalletData-db.realm";
+        RealmConfiguration config = realmConfigurations.get(name);
+        if (config == null) {
+            config = new RealmConfiguration.Builder()
+                    .name(name)
+                    .schemaVersion(BuildConfig.DB_VERSION)
+                    .deleteRealmIfMigrationNeeded()
+                    .build();
+            realmConfigurations.put(name, config);
+        }
+        return Realm.getInstance(config);
+    }
+
     private String get721Name(Wallet wallet) {
         return wallet.address + "-721-db.realm";
     }

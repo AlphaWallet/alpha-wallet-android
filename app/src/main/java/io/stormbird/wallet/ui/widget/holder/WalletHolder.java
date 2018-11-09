@@ -60,7 +60,14 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			return;
 		}
 		this.wallet = data;
-		address.setText(wallet.address);
+		if (wallet.ENSname != null && wallet.ENSname.length() > 0)
+		{
+			address.setText(wallet.ENSname);
+		}
+		else
+		{
+			address.setText(wallet.address);
+		}
 		balance.setText(wallet.balance);
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);

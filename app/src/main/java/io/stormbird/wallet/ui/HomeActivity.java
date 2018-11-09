@@ -55,6 +55,7 @@ import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
+import static io.stormbird.wallet.C.ENS_SCAN_BLOCK;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.DAPP_BROWSER;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.MARKETPLACE;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
@@ -133,6 +134,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .get(HomeViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
+        viewModel.wallets().observe(this, this::onWallets);
+        viewModel.lastENSScanBlock().observe(this, this::onScanBlockReceived);
         viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
 
@@ -155,6 +158,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             bundle.putString("url", url);
             dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
+        }
+
+        viewModel.refreshWallets();
+    }
+
+    private void onScanBlockReceived(Long blockCheck)
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putLong(ENS_SCAN_BLOCK, blockCheck).apply();
+    }
+
+    private void onWallets(Wallet[] wallets)
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        long lastBlockChecked = pref.getLong(ENS_SCAN_BLOCK, 0);
+        if (wallets.length > 0)
+        {
+            viewModel.checkENSNames(wallets, lastBlockChecked);
         }
     }
 

@@ -5,6 +5,7 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
@@ -19,11 +20,12 @@ import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 
 public class EtherscanTransaction
 {
+    private static final String TENZID_REGISTER = "newSubdomain(string,string,string,address,address)";
     //[{"blockNumber":"1671277","timeStamp":"1505373215","hash":"0x1b1717b6d32387041f7053a5ce3426e3c030ba557fcc458c3829abc8ad0601a9","nonce":"5","blockHash":"0x4389a76b07d5b6b82737aebb182b81758adb839431cf49669bf0c234201cdced","transactionIndex":"3",
     // "from":"0xfde7b48f097102e736b45296d1ac6cb8a51426eb","to":"0x007bee82bdd9e866b2bd114780a47f2261c684e3","value":"500000000000000000",
     // "gas":"31501","gasPrice":"4000000000","isError":"0","txreceipt_status":"","input":"0x","contractAddress":"",
     // "cumulativeGasUsed":"184451","gasUsed":"21000","confirmations":"1236861"},
-    String blockNumber;
+    public String blockNumber;
     long timeStamp;
     String hash;
     int nonce;
@@ -43,6 +45,7 @@ public class EtherscanTransaction
     int confirmations;
 
     private static TransactionDecoder decoder = null;
+    private static TransactionDecoder ensDecoder = null;
     private static ParseMagicLink parser = null;
 
     public Transaction createTransaction(String walletAddress)
@@ -312,5 +315,40 @@ public class EtherscanTransaction
 
         int index = input.indexOf(transferFromSig);
         return index > 0;
+    }
+
+    public static void prepParser()
+    {
+        if (ensDecoder == null) ensDecoder = new TransactionDecoder();
+        ensDecoder.addScanFunction(TENZID_REGISTER, false);
+    }
+
+    public Wallet scanForENS(Map<String, Wallet> walletMap)
+    {
+        Wallet foundWallet = null;
+        //breakdown this transaction and see if it has any of the wallets we're using
+        TransactionInput data = ensDecoder.decodeInput(input);
+
+        switch (data.functionData.functionFullName)
+        {
+            case TENZID_REGISTER:
+                String address = data.getFirstAddress();
+                //only accept the ID if:
+                // - the transaction completed successfully
+                // - the transaction originated from the same address that is being designated
+                //This is to stop any attempt at ENS spoofing
+                if (address != null && isError.equals("0") && address.equals(from)
+                        && walletMap.containsKey(address))
+                {
+                    foundWallet = walletMap.get(address);
+                    foundWallet.ENSname = data.miscData.get(0) + "." + data.miscData.get(1) + "." + data.miscData.get(2);
+                }
+                break;
+            default:
+                break;
+        }
+
+
+        return foundWallet;
     }
 }

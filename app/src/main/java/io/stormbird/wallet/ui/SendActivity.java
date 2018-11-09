@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -52,7 +53,7 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 
-public class SendActivity extends BaseActivity {
+public class SendActivity extends BaseActivity implements Runnable {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     private static final String KEY_ADDRESS = "key_address";
     private static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -84,6 +85,8 @@ public class SendActivity extends BaseActivity {
     TextView amountSymbolText;
     AWalletAlertDialog dialog;
 
+    Handler handler;
+
     //Token
     TextView balanceEth;
     TextView symbolText;
@@ -104,6 +107,8 @@ public class SendActivity extends BaseActivity {
 
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
+
+        handler = new Handler();
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS); //contract address
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
@@ -220,9 +225,16 @@ public class SendActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                //reset address check timer
+                checkAddress();
             }
         });
+    }
+
+    private void checkAddress()
+    {
+        handler.removeCallbacks(this);
+        handler.postDelayed(this, 3000);
     }
 
     private void copyAddress()
@@ -421,5 +433,17 @@ public class SendActivity extends BaseActivity {
         df.setRoundingMode(RoundingMode.CEILING);
         String formatted = df.format(usdPrice);
         return formatted;
+    }
+
+    @Override
+    public void run()
+    {
+        //address update delay check
+        final String to = toAddressEditText.getText().toString();
+        System.out.println(to);
+        if (to.length() > 0 && to.charAt(0) == '@')
+        {
+            viewModel.checkENSAddress(to);
+        }
     }
 }

@@ -102,12 +102,14 @@
                     android:id="@+id/bottom_part"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="35dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
                         android:id="@+id/datelayout"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="1.2"
                         android:orientation="horizontal">
 
@@ -123,6 +125,7 @@
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:orientation="vertical">
 
                             <TextView
@@ -139,6 +142,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:paddingRight="5dp"
+                                android:visibility="gone"
                                 android:textSize="12sp" />
 
                         </LinearLayout>
@@ -147,7 +151,7 @@
                     <LinearLayout
                         android:id="@+id/ticketlayout"
                         android:layout_width="0dp"
-                        android:layout_height="35dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="1"
                         android:orientation="horizontal">
@@ -174,7 +178,7 @@
                     <LinearLayout
                         android:id="@+id/catlayout"
                         android:layout_width="0dp"
-                        android:layout_height="35dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="1"
                         android:orientation="horizontal">

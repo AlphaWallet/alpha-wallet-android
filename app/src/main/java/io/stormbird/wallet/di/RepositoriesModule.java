@@ -19,6 +19,7 @@ import io.stormbird.wallet.repository.TransactionLocalSource;
 import io.stormbird.wallet.repository.TransactionRepository;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
+import io.stormbird.wallet.repository.WalletDataRealmSource;
 import io.stormbird.wallet.repository.WalletRepository;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.AccountKeystoreService;
@@ -80,9 +81,11 @@ public class RepositoriesModule {
     WalletRepositoryType provideWalletRepository(
 			PreferenceRepositoryType preferenceRepositoryType,
 			AccountKeystoreService accountKeystoreService,
-			EthereumNetworkRepositoryType networkRepository) {
+			EthereumNetworkRepositoryType networkRepository,
+			TransactionsNetworkClientType blockExplorerClient,
+			WalletDataRealmSource walletDataRealmSource) {
 		return new WalletRepository(
-		        preferenceRepositoryType, accountKeystoreService, networkRepository);
+		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource);
 	}
 
 	@Singleton
@@ -145,6 +148,12 @@ public class RepositoriesModule {
     TokenLocalSource provideRealmTokenSource(RealmManager realmManager) {
 	    return new TokensRealmSource(realmManager);
     }
+
+	@Singleton
+	@Provides
+	WalletDataRealmSource provideRealmWalletDataSource(RealmManager realmManager) {
+		return new WalletDataRealmSource(realmManager);
+	}
 
     @Singleton
 	@Provides

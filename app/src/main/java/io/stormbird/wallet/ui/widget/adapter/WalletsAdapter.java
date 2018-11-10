@@ -103,19 +103,35 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder>
 		return defaultWallet;
 	}
 
-	public void updateWalletBalances(Map<String, BigDecimal> balances)
+	public void updateWalletBalances(Map<String, Wallet> balances)
 	{
 		for (Wallet wallet : wallets)
 		{
 			if (balances.containsKey(wallet.address))
 			{
-				wallet.setWalletBalance(balances.get(wallet.address));
+				wallet.balance = balances.get(wallet.address).balance;
+				wallet.ENSname = balances.get(wallet.address).ENSname;
 			}
 		}
 		notifyDataSetChanged();
 	}
 
-	public interface OnSetWalletDefaultListener
+    public void updateWalletNames(Map<String, String> namedWallets)
+	{
+		for (Wallet localWallet : wallets)
+		{
+			if (namedWallets.containsKey(localWallet.address))
+			{
+				localWallet.ENSname = namedWallets.get(localWallet.address);
+				namedWallets.remove(localWallet.address);
+				if (namedWallets.size() == 0) break;
+			}
+		}
+
+		notifyDataSetChanged();
+	}
+
+    public interface OnSetWalletDefaultListener
 	{
 		void onSetDefault(Wallet wallet);
 	}

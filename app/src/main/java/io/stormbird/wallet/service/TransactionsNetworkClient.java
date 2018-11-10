@@ -9,30 +9,29 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableOperator;
-import io.reactivex.Observer;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.observers.DisposableObserver;
+import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.EtherscanTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
+	private final int PAGESIZE = 300;
+
     private final OkHttpClient httpClient;
 	private final Gson gson;
+	private final EthereumNetworkRepositoryType networkRepository;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
@@ -40,6 +39,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			EthereumNetworkRepositoryType networkRepository) {
 		this.httpClient = httpClient;
 		this.gson = gson;
+		this.networkRepository = networkRepository;
 	}
 
 	@Override
@@ -50,14 +50,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			List<Transaction> result = new ArrayList<>();
 			try
 			{
-				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber));
+				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, 0);
 
 				if (response != null)
 				{
-					Gson reader = new Gson();
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
-					EtherscanTransaction[] myTxs = reader.fromJson(orders.toString(), EtherscanTransaction[].class);
+					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
 					    Transaction tx = etx.createTransaction(userAddress);
@@ -81,11 +80,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		}).subscribeOn(Schedulers.io());
 	}
 
-    private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock)
+    private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock, boolean ascending, int page)
     {
         okhttp3.Response response = null;
         String result = null;
         String fullUrl = null;
+
+        String sort = "asc";
+        if (!ascending) sort = "desc";
 
 		if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanTxUrl))
 		{
@@ -95,7 +97,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			sb.append(address);
 			sb.append("&startblock=");
 			sb.append(firstBlock);
-			sb.append("&endblock=99999999&sort=asc&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+			sb.append("&endblock=99999999&sort=");
+			sb.append(sort);
+			if (page > 0)
+			{
+				sb.append("&page=");
+				sb.append(page);
+				sb.append("&offset=");
+				sb.append(PAGESIZE);
+			}
+			sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
 			fullUrl = sb.toString();
 
 			try
@@ -108,6 +119,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				response = httpClient.newCall(request).execute();
 
 				result = response.body().string();
+				if (result.length() < 80 && result.contains("No transactions found"))
+                {
+                    result = null;
+                }
 			}
 			catch (Exception e)
 			{
@@ -117,4 +132,69 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 
         return result;
     }
+
+    private static final String TENZID = "0xe47405AF3c470e91a02BFC46921C3632776F9C6b";
+
+	@Override
+	public Single<WalletUpdate> scanENSTransactionsForWalletNames(Wallet[] wallets, long lastBlock)
+	{
+		return Single.fromCallable(() -> {
+			EtherscanTransaction.prepParser();
+			WalletUpdate result = new WalletUpdate();
+			result.wallets = new HashMap<>();
+			result.lastBlock = lastBlock;
+			boolean first = true;
+			Map<String, Wallet> walletMap = new HashMap<>();
+			for (Wallet w : wallets)
+			{
+				walletMap.put(w.address, w);
+			}
+
+			try
+			{
+				NetworkInfo network = networkRepository.getAvailableNetworkList()[0];
+				int page = 1;
+				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++);
+
+				while (response != null)
+				{
+					JSONObject stateData = new JSONObject(response);
+					JSONArray orders = stateData.getJSONArray("result");
+					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
+					for (EtherscanTransaction etx : myTxs)
+					{
+						Wallet w = etx.scanForENS(walletMap);
+						if (w != null && walletMap.containsKey(w.address)) //only accept the most recent ENS
+						{
+							walletMap.remove(w.address);
+							result.wallets.put(w.address, w);
+						}
+
+						if (first) //first tx will be highest block (descending sort)
+						{
+							long block = Long.parseLong(etx.blockNumber);
+							if (block > result.lastBlock)
+								result.lastBlock = Long.parseLong(etx.blockNumber) + 1;
+							first = false;
+						}
+					}
+                    if (myTxs.length < PAGESIZE)
+                    {
+                        break; //no need to go any further
+                    }
+					response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++);
+				}
+			}
+			catch (JSONException e)
+			{
+				//silent fail
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+			return result;
+		}).subscribeOn(Schedulers.io());
+	}
 }

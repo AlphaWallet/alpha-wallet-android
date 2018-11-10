@@ -34,7 +34,6 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -846,11 +845,11 @@ public class TokenRepository implements TokenRepositoryType {
             if (tokenInfo.isStormbird) //safety check
             {
                 org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-                List<Bytes32> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+                List<Uint256> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
                 if (indices == null) return result; // return empty array
-                for (Bytes32 val : indices)
+                for (Uint256 val : indices)
                 {
-                    result.add(getCorrectedValue(val, temp));
+                    result.add(val.getValue());
                 }
             }
         }
@@ -901,34 +900,6 @@ public class TokenRepository implements TokenRepositoryType {
                 return event;
             });
         }
-    }
-
-    /**
-     * checking if we need to read a top 16 byte value specifically
-     * We should keep this function in here because when we start to use 32 byte values there is
-     * potentially a problem with the 'always move 16 bytes to low 16' force solution.
-     *
-     * A better solution is not to fight this ethereum feature - we simply start interpreting the XML from
-     * the top byte.
-     */
-    private BigInteger getCorrectedValue(Bytes32 val, byte[] temp)
-    {
-        BigInteger retVal;
-        //does the top second byte have a value and the lower 16 bytes are zero?
-        long lowCheck = 0;
-        long highCheck = val.getValue()[0] + val.getValue()[1];
-        for (int i = 16; i < 32; i++) lowCheck += val.getValue()[i];
-        if (highCheck != 0 && lowCheck == 0)
-        {
-            System.arraycopy(val.getValue(), 0, temp, 0, 16);
-            retVal = Numeric.toBigInt(temp);
-        }
-        else
-        {
-            retVal = Numeric.toBigInt(val.getValue());
-        }
-
-        return retVal;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
@@ -1029,7 +1000,7 @@ public class TokenRepository implements TokenRepositoryType {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
-                Collections.singletonList(new TypeReference<DynamicArray<Bytes32>>() {}));
+                Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function nameOf() {

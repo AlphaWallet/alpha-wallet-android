@@ -1,6 +1,6 @@
 package io.stormbird.wallet.repository;
 
-import io.stormbird.wallet.entity.TradeInstance;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 
 import java.math.BigDecimal;
@@ -8,10 +8,10 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.entity.WalletUpdate;
 
 public interface WalletRepositoryType {
-	Single<Wallet[]> fetchWallets(Map<String, BigDecimal> walletBalances);
+	Single<Wallet[]> fetchWallets(Map<String, Wallet> walletBalances);
 	Single<Wallet> findWallet(String address);
 
 	Single<Wallet> createWallet(String password);
@@ -25,4 +25,10 @@ public interface WalletRepositoryType {
 	Single<Wallet> getDefaultWallet();
 
 	Single<BigDecimal> balanceInWei(Wallet wallet);
+	Single<Wallet[]> loadWallets();
+
+	Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked);
+	Map<String, Wallet> getWalletMap(NetworkInfo network);
+
+	Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
 }

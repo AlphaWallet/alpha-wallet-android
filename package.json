@@ -1,5 +1,5 @@
 {
-  "name": "alpha-wallet",
+  "name": "alpha-wallet-android",
   "version": "1.0.0",
   "description": "Each module has its own README. Please click the name of the module to go to the corrisponding README file.",
   "main": "gulpfile.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/James-Sangalli/alpha-wallet.git"
+    "url": "git+https://github.com/AlphaWallet/alpha-wallet-android.git"
   },
   "author": "",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/James-Sangalli/alpha-wallet/issues"
+    "url": "https://github.com/AlphaWallet/alpha-wallet-android/issues"
   },
-  "homepage": "https://github.com/James-Sangalli/alpha-wallet#readme",
+  "homepage": "https://github.com/AlphaWallet/alpha-wallet-android#readme",
   "dependencies": {
     "normalize.css": "^8.0.0"
   }

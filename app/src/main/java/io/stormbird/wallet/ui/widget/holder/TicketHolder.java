@@ -39,13 +39,16 @@ public class TicketHolder extends BaseTicketHolder
         }
 
         ticketLayout.setOnClickListener(v -> {
-            if (ticketDetailsLayout.getVisibility() == View.VISIBLE)
+            if (ticketDetails.getText().toString().length() > 0)
             {
-                ticketDetailsLayout.setVisibility(View.GONE);
-            }
-            else
-            {
-                ticketDetailsLayout.setVisibility(View.VISIBLE);
+                if (ticketDetailsLayout.getVisibility() == View.VISIBLE)
+                {
+                    ticketDetailsLayout.setVisibility(View.GONE);
+                }
+                else
+                {
+                    ticketDetailsLayout.setVisibility(View.VISIBLE);
+                }
             }
         });
     }

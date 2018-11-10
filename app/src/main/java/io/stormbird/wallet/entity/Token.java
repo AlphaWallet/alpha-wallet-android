@@ -21,6 +21,8 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
@@ -36,8 +38,10 @@ public class Token implements Parcelable
     private boolean isEth = false;
     private String tokenWallet;
     private short tokenNetwork;
+    private boolean requiresAuxRefresh = true;
 
     public TokenTicker ticker;
+    protected Map<String, String> auxData;
 
     public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime) {
         this.tokenInfo = tokenInfo;
@@ -49,6 +53,17 @@ public class Token implements Parcelable
         tokenInfo = in.readParcelable(TokenInfo.class.getClassLoader());
         balance = new BigDecimal(in.readString());
         updateBlancaTime = in.readLong();
+        int size = in.readInt();
+        if (size > 0)
+        {
+            auxData = new ConcurrentHashMap<>();
+            for (; size > 0; size--)
+            {
+                String key = in.readString();
+                String value = in.readString();
+                auxData.put(key, value);
+            }
+        }
     }
 
     public String getStringBalance() {
@@ -97,6 +112,16 @@ public class Token implements Parcelable
         dest.writeParcelable(tokenInfo, flags);
         dest.writeString(balance.toString());
         dest.writeLong(updateBlancaTime);
+        int size = (auxData == null ? 0 : auxData.size());
+        dest.writeInt(size);
+        if (size > 0)
+        {
+            for (String key : auxData.keySet())
+            {
+                dest.writeString(key);
+                dest.writeString(auxData.get(key));
+            }
+        }
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -304,6 +329,12 @@ public class Token implements Parcelable
         return null;
     }
 
+    public void addAuxDataResult(String id, String result)
+    {
+        if (auxData == null) auxData = new ConcurrentHashMap<>();
+        auxData.put(id, result);
+    }
+
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
         String currentState = realmToken.getBalance();
@@ -311,6 +342,7 @@ public class Token implements Parcelable
         if (tokenInfo.name != null && realmToken.getName() == null) return true; //signal to update database if correct name has been fetched (node timeout etc)
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
         if (tokenInfo.isStormbird != realmToken.isStormbird()) return true;
+        if (auxData != null && (realmToken.getAuxData() == null || realmToken.getAuxData().length() <= 4)) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
     }
@@ -318,6 +350,38 @@ public class Token implements Parcelable
     public void setRealmInterfaceSpec(RealmToken realmToken)
     {
 
+    }
+
+    public void setRealmAuxData(RealmToken realmToken)
+    {
+        //first form the data
+        if (auxData != null)
+        {
+            StringBuilder auxDataStr = new StringBuilder();
+            for (String key : auxData.keySet())
+            {
+                auxDataStr.append(key);
+                auxDataStr.append(",");
+                auxDataStr.append(auxData.get(key));
+                auxDataStr.append(",");
+            }
+
+            realmToken.setAuxData(auxDataStr.toString());
+        }
+    }
+
+    public void restoreAuxDataFromRealm(RealmToken realmToken)
+    {
+        String values = realmToken.getAuxData();
+        if (values != null && values.length() > 0)
+        {
+            String[] set = values.split(",");
+            auxData = new ConcurrentHashMap<>();
+            for (int i = 0; i < (set.length - 1); i+=2)
+            {
+                auxData.put(set[i], set[i+1]);
+            }
+        }
     }
 
     public void setIsEthereum()
@@ -373,6 +437,27 @@ public class Token implements Parcelable
 
     public void patchAuxData(Token token)
     {
+        auxData = token.auxData;
+        if (auxData != null) requiresAuxRefresh = false;
+    }
 
+    public BigInteger getTokenID(int index)
+    {
+        return BigInteger.valueOf(-1);
+    }
+
+    public void auxDataRefreshed()
+    {
+        requiresAuxRefresh = false;
+    }
+
+    public void setRequireAuxRefresh()
+    {
+        requiresAuxRefresh = true;
+    }
+
+    public boolean requiresAuxRefresh()
+    {
+        return (requiresAuxRefresh);
     }
 }

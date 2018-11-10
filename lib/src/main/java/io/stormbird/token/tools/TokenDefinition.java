@@ -4,6 +4,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
+import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -28,12 +29,6 @@ public class TokenDefinition {
     protected Locale locale;
     public Map<String, Integer> addresses = new HashMap<>();
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
-
-    class FunctionDefinition
-    {
-        String method;
-        Syntax syntax;
-    }
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables

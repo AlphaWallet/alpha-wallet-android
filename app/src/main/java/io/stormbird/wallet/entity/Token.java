@@ -342,14 +342,47 @@ public class Token implements Parcelable
         if (tokenInfo.name != null && realmToken.getName() == null) return true; //signal to update database if correct name has been fetched (node timeout etc)
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
         if (tokenInfo.isStormbird != realmToken.isStormbird()) return true;
-        if (auxData != null && (realmToken.getAuxData() == null || realmToken.getAuxData().length() <= 4)) return true;
+        if (checkAuxDataChanged(realmToken)) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
+    }
+
+    //Detects if the auxData held in Realm is different from the current auxData.
+    private boolean checkAuxDataChanged(RealmToken realmToken)
+    {
+        if (auxData != null && realmToken.getAuxData().length() <= 4) return true;
+        else if (auxData != null && realmToken.getAuxData().length() > 4)
+        {
+            Map<String, String> currentRealmData = restoreAuxData(realmToken.getAuxData());
+            for (String key : auxData.keySet())
+            {
+                if (!currentRealmData.containsKey(key)) return true;
+                else if (!auxData.get(key).equals(currentRealmData.get(key))) return true;
+            }
+        }
+
+        return false;
     }
 
     public void setRealmInterfaceSpec(RealmToken realmToken)
     {
 
+    }
+
+    private Map<String, String> restoreAuxData(String data)
+    {
+        Map<String, String> aux = null;
+        if (data != null && data.length() > 0)
+        {
+            String[] set = data.split(",");
+            aux = new ConcurrentHashMap<>();
+            for (int i = 0; i < (set.length - 1); i+=2)
+            {
+                aux.put(set[i], set[i+1]);
+            }
+        }
+
+        return aux;
     }
 
     public void setRealmAuxData(RealmToken realmToken)
@@ -373,15 +406,7 @@ public class Token implements Parcelable
     public void restoreAuxDataFromRealm(RealmToken realmToken)
     {
         String values = realmToken.getAuxData();
-        if (values != null && values.length() > 0)
-        {
-            String[] set = values.split(",");
-            auxData = new ConcurrentHashMap<>();
-            for (int i = 0; i < (set.length - 1); i+=2)
-            {
-                auxData.put(set[i], set[i+1]);
-            }
-        }
+        auxData = restoreAuxData(values);
     }
 
     public void setIsEthereum()

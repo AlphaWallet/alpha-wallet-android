@@ -86,13 +86,6 @@ public class HelperTextInputLayout extends TextInputLayout {
 				}
 				this.mHelperView.setVisibility(INVISIBLE);
 				this.addView(this.mHelperView);
-				if (this.mHelperView != null) {
-					ViewCompat.setPaddingRelative(
-							this.mHelperView,
-							ViewCompat.getPaddingStart(getEditText()),
-							0, ViewCompat.getPaddingEnd(getEditText()),
-							getEditText().getPaddingBottom());
-				}
 			} else {
 				this.removeView(this.mHelperView);
 				this.mHelperView = null;

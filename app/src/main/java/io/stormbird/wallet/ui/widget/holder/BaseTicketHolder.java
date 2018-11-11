@@ -49,6 +49,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     protected final TextView ticketRedeemed;
     protected final LinearLayout ticketDetailsLayout;
     protected final LinearLayout ticketLayout;
+    protected final TextView ticketDetails;
 
     public BaseTicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service) {
         super(resId, parent);
@@ -58,6 +59,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         itemView.setOnClickListener(this);
         ticketRedeemed = findViewById(R.id.redeemed);
         ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
+        ticketDetails = findViewById(R.id.ticket_details);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         assetService = service;
         this.ticket = (Ticket)ticket;

@@ -227,6 +227,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onTokenClick(View view, Token token) {
         Context context = view.getContext();
+        token = viewModel.getTokenFromService(token);
         token.clickReact(viewModel, context);
     }
 
@@ -272,8 +273,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     {
         this.wallet = wallet;
         viewModel.fetchTokens();
-        //get the XML address
-        viewModel.setContractAddresses();
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo)

@@ -4,8 +4,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
+import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -26,6 +28,7 @@ public class TokenDefinition {
     public Map<String, AttributeType> attributes = new ConcurrentHashMap<>();
     protected Locale locale;
     public Map<String, Integer> addresses = new HashMap<>();
+    public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -69,6 +72,7 @@ public class TokenDefinition {
         public Syntax syntax;
         public As as;
         public Map<BigInteger, String> members;
+        public String function = null;
 
         public AttributeType(Element attr) {
             name = getLocalisedName(attr,"name");
@@ -112,6 +116,15 @@ public class TokenDefinition {
                 if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("origin")) {
                     // System.out.println("\nFound a name field: " + node.getNodeName());
                     Element origin = (Element) node;
+                    switch(origin.getAttribute("contract").toLowerCase()) {
+                        case "holding-contract":
+                            as = As.Mapping;
+                            // TODO: Syntax is not checked
+                            getFunctions(origin);
+                            break;
+                        default:
+                            break;
+                    }
                     switch(origin.getAttribute("as").toLowerCase()) {
                         case "signed":
                             as = As.Signed;
@@ -146,6 +159,27 @@ public class TokenDefinition {
                 if (child.getNodeType() == Node.ELEMENT_NODE) {
                     option = (Element) child;
                     members.put(new BigInteger(option.getAttribute("key")), getLocalisedName(option,"value"));
+                }
+            }
+        }
+
+        private void getFunctions(Element mapping) {
+            Element option;
+            Node functionDef;
+            for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
+                if (child.getNodeType() == Node.ELEMENT_NODE) {
+                    option = (Element) child;
+                    String type = child.getNodeName(); //function
+                    String functionName = child.getTextContent();  //isExpired
+
+                    switch (type)
+                    {
+                        case "function":
+                            function = functionName;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -211,6 +245,12 @@ public class TokenDefinition {
             if (attr.bitmask != null) {// has <origin> which is from bitmask
                 attributes.put(attr.id, attr);
             } // TODO: take care of attributes whose value does not originate from bitmask!
+            else if (attr.function != null) {
+                FunctionDefinition fd = new FunctionDefinition();
+                fd.method = attr.function;
+                fd.syntax = attr.syntax;
+                functions.put(attr.id, fd);
+            }
         }
         extractFeatureTag(xml);
         extractContractTag(xml);

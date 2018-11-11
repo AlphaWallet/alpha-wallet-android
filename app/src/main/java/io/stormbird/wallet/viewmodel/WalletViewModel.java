@@ -43,7 +43,6 @@ public class WalletViewModel extends BaseViewModel
 {
     private static final long GET_BALANCE_INTERVAL = 10;
 
-    //    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
@@ -183,8 +182,10 @@ public class WalletViewModel extends BaseViewModel
     private void fetchFromOpensea()
     {
         List<Token> serviceList = tokensService.getAllLiveTokens();
-        tokenCache = serviceList.toArray(new Token[serviceList.size()]);
+        tokenCache = serviceList.toArray(new Token[0]);
         tokens.postValue(tokenCache);
+        //get the XML address
+        setContractAddresses();
 
         if (updateTokens != null) updateTokens.dispose();
 
@@ -216,13 +217,13 @@ public class WalletViewModel extends BaseViewModel
         List<Token> tokenList = tokensService.getAllClass(ERC721Token.class);
 
         //store these tokens
-        updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokenList.toArray(new Token[tokenList.size()]))
+        updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokenList.toArray(new Token[0]))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::storedTokens, this::onError);
 
         tokenList = tokensService.getAllLiveTokens();
-        tokenCache = tokenList.toArray(new Token[tokenList.size()]);
+        tokenCache = tokenList.toArray(new Token[0]);
         onFetchTokensCompletable();
     }
 
@@ -249,7 +250,7 @@ public class WalletViewModel extends BaseViewModel
         checkTokensDisposable = Observable.fromCallable(tokensService::getAllTokens)
                 .flatMapIterable(token -> token)
                 .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
-                .flatMap(token-> fetchTokensInteract.getTokenInfo(token.getAddress()))
+                .flatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .subscribeOn(Schedulers.io())
                 .subscribe(addTokenInteract::addS, this::tkError,
@@ -277,6 +278,7 @@ public class WalletViewModel extends BaseViewModel
                             .flatMapIterable(token -> token)
                             .filter(token -> (token.tokenInfo.name != null && !token.isTerminated() && !token.independentUpdate()))
                             .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))
+                            .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();
@@ -425,13 +427,14 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    public void setContractAddresses()
+    private void setContractAddresses()
     {
         disposable = fetchAllContractAddresses()
                 .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
                 .flatMap(setupTokensInteract::addToken)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
+                .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::finishedImport, this::onTokenAddError);
     }
@@ -455,6 +458,12 @@ public class WalletViewModel extends BaseViewModel
     private void finishedImport(Token token)
     {
         Log.d("WVM", "Added " + token.tokenInfo.name);
+    }
+
+    public Token getTokenFromService(Token token)
+    {
+        if (tokensService.getToken(token.getAddress()) != null) token = tokensService.getToken(token.getAddress());
+        return token;
     }
 
     private class AccountData

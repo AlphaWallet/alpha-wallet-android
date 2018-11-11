@@ -148,6 +148,7 @@ public class TokensService
     {
         for (Token t : tokens)
         {
+            t.setRequireAuxRefresh();
             if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
             {
                 tokenMap.put(t.getAddress(), t);

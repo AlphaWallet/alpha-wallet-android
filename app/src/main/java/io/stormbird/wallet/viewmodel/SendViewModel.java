@@ -4,13 +4,17 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import org.web3j.abi.datatypes.Bool;
 import org.web3j.crypto.Hash;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.Ticker;
@@ -28,6 +32,8 @@ public class SendViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
     private final MutableLiveData<Double> ethPrice = new MutableLiveData<>();
+    private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> ensFail = new MutableLiveData<>();
 
     private final ConfirmationRouter confirmationRouter;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
@@ -45,6 +51,8 @@ public class SendViewModel extends BaseViewModel {
     }
 
     public LiveData<Double> ethPriceReading() { return ethPrice; }
+    public LiveData<String> ensResolve() { return ensResolve; }
+    public LiveData<Boolean> ensFail() { return ensFail; }
 
     public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens) {
         confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens);
@@ -80,34 +88,50 @@ public class SendViewModel extends BaseViewModel {
     public void checkENSAddress(String name)
     {
         if (name == null || name.length() < 2 || name.charAt(0) != '@') return;
-        name = name.substring(1);
-        //split name
-        String[] components = name.split("\\.");
+        disposable = checkENSAddressFunc(name.substring(1))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::gotHash, this::onError);
+    }
 
-        byte[] hexZeroBytes = new byte[32];
-        for (int i = 0; i < 32; i++) hexZeroBytes[i] = 0;
-        byte[] resultHash = hexZeroBytes;
-
-        for (int i = (components.length - 1); i >= 0; i--)
-        {
-            String nameComponent = components[i];
-            resultHash = hashJoin(resultHash, nameComponent.getBytes());
-        }
-
-        System.out.println(Numeric.toHexString(resultHash));
+    private void gotHash(byte[] resultHash)
+    {
         disposable = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotAddress, this::onError);
     }
 
+    private Single<byte[]> checkENSAddressFunc(final String name)
+    {
+        return Single.fromCallable(() -> {
+            //split name
+            String[] components = name.split("\\.");
+
+            byte[] resultHash = new byte[32];
+            Arrays.fill(resultHash, (byte)0);
+
+            for (int i = (components.length - 1); i >= 0; i--)
+            {
+                String nameComponent = components[i];
+                resultHash = hashJoin(resultHash, nameComponent.getBytes());
+            }
+
+            return resultHash;
+        });
+    }
+
     private void gotAddress(String returnedAddress)
     {
-        BigInteger test = new BigInteger(returnedAddress, 16);
+        BigInteger test = Numeric.toBigInt(returnedAddress);
         if (!test.equals(BigInteger.ZERO))
         {
             //post the response back
-            System.out.println("YAY GOT ADDRESS: " + returnedAddress);
+            ensResolve.postValue(returnedAddress);
+        }
+        else
+        {
+            ensFail.postValue(true);
         }
     }
 
@@ -119,8 +143,6 @@ public class SendViewModel extends BaseViewModel {
         System.arraycopy(lastHash, 0, joined, 0, lastHash.length);
         System.arraycopy(inputHash, 0, joined, lastHash.length, inputHash.length);
         byte[] resultHash = Hash.sha3(joined);
-        System.out.println(Numeric.toHexString(resultHash));
-
         return resultHash;
     }
 }

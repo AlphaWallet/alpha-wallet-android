@@ -110,7 +110,7 @@ public class WalletsActivity extends BaseActivity implements
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         long lastBlockChecked = pref.getLong(ENS_SCAN_BLOCK, 0);
-        viewModel.swipeRefreshWallets(lastBlockChecked);
+        viewModel.swipeRefreshWallets(0); //check all records
     }
 
     private void onScanBlockReceived(long blockNumber)

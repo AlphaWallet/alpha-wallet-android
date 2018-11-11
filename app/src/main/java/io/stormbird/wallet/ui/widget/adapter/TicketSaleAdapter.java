@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
@@ -46,6 +47,7 @@ public class TicketSaleAdapter extends TicketAdapter {
         super(onTicketIdClickListener, t, assetService, null);
         onTokenCheckListener = this::onTokenCheck;
         selectedTicketRange = null;
+        //setTicket(t);
     }
 
     @Override
@@ -98,50 +100,9 @@ public class TicketSaleAdapter extends TicketAdapter {
 
     private void addRanges(Ticket t)
     {
-        TicketRange currentRange = null;
-        int currentNumber = -1;
-
         //first sort the balance array
-        List<TicketRangeElement> sortedList = new ArrayList<>();
-        for (BigInteger v : t.balanceArray)
-        {
-            if (v.compareTo(BigInteger.ZERO) == 0) continue;
-            TicketRangeElement e = new TicketRangeElement();
-            e.id = v;
-            NonFungibleToken nft = assetService.getNonFungibleToken(t.getAddress(), v);
-            if (nft != null)
-            {
-                e.ticketNumber = nft.getAttribute("numero").value.intValue();
-                e.category = (short) nft.getAttribute("category").value.intValue();
-                e.match = (short) nft.getAttribute("match").value.intValue();
-                e.venue = (short) nft.getAttribute("venue").value.intValue();
-            }
-            sortedList.add(e);
-        }
-        TicketRangeElement.sortElements(sortedList);
-
-        int currentCat = 0;
-
-        for (int i = 0; i < sortedList.size(); i++)
-        {
-            TicketRangeElement e = sortedList.get(i);
-            if (currentRange != null && e.id.equals(currentRange.tokenIds.get(0)))
-            {
-                currentRange.tokenIds.add(e.id);
-            }
-            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
-            {
-                currentRange = new TicketRange(e.id, t.getAddress());
-                items.add(new TicketSaleSortedItem(currentRange, 10 + i));
-                currentCat = e.category;
-            }
-            else
-            {
-                //update
-                currentRange.tokenIds.add(e.id);
-            }
-            currentNumber = e.ticketNumber;
-        }
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, t.balanceArray);
+        addSortedItems(sortedList, t, TicketSaleSortedItem.class);
     }
 
     public void setTicket(Ticket t) {
@@ -151,6 +112,7 @@ public class TicketSaleAdapter extends TicketAdapter {
 
         addRanges(t);
         items.endBatchedUpdates();
+        notifyDataSetChanged();
     }
 
     public void setRedeemTicket(Ticket t) {

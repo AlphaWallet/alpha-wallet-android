@@ -69,7 +69,6 @@
     <string name="price_per_ticket">门票单价</string>
     <string name="action_marketplaceSale">放入市场</string>
     <string name="set_price_subtext_abr">设置以太币价格(ETH)</string>
-    <string name="set_price_subtext_abr_magic">设置MagicLink的以太币ETH价格:</string>
     <string name="transfer_tickets">转让门票</string>
     <string name="link_valid_until">MagicLink有效期至:</string>
     <string name="transfer_method">转让方式:</string>
@@ -211,7 +210,6 @@
     <string name="confirm_transfer_details">确认转发信息</string>
     <string name="advanced_settings">设置</string>
     <string name="action_confirm">确认</string>
-    <string name="title_input_amount_to_transfer">输入转发数额:</string>
     <string name="action_info">信息</string>
     <string name="eth_detail_q1">什么是以太坊?</string>
     <string name="eth_detail_a1">ETH 是以太坊的简写. 以太坊是一种加密货币(类似比特币)运行区块链技术.</string>
@@ -262,7 +260,6 @@
 <string name="select_network">选择网络:</string>
 <string name="title_select_ticket_quantity">选择门票数量:</string>
 <string name="title_select_transfer_method">选择转让方式:</string>
-<string name="title_set_magiclink_expiry">设置链接期限:</string>
 <string name="title_input_wallet_address">输入钱包地址:</string>
 <string name="title_import">导入钱包</string>
 <string name="action_import">导入</string>
@@ -333,4 +330,5 @@
     <string name="visit">访问</string>
     <string name="free_import_with_gas">免费导入(免除 gas 费用)</string>
     <string name="toolbar_header_browser">DApp 浏览器</string>
+    <string name="ens_address">ENS 地址</string>
 </resources>

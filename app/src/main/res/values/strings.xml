@@ -502,4 +502,5 @@
     <string name="action_reload">Reload</string>
     <string name="free_import_with_gas">Free Import (with gas fee)</string>
     <string name="confirm_dapp_transaction">Confirm DApp transaction"</string>
+    <string name="ens_address">ENS Address</string>
 </resources>

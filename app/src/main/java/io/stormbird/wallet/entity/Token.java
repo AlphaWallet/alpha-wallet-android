@@ -350,7 +350,7 @@ public class Token implements Parcelable
     //Detects if the auxData held in Realm is different from the current auxData.
     private boolean checkAuxDataChanged(RealmToken realmToken)
     {
-        if (auxData != null && realmToken.getAuxData().length() <= 4) return true;
+        if (auxData != null && (realmToken.getAuxData() == null || realmToken.getAuxData().length() <= 4)) return true;
         else if (auxData != null && realmToken.getAuxData().length() > 4)
         {
             Map<String, String> currentRealmData = restoreAuxData(realmToken.getAuxData());

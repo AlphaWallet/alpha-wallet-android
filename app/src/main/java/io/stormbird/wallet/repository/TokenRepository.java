@@ -17,6 +17,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -519,6 +520,26 @@ public class TokenRepository implements TokenRepositoryType {
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
                 tokens);
+    }
+
+    @Override
+    public Single<String> callAddressMethod(String method, byte[] resultHash, String address)
+    {
+        return Single.fromCallable(() -> {
+            org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
+            Wallet temp = new Wallet(null);
+            String responseValue = callSmartContractFunction(function, address, temp);
+
+            if (responseValue == null) return null;
+
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1) {
+                return (String)response.get(0).getValue();
+            } else {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -1124,6 +1145,14 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function("decimals",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
+    }
+
+    private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
+    {
+        return new org.web3j.abi.datatypes.Function(
+                method,
+                Collections.singletonList(new Bytes32(resultHash)),
+                Collections.singletonList(new TypeReference<Address>() {}));
     }
 
     private List callSmartContractFunctionArray(

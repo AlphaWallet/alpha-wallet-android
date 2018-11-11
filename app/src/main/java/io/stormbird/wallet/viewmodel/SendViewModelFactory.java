@@ -3,12 +3,12 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
+import io.reactivex.annotations.NonNull;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.ConfirmationRouter;
-
 import io.stormbird.wallet.router.MyAddressRouter;
-import io.reactivex.annotations.NonNull;
 
 public class SendViewModelFactory implements ViewModelProvider.Factory {
 

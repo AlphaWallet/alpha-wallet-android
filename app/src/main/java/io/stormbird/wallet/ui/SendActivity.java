@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -52,8 +53,8 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 
-public class SendActivity extends BaseActivity {
-    private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
+public class SendActivity extends BaseActivity implements Runnable {
+    private static final int ENS_RESOLVE_DELAY = 1500; //In milliseconds
     private static final String KEY_ADDRESS = "key_address";
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -83,6 +84,10 @@ public class SendActivity extends BaseActivity {
     TextView myAddressText;
     TextView amountSymbolText;
     AWalletAlertDialog dialog;
+    LinearLayout layoutENSResolve;
+    TextView textENS;
+
+    Handler handler;
 
     //Token
     TextView balanceEth;
@@ -105,6 +110,8 @@ public class SendActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
 
+        handler = new Handler();
+
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS); //contract address
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
@@ -112,7 +119,8 @@ public class SendActivity extends BaseActivity {
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        viewModel.ensResolve().observe(this, this::onENSSuccess);
+        viewModel.ensFail().observe(this, this::hideENS);
 
         myAddress = wallet.address;
 
@@ -130,6 +138,17 @@ public class SendActivity extends BaseActivity {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
             priceUSDLayout.setVisibility(View.GONE);
         }
+    }
+
+    private void onENSSuccess(String address)
+    {
+        layoutENSResolve.setVisibility(View.VISIBLE);
+        textENS.setText(address);
+    }
+
+    private void hideENS(Boolean dummy)
+    {
+        layoutENSResolve.setVisibility(View.GONE);
     }
 
     private void onNewEthPrice(Double ethPrice)
@@ -172,6 +191,8 @@ public class SendActivity extends BaseActivity {
         ethDetailLayout = findViewById(R.id.layout_eth_detail);
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLayout = findViewById(R.id.layout_usd_price);
+        layoutENSResolve = findViewById(R.id.layout_ens);
+        textENS = findViewById(R.id.text_ens_resolve);
 
         startTransferButton = findViewById(R.id.button_start_transfer);
         startTransferButton.setOnClickListener(v -> onStartTransfer());
@@ -220,9 +241,17 @@ public class SendActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                //reset address check timer
+                textENS.setText("");
+                checkAddress();
             }
         });
+    }
+
+    private void checkAddress()
+    {
+        handler.removeCallbacks(this);
+        handler.postDelayed(this, ENS_RESOLVE_DELAY);
     }
 
     private void copyAddress()
@@ -248,7 +277,8 @@ public class SendActivity extends BaseActivity {
         }
 
         toAddressError.setVisibility(View.GONE);
-        final String to = toAddressEditText.getText().toString();
+        String to = toAddressEditText.getText().toString();
+        if (!isAddressValid(to)) to = textENS.getText().toString();
         if (!isAddressValid(to))
         {
             toAddressError.setVisibility(View.VISIBLE);
@@ -399,18 +429,6 @@ public class SendActivity extends BaseActivity {
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         balanceEth.setText(value);
 
-//        if (token.ticker == null) {
-//            textUsdValue.setText(R.string.NA);
-//            text24Hours.setText(R.string.NA);
-//            textAppreciation.setText(R.string.NA);
-//            textAppreciationSub.setText(R.string.appreciation);
-//            text24HoursSub.setText(R.string.twenty_four_hours);
-//        } else {
-//            // TODO: Fill token details
-//            textAppreciationSub.setText(R.string.appreciation);
-//            text24HoursSub.setText(R.string.twenty_four_hours);
-//        }
-
         balanceEth.setVisibility(View.VISIBLE);
         arrayBalance.setVisibility(View.GONE);
     }
@@ -419,7 +437,17 @@ public class SendActivity extends BaseActivity {
     {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
-        String formatted = df.format(usdPrice);
-        return formatted;
+        return df.format(usdPrice);
+    }
+
+    @Override
+    public void run()
+    {
+        //address update delay check
+        final String to = toAddressEditText.getText().toString();
+        if (to.length() > 0 && to.charAt(0) == '@')
+        {
+            viewModel.checkENSAddress(to);
+        }
     }
 }

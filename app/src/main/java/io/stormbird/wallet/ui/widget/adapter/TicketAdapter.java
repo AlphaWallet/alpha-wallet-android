@@ -174,9 +174,6 @@ public class TicketAdapter extends TokensAdapter {
         items.endBatchedUpdates();
     }
 
-    /* This one look similar to the one in TicketAdapter, it needs a
-     * bit more abstraction to merge - the types produced are
-     * different.*/
     private void addRanges(Token t)
     {
         TicketRange currentRange = null;
@@ -192,10 +189,10 @@ public class TicketAdapter extends TokensAdapter {
             NonFungibleToken nft = assetService.getNonFungibleToken(token.getAddress(), v);
             if (nft != null)
             {
-                e.ticketNumber = nft.getAttribute("numero").value.intValue();
-                e.category = (short) nft.getAttribute("category").value.intValue();
-                e.match = (short) nft.getAttribute("match").value.intValue();
-                e.venue = (short) nft.getAttribute("venue").value.intValue();
+                if (nft.getAttribute("numero") != null)e.ticketNumber = nft.getAttribute("numero").value.intValue();
+                if (nft.getAttribute("category") != null)e.category = (short) nft.getAttribute("category").value.intValue();
+                if (nft.getAttribute("match") != null) e.match = (short) nft.getAttribute("match").value.intValue();
+                if (nft.getAttribute("venue") != null)e.venue = (short) nft.getAttribute("venue").value.intValue();
             }
             sortedList.add(e);
         }

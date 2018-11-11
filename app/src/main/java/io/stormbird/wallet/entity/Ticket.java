@@ -577,70 +577,118 @@ public class Ticket extends Token implements Parcelable
             NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(range.contractAddress, firstTicket);
 
             String nameStr = getTokenTitle(nonFungibleToken);
-
-            String venueStr = nonFungibleToken == null ? "" : nonFungibleToken.getAttribute("venue").text;
+            String venueStr = (nonFungibleToken != null && nonFungibleToken.getAttribute("venue") != null)
+                    ? nonFungibleToken.getAttribute("venue").text : "";
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
+
+            String textField1 = null;
+            String textField2 = null;
+            String textField3 = null;
+
+            //Not exactly sure how to handle this one
+            if (auxData != null && auxData.containsKey("building")) // is an address
+            {
+                nameStr = auxData.get("building");
+                venueStr += auxData.get("street");
+                venueStr += ", ";
+                venueStr += auxData.get("state");
+                textField2 = (auxData.get("expired").equals("true")) ? "expired" : "valid";
+                textField3 = nonFungibleToken.getAttribute("section").value.toString(10);
+                details.setText("");
+
+                if (auxData.get("expiry") != null)
+                {
+                    long eventTime = Long.valueOf(auxData.get("expiry"));
+                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
+                }
+                else
+                {
+                    ticketDate.setText("N.A.");
+                    ticketTime.setVisibility(View.GONE);
+                }
+            }
+            else if (nonFungibleToken != null && nonFungibleToken.getAttribute("countryA") != null)
+            {
+                String countryA = nonFungibleToken.getAttribute("countryA").text;
+                String countryB = nonFungibleToken.getAttribute("countryB").text;
+
+                if (countryA.charAt(0) == 0 && countryB.charAt(0) == 0)
+                {
+                    textField2 = null;
+                }
+                else
+                {
+                    textField2 = countryA + "-" + countryB;
+                }
+
+                String catTxt = nonFungibleToken.getAttribute("match").text;
+
+                if (catTxt.equals("0"))
+                {
+                    textField3 = null;
+                }
+                else
+                {
+                    textField3 = "M" + catTxt;
+                }
+
+                details.setText(
+                        nonFungibleToken.getAttribute("locality").name + ": " +
+                                nonFungibleToken.getAttribute("locality").text
+                );
+
+                long eventTime = nonFungibleToken.getAttribute("time").value.longValue();
+                String eventTimeStr = nonFungibleToken.getAttribute("time").text;
+
+                try
+                {
+                    if (eventTimeStr != null)
+                    {
+                        ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
+                        ticketDate.setText(datetime.format(date));
+                        ticketTime.setText(datetime.format(time));
+                        ticketTime.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
+                    }
+                }
+                catch (ParseException | IllegalArgumentException e)
+                {
+                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
+                }
+            }
 
             name.setText(nameStr);
             amount.setText(seatCount);
             venue.setText(venueStr);
 
-            if (!assetService.hasDefinition(getAddress()))
-            {
-                //remove all info
-                blankTicketExtra(activity);
-                return;
-            }
-
-            String countryA = nonFungibleToken.getAttribute("countryA").text;
-            String countryB = nonFungibleToken.getAttribute("countryB").text;
-
-            if (countryA.charAt(0) == 0 && countryB.charAt(0) == 0)
+            if (textField2 == null)
             {
                 ticketLayout.setVisibility(View.GONE);
             }
             else
             {
                 ticketLayout.setVisibility(View.VISIBLE);
-                ticketRange.setText(countryA + "-" + countryB);
+                ticketRange.setText(textField2);
             }
 
-            String catTxt = nonFungibleToken.getAttribute("match").text;
-
-            if (catTxt.equals("0"))
+            if (textField3 == null)
             {
                 catLayout.setVisibility(View.GONE);
             }
             else
             {
                 catLayout.setVisibility(View.VISIBLE);
-                cat.setText("M" + catTxt);
+                cat.setText(textField3);
             }
 
-            details.setText(
-                    nonFungibleToken.getAttribute("locality").name + ": " +
-                            nonFungibleToken.getAttribute("locality").text
-            );
-
-            long eventTime = nonFungibleToken.getAttribute("time").value.longValue();
-            String eventTimeStr = nonFungibleToken.getAttribute("time").text;
-
-            try
+            if (!assetService.hasDefinition(getAddress()))
             {
-                if (eventTimeStr != null)
-                {
-                    ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
-                    ticketDate.setText(datetime.format(date));
-                    ticketTime.setText(datetime.format(time));
-                }
-                else
-                {
-                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
-                }
-            }
-            catch (ParseException | IllegalArgumentException e)
-            {
-                setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
+                //remove all info
+                blankTicketExtra(activity);
+                return;
             }
         }
     }
@@ -655,10 +703,12 @@ public class Ticket extends Token implements Parcelable
             time.setTimeZone(calendar.getTimeZone());
             ticketDate.setText(date.format(calendar.getTime()));
             ticketTime.setText(time.format(calendar.getTime()));
+            ticketTime.setVisibility(View.VISIBLE);
         }
         else
         {
             ticketDate.setText("N.A.");
+            ticketTime.setVisibility(View.GONE);
         }
     }
 
@@ -796,6 +846,13 @@ public class Ticket extends Token implements Parcelable
     public int interfaceOrdinal()
     {
         return interfaceSpec.ordinal();
+    }
+
+    @Override
+    public BigInteger getTokenID(int index)
+    {
+        if (balanceArray.size() > index && index >= 0) return balanceArray.get(index);
+        else return BigInteger.valueOf(-1);
     }
 
     private enum InterfaceType

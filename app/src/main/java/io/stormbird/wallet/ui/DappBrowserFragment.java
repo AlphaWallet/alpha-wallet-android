@@ -185,8 +185,10 @@ public class DappBrowserFragment extends Fragment implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
-        web3.setChainId(1);
-        web3.setRpcUrl(C.ETH_RPC_URL);
+        web3.setChainId(networkInfo.chainId);
+        String rpcURL = networkInfo.rpcServerUrl;
+        if (networkInfo.backupNodeUrl != null) rpcURL = networkInfo.backupNodeUrl;
+        web3.setRpcUrl(rpcURL);
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {

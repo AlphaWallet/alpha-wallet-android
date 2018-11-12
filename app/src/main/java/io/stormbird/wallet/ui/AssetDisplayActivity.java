@@ -83,15 +83,15 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         adapter = new TicketAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         if (token instanceof ERC721Token)
         {
-            adapter.setERC721Contract(token);
-            findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+            findViewById(R.id.button_use).setVisibility(View.GONE);
+            findViewById(R.id.button_sell).setVisibility(View.GONE);
         }
         else
         {
             findViewById(R.id.button_use).setOnClickListener(this);
             findViewById(R.id.button_sell).setOnClickListener(this);
-            findViewById(R.id.button_transfer).setOnClickListener(this);
         }
+        findViewById(R.id.button_transfer).setOnClickListener(this);
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);

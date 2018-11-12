@@ -14,6 +14,7 @@ import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.adapter.TicketSaleAdapter;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.TransferTicketViewModel;
@@ -48,7 +49,7 @@ public class TransferTicketActivity extends BaseActivity
     public TextView ids;
     public TextView selected;
 
-    private Ticket ticket;
+    private Token token;
     private TicketSaleAdapter adapter;
 
     @Override
@@ -56,7 +57,7 @@ public class TransferTicketActivity extends BaseActivity
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        ticket = getIntent().getParcelableExtra(TICKET);
+        token = getIntent().getParcelableExtra(TICKET);
 
         toolbar();
 
@@ -91,8 +92,8 @@ public class TransferTicketActivity extends BaseActivity
     {
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
-        adapter.setTransferTicket(ticket);
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService());
+        adapter.setTransferTicket(token);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -105,7 +106,7 @@ public class TransferTicketActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare(token);
     }
 
     @Override
@@ -130,9 +131,9 @@ public class TransferTicketActivity extends BaseActivity
                 idList.addAll(tr.tokenIds);
             }
 
-            String idListStr = ticket.intArrayToString(idList, false); //list of B32 ID's
-            List<Integer> idSendList = ticket.ticketIdStringToIndexList(idListStr); //convert string list of b32 to Indexes
-            String indexList = ticket.integerListToString(idSendList, true);
+            String idListStr = ((Ticket)token).intArrayToString(idList, false); //list of B32 ID's
+            List<Integer> idSendList = token.ticketIdStringToIndexList(idListStr); //convert string list of b32 to Indexes
+            String indexList = token.integerListToString(idSendList, true);
 
             //confirm other address
             //confirmation screen

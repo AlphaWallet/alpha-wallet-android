@@ -70,6 +70,4 @@ public class CreateTransactionInteract
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread()));
     }
-
-
 }

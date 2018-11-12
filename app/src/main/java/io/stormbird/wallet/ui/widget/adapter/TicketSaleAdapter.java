@@ -1,8 +1,11 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
-import android.content.Context;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
@@ -25,12 +28,6 @@ import io.stormbird.wallet.ui.widget.holder.TicketSaleHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
 import io.stormbird.wallet.ui.widget.holder.TransferHeaderHolder;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.TicketRange;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by James on 12/02/2018.
@@ -43,11 +40,10 @@ public class TicketSaleAdapter extends TicketAdapter {
     private QuantitySelectorHolder quantitySelector;
 
     /* Context ctx is used to initialise assetDefinition in the super class */
-    public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Ticket t, AssetDefinitionService assetService) {
+    public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Token t, AssetDefinitionService assetService) {
         super(onTicketIdClickListener, t, assetService, null);
         onTokenCheckListener = this::onTokenCheck;
         selectedTicketRange = null;
-        //setTicket(t);
     }
 
     @Override
@@ -89,7 +85,7 @@ public class TicketSaleAdapter extends TicketAdapter {
         return holder;
     }
 
-    public void setTransferTicket(Ticket t) {
+    public void setTransferTicket(Token t) {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TransferHeaderSortedItem(t));
@@ -98,14 +94,15 @@ public class TicketSaleAdapter extends TicketAdapter {
         items.endBatchedUpdates();
     }
 
-    private void addRanges(Ticket t)
+    private void addRanges(Token t)
     {
         //first sort the balance array
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, t.balanceArray);
-        addSortedItems(sortedList, t, TicketSaleSortedItem.class);
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, ((Ticket)t).balanceArray);
+        addSortedItems(sortedList, t, TicketSaleSortedItem.VIEW_TYPE);
     }
 
-    public void setTicket(Ticket t) {
+    @Override
+    public void setToken(Token t) {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new MarketSaleHeaderSortedItem(t));
@@ -115,7 +112,7 @@ public class TicketSaleAdapter extends TicketAdapter {
         notifyDataSetChanged();
     }
 
-    public void setRedeemTicket(Ticket t) {
+    public void setRedeemTicket(Token t) {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new RedeemHeaderSortedItem(t));
@@ -147,7 +144,7 @@ public class TicketSaleAdapter extends TicketAdapter {
         return selectedTicketRange;
     }
 
-    public void setRedeemTicketQuantity(TicketRange range, Ticket ticket)
+    public void setRedeemTicketQuantity(TicketRange range, Token ticket)
     {
         items.beginBatchedUpdates();
         items.clear();

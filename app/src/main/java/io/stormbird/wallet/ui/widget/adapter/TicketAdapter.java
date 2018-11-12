@@ -26,6 +26,7 @@ import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
 import io.stormbird.wallet.ui.widget.holder.TicketHolder;
+import io.stormbird.wallet.ui.widget.holder.TicketSaleHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
 
@@ -115,10 +116,26 @@ public class TicketAdapter extends TokensAdapter {
 
         List<BigInteger> idList = ((Ticket)t).stringHexToBigIntegerList(ticketIds);
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, idList); //generate sorted list
-        addSortedItems(sortedList, t, TokenIdSortedItem.class); //insert sorted items into view
+        addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE); //insert sorted items into view
 
         items.endBatchedUpdates();
     }
+
+    public void setToken(Token t) {
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(new TokenBalanceSortedItem(t));
+
+        if (t instanceof Ticket) addRanges(t);
+        items.endBatchedUpdates();
+    }
+
+    private void addRanges(Token t)
+    {
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, t, ((Ticket)t).balanceArray);
+        addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE);
+    }
+
 
     protected List<TicketRangeElement> generateSortedList(AssetDefinitionService assetService, Token token, List<BigInteger> idList)
     {
@@ -134,24 +151,26 @@ public class TicketAdapter extends TokensAdapter {
         return sortedList;
     }
 
-    protected <T> T generateType(TicketRange range, int weight, T type)
+    @SuppressWarnings("unchecked")
+    protected <T> T generateType(TicketRange range, int weight, int id)
     {
         T item;
-        if (type.getClass().isInstance(TokenIdSortedItem.class))
+        switch (id)
         {
-            item = (T) new TokenIdSortedItem(range, weight);
-        }
-        else
-        {
-            item = (T) new TicketSaleSortedItem(range, weight);
+            case TicketSaleHolder.VIEW_TYPE:
+                item = (T) new TicketSaleSortedItem(range, weight);
+                break;
+            case TicketHolder.VIEW_TYPE:
+            default:
+                item = (T) new TokenIdSortedItem(range, weight);
+                break;
         }
 
         return item;
     }
 
-    protected <T> SortedList<T> addSortedItems(List<TicketRangeElement> sortedList, Token t, T element)
+    protected <T> SortedList<T> addSortedItems(List<TicketRangeElement> sortedList, Token t, int id)
     {
-        TicketRange currentRange = null;
         int currentNumber = -1;
         int currentCat = 0;
 
@@ -165,7 +184,7 @@ public class TicketAdapter extends TokensAdapter {
             else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
-                final T item = generateType(currentRange, 10 + i, element);
+                final T item = generateType(currentRange, 10 + i, id);
                 items.add((SortedItem)item);
                 currentCat = e.category;
             }
@@ -178,59 +197,6 @@ public class TicketAdapter extends TokensAdapter {
         }
 
         return null;
-    }
-
-    public void setToken(Token t) {
-        items.beginBatchedUpdates();
-        items.clear();
-        items.add(new TokenBalanceSortedItem(t));
-
-        if (t instanceof Ticket) addRanges(t);
-        items.endBatchedUpdates();
-    }
-
-    private void addRanges(Token t)
-    {
-        TicketRange currentRange = null;
-        int currentNumber = -1;
-
-        //first sort the balance array
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, t, ((Ticket)t).balanceArray);
-        addSortedItems(sortedList, t, TokenIdSortedItem.class);
-
-//        List<TicketRangeElement> sortedList = new ArrayList<>();
-//        for (BigInteger v : ((Ticket)t).balanceArray)
-//        {
-//            if (v.compareTo(BigInteger.ZERO) == 0) continue;
-//            TicketRangeElement e = new TicketRangeElement(assetService, token, v);
-//            e.id = v;
-//            sortedList.add(e);
-//        }
-//        TicketRangeElement.sortElements(sortedList);
-        //addSortedItems(sortedList, t); //insert sorted items into view
-
-//        int currentCat = 0;
-//
-//        for (int i = 0; i < sortedList.size(); i++)
-//        {
-//            TicketRangeElement e = sortedList.get(i);
-//            if (currentRange != null && e.id.equals(currentRange.tokenIds.get(0)))
-//            {
-//                currentRange.tokenIds.add(e.id);
-//            }
-//            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
-//            {
-//                currentRange = new TicketRange(e.id, t.getAddress());
-//                items.add(new TokenIdSortedItem(currentRange, 10 + i));
-//                currentCat = e.category;
-//            }
-//            else
-//            {
-//                //update
-//                currentRange.tokenIds.add(e.id);
-//            }
-//            currentNumber = e.ticketNumber;
-//        }
     }
 }
 

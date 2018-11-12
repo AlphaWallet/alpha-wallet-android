@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
 import io.stormbird.wallet.entity.Token;
@@ -20,6 +21,8 @@ import io.stormbird.wallet.ui.widget.entity.TicketSaleSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TransferHeaderSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
+import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
+import io.stormbird.wallet.ui.widget.holder.OpenseaSelectHolder;
 import io.stormbird.wallet.ui.widget.holder.QuantitySelectorHolder;
 import io.stormbird.wallet.ui.widget.holder.RedeemTicketHolder;
 import io.stormbird.wallet.ui.widget.holder.SalesOrderHeaderHolder;
@@ -80,6 +83,9 @@ public class TicketSaleAdapter extends TicketAdapter {
             case TransferHeaderHolder.VIEW_TYPE: {
                 holder = new TransferHeaderHolder(R.layout.item_redeem_ticket, parent);
             } break;
+            case OpenseaHolder.VIEW_TYPE: {
+                holder = new OpenseaSelectHolder(R.layout.item_opensea_token, parent, token);
+            } break;
         }
 
         return holder;
@@ -89,9 +95,25 @@ public class TicketSaleAdapter extends TicketAdapter {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TransferHeaderSortedItem(t));
-        addRanges(t);
+        addTokens(t);
 
         items.endBatchedUpdates();
+    }
+
+    private void addTokens(Token t)
+    {
+        if (t instanceof ERC721Token)
+        {
+            setERC721Contract(t);
+        }
+        else if (t instanceof Ticket)
+        {
+            addRanges(t);
+        }
+        else
+        {
+            System.out.println("*** UNKNOWN TOKEN IN LIST **");
+        }
     }
 
     private void addRanges(Token t)

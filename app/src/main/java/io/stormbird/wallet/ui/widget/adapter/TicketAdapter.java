@@ -49,6 +49,7 @@ public class TicketAdapter extends TokensAdapter {
         token = t;
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
+        if (t instanceof ERC721Token) setERC721Contract(t);
     }
 
     public TicketAdapter(OnTicketIdClickListener onTicketIdClick, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)

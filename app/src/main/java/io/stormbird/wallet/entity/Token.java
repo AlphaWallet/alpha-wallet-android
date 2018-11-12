@@ -14,6 +14,7 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -484,5 +485,10 @@ public class Token implements Parcelable
     public boolean requiresAuxRefresh()
     {
         return (requiresAuxRefresh);
+    }
+
+    public Function getTransferFunction(String to, String tokenId)
+    {
+        return null;
     }
 }

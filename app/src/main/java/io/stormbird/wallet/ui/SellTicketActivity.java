@@ -15,6 +15,7 @@ import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.adapter.TicketSaleAdapter;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.SellTicketModel;
@@ -50,7 +51,7 @@ public class SellTicketActivity extends BaseActivity {
     private FinishReceiver finishReceiver;
 
     private String address;
-    private Ticket ticket;
+    private Token token;
     private TicketRange ticketRange;
     private TicketSaleAdapter adapter;
 
@@ -58,18 +59,13 @@ public class SellTicketActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-
-        ticket = getIntent().getParcelableExtra(TICKET);
-
-        address = ticket.getAddress();
-
+        setContentView(R.layout.activity_sell_ticket);
         toolbar();
-
-        address = ticket.tokenInfo.address;
-
         setTitle(getString(R.string.empty));
 
-        setContentView(R.layout.activity_sell_ticket);
+        token = getIntent().getParcelableExtra(TICKET);
+
+        address = token.getAddress();
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellTicketModel.class);
@@ -106,7 +102,7 @@ public class SellTicketActivity extends BaseActivity {
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
+        adapter = new TicketSaleAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -138,7 +134,7 @@ public class SellTicketActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare(token);
     }
 
     private String getIDSelection() {

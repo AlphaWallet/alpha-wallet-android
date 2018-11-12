@@ -51,7 +51,7 @@ window.Trust.init(rpcURL, {
     networkVersion: chainID
 })
 window.web3.setProvider = function () {
-  console.debug('Trust Wallet - overrode web3.setProvider')
+  console.debug('Alpha Wallet - overrode web3.setProvider')
 }
 
 window.web3.version.getNetwork = function(cb) {

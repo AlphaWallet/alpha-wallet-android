@@ -10,8 +10,10 @@ import io.stormbird.token.entity.TicketRange;
 
 public class TicketSaleSortedItem extends SortedItem<TicketRange>
 {
+    public static final int VIEW_TYPE = TicketSaleHolder.VIEW_TYPE;
+
     public TicketSaleSortedItem(TicketRange range, int weight) {
-        super(TicketSaleHolder.VIEW_TYPE, range, weight);
+        super(VIEW_TYPE, range, weight);
     }
 
     @Override

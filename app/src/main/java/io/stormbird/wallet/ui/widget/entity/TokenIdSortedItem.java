@@ -9,8 +9,10 @@ import io.stormbird.token.entity.TicketRange;
 
 public class TokenIdSortedItem extends SortedItem<TicketRange>
 {
+    public static final int VIEW_TYPE = TicketHolder.VIEW_TYPE;
+
     public TokenIdSortedItem(TicketRange range, int weight) {
-        super(TicketHolder.VIEW_TYPE, range, weight);
+        super(VIEW_TYPE, range, weight);
     }
 
     @Override

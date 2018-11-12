@@ -7,7 +7,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -312,15 +311,20 @@ public class TokenDefinition {
 
     private void extractFeatureTag(Document xml)
     {
+        NodeList l;
         NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "feature");
         for (int i = 0; i < nList.getLength(); i++) {
             Element feature = (Element) nList.item(i);
             switch (feature.getAttribute("type")) {
                 case "feemaster":
-                    feemasterAPI = getContentByTagName(feature, "feemaster");
+                    l = feature.getElementsByTagNameNS("http://attestation.id/ns/tbml", "feemaster");
+                    for (int j = 0; j < l.getLength(); j++)
+                        feemasterAPI = l.item(j).getTextContent();
                     break;
                 case "market-queue":
-                    marketQueueAPI = getContentByTagName(feature, "gateway");
+                    l = feature.getElementsByTagNameNS("http://attestation.id/ns/tbml", "gateway");
+                    for (int j = 0; j < l.getLength(); j++)
+                        marketQueueAPI = l.item(j).getTextContent();
                     break;
                 default:
                     break;

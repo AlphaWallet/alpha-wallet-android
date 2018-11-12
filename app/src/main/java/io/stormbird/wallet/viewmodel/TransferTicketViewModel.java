@@ -19,6 +19,8 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
+import static io.stormbird.wallet.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
+
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -101,6 +103,15 @@ public class TransferTicketViewModel extends BaseViewModel {
         try {
             Token ticket = this.ticket().getValue();
             transferTicketDetailRouter.open(context, ticket, ticketIDs, defaultWallet.getValue());
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void openTransferDirectDialog(Context context, String tokenId) {
+        try {
+            Token token = this.ticket().getValue();
+            transferTicketDetailRouter.openTransfer(context, token, tokenId, defaultWallet.getValue(), TRANSFER_TO_ADDRESS);
         } catch (Exception e) {
 
         }

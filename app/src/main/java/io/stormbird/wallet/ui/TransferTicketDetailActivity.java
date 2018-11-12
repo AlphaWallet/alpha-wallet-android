@@ -40,8 +40,10 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
@@ -75,7 +77,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     private static final int CHOOSE_QUANTITY = 0;
     private static final int PICK_TRANSFER_METHOD = 1;
     private static final int TRANSFER_USING_LINK = 2;
-    private static final int TRANSFER_TO_ADDRESS = 3;
+    public  static final int TRANSFER_TO_ADDRESS = 3;
 
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
@@ -86,7 +88,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private FinishReceiver finishReceiver;
 
-    private Ticket ticket;
+    private Token token;
     private TicketAdapter adapter;
 
     private TextView titleText;
@@ -124,7 +126,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        ticket = getIntent().getParcelableExtra(TICKET);
+        token = getIntent().getParcelableExtra(TICKET);
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
@@ -152,7 +154,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new TicketAdapter(this::onTicketIdClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -215,7 +217,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             int nextState = getNextState();
             if (nextState >= 0)
             {
-                viewModel.openTransferState(this, ticket, prunedIds, nextState);
+                viewModel.openTransferState(this, token, prunedIds, nextState);
             }
         });
 
@@ -262,7 +264,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             if ((quantity + 1) <= adapter.getTicketRangeCount()) {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+                prunedIds = ((Ticket)token).pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -272,12 +274,12 @@ public class TransferTicketDetailActivity extends BaseActivity
             if ((quantity - 1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+                prunedIds = ((Ticket)token).pruneIDList(ticketIds, quantity);
             }
         });
 
         textQuantity.setText("1");
-        prunedIds = ticket.pruneIDList(ticketIds, 1);
+        prunedIds = ((Ticket)token).pruneIDList(ticketIds, 1);
     }
 
     private void setupRadioButtons()
@@ -333,7 +335,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                 break;
             case TRANSFER_USING_LINK:
                 //generate link
-                viewModel.generateUniversalLink(ticket.getTicketIndicies(ticketIds), ticket.getAddress(), calculateExpiryTime());
+                viewModel.generateUniversalLink(((Ticket)token).getTicketIndicies(ticketIds), token.getAddress(), calculateExpiryTime());
                 break;
             case TRANSFER_TO_ADDRESS:
                 //transfer using eth
@@ -495,8 +497,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         {
             viewModel.createTicketTransfer(
                     to,
-                    ticket.getAddress(),
-                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
+                    token.getAddress(),
+                    token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true),
                     Contract.GAS_PRICE,
                     Contract.GAS_LIMIT);
 
@@ -535,7 +537,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare(token);
         KeyboardUtils.hideKeyboard(toAddressEditText);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
@@ -607,7 +609,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void linkReady(String universalLink)
     {
-        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
         String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +
@@ -635,8 +637,20 @@ public class TransferTicketDetailActivity extends BaseActivity
             return;
         }
 
+        if (token instanceof ERC721Token)
+        {
+            viewModel.openConfirm(getApplicationContext(), to, token, ticketIds);
+        }
+        else
+        {
+            handleERC875Transfer(to);
+        }
+    }
+
+    private void handleERC875Transfer(final String to)
+    {
         //how many tickets are we selling?
-        int quantity = ticket.stringHexToBigIntegerList(prunedIds).size();
+        int quantity = ((Ticket)token).stringHexToBigIntegerList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
 
         String qty = String.valueOf(quantity) + " " +

@@ -6,10 +6,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.opensea.Asset;
+import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
 
 /**
  * Created by James on 12/11/2018.
@@ -18,6 +20,7 @@ import io.stormbird.wallet.entity.opensea.Asset;
 public class OpenseaSelectHolder extends OpenseaHolder
 {
     private final AppCompatRadioButton select;
+    private OnTokenCheckListener onTokenCheckListener;
 
     public OpenseaSelectHolder(int resId, ViewGroup parent, Token token)
     {
@@ -30,5 +33,21 @@ public class OpenseaSelectHolder extends OpenseaHolder
     {
         super.bind(asset, addition);
         select.setVisibility(View.VISIBLE);
+
+        select.setChecked(asset.isChecked);
+
+        select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+            {
+                asset.isChecked = b;
+            }
+        });
+    }
+
+    public void setOnTokenCheckListener(OnTokenCheckListener onTokenCheckListener)
+    {
+        this.onTokenCheckListener = onTokenCheckListener;
     }
 }

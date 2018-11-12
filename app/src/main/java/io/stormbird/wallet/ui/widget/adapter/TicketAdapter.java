@@ -61,6 +61,7 @@ public class TicketAdapter extends TokensAdapter {
         //setTicket(ticket);
         if (token instanceof Ticket) setTokenRange(token, ticketIds);
         openseaService = opensea;
+        if (token instanceof ERC721Token) setERC721Contract(token);
     }
 
     @Override

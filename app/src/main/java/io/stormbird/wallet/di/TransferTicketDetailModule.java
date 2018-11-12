@@ -8,6 +8,7 @@ import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -36,9 +37,10 @@ public class TransferTicketDetailModule {
             FeeMasterService feeMasterService,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            ConfirmationRouter confirmationRouter) {
         return new TransferTicketDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService, tokensService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService, tokensService, confirmationRouter);
     }
 
     @Provides
@@ -65,5 +67,10 @@ public class TransferTicketDetailModule {
     @Provides
     AssetDisplayRouter provideAssetDisplayRouter() {
         return new AssetDisplayRouter();
+    }
+
+    @Provides
+    ConfirmationRouter provideConfirmationRouter() {
+        return new ConfirmationRouter();
     }
 }

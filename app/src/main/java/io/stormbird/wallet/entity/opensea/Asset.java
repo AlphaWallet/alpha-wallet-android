@@ -43,6 +43,8 @@ public class Asset implements Parcelable {
     @Expose
     private List<Trait> traits = null;
 
+    public boolean isChecked;
+
     protected Asset(Parcel in) {
         tokenId = in.readString();
         imagePreviewUrl = in.readString();

@@ -14,6 +14,7 @@ import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
+import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
 import io.stormbird.wallet.ui.widget.entity.MarketSaleHeaderSortedItem;
 import io.stormbird.wallet.ui.widget.entity.QuantitySelectorSortedItem;
 import io.stormbird.wallet.ui.widget.entity.RedeemHeaderSortedItem;
@@ -85,6 +86,7 @@ public class TicketSaleAdapter extends TicketAdapter {
             } break;
             case OpenseaHolder.VIEW_TYPE: {
                 holder = new OpenseaSelectHolder(R.layout.item_opensea_token, parent, token);
+                ((OpenseaSelectHolder)holder).setOnTokenCheckListener(onTokenCheckListener);
             } break;
         }
 
@@ -141,6 +143,24 @@ public class TicketSaleAdapter extends TicketAdapter {
 
         addRanges(t);
         items.endBatchedUpdates();
+    }
+
+    //TODO: Make this into a single templated fetch
+    public List<String> getERC721Checked()
+    {
+        List<String> checkedItems = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i) instanceof AssetSortedItem)
+            {
+                AssetSortedItem thisItem = (AssetSortedItem) items.get(i);
+                if (thisItem.value.isChecked)
+                {
+                    checkedItems.add(thisItem.value.getTokenId());
+                }
+            }
+        }
+        return checkedItems;
     }
 
     public List<TicketRange> getCheckedItems()

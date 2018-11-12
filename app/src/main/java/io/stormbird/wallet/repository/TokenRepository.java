@@ -1210,6 +1210,13 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
+    public static byte[] createERC721TransferFunction(String to, Token token, String tokenId)
+    {
+        Function function = token.getTransferFunction(to, tokenId);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
     public static byte[] createTrade(Token token, BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
     {
         Function function = ((Ticket)token).getTradeFunction(expiry, ticketIndices, v, r, s);

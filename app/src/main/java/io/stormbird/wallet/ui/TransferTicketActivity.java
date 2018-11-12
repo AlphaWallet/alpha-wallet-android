@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
@@ -56,14 +57,11 @@ public class TransferTicketActivity extends BaseActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_transfer_ticket_select);
+        toolbar();
+        setTitle("");
 
         token = getIntent().getParcelableExtra(TICKET);
-
-        toolbar();
-
-        setTitle(getString(R.string.empty));
-
-        setContentView(R.layout.activity_transfer_ticket_select);
 
         systemView = findViewById(R.id.system_view);
         systemView.hide();
@@ -120,11 +118,34 @@ public class TransferTicketActivity extends BaseActivity
         // Validate input fields
         boolean inputValid = true;
         //look up all checked fields
+        //TODO: Abstract into Token class
+        if (token instanceof ERC721Token)
+        {
+            handleTransferERC721(token);
+        }
+        else if (token instanceof Ticket)
+        {
+            handleTransferERC875(token);
+        }
+    }
+
+    private void handleTransferERC721(Token token)
+    {
+        List<String> transferToken = adapter.getERC721Checked();
+        if (!transferToken.isEmpty())
+        {
+            //take user to ERC721 transfer page
+            viewModel.openTransferDirectDialog(this, transferToken.get(0));
+        }
+    }
+
+    private void handleTransferERC875(Token token)
+    {
         List<TicketRange> sellRange = adapter.getCheckedItems();
 
         if (!sellRange.isEmpty()) {
             //add this range to the sell order confirmation
-            //Generate list of indicies and actual ids
+            //Generate list of indices and actual ids
             List<BigInteger> idList = new ArrayList<>();
             for (TicketRange tr : sellRange)
             {
@@ -132,12 +153,6 @@ public class TransferTicketActivity extends BaseActivity
             }
 
             String idListStr = ((Ticket)token).intArrayToString(idList, false); //list of B32 ID's
-            List<Integer> idSendList = token.ticketIdStringToIndexList(idListStr); //convert string list of b32 to Indexes
-            String indexList = token.integerListToString(idSendList, true);
-
-            //confirm other address
-            //confirmation screen
-            //(Context context, String to, String ids, String ticketIDs)
             viewModel.openSellDialog(this, idListStr);
         }
     }

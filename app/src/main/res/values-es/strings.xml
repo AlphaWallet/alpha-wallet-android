@@ -5,4 +5,6 @@
     <string name="currency">Monedas</string>
     <string name="assets">Activos</string>
     <string name="ens_address">ENS Address</string>
+    <string name="confirm_erc721_transfer">Confirm Token Transfer</string>
+    <string name="asset_name">Asset Name</string>
 </resources>

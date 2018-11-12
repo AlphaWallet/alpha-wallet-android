@@ -167,6 +167,7 @@ public class TransactionsViewModel extends BaseViewModel
      */
     private void fetchTransactions(boolean shouldShowProgress) {
         showEmpty.postValue(false);
+        latestBlock = 0;
         if (wallet.getValue() != null)
         {
             if (fetchTransactionDisposable == null)
@@ -214,6 +215,7 @@ public class TransactionsViewModel extends BaseViewModel
         for (Transaction tx : transactions)
         {
             txMap.put(tx.hash, tx);
+            if (Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
         }
     }
 
@@ -242,7 +244,7 @@ public class TransactionsViewModel extends BaseViewModel
                 fetchTransactionsInteract.fetchNetworkTransactions(wallet.getValue(), latestBlock, null)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onUpdateTransactions, this::onError, this::updateBlockNumber);
+                        .subscribe(this::onUpdateTransactions, this::onError, this::enumerateTokens);
     }
 
     /**
@@ -268,13 +270,6 @@ public class TransactionsViewModel extends BaseViewModel
         }
     }
 
-    private void updateBlockNumber()
-    {
-        fetchTransactionDisposable = fetchTokensInteract.getLatestBlock()
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::enumerateTokens, this::onError);
-    }
-
     /**
      *  3. Once we have fetched all user account related transactions we need to fill in all the contract transactions
      *   This functions performs the following tasks:
@@ -292,7 +287,7 @@ public class TransactionsViewModel extends BaseViewModel
      *   ---------------------------
      *   finally go to siftUnknownTransactions
      */
-    private void enumerateTokens(BigInteger blockNumber)
+    private void enumerateTokens()
     {
         //stop the spinner
         progress.postValue(false);
@@ -300,7 +295,6 @@ public class TransactionsViewModel extends BaseViewModel
         txArray = txMap.values().toArray(new Transaction[0]);
         transactionCount += txArray.length;
         txContractList.clear();
-        latestBlock = blockNumber.longValue();
 
         if (wallet.getValue() != null)
         {
@@ -374,6 +368,7 @@ public class TransactionsViewModel extends BaseViewModel
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
                 .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address))) //add to database
+                .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(this::updateTokenService, this::onError, this::scanForTerminatedTokens);

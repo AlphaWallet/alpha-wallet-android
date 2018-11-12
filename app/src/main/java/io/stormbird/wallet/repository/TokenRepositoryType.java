@@ -19,6 +19,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import rx.functions.Action1;
 
 public interface TokenRepositoryType {
@@ -42,6 +43,7 @@ public interface TokenRepositoryType {
     rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, int interfaceSpec);
+    Single<Token> callTokenFunctions(Token token, AssetDefinitionService service);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos);
     Single<Ticker> getEthTicker();

@@ -58,6 +58,7 @@ public class TokenFactory
         }
 
         thisToken.setInterfaceSpecFromRealm(realmItem);
+        thisToken.restoreAuxDataFromRealm(realmItem);
 
         return thisToken;
     }
@@ -82,6 +83,7 @@ public class TokenFactory
         }
 
         thisToken.setInterfaceSpecFromRealm(realmItem);
+        thisToken.restoreAuxDataFromRealm(realmItem);
 
         return thisToken;
     }

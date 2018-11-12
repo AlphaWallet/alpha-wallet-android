@@ -1,7 +1,5 @@
 package io.stormbird.token.web.Ethereum;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -10,18 +8,12 @@ import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.crypto.Credentials;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.Contract;
-import org.web3j.tx.RawTransactionManager;
-import org.web3j.tx.TransactionManager;
-import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -32,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.stormbird.token.entity.BadContract;
 import okhttp3.OkHttpClient;
-import rx.schedulers.Schedulers;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -68,70 +59,14 @@ public class TransactionHandler
     public List<BigInteger> getBalanceArray(String address, String contractAddress) throws Exception
     {
         List<BigInteger> result = new ArrayList<>();
-        byte[] temp = new byte[16];
         org.web3j.abi.datatypes.Function function = balanceOfArray(address);
-        List<Bytes32> indices = callSmartContractFunctionArray(function, contractAddress, address);
+        List<Uint256> indices = callSmartContractFunctionArray(function, contractAddress, address);
         if (indices == null) throw new BadContract();
-        for (Bytes32 val : indices)
+        for (Uint256 val : indices)
         {
-            result.add(getCorrectedValue(val, temp));
+            result.add(val.getValue());
         }
         return result;
-    }
-
-    private void convertToBytes32(List gList, String address, String selection)
-
-    {
-        List<Bytes32> list = (List<Bytes32>) gList;
-        receiveBalance(list, address, selection);
-    }
-
-    //result from the queryBalance observable
-    private void receiveBalance(List<Bytes32> list, String address, String selection)
-    {
-        List<BigInteger> resultList = new ArrayList<>();
-        byte[] buffer = new byte[16];
-
-        //receive a list of ticket indexes that belong to this address
-        for (Bytes32 index : list)
-        {
-            resultList.add(correctValue(index, buffer));
-        }
-
-        sendBalanceResult(resultList, address, selection);
-    }
-
-    private void sendBalanceResult(List<BigInteger> resultList, String address, String selection)
-    {
-
-    }
-
-    /**
-     * checking if we need to read a top 16 byte value specifically
-     * We should keep this function in here because when we start to use 32 byte values there is
-     * potentially a problem with the 'always move 16 bytes to low 16' force solution.
-     * <p>
-     * A better solution is not to fight this ethereum feature - we simply start interpreting the XML from
-     * the top byte.
-     */
-    private BigInteger correctValue(Bytes32 val, byte[] temp)
-    {
-        BigInteger retVal;
-        //does the top second byte have a value and the lower 16 bytes are zero?
-        long lowCheck = 0;
-        long highCheck = val.getValue()[0] + val.getValue()[1];
-        for (int i = 16; i < 32; i++) lowCheck += val.getValue()[i];
-        if (highCheck != 0 && lowCheck == 0)
-        {
-            System.arraycopy(val.getValue(), 0, temp, 0, 16);
-            retVal = Numeric.toBigInt(temp);
-        }
-        else
-        {
-            retVal = Numeric.toBigInt(val.getValue());
-        }
-
-        return retVal;
     }
 
     public String getName(String address)
@@ -197,68 +132,16 @@ public class TransactionHandler
         return (List) o;
     }
 
-    private void onError(Throwable throwable)
-    {
-
-    }
-
-    private void handleName(String name, String address)
-    {
-        int zeroIndex = name.indexOf('\0');
-        if (zeroIndex > 0)
-        {
-            name = name.substring(0, zeroIndex);
-        }
-
-
-    }
-
     private static org.web3j.abi.datatypes.Function stringParam(String param) {
         return new Function(param,
                             Arrays.<Type>asList(),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
-    private void handleHasExpired(Boolean res, String address)
-    {
-        System.out.println("Has " + address + " Expired? : " + (res ? " YES " : " NO"));
-    }
-
     private static org.web3j.abi.datatypes.Function balanceOfArray(String owner) {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
-                Collections.singletonList(new TypeReference<DynamicArray<Bytes32>>() {}));
+                Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
-
-    /**
-     * checking if we need to read a top 16 byte value specifically
-     * We should keep this function in here because when we start to use 32 byte values there is
-     * potentially a problem with the 'always move 16 bytes to low 16' force solution.
-     *
-     * A better solution is not to fight this ethereum feature - we simply start interpreting the XML from
-     * the top byte.
-     */
-    private BigInteger getCorrectedValue(Bytes32 val, byte[] temp)
-    {
-        BigInteger retVal;
-        //does the top second byte have a value and the lower 16 bytes are zero?
-        long lowCheck = 0;
-        long highCheck = val.getValue()[0] + val.getValue()[1];
-        for (int i = 16; i < 32; i++) lowCheck += val.getValue()[i];
-        if (highCheck != 0 && lowCheck == 0)
-        {
-            System.arraycopy(val.getValue(), 0, temp, 0, 16);
-            retVal = Numeric.toBigInt(temp);
-        }
-        else
-        {
-            retVal = Numeric.toBigInt(val.getValue());
-        }
-
-        return retVal;
-    }
-
-
-
 }

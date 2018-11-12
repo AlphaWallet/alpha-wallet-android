@@ -4,6 +4,9 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
+import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.wallet.service.AssetDefinitionService;
+
 public class TicketRangeElement
 {
     public BigInteger id;
@@ -11,6 +14,18 @@ public class TicketRangeElement
     public int ticketNumber;
     public short venue;
     public short match;
+
+    public TicketRangeElement(AssetDefinitionService assetService, Token token, BigInteger v)
+    {
+        NonFungibleToken nft = assetService.getNonFungibleToken(token.getAddress(), v);
+        if (nft != null)
+        {
+            if (nft.getAttribute("numero") != null) ticketNumber = nft.getAttribute("numero").value.intValue();
+            if (nft.getAttribute("category") != null) category = (short) nft.getAttribute("category").value.intValue();
+            if (nft.getAttribute("match") != null) match = (short) nft.getAttribute("match").value.intValue();
+            if (nft.getAttribute("venue") != null) venue = (short) nft.getAttribute("venue").value.intValue();
+        }
+    }
 
     public static void sortElements(List<TicketRangeElement> elementList)
     {

@@ -462,8 +462,8 @@ public class WalletViewModel extends BaseViewModel
 
     public Token getTokenFromService(Token token)
     {
-        if (tokensService.getToken(token.getAddress()) != null) token = tokensService.getToken(token.getAddress());
-        return token;
+        Token serviceToken = tokensService.getToken(token.getAddress());
+        return (serviceToken != null) ? serviceToken : token;
     }
 
     private class AccountData

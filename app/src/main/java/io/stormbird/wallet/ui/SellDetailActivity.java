@@ -332,7 +332,7 @@ public class SellDetailActivity extends BaseActivity {
         RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
         minusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity - 1) >= 0) {
+            if ((quantity - 1) > 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);

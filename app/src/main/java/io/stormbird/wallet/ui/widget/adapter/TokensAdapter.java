@@ -1,7 +1,6 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
 import android.content.Context;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,14 +11,13 @@ import android.view.animation.AnimationUtils;
 
 import org.web3j.utils.Numeric;
 
-import io.stormbird.token.tools.TokenDefinition;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenDiffCallback;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionDiffCallback;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
@@ -28,16 +26,6 @@ import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
-
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
-import static io.stormbird.wallet.C.ETH_SYMBOL;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -394,12 +382,45 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (t instanceof Ticket)
         {
-            ((Ticket)t).checkIsMatchedInXML(assetService);
+            t.checkIsMatchedInXML(assetService);
         }
     }
 
     public void setClear()
     {
         needsRefresh = true;
+    }
+
+    public void onRemoveTokens(List<String> tokens)
+    {
+        List<Integer> removeList = new ArrayList<>();
+
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem)si;
+                Token thisToken = tsi.value;
+                if (tokens.contains(thisToken.getAddress()))
+                {
+                    removeList.add(i);
+                }
+            }
+        }
+
+        items.beginBatchedUpdates();
+        if (!removeList.isEmpty())
+        {
+            //remove in reverse order so indices stay the same
+            for (int i = removeList.size() - 1; i >= 0; i--)
+            {
+                int index = removeList.get(i);
+                TokenSortedItem tsi = (TokenSortedItem)items.get(index);
+                items.remove(tsi);
+                notifyItemChanged(index);
+            }
+        }
+        items.endBatchedUpdates();
     }
 }

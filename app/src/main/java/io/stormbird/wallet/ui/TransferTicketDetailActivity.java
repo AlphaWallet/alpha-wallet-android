@@ -650,7 +650,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     private void handleERC875Transfer(final String to)
     {
         //how many tickets are we selling?
-        int quantity = ((Ticket)token).stringHexToBigIntegerList(prunedIds).size();
+        int quantity = token.stringHexToBigIntegerList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
 
         String qty = String.valueOf(quantity) + " " +

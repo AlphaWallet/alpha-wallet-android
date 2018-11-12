@@ -144,6 +144,14 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getFullBalance()
     {
-        return String.valueOf(tokenBalance.size());
+        boolean firstItem = true;
+        StringBuilder sb = new StringBuilder();
+        for (Asset item : tokenBalance)
+        {
+            if (!firstItem) sb.append(",");
+            sb.append(item.getTokenId());
+            firstItem = false;
+        }
+        return sb.toString();
     }
 }

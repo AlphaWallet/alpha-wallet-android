@@ -152,7 +152,7 @@ public class TransferTicketActivity extends BaseActivity
                 idList.addAll(tr.tokenIds);
             }
 
-            String idListStr = ((Ticket)token).intArrayToString(idList, false); //list of B32 ID's
+            String idListStr = token.intArrayToString(idList, false); //list of B32 ID's
             viewModel.openSellDialog(this, idListStr);
         }
     }

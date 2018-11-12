@@ -244,6 +244,7 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(range.tokenIds, false);
     }
 
+    @Override
     public int[] getTicketIndicies(String ticketIds)
     {
         List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
@@ -323,6 +324,7 @@ public class Ticket extends Token implements Parcelable
      * @param integerString CSV string of hex ticket id's
      * @return
      */
+    @Override
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         List<BigInteger> idList = new ArrayList<>();
@@ -778,7 +780,7 @@ public class Ticket extends Token implements Parcelable
     {
         if (token instanceof Ticket)
         {
-            this.interfaceSpec = InterfaceType.values()[((Ticket)token).interfaceOrdinal()];
+            this.interfaceSpec = InterfaceType.values()[token.interfaceOrdinal()];
         }
         super.patchAuxData(token);
     }
@@ -843,6 +845,7 @@ public class Ticket extends Token implements Parcelable
         return super.checkRealmBalanceChange(realmToken);
     }
 
+    @Override
     public int interfaceOrdinal()
     {
         return interfaceSpec.ordinal();

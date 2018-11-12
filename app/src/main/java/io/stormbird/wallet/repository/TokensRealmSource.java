@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -89,8 +91,31 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 realm.commitTransaction();
             }
+            checkTokenRealm(networkInfo, wallet, tokens);
             return tokens;
         });
+    }
+
+    private void checkTokenRealm(NetworkInfo networkInfo, Wallet wallet, Token[] tokens)
+    {
+        Map<String, Token> erc721Map = new HashMap<>();
+        for (Token t : tokens) erc721Map.put(t.getAddress(), t);
+        try (Realm realm = realmManager.getRealmInstance(networkInfo, wallet))
+        {
+            realm.beginTransaction();
+            RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                    .findAll();
+
+            for (RealmToken rt : realmItems)
+            {
+                if (erc721Map.containsKey(rt.getAddress()))
+                {
+                    rt.deleteFromRealm();
+                }
+            }
+
+            realm.commitTransaction();
+        }
     }
 
     @Override
@@ -609,14 +634,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 .equalTo("address", address)
                 .findFirst();
 
-        if (!token.hasPositiveBalance())
-        {
-            if (realmToken != null)
-            {
-                realmToken.deleteFromRealm();
-            }
-        }
-        else if (realmToken == null)
+        if (realmToken == null)
         {
             //create new storage
             Log.d(TAG, "Save New ERC721 Token: " + token.tokenInfo.name + " :" + address);
@@ -649,7 +667,7 @@ public class TokensRealmSource implements TokenLocalSource {
             if (needsUpdate)
             {
                 //balance changed, remove old assets
-                deleteAssets(realm, e.tokenBalance, contract.getAddress());
+                deleteAssets(realm, address);
 
                 //update balance
                 realmToken.setUpdatedTime(currentTime.getTime());
@@ -689,7 +707,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void deleteAssets(Realm realm, List<Asset> tokenBalance, String address)
+    private void deleteAssets(Realm realm, String address)
     {
         String key = address + "-";
 

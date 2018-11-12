@@ -74,7 +74,8 @@ public class TokenDefinition {
         public String function = null;
 
         public AttributeType(Element attr) {
-            name = getLocalisedName(attr,"name");
+            name = getLocalisedString(attr,"name");
+            System.err.println(name);
             id = attr.getAttribute("id");
 
             try {
@@ -157,7 +158,7 @@ public class TokenDefinition {
             for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
                 if (child.getNodeType() == Node.ELEMENT_NODE) {
                     option = (Element) child;
-                    members.put(new BigInteger(option.getAttribute("key")), getLocalisedName(option,"value"));
+                    members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option,"value"));
                 }
             }
         }
@@ -203,21 +204,22 @@ public class TokenDefinition {
         }
     }
 
-    String getLocalisedName(Element nameContainer,String targetName) {
-        Element name = null;
-        Locale currentNodeLang;
-        for(Node node=nameContainer.getLastChild();
-            node!=null; node=node.getPreviousSibling()){
-            if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals(targetName)) {
-                // System.out.println("\nFound a name field: " + node.getNodeName());
-                name = (Element) node;
-                currentNodeLang = new Locale(name.getAttribute("lang"));
-                if (currentNodeLang.getLanguage().equals(locale.getLanguage())) {
-                    return name.getTextContent();
-                }
+    /* for many occurance of the same tag, return the text content of the one in user's current language */
+    // FIXME: this function will break if there are nested <tagName> in the nameContainer
+    String getLocalisedString(Element nameContainer, String tagName) {
+        NodeList nList = nameContainer.getElementsByTagNameNS("http://attestation.id/ns/tbml", tagName);
+        Element name;
+        for (int i = 0; i < nList.getLength(); i++) {
+            name = (Element) nList.item(i);
+            String currentNodeLang = (new Locale(name.getAttribute("lang"))).getLanguage();
+            if (currentNodeLang.equals(locale.getLanguage())) {
+                return name.getTextContent();
             }
         }
-        return name != null ? name.getTextContent() : " "; /* Should be the first occurrence of <name> */
+        /* no matching language found. return the first tag's content */
+        name = (Element) nList.item(0);
+        // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
+        return name.getTextContent();
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
@@ -240,7 +242,6 @@ public class TokenDefinition {
         xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
         NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "attribute-type");
         for (int i = 0; i < nList.getLength(); i++) {
-            Node nNode = nList.item(i);
             AttributeType attr = new AttributeType((Element) nList.item(i));
             if (attr.bitmask != null) {// has <origin> which is from bitmask
                 attributes.put(attr.id, attr);
@@ -341,7 +342,7 @@ public class TokenDefinition {
 
         /* if there is no token name in <contract> this breaks;
          * token name shouldn't be in <contract> anyway, re-design pending */
-        tokenName = getLocalisedName(contract,"name");
+        tokenName = getLocalisedString(contract,"name");
 
          /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */

@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<t:token xmlns:t="http://attestation.id/ns/tbml">
+  <t:contract id="holding_contract" type="holding">
+    <t:address network="1">0xA66A3F08068174e8F005112A8b2c7A507a822335</t:address>
+    <t:address network="3">0xd8e5f58de3933e1e35f9c65eb72cb188674624f3</t:address>
+    <t:name lang="ru">Ваучеры</t:name>
+    <t:name lang="en">Tickets</t:name>
+    <t:name lang="zh">门票</t:name>
+    <t:name lang="es">Cupones</t:name>
+    <t:name lang="ru">Ваучеры</t:name>
+    <t:interface>erc875</t:interface>
+  </t:contract>
+  <!-- consider metadata of tokens, e.g. quantifier in each languages -->
+  <t:features>
+    <!-- a feature is only usable if all tokens are included, but, if
+         only some are excluded, the feature is still available for
+         the ones that are not excluded. Think about redeem function,
+         the button should be grayed out with the "include" message
+         there -->
+    <t:feature type="market-queue">
+      <t:include>valid</t:include>
+      <t:exclude>invited</t:exclude>
+      <t:exclude>discounted</t:exclude>
+      <t:gateway>https://482kdh4npg.execute-api.ap-southeast-1.amazonaws.com/dev/</t:gateway>
+      <t:message lang="en" type="exclude">%name% can't be traded on the market</t:message>
+      <t:message lang="zh" type="exclude">%name% 不能再在市场上交易</t:message>
+      <t:message type="include">Only %name% can be traded on the market</t:message>
+      <t:message type="include">只有%name%才可以在市场上交易</t:message>
+    </t:feature>
+    <t:feature type="market-contract">
+      <t:include>valid</t:include>
+      <t:exclude>discounted</t:exclude>
+      <t:exclude>invited</t:exclude>
+      <!-- buy and sell tokens on this contract -->
+      <t:address network="1">0xdecafbaddecafbaddecafbaddecafbaddecafbad</t:address>
+      <t:message lang="en" type="exclude">%name% can't be traded on the market</t:message>
+      <t:message lang="zh" type="exclude">%name% 不能再在市场上交易</t:message>
+      <t:message type="include">Only %name% can be traded on the market</t:message>
+      <t:message type="include">只有%name%才可以在市场上交易</t:message>
+    </t:feature>
+    <t:feature type="magic-link">
+      <t:include>valid</t:include>
+      <t:exclude>discounted</t:exclude>
+      <t:prefix>https://app.awallet.io/</t:prefix>
+      <t:message lang="en" type="exclude">%name% can't be traded with MagicLink</t:message>
+      <t:message type="include">Only %name% can be traded with MagicLink</t:message>
+      <t:message lang="zh" type="exclude">%name% 不能用MagicLink交易</t:message>
+      <t:message lang="zh" type="include">只有末到期的票才可以用MagicLink交易</t:message>
+    </t:feature>
+    <t:feature type="transfer-link">
+      <t:exclude>discounted</t:exclude>
+      <t:exclude>invited</t:exclude>
+      <t:prefix>https://app.awallet.io/</t:prefix>
+      <t:message lang="en" type="exclude">%name% can't be traded on the market</t:message>
+      <t:message lang="zh" type="exclude">%name% 不能再在市场上交易</t:message>
+    </t:feature>
+    <t:feature type="feemaster">
+      <t:exclude>expired</t:exclude>
+      <t:feemaster>https://app.awallet.io:80/api/claimToken</t:feemaster>
+      <t:message lang="en" type="include">%name% can't be imported</t:message>
+      <t:message lang="zh" type="include">不能收下%name%</t:message>
+    </t:feature>
+    <t:feature type="qr-redeem">
+      <t:include>valid</t:include>
+      <t:redeem format="Aztec"/>
+      <t:message lang="en" type="include">Only %name% can be redeemed for paper tickets</t:message>
+      <t:message lang="zh" type="include">只有%name%才可以兑换纸票</t:message>
+    </t:feature>
+    <t:feature type="nfc-redeem">
+      <t:include>valid</t:include>
+      <t:device>decafbaddecafbad</t:device>
+      <t:message lang="en" type="include">Only %name% can be redeemed for paper tickets</t:message>
+      <t:message lang="zh" type="include">只有%name%才可以兑换纸票</t:message>
+    </t:feature>
+  </t:features>
+  <t:selections>
+    <t:selection id="discounted">
+      <t:name lang="en">Discount Tickets</t:name>
+      <t:name lang="zh">打折票</t:name>
+      <t:filter>(|category=打折票)(category=Discounted))</t:filter>
+    </t:selection>
+    <t:selection id="invited">
+      <t:name lang="en">Gift Ticket</t:name>
+      <t:name lang="zh">赠票</t:name>
+      <t:filter>gifted</t:filter>
+    </t:selection>
+    <t:selection id="valid">
+      <t:name lang="en">Tickets not expired</t:name>
+      <t:name lang="zh">末到期票</t:name>
+      <t:filter>!expired</t:filter>
+    </t:selection>
+    <t:selection id="expired">
+      <t:name lang="en">Expired Tickets</t:name>
+      <t:name lang="zh">已经过期的票</t:name>
+      <t:filter>expired</t:filter>
+    </t:selection>
+  </t:selections>
+  <t:grouping>
+    <t:group bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
+      <t:consecutive_groups/>
+    </t:group>
+  </t:grouping>
+  <t:ordering>
+    <t:order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
+      <t:byName field="locality"/>
+      <t:byValue field="match"/>
+      <t:byValue field="number"/>
+    </t:order>
+    <t:order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="concise">
+      <t:byValue field="match"/>
+      <t:byValue field="category"/>
+      <t:byValue field="number"/>
+    </t:order>
+  </t:ordering>
+
+  <!-- token UI definition can happen here -->
+  <t:attribute-types>
+    <!--
+    There are 64 matches (1-64), each has up to 16 ticket classes,
+    within each class, there are less than 65536 tickets.  A compact
+    format identifier would consist of 26 bits:
+
+    [6] [4] [16]
+
+    Representing:
+
+        Match ID: 1-64
+        Class: 1-16
+        Seat: 0-65536
+
+    These are represented by 7 hex codes. Therefore 0x40F0481 means
+    the final match (64th), class F (highest) ticket number 1153. But
+    we didn't end up using this compatct form.
+
+    Information about a match, like Venue, City, Date, which team
+    against which, can all be looked up by MatchID. There are
+    advantages and disadvantages in encoding them by a look up table
+    or by a bit field.
+
+    The advantage of storing them as a bit field is that one can
+    enquiry the range of it in the market queue server without the
+    server kowing the meaning of the bitfields. Furthermore it make
+    the android and ios library which accesses the XML file a bit
+    easier to write, but at the cost that the ticket issuing
+    (authorisation) server is a bit more complicated.
+
+    For now we decide to use bit-fields.  The fields, together with
+    its bitwidth or byte-width are represented in this table:
+
+    Fields:           City,   Venue,  Date,   TeamA,  TeamB,  Match, Category
+    Maximum, 2018:    11,     12,     32,     32,     32,     64,    16
+    Maximum, all time:64,     64,     64,     32,     32,     64,    64
+    Bitwidth:         6,      6,      6,      5,      5,      6,     6
+    Bytewidth:        1,      1,      4,      3,      3,      1,     1,
+
+    In practise, because this XML file is used in 3 to 4 places
+    (authorisation server, ios, android, potentially market-queue),
+    Weiwu thought that it helps the developers if we use byte-fields
+    instead of bit-fields.
+    1.3.6.1.4.1.1466.115.121.1.15 is DirectoryString
+    1.3.6.1.4.1.1466.115.121.1.24 is GeneralisedTime
+    1.3.6.1.4.1.1466.115.121.1.26 is IA5String
+    1.3.6.1.4.1.1466.115.121.1.27 is Integer
+  -->
+    <t:attribute-type id="locality" oid="2.5.4.7" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+      <t:name lang="en">City</t:name>
+      <t:name lang="zh">城市</t:name>
+      <t:name lang="es">Ciudad</t:name>
+      <t:name lang="ru">город</t:name>
+      <t:origin bitmask="00000000000000000000000000000000FF000000000000000000000000000000" as="mapping">
+        <t:mapping>
+          <t:option key="1">
+            <t:value lang="ru">Москва́</t:value>
+            <t:value lang="en">Moscow</t:value>
+            <t:value lang="zh">莫斯科</t:value>
+            <t:value lang="es">Moscú</t:value>
+          </t:option>
+          <t:option key="2">
+            <t:value lang="ru">Санкт-Петербу́рг</t:value>
+            <t:value lang="en">Saint Petersburg</t:value>
+            <t:value lang="zh">圣彼得堡</t:value>
+            <t:value lang="es">San Petersburgo</t:value>
+          </t:option>
+          <t:option key="3">
+            <t:value lang="ru">сочи</t:value>
+            <t:value lang="en">Sochi</t:value>
+            <t:value lang="zh">索契</t:value>
+            <t:value lang="es">Sochi</t:value>
+          </t:option>
+          <t:option key="4">
+            <t:value lang="ru">екатеринбург</t:value>
+            <t:value lang="en">Ekaterinburg</t:value>
+            <t:value lang="zh">叶卡捷琳堡</t:value>
+            <t:value lang="es">Ekaterinburg</t:value>
+          </t:option>
+          <t:option key="5">
+            <t:value lang="ru">Саранск</t:value>
+            <t:value lang="en">Saransk</t:value>
+            <t:value lang="zh">萨兰斯克</t:value>
+            <t:value lang="es">Saransk</t:value>
+          </t:option>
+          <t:option key="6">
+            <t:value lang="ru">казань</t:value>
+            <t:value lang="en">Kazan</t:value>
+            <t:value lang="zh">喀山</t:value>
+            <t:value lang="es">Kazan</t:value>
+          </t:option>
+          <t:option key="7">
+            <t:value lang="ru">Нижний Новгород</t:value>
+            <t:value lang="en">Nizhny Novgorod</t:value>
+            <t:value lang="zh">下诺夫哥罗德</t:value>
+            <t:value lang="es">Nizhny Novgorod</t:value>
+          </t:option>
+          <t:option key="8">
+            <t:value lang="ru">Ростов-на-Дону</t:value>
+            <t:value lang="en">Rostov-on-Don</t:value>
+            <t:value lang="zh">顿河畔罗斯托夫</t:value>
+            <t:value lang="es">Rostov-on-Don</t:value>
+          </t:option>
+          <t:option key="9">
+            <t:value lang="ru">Самара</t:value>
+            <t:value lang="en">Samara</t:value>
+            <t:value lang="zh">萨马拉</t:value>
+            <t:value lang="es">Samara</t:value>
+          </t:option>
+          <t:option key="10">
+            <t:value lang="ru">Волгоград</t:value>
+            <t:value lang="en">Volgograd</t:value>
+            <t:value lang="zh">伏尔加格勒</t:value>
+            <t:value lang="es">Volgogrado</t:value>
+          </t:option>
+          <t:option key="11">
+            <t:value lang="ru">Калининград</t:value>
+            <t:value lang="en">Kaliningrad</t:value>
+            <t:value lang="zh">加里宁格勒</t:value>
+            <t:value lang="es">Kaliningrad</t:value>
+          </t:option>
+          <t:option key="255">
+            <t:value lang="ru">Сидней</t:value>
+            <t:value lang="en">Sydney</t:value>
+            <t:value lang="zh">悉尼</t:value>
+            <t:value lang="es">Sídney</t:value>
+          </t:option>
+          <t:option key="254">
+            <t:value lang="ru">Сингапур</t:value>
+            <t:value lang="en">Singapore</t:value>
+            <t:value lang="zh">新加坡</t:value>
+            <t:value lang="es">Singapur</t:value>
+          </t:option>
+          <t:option key="253">
+            <t:value lang="zh">深圳</t:value>
+            <t:value lang="en">Shenzhen</t:value>
+          </t:option>
+          <t:option key="252">
+            <t:value lang="zh">北京</t:value>
+            <t:value lang="en">Beijing</t:value>
+          </t:option>
+          <t:option key="251">
+            <t:value lang="zh">上海</t:value>
+            <t:value lang="en">Shanghai</t:value>
+          </t:option>
+          <t:option key="250">
+            <t:value lang="en">Tokyo</t:value>
+            <t:value lang="zh">东京</t:value>
+          </t:option>
+          <t:option key="249">
+            <t:value lang="en">Seoul</t:value>
+            <t:value lang="zh">首尔</t:value>
+          </t:option>
+          <t:option key="248">
+            <t:value lang="zh">重庆</t:value>
+            <t:value lang="en">Chongqing</t:value>
+          </t:option>
+          <t:option key="247">
+            <t:value lang="en">New York</t:value>
+            <t:value lang="zh">纽约</t:value>
+          </t:option>
+          <t:option key="246">
+            <t:value lang="en">Melbourne</t:value>
+            <t:value lang="zh">墨尔本</t:value>
+          </t:option>
+          <t:option key="245">
+            <t:value lang="en">Hong Kong</t:value>
+            <t:value lang="zh">香港</t:value>
+          </t:option>
+          <t:option key="244">
+            <t:value lang="zh">成都</t:value>
+            <t:value lang="en">Chengdu</t:value>
+          </t:option>
+          <t:option key="243">
+            <t:value lang="en">Kuala Lumpur</t:value>
+            <t:value lang="zh">吉隆坡</t:value>
+          </t:option>
+          <t:option key="242">
+            <t:value lang="en">Bangkok</t:value>
+            <t:value lang="zh">曼谷</t:value>
+          </t:option>
+          <t:option key="241">
+            <t:value lang="en">San Francisco</t:value>
+            <t:value lang="zh">三藩市</t:value>
+          </t:option>
+          <t:option key="240">
+            <t:value lang="en">Las Vegas</t:value>
+            <t:value lang="zh">拉斯维加斯</t:value>
+          </t:option>
+          <t:option key="239">
+            <t:value lang="en">London</t:value>
+            <t:value lang="zh">伦敦</t:value>
+          </t:option>
+          <t:option key="238">
+            <t:value lang="en">Barcelona</t:value>
+            <t:value lang="zh">巴塞罗那</t:value>
+          </t:option>
+          <t:option key="237">
+            <t:value lang="en">Madrid</t:value>
+            <t:value lang="zh">马德里</t:value>
+          </t:option>
+          <t:option key="236">
+            <t:value lang="en">Zug</t:value>
+            <t:value lang="zh">楚格</t:value>
+          </t:option>
+          <t:option key="235">
+            <t:value lang="en">Paris</t:value>
+            <t:value lang="zh">巴黎</t:value>
+          </t:option>
+          <t:option key="234">
+            <t:value lang="en">Dubai</t:value>
+            <t:value lang="zh">迪拜</t:value>
+          </t:option>
+          <t:option key="233">
+            <t:value lang="en">TBC</t:value>
+            <t:value lang="zh">待定</t:value>
+          </t:option>
+          <t:option key="232">
+            <t:value lang="en">Exhibition stand A311</t:value>
+            <t:value lang="zh">展台A311</t:value>
+          </t:option>
+        </t:mapping>
+      </t:origin>
+    </t:attribute-type>
+    <t:attribute-type id="venue" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+      <t:name lang="en">Venue</t:name>
+      <t:name lang="zh">场馆</t:name>
+      <t:name lang="es">Lugar</t:name>
+      <t:name lang="ru">место встречи</t:name>
+      <t:origin bitmask="0000000000000000000000000000000000FF0000000000000000000000000000" as="mapping">
+        <t:mapping>
+          <t:option key="1">
+            <t:value lang="ru">Стадион Калининград</t:value>
+            <t:value lang="en">Kaliningrad Stadium</t:value>
+            <t:value lang="zh">加里宁格勒体育场</t:value>
+            <t:value lang="es">Estadio de Kaliningrado</t:value>
+          </t:option>
+          <t:option key="2">
+            <t:value lang="ru">Екатеринбург Арена</t:value>
+            <t:value lang="en">Volgograd Arena</t:value>
+            <t:value lang="zh">伏尔加格勒体育场</t:value>
+            <t:value lang="es">Volgogrado Arena</t:value>
+          </t:option>
+          <t:option key="3">
+            <t:value lang="ru">Казань Арена</t:value>
+            <t:value lang="en">Ekaterinburg Arena</t:value>
+            <t:value lang="zh">加里宁格勒体育场</t:value>
+            <t:value lang="es">Ekaterimburgo Arena</t:value>
+          </t:option>
+          <t:option key="4">
+            <t:value lang="ru">Мордовия Арена</t:value>
+            <t:value lang="en">Fisht Stadium</t:value>
+            <t:value lang="zh">费什体育场</t:value>
+            <t:value lang="es">Estadio Fisht</t:value>
+          </t:option>
+          <t:option key="5">
+            <t:value lang="ru">Ростов Арена</t:value>
+            <t:value lang="en">Kazan Arena</t:value>
+            <t:value lang="zh">喀山体育场</t:value>
+            <t:value lang="es">Kazan Arena</t:value>
+          </t:option>
+          <t:option key="6">
+            <t:value lang="ru">Самара Арена</t:value>
+            <t:value lang="en">Nizhny Novgorod Stadium</t:value>
+            <t:value lang="zh">下诺夫哥罗德体育场</t:value>
+            <t:value lang="es">Estadio de Nizhni Novgorod</t:value>
+          </t:option>
+          <t:option key="7">
+            <t:value lang="ru">Стадион Калининград</t:value>
+            <t:value lang="en">Luzhniki Stadium</t:value>
+            <t:value lang="zh">卢日尼基体育场</t:value>
+            <t:value lang="es">Estadio Luzhniki</t:value>
+          </t:option>
+          <t:option key="8">
+            <t:value lang="ru">Стадион Лужники</t:value>
+            <t:value lang="en">Samara Arena</t:value>
+            <t:value lang="zh">萨马拉体育场</t:value>
+            <t:value lang="es">Samara Arena</t:value>
+          </t:option>
+          <t:option key="9">
+            <t:value lang="ru">Стадион Нижний Новгород</t:value>
+            <t:value lang="en">Rostov Arena</t:value>
+            <t:value lang="zh">罗斯托夫体育场</t:value>
+            <t:value lang="es">Rostov Arena</t:value>
+          </t:option>
+          <t:option key="10">
+            <t:value lang="ru">Стадион Спартак</t:value>
+            <t:value lang="en">Spartak Stadium</t:value>
+            <t:value lang="zh">斯巴达克体育场</t:value>
+            <t:value lang="es">Estadio del Spartak</t:value>
+          </t:option>
+          <t:option key="11">
+            <t:value lang="ru">Стадион Санкт-Петербург</t:value>
+            <t:value lang="en">Saint Petersburg Stadium</t:value>
+            <t:value lang="zh">圣彼得堡体育场</t:value>
+            <t:value lang="es">Estadio de San Petersburgo</t:value>
+          </t:option>
+          <t:option key="12">
+            <t:value lang="ru">Стадион Фишт</t:value>
+            <t:value lang="en">Mordovia Arena</t:value>
+            <t:value lang="zh">莫多维亚体育场</t:value>
+            <t:value lang="es">Mordovia Arena</t:value>
+          </t:option>
+          <t:option key="255">
+            <t:value lang="en">UNSW Michael Crouch Innovation Center</t:value>
+            <t:value lang="zh">新南威尔大学Michael Crouch创新中心</t:value>
+            <t:value lang="es">Centro de Innovación de Michael Crouch UNSW</t:value>
+          </t:option>
+          <t:option key="254">
+            <t:value lang="en">FOUR SEASONS HOTEL SHENZHEN</t:value>
+            <t:value lang="zh">深圳四季酒店</t:value>
+          </t:option>
+          <t:option key="253">
+            <t:value lang="en">Paypal Innovation Lab</t:value>
+          </t:option>
+          <t:option key="252">
+            <t:value lang="en">The Centrepoint</t:value>
+          </t:option>
+          <t:option key="251">
+            <t:value lang="en">TBC</t:value>
+            <t:value lang="zh">待定</t:value>
+          </t:option>
+          <t:option key="250">
+            <t:value>thebridge</t:value>
+          </t:option>
+          <t:option key="249">
+            <t:value>BASH</t:value>
+          </t:option>
+          <t:option key="248">
+            <t:value>Spacemob</t:value>
+          </t:option>
+          <t:option key="247">
+            <t:value lang="en">32 Carpenter Street</t:value>
+          </t:option>
+          <t:option key="246">
+            <t:value>Block 71</t:value>
+          </t:option>
+          <t:option key="245">
+            <t:value lang="en">Microsoft Singapore</t:value>
+            <t:value lang="zh">微软新加坡</t:value>
+          </t:option>
+          <t:option key="243">
+            <t:value lang="en">Google Singapore</t:value>
+          </t:option>
+          <t:option key="242">
+            <t:value lang="en">The Blockchain Hub</t:value>
+          </t:option>
+          <t:option key="241">
+            <t:value>BitTemple</t:value>
+          </t:option>
+          <t:option key="240">
+            <t:value lang="en">ADD BLOCKCHAIN STUDIO</t:value>
+          </t:option>
+          <t:option key="239">
+            <t:value lang="en">Rosewood Beijing</t:value>
+            <t:value lang="zh">北京瑰丽酒店</t:value>
+          </t:option>
+          <t:option key="238">
+            <t:value lang="en">Stratum</t:value>
+            <t:value lang="zh">臻宛</t:value>
+          </t:option>
+          <t:option key="237">
+            <t:value lang="en">Hong Kong Convention and Exhibition Centre</t:value>
+            <t:value lang="zh">香港会议展览中心</t:value>
+          </t:option>
+          <t:option key="236">
+            <t:value lang="en">P2联合创业办公社 中关村e世界</t:value>
+            <t:value lang="zh">P2联合创业办公社 中关村e世界</t:value>
+          </t:option>
+          <t:option key="235">
+            <t:value lang="en">Fortune coffee@The Bund</t:value>
+            <t:value lang="zh">泛合金融咖啡@上海外滩</t:value>
+          </t:option>
+        </t:mapping>
+      </t:origin>
+    </t:attribute-type>
+    <t:attribute-type id="time" syntax="1.3.6.1.4.1.1466.115.121.1.24">
+      <t:name lang="en">Time</t:name>
+      <t:name lang="zh">时间</t:name>
+      <t:name lang="es">Tiempo</t:name>
+      <t:name lang="ru">время</t:name>
+      <!-- keys used here are BinaryTime (RFC6019) for backward compatibility,
+           don't copy this behaviour when creating new assets -->
+      <t:origin bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000" as="mapping">
+        <t:mapping>
+          <!-- Shanghai -->
+          <t:option key="1531576800">
+            <t:value>20180714170000+0300</t:value>
+          </t:option>
+          <!-- Hong Kong -->
+          <t:option key="1531328400">
+            <t:value>20180711090000+0800</t:value>
+          </t:option>
+        </t:mapping>
+      </t:origin>
+    </t:attribute-type>
+    <t:attribute-type id="countryA" syntax="1.3.6.1.4.1.1466.115.121.1.26">
+      <!-- Intentionally avoid using countryName
+       (SYNTAX 1.3.6.1.4.1.1466.115.121.1.11) per RFC 4519
+           CountryName is two-characters long, not 3-characters.
+       -->
+      <t:name lang="en">Team A</t:name>
+      <t:name lang="zh">甲队</t:name>
+      <t:name lang="es">Equipo A</t:name>
+      <t:origin bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000" as="utf8"/>
+    </t:attribute-type>
+    <t:attribute-type id="countryB" syntax="1.3.6.1.4.1.1466.115.121.1.26">
+      <t:name lang="en">Team B</t:name>
+      <t:name lang="zh">乙队</t:name>
+      <t:name lang="es">Equipo B</t:name>
+      <t:origin bitmask="00000000000000000000000000000000000000000000000000FFFFFF00000000" as="utf8"/>
+    </t:attribute-type>
+    <t:attribute-type id="match" syntax="1.3.6.1.4.1.1466.115.121.1.27">
+      <t:name lang="en">Match</t:name>
+      <t:name lang="zh">场次</t:name>
+      <t:name lang="es">Evento</t:name>
+      <t:origin bitmask="00000000000000000000000000000000000000000000000000000000FF000000" as="unsigned"/>
+    </t:attribute-type>
+    <t:attribute-type id="category" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+      <t:name lang="en">Cat</t:name>
+      <t:name lang="zh">等级</t:name>
+      <t:name lang="es">Cat</t:name>
+      <t:origin bitmask="0000000000000000000000000000000000000000000000000000000000FF0000" as="mapping">
+        <t:mapping>
+          <t:option key="1">
+            <t:value lang="en">Category 1</t:value>
+            <t:value lang="zh">一类票</t:value>
+          </t:option>
+          <t:option key="2">
+            <t:value lang="en">Category 2</t:value>
+            <t:value lang="zh">二类票</t:value>
+          </t:option>
+          <t:option key="3">
+            <t:value lang="en">Category 3</t:value>
+            <t:value lang="zh">三类票</t:value>
+          </t:option>
+          <t:option key="4">
+            <t:value lang="en">Category 4</t:value>
+            <t:value lang="zh">四类票</t:value>
+          </t:option>
+          <t:option key="5">
+            <t:value lang="en">Match Club</t:value>
+            <t:value lang="zh">俱乐部坐席</t:value>
+          </t:option>
+          <t:option key="6">
+            <t:value lang="en">Match House Premier</t:value>
+            <t:value lang="zh">比赛之家坐席</t:value>
+          </t:option>
+          <t:option key="7">
+            <t:value lang="en">MATCH PAVILION</t:value>
+            <t:value lang="zh">款待大厅坐席</t:value>
+          </t:option>
+          <t:option key="8">
+            <t:value lang="en">MATCH BUSINESS SEAT</t:value>
+            <t:value lang="zh">商务坐席</t:value>
+          </t:option>
+          <t:option key="9">
+            <t:value lang="en">MATCH SHARED SUITE</t:value>
+            <t:value lang="zh">公共包厢</t:value>
+          </t:option>
+          <t:option key="10">
+            <t:value lang="en">TSARSKY LOUNGE</t:value>
+            <t:value lang="zh">特拉斯基豪华包厢</t:value>
+          </t:option>
+          <t:option key="11">
+            <t:value lang="en">MATCH PRIVATE SUITE</t:value>
+            <t:value lang="zh">私人包厢</t:value>
+          </t:option>
+          <t:option key="255">
+            <t:value lang="en">Singapore Blockchain Event</t:value>
+            <t:value lang="zh">新加坡区块链活动</t:value>
+          </t:option>
+          <t:option key="254">
+            <t:value lang="en">TECHNOLOGY RADAR SUMMIT 2018</t:value>
+            <t:value lang="zh">技术雷达峰会2018</t:value>
+          </t:option>
+          <t:option key="253">
+            <t:value lang="en">Sydney Blockchain Event</t:value>
+            <t:value lang="zh">悉尼区块链活动</t:value>
+          </t:option>
+          <t:option key="252">
+            <t:value lang="en">Beijing Blockchain Event</t:value>
+            <t:value lang="zh">北京区块链活动</t:value>
+          </t:option>
+          <t:option key="251">
+            <t:value lang="en">Shanghai Blockchain Event</t:value>
+            <t:value lang="zh">上海区块链活动</t:value>
+          </t:option>
+          <t:option key="250">
+            <t:value lang="en">Tokyo Blockchain Event</t:value>
+            <t:value lang="zh">东京区块链活动</t:value>
+          </t:option>
+          <t:option key="249">
+            <t:value lang="en">Blockchain Event</t:value>
+            <t:value lang="zh">区块链活动</t:value>
+          </t:option>
+          <t:option key="248">
+            <t:value lang="en">Other Events</t:value>
+            <t:value lang="zh">其他活动</t:value>
+          </t:option>
+          <t:option key="247">
+            <t:value lang="en">Seoul Blockchain Event</t:value>
+            <t:value lang="zh">首尔区块链活动</t:value>
+          </t:option>
+          <t:option key="246">
+            <t:value lang="en">Bangkok Blockchain Event</t:value>
+            <t:value lang="zh">曼谷区块链活动</t:value>
+          </t:option>
+          <t:option key="245">
+            <t:value lang="en">AlphaWallet Event</t:value>
+            <t:value lang="zh">AlphaWallet活动</t:value>
+          </t:option>
+          <t:option key="243">
+            <t:value lang="en">Stormbird Event</t:value>
+            <t:value lang="zh">Stormbird活动</t:value>
+          </t:option>
+          <t:option key="242">
+            <t:value lang="en">UNITY VENTURES Event</t:value>
+            <t:value lang="zh">九合创投活动</t:value>
+          </t:option>
+          <t:option key="241">
+            <t:value lang="en">Max's Event</t:value>
+            <t:value lang="zh">Max的活动</t:value>
+          </t:option>
+          <t:option key="240">
+            <t:value lang="en">Chongqing Blockchain Event</t:value>
+            <t:value lang="zh">重庆区块链活动</t:value>
+          </t:option>
+          <t:option key="239">
+            <t:value lang="en">Dubai Blockchain Event</t:value>
+            <t:value lang="zh">迪拜区块链活动</t:value>
+          </t:option>
+          <t:option key="238">
+            <t:value lang="en">Silicon Valley Blockchain Event</t:value>
+            <t:value lang="zh">硅谷区块链活动</t:value>
+          </t:option>
+          <t:option key="237">
+            <t:value lang="en">Melbourne Blockchain Event</t:value>
+            <t:value lang="zh">墨尔本区块链活动</t:value>
+          </t:option>
+          <t:option key="236">
+            <t:value lang="en">General Event</t:value>
+            <t:value lang="zh">通用活动</t:value>
+          </t:option>
+          <t:option key="235">
+            <t:value lang="en">AlphaWallet Meeting Slot</t:value>
+            <t:value lang="zh">AlphaWallet面议机会</t:value>
+          </t:option>
+          <t:option key="234">
+            <t:value lang="en">ERC875 Meetup</t:value>
+            <t:value lang="zh">ERC875线下聚会</t:value>
+          </t:option>
+          <t:option key="233">
+            <t:value lang="en">Nervos and AlphaWallet Meetup</t:value>
+            <t:value lang="zh">Nervos和AlphaWallet见面会</t:value>
+          </t:option>
+        </t:mapping>
+      </t:origin>
+    </t:attribute-type>
+    <t:attribute-type id="numero" syntax="1.3.6.1.4.1.1466.115.121.1.27">
+      <t:name>№</t:name>
+      <t:origin bitmask="000000000000000000000000000000000000000000000000000000000000FFFF" as="unsigned"/>
+    </t:attribute-type>
+  </t:attribute-types>
+</t:token>

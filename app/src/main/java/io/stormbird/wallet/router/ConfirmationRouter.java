@@ -66,4 +66,19 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_CONTRACT_NAME, requesterURL);
         context.startActivity(intent);
     }
+
+    public void openERC721Transfer(Context context, String to, String tokenId, String contractAddress, String name, String tokenName)
+    {
+        Intent intent = new Intent(context, ConfirmationActivity.class);
+        intent.putExtra(C.EXTRA_TO_ADDRESS, to);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
+        intent.putExtra(C.EXTRA_DECIMALS, 0);
+        intent.putExtra(C.EXTRA_SYMBOL, tokenName);
+        intent.putExtra(C.EXTRA_AMOUNT, tokenId);
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
+        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ERC721.ordinal());
+        intent.putExtra(C.EXTRA_TOKENID_LIST, tokenId);
+        intent.putExtra(C.EXTRA_CONTRACT_NAME, name);
+        context.startActivity(intent);
+    }
 }

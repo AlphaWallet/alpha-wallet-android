@@ -69,6 +69,7 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView websiteText;
     private Button sendButton;
     private TextView title;
+    private TextView labelAmount;
 
     private BigDecimal amount;
     private int decimals;
@@ -106,6 +107,7 @@ public class ConfirmationActivity extends BaseActivity {
         websiteLabel = findViewById(R.id.label_website);
         websiteText = findViewById(R.id.text_website);
         title = findViewById(R.id.title_confirm);
+        labelAmount = findViewById(R.id.label_amount);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -169,6 +171,17 @@ public class ConfirmationActivity extends BaseActivity {
                 BigDecimal ethAmount = Convert.fromWei(transaction.value.toString(10), Convert.Unit.ETHER);
                 amountString = getEthString(ethAmount.doubleValue()) + " " + ETH_SYMBOL;
                 //handle web3 transaction signing
+                break;
+            case ERC721:
+                String contractName = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                title.setText(R.string.confirm_erc721_transfer);
+                contractAddrText.setVisibility(View.VISIBLE);
+                contractAddrLabel.setVisibility(View.VISIBLE);
+                String contractTxt = contractAddress + " " + contractName;
+                labelAmount.setText(R.string.asset_name);
+                contractAddrText.setText(contractTxt);
+                amountString = symbol;
+                tokenTransfer = true;
                 break;
             default:
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
@@ -281,6 +294,15 @@ public class ConfirmationActivity extends BaseActivity {
                 //price in eth
                 BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
                 viewModel.generateSalesOrders(amountStr, contractAddress, wei, valueText.getText().toString());
+                break;
+
+            case ERC721:
+                viewModel.createERC721Transfer(
+                        toAddressText.getText().toString(),
+                        contractAddress,
+                        amountStr,
+                        gasSettings.gasPrice,
+                        gasSettings.gasLimit);
                 break;
 
             default:

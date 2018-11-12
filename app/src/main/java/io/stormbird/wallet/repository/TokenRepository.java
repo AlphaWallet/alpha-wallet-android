@@ -1151,7 +1151,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return new org.web3j.abi.datatypes.Function(
                 method,
-                Collections.singletonList(new Bytes32(resultHash)),
+                Collections.singletonList(new org.web3j.abi.datatypes.generated.Bytes32(resultHash)),
                 Collections.singletonList(new TypeReference<Address>() {}));
     }
 

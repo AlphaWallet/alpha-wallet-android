@@ -111,11 +111,9 @@ public class TokenDefinition {
                 syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
             }
             bitmask = null;
-            for(Node node=attr.getFirstChild();
-                node!=null; node=node.getNextSibling()){
-                if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("origin")) {
-                    // System.out.println("\nFound a name field: " + node.getNodeName());
-                    Element origin = (Element) node;
+            NodeList nList = attr.getElementsByTagNameNS("http://attestation.id/ns/tbml", "origin");
+            for (int i = 0; i < nList.getLength(); i++) {
+                    Element origin = (Element) nList.item(i);
                     switch(origin.getAttribute("contract").toLowerCase()) {
                         case "holding-contract":
                             as = As.Mapping;
@@ -144,7 +142,6 @@ public class TokenDefinition {
                     if (origin.hasAttribute("bitmask")) {
                         bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
                     }
-                }
             }
             if (bitmask != null ) {
                 while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
@@ -155,11 +152,10 @@ public class TokenDefinition {
 
         private void populate(Element mapping) {
             Element option;
-            for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
-                if (child.getNodeType() == Node.ELEMENT_NODE) {
-                    option = (Element) child;
-                    members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option,"value"));
-                }
+            NodeList nList = mapping.getElementsByTagNameNS("http://attestation.id/ns/tbml", "option");
+            for (int i = 0; i < nList.getLength(); i++) {
+                option = (Element) nList.item(i);
+                members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option, "value"));
             }
         }
 

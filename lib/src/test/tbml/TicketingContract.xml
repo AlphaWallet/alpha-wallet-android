@@ -8,13 +8,13 @@
 <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-<ds:DigestValue>9XNUFejQ4O+8zpu1Y2JC4Kw8A5ZwslARRSlnPyFPpRw=</ds:DigestValue>
+<ds:DigestValue>TYTiF+/3cGjUC+iuxF/UwVHgWs/OYklHoE/zLxwOURo=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
 <ds:SignatureValue>
-AcvK5F6pAlj9cUfbfiIDNTzzUipm6mdiNPhZ+cgZEzkCP/zKQnFEeOaFd5GmlNskRnBihueBO8Jt
-BzvjjfQatX8LABYSE7QrrgebypwM6/n1SXzh0kiReV4Z0KOVs5M5QF8Vt8o3fdQFaUpKw/xdnbXh
-4dGbO2mlvnXQvOSHMMHLdAi2
+ATQQV7zS9WOSeI2FeCnd1mj3aItkud5zyrctmf5UR6D1vnNm9UFzVJRnsLr8pV6nAJYozXCOs4gU
+rDRGE2tbiqAIAfflE3fhYV/bzAqBeYnABRKkz4z7CszwTwVaFrMNWEDo6x+mdO1mjySh0p46h/jL
+Ar1p6N2mfvKWdnWkV4Is1FVO
 </ds:SignatureValue>
 <ds:KeyInfo>
 <ds:KeyName>Shankai</ds:KeyName>
@@ -592,6 +592,9 @@ EPUQyp2aDrV1aug=
           <!-- Hong Kong -->
           <t:option key="1531328400">
             <t:value>20180711090000+0800</t:value>
+          </t:option>
+          <t:option key="1528988400">
+            <t:value>20180614180000+0300</t:value>
           </t:option>
         </t:mapping>
       </t:origin>

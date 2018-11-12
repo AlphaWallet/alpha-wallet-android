@@ -1,10 +1,7 @@
 package io.stormbird.token.management.Model;
 
-import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.tools.TokenDefinition;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -27,8 +24,8 @@ public class TokenViewModel extends TokenDefinition {
         Map<BigInteger,List<String>> bitmaskIdsMap=new ConcurrentHashMap<>();
         Map<String, ComboBoxDataModel[]> comboBoxDataMap = new ConcurrentHashMap<String, ComboBoxDataModel[]>();
 
-        for (String key : ad.attributes.keySet()) {
-            AttributeType attr = ad.attributes.get(key);
+        for (String key : ad.attributeTypes.keySet()) {
+            AttributeType attr = ad.attributeTypes.get(key);
             if(attr.members!=null && attr.members.size()>0){
                 if(bitmaskIdsMap.containsKey(attr.bitmask)){
                     List<String> ids = bitmaskIdsMap.get(attr.bitmask);
@@ -56,7 +53,7 @@ public class TokenViewModel extends TokenDefinition {
             String idCombined="";
             String labelName="";
             for(String id: bitmaskIdsMap.get(bitmask)) {
-                AttributeType attr = ad.attributes.get(id);
+                AttributeType attr = ad.attributeTypes.get(id);
                 membersList.add(ad.getConvertedMappingMembersByKey(id));
                 //membersList.add(attr.members);
                 labelName+=attr.name+",";

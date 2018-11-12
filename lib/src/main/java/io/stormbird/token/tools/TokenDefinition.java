@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, AttributeType> attributes = new ConcurrentHashMap<>();
+    public Map<String, AttributeType> attributeTypes = new ConcurrentHashMap<>();
     protected Locale locale;
     public Map<String, Integer> addresses = new HashMap<>();
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
@@ -74,9 +74,7 @@ public class TokenDefinition {
 
         public AttributeType(Element attr) {
             name = getLocalisedString(attr,"name");
-            System.err.println(name);
             id = attr.getAttribute("id");
-
             try {
                 switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
                     case "1.3.6.1.4.1.1466.115.121.1.6":
@@ -130,8 +128,8 @@ public class TokenDefinition {
                             as = As.UTF8;
                             break;
                         case "mapping":
+                            // the case <mapping> missing should be prevented by XSD.
                             as = As.Mapping;
-                            // TODO: Syntax is not checked
                             members = new ConcurrentHashMap<>();
                             populate(origin);
                             break;
@@ -179,8 +177,8 @@ public class TokenDefinition {
             }
         }
 
-        public String toString(BigInteger data) {
-            try {
+        public String toString(BigInteger data) throws UnsupportedEncodingException {
+            // TODO: in all cases other than UTF8, syntax should be checked
                 if (as == As.UTF8) {
                     return new String(data.toByteArray(), "UTF8");
                 } else if(as == As.Unsigned){
@@ -188,14 +186,13 @@ public class TokenDefinition {
                 } else if(as == As.Mapping){
                     // members might be null, but it is better to throw up ( NullPointerException )
                     // than silently ignore
-                    System.out.println(data);
-                    System.out.println(members.toString());
-                    return members.get(data);
+                    if (members.containsKey(data)) {
+                        return members.get(data);
+                    } else {
+                        throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
+                    }
                 }
                 throw new NullPointerException("Missing valid 'as' attribute");
-            } catch(UnsupportedEncodingException e){
-                return null;
-            }
         }
     }
 
@@ -239,8 +236,8 @@ public class TokenDefinition {
         for (int i = 0; i < nList.getLength(); i++) {
             AttributeType attr = new AttributeType((Element) nList.item(i));
             if (attr.bitmask != null) {// has <origin> which is from bitmask
-                attributes.put(attr.id, attr);
-            } // TODO: take care of attributes whose value does not originate from bitmask!
+                attributeTypes.put(attr.id, attr);
+            } // TODO: take care of attributeTypes whose value does not originate from bitmask!
             else if (attr.function != null) {
                 FunctionDefinition fd = new FunctionDefinition();
                 fd.method = attr.function;
@@ -279,32 +276,20 @@ public class TokenDefinition {
     }
 
     public Map<BigInteger, String> getMappingMembersByKey(String key){
-        if(attributes.containsKey(key)) {
-            AttributeType attr = attributes.get(key);
+        if(attributeTypes.containsKey(key)) {
+            AttributeType attr = attributeTypes.get(key);
             return attr.members;
         }
         return null;
     }
     public Map<BigInteger, String> getConvertedMappingMembersByKey(String key){
-        if(attributes.containsKey(key)) {
+        if(attributeTypes.containsKey(key)) {
             Map<BigInteger,String> convertedMembers=new HashMap<>();
-            AttributeType attr = attributes.get(key);
+            AttributeType attr = attributeTypes.get(key);
             for(BigInteger actualValue:attr.members.keySet()){
                 convertedMembers.put(actualValue.shiftLeft(attr.bitshift).and(attr.bitmask),attr.members.get(actualValue));
             }
             return convertedMembers;
-        }
-        return null;
-    }
-    private String getContentByTagName(Node node, String tagname) {
-        /* I hope stream() -like pattern is supported in DOM but they don't want to evolve */
-        for (Node nNode = node.getFirstChild(); nNode != null; nNode = nNode.getNextSibling()) {
-            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element eElement = (Element) nNode;
-                if (eElement.getTagName().equals(tagname)) {
-                    return eElement.getTextContent();
-                }
-            }
         }
         return null;
     }
@@ -362,11 +347,16 @@ public class TokenDefinition {
      * temporarily for the need to retrofit the class with J.B.'s design */
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
-        for (String key : attributes.keySet()) {
-            AttributeType attr = attributes.get(key);
-            BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-            token.setAttribute(attr.id,
-                    new NonFungibleToken.Attribute(attr.id, attr.name, val, attr.toString(val)));
+        for (String key : attributeTypes.keySet()) {
+            AttributeType attrtype = attributeTypes.get(key);
+            BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+            try {
+                token.setAttribute(attrtype.id,
+                        new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+            } catch (UnsupportedEncodingException e) {
+                token.setAttribute(attrtype.id,
+                        new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+            }
         }
     }
 }

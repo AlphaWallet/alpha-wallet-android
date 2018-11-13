@@ -28,6 +28,8 @@ public class TokenDefinition {
     public Map<String, Integer> addresses = new HashMap<>();
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
 
+    private boolean legacyFormat;
+
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
      are going to be one-per-XML-file:
@@ -162,13 +164,16 @@ public class TokenDefinition {
             for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
                 if (child.getNodeType() == Node.ELEMENT_NODE) {
                     option = (Element) child;
-                    String type = child.getNodeName(); //function
-                    String functionName = child.getTextContent();  //isExpired
+                    String type = child.getLocalName();
+                    String functionName = option.getAttribute("name");
+                    //TODO: Get child elements; inputs and input param keys
 
                     switch (type)
                     {
                         case "function":
                             function = functionName;
+                            //TODO Read inputs from child node
+                            //String inputSpec = getChildElement(child, );
                             break;
                         default:
                             break;
@@ -196,9 +201,36 @@ public class TokenDefinition {
         }
     }
 
+    // Legacy function to parse older format XML.
+    // TODO: Remove once this is no longer needed - once the new parser can successfully not crash with older formats.
+    String getLocalisedName(Element nameContainer,String targetName) {
+        Element name = null;
+        Locale currentNodeLang;
+        if (nameContainer == null)
+        {
+            return " ";
+        }
+        for(Node node=nameContainer.getLastChild();
+            node!=null; node=node.getPreviousSibling()){
+            if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals(targetName)) {
+                // System.out.println("\nFound a name field: " + node.getNodeName());
+                name = (Element) node;
+                currentNodeLang = new Locale(name.getAttribute("lang"));
+                if (currentNodeLang.getLanguage().equals(locale.getLanguage())) {
+                    return name.getTextContent();
+                }
+            }
+        }
+        return name != null ? name.getTextContent() : " "; /* Should be the first occurrence of <name> */
+    }
+
     /* for many occurance of the same tag, return the text content of the one in user's current language */
     // FIXME: this function will break if there are nested <tagName> in the nameContainer
     String getLocalisedString(Element nameContainer, String tagName) {
+        if (legacyFormat)
+        {
+            return getLocalisedName(nameContainer, tagName);
+        }
         NodeList nList = nameContainer.getElementsByTagNameNS("http://attestation.id/ns/tbml", tagName);
         Element name;
         for (int i = 0; i < nList.getLength(); i++) {
@@ -211,7 +243,11 @@ public class TokenDefinition {
         /* no matching language found. return the first tag's content */
         name = (Element) nList.item(0);
         // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
-        return name.getTextContent();
+        if (name == null)
+        {
+            System.out.println("*** Developer warning - error in XML format at tag " + nameContainer.getLocalName() + " ***");
+        }
+        return name != null ? name.getTextContent() : " ";
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
@@ -233,20 +269,30 @@ public class TokenDefinition {
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
         NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "attribute-type");
+        if (nList.getLength() == 0)
+        {
+            nList = xml.getElementsByTagName("attribute-type");
+            legacyFormat = true;
+        }
+        else
+        {
+            legacyFormat = false;
+        }
         for (int i = 0; i < nList.getLength(); i++) {
             AttributeType attr = new AttributeType((Element) nList.item(i));
             if (attr.bitmask != null) {// has <origin> which is from bitmask
                 attributeTypes.put(attr.id, attr);
             } // TODO: take care of attributeTypes whose value does not originate from bitmask!
             else if (attr.function != null) {
-                FunctionDefinition fd = new FunctionDefinition();
+                FunctionDefinition fd = new FunctionDefinition(); //TODO: Expand FunctionDefinition to encompass parameters and special strings (eg TokenID)
                 fd.method = attr.function;
                 fd.syntax = attr.syntax;
                 functions.put(attr.id, fd);
             }
         }
         extractFeatureTag(xml);
-        extractContractTag(xml);
+        if (legacyFormat) extractLegacyContractTag(xml);
+        else extractContractTag(xml);
         extractSignedInfo(xml);
     }
 
@@ -317,7 +363,8 @@ public class TokenDefinition {
         }
     }
 
-    private void extractContractTag(Document xml) {
+    private void extractContractTag(Document xml)
+    {
         String nameDefault = null;
         String nameEnglish = null;
         NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "contract");
@@ -327,18 +374,56 @@ public class TokenDefinition {
 
         /* if there is no token name in <contract> this breaks;
          * token name shouldn't be in <contract> anyway, re-design pending */
-        tokenName = getLocalisedString(contract,"name");
+        tokenName = getLocalisedString(contract, "name");
 
-         /*if hit NullPointerException in the next statement, then XML file
+        /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */
-         /* TODO: select the contract of type "holding_contract" */
+        /* TODO: select the contract of type "holding_contract" */
         nList = contract.getElementsByTagNameNS("http://attestation.id/ns/tbml", "address");
-        for(int i=  0; i < nList.getLength(); i++){
+        for (int i = 0; i < nList.getLength(); i++)
+        {
             Element address = (Element) nList.item(i);
             String networkElement = address.getAttribute("network");
             if (networkElement.length() < 1) networkElement = "1"; //default to mainnet
             Integer networkId = Integer.parseInt(networkElement);
             addresses.put(address.getTextContent().toLowerCase(), networkId);
+        }
+
+    }
+
+    private void extractLegacyContractTag(Document xml)
+    {
+        String nameDefault = null;
+        String nameEnglish = null;
+        NodeList nList = xml.getElementsByTagName("contract");
+        /* we allow multiple contracts, e.g. for issuing asset and for
+         * proxy usage. but for now we only deal with the first */
+        Element contract = (Element) nList.item(0);
+
+        /* if there is no token name in <contract> this breaks;
+         * token name shouldn't be in <contract> anyway, re-design pending */
+        tokenName = getLocalisedName(contract,"name");
+
+        /*if hit NullPointerException in the next statement, then XML file
+         * must be missing <contract> elements */
+        /* TODO: select the contract of type "holding_contract" */
+        for(Node nNode = nList.item(0).getFirstChild(); nNode!=null; nNode = nNode.getNextSibling()){
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element eElement = ((Element) nNode);
+                if (eElement.getTagName().equals("address")) {
+                    String networkElement = eElement.getAttribute("network");
+                    if (networkElement.length() < 1) networkElement = "1"; //default to mainnet
+                    Integer networkId = Integer.parseInt(networkElement);
+                    addresses.put(nNode.getTextContent().toLowerCase(), networkId);
+                }
+                /* if there is no token name in <contract> this breaks;
+                 * token name shouldn't be in <contract> anyway, re-design pending */
+                if (eElement.getTagName().equals("name")) {
+                    if (eElement.getAttribute("lang").equals(locale.getLanguage())) {
+                        tokenName = eElement.getTextContent();
+                    }
+                }
+            }
         }
     }
 

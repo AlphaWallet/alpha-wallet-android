@@ -343,8 +343,8 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             //establish the interface spec
             disposable = fetchTransactionsInteract.queryInterfaceSpec(importToken)
-                    .observeOn(Schedulers.io())
                     .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onInterfaceSpec, this::onError);
         }
         else

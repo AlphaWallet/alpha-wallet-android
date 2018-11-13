@@ -121,6 +121,7 @@ public class TicketSaleAdapter extends TicketAdapter {
     private void addRanges(Token t)
     {
         //first sort the balance array
+        currentRange = null;
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, ((Ticket)t).balanceArray);
         addSortedItems(sortedList, t, TicketSaleSortedItem.VIEW_TYPE);
     }

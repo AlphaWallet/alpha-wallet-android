@@ -807,6 +807,7 @@ public class Ticket extends Token implements Parcelable
                 Collections.<TypeReference<?>>emptyList());
     }
 
+    @Override
     public boolean isOldSpec()
     {
         switch (interfaceSpec)
@@ -818,6 +819,7 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
+    @Override
     public boolean unspecifiedSpec()
     {
         switch (interfaceSpec)

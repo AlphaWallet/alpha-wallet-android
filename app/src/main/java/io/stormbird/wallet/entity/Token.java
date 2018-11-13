@@ -466,6 +466,7 @@ public class Token implements Parcelable
 
     public void setInterfaceSpec(int b) { }
     public boolean isOldSpec() { return false; }
+    public boolean unspecifiedSpec() { return false; }
     public void setInterfaceSpecFromRealm(RealmToken ordinal)
     {
 

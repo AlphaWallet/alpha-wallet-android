@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import io.stormbird.wallet.entity.MessagePair;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SignaturePair;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
@@ -118,6 +119,12 @@ public class QRSelectionTest
             {
                 return null;
             }
+
+            @Override
+            public Single<Integer> queryInterfaceSpec(Token token)
+            {
+                return null;
+            }
         };
 
         signatureGenerateInteract = new SignatureGenerateInteract(null)
@@ -198,6 +205,10 @@ public class QRSelectionTest
                 //check the signature corresponds to the test address
                 String addressHex = "0x" + ecRecoverAddress(sPair.message.getBytes(), sigData);
                 assertTrue(selectionRecreate.equals(qr.indices));
+                if (!addressHex.equals(testAddress))
+                {
+                    System.out.println("Mismatch: " + addressHex + " : " + testAddress);
+                }
                 assertTrue(addressHex.equals(testAddress));
             }
         }

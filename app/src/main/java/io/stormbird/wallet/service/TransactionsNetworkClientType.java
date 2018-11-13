@@ -10,4 +10,6 @@ import io.stormbird.wallet.entity.WalletUpdate;
 public interface TransactionsNetworkClientType {
     Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress);
     Single<WalletUpdate> scanENSTransactionsForWalletNames(Wallet[] wallets, long lastBlock);
+
+    Single<Integer> checkConstructorArgs(NetworkInfo networkInfo, String address);
 }

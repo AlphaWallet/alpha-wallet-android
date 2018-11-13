@@ -16,9 +16,12 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.ERC875ContractTransaction;
 import io.stormbird.wallet.entity.EtherscanTransaction;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.TransactionContract;
+import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
@@ -27,7 +30,7 @@ import okhttp3.Request;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
-	private final int PAGESIZE = 300;
+	private int PAGESIZE = 300;
 
     private final OkHttpClient httpClient;
 	private final Gson gson;
@@ -50,7 +53,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			List<Transaction> result = new ArrayList<>();
 			try
 			{
-				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, 0);
+				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, 0, 0);
 
 				if (response != null)
 				{
@@ -80,7 +83,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		}).subscribeOn(Schedulers.io());
 	}
 
-    private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock, boolean ascending, int page)
+    private String readTransactions(NetworkInfo networkInfo, String address, String firstBlock, boolean ascending, int page, int pageSize)
     {
         okhttp3.Response response = null;
         String result = null;
@@ -104,7 +107,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				sb.append("&page=");
 				sb.append(page);
 				sb.append("&offset=");
-				sb.append(PAGESIZE);
+				sb.append(pageSize);
 			}
 			sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
 			fullUrl = sb.toString();
@@ -154,7 +157,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				NetworkInfo network = networkRepository.getAvailableNetworkList()[0];
 				int page = 1;
-				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++);
+				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++, PAGESIZE);
 
 				while (response != null)
 				{
@@ -182,7 +185,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                     {
                         break; //no need to go any further
                     }
-					response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++);
+					response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++, PAGESIZE);
 				}
 			}
 			catch (JSONException e)
@@ -196,5 +199,43 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 
 			return result;
 		}).subscribeOn(Schedulers.io());
+	}
+
+	@Override
+	public Single<Integer> checkConstructorArgs(NetworkInfo networkInfo, String address)
+	{
+		return Single.fromCallable(() -> {
+			int result = 256;
+			try
+			{
+				String response = readTransactions(networkInfo, address, "0", true, 1, 5);
+
+				if (response != null)
+				{
+					JSONObject stateData = new JSONObject(response);
+					JSONArray orders = stateData.getJSONArray("result");
+					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
+					for (EtherscanTransaction etx : myTxs)
+					{
+						Transaction tx = etx.createTransaction(null);
+						if (tx.isConstructor && tx.operations.length > 0)
+						{
+							TransactionContract ct = tx.operations[0].contract;
+							result = ct.decimals;
+							break;
+						}
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				//silent fail
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			return result;
+		});
 	}
 }

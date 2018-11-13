@@ -54,7 +54,7 @@ public class Ticket extends Token implements Parcelable
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
-    private InterfaceType interfaceSpec = InterfaceType.UsingUint256;
+    private InterfaceType interfaceSpec = InterfaceType.NotSpecified;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -812,6 +812,17 @@ public class Ticket extends Token implements Parcelable
         switch (interfaceSpec)
         {
             case UsingUint16:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean unspecifiedSpec()
+    {
+        switch (interfaceSpec)
+        {
+            case NotSpecified:
                 return true;
             default:
                 return false;

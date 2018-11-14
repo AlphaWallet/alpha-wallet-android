@@ -30,7 +30,7 @@ import okhttp3.Request;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
-	private int PAGESIZE = 300;
+	private final int PAGESIZE = 300;
 
     private final OkHttpClient httpClient;
 	private final Gson gson;

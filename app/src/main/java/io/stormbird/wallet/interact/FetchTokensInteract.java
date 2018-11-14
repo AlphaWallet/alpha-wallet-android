@@ -36,8 +36,8 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<TokenInfo> getTokenInfo(String address) {
-        return tokenRepository.update(address);
+    public Observable<TokenInfo> getTokenInfo(String address, boolean isERC875) {
+        return tokenRepository.update(address, isERC875);
     }
 
     public Observable<Token[]> fetchStored(Wallet wallet) {

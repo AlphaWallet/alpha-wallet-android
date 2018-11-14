@@ -16,7 +16,6 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionDecoder;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.service.TokensService;
@@ -25,9 +24,6 @@ public class SetupTokensInteract {
 
     private final static String TAG = "STI";
     private final TokenRepositoryType tokenRepository;
-    private List<String> unknownContracts = new ArrayList<>();
-    private TransactionDecoder transactionDecoder = new TransactionDecoder();
-
     public static final String UNKNOWN_CONTRACT = "[Unknown Contract]";
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
 
@@ -35,35 +31,10 @@ public class SetupTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<TokenInfo> update(String address) {
-        return tokenRepository.update(address)
+    public Observable<TokenInfo> update(String address, boolean isERC875) {
+        return tokenRepository.update(address, isERC875)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public void clearAll()
-    {
-        unknownContracts.clear();
-    }
-
-    //use this function to generate unit test string
-    private void generateTestString(Transaction[] txList)
-    {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("String[] inputTestList = {");
-        boolean first = true;
-        for (Transaction t : txList) {
-            if (!first) {
-                sb.append("\n,");
-            }
-            first = false;
-            sb.append("\"");
-            sb.append(t.input);
-            sb.append("\"");
-        }
-
-        sb.append("};");
     }
 
     /**
@@ -95,21 +66,9 @@ public class SetupTokensInteract {
         });
     }
 
-    public Observable<TokenInfo> addToken(String address)
+    public Observable<TokenInfo> addToken(String address, boolean isERC875)
     {
-        return tokenRepository.update(address);
-    }
-
-    public void setupUnknownList(TokensService tokensService, List<String> xmlContractAddresses)
-    {
-        unknownContracts.clear();
-        if (xmlContractAddresses != null)
-        {
-            for (String address : xmlContractAddresses)
-            {
-                if (tokensService.getToken(address) == null) unknownContracts.add(address);
-            }
-        }
+        return tokenRepository.update(address, isERC875);
     }
 
     public Token terminateToken(Token token, Wallet wallet, NetworkInfo network)

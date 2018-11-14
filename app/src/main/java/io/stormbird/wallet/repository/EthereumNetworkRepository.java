@@ -47,7 +47,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							"https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
-							"http://66.96.208.58:8545/",
+							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
                     "https://ropsten.etherscan.io/tx/",3, false,
 							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 					"https://api-ropsten.etherscan.io/"),

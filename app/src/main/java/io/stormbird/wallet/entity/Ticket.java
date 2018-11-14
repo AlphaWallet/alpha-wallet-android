@@ -226,12 +226,10 @@ public class Ticket extends Token implements Parcelable
         if (isOldSpec())
         {
             tokenHolder.contractType.setText(R.string.erc875legacy);
-            tokenHolder.contractType.setTextSize(10.0f);
         }
         else
         {
             tokenHolder.contractType.setText(R.string.erc875);
-            tokenHolder.contractType.setTextSize(11.0f);
         }
 
         //tokenHolder.text24HoursSub.setText(R.string.burned);

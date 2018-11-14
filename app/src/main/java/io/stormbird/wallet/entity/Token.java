@@ -234,7 +234,6 @@ public class Token implements Parcelable
             holder.contractType.setVisibility(View.VISIBLE);
             holder.contractSeparator.setVisibility(View.VISIBLE);
             holder.contractType.setText(R.string.erc20);
-            holder.contractType.setTextSize(11.0f);
             holder.layoutValueDetails.setVisibility(View.GONE);
             //currently we don't collect the value of ERC20 tokens
             //TODO: get ticker for ERC20 tokens

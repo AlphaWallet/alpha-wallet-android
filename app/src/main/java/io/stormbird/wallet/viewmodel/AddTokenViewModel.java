@@ -72,7 +72,7 @@ public class AddTokenViewModel extends BaseViewModel {
             findDefaultNetwork();
         }
         disposable = setupTokensInteract
-                .update(addr)
+                .update(addr, false)
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
     }
 

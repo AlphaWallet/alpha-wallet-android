@@ -234,6 +234,7 @@ public class Token implements Parcelable
             holder.contractType.setVisibility(View.VISIBLE);
             holder.contractSeparator.setVisibility(View.VISIBLE);
             holder.contractType.setText(R.string.erc20);
+            holder.contractType.setTextSize(11.0f);
             holder.layoutValueDetails.setVisibility(View.GONE);
             //currently we don't collect the value of ERC20 tokens
             //TODO: get ticker for ERC20 tokens
@@ -326,8 +327,9 @@ public class Token implements Parcelable
         }
     }
 
-    public boolean isCurrency() {
-        return !tokenInfo.isStormbird;
+    public boolean isCurrency()
+    {
+        return true;
     }
 
     public List<Integer> indexToIDList(int[] prunedIndices)
@@ -338,7 +340,8 @@ public class Token implements Parcelable
     public void addAuxDataResult(String id, String result)
     {
         if (auxData == null) auxData = new ConcurrentHashMap<>();
-        auxData.put(id, result);
+        if (result == null) auxData.remove(id);
+        else auxData.put(id, result);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)
@@ -485,7 +488,7 @@ public class Token implements Parcelable
     public void patchAuxData(Token token)
     {
         auxData = token.auxData;
-        if (auxData != null) requiresAuxRefresh = false;
+        requiresAuxRefresh = token.requiresAuxRefresh;
     }
 
     public BigInteger getTokenID(int index)

@@ -518,7 +518,12 @@ public class Token implements Parcelable
         return !getFullBalance().equals(token.getFullBalance());
     }
 
-    public int[] getTicketIndicies(String ticketIds)
+    /**
+     * Baseclass placeholder which should never be called. Returns empty array to avoid error
+     * @param ticketIds
+     * @return
+     */
+    public int[] getTicketIndices(String ticketIds)
     {
         return new int[0];
     }

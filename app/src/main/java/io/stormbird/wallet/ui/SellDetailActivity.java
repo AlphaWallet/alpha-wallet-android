@@ -428,11 +428,11 @@ public class SellDetailActivity extends BaseActivity {
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get quantity
-        int quantity = ticket.getTicketIndicies(prunedIds).length;
+        int quantity = ticket.getTicketIndices(prunedIds).length;
 
         if (price.doubleValue() > 0.0 && prunedIds != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            int[] prunedIndices = ticket.getTicketIndicies(prunedIds);
+            int[] prunedIndices = ticket.getTicketIndices(prunedIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
             viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), totalValue, UTCTimeStamp);
         }
@@ -446,7 +446,7 @@ public class SellDetailActivity extends BaseActivity {
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        int[] prunedIndices = ticket.getTicketIndicies(prunedIds);
+        int[] prunedIndices = ticket.getTicketIndices(prunedIds);
         int quantity = Integer.parseInt(textQuantity.getText().toString());
 
         if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {

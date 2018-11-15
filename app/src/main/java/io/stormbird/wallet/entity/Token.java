@@ -436,20 +436,10 @@ public class Token implements Parcelable
         this.tokenNetwork = (short)tokenNetwork;
     }
 
-    public String getFunctionSignature(String function)
-    {
-        return "";
-    }
-
-    public boolean needsInterfaceSpecUpdate(RealmToken realmToken)
-    {
-        return false;
-    }
-
     public void patchAuxData(Token token)
     {
         auxData = token.auxData;
-        requiresAuxRefresh = token.requiresAuxRefresh;
+        if (auxData != null) requiresAuxRefresh = false;
     }
 
     public boolean checkBalanceChange(Token token)

@@ -445,11 +445,6 @@ public class Token implements Parcelable
         return !getFullBalance().equals(token.getFullBalance());
     }
 
-    public int[] getTicketIndicies(String ticketIds)
-    {
-        return new int[0];
-    }
-
     /**
      * Stub functions - these are intended to be overridden in inherited classes.
      * This is a consequence of OO design. Is is good? Only the software seers can say, but
@@ -493,4 +488,5 @@ public class Token implements Parcelable
     {
         return null;
     }
+    public int[] getTicketIndicies(String ticketIds) { return new int[0]; }
 }

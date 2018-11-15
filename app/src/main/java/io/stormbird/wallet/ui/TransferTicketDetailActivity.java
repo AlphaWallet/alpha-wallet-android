@@ -35,7 +35,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -354,7 +353,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 break;
             case TRANSFER_USING_LINK:
                 //generate link
-                viewModel.generateUniversalLink(((Ticket)token).getTicketIndicies(ticketIds), token.getAddress(), calculateExpiryTime());
+                viewModel.generateUniversalLink(((Ticket)token).getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
                 break;
             case TRANSFER_TO_ADDRESS:
                 //transfer using eth

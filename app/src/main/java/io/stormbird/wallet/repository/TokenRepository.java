@@ -66,6 +66,7 @@ import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
 import rx.functions.Func1;
 
+import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -525,16 +526,16 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
             Wallet temp = new Wallet(null);
-            String responseValue = callSmartContractFunction(function, address, temp);
+            String responseValue = callMainNetSmartContractFunction(function, address, temp);
 
-            if (responseValue == null) return null;
+            if (responseValue == null) return BURN_ADDRESS;
 
             List<Type> response = FunctionReturnDecoder.decode(
                     responseValue, function.getOutputParameters());
             if (response.size() == 1) {
                 return (String)response.get(0).getValue();
             } else {
-                return null;
+                return BURN_ADDRESS;
             }
         });
     }
@@ -1180,6 +1181,46 @@ public class TokenRepository implements TokenRepositoryType {
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
             EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            return response.getValue();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Call smart contract function on mainnet contract. This would be used for things like ENS lookup
+     * Currently because it's tied to a mainnet contract address there's no circumstance it would work
+     * outside of mainnet. Users may be confused if their namespace doesn't work, even if they're currently
+     * using testnet.
+     *
+     * @param function
+     * @param contractAddress
+     * @param wallet
+     * @return
+     * @throws Exception
+     */
+    private String callMainNetSmartContractFunction(
+            Function function, String contractAddress, Wallet wallet) throws Exception {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            Web3j mainNet;
+            if (network.isMainNetwork)
+            {
+                mainNet = web3j;
+            }
+            else
+            {
+                mainNet = Web3jFactory.build(new org.web3j.protocol.http.HttpService(ethereumNetworkRepository.getAvailableNetworkList()[0].rpcServerUrl));
+            }
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
+            EthCall response = mainNet.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
         }

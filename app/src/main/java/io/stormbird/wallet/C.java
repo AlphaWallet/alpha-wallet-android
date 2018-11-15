@@ -23,6 +23,7 @@ public abstract class C {
     public static final String ETC_SYMBOL = "ETC";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
+    public static final String ENSCONTRACT = "0x314159265dD8dbb310642f98f50C066173C1259b";
 
     public static final String GWEI_UNIT = "Gwei";
 

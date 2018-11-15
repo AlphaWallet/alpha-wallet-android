@@ -45,6 +45,7 @@ import io.stormbird.wallet.router.EthereumInfoRouter;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.BalanceUtils;
+import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.util.QRUtils;
 import io.stormbird.wallet.viewmodel.SendViewModel;
@@ -54,7 +55,7 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 import static io.stormbird.wallet.C.Key.WALLET;
 
 public class SendActivity extends BaseActivity implements Runnable {
-    private static final int ENS_RESOLVE_DELAY = 1500; //In milliseconds
+    public  static final int ENS_RESOLVE_DELAY = 1500; //In milliseconds
     private static final String KEY_ADDRESS = "key_address";
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -144,6 +145,7 @@ public class SendActivity extends BaseActivity implements Runnable {
     {
         layoutENSResolve.setVisibility(View.VISIBLE);
         textENS.setText(address);
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
     }
 
     private void hideENS(Boolean dummy)
@@ -375,6 +377,7 @@ public class SendActivity extends BaseActivity implements Runnable {
             dialog.dismiss();
         }
         super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
     }
 
     boolean isAddressValid(String address) {

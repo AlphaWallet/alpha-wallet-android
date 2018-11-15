@@ -252,11 +252,6 @@ public class Token implements Parcelable
         holder.arrayBalance.setVisibility(View.GONE);
     }
 
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
-    {
-
-    }
-
     public List<Integer> ticketIdStringToIndexList(String userList)
     {
         return null;
@@ -330,11 +325,6 @@ public class Token implements Parcelable
         return !tokenInfo.isStormbird;
     }
 
-    public List<Integer> indexToIDList(int[] prunedIndices)
-    {
-        return null;
-    }
-
     public void addAuxDataResult(String id, String result)
     {
         if (auxData == null) auxData = new ConcurrentHashMap<>();
@@ -370,21 +360,6 @@ public class Token implements Parcelable
         return false;
     }
 
-    public void setRealmInterfaceSpec(RealmToken realmToken)
-    {
-
-    }
-
-    public List<BigInteger> stringHexToBigIntegerList(String integerString)
-    {
-        return null;
-    }
-
-    public int interfaceOrdinal()
-    {
-        return 0;
-    }
-
     private Map<String, String> restoreAuxData(String data)
     {
         Map<String, String> aux = null;
@@ -417,11 +392,6 @@ public class Token implements Parcelable
 
             realmToken.setAuxData(auxDataStr.toString());
         }
-    }
-
-    public void checkIsMatchedInXML(AssetDefinitionService assetService)
-    {
-
     }
 
     public void restoreAuxDataFromRealm(RealmToken realmToken)
@@ -464,53 +434,10 @@ public class Token implements Parcelable
         this.tokenNetwork = (short)tokenNetwork;
     }
 
-    public void setInterfaceSpec(int b) { }
-    public boolean isOldSpec() { return false; }
-    public boolean unspecifiedSpec() { return false; }
-    public void setInterfaceSpecFromRealm(RealmToken ordinal)
-    {
-
-    }
-
-    public String getFunctionSignature(String function)
-    {
-        return "";
-    }
-
-    public boolean needsInterfaceSpecUpdate(RealmToken realmToken)
-    {
-        return false;
-    }
-
     public void patchAuxData(Token token)
     {
         auxData = token.auxData;
         if (auxData != null) requiresAuxRefresh = false;
-    }
-
-    public BigInteger getTokenID(int index)
-    {
-        return BigInteger.valueOf(-1);
-    }
-
-    public void auxDataRefreshed()
-    {
-        requiresAuxRefresh = false;
-    }
-
-    public void setRequireAuxRefresh()
-    {
-        requiresAuxRefresh = true;
-    }
-
-    public boolean requiresAuxRefresh()
-    {
-        return (requiresAuxRefresh);
-    }
-
-    public Function getTransferFunction(String to, String tokenId)
-    {
-        return null;
     }
 
     public boolean checkBalanceChange(Token token)
@@ -519,12 +446,48 @@ public class Token implements Parcelable
     }
 
     /**
-     * Baseclass placeholder which should never be called. Returns empty array to avoid error
-     * @param ticketIds
-     * @return
+     * Stub functions - these are intended to be overridden in inherited classes.
+     * This is a consequence of OO design. Is is good? Only the software seers can say, but
+     * it is a workable standard for now.
      */
-    public int[] getTicketIndices(String ticketIds)
+    public void setInterfaceSpec(int b) { }
+    public boolean isOldSpec() { return false; }
+    public void setInterfaceSpecFromRealm(RealmToken ordinal) { }
+    public void setRealmInterfaceSpec(RealmToken realmToken) { }
+    public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
-        return new int[0];
+        return null;
     }
+    public int interfaceOrdinal()
+    {
+        return 0;
+    }
+    public BigInteger getTokenID(int index)
+    {
+        return BigInteger.valueOf(-1);
+    }
+    public void auxDataRefreshed()
+    {
+        requiresAuxRefresh = false;
+    }
+    public void setRequireAuxRefresh()
+    {
+        requiresAuxRefresh = true;
+    }
+    public boolean requiresAuxRefresh()
+    {
+        return (requiresAuxRefresh);
+    }
+    public Function getTransferFunction(String to, String tokenId)
+    {
+        return null;
+    }
+    public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
+    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList) { }
+    public List<Integer> indexToIDList(int[] prunedIndices)
+    {
+        return null;
+    }
+    public int[] getTicketIndices(String ticketIds) { return new int[0]; }
+    public boolean unspecifiedSpec() { return false; };
 }

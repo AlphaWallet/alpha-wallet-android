@@ -54,7 +54,7 @@ public class Ticket extends Token implements Parcelable
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
-    private InterfaceType interfaceSpec = InterfaceType.UsingUint256;
+    private InterfaceType interfaceSpec = InterfaceType.NotSpecified;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -244,7 +244,8 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(range.tokenIds, false);
     }
 
-    public int[] getTicketIndicies(String ticketIds)
+    @Override
+    public int[] getTicketIndices(String ticketIds)
     {
         List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
         int[] indicies = new int[indexList.size()];
@@ -323,6 +324,7 @@ public class Ticket extends Token implements Parcelable
      * @param integerString CSV string of hex ticket id's
      * @return
      */
+    @Override
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         List<BigInteger> idList = new ArrayList<>();
@@ -778,7 +780,7 @@ public class Ticket extends Token implements Parcelable
     {
         if (token instanceof Ticket)
         {
-            this.interfaceSpec = InterfaceType.values()[((Ticket)token).interfaceOrdinal()];
+            this.interfaceSpec = InterfaceType.values()[token.interfaceOrdinal()];
         }
         super.patchAuxData(token);
     }
@@ -805,11 +807,24 @@ public class Ticket extends Token implements Parcelable
                 Collections.<TypeReference<?>>emptyList());
     }
 
+    @Override
     public boolean isOldSpec()
     {
         switch (interfaceSpec)
         {
             case UsingUint16:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public boolean unspecifiedSpec()
+    {
+        switch (interfaceSpec)
+        {
+            case NotSpecified:
                 return true;
             default:
                 return false;
@@ -843,6 +858,7 @@ public class Ticket extends Token implements Parcelable
         return super.checkRealmBalanceChange(realmToken);
     }
 
+    @Override
     public int interfaceOrdinal()
     {
         return interfaceSpec.ordinal();

@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
@@ -40,9 +41,10 @@ public class ImportTokenModule {
             FeeMasterService feeMasterService,
             AddTokenInteract addTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            FetchTransactionsInteract fetchTransactionsInteract) {
         return new ImportTokenViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract);
     }
 
     @Provides
@@ -76,5 +78,10 @@ public class ImportTokenModule {
             TokenRepositoryType tokenRepository,
             WalletRepositoryType walletRepository) {
         return new AddTokenInteract(walletRepository, tokenRepository);
+    }
+
+    @Provides
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
+        return new FetchTransactionsInteract(transactionRepository);
     }
 }

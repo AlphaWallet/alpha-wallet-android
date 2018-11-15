@@ -5,8 +5,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
+
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.stormbird.wallet.R;
@@ -101,6 +111,25 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
+    public Function getTransferFunction(String to, String tokenId)
+    {
+        Function function = null;
+        try
+        {
+            BigInteger tokenIdBI = new BigInteger(tokenId);
+            List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenIdBI));
+            List<TypeReference<?>> returnTypes = Collections.<TypeReference<?>>emptyList();
+            function = new Function("transfer", params, returnTypes);
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+        }
+
+        return function;
+    }
+
+    @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showRedeemToken(context, this);
@@ -115,6 +144,14 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public String getFullBalance()
     {
-        return String.valueOf(tokenBalance.size());
+        boolean firstItem = true;
+        StringBuilder sb = new StringBuilder();
+        for (Asset item : tokenBalance)
+        {
+            if (!firstItem) sb.append(",");
+            sb.append(item.getTokenId());
+            firstItem = false;
+        }
+        return sb.toString();
     }
 }

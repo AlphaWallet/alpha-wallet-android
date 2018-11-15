@@ -1,6 +1,7 @@
 package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
@@ -8,10 +9,9 @@ import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
-import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
@@ -33,12 +33,13 @@ public class TransferTicketDetailModule {
             MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
-            FeeMasterService feeMasterService,
+            FetchTransactionsInteract fetchTransactionsInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            ConfirmationRouter confirmationRouter) {
         return new TransferTicketDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, feeMasterService, assetDisplayRouter, assetDefinitionService, tokensService);
+                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract, assetDisplayRouter, assetDefinitionService, tokensService, confirmationRouter);
     }
 
     @Provides
@@ -65,5 +66,15 @@ public class TransferTicketDetailModule {
     @Provides
     AssetDisplayRouter provideAssetDisplayRouter() {
         return new AssetDisplayRouter();
+    }
+
+    @Provides
+    ConfirmationRouter provideConfirmationRouter() {
+        return new ConfirmationRouter();
+    }
+
+    @Provides
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
+        return new FetchTransactionsInteract(transactionRepository);
     }
 }

@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC721Token;
@@ -49,6 +48,7 @@ public class TicketAdapter extends TokensAdapter {
         token = t;
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
+        if (t instanceof ERC721Token) setERC721Contract(t);
     }
 
     public TicketAdapter(OnTicketIdClickListener onTicketIdClick, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
@@ -60,6 +60,7 @@ public class TicketAdapter extends TokensAdapter {
         //setTicket(ticket);
         if (token instanceof Ticket) setTokenRange(token, ticketIds);
         openseaService = opensea;
+        if (token instanceof ERC721Token) setERC721Contract(token);
     }
 
     @Override
@@ -114,7 +115,7 @@ public class TicketAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
 
-        List<BigInteger> idList = ((Ticket)t).stringHexToBigIntegerList(ticketIds);
+        List<BigInteger> idList = t.stringHexToBigIntegerList(ticketIds);
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, idList); //generate sorted list
         addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE); //insert sorted items into view
 
@@ -132,6 +133,7 @@ public class TicketAdapter extends TokensAdapter {
 
     private void addRanges(Token t)
     {
+        currentRange = null;
         List<TicketRangeElement> sortedList = generateSortedList(assetService, t, ((Ticket)t).balanceArray);
         addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE);
     }

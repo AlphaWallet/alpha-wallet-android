@@ -14,6 +14,7 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -261,6 +262,11 @@ public class Token implements Parcelable
         return null;
     }
 
+    public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
+    {
+        return "";
+    }
+
     public List<Integer> stringIntsToIntegerList(String userList)
     {
         List<Integer> idList = new ArrayList<>();
@@ -369,6 +375,16 @@ public class Token implements Parcelable
 
     }
 
+    public List<BigInteger> stringHexToBigIntegerList(String integerString)
+    {
+        return null;
+    }
+
+    public int interfaceOrdinal()
+    {
+        return 0;
+    }
+
     private Map<String, String> restoreAuxData(String data)
     {
         Map<String, String> aux = null;
@@ -401,6 +417,11 @@ public class Token implements Parcelable
 
             realmToken.setAuxData(auxDataStr.toString());
         }
+    }
+
+    public void checkIsMatchedInXML(AssetDefinitionService assetService)
+    {
+
     }
 
     public void restoreAuxDataFromRealm(RealmToken realmToken)
@@ -445,6 +466,7 @@ public class Token implements Parcelable
 
     public void setInterfaceSpec(int b) { }
     public boolean isOldSpec() { return false; }
+    public boolean unspecifiedSpec() { return false; }
     public void setInterfaceSpecFromRealm(RealmToken ordinal)
     {
 
@@ -484,5 +506,25 @@ public class Token implements Parcelable
     public boolean requiresAuxRefresh()
     {
         return (requiresAuxRefresh);
+    }
+
+    public Function getTransferFunction(String to, String tokenId)
+    {
+        return null;
+    }
+
+    public boolean checkBalanceChange(Token token)
+    {
+        return !getFullBalance().equals(token.getFullBalance());
+    }
+
+    /**
+     * Baseclass placeholder which should never be called. Returns empty array to avoid error
+     * @param ticketIds
+     * @return
+     */
+    public int[] getTicketIndices(String ticketIds)
+    {
+        return new int[0];
     }
 }

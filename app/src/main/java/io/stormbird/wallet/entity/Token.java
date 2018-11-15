@@ -488,5 +488,6 @@ public class Token implements Parcelable
     {
         return null;
     }
-    public int[] getTicketIndicies(String ticketIds) { return new int[0]; }
+    public int[] getTicketIndices(String ticketIds) { return new int[0]; }
+    public boolean unspecifiedSpec() { return false; };
 }

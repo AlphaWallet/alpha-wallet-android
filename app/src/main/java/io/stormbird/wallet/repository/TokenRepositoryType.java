@@ -37,7 +37,7 @@ public interface TokenRepositoryType {
     Observable<Token> fetchActiveTokenBalance(Token token, NetworkInfo network, Wallet wallet);
     Observable<Token[]> fetchAll(String walletAddress);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
-    Observable<TokenInfo> update(String address);
+    Observable<TokenInfo> update(String address, boolean isERC875);
     Single<TokenInfo[]> update(String[] address);
     rx.Subscription memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
     rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);

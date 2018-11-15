@@ -261,7 +261,7 @@ public class WalletViewModel extends BaseViewModel
         checkTokensDisposable = Observable.fromCallable(tokensService::getAllTokens)
                 .flatMapIterable(token -> token)
                 .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
-                .flatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
+                .flatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress(), false))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .subscribeOn(Schedulers.io())
                 .subscribe(addTokenInteract::addS, this::tkError,
@@ -443,7 +443,7 @@ public class WalletViewModel extends BaseViewModel
         disposable = fetchAllContractAddresses()
                 .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
-                .flatMap(setupTokensInteract::addToken)
+                .flatMap(tokenAddress -> setupTokensInteract.addToken(tokenAddress, true)) //TODO: contract type should be an enum
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())

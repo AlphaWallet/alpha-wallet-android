@@ -77,7 +77,7 @@ public class TokenFactory
         {
             long now = System.currentTimeMillis();
             String realmBalance = realmItem.getBalance();
-            if (realmBalance == null) realmBalance = "0";
+            if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
             BigDecimal balance = new BigDecimal(realmBalance);
             thisToken = new Token(tokenInfo, balance, updateBlancaTime);
         }

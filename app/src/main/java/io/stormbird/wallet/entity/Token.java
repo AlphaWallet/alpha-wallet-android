@@ -321,14 +321,16 @@ public class Token implements Parcelable
         }
     }
 
-    public boolean isCurrency() {
-        return !tokenInfo.isStormbird;
+    public boolean isCurrency()
+    {
+        return true;
     }
 
     public void addAuxDataResult(String id, String result)
     {
         if (auxData == null) auxData = new ConcurrentHashMap<>();
-        auxData.put(id, result);
+        if (result == null) auxData.remove(id);
+        else auxData.put(id, result);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)

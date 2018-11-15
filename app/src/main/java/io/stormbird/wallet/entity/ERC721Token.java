@@ -154,4 +154,9 @@ public class ERC721Token extends Token implements Parcelable
         }
         return sb.toString();
     }
+
+    @Override
+    public boolean isCurrency() {
+        return false;
+    }
 }

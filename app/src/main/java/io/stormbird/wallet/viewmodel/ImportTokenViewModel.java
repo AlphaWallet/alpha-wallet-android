@@ -255,7 +255,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private void setupTokenAddr(String contractAddress)
     {
         disposable = setupTokensInteract
-                .update(contractAddress)
+                .update(contractAddress, false)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::onTokensSetup, this::onError);
@@ -514,7 +514,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (importToken != null)
         {
-            disposable = addTokenInteract.add(importToken.tokenInfo, wallet().getValue())
+            disposable = addTokenInteract.add(importToken.tokenInfo, wallet.getValue())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::finishedImport, this::onError);
         }

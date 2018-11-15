@@ -451,6 +451,7 @@ public class TokenRepository implements TokenRepositoryType {
         TokenDefinition definition = service.getAssetDefinition(token.getAddress());
         if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
         else return Single.fromCallable(() -> {
+            token.auxDataRefreshed();
             //need to call the token functions now
             for (String keyName : definition.functions.keySet())
             {
@@ -472,11 +473,7 @@ public class TokenRepository implements TokenRepositoryType {
                         break;
                 }
 
-                if (result != null)
-                {
-                    token.addAuxDataResult(keyName, result);
-                }
-                token.auxDataRefreshed();
+                token.addAuxDataResult(keyName, result);
             }
             return token;
         });
@@ -573,8 +570,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<TokenInfo> update(String contractAddr) {
-        return setupTokensFromLocal(contractAddr).toObservable();
+    public Observable<TokenInfo> update(String contractAddr, boolean contractHint) {
+        return setupTokensFromLocal(contractAddr, contractHint).toObservable();
     }
 
     @Override
@@ -1233,13 +1230,17 @@ public class TokenRepository implements TokenRepositoryType {
         return tokens;
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address)
+    private Single<TokenInfo> setupTokensFromLocal(String address, boolean contractHint)
     {
         return Single.fromCallable(() -> {
             try
             {
                 long now = System.currentTimeMillis();
-                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
+                Boolean isStormbird = contractHint;
+                if (!isStormbird)
+                {
+                    isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
+                }
                 if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,

@@ -79,9 +79,9 @@
             <br>
             <hr>
             <h5 class="mt-4 mb-2"><b>Owner's Ethereum Address</b></h5>
-            <h5 style="font-size: 12px;" class="mb-4" th:text="${link.ownerAddress}"/>
+             <a href="https://etherscan.io/address/${link.ownerAddress}"><h5 style="font-size: 12px;" class="mb-4" th:text="${link.ownerAddress}"/></h5>
             <h5 class="mb-2"><b>Contract Address</b></h6>
-            <h5 style="font-size: 12px;" th:text="${link.contractAddress}"/>
+            <a href="https://etherscan.io/token/${link.contractAddress}"><h5 style="font-size: 12px;" th:text="${link.contractAddress}"/></h5></a>
             <br>
           </div>
         </div>

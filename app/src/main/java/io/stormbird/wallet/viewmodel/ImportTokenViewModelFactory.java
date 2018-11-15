@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 ;import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
@@ -29,6 +30,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
 
     public ImportTokenViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
                                        FindDefaultWalletInteract findDefaultWalletInteract,
@@ -38,7 +40,8 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
                                        FeeMasterService feeMasterService,
                                        AddTokenInteract addTokenInteract,
                                        EthereumNetworkRepositoryType ethereumNetworkRepository,
-                                       AssetDefinitionService assetDefinitionService) {
+                                       AssetDefinitionService assetDefinitionService,
+                                       FetchTransactionsInteract fetchTransactionsInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -48,12 +51,13 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
         this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService);
+        return (T) new ImportTokenViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract);
     }
 }
 

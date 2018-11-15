@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.entity.BaseViewCallback;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TradeInstance;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
@@ -162,6 +163,12 @@ public class MarketOrderTest
 
             @Override
             public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<Integer> queryInterfaceSpec(Token token)
             {
                 return null;
             }

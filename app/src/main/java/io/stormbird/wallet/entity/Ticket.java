@@ -587,7 +587,8 @@ public class Ticket extends Token implements Parcelable
             long eventTime = 0;
 
             // TODO: we should be checking the contract functions for individual ticket ranges
-            if (checkSpawable())
+            // TODO: Work on a coded placement system
+            if (checkDynamic())
             {
                 if (auxData.containsKey("building")) nameStr = auxData.get("building");
                 venueStr += auxData.get("street");
@@ -711,16 +712,16 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
-    private boolean checkSpawable()
+    private boolean checkDynamic()
     {
-        boolean isSpawnable = false;
+        boolean isDynamic = false;
         if (auxData != null && auxData.size() > 0)
         {
             if (auxData.containsKey("street") || auxData.containsKey("building") || auxData.containsKey("state"))
-                isSpawnable = true;
+                isDynamic = true;
         }
 
-        return isSpawnable;
+        return isDynamic;
     }
 
     private boolean isAlNum(String testStr)

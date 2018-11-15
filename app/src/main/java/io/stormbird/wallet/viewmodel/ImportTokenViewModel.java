@@ -20,6 +20,7 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
@@ -64,6 +65,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -83,6 +85,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private Ticket importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
     private double ethToUsd = 0;
+    private TicketRange currentRange;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -97,7 +100,8 @@ public class ImportTokenViewModel extends BaseViewModel
                          FeeMasterService feeMasterService,
                          AddTokenInteract addTokenInteract,
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
-                         AssetDefinitionService assetDefinitionService) {
+                         AssetDefinitionService assetDefinitionService,
+                         FetchTransactionsInteract fetchTransactionsInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -107,6 +111,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
     }
 
     private void initParser()
@@ -171,6 +176,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.wallet.setValue(wallet);
         try
         {
+            currentRange = null;
             importOrder = parser.parseUniversalLink(univeralImportLink);
             //ecrecover the owner
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
@@ -322,14 +328,37 @@ public class ImportTokenViewModel extends BaseViewModel
         else if (balanceChange(newBalance))
         {
             availableBalance = newBalance;
-            TicketRange range = new TicketRange(availableBalance.get(0), importToken.getAddress());
+            currentRange = new TicketRange(availableBalance.get(0), importToken.getAddress());
             for (int i = 1; i < availableBalance.size(); i++)
             {
-                range.tokenIds.add(availableBalance.get(i));
+                currentRange.tokenIds.add(availableBalance.get(i));
             }
-            importRange.setValue(range);
+            determineInterface();
+        }
+    }
+
+    private void determineInterface()
+    {
+        if (importToken.unspecifiedSpec())
+        {
+            //establish the interface spec
+            disposable = fetchTransactionsInteract.queryInterfaceSpec(importToken)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onInterfaceSpec, this::onError);
+        }
+        else
+        {
+            importRange.setValue(currentRange);
             regularBalanceCheck();
         }
+    }
+
+    private void onInterfaceSpec(Integer spec)
+    {
+        importToken.setInterfaceSpec(spec);
+        importRange.setValue(currentRange);
+        regularBalanceCheck();
     }
 
     private long checkExpiry()

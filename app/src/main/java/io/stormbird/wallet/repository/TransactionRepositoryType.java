@@ -1,6 +1,7 @@
 package io.stormbird.wallet.repository;
 
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 
@@ -19,4 +20,6 @@ public interface TransactionRepositoryType {
 	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList);
+
+    Single<Integer> queryInterfaceSpec(Token token);
 }

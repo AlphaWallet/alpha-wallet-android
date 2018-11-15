@@ -1,6 +1,7 @@
 package io.stormbird.wallet.interact;
 
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
@@ -35,5 +36,12 @@ public class FetchTransactionsInteract {
     public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
     {
         return transactionRepository.storeTransactions(networkInfo, wallet, txList);
+    }
+
+    public Single<Integer> queryInterfaceSpec(Token token)
+    {
+        return transactionRepository.queryInterfaceSpec(token)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
     }
 }

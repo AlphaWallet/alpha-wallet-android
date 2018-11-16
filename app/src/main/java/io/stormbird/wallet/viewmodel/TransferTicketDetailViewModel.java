@@ -241,7 +241,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void checkENSAddress(String name)
     {
-        if (name == null || name.length() < 2 || name.charAt(0) != '@') return;
+        if (name == null || name.length() < 2) return;
         disposable = checkENSAddressFunc(name.substring(1))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())

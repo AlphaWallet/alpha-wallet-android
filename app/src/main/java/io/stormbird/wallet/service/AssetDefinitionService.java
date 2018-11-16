@@ -63,9 +63,9 @@ public class AssetDefinitionService
     private static final String XML_EXT = "xml";
     private final Context context;
     private final OkHttpClient okHttpClient;
-    private Map<String, TokenDefinition> assetDefinitions;
-    private Map<String, Long> assetChecked;
-    private List<String> devOverrideContracts;
+    private Map<String, TokenDefinition> assetDefinitions; //Mapping of contract address to token definitions
+    private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
+    private List<String> devOverrideContracts;             //List of contract addresses which have been overridden by definition in developer folder
 
     public AssetDefinitionService(OkHttpClient client, Context ctx)
     {
@@ -280,6 +280,12 @@ public class AssetDefinitionService
             }
         }
     }
+
+    /**
+     * Add the contract addresses defined in the developer XML file to the override list.
+     * Subsequent refresh of XML from server will not override these definitions.
+     * @param definition interpreted definition
+     */
     private void addOverrideFile(TokenDefinition definition)
     {
         if (definition != null)

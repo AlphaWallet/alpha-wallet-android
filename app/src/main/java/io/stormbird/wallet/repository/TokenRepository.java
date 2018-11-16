@@ -571,8 +571,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<TokenInfo> update(String contractAddr, boolean isStormbird) {
-        return setupTokensFromLocal(contractAddr, isStormbird).toObservable();
+    public Observable<TokenInfo> update(String contractAddr, boolean contractHint) {
+        return setupTokensFromLocal(contractAddr, contractHint).toObservable();
     }
 
     @Override

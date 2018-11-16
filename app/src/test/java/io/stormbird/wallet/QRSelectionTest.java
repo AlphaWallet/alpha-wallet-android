@@ -55,10 +55,7 @@ public class QRSelectionTest
         sr.nextBytes(keySeed);
         testKey = ECKeyPair.create(keySeed);
 
-        try
-        {
-            transactionRepository = new TransactionRepositoryType()
-            {
+        transactionRepository = new TransactionRepositoryType() {
 
                 @Override
                 public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet)
@@ -193,6 +190,8 @@ public class QRSelectionTest
                 qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
             }
 
+        try
+        {
             //now check we can recover all the selections and their signings
             for (QREncoding qr : qrList)
             {

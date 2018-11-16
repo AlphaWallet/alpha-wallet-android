@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
+import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
@@ -44,7 +45,11 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        //Fabric.with(this, new Crashlytics());
+        System.out.println();
+        if (BuildConfig.BUILD_TYPE.equals("release")) //only implement Crashalytics for release builds
+        {
+            Fabric.with(this, new Crashlytics());
+        }
 
         // Get the intent that started this activity
         Intent intent = getIntent();

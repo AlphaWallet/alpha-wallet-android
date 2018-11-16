@@ -6,6 +6,7 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,147 +44,155 @@ public class QRSelectionTest
     {
         List<Integer> indices = new ArrayList<>();
         SignaturePair sigPair;
-        long localTime;
     }
 
     @Test
     public void QRSelectionTest()
     {
-        //roll a new key
-        testKey = ECKeyPair.create("Test Key".getBytes());
-
-        transactionRepository = new TransactionRepositoryType() {
-
-            @Override
-            public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet)
-            {
-                return null;
-            }
-
-            @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
-                return null;
-            }
-
-            @Override
-            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password) {
-                return null;
-            }
-
-            @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String pass) {
-                return Single.fromCallable(() -> {
-                    //sign using the local key
-                    Sign.SignatureData sigData = Sign.signMessage(message, testKey);
-
-                    byte[] sig = new byte[65];
-
-                    try {
-                        System.arraycopy(sigData.getR(), 0, sig, 0, 32);
-                        System.arraycopy(sigData.getS(), 0, sig, 32, 32);
-                        sig[64] = (byte) (int) sigData.getV();
-                    }
-                    catch (IndexOutOfBoundsException e)
-                    {
-                        throw new SalesOrderMalformed("Signature shorter than expected 256");
-                    }
-
-                    return sig;
-                });
-            }
-
-            @Override
-            public void unlockAccount(Wallet signer, String signerPassword) throws Exception {
-
-            }
-
-            @Override
-            public void lockAccount(Wallet signer, String signerPassword) throws Exception {
-
-            }
-
-            @Override
-            public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<Integer> queryInterfaceSpec(Token token)
-            {
-                return null;
-            }
-        };
-
-        signatureGenerateInteract = new SignatureGenerateInteract(null)
-        {
-            @Override
-            //TODO: Sign message here not in the additional field
-            public Single<MessagePair> getMessage(List<Integer> indexList, String contract) {
-                return Single.fromCallable(() -> {
-                    String selectionStr = SignaturePair.generateSelection(indexList);
-                    long currentTime = System.currentTimeMillis();
-                    long minsT = currentTime / (30 * 1000);
-                    int minsTime = (int) minsT;
-                    String plainMessage = selectionStr + "," + String.valueOf(minsTime) + "," + contract.toLowerCase();  //This is the plain text message that gets signed
-                    return new MessagePair(selectionStr, plainMessage);
-                });
-            }
-        };
-
-        List<QREncoding> qrList = new ArrayList<>();
-
-        //test key address
-        String testAddress = "0x" + Keys.getAddress(testKey.getPublicKey());
-
-        //generate all ticket redeem combos up to index 256, then check signature and regenerate the selection
-        final int indicesCount = 8*2;
-        final int combinations = (int)Math.pow(2, indicesCount);
-
-        for (int i = 1; i < combinations; i += 1) // pick all the combinations, even though it slows the test down
-        {
-            QREncoding qr = new QREncoding();
-            qrList.add(qr);
-            qr.localTime = System.currentTimeMillis() / (30*1000);
-            //generate an entry
-            //1 generate the indices
-            //consume the bitfield
-            BigInteger k = BigInteger.valueOf(i);
-            int radix = k.getLowestSetBit();
-            while (!k.equals(BigInteger.ZERO))
-            {
-                if (k.testBit(radix))
-                {
-                    qr.indices.add(radix+1);
-                    k = k.clearBit(radix);
-                }
-                radix++;
-            }
-
-            MessagePair messagePair = signatureGenerateInteract
-                    .getMessage(qr.indices, CONTRACT_ADDR).blockingGet();
-
-            //now sign
-            byte[] sig = transactionRepository
-                    .getSignatureFast(null, messagePair.message.getBytes(), "hackintosh").blockingGet();
-
-            qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
-        }
+        //Use a different key each time
+        SecureRandom sr = new SecureRandom();
+        byte[] keySeed = new byte[32];
+        sr.nextBytes(keySeed);
+        testKey = ECKeyPair.create(keySeed);
 
         try
         {
+            transactionRepository = new TransactionRepositoryType()
+            {
+
+                @Override
+                public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet)
+                {
+                    return null;
+                }
+
+                @Override
+                public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress)
+                {
+                    return null;
+                }
+
+                @Override
+                public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password)
+                {
+                    return null;
+                }
+
+                @Override
+                public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+                {
+                    return null;
+                }
+
+                @Override
+                public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password)
+                {
+                    return null;
+                }
+
+                @Override
+                public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String pass)
+                {
+                    return Single.fromCallable(() -> {
+                        //sign using the local key
+                        Sign.SignatureData sigData = Sign.signMessage(message, testKey);
+
+                        byte[] sig = new byte[65];
+
+                        try {
+                            System.arraycopy(sigData.getR(), 0, sig, 0, 32);
+                            System.arraycopy(sigData.getS(), 0, sig, 32, 32);
+                            sig[64] = (byte) (int) sigData.getV();
+                        }
+                        catch (IndexOutOfBoundsException e)
+                        {
+                            throw new SalesOrderMalformed("Signature shorter than expected 256");
+                        }
+
+                        return sig;
+                    });
+                }
+
+                @Override
+                public void unlockAccount(Wallet signer, String signerPassword) throws Exception
+                {
+
+                }
+
+                @Override
+                public void lockAccount(Wallet signer, String signerPassword) throws Exception
+                {
+
+                }
+
+                @Override
+                public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+                {
+                    return null;
+                }
+
+                @Override
+                public Single<Integer> queryInterfaceSpec(Token token)
+                {
+                    return null;
+                }
+            };
+
+            signatureGenerateInteract = new SignatureGenerateInteract(null)
+            {
+                @Override
+                //TODO: Sign message here not in the additional field
+                public Single<MessagePair> getMessage(List<Integer> indexList, String contract)
+                {
+                    return Single.fromCallable(() -> {
+                        String selectionStr = SignaturePair.generateSelection(indexList);
+                        long currentTime = System.currentTimeMillis();
+                        long minsT = currentTime / (30 * 1000);
+                        int minsTime = (int) minsT;
+                        String plainMessage = selectionStr + "," + String.valueOf(minsTime) + "," + contract.toLowerCase();  //This is the plain text message that gets signed
+                        return new MessagePair(selectionStr, plainMessage);
+                    });
+                }
+            };
+
+            List<QREncoding> qrList = new ArrayList<>();
+
+            //test key address
+            String testAddress = "0x" + Keys.getAddress(testKey.getPublicKey());
+
+            //generate all ticket redeem combos up to index 256, then check signature and regenerate the selection
+            final int indicesCount = 8 * 2;
+            final int combinations = (int) Math.pow(2, indicesCount);
+
+            for (int i = 1; i < combinations; i += 1) // pick all the combinations, even though it slows the test down
+            {
+                QREncoding qr = new QREncoding();
+                qrList.add(qr);
+
+                //generate an entry
+                //1 generate the indices
+                //consume the bitfield
+                BigInteger k = BigInteger.valueOf(i);
+                int radix = k.getLowestSetBit();
+                while (!k.equals(BigInteger.ZERO))
+                {
+                    if (k.testBit(radix))
+                    {
+                        qr.indices.add(radix + 1);
+                        k = k.clearBit(radix);
+                    }
+                    radix++;
+                }
+
+                MessagePair messagePair = signatureGenerateInteract
+                        .getMessage(qr.indices, CONTRACT_ADDR).blockingGet();
+
+                byte[] sig = transactionRepository
+                        .getSignatureFast(null, messagePair.message.getBytes(), "hackintosh").blockingGet();
+
+                qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
+            }
+
             //now check we can recover all the selections and their signings
             for (QREncoding qr : qrList)
             {
@@ -194,7 +203,8 @@ public class QRSelectionTest
                 // |       Imagine this string is being encoded on one phone, and scanned by another
                 // v
 
-                long localTime = qr.localTime;
+                //read time from message
+                long localTime = getTimeFromMessage(qr);
 
                 //now using this alone recompose the selection and check the signature and contract
                 //extract the sig pair
@@ -205,10 +215,6 @@ public class QRSelectionTest
                 //check the signature corresponds to the test address
                 String addressHex = "0x" + ecRecoverAddress(sPair.message.getBytes(), sigData);
                 assertTrue(selectionRecreate.equals(qr.indices));
-                if (!addressHex.equals(testAddress))
-                {
-                    System.out.println("Mismatch: " + addressHex + " : " + testAddress);
-                }
                 assertTrue(addressHex.equals(testAddress));
             }
         }
@@ -216,6 +222,13 @@ public class QRSelectionTest
         {
             e.printStackTrace();
         }
+    }
+
+    private long getTimeFromMessage(QREncoding qr)
+    {
+        String[] split = qr.sigPair.message.split(",");
+        String timeStr = split[1];
+        return Long.parseLong(timeStr);
     }
 
     private String ecRecoverAddress(byte[] data, Sign.SignatureData signature) //get the hex string address from the sig and data

@@ -607,11 +607,6 @@ public class Ticket extends Token implements Parcelable
                 {
                     eventTime = Long.valueOf(auxData.get("expiry"));
                 }
-                else
-                {
-                    eventTime = System.currentTimeMillis() / 1000;
-                    time = null;
-                }
             }
             else if (nonFungibleToken != null)
             {
@@ -644,7 +639,7 @@ public class Ticket extends Token implements Parcelable
                 }
             }
 
-            if (nonFungibleToken != null)
+            if (nonFungibleToken != null && eventTime == 0)
             {
                 if (nonFungibleToken.getAttribute("time") != null)
                 {
@@ -654,7 +649,7 @@ public class Ticket extends Token implements Parcelable
 
                 try
                 {
-                    if (eventTimeStr != null)
+                    if (isAlNum(eventTimeStr))
                     {
                         ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
                         ticketDate.setText(datetime.format(date));
@@ -733,7 +728,7 @@ public class Ticket extends Token implements Parcelable
             for (int i = 0; i < testStr.length(); i++)
             {
                 char c = testStr.charAt(i);
-                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c))
+                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !(c == '+') && !(c == ',') && !(c == ';'))
                 {
                     result = false;
                     break;
@@ -746,6 +741,12 @@ public class Ticket extends Token implements Parcelable
 
     private void setDateFromTokenID(TextView ticketDate, TextView ticketTime, long eventTime, DateFormat date, DateFormat time)
     {
+        if (eventTime == 0)
+        {
+            eventTime = System.currentTimeMillis()/1000;
+            time = null;
+        }
+
         Calendar calendar = GregorianCalendar.getInstance(); //UTC time
         calendar.setTimeInMillis(eventTime * 1000);
         date.setTimeZone(calendar.getTimeZone());

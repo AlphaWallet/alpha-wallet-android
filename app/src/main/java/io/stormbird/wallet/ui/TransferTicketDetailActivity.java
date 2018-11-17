@@ -9,6 +9,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -64,12 +65,13 @@ import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.ui.SendActivity.ENS_RESOLVE_DELAY;
 
 /**
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -96,10 +98,14 @@ public class TransferTicketDetailActivity extends BaseActivity
     private EditText toAddressEditText;
     private ImageButton qrImageView;
     private TextView textQuantity;
+    private LinearLayout layoutENSResolve;
+    private TextView textENS;
 
     private String ticketIds;
     private String prunedIds;
     private int transferStatus;
+
+    private Handler handler;
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -126,6 +132,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         setContentView(R.layout.activity_transfer_detail);
 
         token = getIntent().getParcelableExtra(TICKET);
+        handler = new Handler();
+
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
@@ -139,6 +147,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         progressView.hide();
 
         toAddressEditText = findViewById(R.id.edit_to_address);
+        layoutENSResolve = findViewById(R.id.layout_ens);
+        textENS = findViewById(R.id.text_ens_resolve);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
@@ -150,6 +160,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.userTransaction().observe(this, this::onUserTransaction);
+        viewModel.ensResolve().observe(this, this::onENSSuccess);
+        viewModel.ensFail().observe(this, this::hideENS);
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
@@ -245,13 +257,20 @@ public class TransferTicketDetailActivity extends BaseActivity
             @Override
             public void afterTextChanged(Editable s)
             {
-
+                textENS.setText("");
+                checkAddress();
             }
         });
 
         setupScreen();
 
         finishReceiver = new FinishReceiver(this);
+    }
+
+    private void checkAddress()
+    {
+        handler.removeCallbacks(this);
+        handler.postDelayed(this, ENS_RESOLVE_DELAY);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -482,7 +501,8 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //check send address
         toAddressError.setVisibility(View.GONE);
-        final String to = toAddressEditText.getText().toString();
+        String to = toAddressEditText.getText().toString();
+        if (!isAddressValid(to)) to = textENS.getText().toString();
         if (!isAddressValid(to))
         {
             toAddressError.setVisibility(View.VISIBLE);
@@ -628,8 +648,9 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void confirmTransfer()
     {
-        final String to = toAddressEditText.getText().toString();
+        String to = toAddressEditText.getText().toString();
         //check address
+        if (!isAddressValid(to)) to = textENS.getText().toString();
         if (!isAddressValid(to))
         {
             toAddressError.setVisibility(View.VISIBLE);
@@ -721,6 +742,29 @@ public class TransferTicketDetailActivity extends BaseActivity
         String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
                                     Calendar.getInstance().get(Calendar.MINUTE));
         expiryTimeEditText.setText(time);
+    }
+
+    @Override
+    public void run()
+    {
+        //address update delay check
+        final String to = toAddressEditText.getText().toString();
+        if (to.length() > 0 && to.charAt(0) == '@')
+        {
+            viewModel.checkENSAddress(to);
+        }
+    }
+
+    private void onENSSuccess(String address)
+    {
+        layoutENSResolve.setVisibility(View.VISIBLE);
+        textENS.setText(address);
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+    }
+
+    private void hideENS(Boolean dummy)
+    {
+        layoutENSResolve.setVisibility(View.GONE);
     }
 }
 

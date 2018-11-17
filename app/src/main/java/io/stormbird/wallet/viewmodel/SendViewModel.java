@@ -26,9 +26,10 @@ import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 
+import static io.stormbird.wallet.C.ENSCONTRACT;
+
 public class SendViewModel extends BaseViewModel {
     private static final long CHECK_ETHPRICE_INTERVAL = 10;
-    private static final String ENSCONTRACT = "0x314159265dD8dbb310642f98f50C066173C1259b";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
     private final MutableLiveData<Double> ethPrice = new MutableLiveData<>();
@@ -135,7 +136,7 @@ public class SendViewModel extends BaseViewModel {
         }
     }
 
-    private byte[] hashJoin(byte[] lastHash, byte[] input)
+    public static byte[] hashJoin(byte[] lastHash, byte[] input)
     {
         byte[] joined = new byte[lastHash.length*2];
 

@@ -3,19 +3,26 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.util.Log;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.Numeric;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
@@ -24,21 +31,11 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
-import io.stormbird.wallet.ui.TransferTicketDetailActivity;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.tools.ParseMagicLink;
 
-import java.math.BigInteger;
-import java.util.List;
-
-import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.C.ENSCONTRACT;
+import static io.stormbird.wallet.viewmodel.SendViewModel.hashJoin;
 
 /**
  * Created by James on 21/02/2018.
@@ -50,6 +47,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
+    private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> ensFail = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -61,6 +60,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final ConfirmationRouter confirmationRouter;
+    private final FetchTokensInteract fetchTokensInteract;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -76,7 +76,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   AssetDisplayRouter assetDisplayRouter,
                                   AssetDefinitionService assetDefinitionService,
                                   TokensService tokensService,
-                                  ConfirmationRouter confirmationRouter) {
+                                  ConfirmationRouter confirmationRouter,
+                                  FetchTokensInteract fetchTokensInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -87,6 +88,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.confirmationRouter = confirmationRouter;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -95,6 +97,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<String> userTransaction() { return userTransaction; }
+    public LiveData<String> ensResolve() { return ensResolve; }
+    public LiveData<Boolean> ensFail() { return ensFail; }
 
     private void initParser()
     {
@@ -220,14 +224,69 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         //first find the asset within the token
         Asset asset = null;
-        for (Asset a : ((ERC721Token)token).tokenBalance)
+        for (Asset a : ((ERC721Token) token).tokenBalance)
         {
-            if (a.getTokenId().equals(tokenId)) { asset = a; break; }
+            if (a.getTokenId().equals(tokenId))
+            {
+                asset = a;
+                break;
+            }
         }
 
-        if (asset != null )
+        if (asset != null)
         {
             confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName());
+        }
+    }
+
+    public void checkENSAddress(String name)
+    {
+        if (name == null || name.length() < 2) return;
+        disposable = checkENSAddressFunc(name.substring(1))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::gotHash, this::onError);
+    }
+
+    private void gotHash(byte[] resultHash)
+    {
+        disposable = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::gotAddress, this::onError);
+
+    }
+
+    private Single<byte[]> checkENSAddressFunc(final String name)
+    {
+        return Single.fromCallable(() -> {
+            //split name
+            String[] components = name.split("\\.");
+
+            byte[] resultHash = new byte[32];
+            Arrays.fill(resultHash, (byte)0);
+
+            for (int i = (components.length - 1); i >= 0; i--)
+            {
+                String nameComponent = components[i];
+                resultHash = hashJoin(resultHash, nameComponent.getBytes());
+            }
+
+            return resultHash;
+        });
+    }
+
+    private void gotAddress(String returnedAddress)
+    {
+        BigInteger test = Numeric.toBigInt(returnedAddress);
+        if (!test.equals(BigInteger.ZERO))
+        {
+            //post the response back
+            ensResolve.postValue(returnedAddress);
+        }
+        else
+        {
+            ensFail.postValue(true);
         }
     }
 }

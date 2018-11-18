@@ -124,11 +124,7 @@ public class TokenDetailActivity extends BaseActivity {
     }
 
     private void setNameAndDesc(Asset asset) {
-        if (asset.getName() != null && !asset.getName().equals("null")) {
-            name.setText(asset.getName());
-        } else {
-            name.setText(String.format("ID# %s", asset.getTokenId()));
-        }
+        name.setText(asset.getName());
         desc.setText(asset.getDescription());
     }
 

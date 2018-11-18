@@ -331,6 +331,7 @@
     <string name="free_import_with_gas">免费导入(免除 gas 费用)</string>
     <string name="toolbar_header_browser">DApp 浏览器</string>
     <string name="ens_address">以太坊地址</string>
-    <string name="confirm_erc721_transfer">Confirm Token Transfer</string>
-    <string name="asset_name">Asset Name</string>
+    <string name="confirm_erc721_transfer">确认转出 Token</string>
+    <string name="asset_name">资产名称</string>
+    <string name="title_dialog_check_ens">正在查询 ENS</string>
 </resources>

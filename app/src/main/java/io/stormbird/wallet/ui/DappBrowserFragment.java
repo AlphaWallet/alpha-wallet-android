@@ -25,8 +25,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -45,7 +43,7 @@ import io.stormbird.wallet.entity.URLLoadInterface;
 import io.stormbird.wallet.entity.URLLoadReceiver;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
-import io.stormbird.wallet.util.BalanceUtils;
+import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
@@ -64,14 +62,12 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SelectNetworkDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
-import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
-import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        OnVerifyListener, OnGetBalanceListener, URLLoadInterface
+        OnVerifyListener, OnGetBalanceListener, URLLoadInterface, ItemClickListener
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
 
@@ -127,7 +123,8 @@ public class DappBrowserFragment extends Fragment implements
     private void setupAddressBar() {
         urlTv.setText(viewModel.getLastUrl(getContext()));
 
-        adapter = new AutoCompleteUrlAdapter(getContext(), viewModel.getBrowserHistoryFromPrefs(getContext()));
+        adapter = new AutoCompleteUrlAdapter(getContext(), C.DAPP_BROWSER_HISTORY);
+        adapter.setListener(this);
         urlTv.setAdapter(adapter);
 
         urlTv.setOnEditorActionListener((v, actionId, event) -> {
@@ -138,10 +135,6 @@ public class DappBrowserFragment extends Fragment implements
                 handled = loadUrl(urlText);
             }
             return handled;
-        });
-
-        urlTv.setOnItemClickListener((parent, view, position, id) -> {
-            loadUrl(adapter.getItem(position));
         });
 
         urlTv.setOnClickListener(v -> urlTv.showDropDown());
@@ -229,6 +222,7 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
+        if (adapter == null || !adapter.hasContext()) setupAddressBar();
     }
 
     @Override
@@ -343,7 +337,7 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onWebpageLoaded(String url)
     {
-        viewModel.addToBrowserHistory(getContext(), url);
+        adapter.addDAppURL(url);
     }
 
     public void homePressed()
@@ -413,5 +407,11 @@ public class DappBrowserFragment extends Fragment implements
             intent.setType("text/plain");
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onItemClick(String url)
+    {
+        loadUrl(url);
     }
 }

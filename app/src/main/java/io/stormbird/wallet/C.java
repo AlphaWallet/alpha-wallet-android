@@ -51,6 +51,7 @@ public abstract class C {
     public static final String EXTRA_WEB3TRANSACTION = "WEB3_TRANSACTION";
     public static final String EXTRA_NETWORK_NAME = "NETWORK_NAME";
     public static final String EXTRA_NETWORK_MAINNET = "NETWORK_MAINNET";
+    public static final String EXTRA_ENS_DETAILS = "ENS_DETAILS";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";
@@ -120,6 +121,7 @@ public abstract class C {
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
+    public static final String ENS_HISTORY = "ensHistory";
 
     public enum TokenStatus {
         DEFAULT, PENDING, INCOMPLETE

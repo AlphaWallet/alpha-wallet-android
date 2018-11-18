@@ -115,7 +115,7 @@ public class ConfirmationActivity extends BaseActivity {
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
-
+        String ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
         amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
@@ -189,7 +189,14 @@ public class ConfirmationActivity extends BaseActivity {
                 break;
         }
 
-        toAddressText.setText(toAddress);
+        if (ensName != null && ensName.length() > 0)
+        {
+            toAddressText.setText(ensName);
+        }
+        else
+        {
+            toAddressText.setText(toAddress);
+        }
 
         valueText.setText(amountString);
 
@@ -207,7 +214,6 @@ public class ConfirmationActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.confirmation_menu, menu);
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return super.onCreateOptionsMenu(menu);
     }

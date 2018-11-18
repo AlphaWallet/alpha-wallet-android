@@ -48,7 +48,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> ensFail = new MutableLiveData<>();
+    private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -98,7 +98,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<String> userTransaction() { return userTransaction; }
     public LiveData<String> ensResolve() { return ensResolve; }
-    public LiveData<Boolean> ensFail() { return ensFail; }
+    public LiveData<String> ensFail() { return ensFail; }
 
     private void initParser()
     {
@@ -220,7 +220,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         assetDisplayRouter.open(ctx, ticket, isClearStack);
     }
 
-    public void openConfirm(Context ctx, String to, Token token, String tokenId)
+    public void openConfirm(Context ctx, String to, Token token, String tokenId, String ensDetails)
     {
         //first find the asset within the token
         Asset asset = null;
@@ -235,26 +235,30 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         if (asset != null)
         {
-            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName());
+            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails);
         }
     }
 
     public void checkENSAddress(String name)
     {
-        if (name == null || name.length() < 2) return;
-        disposable = checkENSAddressFunc(name.substring(1))
+        if (name == null || name.length() < 1) return;
+        disposable = checkENSAddressFunc(name)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotHash, this::onError);
+                .subscribe(hash -> gotHash(hash, name), this::ensFail);
     }
 
-    private void gotHash(byte[] resultHash)
+    private void gotHash(byte[] resultHash, String name)
     {
         disposable = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotAddress, this::onError);
+                .subscribe(address -> gotAddress(address, name), this::ensFail);
+    }
 
+    private void ensFail(Throwable error)
+    {
+        ensFail.postValue("");
     }
 
     private Single<byte[]> checkENSAddressFunc(final String name)
@@ -276,17 +280,16 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         });
     }
 
-    private void gotAddress(String returnedAddress)
+    private void gotAddress(String returnedAddress, String name)
     {
         BigInteger test = Numeric.toBigInt(returnedAddress);
         if (!test.equals(BigInteger.ZERO))
         {
-            //post the response back
             ensResolve.postValue(returnedAddress);
         }
         else
         {
-            ensFail.postValue(true);
+            ensFail.postValue(name);
         }
     }
 }

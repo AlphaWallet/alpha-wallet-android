@@ -85,7 +85,7 @@ public class AssetDefinitionService
         {
             assetDefinitions.clear();
             loadContracts(context.getFilesDir(), false);
-            //checkDownloadedFiles();
+            checkDownloadedFiles();
         }
         catch (IOException|SAXException e)
         {

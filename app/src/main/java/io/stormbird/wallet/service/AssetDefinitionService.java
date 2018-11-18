@@ -85,7 +85,7 @@ public class AssetDefinitionService
         {
             assetDefinitions.clear();
             loadContracts(context.getFilesDir(), false);
-            checkDownloadedFiles();
+            //checkDownloadedFiles();
         }
         catch (IOException|SAXException e)
         {
@@ -510,7 +510,7 @@ public class AssetDefinitionService
                 .filter(this::isValidXML)
                 .map(this::convertToAddress)
                 .filter(this::notOverriden)
-                .flatMap(this::fetchXMLFromServer)
+                .concatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleFile, this::onError);

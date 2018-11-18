@@ -261,7 +261,7 @@ public class WalletViewModel extends BaseViewModel
         checkTokensDisposable = Observable.fromCallable(tokensService::getAllTokens)
                 .flatMapIterable(token -> token)
                 .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
-                .flatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress(), false))
+                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress(), false))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .subscribeOn(Schedulers.io())
                 .subscribe(addTokenInteract::addS, this::tkError,
@@ -288,8 +288,8 @@ public class WalletViewModel extends BaseViewModel
                     .doOnNext(l -> Observable.fromCallable(tokensService::getAllTokens)
                             .flatMapIterable(token -> token)
                             .filter(token -> (token.tokenInfo.name != null && !token.isTerminated() && !token.independentUpdate()))
-                            .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))
-                            .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
+                            .concatMap(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))
+                            .concatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(this::onTokenBalanceUpdate, this::onError, this::onFetchTokensBalanceCompletable)).subscribe();

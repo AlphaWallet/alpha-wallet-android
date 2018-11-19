@@ -31,6 +31,7 @@ import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModel;
@@ -44,6 +45,7 @@ import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
+import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class ConfirmationActivity extends BaseActivity {
     AWalletAlertDialog dialog;
@@ -77,7 +79,7 @@ public class ConfirmationActivity extends BaseActivity {
     private String amountStr;
 
     private ConfirmationType confirmationType;
-    private boolean tokenTransfer;
+    private byte[] transactionBytes = null;
     private Web3Transaction transaction;
     private boolean isMainNet;
     private String networkName;
@@ -125,42 +127,53 @@ public class ConfirmationActivity extends BaseActivity {
 
         amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
 
+        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
+                .get(ConfirmationViewModel.class);
+
         switch (confirmationType) {
             case ETH:
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
-                tokenTransfer = false;
+                transactionBytes = null;
                 break;
             case ERC20:
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
-                tokenTransfer = true;
+                transactionBytes = TokenRepository.createTokenTransferData(toAddress, amount.toBigInteger());
                 break;
             case ERC875:
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = tokenList;
-                tokenTransfer = true;
+                transactionBytes = viewModel.getERC875TransferBytes(toAddress, contractAddress, amountStr);
                 break;
             case MARKET:
                 amountString = tokenList;
                 toAddress = "Stormbird market";
-                tokenTransfer = false;
                 break;
             case WEB3TRANSACTION:
                 title.setText(R.string.confirm_dapp_transaction);
+                toAddress = transaction.recipient.toString();
                 if (transaction.contract != null)
                 {
                     contractAddrText.setVisibility(View.VISIBLE);
                     contractAddrLabel.setVisibility(View.VISIBLE);
                     contractAddrText.setText(transaction.contract.toString());
                 }
+                else
+                {
+                    BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
+                    if (addr.equals(BigInteger.ZERO)) //constructor
+                    {
+                        toAddress = getString(R.string.ticket_contract_constructor);
+                    }
+                }
                 String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
                 networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
                 isMainNet = getIntent().getBooleanExtra(C.EXTRA_NETWORK_MAINNET, false);
-                toAddress = transaction.recipient.toString();
+
                 if (urlRequester != null)
                 {
                     websiteLabel.setVisibility(View.VISIBLE);
@@ -170,7 +183,7 @@ public class ConfirmationActivity extends BaseActivity {
 
                 BigDecimal ethAmount = Convert.fromWei(transaction.value.toString(10), Convert.Unit.ETHER);
                 amountString = getEthString(ethAmount.doubleValue()) + " " + ETH_SYMBOL;
-                //handle web3 transaction signing
+                transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 break;
             case ERC721:
                 String contractName = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
@@ -181,11 +194,11 @@ public class ConfirmationActivity extends BaseActivity {
                 labelAmount.setText(R.string.asset_name);
                 contractAddrText.setText(contractTxt);
                 amountString = symbol;
-                tokenTransfer = true;
+                transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr);
                 break;
             default:
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
-                tokenTransfer = false;
+                transactionBytes = null;
                 break;
         }
 
@@ -199,9 +212,6 @@ public class ConfirmationActivity extends BaseActivity {
         }
 
         valueText.setText(amountString);
-
-        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
-                .get(ConfirmationViewModel.class);
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.gasSettings().observe(this, this::onGasSettings);
@@ -232,7 +242,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(tokenTransfer);
+        viewModel.prepare(transactionBytes);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -369,6 +379,7 @@ public class ConfirmationActivity extends BaseActivity {
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.error_transaction_failed);
         dialog.setMessage(error.message);
+        dialog.setIcon(ERROR);
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();

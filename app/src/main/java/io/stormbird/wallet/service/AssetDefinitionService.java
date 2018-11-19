@@ -164,7 +164,10 @@ public class AssetDefinitionService
             else
             {
                 assetDef = loadTokenDefinition(correctedAddress);
-                assetDefinitions.put(address.toLowerCase(), assetDef);
+                if (assetDef.addresses.size() > 0)
+                {
+                    assetDefinitions.put(address.toLowerCase(), assetDef);
+                }
             }
         }
 
@@ -263,7 +266,10 @@ public class AssetDefinitionService
                 context.getResources().getConfiguration().locale);
 
         //now assign the networks
-        assignNetworks(definition);
+        if (definition.addresses.size() > 0)
+        {
+            assignNetworks(definition);
+        }
 
         return definition;
     }

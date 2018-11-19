@@ -334,4 +334,36 @@
     <string name="confirm_erc721_transfer">确认转出 Token</string>
     <string name="asset_name">资产名称</string>
     <string name="title_dialog_check_ens">正在查询 ENS</string>
+
+    <string name="label_amount_to_transfer">Amount to Transfer</string>
+    <string name="title_set_universal_link_expiry">Set MagicLink Expiry:</string>
+    <string name="select_camera">Select a Camera</string>
+    <string name="formats">Formats</string>
+    <string name="choose_formats">Choose Formats</string>
+    <string name="qr_scanner">QR Scanner</string>
+    <string name="dialog_title_select_locale">Select Locale:</string>
+    <string name="settings_locale_lang">Locale</string>
+    <string name="settings_network">Network</string>
+    <string name="ticket_transfer_from">Transfer From</string>
+    <string name="new_version_title">Update available</string>
+    <string name="new_version">Version update is available on the AlphaWallet website.</string>
+    <string name="confirm_update">Download and Install</string>
+    <string name="dialog_later">Later</string>
+    <string name="alphawallet_update">Alphawallet update</string>
+    <string name="install_error">Unable to update App</string>
+    <string name="require_write_permission">Storage write permission not given.</string>
+    <string name="dialog_not_again">Skip until next release</string>
+    <string name="enable_xml_override_dir">Enable XML Override</string>
+    <string name="explain_xml_override">Enable XML override will create a directory \'AlphaWallet\' in your phone storage. Token config files (XML) can be dropped into this directory which will override default or network Token configs.</string>
+    <string name="ask_user_about_xml_override">Do you wish to enable Token config override directory?</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_incomplete_data">Incomplete Data</string>
+    <string name="status_pending_with_qty">%1$s Pending</string>
+    <string name="status_incomplete_data_with_qty">%1$s Incomplete Data</string>
+    <string name="token_details">Token Details</string>
+    <string name="label_cattributes">Cattributes</string>
+    <string name="label_attributes">Attributes</string>
+    <string name="open_on_external_link">Open on %1$s</string>
+    <string name="action_reload">Reload</string>
+    <string name="confirm_dapp_transaction">Confirm DApp transaction</string>
 </resources>

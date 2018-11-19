@@ -122,9 +122,10 @@ public class TokensService
     public List<Token> getAllLiveTokens()
     {
         List<Token> tokens = new ArrayList<>();
+        tokens.add(tokenMap.get(currentAddress)); //currency token goes first
         for (Token t : tokenMap.values())
         {
-            if (!t.isTerminated() && t.tokenInfo.name != null) tokens.add(t);
+            if (!t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t)) tokens.add(t);
         }
 
         return tokens;

@@ -285,7 +285,7 @@ public class WalletViewModel extends BaseViewModel
         if (info != null && wallet != null)
         {
             fetchTokenBalanceDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                    .doOnNext(l -> Observable.fromCallable(tokensService::getAllTokens)
+                    .doOnNext(l -> Observable.fromCallable(tokensService::getAllLiveTokens)
                             .flatMapIterable(token -> token)
                             .filter(token -> (token.tokenInfo.name != null && !token.isTerminated() && !token.independentUpdate()))
                             .concatMap(token -> fetchTokensInteract.updateDefaultBalance(token, info, wallet))

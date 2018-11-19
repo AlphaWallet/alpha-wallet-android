@@ -77,6 +77,7 @@ public class ConfirmationActivity extends BaseActivity {
     private int decimals;
     private String contractAddress;
     private String amountStr;
+    private String toAddress;
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
@@ -114,7 +115,7 @@ public class ConfirmationActivity extends BaseActivity {
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
 
-        String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
+        toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
         String ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
@@ -276,7 +277,7 @@ public class ConfirmationActivity extends BaseActivity {
             case ETH:
                 viewModel.createTransaction(
                         fromAddressText.getText().toString(),
-                        toAddressText.getText().toString(),
+                        toAddress,
                         amount.toBigInteger(),
                         gasSettings.gasPrice,
                         gasSettings.gasLimit);
@@ -285,7 +286,7 @@ public class ConfirmationActivity extends BaseActivity {
             case ERC20:
                 viewModel.createTokenTransfer(
                         fromAddressText.getText().toString(),
-                        toAddressText.getText().toString(),
+                        toAddress,
                         contractAddress,
                         amount.toBigInteger(),
                         gasSettings.gasPrice,
@@ -295,7 +296,7 @@ public class ConfirmationActivity extends BaseActivity {
             case ERC875:
                 viewModel.createTicketTransfer(
                         fromAddressText.getText().toString(),
-                        toAddressText.getText().toString(),
+                        toAddress,
                         contractAddress,
                         amountStr,
                         gasSettings.gasPrice,
@@ -314,7 +315,7 @@ public class ConfirmationActivity extends BaseActivity {
 
             case ERC721:
                 viewModel.createERC721Transfer(
-                        toAddressText.getText().toString(),
+                        toAddress,
                         contractAddress,
                         amountStr,
                         gasSettings.gasPrice,

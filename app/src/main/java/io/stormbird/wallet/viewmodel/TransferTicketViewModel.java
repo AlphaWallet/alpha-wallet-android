@@ -19,6 +19,8 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
+import static io.stormbird.wallet.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
+
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -29,7 +31,7 @@ public class TransferTicketViewModel extends BaseViewModel {
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<Token> ticket = new MutableLiveData<>();
+    private final MutableLiveData<Token> token = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -59,7 +61,7 @@ public class TransferTicketViewModel extends BaseViewModel {
         return defaultWallet;
     }
     public LiveData<Token> ticket() {
-        return ticket;
+        return token;
     }
 
     public void fetchCurrentTicketBalance() {
@@ -71,7 +73,7 @@ public class TransferTicketViewModel extends BaseViewModel {
     }
 
     public void prepare(Token t) {
-        ticket.setValue(t);
+        token.setValue(t);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
@@ -79,8 +81,7 @@ public class TransferTicketViewModel extends BaseViewModel {
 
     private void onToken(Token t)
     {
-        ticket.setValue(t);
-        ticket.postValue(t);
+        token.postValue(t);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -97,13 +98,14 @@ public class TransferTicketViewModel extends BaseViewModel {
         fetchCurrentTicketBalance();
     }
 
-    public void openSellDialog(Context context, String ticketIDs) {
-        try {
-            Token ticket = this.ticket().getValue();
-            transferTicketDetailRouter.open(context, ticket, ticketIDs, defaultWallet.getValue());
-        } catch (Exception e) {
+    public void openSellDialog(Context context, String ticketIDs)
+    {
+        transferTicketDetailRouter.open(context, token.getValue(), ticketIDs, defaultWallet.getValue());
+    }
 
-        }
+    public void openTransferDirectDialog(Context context, String tokenId)
+    {
+        transferTicketDetailRouter.openTransfer(context, token.getValue(), tokenId, defaultWallet.getValue(), TRANSFER_TO_ADDRESS);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

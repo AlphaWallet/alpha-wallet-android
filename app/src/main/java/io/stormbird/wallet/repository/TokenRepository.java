@@ -66,6 +66,7 @@ import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
 import rx.functions.Func1;
 
+import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -451,6 +452,7 @@ public class TokenRepository implements TokenRepositoryType {
         TokenDefinition definition = service.getAssetDefinition(token.getAddress());
         if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
         else return Single.fromCallable(() -> {
+            token.auxDataRefreshed();
             //need to call the token functions now
             for (String keyName : definition.functions.keySet())
             {
@@ -472,11 +474,7 @@ public class TokenRepository implements TokenRepositoryType {
                         break;
                 }
 
-                if (result != null)
-                {
-                    token.addAuxDataResult(keyName, result);
-                }
-                token.auxDataRefreshed();
+                token.addAuxDataResult(keyName, result);
             }
             return token;
         });
@@ -528,16 +526,16 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
             Wallet temp = new Wallet(null);
-            String responseValue = callSmartContractFunction(function, address, temp);
+            String responseValue = callMainNetSmartContractFunction(function, address, temp);
 
-            if (responseValue == null) return null;
+            if (responseValue == null) return BURN_ADDRESS;
 
             List<Type> response = FunctionReturnDecoder.decode(
                     responseValue, function.getOutputParameters());
             if (response.size() == 1) {
                 return (String)response.get(0).getValue();
             } else {
-                return null;
+                return BURN_ADDRESS;
             }
         });
     }
@@ -573,8 +571,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<TokenInfo> update(String contractAddr) {
-        return setupTokensFromLocal(contractAddr).toObservable();
+    public Observable<TokenInfo> update(String contractAddr, boolean contractHint) {
+        return setupTokensFromLocal(contractAddr, contractHint).toObservable();
     }
 
     @Override
@@ -1193,6 +1191,46 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
+    /**
+     * Call smart contract function on mainnet contract. This would be used for things like ENS lookup
+     * Currently because it's tied to a mainnet contract address there's no circumstance it would work
+     * outside of mainnet. Users may be confused if their namespace doesn't work, even if they're currently
+     * using testnet.
+     *
+     * @param function
+     * @param contractAddress
+     * @param wallet
+     * @return
+     * @throws Exception
+     */
+    private String callMainNetSmartContractFunction(
+            Function function, String contractAddress, Wallet wallet) throws Exception {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            Web3j mainNet;
+            if (network.isMainNetwork)
+            {
+                mainNet = web3j;
+            }
+            else
+            {
+                mainNet = Web3jFactory.build(new org.web3j.protocol.http.HttpService(ethereumNetworkRepository.getAvailableNetworkList()[0].rpcServerUrl));
+            }
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
+            EthCall response = mainNet.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            return response.getValue();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static byte[] createTokenTransferData(String to, BigInteger tokenAmount) {
         List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenAmount));
         List<TypeReference<?>> returnTypes = Collections.singletonList(new TypeReference<Bool>() {});
@@ -1206,6 +1244,13 @@ public class TokenRepository implements TokenRepositoryType {
                 .map(s -> new BigInteger(s.trim())).toList().blockingGet();
         Function function = ((Ticket)token).getTransferFunction(to, ticketIndicies);
 
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    public static byte[] createERC721TransferFunction(String to, Token token, String tokenId)
+    {
+        Function function = token.getTransferFunction(to, tokenId);
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
@@ -1226,13 +1271,17 @@ public class TokenRepository implements TokenRepositoryType {
         return tokens;
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address)
+    private Single<TokenInfo> setupTokensFromLocal(String address, boolean contractHint)
     {
         return Single.fromCallable(() -> {
             try
             {
                 long now = System.currentTimeMillis();
-                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
+                Boolean isStormbird = contractHint;
+                if (!isStormbird)
+                {
+                    isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
+                }
                 if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,

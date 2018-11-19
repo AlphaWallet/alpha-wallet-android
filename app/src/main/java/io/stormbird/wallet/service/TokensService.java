@@ -1,6 +1,7 @@
 package io.stormbird.wallet.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -227,5 +228,27 @@ public class TokensService
                 ((ERC721Token)t).tokenBalance.clear();
             }
         }
+    }
+
+    public List<String> getRemovedTokensOfClass(Token[] tokens, Class<?> tokenClass)
+    {
+        List<Token> newTokens = Arrays.asList(tokens);
+        List<Token> oldTokens = getAllClass(tokenClass);
+
+        List<String> removedTokens = new ArrayList<>();
+
+        if (oldTokens.size() > newTokens.size())
+        {
+            //tokens were removed
+            for (Token t : oldTokens)
+            {
+                if (!newTokens.contains(t))
+                {
+                    removedTokens.add(t.getAddress());
+                }
+            }
+        }
+
+        return removedTokens;
     }
 }

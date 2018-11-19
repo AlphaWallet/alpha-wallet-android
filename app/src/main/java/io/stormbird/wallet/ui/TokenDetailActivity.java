@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.entity.opensea.Trait;
@@ -63,18 +64,23 @@ public class TokenDetailActivity extends BaseActivity {
             Asset asset = getIntent().getExtras().getParcelable("asset");
             Token token = getIntent().getExtras().getParcelable("token");
             title.setText(String.format("%s %s", "1", token.getFullName()));
-            setupPage(asset);
+            setupPage(asset, token);
         } else {
             finish();
         }
     }
 
-    private void setupPage(Asset asset) {
+    private void setupPage(Asset asset, Token token) {
         setImage(asset);
         setDetails(asset);
         setNameAndDesc(asset);
         setExternalLink(asset);
         setTraits(asset);
+
+        if (token instanceof ERC721Token)
+        {
+            findViewById(R.id.button_transfer).setVisibility(View.GONE);
+        }
     }
 
     private void setTraits(Asset asset) {
@@ -118,11 +124,7 @@ public class TokenDetailActivity extends BaseActivity {
     }
 
     private void setNameAndDesc(Asset asset) {
-        if (asset.getName() != null && !asset.getName().equals("null")) {
-            name.setText(asset.getName());
-        } else {
-            name.setText(String.format("ID# %s", asset.getTokenId()));
-        }
+        name.setText(asset.getName());
         desc.setText(asset.getDescription());
     }
 

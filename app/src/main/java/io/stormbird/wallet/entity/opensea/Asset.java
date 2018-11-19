@@ -43,6 +43,8 @@ public class Asset implements Parcelable {
     @Expose
     private List<Trait> traits = null;
 
+    public boolean isChecked;
+
     protected Asset(Parcel in) {
         tokenId = in.readString();
         imagePreviewUrl = in.readString();
@@ -98,8 +100,15 @@ public class Asset implements Parcelable {
         return this;
     }
 
-    public String getName() {
-        return name;
+    public String getName()
+    {
+        String assetName;
+        if (name != null && !name.equals("null")) {
+            assetName = name;
+        } else {
+            assetName = "ID# " + String.valueOf(tokenId);
+        }
+        return assetName;
     }
 
     public void setName(String name) {

@@ -15,7 +15,7 @@ import java.math.BigInteger;
 
 //TODO: Refactor when we add token type to token class
 public class ConfirmationRouter {
-    public void open(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens) {
+    public void open(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails) {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_TO_ADDRESS, to);
         intent.putExtra(C.EXTRA_AMOUNT, amount.toString());
@@ -23,6 +23,7 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
+        intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
         int tokenType = ConfirmationType.ETH.ordinal();
         if (sendingTokens) tokenType = ConfirmationType.ERC20.ordinal();
         intent.putExtra(C.TOKEN_TYPE, tokenType);
@@ -64,6 +65,22 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_NETWORK_NAME, networkName);
         intent.putExtra(C.EXTRA_NETWORK_MAINNET, isMainNet);
         intent.putExtra(C.EXTRA_CONTRACT_NAME, requesterURL);
+        context.startActivity(intent);
+    }
+
+    public void openERC721Transfer(Context context, String to, String tokenId, String contractAddress, String name, String tokenName, String ensDetails)
+    {
+        Intent intent = new Intent(context, ConfirmationActivity.class);
+        intent.putExtra(C.EXTRA_TO_ADDRESS, to);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
+        intent.putExtra(C.EXTRA_DECIMALS, 0);
+        intent.putExtra(C.EXTRA_SYMBOL, tokenName);
+        intent.putExtra(C.EXTRA_AMOUNT, tokenId);
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
+        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ERC721.ordinal());
+        intent.putExtra(C.EXTRA_TOKENID_LIST, tokenId);
+        intent.putExtra(C.EXTRA_CONTRACT_NAME, name);
+        intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
         context.startActivity(intent);
     }
 }

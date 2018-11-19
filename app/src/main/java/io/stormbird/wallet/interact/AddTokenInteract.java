@@ -64,6 +64,7 @@ public class AddTokenInteract {
 
     public Observable<Token> addTokenFunctionData(Token token, AssetDefinitionService service)
     {
-        return tokenRepository.callTokenFunctions(token, service).toObservable();
+        if (token.hasPositiveBalance()) return tokenRepository.callTokenFunctions(token, service).toObservable();
+        else return Observable.fromCallable(() -> token);
     }
 }

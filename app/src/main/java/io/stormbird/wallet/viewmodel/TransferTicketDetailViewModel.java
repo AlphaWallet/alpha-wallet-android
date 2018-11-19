@@ -3,38 +3,39 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.util.Log;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.Numeric;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
-import io.stormbird.wallet.ui.TransferTicketDetailActivity;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.tools.ParseMagicLink;
 
-import java.math.BigInteger;
-import java.util.List;
-
-import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.C.ENSCONTRACT;
+import static io.stormbird.wallet.viewmodel.SendViewModel.hashJoin;
 
 /**
  * Created by James on 21/02/2018.
@@ -46,16 +47,20 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
+    private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
+    private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
-    private final FeeMasterService feeMasterService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDisplayRouter assetDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final ConfirmationRouter confirmationRouter;
+    private final FetchTokensInteract fetchTokensInteract;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -67,19 +72,23 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
                                   TransferTicketDetailRouter transferTicketDetailRouter,
-                                  FeeMasterService feeMasterService,
+                                  FetchTransactionsInteract fetchTransactionsInteract,
                                   AssetDisplayRouter assetDisplayRouter,
                                   AssetDefinitionService assetDefinitionService,
-                                  TokensService tokensService) {
+                                  TokensService tokensService,
+                                  ConfirmationRouter confirmationRouter,
+                                  FetchTokensInteract fetchTokensInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
-        this.feeMasterService = feeMasterService;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.confirmationRouter = confirmationRouter;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -88,6 +97,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<String> userTransaction() { return userTransaction; }
+    public LiveData<String> ensResolve() { return ensResolve; }
+    public LiveData<String> ensFail() { return ensFail; }
 
     private void initParser()
     {
@@ -98,7 +109,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
     }
 
-    public void prepare(Ticket ticket)
+    public void prepare(Token token)
     {
         disposable = findDefaultNetworkInteract
                 .find()
@@ -166,48 +177,37 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
     }
 
-    public void openTransferState(Context context, Ticket ticket, String ticketIds, int transferStatus)
+    public void openTransferState(Context context, Token token, String ticketIds, int transferStatus)
     {
-        transferTicketDetailRouter.openTransfer(context, ticket, ticketIds, defaultWallet.getValue(), transferStatus);
+        transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus);
     }
 
     public void createTicketTransfer(String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
         Token token = tokensService.getToken(contractAddress);
-        final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
-        disposable = createTransactionInteract
-                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
-                .subscribe(this::onCreateTransaction, this::onError);
-    }
-
-    public void feeMasterCall(String url, String to, Ticket t, String indices)
-    {
-        disposable = feeMasterService.generateAndSendFeemasterTransaction(url, defaultWallet.getValue(), defaultNetwork.getValue().chainId, to, t, 0, indices)
-            .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::processResult, this::txError);
-    }
-
-    private void txError(Throwable throwable)
-    {
-        error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Network error."));
-    }
-
-    private void processResult(Integer result)
-    {
-        if ((result/100) == 2) newTransaction.postValue("Transaction accepted by server.");
+        if (token.unspecifiedSpec())
+        {
+            //need to determine the spec
+            disposable = fetchTransactionsInteract.queryInterfaceSpec(token)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(spec -> onInterfaceSpec(spec, to, contractAddress, indexList, gasPrice, gasLimit), this::onError);
+        }
         else
         {
-            switch (result)
-            {
-                case 401:
-                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
-                    break;
-                default:
-                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Transfer failed."));
-                    break;
-            }
+            final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
+            disposable = createTransactionInteract
+                    .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                    .subscribe(this::onCreateTransaction, this::onError);
         }
+    }
+
+    private void onInterfaceSpec(Integer spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    {
+        Token token = tokensService.getToken(contractAddress);
+        token.setInterfaceSpec(spec);
+        TokensService.setInterfaceSpec(token.getAddress(), spec);
+        createTicketTransfer(to, contractAddress, indexList, gasPrice, gasLimit);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -218,5 +218,78 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)
     {
         assetDisplayRouter.open(ctx, ticket, isClearStack);
+    }
+
+    public void openConfirm(Context ctx, String to, Token token, String tokenId, String ensDetails)
+    {
+        //first find the asset within the token
+        Asset asset = null;
+        for (Asset a : ((ERC721Token) token).tokenBalance)
+        {
+            if (a.getTokenId().equals(tokenId))
+            {
+                asset = a;
+                break;
+            }
+        }
+
+        if (asset != null)
+        {
+            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails);
+        }
+    }
+
+    public void checkENSAddress(String name)
+    {
+        if (name == null || name.length() < 1) return;
+        disposable = checkENSAddressFunc(name)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(hash -> gotHash(hash, name), this::ensFail);
+    }
+
+    private void gotHash(byte[] resultHash, String name)
+    {
+        disposable = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(address -> gotAddress(address, name), this::ensFail);
+    }
+
+    private void ensFail(Throwable error)
+    {
+        ensFail.postValue("");
+    }
+
+    private Single<byte[]> checkENSAddressFunc(final String name)
+    {
+        return Single.fromCallable(() -> {
+            //split name
+            String[] components = name.split("\\.");
+
+            byte[] resultHash = new byte[32];
+            Arrays.fill(resultHash, (byte)0);
+
+            for (int i = (components.length - 1); i >= 0; i--)
+            {
+                String nameComponent = components[i];
+                resultHash = hashJoin(resultHash, nameComponent.getBytes());
+            }
+
+            return resultHash;
+        });
+    }
+
+    private void gotAddress(String returnedAddress, String name)
+    {
+        BigInteger test = Numeric.toBigInt(returnedAddress);
+        if (!test.equals(BigInteger.ZERO))
+        {
+            ensResolve.postValue(returnedAddress);
+        }
+        else
+        {
+            ensFail.postValue(name);
+        }
     }
 }

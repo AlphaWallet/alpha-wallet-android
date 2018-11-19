@@ -159,4 +159,14 @@ public class ConfirmationViewModel extends BaseViewModel {
                                this::onError);
         }
     }
+
+    public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit)
+    {
+        progress.postValue(true);
+        Token token = tokensService.getToken(contractAddress);
+        final byte[] data = TokenRepository.createERC721TransferFunction(to, token, tokenId);
+        disposable = createTransactionInteract
+                .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
 }

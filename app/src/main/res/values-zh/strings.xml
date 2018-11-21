@@ -1,16 +1,98 @@
 <resources>
+
     <string name="app_name">AlphaWallet</string>
     <string name="all">全部</string>
     <string name="currency">币类</string>
     <string name="assets">资产类</string>
-     <string name="advanced">高级设置</string>
-     <string name="copy_wallet_address">复制钱包地址</string>
-     <string name="message_attending_venue">场地门票的进入代码</string>
-     <string name="entrance_token_address">输入token地址 %s</string>
-     <string name="hint_contract_name">名称</string>
-     <string name="hint_contract_venue">场馆</string>
-     <string name="hint_contract_date">日期</string>
-     <string name="hint_contract_price">价格</string>
+    <string name="advanced">高级设置</string>
+    <string name="copy_wallet_address">复制钱包地址</string>
+    <string name="message_attending_venue">场地门票的进入代码</string>
+    <string name="entrance_token_address">输入token地址 %s</string>
+    <string name="hint_contract_name">名称</string>
+    <string name="hint_contract_venue">场馆</string>
+    <string name="hint_contract_date">日期</string>
+    <string name="hint_contract_price">价格</string>
+     
+   <!-- Titles -->
+    <string name="title_email">发送邮件</string>
+    <string name="title_my_address">我的地址</string>
+    <string name="title_my_tokens">我的 Token</string>
+    <string name="title_activity_send">发送</string>
+    <string name="title_activity_confirmation">确认</string>
+    <string name="title_transaction_details">交易明细</string>
+    <string name="suggestion_empty_password_available">密码不可以为空</string>
+
+    <!-- Dialog titles -->
+    <string name="title_dialog_error">错误</string>
+    <string name="title_dialog_handling">正在处理...</string>
+    <string name="title_dialog_watch_out">小心！</string>
+    <string name="title_dialog_add_account">Add wallet</string>
+    <string name="title_dialog_deposit">How would you like to buy?</string>
+
+    <!-- Dialog messages-->
+    <string name="dialog_message">请输入密码来加密你的钱包</string>
+    <string name="dialog_message_unrecoverable_message">如果这台设备重置或者 AlphaWallet被删除，你必须要有备份才可以恢复你的钱包地址.</string>
+    <string name="toast_message_wallet_imported">钱包地址已导入</string>
+    <string name="toast_message_wallet_exported">备份已创建</string>
+    <string name="toast_qr_code_no_address">QR code 未包含合法地址</string>
+
+    <!-- Labels -->
+    <string name="label_from">来自</string>
+    <string name="label_to">To</string>
+    <string name="label_gas_limit">Gas 限制</string>
+    <string name="label_gas_price">Gas 费用</string>
+    <string name="label_network_fee">网络费用</string>
+    <string name="button_ok">OK</string>
+    <string name="hint_recipient_address">接收地址</string>
+    <string name="hint_amount">总数</string>
+    <string name="hint_contract_address">智能合约地址</string>
+
+     
+    <!-- Subtitles -->
+    <string name="subtitle_from">来自</string>
+    <string name="subtitle_to">To</string>
+    <string name="subtitle_gas_fee">Gas 费用</string>
+    <string name="subtitle_transaction_num">交易  #</string>
+    <string name="subtitle_transaction_time">交易时间</string>
+    <string name="subtitle_block_num">Block #</string>
+
+    <!-- Actions -->
+    <string name="action_share">分享</string>
+    <string name="action_more_details">更多细节</string>
+    <string name="action_add_wallet">增加钱包地址</string>
+
+    <string name="action_coinbase">Coinbase</string>
+    <string name="action_shapeshift">Shapeshift (Crypto only)</string>
+    <string name="action_changelly">Changelly</string>
+    <string name="action_wallets">Wallets</string>
+    
+    <!-- Subject -->
+    <string name="subject_transaction_detail">交易细节</string>
+    <string name="error_fail_generate_qr">无法生成 QR Code.</string>
+    <string name="error_invalid_address">地址错误</string>
+    <string name="error_invalid_amount">数量错误</string>
+    <string name="error_transaction_failed">交易失败</string>
+    <string name="error_must_numeric">请输入数字.</string>
+    <string name="transaction_succeeded">交易成功</string>
+    <string name="NA">N/A</string>
+    <string name="error_wallet_not_selected">未选择钱包地址</string>
+    <string name="no_transactions_yet">暂时还没有交易记录</string>
+    <string name="unknown_balance_with_symbol">-- ETH</string>
+    <string name="unknown_balance_without_symbol">--</string>
+    <string name="dummy_transaction_value">&#45;&#45; ETH</string>
+    <string name="title_dialog_sending">正在发送...</string>
+    <string name="i_understand">我知道了</string>
+    <string name="scan_qr">从 QR Code 获得地址</string>
+    <string name="info_gas_price">支付更高的 Gas 费用，会让你的交易成本升高，同时会让你的交易被以太坊网络更快处理 </string>
+    <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
+    <string name="title_send_settings">Advanced</string>
+    <!--<string name="title_activity_barcode">Barcode Scan</string>-->
+    <string name="error_add_token">无法添加 token.</string>
+    <string name="error_already_added">已添加</string>
+    <string name="error_export">导出钱包地址失败</string>
+    <string name="error_fail_load_tokens">加载 tokens 列表失败</string>
+    <string name="error_create_wallet">创建钱包地址失败</string>   
+     
      <!-- Price -->
      <string name="hint_asking_price">售价 货币单位以太币</string>
      <string name="hint_ticket_selection">票数</string>

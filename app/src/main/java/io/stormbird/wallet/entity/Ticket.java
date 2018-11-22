@@ -54,7 +54,7 @@ public class Ticket extends Token implements Parcelable
     public final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
-    private InterfaceType interfaceSpec = InterfaceType.UsingUint256;
+    private InterfaceType interfaceSpec = InterfaceType.NotSpecified;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -244,7 +244,8 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(range.tokenIds, false);
     }
 
-    public int[] getTicketIndicies(String ticketIds)
+    @Override
+    public int[] getTicketIndices(String ticketIds)
     {
         List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
         int[] indicies = new int[indexList.size()];
@@ -323,6 +324,7 @@ public class Ticket extends Token implements Parcelable
      * @param integerString CSV string of hex ticket id's
      * @return
      */
+    @Override
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         List<BigInteger> idList = new ArrayList<>();
@@ -565,8 +567,6 @@ public class Ticket extends Token implements Parcelable
         TextView cat = activity.findViewById(R.id.cattext);
         TextView details = activity.findViewById(R.id.ticket_details);
         TextView ticketTime = activity.findViewById(R.id.time);
-        ImageView ticketIcon = activity.findViewById(R.id.ticketicon);
-        ImageView catIcon = activity.findViewById(R.id.caticon);
         LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
         LinearLayout catLayout = activity.findViewById(R.id.catlayout);
 
@@ -581,73 +581,87 @@ public class Ticket extends Token implements Parcelable
                     ? nonFungibleToken.getAttribute("venue").text : "";
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
 
-            String textField1 = null;
-            String textField2 = null;
-            String textField3 = null;
+            String textFieldVs = null;
+            String textFieldNumero = null;
+            String detailsText = "";
+            long eventTime = 0;
 
-            //Not exactly sure how to handle this one
-            if (auxData != null && auxData.containsKey("building")) // is an address
+            // TODO: we should be checking the contract functions for individual ticket ranges
+            // TODO: Work on a coded placement system
+            if (checkDynamic())
             {
-                nameStr = auxData.get("building");
+                if (auxData.containsKey("building")) nameStr = auxData.get("building");
                 venueStr += auxData.get("street");
                 venueStr += ", ";
                 venueStr += auxData.get("state");
-                textField2 = (auxData.get("expired").equals("true")) ? "expired" : "valid";
-                textField3 = nonFungibleToken.getAttribute("section").value.toString(10);
-                details.setText("");
+                textFieldVs = (auxData.get("expired").equals("true")) ? "expired" : "valid";
+                if (nonFungibleToken != null && nonFungibleToken.getAttribute("section") != null)
+                    textFieldNumero = nonFungibleToken.getAttribute("section").value.toString(10);
+
+                if (auxData.get("location") != null)
+                {
+                    detailsText = auxData.get("location");
+                }
 
                 if (auxData.get("expiry") != null)
                 {
-                    long eventTime = Long.valueOf(auxData.get("expiry"));
-                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
-                }
-                else
-                {
-                    ticketDate.setText("N.A.");
-                    ticketTime.setVisibility(View.GONE);
+                    eventTime = Long.valueOf(auxData.get("expiry"));
                 }
             }
-            else if (nonFungibleToken != null && nonFungibleToken.getAttribute("countryA") != null)
+            else if (nonFungibleToken != null)
             {
-                String countryA = nonFungibleToken.getAttribute("countryA").text;
-                String countryB = nonFungibleToken.getAttribute("countryB").text;
+                String countryA = null;
+                String countryB = null;
 
-                if (countryA.charAt(0) == 0 && countryB.charAt(0) == 0)
+                if (nonFungibleToken.getAttribute("countryA") != null)
+                    countryA = nonFungibleToken.getAttribute("countryA").text;
+                if (nonFungibleToken.getAttribute("countryB") != null)
+                    countryB = nonFungibleToken.getAttribute("countryB").text;
+
+                if (isAlNum(countryA)) textFieldVs = countryA;
+                if (isAlNum(countryB)) textFieldVs = (countryA != null) ?
+                        countryA + "-" + countryB : countryB;
+
+                if (nonFungibleToken.getAttribute("match") != null)
                 {
-                    textField2 = null;
+                    String catTxt = nonFungibleToken.getAttribute("match").text;
+
+                    if (!catTxt.equals("0"))
+                    {
+                        textFieldNumero = "M" + catTxt;
+                    }
                 }
-                else
+
+                if (nonFungibleToken.getAttribute("locality") != null)
                 {
-                    textField2 = countryA + "-" + countryB;
+                    detailsText = nonFungibleToken.getAttribute("locality").name + ": " +
+                            nonFungibleToken.getAttribute("locality").text;
                 }
+            }
 
-                String catTxt = nonFungibleToken.getAttribute("match").text;
-
-                if (catTxt.equals("0"))
+            if (nonFungibleToken != null && eventTime == 0)
+            {
+                if (nonFungibleToken.getAttribute("time") != null)
                 {
-                    textField3 = null;
+                    eventTime = nonFungibleToken.getAttribute("time").value.longValue();
                 }
-                else
-                {
-                    textField3 = "M" + catTxt;
-                }
-
-                details.setText(
-                        nonFungibleToken.getAttribute("locality").name + ": " +
-                                nonFungibleToken.getAttribute("locality").text
-                );
-
-                long eventTime = nonFungibleToken.getAttribute("time").value.longValue();
                 String eventTimeStr = nonFungibleToken.getAttribute("time").text;
 
                 try
                 {
-                    if (eventTimeStr != null)
+                    if (isAlNum(eventTimeStr))
                     {
                         ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
                         ticketDate.setText(datetime.format(date));
-                        ticketTime.setText(datetime.format(time));
-                        ticketTime.setVisibility(View.VISIBLE);
+                        if (time == null)
+                        {
+                            ticketTime.setVisibility(View.GONE);
+                        }
+                        else
+                        {
+                            ticketTime.setText(datetime.format(time));
+                            ticketTime.setVisibility(View.VISIBLE);
+                        }
                     }
                     else
                     {
@@ -663,51 +677,89 @@ public class Ticket extends Token implements Parcelable
             name.setText(nameStr);
             amount.setText(seatCount);
             venue.setText(venueStr);
+            details.setText(detailsText);
 
-            if (textField2 == null)
+            if (textFieldVs == null)
             {
                 ticketLayout.setVisibility(View.GONE);
             }
             else
             {
                 ticketLayout.setVisibility(View.VISIBLE);
-                ticketRange.setText(textField2);
+                ticketRange.setText(textFieldVs);
             }
 
-            if (textField3 == null)
+            if (textFieldNumero == null)
             {
                 catLayout.setVisibility(View.GONE);
             }
             else
             {
                 catLayout.setVisibility(View.VISIBLE);
-                cat.setText(textField3);
+                cat.setText(textFieldNumero);
             }
 
             if (!assetService.hasDefinition(getAddress()))
             {
                 //remove all info
                 blankTicketExtra(activity);
-                return;
             }
         }
     }
 
+    private boolean checkDynamic()
+    {
+        boolean isDynamic = false;
+        if (auxData != null && auxData.size() > 0)
+        {
+            if (auxData.containsKey("street") || auxData.containsKey("building") || auxData.containsKey("state"))
+                isDynamic = true;
+        }
+
+        return isDynamic;
+    }
+
+    private boolean isAlNum(String testStr)
+    {
+        boolean result = false;
+        if (testStr != null && testStr.length() > 0)
+        {
+            result = true;
+            for (int i = 0; i < testStr.length(); i++)
+            {
+                char c = testStr.charAt(i);
+                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !(c == '+') && !(c == ',') && !(c == ';'))
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
     private void setDateFromTokenID(TextView ticketDate, TextView ticketTime, long eventTime, DateFormat date, DateFormat time)
     {
-        if (eventTime > 0)
+        if (eventTime == 0)
         {
-            Calendar calendar = GregorianCalendar.getInstance(); //UTC time
-            calendar.setTimeInMillis( eventTime*1000 );
-            date.setTimeZone(calendar.getTimeZone());
+            eventTime = System.currentTimeMillis()/1000;
+            time = null;
+        }
+
+        Calendar calendar = GregorianCalendar.getInstance(); //UTC time
+        calendar.setTimeInMillis(eventTime * 1000);
+        date.setTimeZone(calendar.getTimeZone());
+
+        ticketDate.setText(date.format(calendar.getTime()));
+        if (time != null)
+        {
             time.setTimeZone(calendar.getTimeZone());
-            ticketDate.setText(date.format(calendar.getTime()));
             ticketTime.setText(time.format(calendar.getTime()));
             ticketTime.setVisibility(View.VISIBLE);
         }
         else
         {
-            ticketDate.setText("N.A.");
             ticketTime.setVisibility(View.GONE);
         }
     }
@@ -717,11 +769,8 @@ public class Ticket extends Token implements Parcelable
         String tokenTitle = getFullName();
         if (nonFungibleToken != null)
         {
-            tokenTitle = nonFungibleToken.getAttribute("category").text;
-            if (tokenTitle == null || tokenTitle.length() == 0)
-            {
-                tokenTitle = getFullName();
-            }
+            String assetCategory = nonFungibleToken.getAttribute("category").text;
+            if (isAlNum(assetCategory)) tokenTitle = assetCategory;
         }
 
         return tokenTitle;
@@ -778,7 +827,7 @@ public class Ticket extends Token implements Parcelable
     {
         if (token instanceof Ticket)
         {
-            this.interfaceSpec = InterfaceType.values()[((Ticket)token).interfaceOrdinal()];
+            this.interfaceSpec = InterfaceType.values()[token.interfaceOrdinal()];
         }
         super.patchAuxData(token);
     }
@@ -805,11 +854,24 @@ public class Ticket extends Token implements Parcelable
                 Collections.<TypeReference<?>>emptyList());
     }
 
+    @Override
     public boolean isOldSpec()
     {
         switch (interfaceSpec)
         {
             case UsingUint16:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public boolean unspecifiedSpec()
+    {
+        switch (interfaceSpec)
+        {
+            case NotSpecified:
                 return true;
             default:
                 return false;
@@ -843,6 +905,7 @@ public class Ticket extends Token implements Parcelable
         return super.checkRealmBalanceChange(realmToken);
     }
 
+    @Override
     public int interfaceOrdinal()
     {
         return interfaceSpec.ordinal();
@@ -853,6 +916,11 @@ public class Ticket extends Token implements Parcelable
     {
         if (balanceArray.size() > index && index >= 0) return balanceArray.get(index);
         else return BigInteger.valueOf(-1);
+    }
+
+    @Override
+    public boolean isCurrency() {
+        return false;
     }
 
     private enum InterfaceType

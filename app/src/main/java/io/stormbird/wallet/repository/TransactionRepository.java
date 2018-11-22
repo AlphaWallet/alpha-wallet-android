@@ -24,6 +24,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AccountKeystoreService;
@@ -225,5 +226,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Single<Integer> queryInterfaceSpec(Token token)
+	{
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		return blockExplorerClient.checkConstructorArgs(networkInfo, token.getAddress());
 	}
 }

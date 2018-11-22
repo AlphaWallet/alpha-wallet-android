@@ -186,6 +186,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
             typeIcon.setImageResource(R.drawable.ic_error);
             typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
                                     PorterDuff.Mode.SRC_ATOP);
+            value.setText("");
         }
         else
         {

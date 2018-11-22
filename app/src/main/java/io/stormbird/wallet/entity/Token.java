@@ -14,6 +14,7 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
+import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -251,14 +252,14 @@ public class Token implements Parcelable
         holder.arrayBalance.setVisibility(View.GONE);
     }
 
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
-    {
-
-    }
-
     public List<Integer> ticketIdStringToIndexList(String userList)
     {
         return null;
+    }
+
+    public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
+    {
+        return "";
     }
 
     public List<Integer> stringIntsToIntegerList(String userList)
@@ -320,19 +321,16 @@ public class Token implements Parcelable
         }
     }
 
-    public boolean isCurrency() {
-        return !tokenInfo.isStormbird;
-    }
-
-    public List<Integer> indexToIDList(int[] prunedIndices)
+    public boolean isCurrency()
     {
-        return null;
+        return true;
     }
 
     public void addAuxDataResult(String id, String result)
     {
         if (auxData == null) auxData = new ConcurrentHashMap<>();
-        auxData.put(id, result);
+        if (result == null) auxData.remove(id);
+        else auxData.put(id, result);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)
@@ -362,11 +360,6 @@ public class Token implements Parcelable
         }
 
         return false;
-    }
-
-    public void setRealmInterfaceSpec(RealmToken realmToken)
-    {
-
     }
 
     private Map<String, String> restoreAuxData(String data)
@@ -443,46 +436,60 @@ public class Token implements Parcelable
         this.tokenNetwork = (short)tokenNetwork;
     }
 
-    public void setInterfaceSpec(int b) { }
-    public boolean isOldSpec() { return false; }
-    public void setInterfaceSpecFromRealm(RealmToken ordinal)
-    {
-
-    }
-
-    public String getFunctionSignature(String function)
-    {
-        return "";
-    }
-
-    public boolean needsInterfaceSpecUpdate(RealmToken realmToken)
-    {
-        return false;
-    }
-
     public void patchAuxData(Token token)
     {
         auxData = token.auxData;
         if (auxData != null) requiresAuxRefresh = false;
     }
 
+    public boolean checkBalanceChange(Token token)
+    {
+        return !getFullBalance().equals(token.getFullBalance());
+    }
+
+    /**
+     * Stub functions - these are intended to be overridden in inherited classes.
+     * This is a consequence of OO design. Is is good? Only the software seers can say, but
+     * it is a workable standard for now.
+     */
+    public void setInterfaceSpec(int b) { }
+    public boolean isOldSpec() { return false; }
+    public void setInterfaceSpecFromRealm(RealmToken ordinal) { }
+    public void setRealmInterfaceSpec(RealmToken realmToken) { }
+    public List<BigInteger> stringHexToBigIntegerList(String integerString)
+    {
+        return null;
+    }
+    public int interfaceOrdinal()
+    {
+        return 0;
+    }
     public BigInteger getTokenID(int index)
     {
         return BigInteger.valueOf(-1);
     }
-
     public void auxDataRefreshed()
     {
         requiresAuxRefresh = false;
     }
-
     public void setRequireAuxRefresh()
     {
         requiresAuxRefresh = true;
     }
-
     public boolean requiresAuxRefresh()
     {
         return (requiresAuxRefresh);
     }
+    public Function getTransferFunction(String to, String tokenId)
+    {
+        return null;
+    }
+    public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
+    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList) { }
+    public List<Integer> indexToIDList(int[] prunedIndices)
+    {
+        return null;
+    }
+    public int[] getTicketIndices(String ticketIds) { return new int[0]; }
+    public boolean unspecifiedSpec() { return false; };
 }

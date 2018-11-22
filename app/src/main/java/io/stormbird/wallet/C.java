@@ -23,6 +23,7 @@ public abstract class C {
     public static final String ETC_SYMBOL = "ETC";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
+    public static final String ENSCONTRACT = "0x314159265dD8dbb310642f98f50C066173C1259b";
 
     public static final String GWEI_UNIT = "Gwei";
 
@@ -50,6 +51,7 @@ public abstract class C {
     public static final String EXTRA_WEB3TRANSACTION = "WEB3_TRANSACTION";
     public static final String EXTRA_NETWORK_NAME = "NETWORK_NAME";
     public static final String EXTRA_NETWORK_MAINNET = "NETWORK_MAINNET";
+    public static final String EXTRA_ENS_DETAILS = "ENS_DETAILS";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";
@@ -72,8 +74,9 @@ public abstract class C {
     public static final String DONATION_ADDRESS = "0xb1aD48527d694D30401D082bcD21a33F41811501";
 
     public static final String DEFAULT_GAS_PRICE = "30000000000";
-    public static final String DEFAULT_GAS_LIMIT = "90000";
+    public static final String DEFAULT_GAS_LIMIT = "125000";
     public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
+    public static final long GAS_PER_BYTE = 300; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_MAX = 300000L;
     public static final long GAS_PRICE_MIN = 1000000000L;
@@ -119,6 +122,7 @@ public abstract class C {
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
+    public static final String ENS_HISTORY = "ensHistory";
 
     public enum TokenStatus {
         DEFAULT, PENDING, INCOMPLETE

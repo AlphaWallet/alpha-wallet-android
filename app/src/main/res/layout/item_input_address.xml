@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/edit_to_address"
             android:layout_width="match_parent"
             android:layout_height="47dp"
@@ -30,6 +30,7 @@
             android:layout_centerVertical="true"
             android:background="@drawable/background_quantity"
             android:fontFamily="@font/font_semibold"
+            android:completionThreshold="1"
             android:hint=""
             android:imeOptions="actionDone"
             android:inputType="text"

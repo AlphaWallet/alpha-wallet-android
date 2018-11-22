@@ -4,5 +4,8 @@
     <string name="all">Todos</string>
     <string name="currency">Monedas</string>
     <string name="assets">Activos</string>
-    <string name="ens_address">ENS Address</string>
+    <string name="ens_address">Resolved Address</string>
+    <string name="confirm_erc721_transfer">Confirm Token Transfer</string>
+    <string name="asset_name">Asset Name</string>
+    <string name="title_dialog_check_ens">Checking ENS</string>
 </resources>

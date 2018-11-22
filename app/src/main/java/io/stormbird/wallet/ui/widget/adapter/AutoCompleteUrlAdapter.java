@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,21 +10,32 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.widget.entity.UrlFilter;
 
-public class AutoCompleteUrlAdapter extends ArrayAdapter<String> {
+import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
+
+public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
+{
     private final List<String> history;
     public List<String> filteredUrls = new ArrayList<>();
     private Context context;
+    private ItemClickListener listener;
+    private String preferenceTag;
 
-    public AutoCompleteUrlAdapter(Context context, List<String> history) {
-        super(context, 0, history);
-        this.history = history;
+    public AutoCompleteUrlAdapter(Context context, String tag) {
+        super(context, 0);
+        preferenceTag = tag;
         this.context = context;
+        this.history = getENSHistoryFromPrefs();
+        super.addAll(history);
     }
 
     @Override
@@ -43,9 +55,19 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String> {
     }
 
     @Override
+    public void remove(@Nullable String object)
+    {
+        if (history.contains(object)) {
+            super.remove(object);
+            filteredUrls.remove(object);
+        }
+    }
+
+    @Override
     public void add(@Nullable String object) {
         if (!history.contains(object)) {
             super.insert(object, 0);
+            storeItem(object);
         }
     }
 
@@ -56,6 +78,93 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String> {
         convertView = inflater.inflate(R.layout.item_autocomplete_url, parent, false);
         TextView urlText = convertView.findViewById(R.id.url);
         urlText.setText(url);
+        urlText.setOnLongClickListener(v -> onViewLongClick(url));
+        urlText.setOnClickListener(v -> onClickListener(url));
         return convertView;
+    }
+
+    private void onClickListener(String url)
+    {
+        listener.onItemClick(url);
+    }
+
+    private boolean onViewLongClick(String url)
+    {
+        remove(url);
+        notifyDataSetChanged();
+        listener.onItemLongClick(url);
+        return true;
+    }
+
+    public void setListener(ItemClickListener listener)
+    {
+        this.listener = listener;
+    }
+
+    private ArrayList<String> getENSHistoryFromPrefs()
+    {
+        ArrayList<String> history;
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(preferenceTag, "");
+        if (!historyJson.isEmpty()) {
+            history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<String>>(){}.getType());
+        } else {
+            history = new ArrayList<>();
+        }
+        return history;
+    }
+
+    private void storeItem(String address)
+    {
+        ArrayList<String> history = getENSHistoryFromPrefs();
+        boolean foundValue = false;
+        for (String item : history)
+        {
+            if (item.contains(address))
+            {
+                foundValue = true;
+                break;
+            }
+        }
+
+        if (!foundValue)
+        {
+            history.add(address);
+            storeHistory();
+        }
+    }
+
+    private void storeHistory()
+    {
+        String historyJson = new Gson().toJson(history);
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(preferenceTag, historyJson).apply();
+    }
+
+    public void addDAppURL(String url)
+    {
+        if (url.contains(DAPP_DEFAULT_URL)) return; // don't record the homepage
+
+        String checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
+        for (String item : history)
+        {
+            if (item.contains(checkVal))
+            {
+                //replace with this new one
+                history.remove(item);
+                if (!history.contains(item))
+                {
+                    history.add(0, url);
+                }
+                storeHistory();
+                return;
+            }
+        }
+
+        history.add(0, url);
+        storeHistory();
+    }
+
+    public boolean hasContext()
+    {
+        return context != null;
     }
 }

@@ -9,6 +9,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -34,17 +36,21 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Set;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -63,19 +69,20 @@ import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.ui.SendActivity.ENS_RESOLVE_DELAY;
 
 /**
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
     private static final int CHOOSE_QUANTITY = 0;
     private static final int PICK_TRANSFER_METHOD = 1;
     private static final int TRANSFER_USING_LINK = 2;
-    private static final int TRANSFER_TO_ADDRESS = 3;
+    public  static final int TRANSFER_TO_ADDRESS = 3;
 
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
@@ -85,20 +92,29 @@ public class TransferTicketDetailActivity extends BaseActivity
     private AWalletAlertDialog dialog;
 
     private FinishReceiver finishReceiver;
+    private AutoCompleteUrlAdapter adapterUrl;
 
-    private Ticket ticket;
+    private Token token;
     private TicketAdapter adapter;
 
     private TextView titleText;
     private TextView toAddressError;
     private TextView validUntil;
-    private EditText toAddressEditText;
+    private AutoCompleteTextView toAddressEditText;
     private ImageButton qrImageView;
     private TextView textQuantity;
+    private LinearLayout layoutENSResolve;
+    private TextWatcher ensTextWatcher;
+    private TextView textENS;
+    private String ensName;
 
     private String ticketIds;
     private String prunedIds;
     private int transferStatus;
+
+    private Handler handler;
+    private volatile boolean waitingForENS = false;
+    private boolean transferAfterENS = false;
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -124,7 +140,9 @@ public class TransferTicketDetailActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_detail);
 
-        ticket = getIntent().getParcelableExtra(TICKET);
+        token = getIntent().getParcelableExtra(TICKET);
+        handler = new Handler();
+
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
@@ -138,6 +156,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         progressView.hide();
 
         toAddressEditText = findViewById(R.id.edit_to_address);
+        layoutENSResolve = findViewById(R.id.layout_ens);
+        textENS = findViewById(R.id.text_ens_resolve);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
@@ -149,10 +169,12 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.userTransaction().observe(this, this::onUserTransaction);
+        viewModel.ensResolve().observe(this, this::onENSSuccess);
+        viewModel.ensFail().observe(this, this::hideENS);
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new TicketAdapter(this::onTicketIdClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -165,6 +187,8 @@ public class TransferTicketDetailActivity extends BaseActivity
         pickTicketQuantity = findViewById(R.id.layout_ticket_quantity);
         pickTransferMethod = findViewById(R.id.layout_choose_method);
         pickExpiryDate = findViewById(R.id.layout_date_picker);
+
+        setupAddressEditField();
 
         expiryDateEditText = findViewById(R.id.edit_expiry_date);
         expiryDateEditText.addTextChangedListener(new TextWatcher() {
@@ -215,7 +239,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             int nextState = getNextState();
             if (nextState >= 0)
             {
-                viewModel.openTransferState(this, ticket, prunedIds, nextState);
+                viewModel.openTransferState(this, token, prunedIds, nextState);
             }
         });
 
@@ -223,11 +247,23 @@ public class TransferTicketDetailActivity extends BaseActivity
         qrImageView.setOnClickListener(view -> {
             Intent intent = new Intent(this, QRScanningActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-//            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
-//            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
 
-        toAddressEditText.addTextChangedListener(new TextWatcher()
+        setupScreen();
+
+        finishReceiver = new FinishReceiver(this);
+    }
+
+    private void setupAddressEditField()
+    {
+        adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        adapterUrl.setListener(this);
+        toAddressEditText.setAdapter(adapterUrl);
+        toAddressEditText.setOnClickListener(v -> toAddressEditText.showDropDown());
+
+        waitingForENS = false;
+
+        ensTextWatcher = new TextWatcher()
         {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
@@ -244,13 +280,22 @@ public class TransferTicketDetailActivity extends BaseActivity
             @Override
             public void afterTextChanged(Editable s)
             {
-
+                textENS.setText("");
+                checkAddress();
             }
-        });
+        };
 
-        setupScreen();
+        toAddressEditText.addTextChangedListener(ensTextWatcher);
+    }
 
-        finishReceiver = new FinishReceiver(this);
+    private void checkAddress()
+    {
+        if (!transferAfterENS)
+        {
+            waitingForENS = true;
+            handler.removeCallbacks(this);
+            handler.postDelayed(this, ENS_RESOLVE_DELAY);
+        }
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -262,7 +307,7 @@ public class TransferTicketDetailActivity extends BaseActivity
             if ((quantity + 1) <= adapter.getTicketRangeCount()) {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+                prunedIds = ((Ticket)token).pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -272,12 +317,12 @@ public class TransferTicketDetailActivity extends BaseActivity
             if ((quantity - 1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+                prunedIds = ((Ticket)token).pruneIDList(ticketIds, quantity);
             }
         });
 
         textQuantity.setText("1");
-        prunedIds = ticket.pruneIDList(ticketIds, 1);
+        prunedIds = ((Ticket)token).pruneIDList(ticketIds, 1);
     }
 
     private void setupRadioButtons()
@@ -333,7 +378,7 @@ public class TransferTicketDetailActivity extends BaseActivity
                 break;
             case TRANSFER_USING_LINK:
                 //generate link
-                viewModel.generateUniversalLink(ticket.getTicketIndicies(ticketIds), ticket.getAddress(), calculateExpiryTime());
+                viewModel.generateUniversalLink(((Ticket)token).getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
                 break;
             case TRANSFER_TO_ADDRESS:
                 //transfer using eth
@@ -461,6 +506,20 @@ public class TransferTicketDetailActivity extends BaseActivity
         }
     }
 
+    private void onENSProgress(boolean shouldShowProgress)
+    {
+        hideDialog();
+        if (shouldShowProgress)
+        {
+            dialog = new AWalletAlertDialog(this);
+            dialog.setIcon(AWalletAlertDialog.NONE);
+            dialog.setTitle(R.string.title_dialog_check_ens);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
+            dialog.show();
+        }
+    }
+
     private void onError(ErrorEnvelope error)
     {
         hideDialog();
@@ -476,66 +535,25 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void transferTicketFinal()
     {
-        boolean isValid = true;
         //complete the transfer
-
-        //check send address
-        toAddressError.setVisibility(View.GONE);
-        final String to = toAddressEditText.getText().toString();
-        if (!isAddressValid(to))
-        {
-            toAddressError.setVisibility(View.VISIBLE);
-            toAddressError.setText(getString(R.string.error_invalid_address));
-            isValid = false;
-        }
+        String to = getAddressFromEditView();
+        if (to == null) return;
 
         onProgress(true);
 
-        if (isValid)
-        {
-            viewModel.createTicketTransfer(
-                    to,
-                    ticket.getAddress(),
-                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
-                    Contract.GAS_PRICE,
-                    Contract.GAS_LIMIT);
-
-//            viewModel.createTicketTransfer(
-//                    to,
-//                    ticket.getAddress(),
-//                    ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
-//                    Contract.GAS_PRICE,
-//                    Contract.GAS_LIMIT);
-
-            //select between feemaster or user-pays-gas
-            //Not sure if we will ever implement this
-//            String XMLContractAddress = ticket.getXMLProperty("address", this);
-//            if (XMLContractAddress.equalsIgnoreCase(ticket.getAddress()))
-//            {
-//                String feeMasterUrl = ticket.getXMLProperty("feemaster", this);
-//                viewModel.feeMasterCall(
-//                        feeMasterUrl,
-//                        to,
-//                        ticket,
-//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true));
-//            }
-//            else
-//            {
-//                viewModel.createTicketTransfer(
-//                        to,
-//                        ticket.getAddress(),
-//                        ticket.integerListToString(ticket.ticketIdStringToIndexList(prunedIds), true),
-//                        Contract.GAS_PRICE,
-//                        Contract.GAS_LIMIT);
-//            }
-        }
+        viewModel.createTicketTransfer(
+                to,
+                token.getAddress(),
+                token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true),
+                Contract.GAS_PRICE,
+                Contract.GAS_LIMIT);
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare(ticket);
+        viewModel.prepare(token);
         KeyboardUtils.hideKeyboard(toAddressEditText);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
@@ -607,7 +625,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void linkReady(String universalLink)
     {
-        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
         String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +
@@ -625,24 +643,68 @@ public class TransferTicketDetailActivity extends BaseActivity
         confirmationDialog.show();
     }
 
-    private void confirmTransfer()
+    private String getAddressFromEditView()
     {
-        final String to = toAddressEditText.getText().toString();
-        //check address
+        //check send address
+        ensName = null;
+        toAddressError.setVisibility(View.GONE);
+        String to = toAddressEditText.getText().toString();
         if (!isAddressValid(to))
         {
-            toAddressError.setVisibility(View.VISIBLE);
-            return;
+            String ens = to;
+            to = textENS.getText().toString();
+            ensName = "@" + ens + " (" + to + ")";
         }
 
+        if (!isAddressValid(to))
+        {
+            to = null;
+            if (waitingForENS)
+            {
+                transferAfterENS = true;
+                onENSProgress(true);
+            }
+            else
+            {
+                toAddressError.setVisibility(View.VISIBLE);
+                toAddressError.setText(getString(R.string.error_invalid_address));
+            }
+        }
+
+        return to;
+    }
+
+    private void confirmTransfer()
+    {
+        //complete the transfer
+        toAddressEditText.dismissDropDown();
+        String to = getAddressFromEditView();
+        if (to == null) return;
+
+        if (token instanceof ERC721Token)
+        {
+            viewModel.openConfirm(getApplicationContext(), to, token, ticketIds, ensName);
+        }
+        else
+        {
+            handleERC875Transfer(to);
+        }
+
+        adapterUrl.add(toAddressEditText.getText().toString());
+    }
+
+    private void handleERC875Transfer(final String to)
+    {
         //how many tickets are we selling?
-        int quantity = ticket.stringHexToBigIntegerList(prunedIds).size();
+        int quantity = token.stringHexToBigIntegerList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
+
+        String toAddress = (ensName == null) ? to : ensName;
 
         String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +
                 getResources().getString(R.string.to) + " " +
-                to;
+                toAddress;
 
         confirmationDialog = new AWalletConfirmationDialog(this);
         confirmationDialog.setTitle(R.string.title_transaction_details);
@@ -708,6 +770,62 @@ public class TransferTicketDetailActivity extends BaseActivity
         String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
                                     Calendar.getInstance().get(Calendar.MINUTE));
         expiryTimeEditText.setText(time);
+    }
+
+    @Override
+    public void run()
+    {
+        //address update delay check
+        final String to = toAddressEditText.getText().toString();
+        if (to.length() > 2 && !to.startsWith("0x"))
+        {
+            viewModel.checkENSAddress(to);
+        }
+        else
+        {
+            waitingForENS = false;
+        }
+    }
+
+    private void onENSSuccess(String address)
+    {
+        waitingForENS = false;
+        toAddressEditText.dismissDropDown();
+        layoutENSResolve.setVisibility(View.VISIBLE);
+        textENS.setText(address);
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        checkIfWaitingForENS();
+        toAddressError.setVisibility(View.GONE);
+    }
+
+    private void hideENS(String name)
+    {
+        waitingForENS = false;
+        layoutENSResolve.setVisibility(View.GONE);
+        checkIfWaitingForENS();
+    }
+
+    private void checkIfWaitingForENS()
+    {
+        onENSProgress(false);
+        if (transferAfterENS)
+        {
+            transferAfterENS = false;
+            confirmTransfer();
+        }
+    }
+
+    @Override
+    public void onItemClick(String url)
+    {
+        toAddressEditText.removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
+        toAddressEditText.setText(url);
+        toAddressEditText.addTextChangedListener(ensTextWatcher);
+        toAddressEditText.dismissDropDown();
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        handler.removeCallbacksAndMessages(this);
+        waitingForENS = true;
+        run();
     }
 }
 

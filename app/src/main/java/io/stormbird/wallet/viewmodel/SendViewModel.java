@@ -11,6 +11,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -26,19 +28,23 @@ import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 
+import static io.stormbird.wallet.C.ENSCONTRACT;
+
 public class SendViewModel extends BaseViewModel {
     private static final long CHECK_ETHPRICE_INTERVAL = 10;
-    private static final String ENSCONTRACT = "0x314159265dD8dbb310642f98f50C066173C1259b";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
     private final MutableLiveData<Double> ethPrice = new MutableLiveData<>();
     private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> ensFail = new MutableLiveData<>();
+    private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
     private final ConfirmationRouter confirmationRouter;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
+
+    @Nullable
+    private Disposable ensSearch;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          FetchGasSettingsInteract fetchGasSettingsInteract,
@@ -52,10 +58,10 @@ public class SendViewModel extends BaseViewModel {
 
     public LiveData<Double> ethPriceReading() { return ethPrice; }
     public LiveData<String> ensResolve() { return ensResolve; }
-    public LiveData<Boolean> ensFail() { return ensFail; }
+    public LiveData<String> ensFail() { return ensFail; }
 
-    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens) {
-        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens);
+    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails) {
+        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails);
     }
 
     public void showMyAddress(Context context, Wallet wallet) {
@@ -87,19 +93,24 @@ public class SendViewModel extends BaseViewModel {
 
     public void checkENSAddress(String name)
     {
-        if (name == null || name.length() < 2 || name.charAt(0) != '@') return;
-        disposable = checkENSAddressFunc(name.substring(1))
+        if (name == null || name.length() < 1) return;
+        ensSearch = checkENSAddressFunc(name)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotHash, this::onError);
+                .subscribe(hash -> gotHash(hash, name), this::ensFail);
     }
 
-    private void gotHash(byte[] resultHash)
+    private void gotHash(byte[] resultHash, String name)
     {
-        disposable = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
+        ensSearch = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotAddress, this::onError);
+                .subscribe(address -> gotAddress(address, name), this::ensFail);
+    }
+
+    private void ensFail(Throwable error)
+    {
+        ensFail.postValue("");
     }
 
     private Single<byte[]> checkENSAddressFunc(final String name)
@@ -121,28 +132,26 @@ public class SendViewModel extends BaseViewModel {
         });
     }
 
-    private void gotAddress(String returnedAddress)
+    private void gotAddress(String returnedAddress, String name)
     {
         BigInteger test = Numeric.toBigInt(returnedAddress);
         if (!test.equals(BigInteger.ZERO))
         {
-            //post the response back
             ensResolve.postValue(returnedAddress);
         }
         else
         {
-            ensFail.postValue(true);
+            ensFail.postValue(name);
         }
     }
 
-    private byte[] hashJoin(byte[] lastHash, byte[] input)
+    public static byte[] hashJoin(byte[] lastHash, byte[] input)
     {
         byte[] joined = new byte[lastHash.length*2];
 
         byte[] inputHash = Hash.sha3(input);
         System.arraycopy(lastHash, 0, joined, 0, lastHash.length);
         System.arraycopy(inputHash, 0, joined, lastHash.length, inputHash.length);
-        byte[] resultHash = Hash.sha3(joined);
-        return resultHash;
+        return Hash.sha3(joined);
     }
 }

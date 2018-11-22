@@ -135,7 +135,6 @@ public class TransactionsViewModel extends BaseViewModel
 
         txArray = null;
         txMap.clear();
-        setupTokensInteract.clearAll();
     }
 
     public LiveData<NetworkInfo> defaultNetwork() {
@@ -304,7 +303,7 @@ public class TransactionsViewModel extends BaseViewModel
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
-                    .flatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                    .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .subscribe(this::onContractTransactions, this::onError, this::siftUnknownTransactions);
@@ -348,8 +347,6 @@ public class TransactionsViewModel extends BaseViewModel
         transactions.postValue(txContractList.toArray(new Transaction[0]));
         txContractList.clear();
         immediateCycleStart = false;
-        //add in the XML contract address to list of unknowns to fetch if we don't have it already
-        setupTokensInteract.setupUnknownList(tokensService, assetDefinitionService.getAllContracts(network.getValue().chainId));
 
         fetchTransactionDisposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), txMap.values().toArray(new Transaction[0]))
                 .flatMap(transactions -> setupTokensInteract.getUnknownTokens(transactions, tokensService, txMap))
@@ -366,7 +363,7 @@ public class TransactionsViewModel extends BaseViewModel
     private void queryUnknownTokens(List<String> unknownTokens)
     {
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
-                .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
+                .flatMap(address -> setupTokensInteract.addToken(address, assetDefinitionService.hasDefinition(address))) //fetch tokenInfo
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address))) //add to database
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
@@ -418,6 +415,7 @@ public class TransactionsViewModel extends BaseViewModel
         if (fetchTransactionDisposable == null)
         {
             handler.removeCallbacks(startFetchTransactionsTask);
+            restoreRequired = true;
             fetchTransactions(true);
         }
         else

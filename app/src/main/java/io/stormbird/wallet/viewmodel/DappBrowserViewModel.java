@@ -4,8 +4,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.preference.PreferenceManager;
-import android.text.Editable;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -15,8 +13,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 
@@ -24,7 +20,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
-import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
@@ -327,17 +322,6 @@ public class DappBrowserViewModel extends BaseViewModel {
                                                     transaction.leafPosition);
     }
 
-    public ArrayList<String> getBrowserHistoryFromPrefs(Context context) {
-        ArrayList<String> history;
-        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_BROWSER_HISTORY, "");
-        if (!historyJson.isEmpty()) {
-            history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<String>>(){}.getType());
-        } else {
-            history = new ArrayList<>();
-        }
-        return history;
-    }
-
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {
         ArrayList<String> storedBookmarks;
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_BROWSER_BOOKMARKS, "");
@@ -347,37 +331,6 @@ public class DappBrowserViewModel extends BaseViewModel {
             storedBookmarks = new ArrayList<>();
         }
         return storedBookmarks;
-    }
-
-    public void addToBrowserHistory(Context context, String url)
-    {
-        if (url.contains(DAPP_DEFAULT_URL) || context == null) return; // don't record the homepage
-
-        String checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
-        ArrayList<String> history = getBrowserHistoryFromPrefs(context);
-        for (String item : history)
-        {
-            if (item.contains(checkVal))
-            {
-                //replace with this new one
-                history.remove(item);
-                if (!history.contains(item))
-                {
-                    history.add(0, url);
-                }
-                writeURLHistory(context, history);
-                return;
-            }
-        }
-
-        history.add(0, url);
-        writeURLHistory(context, history);
-    }
-
-    private void writeURLHistory(Context context, ArrayList<String> history)
-    {
-        String historyJson = new Gson().toJson(history);
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_HISTORY, historyJson).apply();
     }
 
     private void writeBookmarks(Context context, ArrayList<String> bookmarks)

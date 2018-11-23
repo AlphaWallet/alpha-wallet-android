@@ -41,6 +41,8 @@ public class TabUtils {
             }
         } catch (Resources.NotFoundException nfe) {
             Log.e(TabUtils.class.getSimpleName(), nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            Log.e(TabUtils.class.getSimpleName(), npe.getMessage(), npe);
         }
     }
 

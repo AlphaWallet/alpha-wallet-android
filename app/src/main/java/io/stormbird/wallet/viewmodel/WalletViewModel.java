@@ -197,7 +197,7 @@ public class WalletViewModel extends BaseViewModel
         if (defaultNetwork.getValue() != null && defaultNetwork.getValue().isMainNetwork)
         {
             updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
-                    //openseaService.getTokens("0x51A9f155405Ea594d881fE9c1f1eb38F003B0A57") //"0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"
+                    //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::gotOpenseaTokens, this::onError);

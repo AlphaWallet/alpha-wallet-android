@@ -14,6 +14,7 @@ import android.webkit.WebViewClient;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
+import io.stormbird.wallet.web3.entity.OptionsAllowResponse;
 import okhttp3.HttpUrl;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -84,10 +85,15 @@ public class Web3ViewClient extends WebViewClient {
         if (request == null) {
             return null;
         }
+        else if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+            return OptionsAllowResponse.build();
+        }
+        else
         if (!request.getMethod().equalsIgnoreCase("GET") || !request.isForMainFrame()) {
              if (request.getMethod().equalsIgnoreCase("GET")
                      && (request.getUrl().toString().contains(".js")
                         || request.getUrl().toString().contains("json")
+                        || request.getUrl().toString().contains("jsonp")
                         || request.getUrl().toString().contains("css"))) {
                 synchronized (lock) {
                     if (!isInjected) {

@@ -25,9 +25,18 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import org.web3j.crypto.ECDSASignature;
+import org.web3j.crypto.Hash;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -64,12 +73,15 @@ import io.stormbird.wallet.widget.SignMessageDialog;
 
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
         OnVerifyListener, OnGetBalanceListener, URLLoadInterface, ItemClickListener
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
+
+    private static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -118,6 +130,11 @@ public class DappBrowserFragment extends Fragment implements
         urlTv = view.findViewById(R.id.url_tv);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(() -> web3.reload());
+
+        web3.enablecrossdomain();
+
+        web3.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        web3.getSettings().setAllowFileAccessFromFileURLs(true);
     }
 
     private void setupAddressBar() {
@@ -180,9 +197,25 @@ public class DappBrowserFragment extends Fragment implements
         }
         web3.setChainId(networkInfo.chainId);
         String rpcURL = networkInfo.rpcServerUrl;
-        if (networkInfo.backupNodeUrl != null) rpcURL = networkInfo.backupNodeUrl;
         web3.setRpcUrl(rpcURL);
         web3.setWalletAddress(new Address(wallet.address));
+
+        try
+        {
+            if (Build.VERSION.SDK_INT >= 16)
+            {
+                Class<?> clazz = web3.getSettings().getClass();
+                Method method = clazz.getMethod("setAllowUniversalAccessFromFileURLs", boolean.class);
+                if (method != null)
+                {
+                    method.invoke(web3.getSettings(), true);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
         web3.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -204,11 +237,26 @@ public class DappBrowserFragment extends Fragment implements
         });
 
         web3.setWebViewClient(new WebViewClient() {
-            @Override
+            /*@Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 urlTv.setText(url);
-                return false;
+                view.loadUrl(url);
+                return true;
+            }*/
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                System.out.println("Load URL: " + url);
+                urlTv.setText(url);
+                view.loadUrl(url);
+                return true;
+//                if (url.startsWith("foo://")) {
+//                    // magic
+//                    return true;
+//                }
+//                return false;
             }
+
         });
 
         web3.setOnSignMessageListener(this);
@@ -217,6 +265,10 @@ public class DappBrowserFragment extends Fragment implements
         web3.setOnSignTypedMessageListener(this);
         web3.setOnVerifyListener(this);
         web3.setOnGetBalanceListener(this);
+
+        web3.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        web3.getSettings().setAllowFileAccessFromFileURLs(true);
+        web3.getSettings().setBlockNetworkLoads(false);
     }
 
     @Override
@@ -246,7 +298,13 @@ public class DappBrowserFragment extends Fragment implements
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
-            viewModel.signMessage(message.value, dAppFunction, message);
+            //ensure we generate the signature correctly:
+            byte[] signRequest = message.value.getBytes();
+            if (message.value.substring(0, 2).equals("0x"))
+            {
+                signRequest = Numeric.hexStringToByteArray(message.value);
+            }
+            viewModel.signMessage(signRequest, dAppFunction, message);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(message);
@@ -269,18 +327,28 @@ public class DappBrowserFragment extends Fragment implements
                 String signHex = Numeric.toHexString(data);
                 Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignPersonalMessageSuccessful(message, signHex);
+
+                //Test Sig
+                testRecoverAddressFromSignature(hexToUtf8(message.value), signHex);
+
+
                 dialog.dismiss();
             }
         };
 
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
+        dialog.setMessage(hexToUtf8(message.value));
         dialog.setOnApproveListener(v -> {
-            String hex = hexToUtf8(message.value);
-            String signMessage = ("\u0019Ethereum Signed Message:\n"
-                    + hex.getBytes().length
-                    + org.web3j.utils.Numeric.cleanHexPrefix(hex));
-            viewModel.signMessage(signMessage, dAppFunction, message);
+            String convertedMessage = hexToUtf8(message.value);
+            String signMessage = PERSONAL_MESSAGE_PREFIX
+                    + convertedMessage.length()
+                    + convertedMessage;
+
+            //byte[] msgHash = Hash.sha3(signMessage.getBytes());
+            byte[] msgHash = signMessage.getBytes();
+
+            viewModel.signMessage(msgHash, dAppFunction, message);
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(message);
@@ -304,12 +372,12 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onVerify(String message, String signHex) {
-        web3.onVerify(viewModel.getRecoveredAddress(message, signHex), viewModel.getVerificationResult(getContext(), wallet, message, signHex));
+        //web3.onVerify(viewModel.getRecoveredAddress(message, signHex), viewModel.getVerificationResult(getContext(), wallet, message, signHex));
     }
 
     @Override
     public void onGetBalance(String balance) {
-        web3.onGetBalance(viewModel.getFormattedBalance(balance));
+        //web3.onGetBalance(viewModel.getFormattedBalance(balance));
     }
 
     public static String hexToUtf8(String hex) {
@@ -413,5 +481,26 @@ public class DappBrowserFragment extends Fragment implements
     public void onItemClick(String url)
     {
         loadUrl(url);
+    }
+
+    public void testRecoverAddressFromSignature(String message, String sig)
+    {
+        String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
+        byte[] msgHash = (prefix + message).getBytes(); //Hash.sha3((prefix + message3).getBytes());
+
+        byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
+        Sign.SignatureData sd = sigFromByteArray(signatureBytes);
+        String addressRecovered;
+
+        try
+        {
+            BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
+            addressRecovered = "0x" + Keys.getAddress(recoveredKey);
+            System.out.println("Recovered: " + addressRecovered);
+        }
+        catch (SignatureException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

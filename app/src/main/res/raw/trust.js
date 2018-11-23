@@ -54905,7 +54905,7 @@ HttpProvider.prototype.prepareRequest = function (async) {
   if (this.user && this.password) {
     var auth = 'Basic ' + new Buffer(this.user + ':' + this.password).toString('base64');
     request.setRequestHeader('Authorization', auth);
-  } request.setRequestHeader('Content-Type', 'application/json');
+  } request.setRequestHeader('Content-Type', 'application/jsonp');
   if(this.headers) {
       this.headers.forEach(function(header) {
           request.setRequestHeader(header.name, header.value);

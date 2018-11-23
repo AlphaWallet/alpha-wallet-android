@@ -1,6 +1,7 @@
 package io.stormbird.wallet.web3;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -23,8 +25,16 @@ import com.google.gson.Gson;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
+import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
@@ -35,8 +45,9 @@ import static io.stormbird.wallet.C.PAGE_LOADED;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
-    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "onSignSuccessful(%1$s, \"%2$s\")";
-    private static final String JS_PROTOCOL_ON_FAILURE = "onSignError(%1$s, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
+
     @Nullable
     private OnSignTransactionListener onSignTransactionListener;
     @Nullable
@@ -82,35 +93,49 @@ public class Web3View extends WebView {
     private void init() {
         jsInjectorClient = new JsInjectorClient(getContext());
         webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
-        WebSettings webSettings = getSettings();
+        WebSettings webSettings = super.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setAllowFileAccessFromFileURLs(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setDomStorageEnabled(true);
+
+        webSettings.setAllowContentAccess(true);
+
+        webSettings.setGeolocationEnabled(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
+        webSettings.setAllowFileAccessFromFileURLs(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webSettings.setSafeBrowsingEnabled(true);
+        }
+
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
+
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
-                innerOnSignTypedMessageListener,
-                innerOnVerifyListener,
-                innerOnGetBalanceListener), "trust");
+                innerOnSignTypedMessageListener), "alpha");
 
         super.setWebViewClient(webViewClient);
     }
 
-//    @Override
-//    public WebSettings getSettings() {
-//        return new WrapWebSettings(super.getSettings());
-//    }
-
+    @Override
+    public WebSettings getSettings() {
+        return new WrapWebSettings(super.getSettings());
+    }
 
     public void setWalletAddress(@NonNull Address address) {
         jsInjectorClient.setWalletAddress(address);
@@ -205,30 +230,57 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
-    public void onVerify(String recoveredAddress, String result) {
-        post(() -> {
-            loadUrl("javascript:(function() {" +
-                    "alert('" + result + "');" +
-                    "verificationAddressBox.value = '" + recoveredAddress + "';" +
-                    "})()");
-        });
-    }
-
-    public void onGetBalance(String balance) {
-        post(() -> {
-            loadUrl("javascript:(function() {" +
-                    "var balanceDiv = document.createElement('div');" +
-                    "balanceDiv.style.cssText = 'color:white';" +
-                    "balanceDiv.innerHTML = 'Wallet Balance: " + balance + "';" +
-                    "document.getElementsByClassName('container')[0].appendChild(balanceDiv);" +
-                    "})()");
-        });
-    }
+//    public void onVerify(String recoveredAddress, String result) {
+//        post(() -> {
+//            loadUrl("javascript:(function() {" +
+//                    "alert('" + result + "');" +
+//                    "verificationAddressBox.value = '" + recoveredAddress + "';" +
+//                    "})()");
+//        });
+//    }
+//
+//    public void onGetBalance(String balance) {
+//        post(() -> {
+//            loadUrl("javascript:(function() {" +
+//                    "var balanceDiv = document.createElement('div');" +
+//                    "balanceDiv.style.cssText = 'color:white';" +
+//                    "balanceDiv.innerHTML = 'Wallet Balance: " + balance + "';" +
+//                    "document.getElementsByClassName('container')[0].appendChild(balanceDiv);" +
+//                    "})()");
+//        });
+//    }
 
     private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
+
+//        post(() -> {
+//            loadUrl("javascript:(function() {" +
+//                    "var balanceDiv = document.createElement('div');" +
+//                    "balanceDiv.style.cssText = 'color:white';" +
+//                    "balanceDiv.innerHTML = 'Wallet Balance: " + param + "';" +
+//                    "document.getElementsByClassName('container')[0].appendChild(balanceDiv);" +
+//                    "})()");
+//        });
+
+        post(() -> {
+            loadUrl("javascript:(" + callback +
+                            ")");
+        });
+
+        //postUrl();
+        //post()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
+            evaluateJavascript(callback, new ValueCallback<String>()
+                               {
+                                   @Override
+                                   public void onReceiveValue(String s)
+                                   {
+                                       Log.d("WEB_VIEW", s);
+                                   }
+                               });
+            //evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value));
+
+            //ORIG: post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
         }
     }
 
@@ -295,55 +347,77 @@ public class Web3View extends WebView {
             this.jsInjectorClient = jsInjectorClient;
         }
 
-        @Override
-        public void onPageStarted(WebView view, String url,Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-        }
+//        @Override
+//        public void onPageStarted(WebView view, String url,Bitmap favicon) {
+//            super.onPageStarted(view, url, favicon);
+//        }
+//
+//        @Override
+//        public void onPageFinished(WebView view, String url) {
+//            super.onPageFinished(view, url);
+//
+//            if (!redirect && !loadingError)
+//            {
+//                Intent intent = new Intent(PAGE_LOADED);
+//                intent.putExtra("url", url);
+//                getContext().sendBroadcast(intent);
+//            }
+//            else
+//            {
+//                redirect = false;
+//            }
+//
+//            loadingError = false;
+//
+//            /* Inject javascript to override verify button onclick */
+//            view.loadUrl("javascript:(function() { " +
+//                    "var messageBox = document.getElementById('messageBox');" +
+//                    "var verifyMessageBox = document.getElementById('verifyMessageBox');" +
+//                    "var signatureBox = document.getElementById('signatureBox');" +
+//                    "var verificationAddressBox = document.getElementById('verificationAddressBox');" +
+//                    "var verifyBtn = document.getElementById('verifyButton');" +
+//                    "if (verifyBtn) verifyBtn.onclick = function(){ " +
+//                    "alpha.verify(verifyMessageBox.value, signatureBox.value); " +
+//                    "};" +
+//                    // Get Balance
+//                    "var account = web3.eth.accounts[0];" +
+//                    "var walletBalance = web3.eth.getBalance(account, " +
+//                    "function(error, result) { " +
+//                    "if (error) alert(error);" +
+//                    "alpha.getBalance(result.toString());" +
+//                    "});" +
+//                    "})()");
+//        }
 
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view, url);
-
-            if (!redirect && !loadingError)
-            {
-                Intent intent = new Intent(PAGE_LOADED);
-                intent.putExtra("url", url);
-                getContext().sendBroadcast(intent);
-            }
-            else
-            {
-                redirect = false;
-            }
-
-            loadingError = false;
-
-            /* Inject javascript to override verify button onclick */
-            view.loadUrl("javascript:(function() { " +
-                    "var messageBox = document.getElementById('messageBox');" +
-                    "var verifyMessageBox = document.getElementById('verifyMessageBox');" +
-                    "var signatureBox = document.getElementById('signatureBox');" +
-                    "var verificationAddressBox = document.getElementById('verificationAddressBox');" +
-                    "var verifyBtn = document.getElementById('verifyButton');" +
-                    "if (verifyBtn) verifyBtn.onclick = function(){ " +
-                    "trust.verify(verifyMessageBox.value, signatureBox.value); " +
-                    "};" +
-                    // Get Balance
-                    "var account = web3.eth.accounts[0];" +
-                    "var walletBalance = web3.eth.getBalance(account, " +
-                    "function(error, result) { " +
-                    "if (error) alert(error);" +
-                    "trust.getBalance(result.toString());" +
-                    "});" +
-                    "})()");
-        }
+//        @Override
+//        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+//            redirect = true;
+//
+//            return externalClient.shouldOverrideUrlLoading(view, url)
+//                    || internalClient.shouldOverrideUrlLoading(view, url);
+//        }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            redirect = true;
-
             return externalClient.shouldOverrideUrlLoading(view, url)
                     || internalClient.shouldOverrideUrlLoading(view, url);
         }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            return externalClient.shouldOverrideUrlLoading(view, request)
+                    || internalClient.shouldOverrideUrlLoading(view, request);
+        }
+
+//        @Override
+//        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+//            // TODO Auto-generated method stub
+//
+//            view.loadUrl(url);
+//            return true;
+//
+//        }
 
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
@@ -352,14 +426,14 @@ public class Web3View extends WebView {
             loadingError = true;
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            redirect = true;
-
-            return externalClient.shouldOverrideUrlLoading(view, request)
-                    || internalClient.shouldOverrideUrlLoading(view, request);
-        }
+//        @RequiresApi(api = Build.VERSION_CODES.N)
+//        @Override
+//        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+//            redirect = true;
+//
+//            return externalClient.shouldOverrideUrlLoading(view, request)
+//                    || internalClient.shouldOverrideUrlLoading(view, request);
+//        }
 
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
@@ -385,4 +459,25 @@ public class Web3View extends WebView {
             return response;
         }
     }
+
+    public void enablecrossdomain()
+    {
+        try
+        {
+            Field field = WebView.class.getDeclaredField("mWebViewCore");
+            field.setAccessible(true);
+            Object webviewcore=field.get(this);
+            Method method=webviewcore.getClass().getDeclaredMethod("nativeRegisterURLSchemeAsLocal", String.class);
+            method.setAccessible(true);
+            method.invoke(webviewcore, "http");
+            method.invoke(webviewcore, "https");
+        }
+        catch(Exception e)
+        {
+            Log.d("wokao","enablecrossdomain error");
+            e.printStackTrace();
+        }
+    }
+
+
 }

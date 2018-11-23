@@ -171,12 +171,12 @@ public class DappBrowserViewModel extends BaseViewModel {
                             .find()).toObservable();
     }
 
-    public void signMessage(String msg, DAppFunction dAppFunction, Message<String> message) {
-        byte[] signRequest = msg.getBytes();
+    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
+        //byte[] signRequest = msg.getBytes();
         //if we're passed a hex then sign it correctly
-        if (msg.substring(0, 2).equals("0x")) {
-            signRequest = Numeric.hexStringToByteArray(msg);
-        }
+//        if (msg.substring(0, 2).equals("0x")) {
+//            signRequest = Numeric.hexStringToByteArray(msg);
+//        }
 
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest)
                 .subscribeOn(Schedulers.computation())
@@ -267,7 +267,7 @@ public class DappBrowserViewModel extends BaseViewModel {
 //        Log.d(TAG, "signHex: " + signHex);
 //        Log.d(TAG, "verification address: " + viewModel.checkSignature(message, signHex));
 //        Log.d(TAG, "address: " + wallet.address);
-        message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
+        //message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
         StringBuilder recoveredAddress = new StringBuilder("0x");
         recoveredAddress.append(checkSignature(message, signHex));
 

@@ -53,9 +53,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			List<Transaction> result = new ArrayList<>();
 			try
 			{
-				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, 0, 0);
+				int page = 1;
+				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
 
-				if (response != null)
+				while (response != null)
 				{
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
@@ -68,6 +69,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                             result.add(tx);
                         }
 					}
+					response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
 				}
 			}
 			catch (JSONException e)
@@ -157,7 +159,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				NetworkInfo network = networkRepository.getAvailableNetworkList()[0];
 				int page = 1;
-				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++, PAGESIZE);
+				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page, PAGESIZE);
 
 				while (response != null)
 				{

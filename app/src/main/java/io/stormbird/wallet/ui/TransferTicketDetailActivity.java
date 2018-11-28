@@ -787,13 +787,14 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         }
     }
 
+    //TODO: This could be abstracted into an ENS class
     private void onENSSuccess(String address)
     {
         waitingForENS = false;
         toAddressEditText.dismissDropDown();
         layoutENSResolve.setVisibility(View.VISIBLE);
         textENS.setText(address);
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        if (toAddressEditText.hasFocus()) KeyboardUtils.hideKeyboard(getCurrentFocus()); //user was waiting for ENS, not in the middle of typing a value etc
         checkIfWaitingForENS();
         toAddressError.setVisibility(View.GONE);
     }

@@ -123,7 +123,7 @@ public class WalletRepository implements WalletRepositoryType
 			try {
 				return new BigDecimal(Web3jFactory
 						.build(new org.web3j.protocol.http.HttpService(networkRepository.getActiveRPC()))
-						.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
+						.ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
 						.send()
 						.getBalance());
 			}

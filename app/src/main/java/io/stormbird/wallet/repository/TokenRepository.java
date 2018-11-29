@@ -260,7 +260,7 @@ public class TokenRepository implements TokenRepositoryType {
                     List<Token> result = new ArrayList<>();
                     result.addAll(Arrays.asList(ERC721Tokens));
                     result.addAll(Arrays.asList(tokens));
-                    return result.toArray(new Token[result.size()]);
+                    return result.toArray(new Token[0]);
                 });
     }
 
@@ -273,7 +273,7 @@ public class TokenRepository implements TokenRepositoryType {
                     List<Token> result = new ArrayList<>();
                     result.add(ethToken);
                     result.addAll(Arrays.asList(tokens));
-                    return result.toArray(new Token[result.size()]);
+                    return result.toArray(new Token[0]);
                 });
     }
 
@@ -856,22 +856,7 @@ public class TokenRepository implements TokenRepositoryType {
      */
     @Override
     public Single<Token> getEthBalance(NetworkInfo network, Wallet wallet) {
-        return walletRepository.balanceInWei(wallet)
-                .map(balance -> {
-                    if (balance.equals(BigDecimal.valueOf(-1)))
-                    {
-                        //network error - retrieve from cache
-                        Token b = localSource.getTokenBalance(network, wallet, wallet.address);
-                        if (b != null) balance = b.balance;
-                        else balance = BigDecimal.ZERO;
-                    }
-                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    Token eth = new Token(info, balance, System.currentTimeMillis());
-                    eth.setIsEthereum();
-                    //store token and balance
-                    localSource.updateTokenBalance(network, wallet, eth);
-                    return eth;
-                });
+        return attachEth(network, wallet);
     }
 
     @Override

@@ -242,7 +242,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onTokens(Token[] tokens)
     {
-        for (Token t : tokens) if(t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
         adapter.setTokens(tokens);
     }
 

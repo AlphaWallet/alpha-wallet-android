@@ -114,13 +114,13 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	@Override
 	public String getActiveRPC()
 	{
-		if (currentActiveRPC != null)
+		if (defaultNetwork != null)
 		{
-			return currentActiveRPC;
+			return defaultNetwork.rpcServerUrl;
 		}
 		else
 		{
-			return defaultNetwork.rpcServerUrl;
+			return NETWORKS[0].rpcServerUrl; //default to mainnet if no current default
 		}
 	}
 

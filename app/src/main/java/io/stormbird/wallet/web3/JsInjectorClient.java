@@ -35,6 +35,7 @@ class JsInjectorClient {
 
     private int chainId = 1;
     private Address walletAddress;
+    //Note: this default RPC is overriden before injection
     private String rpcUrl = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";//"https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
 
     JsInjectorClient(Context context) {
@@ -87,7 +88,7 @@ class JsInjectorClient {
 
     String assembleJs(Context context, String template) {
         if (TextUtils.isEmpty(jsLibrary)) {
-            jsLibrary = loadFile(context, R.raw.alphawallet);
+            jsLibrary = loadFile(context, R.raw.alphawallet_min);
         }
         String initJs = loadInitJs(context);
         return String.format(template, jsLibrary, initJs);
@@ -168,7 +169,7 @@ class JsInjectorClient {
     }
 
     private String loadInitJs(Context context) {
-        String initSrc = loadFile(context, R.raw.init_alpha);
+        String initSrc = loadFile(context, R.raw.init);
         String address = walletAddress == null ? Address.EMPTY.toString() : walletAddress.toString();
         return String.format(initSrc, address, rpcUrl, chainId);
     }

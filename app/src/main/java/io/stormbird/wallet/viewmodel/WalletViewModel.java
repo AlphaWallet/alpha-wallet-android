@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.crashlytics.android.Crashlytics;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -168,7 +169,7 @@ public class WalletViewModel extends BaseViewModel
             updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultNetwork.getValue(), defaultWallet.getValue())
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokens, this::onError, this::fetchFromOpensea);
+                    .subscribe(this::onTokens, this::onTokenFetchError, this::fetchFromOpensea);
         }
         else
         {
@@ -177,12 +178,20 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
+    private void onTokenFetchError(Throwable throwable)
+    {
+        //We encountered an unknown issue during token fetch
+        //This is most likely due to a balance recording error
+        //log the exception for reference
+        Crashlytics.logException(throwable);
+        throwable.printStackTrace();
+        onError(throwable);
+    }
+
     private void onTokens(Token[] tokens)
     {
         tokensService.addTokens(tokens);
     }
-
-    private boolean firstRunDebugTest = true;
 
     private void fetchFromOpensea()
     {
@@ -200,12 +209,19 @@ public class WalletViewModel extends BaseViewModel
                     //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::gotOpenseaTokens, this::onError);
+                    .subscribe(this::gotOpenseaTokens, this::onOpenseaError);
         }
         else
         {
             onFetchTokensCompletable();
         }
+    }
+
+    private void onOpenseaError(Throwable throwable)
+    {
+        Crashlytics.logException(throwable);
+        throwable.printStackTrace();
+        onError(throwable);
     }
 
     private void gotOpenseaTokens(Token[] tokens)
@@ -239,7 +255,6 @@ public class WalletViewModel extends BaseViewModel
     private void storedTokens(Token[] tokens)
     {
         Log.d("WVM", "Stored " + tokens.length);
-        //if (updateTokens != null && !updateTokens.isDisposed()) updateTokens.dispose();
         onFetchTokensCompletable();
     }
 
@@ -270,7 +285,12 @@ public class WalletViewModel extends BaseViewModel
 
     private void tkError(Throwable throwable)
     {
+        Crashlytics.logException(throwable);
+        throwable.printStackTrace();
+        onError(throwable);
         if (checkTokensDisposable != null) checkTokensDisposable.dispose();
+        //restart a refresh
+        fetchTokens();
     }
 
     private void updateTokenBalances()

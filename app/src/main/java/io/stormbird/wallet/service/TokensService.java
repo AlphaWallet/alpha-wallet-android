@@ -231,25 +231,37 @@ public class TokensService
         }
     }
 
+    /**
+     * Fetch the inverse of the intersection between displayed tokens and the balance received from Opensea
+     * If a token was transferred out then it will no longer be displayed
+     *
+     * @param tokens array of tokens with active balance
+     * @param tokenClass type of token to filter (eg erc721)
+     * @return
+     */
     public List<String> getRemovedTokensOfClass(Token[] tokens, Class<?> tokenClass)
     {
-        List<Token> newTokens = Arrays.asList(tokens);
+        List<String> newTokens = getAddresses(tokens);
         List<Token> oldTokens = getAllClass(tokenClass);
 
         List<String> removedTokens = new ArrayList<>();
 
-        if (oldTokens.size() > newTokens.size())
+        for (Token s : oldTokens)
         {
-            //tokens were removed
-            for (Token t : oldTokens)
-            {
-                if (!newTokens.contains(t))
-                {
-                    removedTokens.add(t.getAddress());
-                }
-            }
+            if (!newTokens.contains(s.getAddress())) removedTokens.add(s.getAddress());
         }
 
         return removedTokens;
+    }
+
+    private List<String> getAddresses(Token[] tokens)
+    {
+        List<String> addresses = new ArrayList<>();
+        for (Token t : tokens)
+        {
+            addresses.add(t.getAddress());
+        }
+
+        return addresses;
     }
 }

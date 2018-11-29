@@ -162,10 +162,13 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
             byte[] messageHash = Hash.sha3(message);
             org.ethereum.geth.Account gethAccount = findAccount(signer.address);
             byte[] signed = keyStore.signHash(gethAccount.getAddress(), messageHash);
+            signed = patchSignatureVComponent(signed);
             return signed;
         }).subscribeOn(Schedulers.io());
     }
 
+    //In all cases where we need to sign data the signature needs to be in Ethereum format
+    //Geth gives us the pure EC function, but for hash signing
     @Override
     public Single<byte[]> signTransaction(Wallet signer, String signerPassword, byte[] message, long chainId)
     {
@@ -176,6 +179,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
             keyStore.unlock(gethAccount, signerPassword);
             byte[] signed = keyStore.signHash(gethAccount.getAddress(), messageHash);
             keyStore.lock(gethAccount.getAddress());
+            signed = patchSignatureVComponent(signed);
             return signed;
         }).subscribeOn(Schedulers.io());
     }
@@ -215,5 +219,15 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
             }
         }
         throw new ServiceException("Wallet with address: " + address + " not found");
+    }
+
+    private byte[] patchSignatureVComponent(byte[] signature)
+    {
+        if (signature != null && signature.length == 65 && signature[64] < 27)
+        {
+            signature[64] = (byte)(signature[64] + (byte)0x1b);
+        }
+
+        return signature;
     }
 }

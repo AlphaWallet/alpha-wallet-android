@@ -4,41 +4,24 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.preference.PreferenceManager;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import org.web3j.crypto.Hash;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-
-import java.math.BigInteger;
-import java.security.SignatureException;
-import java.util.ArrayList;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchGasSettingsInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
-import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 public class DappBrowserViewModel extends BaseViewModel {
@@ -172,12 +155,6 @@ public class DappBrowserViewModel extends BaseViewModel {
     }
 
     public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
-        //byte[] signRequest = msg.getBytes();
-        //if we're passed a hex then sign it correctly
-//        if (msg.substring(0, 2).equals("0x")) {
-//            signRequest = Numeric.hexStringToByteArray(msg);
-//        }
-
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -216,110 +193,11 @@ public class DappBrowserViewModel extends BaseViewModel {
         dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
-    public String checkSignature(Message<String> message, String signHex) {
-        byte[] messageCheck = message.value.getBytes();
-        //if we're passed a hex then sign it correctly
-        if (message.value.substring(0, 2).equals("0x")) {
-            messageCheck = Numeric.hexStringToByteArray(message.value);
-        }
-
-        //convert to signature
-        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
-        String recoveredAddress = "";
-
-        try {
-            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
-            recoveredAddress = Keys.getAddress(recoveredKey);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-
-        return recoveredAddress;
-    }
-
-    public String checkSignature(String message, String signHex) {
-        byte[] messageCheck = message.getBytes();
-        //if we're passed a hex then sign it correctly
-        if (message.substring(0, 2).equals("0x")) {
-            messageCheck = Numeric.hexStringToByteArray(message);
-        }
-
-        //convert to signature
-        Sign.SignatureData sigData = sigFromByteArray(Numeric.hexStringToByteArray(signHex));
-        String recoveredAddress = "";
-
-        try {
-            BigInteger recoveredKey = Sign.signedMessageToKey(messageCheck, sigData);
-            recoveredAddress = Keys.getAddress(recoveredKey);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-
-        return recoveredAddress;
-    }
-
-    public String getVerificationResult(Context context, Wallet wallet, String message, String signHex) {
-//        Log.d(TAG, "message: " + message);
-//        Log.d(TAG, "signHex: " + signHex);
-//        Log.d(TAG, "verification address: " + viewModel.checkSignature(message, signHex));
-//        Log.d(TAG, "address: " + wallet.address);
-        //message = Hash.sha3String(message);  // <--- When you send a string for signing, it already takes the SHA3 of it.
-        StringBuilder recoveredAddress = new StringBuilder("0x");
-        recoveredAddress.append(checkSignature(message, signHex));
-
-//        Log.d(TAG, "recovered address: " + recoveredAddress.toString());
-        String result = wallet.address.equals(recoveredAddress.toString()) ? context.getString(R.string.popup_verification_success) : context.getString(R.string.popup_verification_failed);
-        return result;
-    }
-
-    public String getRecoveredAddress(String message, String signHex) {
-        message = Hash.sha3String(message);
-        StringBuilder recoveredAddress = new StringBuilder("0x");
-        recoveredAddress.append(checkSignature(message, signHex));
-        return recoveredAddress.toString();
-    }
-
-    public String getFormattedBalance(String balance) {
-        if (balance == null) {
-            return "0";
-        } else {
-            //TODO: Format balance text
-            return balance;
-        }
-    }
-
     public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL)
     {
         String networkName = defaultNetwork.getValue().name;
         boolean mainNet = defaultNetwork.getValue().isMainNetwork;
         confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL);
-    }
-
-    public Web3Transaction doGasSettings(Web3Transaction transaction)
-    {
-        BigInteger gasLimit = transaction.gasLimit;
-        BigInteger gasPrice = transaction.gasPrice;
-        if (gasLimit.equals(BigInteger.ZERO))
-        {
-            gasLimit = internalGasSettings.gasLimit;
-        }
-        if (gasPrice.equals(BigInteger.ZERO))
-        {
-            gasPrice = internalGasSettings.gasPrice;
-        }
-
-        return new Web3Transaction(transaction.recipient,
-                                                    transaction.contract,
-                                                    transaction.value,
-                                                    gasPrice,
-                                                    gasLimit,
-                                                    transaction.nonce,
-                                                    transaction.payload,
-                                                    transaction.leafPosition);
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {

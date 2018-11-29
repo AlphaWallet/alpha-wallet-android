@@ -106,7 +106,7 @@ public class TicketSaleAdapter extends TicketAdapter {
     {
         if (t instanceof ERC721Token)
         {
-            setERC721Contract(t);
+            setERC721Tokens(t);
         }
         else if (t instanceof Ticket)
         {

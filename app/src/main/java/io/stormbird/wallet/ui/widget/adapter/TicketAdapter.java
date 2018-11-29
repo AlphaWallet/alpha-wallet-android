@@ -1,21 +1,28 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
+import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.view.ViewGroup;
+
+import com.bumptech.glide.Glide;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
@@ -48,7 +55,7 @@ public class TicketAdapter extends TokensAdapter {
         token = t;
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
-        if (t instanceof ERC721Token) setERC721Contract(t);
+        if (t instanceof ERC721Token) setERC721Tokens(t);
     }
 
     public TicketAdapter(OnTicketIdClickListener onTicketIdClick, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
@@ -60,7 +67,7 @@ public class TicketAdapter extends TokensAdapter {
         //setTicket(ticket);
         if (token instanceof Ticket) setTokenRange(token, ticketIds);
         openseaService = opensea;
-        if (token instanceof ERC721Token) setERC721Contract(token);
+        if (token instanceof ERC721Token) setERC721Tokens(token);
     }
 
     @Override
@@ -86,7 +93,7 @@ public class TicketAdapter extends TokensAdapter {
         return holder;
     }
 
-    public void setERC721Contract(Token token)
+    protected void setERC721Tokens(Token token)
     {
         if (!(token instanceof ERC721Token)) return;
         items.beginBatchedUpdates();
@@ -200,5 +207,31 @@ public class TicketAdapter extends TokensAdapter {
 
         return null;
     }
-}
 
+    private Single<Boolean> clearCache(Context ctx)
+    {
+        return Single.fromCallable(() -> {
+            Glide.get(ctx).clearDiskCache();
+            return true;
+        });
+    }
+
+    //TODO: Find out how to calculate the storage hash for each image and reproduce that, deleting only the right image.
+    public void reloadAssets(Context ctx)
+    {
+        token.setRequireAuxRefresh();
+
+        if (token instanceof ERC721Token)
+        {
+            Disposable d = clearCache(ctx)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::cleared, error -> System.out.println("Cache clean: " + error.getMessage()));
+        }
+    }
+
+    private void cleared(Boolean aBoolean)
+    {
+        this.notifyDataSetChanged();
+    }
+}

@@ -26,10 +26,6 @@ public class SignCallbackJSInterface {
     private final OnSignPersonalMessageListener onSignPersonalMessageListener;
     @NonNull
     private final OnSignTypedMessageListener onSignTypedMessageListener;
-    //@NonNull
-    //private final OnVerifyListener onVerifyListener;
-    //@NonNull
-    //private final OnGetBalanceListener onGetBalanceListener;
 
     public SignCallbackJSInterface(
             WebView webView,
@@ -89,16 +85,6 @@ public class SignCallbackJSInterface {
             }
             onSignTypedMessageListener.onSignTypedMessage(new Message<>(typedData, getUrl(), callbackId));
         });
-    }
-
-    @JavascriptInterface
-    public void verify(String message, String signHex) {
-        //onVerifyListener.onVerify(message, signHex);
-    }
-
-    @JavascriptInterface
-    public void getBalance(String balance) {
-        //onGetBalanceListener.onGetBalance(balance);
     }
 
     private String getUrl() {

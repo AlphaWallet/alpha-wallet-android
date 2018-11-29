@@ -524,7 +524,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         toAddressEditText.dismissDropDown();
         layoutENSResolve.setVisibility(View.VISIBLE);
         textENS.setText(address);
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        if (toAddressEditText.hasFocus()) KeyboardUtils.hideKeyboard(getCurrentFocus()); //user was waiting for ENS, not in the middle of typing a value etc
         checkIfWaitingForENS();
         toAddressError.setVisibility(View.GONE);
     }

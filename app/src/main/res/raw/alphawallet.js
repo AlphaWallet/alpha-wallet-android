@@ -54141,7 +54141,7 @@ This is a work around for https://github.com/ethereum/go-ethereum/issues/2577
                     engine.on('error', function (err) {
                         return console.error(err.stack);
                     });
-                    engine.isNeuron = true;
+                    engine.isAlphaWallet = true;
                     engine.start();
 
                     return engine;

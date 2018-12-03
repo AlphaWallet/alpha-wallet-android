@@ -160,8 +160,16 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
                 int position = items.indexOf(data);
                 if (!data.value.contentHash.equals(transaction.contentHash))
                 {
-                    items.updateItemAt(position, sortedItem);
-                    notifyItemChanged(position);
+                    if (position >= 0)
+                    {
+                        items.updateItemAt(position, sortedItem);
+                        notifyItemChanged(position);
+                    }
+                    else
+                    {
+                        items.add(sortedItem);
+                        items.add(DateSortedItem.round(transaction.timeStamp));
+                    }
                 }
             }
             else

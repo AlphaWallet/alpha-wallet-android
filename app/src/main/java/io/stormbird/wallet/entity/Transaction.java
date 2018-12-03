@@ -35,7 +35,6 @@ public class Transaction implements Parcelable {
     public final String input;
     public final TransactionOperation[] operations;
     public final String error;
-    public final String contentHash;
 
     public boolean isConstructor = false;
 
@@ -66,8 +65,6 @@ public class Transaction implements Parcelable {
 		this.input = input;
 		this.gasUsed = gasUsed;
 		this.operations = operations;
-
-		this.contentHash = calculateContentHash();
 	}
 
 	protected Transaction(Parcel in)
@@ -85,7 +82,6 @@ public class Transaction implements Parcelable {
 		input = in.readString();
 		gasUsed = in.readString();
 		Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
-		this.contentHash = in.readString();
 		TransactionOperation[] operations = null;
 		if (parcelableArray != null)
 		{
@@ -126,39 +122,5 @@ public class Transaction implements Parcelable {
 		dest.writeString(input);
 		dest.writeString(gasUsed);
 		dest.writeParcelableArray(operations, flags);
-		dest.writeString(contentHash);
-	}
-
-	private String calculateContentHash()
-	{
-		String operationContent = "";
-		String calcHash = "";
-		try
-		{
-			if (operations != null && operations.length > 0)
-			{
-				if (operations[0].contract instanceof ERC875ContractTransaction)
-				{
-					ERC875ContractTransaction ctx = (ERC875ContractTransaction) operations[0].contract;
-					operationContent = ctx.address + ctx.operation + ctx.getIndicesString() + ctx.type + ctx.name;
-				}
-				else
-				{
-					TransactionContract ctx = operations[0].contract;
-					String addend = "";
-					if (operations[0].viewType != null) addend = operations[0].viewType;
-					operationContent = ctx.address + ctx.totalSupply + ctx.name + addend;
-				}
-			}
-
-			calcHash = Hash.sha3String(to + hash + input + timeStamp + blockNumber + gasPrice + from + value + nonce + operationContent);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			calcHash = Hash.sha3String(to + hash + timeStamp + nonce);
-		}
-
-		return calcHash;
 	}
 }

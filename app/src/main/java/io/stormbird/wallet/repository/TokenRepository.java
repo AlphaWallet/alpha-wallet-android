@@ -3,21 +3,21 @@ package io.stormbird.wallet.repository;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
-
-import org.web3j.abi.EventEncoder;
-import org.web3j.abi.EventValues;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
+import io.reactivex.*;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.BadContract;
+import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TickerService;
+import io.stormbird.wallet.service.TokenExplorerClientType;
+import okhttp3.OkHttpClient;
+import org.web3j.abi.*;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Uint;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -28,43 +28,16 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthSyncing;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
+import rx.functions.Func1;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.ObservableTransformer;
-import io.reactivex.Single;
-import io.reactivex.SingleTransformer;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.BadContract;
-import io.stormbird.token.entity.FunctionDefinition;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.SubscribeWrapper;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.TokenTicker;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.TransferFromEventResponse;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.TickerService;
-import io.stormbird.wallet.service.TokenExplorerClientType;
-import rx.functions.Func1;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -107,7 +80,17 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo defaultNetwork)
     {
         network = defaultNetwork;
-        org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
+        //Adjust timeout params for node connection - it should timeout quickly and not keep retrying,
+        //otherwise it can hold up resources
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+
+        HttpService publicNodeService = new HttpService(defaultNetwork.rpcServerUrl, client, false);
+
         web3j = Web3jFactory.build(publicNodeService);
         ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
@@ -290,6 +273,7 @@ public class TokenRepository implements TokenRepositoryType {
                 eth.setTokenNetwork(network.chainId);
                 eth.setTokenWallet(wallet.address);
             }
+            Log.d(TAG, "ETH(BAL): " + eth.balance);
             eth.setIsEthereum();
             return eth;
         });
@@ -821,8 +805,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
-        return walletRepository.balanceInWei(wallet)
+        return getEthBalance(wallet) //use local balance fetch, uses less resources
                 .map(balance -> {
+                    Log.d(TAG, "ETH: " + balance.toPlainString());
                     if (balance.equals(BigDecimal.valueOf(-1)))
                     {
                         //network error - retrieve from cache
@@ -891,6 +876,7 @@ public class TokenRepository implements TokenRepositoryType {
      * This function checks for suspicious contracts. If the value of tokens is 32, this could be an array return.
      * Parsing the returned value with DynamicArray, if it is an array spec (ie 0x02, then array size etc) then
      * we can remove this token. However it would be better to display the token as a ticket if the array balance has elements.
+     * TODO: refactor this out using constructor analysis
      * @param value
      * @param wallet
      * @param responseValue
@@ -910,6 +896,26 @@ public class TokenRepository implements TokenRepositoryType {
         {
             return value;
         }
+    }
+
+    private Single<BigDecimal> getEthBalance(Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            try {
+                return new BigDecimal(web3j.ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
+                        .send()
+                        .getBalance());
+            }
+            catch (IOException e)
+            {
+                return BigDecimal.valueOf(-1);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return BigDecimal.valueOf(-1);
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
@@ -1027,38 +1033,6 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private String getSymbol(String address) throws Exception {
-        org.web3j.abi.datatypes.Function function = symbolOf();
-        Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, temp);
-
-        if (responseValue == null) return null;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return (String)response.get(0).getValue();
-        } else {
-            return null;
-        }
-    }
-
-    private String getVenue(String address) throws Exception {
-        org.web3j.abi.datatypes.Function function = symbolOf();
-        Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, temp);
-
-        if (responseValue == null) return null;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return (String)response.get(0).getValue();
-        } else {
-            return null;
-        }
-    }
-
     private int getDecimals(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = decimalsOf();
         Wallet temp = new Wallet(null);
@@ -1139,22 +1113,34 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private List callSmartContractFunctionArray(
-            org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet) throws Exception
+            org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet)
     {
-        String encodedFunction = FunctionEncoder.encode(function);
-        org.web3j.protocol.core.methods.response.EthCall ethCall = web3j.ethCall(
-                org.web3j.protocol.core.methods.request.Transaction
-                        .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
-                DefaultBlockParameterName.LATEST)
-                .sendAsync().get();
+        try
+        {
+            String encodedFunction = FunctionEncoder.encode(function);
+            org.web3j.protocol.core.methods.response.EthCall ethCall = web3j.ethCall(
+                    org.web3j.protocol.core.methods.request.Transaction
+                            .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
+                    DefaultBlockParameterName.LATEST).send();
 
-        String value = ethCall.getValue();
-        List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
-        if (values.isEmpty()) return null;
+            String value = ethCall.getValue();
+            List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
+            if (values.isEmpty())
+                return null;
 
-        Type T = values.get(0);
-        Object o = T.getValue();
-        return (List) o;
+            Type T = values.get(0);
+            Object o = T.getValue();
+            return (List) o;
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String callSmartContractFunction(
@@ -1168,6 +1154,10 @@ public class TokenRepository implements TokenRepositoryType {
             EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
         }
         catch (Exception e)
         {

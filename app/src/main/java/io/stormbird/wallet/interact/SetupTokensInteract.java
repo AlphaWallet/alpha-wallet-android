@@ -54,7 +54,7 @@ public class SetupTokensInteract {
                 Token localToken = tokensService.getToken(t.to);
                 if (t.input != null && t.input.length() > 2 && localToken == null && !unknownTokens.contains(t.to))
                 {
-                    unknownTokens.add(t.to);
+                    if (t.error.equals("0")) unknownTokens.add(t.to); //only add token to scan if it wasn't an error transaction
                 }
                 if (localToken != null)
                 {

@@ -8,38 +8,23 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionType;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 
@@ -398,14 +383,12 @@ public class TransactionsViewModel extends BaseViewModel
 
     private Transaction[] removeFromMapTx(Transaction[] transactions)
     {
-        Log.d(TAG, "GOT: " + transactions.length );
         //first remove all these transactions from the network + cached list
         for (Transaction t : transactions)
         {
             txMap.remove(t.hash);
         }
 
-        Log.d(TAG, "Remaining unknown: " + txMap.size() );
         transactionCount += transactions.length;
         return transactions;
     }

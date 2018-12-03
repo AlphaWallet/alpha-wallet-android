@@ -378,14 +378,12 @@ public class TransactionsViewModel extends BaseViewModel
 
     private Transaction[] removeFromMapTx(Transaction[] transactions)
     {
-        Log.d(TAG, "GOT: " + transactions.length );
         //first remove all these transactions from the network + cached list
         for (Transaction t : transactions)
         {
             txMap.remove(t.hash);
         }
 
-        Log.d(TAG, "Remaining unknown: " + txMap.size() );
         transactionCount += transactions.length;
         return transactions;
     }

@@ -1,17 +1,9 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
 import android.os.Bundle;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
-import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
@@ -27,6 +19,9 @@ import io.stormbird.wallet.ui.widget.entity.TransactionSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TransactionDateHolder;
 import io.stormbird.wallet.ui.widget.holder.TransactionHolder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
@@ -140,10 +135,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
         for (Transaction transaction : transactions)
         {
-            if (transaction.hash.equals("0x35fb8a58b989f8409bd7183b0abc5d540620f3a9322f8578bbe9afbdb99200a2"))
-            {
-                System.out.println(transaction.hash);
-            }
             TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
             TransactionSortedItem sortedItem = new TransactionSortedItem(
                     TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);

@@ -27,6 +27,7 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
+import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
 
@@ -74,6 +75,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             {
                 return null;
             }
+        }
+        catch (Exception e)
+        {
+            return null;
         }
     }
 

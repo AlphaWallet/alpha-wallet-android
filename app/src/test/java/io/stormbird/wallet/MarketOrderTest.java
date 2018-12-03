@@ -172,6 +172,12 @@ public class MarketOrderTest
             {
                 return null;
             }
+
+            @Override
+            public Transaction fetchCachedTransaction(String walletAddr, String hash)
+            {
+                return null;
+            }
         };
 
         marketService = new MarketQueueService(null, null, transactionRepository, passwordStore);

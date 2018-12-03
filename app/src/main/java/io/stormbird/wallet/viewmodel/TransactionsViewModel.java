@@ -8,38 +8,23 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionType;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 
@@ -75,13 +60,10 @@ public class TransactionsViewModel extends BaseViewModel
     private Handler handler = new Handler();
 
     private boolean isVisible = false;
-    private Transaction[] txArray;
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private List<Transaction> txContractList = new ArrayList<>();
     private int transactionCount;
     private boolean restoreRequired = false;
-    private boolean immediateCycleStart = false;//this is used to flag the need to start a new cycle,
-                                                // usually only seen when importing a new wallet with a lot of transactions on it
     private long latestBlock = 0;
 
     TransactionsViewModel(
@@ -133,7 +115,6 @@ public class TransactionsViewModel extends BaseViewModel
 
         fetchTransactionDisposable = null;
 
-        txArray = null;
         txMap.clear();
     }
 
@@ -209,7 +190,7 @@ public class TransactionsViewModel extends BaseViewModel
      */
     private void onTransactions(Transaction[] transactions) {
         Log.d(TAG, "Found " + transactions.length + " Cached transactions");
-        txArray = transactions;
+        updateDisplay(transactions);
 
         for (Transaction tx : transactions)
         {
@@ -227,13 +208,8 @@ public class TransactionsViewModel extends BaseViewModel
         if (restoreRequired)
         {
             latestBlock = 0;
-            txArray = new Transaction[0];
             txMap.clear();
             restoreRequired = false;
-        }
-        else
-        {
-            updateDisplay(txArray);
         }
 
         Log.d(TAG, "Fetching network transactions.");
@@ -251,7 +227,6 @@ public class TransactionsViewModel extends BaseViewModel
      * @param transactions
      */
     private void onUpdateTransactions(Transaction[] transactions) {
-        Log.d(TAG, "Found " + transactions.length + " Network transactions");
         //check against existing transactions
         List<Transaction> newTxs = new ArrayList<Transaction>();
         for (Transaction tx : transactions)
@@ -260,12 +235,18 @@ public class TransactionsViewModel extends BaseViewModel
             {
                 txMap.put(tx.hash, tx);
                 newTxs.add(tx);
+                if (Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
             }
         }
 
         if (newTxs.size() > 0)
         {
-            updateDisplay(newTxs.toArray(new Transaction[0]));
+            Log.d(TAG, "Found " + transactions.length + " Network transactions");
+            //store new transactions, so they will appear in the transaction view, then update the view
+            disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), newTxs.toArray(new Transaction[0]))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::updateDisplay, this::onError);
         }
     }
 
@@ -291,8 +272,7 @@ public class TransactionsViewModel extends BaseViewModel
         //stop the spinner
         progress.postValue(false);
         Log.d(TAG, "Enumerating tokens");
-        txArray = txMap.values().toArray(new Transaction[0]);
-        transactionCount += txArray.length;
+        transactionCount += txMap.size();
         txContractList.clear();
 
         if (wallet.getValue() != null)
@@ -303,6 +283,7 @@ public class TransactionsViewModel extends BaseViewModel
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
+                    .filter(token -> !token.independentUpdate())//don't scan ERC721 transactions
                     .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
@@ -346,7 +327,6 @@ public class TransactionsViewModel extends BaseViewModel
     {
         transactions.postValue(txContractList.toArray(new Transaction[0]));
         txContractList.clear();
-        immediateCycleStart = false;
 
         fetchTransactionDisposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), txMap.values().toArray(new Transaction[0]))
                 .flatMap(transactions -> setupTokensInteract.getUnknownTokens(transactions, tokensService, txMap))
@@ -428,14 +408,8 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void checkIfRegularUpdateNeeded()
     {
-        if (immediateCycleStart)
-        {
-            handler.removeCallbacks(startFetchTransactionsTask);
-            handler.postDelayed(
-                    startFetchTransactionsTask,
-                    100);
-        }
-        else if (!isVisible)
+        txMap.clear();
+        if (!isVisible)
         {
             //no longer any need to refresh
             Log.d(TAG, "Finish");
@@ -485,7 +459,7 @@ public class TransactionsViewModel extends BaseViewModel
         externalBrowserRouter.open(context, uri);
     }
 
-    private final Runnable startFetchTransactionsTask = () -> this.fetchTransactions(false);
+    private final Runnable startFetchTransactionsTask = this::fetchNetworkTransactions;
 
     //Called from the activity when it comes into view,
     //start updating transactions
@@ -580,5 +554,10 @@ public class TransactionsViewModel extends BaseViewModel
     public TokensService getTokensService()
     {
         return tokensService;
+    }
+
+    public FetchTransactionsInteract provideTransactionsInteract()
+    {
+        return fetchTransactionsInteract;
     }
 }

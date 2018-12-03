@@ -80,7 +80,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
 
-        adapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService());
+        adapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService(),
+                                          viewModel.provideTransactionsInteract());
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
 

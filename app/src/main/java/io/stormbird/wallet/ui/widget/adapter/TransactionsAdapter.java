@@ -15,7 +15,9 @@ import java.util.Map;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
+import io.stormbird.wallet.entity.TransactionMeta;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 import io.stormbird.wallet.ui.widget.entity.DateSortedItem;
@@ -72,9 +74,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     private NetworkInfo network;
     private Map<String, TransactionSortedItem> checkMap = new HashMap<>();
     private final TokensService tokensService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
 
-    public TransactionsAdapter(OnTransactionClickListener onTransactionClickListener, TokensService service) {
+    public TransactionsAdapter(OnTransactionClickListener onTransactionClickListener, TokensService service,
+                               FetchTransactionsInteract fetchTransactionsInteract) {
         this.onTransactionClickListener = onTransactionClickListener;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
         tokensService = service;
         setHasStableIds(true);
     }
@@ -85,7 +90,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE: {
                 TransactionHolder transactionHolder
-                        = new TransactionHolder(R.layout.item_transaction, parent, tokensService);
+                        = new TransactionHolder(R.layout.item_transaction, parent, tokensService, fetchTransactionsInteract);
                 transactionHolder.setOnTransactionClickListener(onTransactionClickListener);
                 holder = transactionHolder;
             } break;
@@ -129,46 +134,21 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         return position;
     }
 
-    private void createMap()
-    {
-        checkMap.clear();
-        for (int i = 0; i < items.size(); i++)
-        {
-            SortedItem I = items.get(i);
-            if (I instanceof TransactionSortedItem)
-            {
-                TransactionSortedItem tsi = (TransactionSortedItem) I;
-                checkMap.put(tsi.value.hash, tsi);
-            }
-        }
-    }
-
     public void updateTransactions(Transaction[] transactions)
     {
-        createMap();
-
         items.beginBatchedUpdates();
 
         for (Transaction transaction : transactions)
         {
+            if (transaction.hash.equals("0x35fb8a58b989f8409bd7183b0abc5d540620f3a9322f8578bbe9afbdb99200a2"))
+            {
+                System.out.println(transaction.hash);
+            }
+            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
             TransactionSortedItem sortedItem = new TransactionSortedItem(
-                    TransactionHolder.VIEW_TYPE, transaction, TimestampSortedItem.DESC);
-
-            if (checkMap.containsKey(transaction.hash))
-            {
-                TransactionSortedItem data = checkMap.get(transaction.hash);
-                int position = items.indexOf(data);
-                if (!data.value.contentHash.equals(transaction.contentHash))
-                {
-                    items.updateItemAt(position, sortedItem);
-                    notifyItemChanged(position);
-                }
-            }
-            else
-            {
-                items.add(sortedItem);
-                items.add(DateSortedItem.round(transaction.timeStamp));
-            }
+                    TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+            items.add(sortedItem);
+            items.add(DateSortedItem.round(transaction.timeStamp));
         }
 
         items.endBatchedUpdates();

@@ -12,17 +12,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionLookup;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.TransactionType;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -30,7 +25,7 @@ import java.math.RoundingMode;
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 
-public class TransactionHolder extends BinderViewHolder<Transaction> implements View.OnClickListener {
+public class TransactionHolder extends BinderViewHolder<TransactionMeta> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1003;
 
@@ -45,12 +40,13 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     private final ImageView typeIcon;
     private final TextView supplimental;
     private final TokensService tokensService;
+    private final FetchTransactionsInteract transactionsInteract;
 
     private Transaction transaction;
     private String defaultAddress;
     private OnTransactionClickListener onTransactionClickListener;
 
-    public TransactionHolder(int resId, ViewGroup parent, TokensService service) {
+    public TransactionHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact) {
         super(resId, parent);
 
         typeIcon = findViewById(R.id.type_icon);
@@ -59,6 +55,7 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
         value = findViewById(R.id.value);
         supplimental = findViewById(R.id.supplimental);
         tokensService = service;
+        transactionsInteract = interact;
 
         typeIcon.setColorFilter(
                 ContextCompat.getColor(getContext(), R.color.item_icon_tint),
@@ -68,13 +65,17 @@ public class TransactionHolder extends BinderViewHolder<Transaction> implements 
     }
 
     @Override
-    public void bind(@Nullable Transaction data, @NonNull Bundle addition) {
-        transaction = data; // reset
+    public void bind(@Nullable TransactionMeta data, @NonNull Bundle addition) {
+        defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
+        supplimental.setText("");
+
+        //fetch data from database
+        String hash = data.hash;
+        transaction = transactionsInteract.fetchCached(tokensService.getCurrentAddress(), hash);
+
         if (this.transaction == null) {
             return;
         }
-        defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
-        supplimental.setText("");
 
         String networkSymbol = addition.getString(DEFAULT_SYMBOL_ADDITIONAL);
         // If operations include token transfer, display token transfer instead

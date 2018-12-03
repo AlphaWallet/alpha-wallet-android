@@ -185,7 +185,6 @@ public class WalletsActivity extends BaseActivity implements
             showToolbar();
             if (resultCode == RESULT_OK)
             {
-                viewModel.fetchWallets();
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
                 onScanBlockReceived(0); //reset scan block
@@ -193,13 +192,10 @@ public class WalletsActivity extends BaseActivity implements
 				Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
 				if (importedWallet != null)
 				{
+				    isSetDefault = true;
+				    walletChange = true;
 					viewModel.setDefaultWallet(importedWallet);
 				}
-                if (adapter.getItemCount() <= 1) {
-                    viewModel.showHome(this);
-                }
-
-                sendBroadcast(new Intent(RESET_WALLET));
             }
         } else if (requestCode == SHARE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {

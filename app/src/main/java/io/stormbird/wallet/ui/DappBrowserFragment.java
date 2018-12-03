@@ -37,11 +37,7 @@ import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.URLLoadInterface;
-import io.stormbird.wallet.entity.URLLoadReceiver;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.util.Utils;
@@ -180,7 +176,6 @@ public class DappBrowserFragment extends Fragment implements
         }
         web3.setChainId(networkInfo.chainId);
         String rpcURL = networkInfo.rpcServerUrl;
-        if (networkInfo.backupNodeUrl != null) rpcURL = networkInfo.backupNodeUrl;
         web3.setRpcUrl(rpcURL);
         web3.setWalletAddress(new Address(wallet.address));
 

@@ -61,6 +61,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Transaction fetchCachedTransaction(String walletAddr, String hash)
+	{
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		Wallet wallet = new Wallet(walletAddr);
+		return inDiskCache.fetchTransaction(networkInfo, wallet, hash);
+	}
+
+	@Override
 	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 		return fetchFromNetwork(networkInfo, wallet, lastBlock, userAddress)

@@ -22,4 +22,6 @@ public interface TransactionRepositoryType {
 	Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList);
 
     Single<Integer> queryInterfaceSpec(Token token);
+
+    Transaction fetchCachedTransaction(String walletAddr, String hash);
 }

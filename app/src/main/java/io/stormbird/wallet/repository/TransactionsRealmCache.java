@@ -58,6 +58,26 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	}
 
     @Override
+    public Transaction fetchTransaction(NetworkInfo networkInfo, Wallet wallet, String hash)
+    {
+        try (Realm instance = realmManager.getRealmInstance(networkInfo, wallet))
+        {
+            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                    .equalTo("hash", hash)
+                    .findFirst();
+
+            if (realmTx != null)
+            {
+                return convert(realmTx);
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    @Override
 	public Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
         return Completable.fromAction(() -> {
             Realm instance = null;

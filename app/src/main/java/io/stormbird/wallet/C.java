@@ -115,7 +115,7 @@ public abstract class C {
         String FROM_SETTINGS = "from_settings";
     }
 
-    public static final String ETH_RPC_URL = "https://mainnet.infura.io/llyrtzQ3YhkdESt2Fzrk";
+    public static final String ETH_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String DAPP_LASTURL_KEY = "dappURL";
     public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";

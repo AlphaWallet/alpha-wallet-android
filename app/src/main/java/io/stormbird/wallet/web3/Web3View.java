@@ -5,38 +5,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-
-import com.google.gson.Gson;
+import android.webkit.*;
+import io.stormbird.wallet.web3.entity.Address;
+import io.stormbird.wallet.web3.entity.Message;
+import io.stormbird.wallet.web3.entity.TypedData;
+import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-
-import io.stormbird.wallet.C;
-import io.stormbird.wallet.web3.entity.Address;
-import io.stormbird.wallet.web3.entity.Message;
-import io.stormbird.wallet.web3.entity.Web3Transaction;
-import io.stormbird.wallet.web3.entity.TypedData;
 
 import static io.stormbird.wallet.C.PAGE_LOADED;
 
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
-    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "onSignSuccessful(%1$s, \"%2$s\")";
-    private static final String JS_PROTOCOL_ON_FAILURE = "onSignError(%1$s, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
+
     @Nullable
     private OnSignTransactionListener onSignTransactionListener;
     @Nullable
@@ -82,7 +72,7 @@ public class Web3View extends WebView {
     private void init() {
         jsInjectorClient = new JsInjectorClient(getContext());
         webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
-        WebSettings webSettings = getSettings();
+        WebSettings webSettings = super.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setBuiltInZoomControls(true);
@@ -94,23 +84,21 @@ public class Web3View extends WebView {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
+
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
-                innerOnSignTypedMessageListener,
-                innerOnVerifyListener,
-                innerOnGetBalanceListener), "trust");
+                innerOnSignTypedMessageListener), "alpha");
 
         super.setWebViewClient(webViewClient);
     }
 
-//    @Override
-//    public WebSettings getSettings() {
-//        return new WrapWebSettings(super.getSettings());
-//    }
-
+    @Override
+    public WebSettings getSettings() {
+        return new WrapWebSettings(super.getSettings());
+    }
 
     public void setWalletAddress(@NonNull Address address) {
         jsInjectorClient.setWalletAddress(address);
@@ -203,26 +191,6 @@ public class Web3View extends WebView {
     public void onSignCancel(Message message) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
-    }
-
-    public void onVerify(String recoveredAddress, String result) {
-        post(() -> {
-            loadUrl("javascript:(function() {" +
-                    "alert('" + result + "');" +
-                    "verificationAddressBox.value = '" + recoveredAddress + "';" +
-                    "})()");
-        });
-    }
-
-    public void onGetBalance(String balance) {
-        post(() -> {
-            loadUrl("javascript:(function() {" +
-                    "var balanceDiv = document.createElement('div');" +
-                    "balanceDiv.style.cssText = 'color:white';" +
-                    "balanceDiv.innerHTML = 'Wallet Balance: " + balance + "';" +
-                    "document.getElementsByClassName('container')[0].appendChild(balanceDiv);" +
-                    "})()");
-        });
     }
 
     private void callbackToJS(long callbackId, String function, String param) {

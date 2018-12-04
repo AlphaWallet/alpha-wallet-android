@@ -44,4 +44,9 @@ public class FetchTransactionsInteract {
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }
+
+    public Transaction fetchCached(String walletAddress, String hash)
+    {
+        return transactionRepository.fetchCachedTransaction(walletAddress, hash);
+    }
 }

@@ -923,6 +923,20 @@ public class Ticket extends Token implements Parcelable
         return false;
     }
 
+    @Override
+    public String getTransactionAmount(Transaction transaction)
+    {
+        if (transaction.operations != null && transaction.operations.length > 0)
+        {
+            ERC875ContractTransaction ct = (ERC875ContractTransaction)transaction.operations[0].contract;
+            return String.valueOf(ct.indices.size());
+        }
+        else
+        {
+            return "0";
+        }
+    }
+
     private enum InterfaceType
     {
         NotSpecified, UsingUint16, UsingUint256

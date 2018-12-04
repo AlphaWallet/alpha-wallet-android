@@ -159,4 +159,18 @@ public class ERC721Token extends Token implements Parcelable
     public boolean isCurrency() {
         return false;
     }
+
+    @Override
+    public String getTransactionAmount(Transaction transaction)
+    {
+        if (transaction.operations != null && transaction.operations.length > 0)
+        {
+            TransactionOperation operation = transaction.operations[0];
+            return "#" + operation.value;
+        }
+        else
+        {
+            return "-"; //Placeholder - should never see this
+        }
+    }
 }

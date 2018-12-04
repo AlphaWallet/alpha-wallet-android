@@ -494,4 +494,44 @@ public class Token implements Parcelable
     }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean unspecifiedSpec() { return false; };
+
+    /**
+     * On given a transaction, this method will display transaction details.
+     * NB This method is overridden for each token contract type eg ERC20, ERC875, ERC721
+     * @param transaction
+     * @return
+     */
+    public String getTransactionAmount(Transaction transaction)
+    {
+        if (isEthereum())
+        {
+            return getScaledValue(transaction.value, tokenInfo.decimals);
+        }
+        else
+        {
+            if (transaction.operations != null && transaction.operations.length > 0)
+            {
+                TransactionOperation operation = transaction.operations[0];
+                return getScaledValue(operation.value, tokenInfo.decimals);
+            }
+            else
+            {
+                return "0";
+            }
+        }
+    }
+
+    /**
+     * Universal scaled value method
+     * @param valueStr
+     * @param decimals
+     * @return
+     */
+    public static String getScaledValue(String valueStr, long decimals) {
+        // Perform decimal conversion
+        BigDecimal value = new BigDecimal(valueStr);
+        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
+        int scale = 4;
+        return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+    }
 }

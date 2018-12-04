@@ -27,6 +27,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import io.stormbird.wallet.entity.ENSCallback;
+import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import org.web3j.abi.datatypes.Address;
 
 import java.math.BigDecimal;
@@ -59,7 +61,6 @@ import static io.stormbird.wallet.C.Key.WALLET;
 
 public class SendActivity extends BaseActivity implements Runnable, ItemClickListener
 {
-    public  static final int ENS_RESOLVE_DELAY = 1500; //In milliseconds
     private static final String KEY_ADDRESS = "key_address";
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -89,15 +90,9 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     TextView myAddressText;
     TextView amountSymbolText;
     AWalletAlertDialog dialog;
-    LinearLayout layoutENSResolve;
-    private TextWatcher ensTextWatcher;
-    TextView textENS;
-    private String ensName;
 
-    private AutoCompleteUrlAdapter adapterUrl;
+    private ENSHandler ensHandler;
     Handler handler;
-    private volatile boolean waitingForENS = false;
-    private boolean transferAfterENS = false;
 
     //Token
     TextView balanceEth;
@@ -129,9 +124,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        viewModel.ensResolve().observe(this, this::onENSSuccess);
-        viewModel.ensFail().observe(this, this::hideENS);
-
         myAddress = wallet.address;
 
         setupTokenContent();
@@ -153,36 +145,25 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     private void setupAddressEditField()
     {
-        adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        toAddressEditText.setAdapter(adapterUrl);
-        toAddressEditText.setOnClickListener(v -> toAddressEditText.showDropDown());
-
-        waitingForENS = false;
-
-        ensTextWatcher = new TextWatcher()
+        ENSCallback ensCallback = new ENSCallback()
         {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            public void ENSComplete()
             {
-
+                onStartTransfer();
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
+            public void ENSCheck(String name)
             {
-                toAddressError.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                textENS.setText("");
-                checkAddress();
+                viewModel.checkENSAddress(name);
             }
         };
-
-        toAddressEditText.addTextChangedListener(ensTextWatcher);
+        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
+        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
+        viewModel.ensFail().observe(this, ensHandler::hideENS);
     }
 
     private void onNewEthPrice(Double ethPrice)
@@ -225,8 +206,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         ethDetailLayout = findViewById(R.id.layout_eth_detail);
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLayout = findViewById(R.id.layout_usd_price);
-        layoutENSResolve = findViewById(R.id.layout_ens);
-        textENS = findViewById(R.id.text_ens_resolve);
 
         startTransferButton = findViewById(R.id.button_start_transfer);
         startTransferButton.setOnClickListener(v -> onStartTransfer());
@@ -264,16 +243,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         toAddressEditText = findViewById(R.id.edit_to_address);
     }
 
-    private void checkAddress()
-    {
-        if (!transferAfterENS)
-        {
-            waitingForENS = true;
-            handler.removeCallbacks(this);
-            handler.postDelayed(this, ENS_RESOLVE_DELAY);
-        }
-    }
-
     private void copyAddress()
     {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -297,45 +266,14 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
 
         toAddressError.setVisibility(View.GONE);
-        String to = getAddressFromEditView();
+        String to = ensHandler.getAddressFromEditView();
         if (to == null) return;
 
         if (isValid)
         {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amountEditText.getText().toString(), decimals);
-            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensName);
+            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName());
         }
-    }
-
-    private String getAddressFromEditView()
-    {
-        //check send address
-        ensName = null;
-        toAddressError.setVisibility(View.GONE);
-        String to = toAddressEditText.getText().toString();
-        if (!isAddressValid(to))
-        {
-            String ens = to;
-            to = textENS.getText().toString();
-            ensName = "@" + ens + " (" + to + ")";
-        }
-
-        if (!isAddressValid(to))
-        {
-            to = null;
-            if (waitingForENS)
-            {
-                transferAfterENS = true;
-                onENSProgress(true);
-            }
-            else
-            {
-                toAddressError.setVisibility(View.VISIBLE);
-                toAddressError.setText(getString(R.string.error_invalid_address));
-            }
-        }
-
-        return to;
     }
 
     private void onBack()
@@ -423,15 +361,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         handler.removeCallbacksAndMessages(null);
     }
 
-    boolean isAddressValid(String address) {
-        try {
-            new Address(address);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     boolean isValidAmount(String eth) {
         try {
             String wei = BalanceUtils.EthToWei(eth);
@@ -448,23 +377,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    private void onENSProgress(boolean shouldShowProgress)
-    {
-        if (shouldShowProgress)
-        {
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(AWalletAlertDialog.NONE);
-            dialog.setTitle(R.string.title_dialog_check_ens);
-            dialog.setProgressMode();
-            dialog.setCancelable(false);
-            dialog.show();
-        }
-        else if (dialog != null && dialog.isShowing())
-        {
-            dialog.dismiss();
         }
     }
 
@@ -506,56 +418,12 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     @Override
     public void run()
     {
-        //address update delay check
-        final String to = toAddressEditText.getText().toString();
-        if (to.length() > 2 && !to.startsWith("0x"))
-        {
-            viewModel.checkENSAddress(to);
-        }
-        else
-        {
-            waitingForENS = false;
-        }
-    }
-
-    private void onENSSuccess(String address)
-    {
-        waitingForENS = false;
-        toAddressEditText.dismissDropDown();
-        layoutENSResolve.setVisibility(View.VISIBLE);
-        textENS.setText(address);
-        if (toAddressEditText.hasFocus()) KeyboardUtils.hideKeyboard(getCurrentFocus()); //user was waiting for ENS, not in the middle of typing a value etc
-        checkIfWaitingForENS();
-        toAddressError.setVisibility(View.GONE);
-    }
-
-    private void hideENS(String name)
-    {
-        waitingForENS = false;
-        layoutENSResolve.setVisibility(View.GONE);
-        checkIfWaitingForENS();
-    }
-
-    private void checkIfWaitingForENS()
-    {
-        onENSProgress(false);
-        if (transferAfterENS)
-        {
-            transferAfterENS = false;
-            onStartTransfer();
-        }
+        ensHandler.checkENS();
     }
 
     @Override
     public void onItemClick(String url)
     {
-        toAddressEditText.removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
-        toAddressEditText.setText(url);
-        toAddressEditText.addTextChangedListener(ensTextWatcher);
-        toAddressEditText.dismissDropDown();
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
-        handler.removeCallbacksAndMessages(this);
-        waitingForENS = true;
-        run();
+        ensHandler.handleHistoryItemClick(url);
     }
 }

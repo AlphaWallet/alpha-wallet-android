@@ -110,11 +110,6 @@ public class FetchTokensInteract {
         return tokenRepository.getEthTicker();
     }
 
-    public Single<String> callAddressMethod(String method, byte[] resultHash, String address)
-    {
-        return tokenRepository.callAddressMethod(method, resultHash, address);
-    }
-
     private OrderContractAddressPair mapToPair(Token token, MagicLinkData so)
     {
         OrderContractAddressPair pair = new OrderContractAddressPair();

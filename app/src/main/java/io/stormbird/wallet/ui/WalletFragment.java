@@ -116,6 +116,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
         isVisible = true;
 
+        viewModel.clearProcess();
+
         return view;
     }
 

@@ -144,13 +144,12 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     public void reloadTokens()
     {
         assetDefinitionService.clearCheckTimes();
+        clearProcess();
         fetchTokens();
     }
 
     public void fetchTokens()
     {
-        clearProcess();
-
         if (defaultNetwork.getValue() != null && defaultWallet.getValue() != null)
         {
             tokenCache = null;

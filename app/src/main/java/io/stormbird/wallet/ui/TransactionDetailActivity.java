@@ -12,10 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.TransactionDetailViewModel;
 import io.stormbird.wallet.viewmodel.TransactionDetailViewModelFactory;
@@ -39,6 +36,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
     private Transaction transaction;
     private TextView amount;
+    private Token token;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,7 +69,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-
+        token = viewModel.getToken(transaction.to);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -80,30 +78,21 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         String symbol;
         long decimals = 18;
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-        if (transaction.operations == null || transaction.operations.length == 0 || transaction.operations[0].contract instanceof ERC875ContractTransaction) {
-            rawValue = transaction.value;
-            symbol = networkInfo == null ? "" : networkInfo.symbol;
-        } else {
-            rawValue = transaction.operations[0].value;
-            decimals = transaction.operations[0].contract.decimals;
-            symbol = transaction.operations[0].contract.symbol;
+        if (token != null)
+        {
+            rawValue = token.getTransactionAmount(transaction);
+            symbol = token.tokenInfo.symbol;
+        }
+        else
+        {
+            rawValue = Token.getScaledValue(transaction.value, decimals);
+            symbol = networkInfo.symbol;
         }
 
         amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
-        if (rawValue.equals("0")) {
-            rawValue = "0 " + symbol;
-        } else {
-            rawValue = (isSent ? "-" : "+") + getScaledValue(rawValue, decimals) + " " + symbol;
-        }
-        amount.setText(rawValue);
-    }
+        rawValue = (isSent ? "-" : "+") + rawValue + " " + symbol;
 
-    private String getScaledValue(String valueStr, long decimals) {
-        // Perform decimal conversion
-        BigDecimal value = new BigDecimal(valueStr);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = 3 - value.precision() + value.scale();
-        return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+        amount.setText(rawValue);
     }
 
     private String getDate(long timeStampInSec) {

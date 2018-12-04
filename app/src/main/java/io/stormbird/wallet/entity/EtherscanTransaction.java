@@ -95,8 +95,6 @@ public class EtherscanTransaction
                 if (f.functionData != null)
                 {
                     //recover recipient
-                    //no need for passTo: address is embedded in the tx Input.
-                    //may be desirable for iOS though.
                     switch (f.functionData.functionFullName)
                     {
                         case "trade(uint256,uint16[],uint8,bytes32,bytes32)":
@@ -258,15 +256,16 @@ public class EtherscanTransaction
             long expiry = Long.valueOf(expiryStr, 16);
             BigInteger priceWei = new BigInteger(value);
             contractAddress = to;
-            byte[] tradeBytes = parser.getTradeBytes(ticketIndexArray, contractAddress, priceWei, expiry);
-            //attempt ecrecover
-            BigInteger key = Sign.signedMessageToKey(tradeBytes, sig);
-
             o = generateERC875Op();
             TransactionOperation op = o[0];
             TransactionContract ct = op.contract;
-
-            ct.setOtherParty("0x" + Keys.getAddress(key));
+            if (isError.equals("0")) //don't bother checking signature unless the transaction succeeded
+            {
+                byte[] tradeBytes = parser.getTradeBytes(ticketIndexArray, contractAddress, priceWei, expiry);
+                //attempt ecrecover
+                BigInteger key = Sign.signedMessageToKey(tradeBytes, sig);
+                ct.setOtherParty("0x" + Keys.getAddress(key));
+            }
             ct.address = contractAddress;
             ct.setIndicies(f.paramValues);
             ct.name = contractAddress;

@@ -124,7 +124,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				response = httpClient.newCall(request).execute();
 
 				result = response.body().string();
-				if (result.length() < 80 && result.contains("No transactions found"))
+				if (result != null && result.length() < 80 && result.contains("No transactions found"))
                 {
                     result = null;
                 }

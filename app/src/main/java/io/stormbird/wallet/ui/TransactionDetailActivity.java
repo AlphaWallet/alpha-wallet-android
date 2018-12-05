@@ -70,6 +70,27 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
         token = viewModel.getToken(transaction.to);
+
+        String operationName = null;
+        if (token != null)
+        {
+            ((TextView)findViewById(R.id.contract_name)).setText(token.getFullName());
+            operationName = token.getOperationName(transaction, getApplicationContext());
+        }
+        else
+        {
+            findViewById(R.id.contract_name_title).setVisibility(View.GONE);
+            findViewById(R.id.contract_name).setVisibility(View.GONE);
+        }
+
+        if (operationName != null)
+        {
+            ((TextView)findViewById(R.id.transaction_name)).setText(operationName);
+        }
+        else
+        {
+            findViewById(R.id.transaction_name).setVisibility(View.GONE);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -80,7 +101,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
         if (token != null)
         {
-            rawValue = token.getTransactionAmount(transaction);
+            rawValue = token.getTransactionAmount(transaction, getApplicationContext());
             symbol = token.tokenInfo.symbol;
         }
         else

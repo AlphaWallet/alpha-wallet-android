@@ -1,6 +1,7 @@
 package io.stormbird.wallet.entity;
 
 
+import android.content.Context;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -48,7 +49,7 @@ public class EtherscanTransaction
     private static TransactionDecoder ensDecoder = null;
     private static ParseMagicLink parser = null;
 
-    public Transaction createTransaction(String walletAddress)
+    public Transaction createTransaction(String walletAddress, Context ctx)
     {
         boolean isConstructor = false;
         TransactionOperation[] o;
@@ -136,7 +137,7 @@ public class EtherscanTransaction
                             op = o[0];
                             op.from = from;
                             op.to = f.getFirstAddress();
-                            op.value = String.valueOf(f.getFirstValue());
+                            op.value = String.valueOf(f.getFirstValue(ctx));
                             op.contract.address = to;
                             setName(o, TransactionType.TRANSFER_TO);
                             break;
@@ -145,10 +146,28 @@ public class EtherscanTransaction
                             op = o[0];
                             op.from = f.getFirstAddress();
                             op.to = f.getAddress(1);
-                            op.value = String.valueOf(f.getFirstValue());
+                            op.value = String.valueOf(f.getFirstValue(ctx));
                             op.contract.address = to;
                             setName(o, TransactionType.TRANSFER_FROM);
                             op.contract.setType(1);
+                            break;
+                        case "allocateTo(address,uint256)":
+                            o = generateERC20Op();
+                            op = o[0];
+                            op.from = from;
+                            op.to = f.getFirstAddress();
+                            op.value = String.valueOf(f.getFirstValue(ctx));
+                            op.contract.address = to;
+                            setName(o, TransactionType.ALLOCATE_TO);
+                            break;
+                        case "approve(address,uint256)":
+                            o = generateERC20Op();
+                            op = o[0];
+                            op.from = from;
+                            op.to = f.getFirstAddress();
+                            op.value = String.valueOf(f.getFirstValue(ctx));
+                            op.contract.address = to;
+                            setName(o, TransactionType.APPROVE);
                             break;
                         case "loadNewTickets(bytes32[])":
                         case "loadNewTickets(uint256[])":
@@ -167,7 +186,7 @@ public class EtherscanTransaction
                             op.from = from;
                             op.to = f.getFirstAddress();
                             //value in what?
-                            op.value = String.valueOf(f.getFirstValue());
+                            op.value = String.valueOf(f.getFirstValue(ctx));
                             op.contract.address = to;
                             setName(o, TransactionType.PASS_TO);
                             op.contract.setType(-1);
@@ -288,6 +307,10 @@ public class EtherscanTransaction
             if (ct instanceof ERC875ContractTransaction)
             {
                 ((ERC875ContractTransaction) ct).operation = name;
+            }
+            else
+            {
+                op.contract.name = "*" + String.valueOf(name.ordinal());
             }
         }
     }

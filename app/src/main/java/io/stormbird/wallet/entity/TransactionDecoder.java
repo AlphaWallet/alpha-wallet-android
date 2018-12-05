@@ -257,12 +257,14 @@ public class TransactionDecoder
             "transferFrom(address,address,uint16[])",
             "transfer(address,uint16[])",
             "trade(uint256,uint16[],uint8,bytes32,bytes32)",
+            //ERC20 functions
             "transfer(address,uint256)",
             "transferFrom(address,address,uint256)",
             "approve(address,uint256)",
+            "allocateTo(address,uint256)",
+            //ERC875
             "loadNewTickets(bytes32[])",
             "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)",
-            //updated ERC875 function sigs
             "transferFrom(address,address,uint256[])",
             "transfer(address,uint256[])",
             "trade(uint256,uint256[],uint8,bytes32,bytes32)",
@@ -278,6 +280,7 @@ public class TransactionDecoder
             false,  //transferFrom
             false,  //transfer
             true,
+            false,  //ERC20
             false,
             false,
             false,
@@ -308,6 +311,7 @@ public class TransactionDecoder
             ERC875,
             ERC875,
             ERC20,   //transferFrom
+            ERC20,
             ERC20,
             ERC20,
             ERC875,

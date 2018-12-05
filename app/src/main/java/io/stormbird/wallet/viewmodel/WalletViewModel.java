@@ -275,7 +275,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private void updateBalances()
     {
         if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
-        {            run();
+        {
+            run();
         }
     }
 
@@ -371,6 +372,18 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
+        if (visibility)
+        {
+            //check if we need a refresh
+            if (tokensService.getAllTokens().size() == 0)
+            {
+                prepare();
+            }
+            else if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
+            {
+                updateTokenBalances();
+            }
+        }
     }
 
     public void reStartTokenUpdate()

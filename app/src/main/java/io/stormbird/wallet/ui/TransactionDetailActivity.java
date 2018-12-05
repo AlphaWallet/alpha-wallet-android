@@ -70,6 +70,11 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
         token = viewModel.getToken(transaction.to);
+
+        if (transaction.error != null && transaction.error.equals("1"))
+        {
+            findViewById(R.id.failed).setVisibility(View.VISIBLE);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet) {

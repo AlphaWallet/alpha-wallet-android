@@ -33,6 +33,17 @@
                 android:textSize="25sp" />
 
             <TextView
+                android:id="@+id/failed"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/font_bold"
+                android:textColor="@color/red"
+                android:text="@string/failed"
+                android:textSize="18sp" />
+
+            <TextView
                 android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -73,6 +73,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String hash = data.hash;
         transaction = transactionsInteract.fetchCached(tokensService.getCurrentAddress(), hash);
 
+        if (data.hash.startsWith("0x942b"))
+        {
+            System.out.println("yoless");
+        }
+
         if (this.transaction == null) {
             return;
         }
@@ -227,13 +232,17 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String name = tokensService.getTokenName(operation.contract.address);
         String symbol = tokensService.getTokenSymbol(operation.contract.address);
         int decimals = tokensService.getTokenDecimals(operation.contract.address);
+        Token token = tokensService.getToken(operation.contract.address);
 
         String from = operation.from;
 
         String supplimentalTxt = "";
 
         boolean isSent = from.toLowerCase().equals(defaultAddress);
-        type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
+        String operationName = token != null ? token.getOperationName(transaction, getContext()) : null;
+        if (operationName == null) operationName = isSent ? getString(R.string.sent) : getString(R.string.received);
+        type.setText(operationName);
+
         if (txSuccess)
         {
             if (!isSent)
@@ -260,12 +269,20 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         setSuccessIndicator(txSuccess, supplimentalTxt);
 
-        String valueStr = operation.value;
+        String valueStr;
+        if (token != null)
+        {
+            valueStr = (isSent ? "-" : "+") + token.getTransactionValue(transaction, getContext());
+        }
+        else
+        {
+            valueStr = operation.value;
 
-        if (valueStr.equals("0")) {
-            valueStr = "0 " + symbol;
-        } else {
-            valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;
+            if (valueStr.equals("0")) {
+                valueStr = valueStr + " " + symbol;
+            } else {
+                valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;
+            }
         }
 
         this.value.setText(valueStr);

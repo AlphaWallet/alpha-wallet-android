@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,6 +129,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                 {
                     result = null;
                 }
+			}
+			catch (InterruptedIOException e)
+			{
+				//If user switches account or network during a fetch
+				//this exception is going to be thrown because we're terminating the API call
+				//Don't display error
 			}
 			catch (Exception e)
 			{

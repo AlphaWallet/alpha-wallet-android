@@ -1,5 +1,6 @@
 package io.stormbird.wallet.service;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
@@ -35,14 +36,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
     private final OkHttpClient httpClient;
 	private final Gson gson;
 	private final EthereumNetworkRepositoryType networkRepository;
+	private final Context context;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
 			Gson gson,
-			EthereumNetworkRepositoryType networkRepository) {
+			EthereumNetworkRepositoryType networkRepository,
+			Context context) {
 		this.httpClient = httpClient;
 		this.gson = gson;
 		this.networkRepository = networkRepository;
+		this.context = context;
 	}
 
 	@Override
@@ -63,7 +67,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-					    Transaction tx = etx.createTransaction(userAddress);
+					    Transaction tx = etx.createTransaction(userAddress, context);
 					    if (tx != null)
                         {
                             result.add(tx);
@@ -219,7 +223,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-						Transaction tx = etx.createTransaction(null);
+						Transaction tx = etx.createTransaction(null, context);
 						if (tx.isConstructor && tx.operations.length > 0)
 						{
 							TransactionContract ct = tx.operations[0].contract;

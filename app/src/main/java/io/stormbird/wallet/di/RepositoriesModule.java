@@ -113,8 +113,9 @@ public class RepositoriesModule {
     TransactionsNetworkClientType provideBlockExplorerClient(
 			OkHttpClient httpClient,
 			Gson gson,
-			EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new TransactionsNetworkClient(httpClient, gson, ethereumNetworkRepository);
+			EthereumNetworkRepositoryType ethereumNetworkRepository,
+			Context context) {
+		return new TransactionsNetworkClient(httpClient, gson, ethereumNetworkRepository, context);
 	}
 
 	@Singleton

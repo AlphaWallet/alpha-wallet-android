@@ -501,7 +501,7 @@ public class Token implements Parcelable
      * @param transaction
      * @return
      */
-    public String getTransactionAmount(Transaction transaction)
+    public String getTransactionAmount(Transaction transaction, Context ctx)
     {
         if (isEthereum())
         {
@@ -512,13 +512,55 @@ public class Token implements Parcelable
             if (transaction.operations != null && transaction.operations.length > 0)
             {
                 TransactionOperation operation = transaction.operations[0];
-                return getScaledValue(operation.value, tokenInfo.decimals);
+                if (operation.value.equals(ctx.getString(R.string.all)))
+                {
+                    return operation.value;
+                }
+                else
+                {
+                    return getScaledValue(operation.value, tokenInfo.decimals);
+                }
             }
             else
             {
                 return "0";
             }
         }
+    }
+
+    public String getOperationName(Transaction transaction, Context ctx)
+    {
+        String name = null;
+        // Attempt to show ERC20 transaction type
+        try
+        {
+            if (transaction.operations != null && transaction.operations.length > 0)
+            {
+                TransactionOperation operation = transaction.operations[0];
+
+                if (operation.contract != null && operation.contract.name != null)
+                {
+                    String typeName = operation.contract.name;
+                    if (typeName.charAt(0) == '*')
+                    {
+                        int operationType = Integer.parseInt(typeName.substring(1));
+                        name = ctx.getString(TransactionLookup.typeToName(TransactionType.values()[operationType]));
+                    }
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            //Silent fail, number was invalid just display default
+        }
+
+        return name;
+    }
+
+    public String getTransactionValue(Transaction transaction, Context ctx)
+    {
+        String value = getTransactionAmount(transaction, ctx);
+        return value + " " + tokenInfo.symbol;
     }
 
     /**

@@ -924,7 +924,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public String getTransactionAmount(Transaction transaction)
+    public String getTransactionAmount(Transaction transaction, Context ctx)
     {
         if (transaction.operations != null && transaction.operations.length > 0)
         {
@@ -934,6 +934,20 @@ public class Ticket extends Token implements Parcelable
         else
         {
             return "0";
+        }
+    }
+
+    @Override
+    public String getOperationName(Transaction transaction, Context ctx)
+    {
+        if (transaction.operations != null && transaction.operations.length > 0)
+        {
+            ERC875ContractTransaction ct = (ERC875ContractTransaction)transaction.operations[0].contract;
+            return ctx.getString(TransactionLookup.typeToName(ct.operation));
+        }
+        else
+        {
+            return null;
         }
     }
 

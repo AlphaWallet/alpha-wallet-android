@@ -161,7 +161,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String getTransactionAmount(Transaction transaction)
+    public String getTransactionAmount(Transaction transaction, Context ctx)
     {
         if (transaction.operations != null && transaction.operations.length > 0)
         {

@@ -284,25 +284,6 @@ public class Web3View extends WebView {
             }
 
             loadingError = false;
-
-            /* Inject javascript to override verify button onclick */
-            view.loadUrl("javascript:(function() { " +
-                    "var messageBox = document.getElementById('messageBox');" +
-                    "var verifyMessageBox = document.getElementById('verifyMessageBox');" +
-                    "var signatureBox = document.getElementById('signatureBox');" +
-                    "var verificationAddressBox = document.getElementById('verificationAddressBox');" +
-                    "var verifyBtn = document.getElementById('verifyButton');" +
-                    "if (verifyBtn) verifyBtn.onclick = function(){ " +
-                    "trust.verify(verifyMessageBox.value, signatureBox.value); " +
-                    "};" +
-                    // Get Balance
-                    "var account = web3.eth.accounts[0];" +
-                    "var walletBalance = web3.eth.getBalance(account, " +
-                    "function(error, result) { " +
-                    "if (error) alert(error);" +
-                    "trust.getBalance(result.toString());" +
-                    "});" +
-                    "})()");
         }
 
         @Override

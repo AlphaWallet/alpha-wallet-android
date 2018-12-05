@@ -926,28 +926,31 @@ public class Ticket extends Token implements Parcelable
     @Override
     public String getTransactionAmount(Transaction transaction, Context ctx)
     {
-        if (transaction.operations != null && transaction.operations.length > 0)
+        if (transaction.operations != null && transaction.operations.length > 0
+                && transaction.operations[0].contract instanceof ERC875ContractTransaction)
         {
             ERC875ContractTransaction ct = (ERC875ContractTransaction)transaction.operations[0].contract;
             return String.valueOf(ct.indices.size());
         }
         else
         {
-            return "0";
+            return super.getTransactionAmount(transaction, ctx);
         }
     }
+
 
     @Override
     public String getOperationName(Transaction transaction, Context ctx)
     {
-        if (transaction.operations != null && transaction.operations.length > 0)
+        if (transaction.operations != null && transaction.operations.length > 0
+                && transaction.operations[0].contract instanceof ERC875ContractTransaction)
         {
             ERC875ContractTransaction ct = (ERC875ContractTransaction)transaction.operations[0].contract;
             return ctx.getString(TransactionLookup.typeToName(ct.operation));
         }
         else
         {
-            return null;
+            return super.getOperationName(transaction, ctx);
         }
     }
 

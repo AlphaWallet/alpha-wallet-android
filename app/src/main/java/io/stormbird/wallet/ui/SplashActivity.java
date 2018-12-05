@@ -45,8 +45,7 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        System.out.println();
-        if (BuildConfig.BUILD_TYPE.equals("release")) //only implement Crashalytics for release builds
+        if (!BuildConfig.DEBUG) //only implement Crashlytics for release builds
         {
             Fabric.with(this, new Crashlytics());
         }

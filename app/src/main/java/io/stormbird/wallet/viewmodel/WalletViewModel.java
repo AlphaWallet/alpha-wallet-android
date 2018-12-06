@@ -60,6 +60,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
     private final TokensService tokensService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
@@ -88,7 +89,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            OpenseaService openseaService)
+            OpenseaService openseaService,
+            FetchTransactionsInteract fetchTransactionsInteract)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -103,6 +105,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
         this.tokensService = tokensService;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
     }
 
     public LiveData<Token[]> tokens() {
@@ -385,8 +388,9 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         disposable = fetchAllContractAddresses()
                 .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
-                .flatMap(tokenAddress -> setupTokensInteract.addToken(tokenAddress, true)) //TODO: determine contract type from constructor
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
+                .flatMap(tokenAddress -> setupTokensInteract.addToken(tokenAddress))
+                .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .filter(token -> (token != null && (token.tokenInfo.name != null || token.tokenInfo.symbol != null)))
                 .subscribeOn(Schedulers.io())
@@ -411,7 +415,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         nullTokensCheckDisposable = Observable.fromCallable(tokensService::getAllTokens)
                 .flatMapIterable(token -> token)
                 .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
-                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress(), false))
+                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .subscribeOn(Schedulers.io())
                 .subscribe(addTokenInteract::addS, this::onError,

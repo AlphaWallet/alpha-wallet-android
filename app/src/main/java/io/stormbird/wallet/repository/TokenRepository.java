@@ -414,13 +414,13 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, int interfaceSpec)
+    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec)
     {
         TokenFactory tf = new TokenFactory();
-        Token newToken = tf.createToken(tokenInfo);
+        Token newToken = tf.createToken(tokenInfo, interfaceSpec);
+
         newToken.setTokenWallet(wallet.address);
         newToken.setTokenNetwork(ethereumNetworkRepository.getDefaultNetwork().chainId);
-        newToken.setInterfaceSpec(interfaceSpec);
         Log.d(TAG, "Create for store4: " + tokenInfo.name);
 
         return localSource.saveToken(
@@ -555,8 +555,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<TokenInfo> update(String contractAddr, boolean contractHint) {
-        return setupTokensFromLocal(contractAddr, contractHint).toObservable();
+    public Observable<TokenInfo> update(String contractAddr) {
+        return setupTokensFromLocal(contractAddr).toObservable();
     }
 
     @Override
@@ -1246,17 +1246,13 @@ public class TokenRepository implements TokenRepositoryType {
         return tokens;
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address, boolean contractHint)
+    private Single<TokenInfo> setupTokensFromLocal(String address)
     {
         return Single.fromCallable(() -> {
             try
             {
                 long now = System.currentTimeMillis();
-                Boolean isStormbird = contractHint;
-                if (!isStormbird)
-                {
-                    isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
-                }
+                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
                 if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,

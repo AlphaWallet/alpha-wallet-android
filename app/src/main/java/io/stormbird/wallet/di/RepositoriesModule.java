@@ -83,9 +83,10 @@ public class RepositoriesModule {
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository,
 			TransactionsNetworkClientType blockExplorerClient,
-			WalletDataRealmSource walletDataRealmSource) {
+			WalletDataRealmSource walletDataRealmSource,
+			OkHttpClient httpClient) {
 		return new WalletRepository(
-		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource);
+		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource, httpClient);
 	}
 
 	@Singleton

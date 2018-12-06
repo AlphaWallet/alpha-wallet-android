@@ -92,7 +92,6 @@ public class TokenRepository implements TokenRepositoryType {
         HttpService publicNodeService = new HttpService(defaultNetwork.rpcServerUrl, client, false);
 
         web3j = Web3jFactory.build(publicNodeService);
-        ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
         disposable = getIsSyncing()
@@ -123,7 +122,6 @@ public class TokenRepository implements TokenRepositoryType {
     {
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(network.backupNodeUrl);
         web3j = Web3jFactory.build(publicNodeService);
-        ethereumNetworkRepository.setActiveRPC(network.backupNodeUrl);
     }
 
     private Single<Boolean> getIsSyncing()

@@ -147,7 +147,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         if (isResumed()) { // fragment created
             viewModel.setVisibility(isVisible);
             if (isVisible) {
-                viewModel.reStartTokenUpdate();
+                viewModel.prepare();
             }
         }
     }

@@ -122,7 +122,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     @Override
     protected void onCleared() {
         super.onCleared();
-        clearProcess();
     }
 
     //we changed wallets or network, ensure we clean up before displaying new data
@@ -277,7 +276,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private void updateBalances()
     {
         if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
-        {            run();
+        {
+            run();
         }
     }
 
@@ -339,11 +339,23 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         return defaultWalletBalance;
     }
 
-    public void prepare() {
-        progress.postValue(true);
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+    public void prepare()
+    {
+        if (defaultNetwork.getValue() == null || defaultWallet.getValue() == null)
+        {
+            progress.postValue(true);
+            disposable = findDefaultNetworkInteract
+                    .find()
+                    .subscribe(this::onDefaultNetwork, this::onError);
+        }
+        else if (tokensService.getAllTokens().size() == 0)
+        {
+            fetchTokens();
+        }
+        else if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
+        {
+            updateTokenBalances();
+        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -373,14 +385,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
-    }
-
-    public void reStartTokenUpdate()
-    {
-        if (updateTokens == null || updateTokens.isDisposed())
-        {
-            fetchTokens();
-        }
     }
 
     private void setContractAddresses()

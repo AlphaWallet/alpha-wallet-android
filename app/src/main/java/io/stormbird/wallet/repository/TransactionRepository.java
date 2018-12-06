@@ -2,6 +2,7 @@ package io.stormbird.wallet.repository;
 
 import android.util.Log;
 
+import io.stormbird.wallet.entity.*;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
@@ -23,10 +24,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
@@ -237,9 +234,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<Integer> queryInterfaceSpec(Token token)
+	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return blockExplorerClient.checkConstructorArgs(networkInfo, token.getAddress());
+		return blockExplorerClient.checkConstructorArgs(networkInfo, tokenInfo.address);
 	}
 }

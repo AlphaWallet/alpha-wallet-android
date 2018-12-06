@@ -111,20 +111,25 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private void fillERC875(boolean txSuccess, Transaction trans, ERC875ContractTransaction ct)
     {
         int colourResource;
-        TransactionOperation operation = transaction.operations[0];
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
         String name = tokensService.getTokenName(ct.address);
+        Token token = tokensService.getToken(ct.address);
 
         address.setText(name);
         supplimental.setTextSize(12.0f);
 
         String ticketMove = "";
-        String supplimentalTxt = "";
 
-        if (ct.indices != null && ct.indices.size() > 0)
+        if (token != null)
+        {
+            ticketMove = token.getTransactionValue(trans, getContext());
+        }
+        else if (ct.indices != null && ct.indices.size() > 0)
         {
             ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
         }
+
+        String supplimentalTxt = "";
 
         switch (ct.operation)
         {
@@ -146,7 +151,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
                 supplimentalTxt = "";//"+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
             case LOAD_NEW_TOKENS:
-                ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
+                //ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
                 break;
             case PASS_TO:
                 break;
@@ -272,13 +277,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String valueStr;
         if (token != null)
         {
-            valueStr = (isSent ? "-" : "+") + token.getTransactionValue(transaction, getContext());
+            valueStr = token.getTransactionValue(transaction, getContext());
         }
         else
         {
             valueStr = operation.value;
 
-            if (valueStr.equals("0")) {
+            if (valueStr.equals("0") || !Character.isDigit(valueStr.charAt(0))) {
                 valueStr = valueStr + " " + symbol;
             } else {
                 valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;

@@ -97,21 +97,29 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         boolean isSent = transaction.from.toLowerCase().equals(wallet.address);
         String rawValue;
         String symbol;
+        String prefix = "";
         long decimals = 18;
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
+        if (token == null && (transaction.input == null || transaction.input.equals("0x")))
+        {
+            token = viewModel.getToken(wallet.address);
+            prefix = (isSent ? "-" : "+");
+        }
+
         if (token != null)
         {
-            rawValue = token.getTransactionAmount(transaction, getApplicationContext());
-            symbol = token.tokenInfo.symbol;
+            rawValue = token.getTransactionValue(transaction, getApplicationContext());
+            symbol = "";
         }
         else
         {
             rawValue = Token.getScaledValue(transaction.value, decimals);
             symbol = networkInfo.symbol;
+            prefix = (isSent ? "-" : "+");
         }
 
         amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
-        rawValue = (isSent ? "-" : "+") + rawValue + " " + symbol;
+        rawValue =  prefix + rawValue + " " + symbol;
 
         amount.setText(rawValue);
     }

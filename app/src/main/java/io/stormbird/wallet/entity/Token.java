@@ -495,57 +495,25 @@ public class Token implements Parcelable
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean unspecifiedSpec() { return false; };
 
-    /**
-     * On given a transaction, this method will display transaction details.
-     * NB This method is overridden for each token contract type eg ERC20, ERC875, ERC721
-     * @param transaction
-     * @return
-     */
-    public String getTransactionAmount(Transaction transaction, Context ctx)
-    {
-        if (isEthereum())
-        {
-            return getScaledValue(transaction.value, tokenInfo.decimals);
-        }
-        else
-        {
-            if (transaction.operations != null && transaction.operations.length > 0)
-            {
-                TransactionOperation operation = transaction.operations[0];
-                if (operation.value.equals(ctx.getString(R.string.all)))
-                {
-                    return operation.value;
-                }
-                else
-                {
-                    return getScaledValue(operation.value, tokenInfo.decimals);
-                }
-            }
-            else
-            {
-                return "0";
-            }
-        }
-    }
-
     public String getOperationName(Transaction transaction, Context ctx)
     {
         String name = null;
-        // Attempt to show ERC20 transaction type
         try
         {
             if (transaction.operations != null && transaction.operations.length > 0)
             {
                 TransactionOperation operation = transaction.operations[0];
-
-                if (operation.contract != null && operation.contract.name != null)
+                name = operation.getOperationName(ctx);
+            }
+            else
+            {
+                if (transaction.from.equals(tokenWallet))
                 {
-                    String typeName = operation.contract.name;
-                    if (typeName.charAt(0) == '*')
-                    {
-                        int operationType = Integer.parseInt(typeName.substring(1));
-                        name = ctx.getString(TransactionLookup.typeToName(TransactionType.values()[operationType]));
-                    }
+                    name = ctx.getString(R.string.sent);
+                }
+                else
+                {
+                    name = ctx.getString(R.string.received);
                 }
             }
         }
@@ -555,12 +523,6 @@ public class Token implements Parcelable
         }
 
         return name;
-    }
-
-    public String getTransactionValue(Transaction transaction, Context ctx)
-    {
-        String value = getTransactionAmount(transaction, ctx);
-        return value + " " + tokenInfo.symbol;
     }
 
     /**
@@ -575,5 +537,45 @@ public class Token implements Parcelable
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
         int scale = 4;
         return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+    }
+
+    public String getTransactionValue(Transaction transaction, Context context)
+    {
+        String result = "0";
+        if (transaction.error.equals("1"))
+        {
+            return "";
+        }
+        else if (transaction.operations != null && transaction.operations.length > 0)
+        {
+            result = transaction.operations[0].getValue(tokenInfo.decimals);
+        }
+        else if (!transaction.value.equals("0"))
+        {
+            result = getScaledValue(transaction.value, tokenInfo.decimals);
+        }
+
+        if (result.length() > 0 && tokenInfo.symbol != null)
+        {
+            result = result + " " + tokenInfo.symbol;
+        }
+
+        result = addSuffix(result, transaction);
+
+        return result;
+    }
+
+    protected String addSuffix(String result, Transaction transaction)
+    {
+        if (transaction.from.equals(tokenWallet))
+        {
+            result = "-" + result;
+        }
+        else
+        {
+            result = "+" + result;
+        }
+
+        return result;
     }
 }

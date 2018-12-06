@@ -64,6 +64,7 @@ public class EtherscanTransaction
             ct.setOperation(TransactionType.CONSTRUCTOR);// R.string.ticket_contract_constructor);
             ct.address = contractAddress;
             ct.setType(-3);// indicate that we need to load the contract
+            o[0].value = "";
             isConstructor = true;
             //TODO: We can detect ERC20, ERC875 and other Token contracts here
             if (detectUint16Contract(input))
@@ -104,6 +105,7 @@ public class EtherscanTransaction
                             op = o[0];
                             setName(o, TransactionType.MAGICLINK_TRANSFER);
                             op.contract.address = to;
+                            op.value = String.valueOf(f.paramValues.size());
                             break;
                         case "transferFrom(address,address,uint16[])":
                         case "transferFrom(address,address,uint256[])":
@@ -121,6 +123,7 @@ public class EtherscanTransaction
                             op.contract.setType(-1);
                             op.contract.address = to;
                             op.contract.setOtherParty(f.getFirstAddress());
+                            op.value = String.valueOf(f.paramValues.size());
                             op.to = f.getAddress(1);
                             break;
                         case "transfer(address,uint16[])":
@@ -130,6 +133,7 @@ public class EtherscanTransaction
                             op.contract.setOtherParty(f.getFirstAddress());
                             op.contract.setIndicies(f.paramValues);
                             setName(o, TransactionType.TRANSFER_TO);
+                            op.value = String.valueOf(f.paramValues.size());
                             op.contract.address = to;
                             break;
                         case "transfer(address,uint256)":
@@ -185,8 +189,7 @@ public class EtherscanTransaction
                             op = o[0];
                             op.from = from;
                             op.to = f.getFirstAddress();
-                            //value in what?
-                            op.value = String.valueOf(f.getFirstValue(ctx));
+                            op.value = String.valueOf(f.paramValues.size());
                             op.contract.address = to;
                             setName(o, TransactionType.PASS_TO);
                             op.contract.setType(-1);
@@ -199,6 +202,7 @@ public class EtherscanTransaction
                             ct.name = to;
                             ct.setType(-2);
                             setName(o, TransactionType.TERMINATE_CONTRACT);
+                            op.value = "";
                             ct.address = to;
                             break;
                         default:

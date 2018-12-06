@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.google.gson.Gson;
 
+import io.stormbird.wallet.entity.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,21 +18,13 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.EtherscanTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
-	private final int PAGESIZE = 300;
+	private final int PAGESIZE = 800;
 
     private final OkHttpClient httpClient;
 	private final Gson gson;
@@ -208,10 +201,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Single<Integer> checkConstructorArgs(NetworkInfo networkInfo, String address)
+	public Single<ContractType> checkConstructorArgs(NetworkInfo networkInfo, String address)
 	{
 		return Single.fromCallable(() -> {
-			int result = 256;
+			ContractType result = ContractType.OTHER;
 			try
 			{
 				String response = readTransactions(networkInfo, address, "0", true, 1, 5);
@@ -227,7 +220,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 						if (tx.isConstructor && tx.operations.length > 0)
 						{
 							TransactionContract ct = tx.operations[0].contract;
-							result = ct.decimals;
+							result = ContractType.values()[ct.decimals];
 							break;
 						}
 					}

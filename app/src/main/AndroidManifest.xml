@@ -69,17 +69,11 @@
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity
             android:name="io.stormbird.wallet.ui.TransactionDetailActivity"
             android:label="@string/title_transaction_details" />
         <activity
             android:name="io.stormbird.wallet.ui.MyAddressActivity"
             android:label="@string/title_my_address" />
-        <activity
-            android:name="io.stormbird.wallet.ui.TokensActivity"
-            android:label="@string/title_my_tokens" />
 
         <activity
             android:name="io.stormbird.wallet.ui.SendActivity"
@@ -105,10 +99,6 @@
         <activity
             android:name="io.stormbird.wallet.ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
-
-        <activity
-            android:name="io.stormbird.wallet.ui.TokenChangeCollectionActivity"
-            android:label="@string/title_tokens" />
 
         <activity
             android:name="io.stormbird.wallet.ui.SellTicketActivity"

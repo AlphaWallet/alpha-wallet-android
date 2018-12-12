@@ -16,6 +16,7 @@ import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -511,6 +512,8 @@ public class Token implements Parcelable
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; };
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
+    public void addToBurnList(List<Uint16> burnList) { }
+    public List<Integer> getBurnList() { return null; }
 
     public String getOperationName(Transaction transaction, Context ctx)
     {

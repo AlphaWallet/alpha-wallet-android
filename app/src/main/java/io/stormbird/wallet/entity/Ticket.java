@@ -157,6 +157,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     //Burn handling
+    @Override
     public void addToBurnList(List<Uint16> burnUpdate)
     {
         for (Uint16 b : burnUpdate) {
@@ -249,6 +250,7 @@ public class Ticket extends Token implements Parcelable
         return indicies;
     }
 
+    @Override
     public List<Integer> getBurnList()
     {
         return burnIndices;

@@ -73,11 +73,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String hash = data.hash;
         transaction = transactionsInteract.fetchCached(tokensService.getCurrentAddress(), hash);
 
-        if (data.hash.startsWith("0x942b"))
-        {
-            System.out.println("yoless");
-        }
-
         if (this.transaction == null) {
             return;
         }
@@ -133,27 +128,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         switch (ct.operation)
         {
-            case MAGICLINK_TRANSFER: //transferred out of our wallet via magic link (0 value)
-                break;
-            case MAGICLINK_PICKUP: //received ticket from a magic link
-                break;
-            case TRANSFER_TO:
-                break;
-            case TRANSFER_FROM:
-                break;
             case MAGICLINK_SALE: //we received ether from magiclink sale
                 supplimentalTxt = "+" + Token.getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
             case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
                 supplimentalTxt = "-" + Token.getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case RECEIVE_FROM:
-                supplimentalTxt = "";//"+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case LOAD_NEW_TOKENS:
-                //ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
-                break;
-            case PASS_TO:
                 break;
             default:
                 break;

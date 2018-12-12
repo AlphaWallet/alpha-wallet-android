@@ -79,7 +79,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        if (! data.isERC20)
+        if (! data.isERC20())
         {
             // TODO: apply styles for none ERC20 contracts
             contractType.setVisibility(View.GONE);

@@ -2,18 +2,15 @@ package io.stormbird.wallet.entity;
 
 
 import android.content.Context;
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.service.TokensService;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.util.Map;
 
-import io.stormbird.token.tools.Numeric;
-import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.wallet.service.TokensService;
-
 import static io.stormbird.wallet.C.BURN_ADDRESS;
-import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 
 /**
  * Created by James on 26/03/2018.
@@ -22,10 +19,7 @@ import static io.stormbird.wallet.entity.TransactionDecoder.buildMethodId;
 public class EtherscanTransaction
 {
     private static final String TENZID_REGISTER = "newSubdomain(string,string,string,address,address)";
-    //[{"blockNumber":"1671277","timeStamp":"1505373215","hash":"0x1b1717b6d32387041f7053a5ce3426e3c030ba557fcc458c3829abc8ad0601a9","nonce":"5","blockHash":"0x4389a76b07d5b6b82737aebb182b81758adb839431cf49669bf0c234201cdced","transactionIndex":"3",
-    // "from":"0xfde7b48f097102e736b45296d1ac6cb8a51426eb","to":"0x007bee82bdd9e866b2bd114780a47f2261c684e3","value":"500000000000000000",
-    // "gas":"31501","gasPrice":"4000000000","isError":"0","txreceipt_status":"","input":"0x","contractAddress":"",
-    // "cumulativeGasUsed":"184451","gasUsed":"21000","confirmations":"1236861"},
+
     public String blockNumber;
     long timeStamp;
     String hash;
@@ -54,6 +48,8 @@ public class EtherscanTransaction
         boolean isConstructor = false;
         TransactionOperation[] o;
         TransactionInput f = null;
+        if (decoder == null) decoder = new TransactionDecoder();
+        if (parser == null) parser = new ParseMagicLink();
 
         if (contractAddress.length() > 0)
         {
@@ -67,16 +63,10 @@ public class EtherscanTransaction
             o[0].value = "";
             isConstructor = true;
             //TODO: We can detect ERC20, ERC875 and other Token contracts here
-            if (detectUint16Contract(input))
-            {
-                ct.decimals = 16;
-            }
-            else
-            {
-                ct.decimals = 256;
-            }
+            ContractType type = decoder.getContractType(input);
+            ct.decimals = type.ordinal();
 
-            TokensService.setInterfaceSpec(contractAddress, ct.decimals);
+            TokensService.setInterfaceSpec(contractAddress, type);
 
             input = "Constructor"; //Placeholder - don't consume storage for the constructor
         }
@@ -90,8 +80,6 @@ public class EtherscanTransaction
                 TransactionOperation op = null;
                 TransactionContract ct = null;
 
-                if (decoder == null) decoder = new TransactionDecoder();
-                if (parser == null) parser = new ParseMagicLink();
                 f = decoder.decodeInput(input);
                 //is this a trade?
                 if (f.functionData != null)
@@ -332,15 +320,6 @@ public class EtherscanTransaction
         if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(walletAddr))
             involved = true;
         return involved;
-    }
-
-    private boolean detectUint16Contract(String input)
-    {
-        String transferFromSig = Numeric.cleanHexPrefix(buildMethodId("transfer(address,uint16[])"));
-        if (input.length() < 10) return false;
-
-        int index = input.indexOf(transferFromSig);
-        return index > 0;
     }
 
     public static void prepParser()

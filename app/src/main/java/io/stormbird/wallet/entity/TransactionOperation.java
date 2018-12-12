@@ -98,20 +98,7 @@ public class TransactionOperation implements Parcelable {
     {
         if (decimals > 1 && value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
         {
-            return Token.getScaledValue(value, decimals);
-        }
-        else if (contract instanceof ERC875ContractTransaction)
-        {
-            if (value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
-            {
-                BigInteger val = new BigInteger(value);
-                if (val.compareTo(BigInteger.valueOf(65535L)) > 0) //This can be removed after the next build
-                {
-                    //index out of range
-                    return contract.getIndicesSize();
-                }
-            }
-            return contract.getIndicesSize();
+            return Token.getScaledValue(value, decimals); //represent balance transfers according to 'decimals' contract indicator property
         }
         else if (value != null)
         {

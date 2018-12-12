@@ -96,6 +96,18 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
+    private void deleteRealmToken(Realm realm, String address)
+    {
+        RealmToken realmToken = realm.where(RealmToken.class)
+                .equalTo("address", address)
+                .findFirst();
+
+        if (realmToken != null)
+        {
+            realmToken.deleteFromRealm();
+        }
+    }
+
     private void checkTokenRealm(NetworkInfo networkInfo, Wallet wallet, Token[] tokens)
     {
         Map<String, Token> erc721Map = new HashMap<>();
@@ -122,7 +134,14 @@ public class TokensRealmSource implements TokenLocalSource {
     public Single<Token> saveToken(NetworkInfo networkInfo, Wallet wallet, Token token) {
         return Single.fromCallable(() -> {
             Date now = new Date();
-            saveToken(networkInfo, wallet, token, now);
+            if (token instanceof ERC721Token)
+            {
+                saveERC721Token(wallet, token, now);
+            }
+            else
+            {
+                saveToken(networkInfo, wallet, token, now);
+            }
             return token;
         });
     }
@@ -436,7 +455,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 TokenFactory tf = new TokenFactory();
                 TokenInfo info = tf.createTokenInfo(realmToken);
-                result = tf.createTokenBalance(info, realmToken, realmToken.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
+                result = tf.createToken(info, realmToken, realmToken.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
                 result.setTokenWallet(wallet.address);
                 result.setTokenNetwork(network.chainId);
             }
@@ -568,7 +587,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setAddedTime(currentTime.getTime());
                     token.setRealmInterfaceSpec(realmToken);
                     token.setRealmAuxData(realmToken);
-                    token.setRealmBalance(realmToken);
+                    //token.setRealmBalance(realmToken);
                     realmToken.setEnabled(true);
                     realm.commitTransaction();
                     TransactionsRealmCache.subRealm();
@@ -583,6 +602,26 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realm != null) {
                 realm.close();
             }
+        }
+    }
+
+    /**
+     * Store single ERC721 token
+     * @param wallet
+     * @param token
+     * @param now
+     */
+    private void saveERC721Token(Wallet wallet, Token token, Date now)
+    {
+        try (Realm realm = realmManager.getERC721RealmInstance(wallet))
+        {
+            realm.beginTransaction();
+            saveERC721Token(realm, wallet, token, now);
+            realm.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -601,6 +640,11 @@ public class TokensRealmSource implements TokenLocalSource {
         //initial check to ensure all assets in this class have the same contract
         AssetContract contract = null;
         String address = token.tokenInfo.address;
+
+        String contractName = null;
+        String contractSymbol = null;
+        String schemaName = null;
+
         for (Asset asset : e.tokenBalance)
         {
             if (address != null)
@@ -616,8 +660,21 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 address = asset.getAssetContract().getAddress();
                 contract = asset.getAssetContract();
+
+                contractName = contract.getName();
+                contractSymbol = contract.getSymbol();
+                schemaName = contract.getSchemaName();
             }
         }
+
+        if (contractName == null)
+        {
+            contractName = token.tokenInfo.name;
+            contractSymbol = token.tokenInfo.symbol;
+            schemaName = "ERC721";
+        }
+
+        deleteRealmToken(realm, address); //in case it was recorded as normal token
 
         RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
                 .equalTo("address", address)
@@ -628,11 +685,11 @@ public class TokensRealmSource implements TokenLocalSource {
             //create new storage
             Log.d(TAG, "Save New ERC721 Token: " + token.tokenInfo.name + " :" + address);
             realmToken = realm.createObject(RealmERC721Token.class, address);
-            realmToken.setName(contract.getName());
-            realmToken.setSymbol(contract.getSymbol());
+            realmToken.setName(contractName);
+            realmToken.setSymbol(contractSymbol);
             realmToken.setAddedTime(currentTime.getTime());
             realmToken.setUpdatedTime(currentTime.getTime());
-            realmToken.setSchemaName(contract.getSchemaName());
+            realmToken.setSchemaName(schemaName);
             realmToken.setTokenIdList(e.tokenBalance);
         }
         else
@@ -796,19 +853,24 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private Token[] convertBalance(RealmResults<RealmToken> realmItems, long now, Wallet wallet, int network) throws Exception
     {
-        int len = realmItems.size();
         TokenFactory tf = new TokenFactory();
-        Token[] result = new Token[len];
-        for (int i = 0; i < len; i++) {
-            RealmToken realmItem = realmItems.get(i);
-            if (realmItem != null) {
+        List<Token> tokenList = new ArrayList<>();
+        for (RealmToken realmItem : realmItems)
+        {
+            if (realmItem != null)
+            {
                 TokenInfo info = tf.createTokenInfo(realmItem);
-                result[i] = tf.createTokenBalance(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
-                result[i].setTokenWallet(wallet.address);
-                result[i].setTokenNetwork(network);
+                Token token = tf.createToken(info, realmItem, realmItem.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
+                if (token != null)
+                {
+                    token.setTokenWallet(wallet.address);
+                    token.setTokenNetwork(network);
+                    tokenList.add(token);
+                }
             }
         }
-        return result;
+
+        return tokenList.toArray(new Token[0]);
     }
 
     private Token convertSingle(RealmResults<RealmToken> realmItems, long now) {

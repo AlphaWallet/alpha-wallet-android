@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.util.Log;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -278,12 +279,13 @@ public class TransactionsViewModel extends BaseViewModel
         if (wallet.getValue() != null)
         {
             //Fetch all stored tokens, but no eth
-            //TODO: after the map addTokenToChecklist stage we should be using a reduce instead of filtering in the fetch function
             fetchTransactionDisposable = Observable.fromCallable(tokensService::getAllTokens)
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
                     .filter(token -> !token.independentUpdate())//don't scan ERC721 transactions
+                    .concatMap(this::checkSpec)
+                    .filter(token -> token.checkIntrinsicType()) //Don't scan tokens that appear to be setup incorrectly
                     .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
@@ -293,6 +295,21 @@ public class TransactionsViewModel extends BaseViewModel
         {
             siftUnknownTransactions();
         }
+    }
+
+    private Observable<Token> checkSpec(Token token)
+    {
+        return Observable.fromCallable(() -> {
+            ContractType fromService = tokensService.getInterfaceSpec(token.getAddress());
+            token.setInterfaceSpec(fromService);
+
+            if (!token.isBad() && !token.checkIntrinsicType())
+            {
+                setupTokensInteract.tokenHasBadSpec(token.getAddress());
+            }
+
+            return token;
+        });
     }
 
     private void onContractTransactions(Transaction[] transactions)
@@ -343,7 +360,8 @@ public class TransactionsViewModel extends BaseViewModel
     private void queryUnknownTokens(List<String> unknownTokens)
     {
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
-                .flatMap(address -> setupTokensInteract.addToken(address, assetDefinitionService.hasDefinition(address))) //fetch tokenInfo
+                .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
+                .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address))) //add to database
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
@@ -441,8 +459,7 @@ public class TransactionsViewModel extends BaseViewModel
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        this.wallet.setValue(wallet);
-        fetchTransactions(true);
+        this.wallet.postValue(wallet);
     }
 
     public void showDetails(Context context, Transaction transaction) {

@@ -217,10 +217,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 viewModel.showAddToken(getContext());
             }
             break;
-            case R.id.action_edit: {
-                viewModel.showEditTokens(getContext());
-            }
-            break;
             case android.R.id.home: {
                 //adapter.clear();
                 //viewModel.showTransactions(getContext());

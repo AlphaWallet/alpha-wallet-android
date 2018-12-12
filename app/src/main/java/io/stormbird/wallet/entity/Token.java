@@ -7,6 +7,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
@@ -35,11 +36,10 @@ public class Token implements Parcelable
     public BigDecimal balance;
     public long updateBlancaTime;
     public boolean balanceIsLive = false;
-    public boolean isERC20 = false; //TODO: when we see ERC20 functions in transaction decoder switch this on
-    private boolean isEth = false;
     private String tokenWallet;
     private short tokenNetwork;
     private boolean requiresAuxRefresh = true;
+    protected ContractType contractType;
 
     public TokenTicker ticker;
     protected Map<String, String> auxData;
@@ -335,11 +335,14 @@ public class Token implements Parcelable
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
+        if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
         if (tokenInfo.name != null && realmToken.getName() == null) return true; //signal to update database if correct name has been fetched (node timeout etc)
         if (tokenInfo.name == null && realmToken.getName() != null) return true;
         if (tokenInfo.symbol == null && realmToken.getSymbol() != null) return true;
+        if (tokenInfo.name != null && realmToken.getName() != null) return true;
+        if (tokenInfo.symbol != null && realmToken.getSymbol() == null) return true;
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
         if (tokenInfo.isStormbird != realmToken.isStormbird()) return true;
         if (checkAuxDataChanged(realmToken)) return true;
@@ -406,11 +409,11 @@ public class Token implements Parcelable
 
     public void setIsEthereum()
     {
-        isEth = true;
+        contractType = ContractType.ETHEREUM;
     }
     public boolean isEthereum()
     {
-        return (tokenInfo != null && tokenInfo.symbol != null && isEth);
+        return contractType == ContractType.ETHEREUM;
     }
 
     public boolean isBad()
@@ -449,15 +452,31 @@ public class Token implements Parcelable
         return !getFullBalance().equals(token.getFullBalance());
     }
 
+    public void setRealmInterfaceSpec(RealmToken realmToken)
+    {
+        if (isEthereum()) contractType = ContractType.ETHEREUM;
+        realmToken.setInterfaceSpec(contractType.ordinal());
+    }
+
+    public void setInterfaceSpecFromRealm(RealmToken realm)
+    {
+        if (realm.getInterfaceSpec() > ContractType.CREATION.ordinal())
+        {
+            //need to re-sync this contract
+            this.contractType = ContractType.NOT_SET;
+        }
+        else
+        {
+            this.contractType = ContractType.values()[realm.getInterfaceSpec()];
+        }
+    }
+
     /**
      * Stub functions - these are intended to be overridden in inherited classes.
-     * This is a consequence of OO design. Is is good? Only the software seers can say, but
-     * it is a workable standard for now.
      */
-    public void setInterfaceSpec(int b) { }
+    public void setInterfaceSpec(ContractType type) { contractType = type; }
+    public ContractType getInterfaceSpec() { return contractType; }
     public boolean isOldSpec() { return false; }
-    public void setInterfaceSpecFromRealm(RealmToken ordinal) { }
-    public void setRealmInterfaceSpec(RealmToken realmToken) { }
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         return null;
@@ -488,12 +507,10 @@ public class Token implements Parcelable
     }
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
     public void setRealmBurn(RealmToken realmToken, List<Integer> burnList) { }
-    public List<Integer> indexToIDList(int[] prunedIndices)
-    {
-        return null;
-    }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
-    public boolean unspecifiedSpec() { return false; };
+    public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; };
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
+    public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
 
     public String getOperationName(Transaction transaction, Context ctx)
     {
@@ -560,7 +577,10 @@ public class Token implements Parcelable
             result = result + " " + tokenInfo.symbol;
         }
 
-        result = addSuffix(result, transaction);
+        if (result.length() > 0 && !result.equals("0"))
+        {
+            result = addSuffix(result, transaction);
+        }
 
         return result;
     }
@@ -577,5 +597,34 @@ public class Token implements Parcelable
         }
 
         return result;
+    }
+
+    public boolean checkIntrinsicType()
+    {
+        return (contractType == ContractType.ETHEREUM || contractType == ContractType.ERC20 || contractType == ContractType.OTHER);
+    }
+
+    public boolean isERC20()
+    {
+        return contractType == ContractType.ERC20;
+    }
+
+    public boolean hasArrayBalance()
+    {
+        return false;
+    }
+
+    public String getTokenName(AssetDefinitionService assetService)
+    {
+        //see if this token is covered by any contract
+        int networkId = assetService.getNetworkId(getAddress());
+        if (networkId >= 1)
+        {
+            return assetService.getAssetDefinition(getAddress()).getTokenName();
+        }
+        else
+        {
+            return tokenInfo.name;
+        }
     }
 }

@@ -468,7 +468,11 @@ public class Token implements Parcelable
         }
         else
         {
-            this.contractType = ContractType.values()[realm.getInterfaceSpec()];
+            //sanity check
+            ContractType fromRealm = ContractType.values()[realm.getInterfaceSpec()];
+            if (fromRealm == ContractType.ETHEREUM && !tokenInfo.symbol.contains(ETH_SYMBOL))
+                fromRealm = ContractType.NOT_SET;
+            this.contractType = fromRealm;
         }
     }
 

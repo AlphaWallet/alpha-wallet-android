@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
+import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 
@@ -16,7 +17,7 @@ public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
-    private static Map<String, Integer> interfaceSpecMap = new ConcurrentHashMap<>();
+    private static Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
     private Map<String, Long> updateMap = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private int currentNetwork = 0;
@@ -185,15 +186,25 @@ public class TokensService
         this.currentNetwork = currentNetwork;
     }
 
-    public static void setInterfaceSpec(String address, int functionSpec)
+    public static void setInterfaceSpec(String address, ContractType functionSpec)
     {
         interfaceSpecMap.put(address, functionSpec);
     }
 
-    public int getInterfaceSpec(String address)
+    public ContractType getInterfaceSpec(String address)
     {
+        ContractType result = ContractType.OTHER;
         if (interfaceSpecMap.containsKey(address)) return interfaceSpecMap.get(address);
-        else return 0;
+        else if (tokenMap.containsKey(address))
+        {
+            Token token = tokenMap.get(address);
+            if (token.getInterfaceSpec() != null)
+            {
+                result = tokenMap.get(address).getInterfaceSpec();
+            }
+        }
+
+        return result;
     }
 
     public void setLatestBlock(String address, long block)

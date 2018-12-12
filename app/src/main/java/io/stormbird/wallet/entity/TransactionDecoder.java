@@ -11,9 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.CREATION;
-import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.ERC20;
-import static io.stormbird.wallet.entity.TransactionDecoder.ContractType.ERC875;
+import static io.stormbird.wallet.entity.ContractType.*;
 import static io.stormbird.wallet.entity.TransactionDecoder.ReadState.ARGS;
 import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 
@@ -41,7 +39,7 @@ public class TransactionDecoder
     private ReadState state = ARGS;
     private int sigCount = 0;
 
-    private FunctionData unknownFunction = new FunctionData();
+    private FunctionData unknownFunction = new FunctionData("unknown()", OTHER, false);
 
     public TransactionDecoder()
     {
@@ -164,6 +162,12 @@ public class TransactionDecoder
                             thisData.paramValues.add(new BigInteger(read256bits(input), 16));
                         }
                         break;
+                    case "uint256[]":
+                        count = new BigInteger(argData, 16);
+                        for (int i = 0; i < count.intValue(); i++) {
+                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
+                        }
+                        break;
                     case "uint256":
                         addArg(argData);
                         break;
@@ -232,127 +236,112 @@ public class TransactionDecoder
         }
     }
 
+    private void addFunction(String method, ContractType type, boolean hasSig)
+    {
+        String methodId = buildMethodId(method);
+        FunctionData data = functionList.get(methodId);
+        if (data != null)
+        {
+            data.addType(type);
+        }
+        else
+        {
+            data = new FunctionData(method, type, hasSig);
+            functionList.put(buildMethodId(method), data);
+        }
+    }
+
     private void setupKnownFunctions()
     {
         functionList = new HashMap<>();
-        for (int index = 0; index < KNOWN_FUNCTIONS.length; index++)
-        {
-            String methodSignature = KNOWN_FUNCTIONS[index];
-            FunctionData data = getArgs(methodSignature);
-            data.hasSig = HAS_SIG[index];
-            data.contractType = CONTRACT_TYPE[index];
-            functionList.put(buildMethodId(methodSignature), data);
-        }
+        addFunction("transferFrom(address,address,uint16[])", ERC875LEGACY, false);
+        addFunction("transfer(address,uint16[])", ERC875LEGACY, false);
+        addFunction("trade(uint256,uint16[],uint8,bytes32,bytes32)", ERC875LEGACY, true);
+        addFunction("passTo(uint256,uint16[],uint8,bytes32,bytes32,address)", ERC875LEGACY, true);
+        addFunction("loadNewTickets(bytes32[])", ERC875LEGACY, false);
+        addFunction("balanceOf(address)", ERC875LEGACY, false);
+
+        addFunction("transfer(address,uint256)", ERC20, false);
+        addFunction("transfer(address,uint)", ERC20, false);
+        addFunction("transferFrom(address,address,uint256)", ERC20, false);
+        addFunction("approve(address,uint256)", ERC20, false);
+        addFunction("approve(address,uint)", ERC20, false);
+        addFunction("allocateTo(address,uint256)", ERC20, false);
+        addFunction("allowance(address,address)", ERC20, false);
+        addFunction("transferFrom(address,address,uint)", ERC20, false);
+        addFunction("approveAndCall(address,uint,bytes)", ERC20, false);
+        addFunction("balanceOf(address)", ERC20, false);
+        addFunction("transferAnyERC20Token(address,uint)", ERC20, false);
+
+        addFunction("transferFrom(address,address,uint256[])", ERC875, false);
+        addFunction("transfer(address,uint256[])", ERC875, false);
+        addFunction("trade(uint256,uint256[],uint8,bytes32,bytes32)", ERC875, true);
+        addFunction("passTo(uint256,uint256[],uint8,bytes32,bytes32,address)", ERC875, true);
+        addFunction("loadNewTickets(uint256[])", ERC875, false);
+        addFunction("balanceOf(address)", ERC875, false);
+
+        addFunction("endContract()", CREATION, false);
+        addFunction("selfdestruct()", CREATION, false);
+        addFunction("kill()", CREATION, false);
+
+        addFunction("safeTransferFrom(address,address,uint256,bytes)", ERC721, false);
+        addFunction("safeTransferFrom(address,address,uint256)", ERC721, false);
+        addFunction("transferFrom(address,address,uint256)", ERC721, false);
+        addFunction("approve(address,uint256)", ERC721, false);
+        addFunction("setApprovalForAll(address,bool)", ERC721, false);
+        addFunction("getApproved(address,address,uint256)", ERC721, false);
+        addFunction("isApprovedForAll(address,address)", ERC721, false);
     }
 
     public void addScanFunction(String methodSignature, boolean hasSig)
     {
-        FunctionData data = getArgs(methodSignature);
-        data.hasSig = hasSig;
-        data.contractType = ContractType.OTHER;
-        functionList.put(buildMethodId(methodSignature), data);
+        addFunction(methodSignature, OTHER, hasSig);
     }
 
-    static final String[] KNOWN_FUNCTIONS = {
-            "transferFrom(address,address,uint16[])",
-            "transfer(address,uint16[])",
-            "trade(uint256,uint16[],uint8,bytes32,bytes32)",
-            //ERC20 functions
-            "transfer(address,uint256)",
-            "transferFrom(address,address,uint256)",
-            "approve(address,uint256)",
-            "allocateTo(address,uint256)",
-            //ERC875
-            "loadNewTickets(bytes32[])",
-            "passTo(uint256,uint16[],uint8,bytes32,bytes32,address)",
-            "transferFrom(address,address,uint256[])",
-            "transfer(address,uint256[])",
-            "trade(uint256,uint256[],uint8,bytes32,bytes32)",
-            "passTo(uint256,uint256[],uint8,bytes32,bytes32,address)",
-            "loadNewTickets(uint256[])",
-            //end updated ERC875 sigs
-            "endContract()",
-            "selfdestruct()",
-            "kill()"
-            };
-
-    static final boolean[] HAS_SIG = {
-            false,  //transferFrom
-            false,  //transfer
-            true,
-            false,  //ERC20
-            false,
-            false,
-            false,
-            false, //loadNewTickets
-            true,  //passTo
-            false, //updated transferFrom
-            false,
-            true, //updated trade
-            true, //updated passTo
-            false,
-            false, //endContract
-            false,  //selfdestruct()
-            false
-    };
-
-    enum ContractType
+    public ContractType getContractType(String input)
     {
-        ERC20, ERC875, CREATION, OTHER
+        if (input.length() < 10) return OTHER;
+        Map<ContractType, Integer> functionCount = new HashMap<>();
+        ContractType highestType = OTHER;
+        int highestCount = 0;
+        boolean hasBalanceFunction = false;
+
+        for (String signature : functionList.keySet())
+        {
+            String cleanSig = Numeric.cleanHexPrefix(signature);
+            int index = input.indexOf(cleanSig);
+            if (index >= 0)
+            {
+                FunctionData data = functionList.get(signature);
+                if (data.functionName.equals("balanceOf")) hasBalanceFunction = true;
+                for (ContractType type : data.contractType)
+                {
+                    int count = 0;
+                    if (functionCount.containsKey(type)) count = functionCount.get(type);
+                    count++;
+                    functionCount.put(type, count);
+                    if (count > highestCount)
+                    {
+                        highestCount = count;
+                        highestType = type;
+                    }
+                }
+            }
+        }
+
+        if (highestCount > 2)
+        {
+            return highestType;
+        }
+        else
+        {
+            return OTHER;
+        }
     }
 
     enum ParseStage
     {
         PARSE_FUNCTION, PARSE_ARGS, FINISH, ERROR
-    }
-
-    static final ContractType[] CONTRACT_TYPE = {
-            ERC875,  //transferFrom
-            ERC875,
-            ERC875,
-            ERC20,   //transferFrom
-            ERC20,
-            ERC20,
-            ERC20,
-            ERC875,
-            ERC875, //old loadnewtickets
-            ERC875, //updated transferFrom
-            ERC875,
-            ERC875,
-            ERC875,
-            ERC875, //updated loadNewTickets
-            CREATION, //endContract
-            CREATION, //selfdestruct
-            CREATION  //kill
-    };
-
-    private FunctionData getArgs(String methodSig)
-    {
-        int b1Index = methodSig.indexOf("(");
-        int b2Index = methodSig.lastIndexOf(")");
-
-        FunctionData data = new FunctionData();
-        data.functionName = methodSig.substring(0, b1Index);
-        String args = methodSig.substring(b1Index + 1, b2Index);
-        String[] argArray = args.split(",");
-        List<String> temp = Arrays.asList(argArray);
-        data.args = new ArrayList<>();
-        data.args.addAll(temp);
-        data.functionFullName = methodSig;
-
-        for (int i = 0; i < temp.size(); i++)//String arg : data.args)
-        {
-            String arg = temp.get(i);
-            if (arg.contains("[]") || arg.equals("string"))
-            {
-                //rearrange to end, no need to store this arg
-                data.args.add(arg);
-                String argPlaceholder = "nodata";
-                data.args.set(i, argPlaceholder);
-            }
-        }
-
-        return data;
     }
 
     public Sign.SignatureData getSignatureData(TransactionInput data)

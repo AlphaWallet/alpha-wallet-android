@@ -11,7 +11,6 @@ import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
-import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -25,7 +24,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
 
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MyTokensRouter myTokensRouter;
     private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -40,7 +38,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
-            MyTokensRouter myTokensRouter,
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -51,7 +48,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             OpenseaService openseaService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.signatureGenerateInteract = signatureGenerateInteract;
@@ -66,6 +62,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
+        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
     }
 }

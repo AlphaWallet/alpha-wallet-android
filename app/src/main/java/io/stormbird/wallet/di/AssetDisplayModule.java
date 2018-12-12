@@ -10,7 +10,6 @@ import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
-import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -31,7 +30,6 @@ public class AssetDisplayModule {
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
-            MyTokensRouter myTokensRouter,
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -41,7 +39,7 @@ public class AssetDisplayModule {
             AssetDefinitionService assetDefinitionService,
             OpenseaService openseaService) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, myTokensRouter, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
+                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
     }
 
     @Provides
@@ -59,11 +57,6 @@ public class AssetDisplayModule {
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
-    }
-
-    @Provides
-    MyTokensRouter provideMyTokensRouter() {
-        return new MyTokensRouter();
     }
 
     @Provides

@@ -8,7 +8,6 @@ import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
-import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
@@ -25,7 +24,6 @@ public class WalletModule {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -40,7 +38,6 @@ public class WalletModule {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
-                changeTokenCollectionRouter,
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -71,11 +68,6 @@ public class WalletModule {
     @Provides
     AssetDisplayRouter provideRedeemTokenRouter() {
         return new AssetDisplayRouter();
-    }
-
-    @Provides
-    ChangeTokenCollectionRouter provideChangeTokenCollectionRouter() {
-        return new ChangeTokenCollectionRouter();
     }
 
     @Provides

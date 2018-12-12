@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
-import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
@@ -19,7 +18,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
@@ -30,11 +28,9 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
 
-    public WalletViewModelFactory(/*FindDefaultNetworkInteract findDefaultNetworkInteract,*/
-                                  FetchTokensInteract fetchTokensInteract,
+    public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
-                                  ChangeTokenCollectionRouter changeTokenCollectionRouter,
                                   AssetDisplayRouter assetDisplayRouter,
                                   FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
@@ -45,12 +41,10 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   TokensService tokensService,
                                   OpenseaService openseaService,
                                   FetchTransactionsInteract fetchTransactionsInteract) {
-        //this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.changeTokenCollectionRouter = changeTokenCollectionRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -70,7 +64,6 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
-                changeTokenCollectionRouter,
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,

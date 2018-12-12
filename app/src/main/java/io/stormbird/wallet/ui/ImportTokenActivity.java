@@ -363,6 +363,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         cDialog.setPrimaryButtonListener(v -> {
             viewModel.performImport();
             cDialog.dismiss();
+            onProgress(true);
         });
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setSecondaryButtonListener(v -> cDialog.dismiss());
@@ -370,6 +371,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void onTransaction(String hash) {
+        onProgress(false);
         hideDialog();
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.transaction_succeeded);

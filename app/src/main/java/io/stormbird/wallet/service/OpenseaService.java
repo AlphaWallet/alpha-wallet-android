@@ -96,7 +96,7 @@ public class OpenseaService {
             StringBuilder sb = new StringBuilder();
             sb.append("https://api.opensea.io/api/v1/assets/?owner=");
             sb.append(address);
-            sb.append("&order_by=current_price&order_direction=asc");
+            sb.append("&order_direction=asc");
             JSONObject result = new JSONObject("{ \"estimated_count\": 0 }");
 
             try {

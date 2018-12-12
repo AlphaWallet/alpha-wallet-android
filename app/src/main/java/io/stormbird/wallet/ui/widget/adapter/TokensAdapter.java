@@ -178,13 +178,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     /**
-     * Leveraging the power of Recycler view:
-     * How I learned to love recycler view not to fight it.
-     * Why assume that Google developers who only look at updating views
-     * don't get exactly what's needed. A simple means to update only when something changes
-     * based on the rules you provide in the 'SortedList' class.
-     *
-     * It works exactly as intended when you simply let it do its job.
+     * Update a single item in the recycler view
      *
      * @param token
      */
@@ -203,11 +197,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 {
                     if (token.hasPositiveBalance() || token.isEthereum())
                     {
-                        tsi = new TokenSortedItem(token, tsi.weight);
-                        items.add(tsi);
-                        if (token.isEthereum()) notifyItemChanged(i, tsi); //notifyItemChanged(i);
+                        tsi.value = token;
+                        notifyItemChanged(i, tsi);
                     }
-                    else if (!thisToken.isEthereum())
+                    else
                     {
                         items.removeItemAt(i);
                         notifyItemRemoved(i);
@@ -219,11 +212,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
 
-        //New token added
-        //after extensive testing it's better not to take any risks - emptying items and rebuilding the list never fails.
-        //However all other methods (notify range changed, notify dataset etc GPF under heavy stress.
-        //If you want to switch on the view stress test search for 'throw new BadContract' in TokenRepository and uncomment the random throw
-        //this causes tokens to pop in and out of this view very frequently.
         if (!updated && !token.isBad() && token.hasPositiveBalance())
         {
             needsRefresh = true;

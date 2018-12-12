@@ -278,7 +278,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private void updateBalances()
     {
-        if (balanceCheckDisposable == null)
+        if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
         {
             run();
         }

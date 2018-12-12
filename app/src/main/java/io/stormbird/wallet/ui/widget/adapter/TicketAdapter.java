@@ -141,10 +141,9 @@ public class TicketAdapter extends TokensAdapter {
     private void addRanges(Token t)
     {
         currentRange = null;
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, t, ((Ticket)t).balanceArray);
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, t, t.getArrayBalance());
         addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE);
     }
-
 
     protected List<TicketRangeElement> generateSortedList(AssetDefinitionService assetService, Token token, List<BigInteger> idList)
     {

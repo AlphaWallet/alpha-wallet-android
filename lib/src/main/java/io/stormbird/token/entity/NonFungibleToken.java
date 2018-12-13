@@ -33,7 +33,14 @@ public class NonFungibleToken
     protected HashMap<String, Attribute> attributes;
 
     public Attribute getAttribute(String attributeId) {
-        return attributes.get(attributeId);
+        if (attributes != null)
+        {
+            return attributes.get(attributeId);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public void setAttribute(String attributeId, Attribute attribute) {

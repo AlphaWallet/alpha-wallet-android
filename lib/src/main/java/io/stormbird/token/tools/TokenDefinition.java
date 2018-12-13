@@ -4,6 +4,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.sun.webkit.dom.ElementImpl;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
 
@@ -28,6 +29,8 @@ public class TokenDefinition {
     protected Locale locale;
     public Map<String, Integer> addresses = new HashMap<>();
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
+
+    private static final String ATTESTATION = "http://attestation.id/ns/tbml";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -75,6 +78,7 @@ public class TokenDefinition {
 
         public AttributeType(Element attr) {
             name = getLocalisedString(attr,"name");
+            if (name == null) return;
             id = attr.getAttribute("id");
             try {
                 switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
@@ -109,9 +113,24 @@ public class TokenDefinition {
                 syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
             }
             bitmask = null;
-            NodeList nList = attr.getElementsByTagNameNS("http://attestation.id/ns/tbml", "origin");
-            for (int i = 0; i < nList.getLength(); i++) {
-                    Element origin = (Element) nList.item(i);
+            for(Node node=attr.getFirstChild();
+                node!=null; node=node.getNextSibling()){
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    System.out.println("\nFound a name field: " + node.getNodeName());
+                    Element origin = (Element) node;
+                    String label = node.getLocalName();
+                    switch (label)
+                    {
+                        case "features":
+                            //look for function
+                            break;
+                        case "contracts":
+                            System.out.println(node.getAttributes().toString());
+                            break;
+                        case "appearance":
+
+                            break;
+                    }
                     switch(origin.getAttribute("contract").toLowerCase()) {
                         case "holding-contract":
                             as = As.Mapping;
@@ -129,8 +148,8 @@ public class TokenDefinition {
                             as = As.UTF8;
                             break;
                         case "mapping":
-                            // the case <mapping> missing should be prevented by XSD.
                             as = As.Mapping;
+                            // TODO: Syntax is not checked
                             members = new ConcurrentHashMap<>();
                             populate(origin);
                             break;
@@ -140,6 +159,7 @@ public class TokenDefinition {
                     if (origin.hasAttribute("bitmask")) {
                         bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
                     }
+                }
             }
             if (bitmask != null ) {
                 while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
@@ -215,7 +235,8 @@ public class TokenDefinition {
         /* no matching language found. return the first tag's content */
         name = (Element) nList.item(0);
         // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
-        return name.getTextContent();
+        if (name != null) return name.getTextContent();
+        else return null;
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
@@ -236,18 +257,24 @@ public class TokenDefinition {
         }
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
-        NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "attribute-type");
+        NodeList nList;
+        nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "token");
+
         if (nList.getLength() == 0)
         {
             System.out.println("Legacy XML format - no longer supported");
             return;
         }
-        for (int i = 0; i < nList.getLength(); i++) {
+        for (int i = 0; i < nList.getLength(); i++)
+        {
+            CrawlAttrs(nList);
             AttributeType attr = new AttributeType((Element) nList.item(i));
-            if (attr.bitmask != null) {// has <origin> which is from bitmask
+            if (attr.bitmask != null)
+            {// has <origin> which is from bitmask
                 attributeTypes.put(attr.id, attr);
             } // TODO: take care of attributeTypes whose value does not originate from bitmask!
-            else if (attr.function != null) {
+            else if (attr.function != null)
+            {
                 FunctionDefinition fd = new FunctionDefinition();
                 fd.method = attr.function;
                 fd.syntax = attr.syntax;
@@ -257,6 +284,41 @@ public class TokenDefinition {
         extractFeatureTag(xml);
         extractContractTag(xml);
         extractSignedInfo(xml);
+    }
+
+    private void CrawlAttrs(NodeList nList)
+    {
+        //Node impl = nList.item(i);
+        //NodeList cNodes = impl.getChildNodes();
+        for (int j = 0; j < nList.getLength(); j++)
+        {
+            Node n = nList.item(j);
+            if (n.getPrefix() != null)
+            {
+                processAttrs(n);
+            }
+
+            if (n.hasChildNodes())
+            {
+                CrawlAttrs(n.getChildNodes());
+            }
+        }
+    }
+
+    private void processAttrs(Node n)
+    {
+        AttributeType attr = new AttributeType((Element) n);
+        if (attr.bitmask != null)
+        {// has <origin> which is from bitmask
+            attributeTypes.put(attr.id, attr);
+        } // TODO: take care of attributeTypes whose value does not originate from bitmask!
+        else if (attr.function != null)
+        {
+            FunctionDefinition fd = new FunctionDefinition();
+            fd.method = attr.function;
+            fd.syntax = attr.syntax;
+            functions.put(attr.id, fd);
+        }
     }
 
     private void extractSignedInfo(Document xml) {
@@ -343,13 +405,17 @@ public class TokenDefinition {
          * must be missing <contract> elements */
         /* TODO: select the contract of type "holding_contract" */
         nList = contract.getElementsByTagNameNS("http://attestation.id/ns/tbml", "address");
-        for (int i = 0; i < nList.getLength(); i++)
+        //NodeList addrCheck = ((Element) node).getElementsByTagNameNS(ATTESTATION,"address");
+        if (nList.getLength() > 0 && nList.item(0).getNodeType() == Node.ELEMENT_NODE)
         {
-            Element address = (Element) nList.item(i);
-            String networkElement = address.getAttribute("network");
-            if (networkElement.length() < 1) networkElement = "1"; //default to mainnet
-            Integer networkId = Integer.parseInt(networkElement);
-            addresses.put(address.getTextContent().toLowerCase(), networkId);
+            for (int i = 0; i < nList.item(0).getChildNodes().getLength(); i++)
+            {
+                Node address = nList.item(0).getChildNodes().item(i);
+                if (address.getNodeType() == Node.TEXT_NODE)
+                {
+                    addresses.put(address.getTextContent().toLowerCase(), networkId);
+                }
+            }
         }
     }
 

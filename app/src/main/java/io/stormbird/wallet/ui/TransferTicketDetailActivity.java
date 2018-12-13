@@ -19,37 +19,16 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.web3j.abi.datatypes.Address;
-import org.web3j.tx.Contract;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-
-import javax.inject.Inject;
-
+import android.widget.*;
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
@@ -61,15 +40,19 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
-import io.stormbird.wallet.entity.FinishReceiver;
-import io.stormbird.token.entity.TicketRange;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.tx.Contract;
 
-import static io.stormbird.wallet.C.EXTRA_STATE;
-import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
+import javax.inject.Inject;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
-import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
-import static io.stormbird.wallet.ui.SendActivity.ENS_RESOLVE_DELAY;
 
 /**
  * Created by James on 21/02/2018.
@@ -92,7 +75,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private AWalletAlertDialog dialog;
 
     private FinishReceiver finishReceiver;
-    private AutoCompleteUrlAdapter adapterUrl;
 
     private Token token;
     private TicketAdapter adapter;
@@ -103,18 +85,13 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private AutoCompleteTextView toAddressEditText;
     private ImageButton qrImageView;
     private TextView textQuantity;
-    private LinearLayout layoutENSResolve;
-    private TextWatcher ensTextWatcher;
-    private TextView textENS;
-    private String ensName;
 
     private String ticketIds;
     private String prunedIds;
     private int transferStatus;
 
+    private ENSHandler ensHandler;
     private Handler handler;
-    private volatile boolean waitingForENS = false;
-    private boolean transferAfterENS = false;
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -156,8 +133,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         progressView.hide();
 
         toAddressEditText = findViewById(R.id.edit_to_address);
-        layoutENSResolve = findViewById(R.id.layout_ens);
-        textENS = findViewById(R.id.text_ens_resolve);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TransferTicketDetailViewModel.class);
@@ -169,8 +144,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         viewModel.error().observe(this, this::onError);
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.userTransaction().observe(this, this::onUserTransaction);
-        viewModel.ensResolve().observe(this, this::onENSSuccess);
-        viewModel.ensFail().observe(this, this::hideENS);
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
@@ -256,46 +229,25 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
     private void setupAddressEditField()
     {
-        adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        toAddressEditText.setAdapter(adapterUrl);
-        toAddressEditText.setOnClickListener(v -> toAddressEditText.showDropDown());
-
-        waitingForENS = false;
-
-        ensTextWatcher = new TextWatcher()
+        ENSCallback ensCallback = new ENSCallback()
         {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            public void ENSComplete()
             {
-
+                confirmTransfer();
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
+            public void ENSCheck(String name)
             {
-                toAddressError.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                textENS.setText("");
-                checkAddress();
+                viewModel.checkENSAddress(name);
             }
         };
-
-        toAddressEditText.addTextChangedListener(ensTextWatcher);
-    }
-
-    private void checkAddress()
-    {
-        if (!transferAfterENS)
-        {
-            waitingForENS = true;
-            handler.removeCallbacks(this);
-            handler.postDelayed(this, ENS_RESOLVE_DELAY);
-        }
+        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
+        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
+        viewModel.ensFail().observe(this, ensHandler::hideENS);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -536,7 +488,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private void transferTicketFinal()
     {
         //complete the transfer
-        String to = getAddressFromEditView();
+        String to = ensHandler.getAddressFromEditView();
         if (to == null) return;
 
         onProgress(true);
@@ -643,54 +595,21 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         confirmationDialog.show();
     }
 
-    private String getAddressFromEditView()
-    {
-        //check send address
-        ensName = null;
-        toAddressError.setVisibility(View.GONE);
-        String to = toAddressEditText.getText().toString();
-        if (!isAddressValid(to))
-        {
-            String ens = to;
-            to = textENS.getText().toString();
-            ensName = "@" + ens + " (" + to + ")";
-        }
-
-        if (!isAddressValid(to))
-        {
-            to = null;
-            if (waitingForENS)
-            {
-                transferAfterENS = true;
-                onENSProgress(true);
-            }
-            else
-            {
-                toAddressError.setVisibility(View.VISIBLE);
-                toAddressError.setText(getString(R.string.error_invalid_address));
-            }
-        }
-
-        return to;
-    }
-
     private void confirmTransfer()
     {
         //complete the transfer
         toAddressEditText.dismissDropDown();
-        String to = getAddressFromEditView();
+        String to = ensHandler.getAddressFromEditView();
         if (to == null) return;
 
         if (token instanceof ERC721Token)
         {
-            viewModel.openConfirm(getApplicationContext(), to, token, ticketIds, ensName);
+            viewModel.openConfirm(getApplicationContext(), to, token, ticketIds, ensHandler.getEnsName());
         }
         else
         {
             handleERC875Transfer(to);
         }
-
-        adapterUrl.add(toAddressEditText.getText().toString());
     }
 
     private void handleERC875Transfer(final String to)
@@ -699,7 +618,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         int quantity = token.stringHexToBigIntegerList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
 
-        String toAddress = (ensName == null) ? to : ensName;
+        String toAddress = (ensHandler.getEnsName() == null) ? to : ensHandler.getEnsName();
 
         String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +
@@ -775,57 +694,13 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     @Override
     public void run()
     {
-        //address update delay check
-        final String to = toAddressEditText.getText().toString();
-        if (to.length() > 2 && !to.startsWith("0x"))
-        {
-            viewModel.checkENSAddress(to);
-        }
-        else
-        {
-            waitingForENS = false;
-        }
-    }
-
-    private void onENSSuccess(String address)
-    {
-        waitingForENS = false;
-        toAddressEditText.dismissDropDown();
-        layoutENSResolve.setVisibility(View.VISIBLE);
-        textENS.setText(address);
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
-        checkIfWaitingForENS();
-        toAddressError.setVisibility(View.GONE);
-    }
-
-    private void hideENS(String name)
-    {
-        waitingForENS = false;
-        layoutENSResolve.setVisibility(View.GONE);
-        checkIfWaitingForENS();
-    }
-
-    private void checkIfWaitingForENS()
-    {
-        onENSProgress(false);
-        if (transferAfterENS)
-        {
-            transferAfterENS = false;
-            confirmTransfer();
-        }
+        ensHandler.checkENS();
     }
 
     @Override
     public void onItemClick(String url)
     {
-        toAddressEditText.removeTextChangedListener(ensTextWatcher); //temporarily remove the watcher because we're handling the text change here
-        toAddressEditText.setText(url);
-        toAddressEditText.addTextChangedListener(ensTextWatcher);
-        toAddressEditText.dismissDropDown();
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
-        handler.removeCallbacksAndMessages(this);
-        waitingForENS = true;
-        run();
+        ensHandler.handleHistoryItemClick(url);
     }
 }
 

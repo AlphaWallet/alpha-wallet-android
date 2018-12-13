@@ -1,18 +1,13 @@
 package io.stormbird.wallet.di;
 
 
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.GetDefaultWalletBalance;
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
+import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
-import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
@@ -29,7 +24,6 @@ public class WalletModule {
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -38,12 +32,12 @@ public class WalletModule {
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            OpenseaService openseaService) {
+            OpenseaService openseaService,
+            FetchTransactionsInteract fetchTransactionsInteract) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
-                changeTokenCollectionRouter,
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -52,7 +46,8 @@ public class WalletModule {
                 setupTokensInteract,
                 assetDefinitionService,
                 tokensService,
-                openseaService);
+                openseaService,
+                fetchTransactionsInteract);
     }
 
     @Provides
@@ -73,11 +68,6 @@ public class WalletModule {
     @Provides
     AssetDisplayRouter provideRedeemTokenRouter() {
         return new AssetDisplayRouter();
-    }
-
-    @Provides
-    ChangeTokenCollectionRouter provideChangeTokenCollectionRouter() {
-        return new ChangeTokenCollectionRouter();
     }
 
     @Provides
@@ -107,5 +97,10 @@ public class WalletModule {
     @Provides
     SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
         return new SetupTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
+        return new FetchTransactionsInteract(transactionRepository);
     }
 }

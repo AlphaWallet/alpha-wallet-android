@@ -51,10 +51,9 @@ import io.stormbird.wallet.viewmodel.BaseViewModel;
 
 public class Ticket extends Token implements Parcelable
 {
-    public final List<BigInteger> balanceArray;
+    private final List<BigInteger> balanceArray;
     private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
-    private InterfaceType interfaceSpec = InterfaceType.NotSpecified;
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
@@ -75,7 +74,7 @@ public class Ticket extends Token implements Parcelable
         int objSize = in.readInt();
         int burnSize = in.readInt();
         int interfaceOrdinal = in.readInt();
-        interfaceSpec = InterfaceType.values()[interfaceOrdinal];
+        contractType = ContractType.values()[interfaceOrdinal];
         if (objSize > 0)
         {
             Object[] readObjArray = in.readArray(Object.class.getClassLoader());
@@ -131,7 +130,7 @@ public class Ticket extends Token implements Parcelable
         super.writeToParcel(dest, flags);
         dest.writeInt(balanceArray.size());
         dest.writeInt(burnIndices.size());
-        dest.writeInt(interfaceSpec.ordinal());
+        dest.writeInt(contractType.ordinal());
         if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
         if (burnIndices.size() > 0) dest.writeArray(burnIndices.toArray());
     }
@@ -158,6 +157,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     //Burn handling
+    @Override
     public void addToBurnList(List<Uint16> burnUpdate)
     {
         for (Uint16 b : burnUpdate) {
@@ -201,12 +201,6 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void setRealmInterfaceSpec(RealmToken realmToken)
-    {
-        realmToken.setInterfaceSpec(interfaceSpec.ordinal());
-    }
-
-    @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showRedeemToken(context, this);
@@ -223,7 +217,7 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.issuer.setText(asset.getIssuerName(getAddress()));
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
-        if (isOldSpec())
+        if (contractType == ContractType.ERC875LEGACY)
         {
             tokenHolder.contractType.setText(R.string.erc875legacy);
         }
@@ -256,6 +250,7 @@ public class Ticket extends Token implements Parcelable
         return indicies;
     }
 
+    @Override
     public List<Integer> getBurnList()
     {
         return burnIndices;
@@ -776,20 +771,6 @@ public class Ticket extends Token implements Parcelable
         return tokenTitle;
     }
 
-    public String getTokenName(AssetDefinitionService assetService)
-    {
-        //see if this token is covered by any contract
-        int networkId = assetService.getNetworkId(getAddress());
-        if (networkId >= 1)
-        {
-            return assetService.getAssetDefinition(getAddress()).getTokenName();
-        }
-        else
-        {
-            return tokenInfo.name;
-        }
-    }
-
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
         int networkId = assetService.getNetworkId(getAddress());
@@ -802,32 +783,11 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void setInterfaceSpec(int data)
-    {
-        switch (data)
-        {
-            case 16:
-                this.interfaceSpec = InterfaceType.UsingUint16;
-                break;
-            case 256:
-            default:
-                this.interfaceSpec = InterfaceType.UsingUint256;
-                break;
-        }
-    }
-
-    @Override
-    public void setInterfaceSpecFromRealm(RealmToken realm)
-    {
-        this.interfaceSpec = InterfaceType.values()[realm.getInterfaceSpec()];
-    }
-
-    @Override
     public void patchAuxData(Token token)
     {
         if (token instanceof Ticket)
         {
-            this.interfaceSpec = InterfaceType.values()[token.interfaceOrdinal()];
+            this.contractType = ContractType.values()[token.interfaceOrdinal()];
         }
         super.patchAuxData(token);
     }
@@ -857,24 +817,19 @@ public class Ticket extends Token implements Parcelable
     @Override
     public boolean isOldSpec()
     {
-        switch (interfaceSpec)
-        {
-            case UsingUint16:
-                return true;
-            default:
-                return false;
-        }
+        return (contractType == ContractType.ERC875LEGACY);
     }
 
     @Override
     public boolean unspecifiedSpec()
     {
-        switch (interfaceSpec)
+        switch (contractType)
         {
-            case NotSpecified:
-                return true;
-            default:
+            case ERC875:
+            case ERC875LEGACY:
                 return false;
+            default:
+                return true;
         }
     }
 
@@ -882,13 +837,13 @@ public class Ticket extends Token implements Parcelable
     {
         org.web3j.abi.datatypes.DynamicArray dynArray;
 
-        switch (interfaceSpec)
+        switch (contractType)
         {
-            case UsingUint16:
+            case ERC875LEGACY:
                 dynArray = new org.web3j.abi.datatypes.DynamicArray<>(
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint16.class));
                 break;
-            case UsingUint256:
+            case ERC875:
             default:
                 dynArray = new org.web3j.abi.datatypes.DynamicArray<>(
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
@@ -899,16 +854,9 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public boolean checkRealmBalanceChange(RealmToken realmToken)
-    {
-        if (interfaceSpec.ordinal() != realmToken.getInterfaceSpec()) return true;
-        return super.checkRealmBalanceChange(realmToken);
-    }
-
-    @Override
     public int interfaceOrdinal()
     {
-        return interfaceSpec.ordinal();
+        return contractType.ordinal();
     }
 
     @Override
@@ -923,8 +871,29 @@ public class Ticket extends Token implements Parcelable
         return false;
     }
 
+    @Override
+    protected String addSuffix(String result, Transaction transaction)
+    {
+        return result;
+    }
+
     private enum InterfaceType
     {
         NotSpecified, UsingUint16, UsingUint256
     };
+
+    @Override
+    public boolean checkIntrinsicType()
+    {
+        return (contractType == ContractType.ERC875 || contractType == ContractType.ERC875LEGACY);
+    }
+
+    @Override
+    public boolean hasArrayBalance()
+    {
+        return true;
+    }
+
+    @Override
+    public List<BigInteger> getArrayBalance() { return balanceArray; }
 }

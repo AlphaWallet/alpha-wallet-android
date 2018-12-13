@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name="io.stormbird.wallet.App"
@@ -65,17 +69,11 @@
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity
             android:name="io.stormbird.wallet.ui.TransactionDetailActivity"
             android:label="@string/title_transaction_details" />
         <activity
             android:name="io.stormbird.wallet.ui.MyAddressActivity"
             android:label="@string/title_my_address" />
-        <activity
-            android:name="io.stormbird.wallet.ui.TokensActivity"
-            android:label="@string/title_my_tokens" />
 
         <activity
             android:name="io.stormbird.wallet.ui.SendActivity"
@@ -101,10 +99,6 @@
         <activity
             android:name="io.stormbird.wallet.ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
-
-        <activity
-            android:name="io.stormbird.wallet.ui.TokenChangeCollectionActivity"
-            android:label="@string/title_tokens" />
 
         <activity
             android:name="io.stormbird.wallet.ui.SellTicketActivity"
@@ -160,13 +154,23 @@
             android:name="io.stormbird.wallet.ui.TokenDetailActivity"
             android:label="@string/token_details"/>
 
+        <service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="7ef307cf90661ead3689e253fe8831d7e216fc5b" />
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_alpha" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
 
     </application>
 

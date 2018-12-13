@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -70,6 +71,9 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
+        refreshLayout.setOnRefreshListener(this::refreshAssets);
         
         list = findViewById(R.id.listTickets);
 
@@ -129,6 +133,15 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
                 burnList = token.getBurnListStr();
             }
         }
+    }
+
+    /**
+     * Useful for volatile assets, this will refresh any volatile data in the token eg dynamic content or images
+     */
+    private void refreshAssets()
+    {
+        adapter.reloadAssets(this);
+        systemView.hide();
     }
 
     @Override

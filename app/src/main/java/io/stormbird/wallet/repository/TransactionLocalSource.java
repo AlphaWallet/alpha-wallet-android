@@ -9,6 +9,7 @@ import io.reactivex.Single;
 
 public interface TransactionLocalSource {
 	Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet);
+	Transaction fetchTransaction(NetworkInfo networkInfo, Wallet wallet, String hash);
 
 	Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions);
 

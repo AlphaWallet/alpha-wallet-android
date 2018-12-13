@@ -10,12 +10,10 @@ import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
-import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
 
-    private final SettingsRouter settingsRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final ImportTokenRouter importTokenRouter;
     private final AddTokenRouter addTokenRouter;
@@ -29,7 +27,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
-            SettingsRouter settingsRouter,
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
@@ -37,7 +34,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.importTokenRouter = importTokenRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.addTokenRouter = addTokenRouter;
-        this.settingsRouter = settingsRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -51,7 +47,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 importTokenRouter,
                 externalBrowserRouter,
                 addTokenRouter,
-                settingsRouter,
                 assetDefinitionService,
                 findDefaultWalletInteract,
                 fetchWalletsInteract);

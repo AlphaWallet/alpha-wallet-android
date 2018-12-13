@@ -116,6 +116,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
         isVisible = true;
 
+        viewModel.clearProcess();
+
         return view;
     }
 
@@ -145,7 +147,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         if (isResumed()) { // fragment created
             viewModel.setVisibility(isVisible);
             if (isVisible) {
-                viewModel.reStartTokenUpdate();
+                viewModel.prepare();
             }
         }
     }
@@ -215,10 +217,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 viewModel.showAddToken(getContext());
             }
             break;
-            case R.id.action_edit: {
-                viewModel.showEditTokens(getContext());
-            }
-            break;
             case android.R.id.home: {
                 //adapter.clear();
                 //viewModel.showTransactions(getContext());
@@ -242,7 +240,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onTokens(Token[] tokens)
     {
-        for (Token t : tokens) if(t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
         adapter.setTokens(tokens);
     }
 

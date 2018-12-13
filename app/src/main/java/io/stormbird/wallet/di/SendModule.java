@@ -2,6 +2,7 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
+import io.stormbird.wallet.interact.ENSInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.repository.GasSettingsRepositoryType;
@@ -16,11 +17,13 @@ class SendModule {
     SendViewModelFactory provideSendViewModelFactory(ConfirmationRouter confirmationRouter,
                                                      FetchGasSettingsInteract fetchGasSettingsInteract,
                                                      MyAddressRouter myAddressRouter,
-                                                     FetchTokensInteract fetchTokensInteract) {
+                                                     FetchTokensInteract fetchTokensInteract,
+                                                     ENSInteract ensInteract) {
         return new SendViewModelFactory(confirmationRouter,
                 fetchGasSettingsInteract,
                 myAddressRouter,
-                fetchTokensInteract);
+                fetchTokensInteract,
+                ensInteract);
     }
 
     @Provides
@@ -41,5 +44,10 @@ class SendModule {
     @Provides
     FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
         return new FetchTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    ENSInteract provideENSInteract(TokenRepositoryType tokenRepository) {
+        return new ENSInteract(tokenRepository);
     }
 }

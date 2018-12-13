@@ -33,7 +33,13 @@ public class TransactionMemoryCache implements TransactionLocalSource {
 		});
 	}
 
-    private String createKey(NetworkInfo networkInfo, Wallet wallet) {
+	@Override
+	public Transaction fetchTransaction(NetworkInfo networkInfo, Wallet wallet, String hash)
+	{
+		return null;
+	}
+
+	private String createKey(NetworkInfo networkInfo, Wallet wallet) {
         return networkInfo.name + wallet.address;
     }
 

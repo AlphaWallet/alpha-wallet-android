@@ -1,9 +1,6 @@
 package io.stormbird.wallet.repository;
 
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 
 import java.math.BigInteger;
 
@@ -21,5 +18,7 @@ public interface TransactionRepositoryType {
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList);
 
-    Single<Integer> queryInterfaceSpec(Token token);
+    Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo);
+
+    Transaction fetchCachedTransaction(String walletAddr, String hash);
 }

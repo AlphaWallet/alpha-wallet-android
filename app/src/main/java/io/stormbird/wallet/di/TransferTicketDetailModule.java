@@ -1,11 +1,7 @@
 package io.stormbird.wallet.di;
 
-import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
@@ -41,10 +37,10 @@ public class TransferTicketDetailModule {
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             ConfirmationRouter confirmationRouter,
-            FetchTokensInteract fetchTokensInteract) {
+            ENSInteract ensInteract) {
         return new TransferTicketDetailViewModelFactory(
                 findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
-                assetDisplayRouter, assetDefinitionService, tokensService, confirmationRouter, fetchTokensInteract);
+                assetDisplayRouter, assetDefinitionService, tokensService, confirmationRouter, ensInteract);
     }
 
     @Provides
@@ -84,7 +80,7 @@ public class TransferTicketDetailModule {
     }
 
     @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
+    ENSInteract provideENSInteract(TokenRepositoryType tokenRepository) {
+        return new ENSInteract(tokenRepository);
     }
 }

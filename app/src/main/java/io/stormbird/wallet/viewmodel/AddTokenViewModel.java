@@ -4,14 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
 
 public class AddTokenViewModel extends BaseViewModel {
@@ -26,6 +20,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final AddTokenInteract addTokenInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final HomeRouter homeRouter;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
 
     private final MutableLiveData<Boolean> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> update = new MutableLiveData<>();
@@ -35,12 +30,14 @@ public class AddTokenViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             HomeRouter homeRouter,
             SetupTokensInteract setupTokenInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            FetchTransactionsInteract fetchTransactionsInteract) {
         this.addTokenInteract = addTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.homeRouter = homeRouter;
         this.setupTokensInteract = setupTokenInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
     }
 
     public MutableLiveData<Wallet> wallet() {
@@ -49,8 +46,8 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public void save(String address, String symbol, int decimals, String name, boolean isStormBird) {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
-        disposable = addTokenInteract
-                .add(tokenInfo, 0)
+        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
+                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType))
                 .subscribe(this::onSaved, this::onError);
     }
 
@@ -72,7 +69,7 @@ public class AddTokenViewModel extends BaseViewModel {
             findDefaultNetwork();
         }
         disposable = setupTokensInteract
-                .update(addr, false)
+                .update(addr)
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
     }
 

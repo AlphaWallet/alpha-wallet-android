@@ -11,7 +11,6 @@ import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
-import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 
@@ -23,7 +22,6 @@ class HomeModule {
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
-            SettingsRouter settingsRouter,
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
@@ -32,7 +30,6 @@ class HomeModule {
                 importTokenRouter,
                 externalBrowserRouter,
                 addTokenRouter,
-                settingsRouter,
                 assetDefinitionService,
                 findDefaultWalletInteract,
                 fetchWalletsInteract);
@@ -41,11 +38,6 @@ class HomeModule {
     @Provides
     LocaleRepositoryType provideLocaleRepository(PreferenceRepositoryType preferenceRepository) {
         return new LocaleRepository(preferenceRepository);
-    }
-
-    @Provides
-    SettingsRouter provideSettingsRouter() {
-        return new SettingsRouter();
     }
 
     @Provides

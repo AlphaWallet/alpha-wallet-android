@@ -83,9 +83,10 @@ public class RepositoriesModule {
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository,
 			TransactionsNetworkClientType blockExplorerClient,
-			WalletDataRealmSource walletDataRealmSource) {
+			WalletDataRealmSource walletDataRealmSource,
+			OkHttpClient httpClient) {
 		return new WalletRepository(
-		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource);
+		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource, httpClient);
 	}
 
 	@Singleton
@@ -113,8 +114,9 @@ public class RepositoriesModule {
     TransactionsNetworkClientType provideBlockExplorerClient(
 			OkHttpClient httpClient,
 			Gson gson,
-			EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new TransactionsNetworkClient(httpClient, gson, ethereumNetworkRepository);
+			EthereumNetworkRepositoryType ethereumNetworkRepository,
+			Context context) {
+		return new TransactionsNetworkClient(httpClient, gson, ethereumNetworkRepository, context);
 	}
 
 	@Singleton

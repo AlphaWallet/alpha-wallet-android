@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
@@ -104,18 +105,10 @@ public class ContractTransactionHolder extends BinderViewHolder<Transaction> imp
         if (valueStr.equals("0")) {
             valueStr = "0 " + symbol;
         } else {
-            valueStr = (isSent ? "-" : "+") + getScaledValue(valueStr, decimals) + " " + symbol;
+            valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;
         }
 
         this.value.setText(valueStr);
-    }
-
-    private String getScaledValue(String valueStr, long decimals) {
-        // Perform decimal conversion
-        BigDecimal value = new BigDecimal(valueStr);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = 4; //SIGNIFICANT_FIGURES - value.precision() + value.scale();
-        return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 
     @Override

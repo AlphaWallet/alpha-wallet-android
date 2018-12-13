@@ -3,21 +3,21 @@ package io.stormbird.wallet.repository;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.util.Log;
-
-import org.web3j.abi.EventEncoder;
-import org.web3j.abi.EventValues;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
+import io.reactivex.*;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.BadContract;
+import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TickerService;
+import io.stormbird.wallet.service.TokenExplorerClientType;
+import okhttp3.OkHttpClient;
+import org.web3j.abi.*;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Uint;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -28,43 +28,16 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthSyncing;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
+import rx.functions.Func1;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.ObservableTransformer;
-import io.reactivex.Single;
-import io.reactivex.SingleTransformer;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.BadContract;
-import io.stormbird.token.entity.FunctionDefinition;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.SubscribeWrapper;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.TokenTicker;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.TransferFromEventResponse;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.TickerService;
-import io.stormbird.wallet.service.TokenExplorerClientType;
-import rx.functions.Func1;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -107,9 +80,18 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo defaultNetwork)
     {
         network = defaultNetwork;
-        org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(defaultNetwork.rpcServerUrl);
+        //Adjust timeout params for node connection - it should timeout quickly and not keep retrying,
+        //otherwise it can hold up resources
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+
+        HttpService publicNodeService = new HttpService(defaultNetwork.rpcServerUrl, client, false);
+
         web3j = Web3jFactory.build(publicNodeService);
-        ethereumNetworkRepository.setActiveRPC(defaultNetwork.rpcServerUrl);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
         disposable = getIsSyncing()
@@ -140,7 +122,6 @@ public class TokenRepository implements TokenRepositoryType {
     {
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(network.backupNodeUrl);
         web3j = Web3jFactory.build(publicNodeService);
-        ethereumNetworkRepository.setActiveRPC(network.backupNodeUrl);
     }
 
     private Single<Boolean> getIsSyncing()
@@ -150,21 +131,6 @@ public class TokenRepository implements TokenRepositoryType {
                     .send();
             return status.isSyncing();
         });
-    }
-
-    @Override
-    public Observable<Token[]> fetchActive(String walletAddress) {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        Wallet wallet = new Wallet(walletAddress);
-        return fetchCachedEnabledTokens(network, wallet).toObservable();
-    }
-
-    @Override
-    public Observable<Token[]> fetchActiveCache(String walletAddress) {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        Wallet wallet = new Wallet(walletAddress);
-        return fetchCachedEnabledTokens(network, wallet) // Immediately show the cache.
-                .toObservable();
     }
 
     @Override
@@ -186,61 +152,10 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    /**
-     * Gives an observable that allows us to process each token as the balance is fetched
-     *
-     * @param walletAddress
-     * @return
-     */
-    @Override
-    public Observable<Token> fetchActiveStoredSequential(String walletAddress) {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokensList(network, wallet)
-                .compose(attachEthereumActive(network, wallet))
-                .flatMapIterable(tokens -> tokens)
-                .flatMap(token -> processBalance(network, wallet, token));
-    }
-
-    @Override
-    public Observable<Token> fetchActiveStoredSequentialNoEth(String walletAddress) {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokensList(network, wallet)
-                .flatMapIterable(tokens -> tokens)
-                .flatMap(token -> processBalance(network, wallet, token));
-    }
-
-    //Add in the fetched current ethereum balance
-    private ObservableTransformer<List<Token>, List<Token>> attachEthereumActive(NetworkInfo network, Wallet wallet)
-    {
-        return upstream -> Observable.zip(
-                upstream, attachEth(network, wallet).toObservable(),
-                (tokens, ethToken) ->
-                {
-                    List<Token> result = new ArrayList<>();
-                    result.add(ethToken);
-                    result.addAll(tokens);
-                    return result;
-                });
-    }
-
-    private Observable<Token> processBalance(NetworkInfo network, Wallet wallet, Token token)
-    {
-        //now fetch the balance
-        return updateBalance(network, wallet, token)
-                .observeOn(Schedulers.newThread())
-                .toObservable();
-    }
 
     private Single<Token[]> fetchERC721Tokens(Wallet wallet)
     {
         return localSource.fetchERC721Tokens(wallet);
-    }
-
-    private Observable<List<Token>> fetchStoredEnabledTokensList(NetworkInfo network, Wallet wallet) {
-        return localSource
-                .fetchEnabledTokensSequentialList(network, wallet);
     }
 
     @Override
@@ -260,7 +175,7 @@ public class TokenRepository implements TokenRepositoryType {
                     List<Token> result = new ArrayList<>();
                     result.addAll(Arrays.asList(ERC721Tokens));
                     result.addAll(Arrays.asList(tokens));
-                    return result.toArray(new Token[result.size()]);
+                    return result.toArray(new Token[0]);
                 });
     }
 
@@ -273,7 +188,7 @@ public class TokenRepository implements TokenRepositoryType {
                     List<Token> result = new ArrayList<>();
                     result.add(ethToken);
                     result.addAll(Arrays.asList(tokens));
-                    return result.toArray(new Token[result.size()]);
+                    return result.toArray(new Token[0]);
                 });
     }
 
@@ -290,6 +205,7 @@ public class TokenRepository implements TokenRepositoryType {
                 eth.setTokenNetwork(network.chainId);
                 eth.setTokenWallet(wallet.address);
             }
+            Log.d(TAG, "ETH(BAL): " + eth.balance);
             eth.setIsEthereum();
             return eth;
         });
@@ -328,16 +244,6 @@ public class TokenRepository implements TokenRepositoryType {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         Wallet wallet = new Wallet(walletAddress);
         return updateBalance(network, wallet, token)
-                .observeOn(Schedulers.newThread())
-                .toObservable();
-    }
-
-    @Override
-    public Observable<Token> fetchActiveDefaultTokenBalance(Token token)
-    {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        return walletRepository.getDefaultWallet()
-                .flatMap(wallet -> updateBalance(network, wallet, token))
                 .observeOn(Schedulers.newThread())
                 .toObservable();
     }
@@ -416,28 +322,14 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo) {
-        TokenFactory tf = new TokenFactory();
-        Token newToken = tf.createToken(tokenInfo);
-        newToken.setTokenWallet(wallet.address);
-        newToken.setTokenNetwork(ethereumNetworkRepository.getDefaultNetwork().chainId);
-        Log.d(TAG, "Create for store3: " + tokenInfo.name);
-
-        return localSource.saveToken(
-                ethereumNetworkRepository.getDefaultNetwork(),
-                wallet,
-                newToken);
-    }
-
-    @Override
-    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, int interfaceSpec)
+    public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec)
     {
         TokenFactory tf = new TokenFactory();
-        Token newToken = tf.createToken(tokenInfo);
+        Token newToken = tf.createToken(tokenInfo, interfaceSpec);
+
         newToken.setTokenWallet(wallet.address);
         newToken.setTokenNetwork(ethereumNetworkRepository.getDefaultNetwork().chainId);
-        newToken.setInterfaceSpec(interfaceSpec);
-        Log.d(TAG, "Create for store4: " + tokenInfo.name);
+        Log.d(TAG, "Create for store: " + tokenInfo.name);
 
         return localSource.saveToken(
                     ethereumNetworkRepository.getDefaultNetwork(),
@@ -541,24 +433,6 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Token[]> addTokens(Wallet wallet, TokenInfo[] tokenInfos)
-    {
-        TokenFactory tf = new TokenFactory();
-        Token[] tokenList = new Token[tokenInfos.length];
-
-        for (int i = 0; i < tokenInfos.length; i++)
-        {
-            tokenList[i] = tf.createToken(tokenInfos[i]);
-            Log.d(TAG, "Create for store: " + tokenInfos[i].name);
-        }
-
-        return localSource.saveTokensList(
-                    ethereumNetworkRepository.getDefaultNetwork(),
-                    wallet,
-                    tokenList);
-    }
-
-    @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
         return Completable.fromAction(() -> localSource.setEnable(network, wallet, token, isEnabled));
@@ -571,8 +445,8 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<TokenInfo> update(String contractAddr, boolean contractHint) {
-        return setupTokensFromLocal(contractAddr, contractHint).toObservable();
+    public Observable<TokenInfo> update(String contractAddr) {
+        return setupTokensFromLocal(contractAddr).toObservable();
     }
 
     @Override
@@ -667,34 +541,24 @@ public class TokenRepository implements TokenRepositoryType {
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
-                if (token.tokenInfo.isStormbird)
+                switch (token.getInterfaceSpec())
                 {
-                    Ticket t = (Ticket) token;
-                    balanceArray = getBalanceArray(wallet, t.tokenInfo);
-                    if (balanceArray.size() == 1 && balanceArray.get(0).equals(BigInteger.valueOf(-1))) //when there's an index out of bounds fail - caused by trying to read ERC20 balance as an array
-                    {
-                        tInfo = changeToERC20Token(token);
-                        balance = BigDecimal.ZERO;
-                        balanceArray = new ArrayList<>();
-                    }
-                    else
-                    {
-                        burnArray = t.getBurnList();
-                    }
-                }
-                else
-                {
-                    balance = getBalance(wallet, token.tokenInfo);
-                    if (balance.equals(BigDecimal.valueOf(-1)))
-                    {
-                        balance = BigDecimal.ZERO;
-                        //array balance, assume ERC875
-                        tInfo = changeToERC875Token(token);
-                        balanceArray = new ArrayList<>(Arrays.asList(BigInteger.ZERO));
-                    }
+                    case ERC875:
+                    case ERC875LEGACY:
+                        balanceArray = getBalanceArray(wallet, tInfo);
+                        burnArray = (token instanceof Ticket) ? ((Ticket)token).getBurnList() : new ArrayList<Integer>();
+                        break;
+                    case ERC721:
+                        break;
+                    case ERC20:
+                    case ETHEREUM:
+                        balance = getBalance(wallet, token.tokenInfo);
+                        break;
+                    default:
+                        break;
                 }
 
-                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis());
+                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis(), token.getInterfaceSpec());
                 updated.patchAuxData(token); //perform any updates we need here
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);
@@ -725,30 +589,24 @@ public class TokenRepository implements TokenRepositoryType {
             TokenInfo tInfo = token.tokenInfo;
             if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
                 try {
-                    if (token.tokenInfo.isStormbird)
+                    switch (token.getInterfaceSpec())
                     {
-                        balanceArray = getBalanceArray(wallet, token.tokenInfo);
-                        if (balanceArray.size() == 1 && balanceArray.get(0).equals(BigInteger.valueOf(-1)))
-                        {
-                            tInfo = changeToERC20Token(token);
-                            burnArray = null;
-                        }
-                        else
-                        {
-                            burnArray = ((Ticket) token).getBurnList();
-                        }
+                        case ERC875:
+                        case ERC875LEGACY:
+                            balanceArray = getBalanceArray(wallet, token.tokenInfo);
+                            burnArray = ((Ticket)token).getBurnList();
+                            break;
+                        case ERC721:
+                            break;
+                        case ERC20:
+                        case ETHEREUM:
+                            balance = getBalance(wallet, token.tokenInfo);
+                            break;
+                        default:
+                            break;
                     }
-                    else
-                    {
-                        balance = getBalance(wallet, token.tokenInfo);
-                        if (balance.equals(BigDecimal.valueOf(-1)))
-                        {
-                            balance = BigDecimal.ZERO;
-                            tInfo = changeToERC875Token(token);
-                            balanceArray = new ArrayList<>(Arrays.asList(BigInteger.ZERO));
-                        }
-                    }
-                    newToken = tFactory.createToken(tInfo, balance, balanceArray, burnArray, now);
+
+                    newToken = tFactory.createToken(tInfo, balance, balanceArray, burnArray, now, token.getInterfaceSpec());
                     localSource.updateTokenBalance(network, wallet, token);
                     newToken.patchAuxData(token);
                 } catch (Throwable th) { /* Quietly */ }
@@ -804,25 +662,15 @@ public class TokenRepository implements TokenRepositoryType {
                 .fetchEnabledTokensWithBalance(network, wallet);
     }
 
-    private Single<Token[]> fetchCachedEnabledTokens(NetworkInfo network, Wallet wallet) {
-        return localSource
-                .fetchEnabledTokens(network, wallet)
-                .flatMapObservable(Observable::fromArray)
-                .compose(updateBalance(network, wallet))
-                .toList()
-                .map(list -> list.toArray(new Token[list.size()]))
-                .compose(attachTicker(network, wallet))
-                .compose(attachEthereum(network, wallet));
-    }
-
     private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address) {
         return localSource
                 .fetchEnabledToken(network, wallet, address);
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet) {
-        return walletRepository.balanceInWei(wallet)
+        return getEthBalance(wallet) //use local balance fetch, uses less resources
                 .map(balance -> {
+                    Log.d(TAG, "ETH: " + balance.toPlainString());
                     if (balance.equals(BigDecimal.valueOf(-1)))
                     {
                         //network error - retrieve from cache
@@ -856,22 +704,7 @@ public class TokenRepository implements TokenRepositoryType {
      */
     @Override
     public Single<Token> getEthBalance(NetworkInfo network, Wallet wallet) {
-        return walletRepository.balanceInWei(wallet)
-                .map(balance -> {
-                    if (balance.equals(BigDecimal.valueOf(-1)))
-                    {
-                        //network error - retrieve from cache
-                        Token b = localSource.getTokenBalance(network, wallet, wallet.address);
-                        if (b != null) balance = b.balance;
-                        else balance = BigDecimal.ZERO;
-                    }
-                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
-                    Token eth = new Token(info, balance, System.currentTimeMillis());
-                    eth.setIsEthereum();
-                    //store token and balance
-                    localSource.updateTokenBalance(network, wallet, eth);
-                    return eth;
-                });
+        return attachEth(network, wallet);
     }
 
     @Override
@@ -906,6 +739,7 @@ public class TokenRepository implements TokenRepositoryType {
      * This function checks for suspicious contracts. If the value of tokens is 32, this could be an array return.
      * Parsing the returned value with DynamicArray, if it is an array spec (ie 0x02, then array size etc) then
      * we can remove this token. However it would be better to display the token as a ticket if the array balance has elements.
+     * TODO: refactor this out using constructor analysis
      * @param value
      * @param wallet
      * @param responseValue
@@ -927,20 +761,37 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
+    private Single<BigDecimal> getEthBalance(Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            try {
+                return new BigDecimal(web3j.ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
+                        .send()
+                        .getBalance());
+            }
+            catch (IOException e)
+            {
+                return BigDecimal.valueOf(-1);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return BigDecimal.valueOf(-1);
+            }
+        }).subscribeOn(Schedulers.io());
+    }
+
     private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         List<BigInteger> result = new ArrayList<>();
-        byte[] temp = new byte[16];
         try
         {
-            if (tokenInfo.isStormbird) //safety check
+            org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
+            List<Uint256> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            if (indices == null)
+                return result; // return empty array
+            for (Uint256 val : indices)
             {
-                org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-                List<Uint256> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-                if (indices == null) return result; // return empty array
-                for (Uint256 val : indices)
-                {
-                    result.add(val.getValue());
-                }
+                result.add(val.getValue());
             }
         }
         catch (StringIndexOutOfBoundsException e)
@@ -1042,38 +893,6 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private String getSymbol(String address) throws Exception {
-        org.web3j.abi.datatypes.Function function = symbolOf();
-        Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, temp);
-
-        if (responseValue == null) return null;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return (String)response.get(0).getValue();
-        } else {
-            return null;
-        }
-    }
-
-    private String getVenue(String address) throws Exception {
-        org.web3j.abi.datatypes.Function function = symbolOf();
-        Wallet temp = new Wallet(null);
-        String responseValue = callSmartContractFunction(function, address, temp);
-
-        if (responseValue == null) return null;
-
-        List<Type> response = FunctionReturnDecoder.decode(
-                responseValue, function.getOutputParameters());
-        if (response.size() == 1) {
-            return (String)response.get(0).getValue();
-        } else {
-            return null;
-        }
-    }
-
     private int getDecimals(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = decimalsOf();
         Wallet temp = new Wallet(null);
@@ -1154,22 +973,34 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private List callSmartContractFunctionArray(
-            org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet) throws Exception
+            org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet)
     {
-        String encodedFunction = FunctionEncoder.encode(function);
-        org.web3j.protocol.core.methods.response.EthCall ethCall = web3j.ethCall(
-                org.web3j.protocol.core.methods.request.Transaction
-                        .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
-                DefaultBlockParameterName.LATEST)
-                .sendAsync().get();
+        try
+        {
+            String encodedFunction = FunctionEncoder.encode(function);
+            org.web3j.protocol.core.methods.response.EthCall ethCall = web3j.ethCall(
+                    org.web3j.protocol.core.methods.request.Transaction
+                            .createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
+                    DefaultBlockParameterName.LATEST).send();
 
-        String value = ethCall.getValue();
-        List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
-        if (values.isEmpty()) return null;
+            String value = ethCall.getValue();
+            List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
+            if (values.isEmpty())
+                return null;
 
-        Type T = values.get(0);
-        Object o = T.getValue();
-        return (List) o;
+            Type T = values.get(0);
+            Object o = T.getValue();
+            return (List) o;
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String callSmartContractFunction(
@@ -1183,6 +1014,10 @@ public class TokenRepository implements TokenRepositoryType {
             EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
         }
         catch (Exception e)
         {
@@ -1271,17 +1106,13 @@ public class TokenRepository implements TokenRepositoryType {
         return tokens;
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address, boolean contractHint)
+    private Single<TokenInfo> setupTokensFromLocal(String address)
     {
         return Single.fromCallable(() -> {
             try
             {
                 long now = System.currentTimeMillis();
-                Boolean isStormbird = contractHint;
-                if (!isStormbird)
-                {
-                    isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
-                }
+                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
                 if (isStormbird == null) isStormbird = false;
                 TokenInfo result = new TokenInfo(
                         address,

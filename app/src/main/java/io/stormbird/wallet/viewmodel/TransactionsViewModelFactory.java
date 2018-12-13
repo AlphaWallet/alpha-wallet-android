@@ -9,17 +9,10 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
-import io.stormbird.wallet.router.MarketBrowseRouter;
-import io.stormbird.wallet.router.MarketplaceRouter;
-import io.stormbird.wallet.router.MyTokensRouter;
-import io.stormbird.wallet.router.NewSettingsRouter;
-import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
-import io.stormbird.wallet.router.WalletRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 

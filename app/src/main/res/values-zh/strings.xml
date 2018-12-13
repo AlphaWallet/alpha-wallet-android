@@ -334,4 +334,6 @@
     <string name="confirm_erc721_transfer">确认转出 Token</string>
     <string name="asset_name">资产名称</string>
     <string name="title_dialog_check_ens">正在查询 ENS</string>
+    <string name="allocate_to">Allocate To</string>
+    <string name="approve">Approve</string>
 </resources>

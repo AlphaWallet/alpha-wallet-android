@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.Ticket;
@@ -18,9 +21,6 @@ import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
-import java.math.BigInteger;
-import java.util.List;
-
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -34,7 +34,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private final GasSettingsRouter gasSettingsRouter;
 
-    private boolean confirmationForTokenTransfer = false;
+    private byte[] transactionBytes = null;
 
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
@@ -67,10 +67,9 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
-        Token token = tokensService.getToken(contractAddress);
-        final byte[] data = TokenRepository.createTicketTransferData(to, ids, token);
+        final byte[] data = getERC875TransferBytes(to, contractAddress, ids);
         disposable = createTransactionInteract
-                .create(new Wallet(from), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -86,8 +85,8 @@ public class ConfirmationViewModel extends BaseViewModel {
         return newTransaction;
     }
 
-    public void prepare(boolean confirmationForTokenTransfer) {
-        this.confirmationForTokenTransfer = confirmationForTokenTransfer;
+    public void prepare(byte[] transactionBytes) {
+        this.transactionBytes = transactionBytes;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -100,10 +99,11 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-        if (gasSettings.getValue() == null) {
+        if (gasSettings.getValue() == null)
+        {
             disposable = fetchGasSettingsInteract
-                    .fetch(confirmationForTokenTransfer)
-                    .subscribe(this::onGasSettings, this::onError);
+                        .fetch(transactionBytes)
+                        .subscribe(this::onGasSettings, this::onError);
         }
     }
 
@@ -141,6 +141,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void signWeb3DAppTransaction(Web3Transaction transaction, BigInteger gasPrice, BigInteger gasLimit)
     {
+        progress.postValue(true);
         BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
 
         if (addr.equals(BigInteger.ZERO)) //constructor
@@ -163,10 +164,21 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit)
     {
         progress.postValue(true);
-        Token token = tokensService.getToken(contractAddress);
-        final byte[] data = TokenRepository.createERC721TransferFunction(to, token, tokenId);
+        final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId);
         disposable = createTransactionInteract
-                .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
                 .subscribe(this::onCreateTransaction, this::onError);
+    }
+
+    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId)
+    {
+        Token token = tokensService.getToken(contractAddress);
+        return TokenRepository.createERC721TransferFunction(to, token, tokenId);
+    }
+
+    public byte[] getERC875TransferBytes(String to, String contractAddress, String tokenIds)
+    {
+        Token token = tokensService.getToken(contractAddress);
+        return TokenRepository.createTicketTransferData(to, tokenIds, token);
     }
 }

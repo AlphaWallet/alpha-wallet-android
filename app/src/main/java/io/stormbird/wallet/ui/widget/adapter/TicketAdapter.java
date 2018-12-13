@@ -29,12 +29,7 @@ import io.stormbird.wallet.ui.widget.entity.SortedItem;
 import io.stormbird.wallet.ui.widget.entity.TicketSaleSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
-import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
-import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketSaleHolder;
-import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
-import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
+import io.stormbird.wallet.ui.widget.holder.*;
 
 /**
  * Created by James on 9/02/2018.
@@ -85,6 +80,10 @@ public class TicketAdapter extends TokensAdapter {
             case TokenDescriptionHolder.VIEW_TYPE: {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService);
             } break;
+            case IFrameHolder.VIEW_TYPE: {
+                holder = new IFrameHolder(R.layout.item_iframe_token, parent, token, assetService);
+            }
+            break;
             case OpenseaHolder.VIEW_TYPE: {
                 holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token);
             } break;

@@ -116,6 +116,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
         isVisible = true;
 
+        viewModel.clearProcess();
+
         return view;
     }
 
@@ -213,10 +215,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         switch (item.getItemId()) {
             case R.id.action_add: {
                 viewModel.showAddToken(getContext());
-            }
-            break;
-            case R.id.action_edit: {
-                viewModel.showEditTokens(getContext());
             }
             break;
             case android.R.id.home: {

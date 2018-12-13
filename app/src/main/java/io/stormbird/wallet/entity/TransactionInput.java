@@ -1,5 +1,7 @@
 package io.stormbird.wallet.entity;
 
+import android.content.Context;
+import io.stormbird.wallet.R;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
@@ -27,6 +29,8 @@ public class TransactionInput
     public List<BigInteger> paramValues;
     public List<String> sigData;
     public List<String> miscData;
+
+    private final String ALL = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
     public TransactionInput()
     {
@@ -74,14 +78,22 @@ public class TransactionInput
         return address;
     }
 
-    public String getFirstValue()
+    public String getFirstValue(Context ctx)
     {
         String value = "0";
         if (miscData.size() > 0)
         {
-            //convert to big integer
-            BigInteger bi = new BigInteger(miscData.get(0), 16);
-            value = bi.toString(10);
+            String firstVal = miscData.get(0);
+            if (firstVal.equals(ALL))
+            {
+                value = ctx.getString(R.string.all);
+            }
+            else
+            {
+                //convert to big integer
+                BigInteger bi = new BigInteger(miscData.get(0), 16);
+                value = bi.toString(10);
+            }
         }
         return value;
     }

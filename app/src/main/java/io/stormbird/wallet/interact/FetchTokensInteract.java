@@ -30,14 +30,8 @@ public class FetchTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<Token[]> fetch(Wallet wallet) {
-        return tokenRepository.fetchActive(wallet.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public Observable<TokenInfo> getTokenInfo(String address, boolean isERC875) {
-        return tokenRepository.update(address, isERC875);
+    public Observable<TokenInfo> getTokenInfo(String address) {
+        return tokenRepository.update(address);
     }
 
     public Observable<Token[]> fetchStored(Wallet wallet) {
@@ -114,10 +108,7 @@ public class FetchTokensInteract {
     {
         OrderContractAddressPair pair = new OrderContractAddressPair();
         pair.order = so;
-        if (token instanceof Ticket) {
-            Ticket t = (Ticket) token;
-            pair.balance = t.balanceArray;
-        }
+        pair.balance = token.getArrayBalance();
         return pair;
     }
 }

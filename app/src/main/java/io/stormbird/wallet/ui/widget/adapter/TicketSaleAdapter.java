@@ -122,7 +122,7 @@ public class TicketSaleAdapter extends TicketAdapter {
     {
         //first sort the balance array
         currentRange = null;
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, ((Ticket)t).balanceArray);
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, t.getArrayBalance());
         addSortedItems(sortedList, t, TicketSaleSortedItem.VIEW_TYPE);
     }
 

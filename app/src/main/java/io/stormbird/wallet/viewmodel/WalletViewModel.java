@@ -16,7 +16,6 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
-import io.stormbird.wallet.router.ChangeTokenCollectionRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
@@ -45,7 +44,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final ChangeTokenCollectionRouter changeTokenCollectionRouter;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
 
@@ -60,6 +58,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
     private final TokensService tokensService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
@@ -79,7 +78,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            ChangeTokenCollectionRouter changeTokenCollectionRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -88,13 +86,13 @@ public class WalletViewModel extends BaseViewModel implements Runnable
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            OpenseaService openseaService)
+            OpenseaService openseaService,
+            FetchTransactionsInteract fetchTransactionsInteract)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.changeTokenCollectionRouter = changeTokenCollectionRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -103,6 +101,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
         this.tokensService = tokensService;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
     }
 
     public LiveData<Token[]> tokens() {
@@ -129,6 +128,11 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         {
             updateTokens.dispose();
         }
+        terminateBalanceUpdate();
+    }
+
+    private void terminateBalanceUpdate()
+    {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable.dispose();
@@ -136,20 +140,18 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed())
         {
             balanceCheckDisposable.dispose();
-            balanceCheckDisposable = null;
         }
     }
 
     public void reloadTokens()
     {
         assetDefinitionService.clearCheckTimes();
+        clearProcess();
         fetchTokens();
     }
 
     public void fetchTokens()
     {
-        clearProcess();
-
         if (defaultNetwork.getValue() != null && defaultWallet.getValue() != null)
         {
             tokenCache = null;
@@ -267,8 +269,11 @@ public class WalletViewModel extends BaseViewModel implements Runnable
      */
     private void updateTokenBalances()
     {
-        balanceTimerDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
+        if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
+        {
+            balanceTimerDisposable = Observable.interval(0, GET_BALANCE_INTERVAL, TimeUnit.SECONDS)
                     .doOnNext(l -> updateBalances()).subscribe();
+        }
     }
 
     private void updateBalances()
@@ -321,10 +326,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         assetDisplayRouter.open(context, token);
     }
 
-    public void showEditTokens(Context context) {
-        changeTokenCollectionRouter.open(context, defaultWallet.getValue());
-    }
-
     public LiveData<NetworkInfo> defaultNetwork() {
         return defaultNetwork;
     }
@@ -352,6 +353,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         }
         else if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
+            balanceCheckDisposable = null;
             updateTokenBalances();
         }
     }
@@ -383,6 +385,16 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
+        if (isVisible)
+        {
+            //restart if required
+            prepare();
+        }
+        else
+        {
+            //stop the update
+            terminateBalanceUpdate();
+        }
     }
 
     private void setContractAddresses()
@@ -390,8 +402,9 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         disposable = fetchAllContractAddresses()
                 .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
-                .flatMap(tokenAddress -> setupTokensInteract.addToken(tokenAddress, true)) //TODO: determine contract type from constructor
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, defaultWallet.getValue()))
+                .flatMap(tokenAddress -> setupTokensInteract.addToken(tokenAddress))
+                .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .filter(token -> (token != null && (token.tokenInfo.name != null || token.tokenInfo.symbol != null)))
                 .subscribeOn(Schedulers.io())
@@ -416,10 +429,11 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         nullTokensCheckDisposable = Observable.fromCallable(tokensService::getAllTokens)
                 .flatMapIterable(token -> token)
                 .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
-                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress(), false))
+                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
                 .filter(tokenInfo -> (tokenInfo.name != null))
+                .concatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                 .subscribeOn(Schedulers.io())
-                .subscribe(addTokenInteract::addS, this::onError,
+                .subscribe(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)), this::onError,
                            () -> { if (nullTokensCheckDisposable != null) nullTokensCheckDisposable.dispose(); });
     }
 
@@ -475,7 +489,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     {
         checkCounter++;
         progress.postValue(false);
-        balanceCheckDisposable = null;
+        if (isVisible) balanceCheckDisposable = null;
         if (tokenCache != null && tokenCache.length > 0)
         {
             checkTokens.postValue(true);

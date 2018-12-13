@@ -78,71 +78,61 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
 
         String networkSymbol = addition.getString(DEFAULT_SYMBOL_ADDITIONAL);
+        boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
         TransactionOperation operation = transaction.operations == null
                 || transaction.operations.length == 0 ? null : transaction.operations[0];
 
         if (operation == null || operation.contract == null) {
             // default to ether transaction
-            fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
+            fill(txSuccess, transaction.from, transaction.to, networkSymbol, transaction.value,
                     ETHER_DECIMALS, transaction.timeStamp);
         }
         else if (operation.contract instanceof ERC875ContractTransaction)
         {
-            fillERC875(transaction, (ERC875ContractTransaction)operation.contract);
+            fillERC875(txSuccess, transaction, (ERC875ContractTransaction)operation.contract);
         }
         else if (operation.from == null)
         {
-            fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
+            fill(txSuccess, transaction.from, transaction.to, networkSymbol, transaction.value,
                  ETHER_DECIMALS, transaction.timeStamp);
         }
         else
         {
-            fillERC20(transaction);
+            fillERC20(txSuccess, transaction);
         }
     }
 
-    private void fillERC875(Transaction trans, ERC875ContractTransaction ct)
+    private void fillERC875(boolean txSuccess, Transaction trans, ERC875ContractTransaction ct)
     {
         int colourResource;
-        TransactionOperation operation = transaction.operations[0];
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
         String name = tokensService.getTokenName(ct.address);
+        Token token = tokensService.getToken(ct.address);
 
         address.setText(name);
         supplimental.setTextSize(12.0f);
 
         String ticketMove = "";
-        String supplimentalTxt = "";
 
-        if (ct.indices != null && ct.indices.size() > 0)
+        if (token != null)
+        {
+            ticketMove = token.getTransactionValue(trans, getContext());
+        }
+        else if (ct.indices != null && ct.indices.size() > 0)
         {
             ticketMove = "x" + ct.indices.size() + " " + getString(R.string.tickets);
         }
 
+        String supplimentalTxt = "";
+
         switch (ct.operation)
         {
-            case MAGICLINK_TRANSFER: //transferred out of our wallet via magic link (0 value)
-                break;
-            case MAGICLINK_PICKUP: //received ticket from a magic link
-                break;
-            case TRANSFER_TO:
-                break;
-            case TRANSFER_FROM:
-                break;
             case MAGICLINK_SALE: //we received ether from magiclink sale
-                supplimentalTxt = "+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
+                supplimentalTxt = "+" + Token.getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
             case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
-                supplimentalTxt = "-" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case RECEIVE_FROM:
-                supplimentalTxt = "";//"+" + getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
-                break;
-            case LOAD_NEW_TOKENS:
-                ticketMove = "x" + operation.value + " " + getString(R.string.tickets);
-                break;
-            case PASS_TO:
+                supplimentalTxt = "-" + Token.getScaledValue(transaction.value, ETHER_DECIMALS) + " " + ETH_SYMBOL;
                 break;
             default:
                 break;
@@ -176,35 +166,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         type.setText(operationName);
         value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
+        value.setText(ticketMove);
 
-        if (!trans.error.equals("0"))
-        {
-            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
-            layoutParams.setMarginStart(10);
-            String failure = getString(R.string.failed) + " ☹";
-            supplimental.setText(failure);
-            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-            typeIcon.setImageResource(R.drawable.ic_error);
-            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
-                                    PorterDuff.Mode.SRC_ATOP);
-            value.setText("");
-        }
-        else
-        {
-            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
-            layoutParams.setMarginStart(30);
-            supplimental.setText(supplimentalTxt);
-            supplimental.setVisibility(View.VISIBLE);
-            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-            value.setText(ticketMove);
-
-            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
-                                    PorterDuff.Mode.SRC_ATOP);
-        }
+        setSuccessIndicator(txSuccess, supplimentalTxt);
     }
 
     private void fill(
-            String error,
+            boolean txSuccess,
             String from,
             String to,
             String symbol,
@@ -213,26 +181,34 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             long timestamp) {
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
-        if (error == null || error.length() == 0) {
-            typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
-        } else if (!isSent) {
-            typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
-        } else {
-            typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+
+        if (txSuccess)
+        {
+            if (!isSent)
+            {
+                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+            }
+            else
+            {
+                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+            }
         }
+
         address.setText(isSent ? to : from);
         value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
+
+        setSuccessIndicator(txSuccess, "");
 
         if (valueStr.equals("0")) {
             valueStr = "0 " + symbol;
         } else {
-            valueStr = (isSent ? "-" : "+") + getScaledValue(valueStr, decimals) + " " + symbol;
+            valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;
         }
 
         this.value.setText(valueStr);
     }
 
-    private void fillERC20(
+    private void fillERC20(boolean txSuccess,
             Transaction transaction)
     {
         TransactionOperation operation = transaction.operations[0];
@@ -240,22 +216,31 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String name = tokensService.getTokenName(operation.contract.address);
         String symbol = tokensService.getTokenSymbol(operation.contract.address);
         int decimals = tokensService.getTokenDecimals(operation.contract.address);
+        Token token = tokensService.getToken(operation.contract.address);
 
         String from = operation.from;
 
         String supplimentalTxt = "";
 
         boolean isSent = from.toLowerCase().equals(defaultAddress);
-        type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
-        if (transaction.error == null || transaction.error.length() == 0) {
-            typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
-        } else if (!isSent) {
-            typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
-            supplimentalTxt = getString(R.string.label_from) + " " + operation.from;
-        } else {
-            typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
-            supplimentalTxt = getString(R.string.label_to) + " " + operation.to;
+        String operationName = token != null ? token.getOperationName(transaction, getContext()) : null;
+        if (operationName == null) operationName = isSent ? getString(R.string.sent) : getString(R.string.received);
+        type.setText(operationName);
+
+        if (txSuccess)
+        {
+            if (!isSent)
+            {
+                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+                supplimentalTxt = getString(R.string.label_from) + " " + operation.from;
+            }
+            else
+            {
+                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                supplimentalTxt = getString(R.string.label_to) + " " + operation.to;
+            }
         }
+
         address.setText(name);
         value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
 
@@ -266,29 +251,57 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             supplimental.setTextSize(10.0f);
         }
 
-        String valueStr = operation.value;
+        setSuccessIndicator(txSuccess, supplimentalTxt);
 
-        if (valueStr.equals("0")) {
-            valueStr = "0 " + symbol;
-        } else {
-            valueStr = (isSent ? "-" : "+") + getScaledValue(valueStr, decimals) + " " + symbol;
+        String valueStr;
+        if (token != null)
+        {
+            valueStr = token.getTransactionValue(transaction, getContext());
+        }
+        else
+        {
+            valueStr = operation.value;
+
+            if (valueStr.equals("0") || !Character.isDigit(valueStr.charAt(0))) {
+                valueStr = valueStr + " " + symbol;
+            } else {
+                valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;
+            }
         }
 
         this.value.setText(valueStr);
-    }
-
-    private String getScaledValue(String valueStr, long decimals) {
-        // Perform decimal conversion
-        BigDecimal value = new BigDecimal(valueStr);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = 4; //SIGNIFICANT_FIGURES - value.precision() + value.scale();
-        return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 
     @Override
     public void onClick(View view) {
         if (onTransactionClickListener != null) {
             onTransactionClickListener.onTransactionClick(view, transaction);
+        }
+    }
+
+    private void setSuccessIndicator(boolean txSuccess, String supplimentalTxt)
+    {
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) supplimental.getLayoutParams();
+        if (txSuccess)
+        {
+            layoutParams.setMarginStart(30);
+            supplimental.setText(supplimentalTxt);
+            supplimental.setVisibility(View.VISIBLE);
+            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+
+            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.black),
+                                    PorterDuff.Mode.SRC_ATOP);
+        }
+        else
+        {
+            layoutParams.setMarginStart(10);
+            String failure = getString(R.string.failed) + " ☹";
+            supplimental.setText(failure);
+            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+            typeIcon.setImageResource(R.drawable.ic_error);
+            typeIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red),
+                                    PorterDuff.Mode.SRC_ATOP);
+            value.setText("");
         }
     }
 

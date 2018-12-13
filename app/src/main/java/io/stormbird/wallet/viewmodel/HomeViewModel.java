@@ -34,7 +34,6 @@ import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
-import io.stormbird.wallet.router.SettingsRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
@@ -47,7 +46,6 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
 
-    private final SettingsRouter settingsRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final ImportTokenRouter importTokenRouter;
     private final AddTokenRouter addTokenRouter;
@@ -69,11 +67,9 @@ public class HomeViewModel extends BaseViewModel {
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
-            SettingsRouter settingsRouter,
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
-        this.settingsRouter = settingsRouter;
         this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -111,11 +107,6 @@ public class HomeViewModel extends BaseViewModel {
 
     public void prepare() {
         progress.postValue(false);
-    }
-
-    public void showSettings(Context context)
-    {
-        settingsRouter.open(context);
     }
 
     public void showImportLink(Context context, String importData)

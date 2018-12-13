@@ -1,5 +1,6 @@
 package io.stormbird.wallet;
 
+import io.stormbird.wallet.entity.*;
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -13,12 +14,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.stormbird.wallet.entity.MessagePair;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.SignaturePair;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
@@ -131,7 +126,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<Integer> queryInterfaceSpec(Token token)
+            public Single<ContractType> queryInterfaceSpec(TokenInfo token)
             {
                 return null;
             }

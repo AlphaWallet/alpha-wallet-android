@@ -1,9 +1,11 @@
 package io.stormbird.wallet.service;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
 
+import io.stormbird.wallet.entity.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,33 +19,28 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.EtherscanTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
-	private final int PAGESIZE = 300;
+	private final int PAGESIZE = 800;
 
     private final OkHttpClient httpClient;
 	private final Gson gson;
 	private final EthereumNetworkRepositoryType networkRepository;
+	private final Context context;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
 			Gson gson,
-			EthereumNetworkRepositoryType networkRepository) {
+			EthereumNetworkRepositoryType networkRepository,
+			Context context) {
 		this.httpClient = httpClient;
 		this.gson = gson;
 		this.networkRepository = networkRepository;
+		this.context = context;
 	}
 
 	@Override
@@ -64,7 +61,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-					    Transaction tx = etx.createTransaction(userAddress);
+					    Transaction tx = etx.createTransaction(userAddress, context);
 					    if (tx != null)
                         {
                             result.add(tx);
@@ -211,10 +208,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Single<Integer> checkConstructorArgs(NetworkInfo networkInfo, String address)
+	public Single<ContractType> checkConstructorArgs(NetworkInfo networkInfo, String address)
 	{
 		return Single.fromCallable(() -> {
-			int result = 256;
+			ContractType result = ContractType.OTHER;
 			try
 			{
 				String response = readTransactions(networkInfo, address, "0", true, 1, 5);
@@ -226,11 +223,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-						Transaction tx = etx.createTransaction(null);
+						Transaction tx = etx.createTransaction(null, context);
 						if (tx.isConstructor && tx.operations.length > 0)
 						{
 							TransactionContract ct = tx.operations[0].contract;
-							result = ct.decimals;
+							result = ContractType.values()[ct.decimals];
 							break;
 						}
 					}

@@ -13,13 +13,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.TokenRepository;
@@ -181,7 +175,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         if (token.unspecifiedSpec())
         {
             //need to determine the spec
-            disposable = fetchTransactionsInteract.queryInterfaceSpec(token)
+            disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, contractAddress, indexList, gasPrice, gasLimit), this::onError);
@@ -195,7 +189,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
     }
 
-    private void onInterfaceSpec(Integer spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    private void onInterfaceSpec(ContractType spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
         Token token = tokensService.getToken(contractAddress);
         token.setInterfaceSpec(spec);

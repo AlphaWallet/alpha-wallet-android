@@ -168,6 +168,10 @@ public class AssetDefinitionService
                 {
                     assetDefinitions.put(address.toLowerCase(), assetDef);
                 }
+                else
+                {
+                    assetDef = null;
+                }
             }
         }
 
@@ -309,7 +313,7 @@ public class AssetDefinitionService
     {
         //this is file stored on the phone, notify to the main app to reload (use receiver)
         TokenDefinition assetDefinition = loadTokenDefinition(address);
-        if (assetDefinition != null)
+        if (assetDefinition != null && assetDefinition.attributeTypes.size() > 0 && assetDefinition.addresses.size() > 0)
         {
             assetDefinitions.put(address.toLowerCase(), assetDefinition);
         }

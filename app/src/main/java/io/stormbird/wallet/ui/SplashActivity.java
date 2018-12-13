@@ -46,8 +46,11 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-        Fabric.with(this, new Crashlytics.Builder().core(core).build());
+        if (!BuildConfig.DEBUG)
+        {
+            CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+            Fabric.with(this, new Crashlytics.Builder().core(core).build());
+        }
 
         // Get the intent that started this activity
         Intent intent = getIntent();

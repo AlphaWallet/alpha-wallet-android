@@ -227,6 +227,7 @@ public class TokenDefinition {
             if (attr != null)
             {
                 fd.method = attr.getTextContent();
+                fd.syntax = Syntax.Integer;
             }
         }
 
@@ -668,6 +669,24 @@ public class TokenDefinition {
                 token.setAttribute(attrtype.id,
                         new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
             }
+        }
+    }
+
+    /**
+     * Check for 'appearance' attribute set
+     * @param tag
+     * @return
+     */
+    public String getAppearance(String tag)
+    {
+        Map<String, String> appearanceSet = attributeSets.get("appearance");
+        if (appearanceSet != null)
+        {
+            return appearanceSet.get(tag);
+        }
+        else
+        {
+            return "";
         }
     }
 }

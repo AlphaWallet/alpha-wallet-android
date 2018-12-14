@@ -8,10 +8,7 @@ import com.sun.webkit.dom.ElementImpl;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -29,6 +26,7 @@ public class TokenDefinition {
     protected Locale locale;
     public Map<String, Integer> addresses = new HashMap<>();
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
+    public Map<String, Map<String, String>> attributeSets = new ConcurrentHashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
 
@@ -170,7 +168,7 @@ public class TokenDefinition {
 
         private void populate(Element mapping) {
             Element option;
-            NodeList nList = mapping.getElementsByTagNameNS("http://attestation.id/ns/tbml", "option");
+            NodeList nList = mapping.getElementsByTagNameNS(ATTESTATION, "option");
             for (int i = 0; i < nList.getLength(); i++) {
                 option = (Element) nList.item(i);
                 members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option, "value"));
@@ -220,10 +218,45 @@ public class TokenDefinition {
         }
     }
 
+    private FunctionDefinition getFunction(Node mapping) {
+        Element option;
+        FunctionDefinition fd = new FunctionDefinition();
+        if (mapping.getAttributes().getLength() > 0)
+        {
+            Node attr = mapping.getAttributes().getNamedItem("name");
+            if (attr != null)
+            {
+                fd.method = attr.getTextContent();
+            }
+        }
+
+        for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling())
+        {
+            if (child.getNodeType() == Node.ELEMENT_NODE)
+            {
+                option = (Element) child;
+                String type = child.getLocalName();
+                String functionName = option.getAttribute("name");
+                //TODO: Get child elements; inputs and input param keys
+
+                switch (type)
+                {
+                    case "inputs":
+                        //TODO Read inputs from child node
+                        //String inputSpec = getChildElement(child, );
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return fd;
+    }
+
     /* for many occurance of the same tag, return the text content of the one in user's current language */
     // FIXME: this function will break if there are nested <tagName> in the nameContainer
     String getLocalisedString(Element nameContainer, String tagName) {
-        NodeList nList = nameContainer.getElementsByTagNameNS("http://attestation.id/ns/tbml", tagName);
+        NodeList nList = nameContainer.getElementsByTagNameNS(ATTESTATION, tagName);
         Element name;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
@@ -237,6 +270,49 @@ public class TokenDefinition {
         // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
         if (name != null) return name.getTextContent();
         else return null;
+    }
+
+    Node getLocalisedContent(Node container, String tagName)
+    {
+        NodeList nList = container.getChildNodes();
+        Node node;
+        Node fallback = null;
+
+        for (int i = 0; i < nList.getLength(); i++)
+        {
+            node = nList.item(i);
+            switch (node.getNodeType())
+            {
+                case Node.TEXT_NODE:
+                    break;
+                case Node.ELEMENT_NODE:
+                    fallback = node;
+                    if (node.getLocalName().equals(tagName))
+                    {
+                        Element element = (Element)node;
+                        String currentNodeLang = (new Locale(element.getAttribute("lang"))).getLanguage();
+                        if (currentNodeLang.equals(locale.getLanguage()))
+                        {
+                            return node;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return fallback;
+    }
+
+    private String getTextContent(Element element)
+    {
+        if (element.getChildNodes().getLength() > 0 && element.getChildNodes().item(0).getNodeType() == Node.TEXT_NODE)
+        {
+            return element.getChildNodes().item(0).getTextContent();
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
@@ -258,7 +334,7 @@ public class TokenDefinition {
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
         NodeList nList;
-        nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "token");
+        nList = xml.getElementsByTagNameNS(ATTESTATION, "token");
 
         if (nList.getLength() == 0)
         {
@@ -267,7 +343,7 @@ public class TokenDefinition {
         }
         for (int i = 0; i < nList.getLength(); i++)
         {
-            CrawlAttrs(nList);
+            //CrawlAttrs(nList);
             AttributeType attr = new AttributeType((Element) nList.item(i));
             if (attr.bitmask != null)
             {// has <origin> which is from bitmask
@@ -284,6 +360,9 @@ public class TokenDefinition {
         extractFeatureTag(xml);
         extractContractTag(xml);
         extractSignedInfo(xml);
+
+        extractTags(xml, "appearance", true);
+        extractTags(xml, "features", false);
     }
 
     private void CrawlAttrs(NodeList nList)
@@ -368,17 +447,17 @@ public class TokenDefinition {
     private void extractFeatureTag(Document xml)
     {
         NodeList l;
-        NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "feature");
+        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "feature");
         for (int i = 0; i < nList.getLength(); i++) {
             Element feature = (Element) nList.item(i);
             switch (feature.getAttribute("type")) {
                 case "feemaster":
-                    l = feature.getElementsByTagNameNS("http://attestation.id/ns/tbml", "feemaster");
+                    l = feature.getElementsByTagNameNS(ATTESTATION, "feemaster");
                     for (int j = 0; j < l.getLength(); j++)
                         feemasterAPI = l.item(j).getTextContent();
                     break;
                 case "market-queue":
-                    l = feature.getElementsByTagNameNS("http://attestation.id/ns/tbml", "gateway");
+                    l = feature.getElementsByTagNameNS(ATTESTATION, "gateway");
                     for (int j = 0; j < l.getLength(); j++)
                         marketQueueAPI = l.item(j).getTextContent();
                     break;
@@ -392,7 +471,7 @@ public class TokenDefinition {
     {
         String nameDefault = null;
         String nameEnglish = null;
-        NodeList nList = xml.getElementsByTagNameNS("http://attestation.id/ns/tbml", "contract");
+        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "contract");
         /* we allow multiple contracts, e.g. for issuing asset and for
          * proxy usage. but for now we only deal with the first */
         Element contract = (Element) nList.item(0);
@@ -404,8 +483,7 @@ public class TokenDefinition {
         /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */
         /* TODO: select the contract of type "holding_contract" */
-        nList = contract.getElementsByTagNameNS("http://attestation.id/ns/tbml", "address");
-        //NodeList addrCheck = ((Element) node).getElementsByTagNameNS(ATTESTATION,"address");
+        nList = contract.getElementsByTagNameNS(ATTESTATION, "address");
         if (nList.getLength() > 0 && nList.item(0).getNodeType() == Node.ELEMENT_NODE)
         {
             for (int i = 0; i < nList.item(0).getChildNodes().getLength(); i++)
@@ -417,6 +495,162 @@ public class TokenDefinition {
                 }
             }
         }
+    }
+
+    private void extractTags(Document xml, String localName, boolean isHTML)
+    {
+        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, localName);
+        Element element = (Element) nList.item(0);
+
+        Map<String, String> attributeSet = new ConcurrentHashMap<>();
+        attributeSets.put(localName, attributeSet);
+
+        //go through each child in this element looking for tags
+        for (int i = 0; i < element.getChildNodes().getLength(); i++)
+        {
+            Node node = element.getChildNodes().item(i);
+            switch (node.getNodeType())
+            {
+                case Node.ATTRIBUTE_NODE:
+                    System.out.println(node.getAttributes().toString());
+                    break;
+                case Node.ELEMENT_NODE:
+                    String nodeName = node.getLocalName();
+                    if (attributeSet.containsKey(nodeName)) continue;
+                    Node content = getLocalisedContent(element, nodeName);
+                    if (content != null)
+                    {
+                        String contentString;
+                        if (isHTML)
+                        {
+                            contentString = getHTMLContent(content);
+                            attributeSet.put(nodeName, contentString);
+                        }
+                        else
+                            getContent(content);
+                    }
+                    break;
+                case Node.TEXT_NODE:
+                    System.out.println(node.getTextContent());
+                    break;
+            }
+        }
+    }
+
+    private String getHTMLContent(Node content)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < content.getChildNodes().getLength(); i++)
+        {
+            Node child = content.getChildNodes().item(i);
+            switch (child.getNodeType())
+            {
+                case Node.TEXT_NODE:
+                    sb.append(child.getTextContent());
+                    break;
+                case Node.ELEMENT_NODE:
+                    sb.append("<");
+                    sb.append(child.getLocalName());
+                    sb.append(htmlAttributes(child));
+                    sb.append(">");
+                    sb.append(getHTMLContent((Element)child));
+                    sb.append("</");
+                    sb.append(child.getLocalName());
+                    sb.append(">");
+                    break;
+                case Node.COMMENT_NODE:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private void getContent(Node content)
+    {
+        switch (content.getLocalName())
+        {
+            case "action":
+                handleFunction(content);
+                break;
+            case "contract":
+                //handleContract
+                break;
+        }
+    }
+
+    private void handleFunction(Node content)
+    {
+        String functionName = "";
+        for (int i = 0; i < content.getChildNodes().getLength(); i++)
+        {
+            Node child = content.getChildNodes().item(i);
+            switch (child.getNodeType())
+            {
+                case Node.TEXT_NODE:
+                    break;
+                case Node.ELEMENT_NODE:
+                    switch (child.getLocalName())
+                    {
+                        case "name":
+                            functionName = getHTMLContent(child);
+                            break;
+                        case "function":
+                            FunctionDefinition fd = getFunction(child);
+                            if (fd != null)
+                            {
+                                functions.put(functionName, fd);
+                            }
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private String htmlAttributes(Node attribute)
+    {
+        StringBuilder sb = new StringBuilder();
+        if (attribute.hasAttributes())
+        {
+            for (int i = 0; i < attribute.getAttributes().getLength(); i++)
+            {
+                Node node = attribute.getAttributes().item(i);
+                sb.append(" ");
+                sb.append(node.getLocalName());
+                sb.append("=\"");
+                sb.append(node.getTextContent());
+                sb.append("\"");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private String extractTag(Document xml, String localName, String elementName)
+    {
+        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, localName);
+        Element element = (Element) nList.item(0);
+
+        nList = element.getElementsByTagNameNS(ATTESTATION, elementName);
+        if (nList.getLength() > 0 && nList.item(0).getNodeType() == Node.ELEMENT_NODE)
+        {
+            for (int i = 0; i < nList.item(0).getChildNodes().getLength(); i++)
+            {
+                Node node = nList.item(0).getChildNodes().item(i);
+                if (node.getNodeType() == Node.TEXT_NODE)
+                {
+                    return node.getTextContent().toLowerCase();
+                }
+            }
+        }
+
+        return null;
     }
 
     /* take a token ID in byte-32, find all the fields in it and call back

@@ -164,7 +164,14 @@ public class AssetDefinitionService
             else
             {
                 assetDef = loadTokenDefinition(correctedAddress);
-                assetDefinitions.put(address.toLowerCase(), assetDef);
+                if (assetDef.addresses.size() > 0)
+                {
+                    assetDefinitions.put(address.toLowerCase(), assetDef);
+                }
+                else
+                {
+                    assetDef = null;
+                }
             }
         }
 
@@ -263,7 +270,10 @@ public class AssetDefinitionService
                 context.getResources().getConfiguration().locale);
 
         //now assign the networks
-        assignNetworks(definition);
+        if (definition.addresses.size() > 0)
+        {
+            assignNetworks(definition);
+        }
 
         return definition;
     }
@@ -303,7 +313,7 @@ public class AssetDefinitionService
     {
         //this is file stored on the phone, notify to the main app to reload (use receiver)
         TokenDefinition assetDefinition = loadTokenDefinition(address);
-        if (assetDefinition != null)
+        if (assetDefinition != null && assetDefinition.attributeTypes.size() > 0 && assetDefinition.addresses.size() > 0)
         {
             assetDefinitions.put(address.toLowerCase(), assetDefinition);
         }

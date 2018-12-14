@@ -1,59 +1,92 @@
 package io.stormbird.wallet.ui.widget.holder;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 
 /**
  * Created by James on 13/12/2018.
  * Stormbird in Singapore
  */
 
-public class IFrameHolder extends BinderViewHolder<Token> implements View.OnClickListener {
+public class IFrameHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1010;
-    public static final String EMPTY_BALANCE = "\u2014\u2014";
 
-    public final WebView iFrame;
-
-    private String test = "<html>\n" +
-            "<head>\n" +
-            "<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n" +
-            ".stormbut { background-color: #195B6A; border: none; color: white; padding: 16px 40px;\n" +
-            "text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; visibility: visible; }\n" +
-            "</style></head>\n" +
-            "<body><h1>Stormbird Door Server</h1>\n" +
-            "<p>Challenge: 0x07533b690c48b495b8 771b6a85fa723ae0bceef8376a8519fa23ad87b788c885</p>\n" +
-            "<p id=\"signLayer\"><button id=\"signButton\" class=\"stormbut\">Open Door</button></p>\n" +
-            "<div id=\"sig\"></div>\n" +
-            "</body></html>";
+    private final WebView iFrame;
+    private final Token token;
+    private final LinearLayout detailLayout;
+    private final WebView detailFrame;
 
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
-    public Token token;
 
-    public IFrameHolder(int resId, ViewGroup parent, Token token, AssetDefinitionService assetService)
+    public IFrameHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService)
     {
         super(resId, parent);
         iFrame = findViewById(R.id.iframe);
+        detailLayout = findViewById(R.id.layout_usage_details);
+        detailFrame = findViewById(R.id.usage_details);
         iFrame.getSettings().setBuiltInZoomControls(false);
         iFrame.getSettings().setJavaScriptEnabled(true);
+        iFrame.getSettings().setDisplayZoomControls(false);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
+        token = t;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void bind(@Nullable Token data, @NonNull Bundle addition)
+    public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        this.token = data;
         try
         {
-            iFrame.loadData(test, "text/html", "utf-8");
+            String getContent = assetDefinition.getAppearanceCode(token);
+            String getDetails = assetDefinition.getDetailCode(token);
+            iFrame.loadData(getContent, "text/html", "utf-8");
+            detailFrame.loadData(getDetails, "text/html", "utf-8");
+
+            if (getDetails != null && getDetails.length() > 0)
+            {
+                iFrame.setOnTouchListener(new View.OnTouchListener() {
+
+                    @Override
+                    public boolean onTouch(View view, MotionEvent event)
+                    {
+                        switch (event.getAction())
+                        {
+                            case MotionEvent.ACTION_DOWN:
+                                if (detailLayout.getVisibility() == View.VISIBLE)
+                                {
+                                    detailLayout.setVisibility(View.GONE);
+                                }
+                                else
+                                {
+                                    detailLayout.setVisibility(View.VISIBLE);
+                                }
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                view.performClick();
+                                break;
+                        }
+
+                        return false;
+                    }
+                });
+            }
         }
         catch (Exception ex)
         {

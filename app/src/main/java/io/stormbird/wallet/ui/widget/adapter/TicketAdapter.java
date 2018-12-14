@@ -24,11 +24,7 @@ import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
-import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
-import io.stormbird.wallet.ui.widget.entity.SortedItem;
-import io.stormbird.wallet.ui.widget.entity.TicketSaleSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
+import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
 
 /**
@@ -141,7 +137,14 @@ public class TicketAdapter extends TokensAdapter {
     {
         currentRange = null;
         List<TicketRangeElement> sortedList = generateSortedList(assetService, t, t.getArrayBalance());
-        addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE);
+        //determine what kind of holder we need:
+        int holderType = TokenIdSortedItem.VIEW_TYPE;
+        if (assetService.hasIFrame(t))
+        {
+            holderType = IFrameSortedItem.VIEW_TYPE;
+        }
+
+        addSortedItems(sortedList, t, holderType);
     }
 
     protected List<TicketRangeElement> generateSortedList(AssetDefinitionService assetService, Token token, List<BigInteger> idList)
@@ -164,6 +167,9 @@ public class TicketAdapter extends TokensAdapter {
         T item;
         switch (id)
         {
+            case IFrameHolder.VIEW_TYPE:
+                item = (T) new IFrameSortedItem(range, weight);
+                break;
             case TicketSaleHolder.VIEW_TYPE:
                 item = (T) new TicketSaleSortedItem(range, weight);
                 break;

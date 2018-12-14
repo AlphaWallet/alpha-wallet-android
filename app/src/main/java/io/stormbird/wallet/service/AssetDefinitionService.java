@@ -6,48 +6,25 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
-import android.text.format.DateUtils;
-
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
-import io.stormbird.wallet.entity.FileData;
-import okhttp3.Cache;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
-import retrofit2.Retrofit;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 
@@ -607,5 +584,41 @@ public class AssetDefinitionService
     public void clearCheckTimes()
     {
         assetChecked.clear();
+    }
+
+    public boolean hasIFrame(String contractAddr)
+    {
+        boolean hasIframe = false;
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        if (td != null && td.attributeSets.containsKey("appearance"))
+        {
+            hasIframe = true;
+        }
+
+        return hasIframe;
+    }
+
+    public String getAppearanceCode(String contractAddr)
+    {
+        String appearance = "";
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        if (td != null && td.attributeSets.containsKey("appearance"))
+        {
+            appearance = td.getAppearance("introduction");
+        }
+
+        return appearance;
+    }
+
+    public String getDetailCode(String contractAddr)
+    {
+        String appearance = "";
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        if (td != null && td.attributeSets.containsKey("appearance"))
+        {
+            appearance = td.getAppearance("instruction");
+        }
+
+        return appearance;
     }
 }

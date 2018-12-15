@@ -49,7 +49,9 @@ public class TokenDefinitionTest {
         ticketIDs.map(ticketID -> new NonFungibleToken(ticketID, ticketAsset)).forEach(ticket -> {
             assertTrue(BigInteger.valueOf(0xCB53).compareTo(ticket.getAttribute("numero").value) < 1);
             assertTrue(BigInteger.valueOf(0xCB54).compareTo(ticket.getAttribute("numero").value) > -1);
-            assertEquals("№", ticket.getAttribute("numero").name);
+            String nameCheck = ticket.getAttribute("numero").name;
+            final String nameConst = "\u2116";
+            assertEquals(nameConst, nameCheck);
             assertEquals("20180614180000+0300", ticket.getAttribute("time").text);
         });
         /* Epoch, the following test only works from Singapore */

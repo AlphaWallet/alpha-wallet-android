@@ -139,7 +139,7 @@ public class TicketAdapter extends TokensAdapter {
         List<TicketRangeElement> sortedList = generateSortedList(assetService, t, t.getArrayBalance());
         //determine what kind of holder we need:
         int holderType = TokenIdSortedItem.VIEW_TYPE;
-        if (assetService.hasIFrame(t))
+        if (assetService.hasIFrame(t.getAddress()))
         {
             holderType = IFrameSortedItem.VIEW_TYPE;
         }

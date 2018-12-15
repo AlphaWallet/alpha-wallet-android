@@ -133,7 +133,7 @@ public class TokenDefinition {
                         case "holding-contract":
                             as = As.Mapping;
                             // TODO: Syntax is not checked
-                            getFunctions(origin);
+                            //getFunctions(origin);
                             break;
                         default:
                             break;
@@ -344,7 +344,7 @@ public class TokenDefinition {
         }
         for (int i = 0; i < nList.getLength(); i++)
         {
-            //CrawlAttrs(nList);
+            CrawlAttrs(nList);
             AttributeType attr = new AttributeType((Element) nList.item(i));
             if (attr.bitmask != null)
             {// has <origin> which is from bitmask
@@ -503,37 +503,41 @@ public class TokenDefinition {
         NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, localName);
         Element element = (Element) nList.item(0);
 
-        Map<String, String> attributeSet = new ConcurrentHashMap<>();
-        attributeSets.put(localName, attributeSet);
-
-        //go through each child in this element looking for tags
-        for (int i = 0; i < element.getChildNodes().getLength(); i++)
+        if (element != null)
         {
-            Node node = element.getChildNodes().item(i);
-            switch (node.getNodeType())
+            Map<String, String> attributeSet = new ConcurrentHashMap<>();
+            attributeSets.put(localName, attributeSet);
+
+            //go through each child in this element looking for tags
+            for (int i = 0; i < element.getChildNodes().getLength(); i++)
             {
-                case Node.ATTRIBUTE_NODE:
-                    System.out.println(node.getAttributes().toString());
-                    break;
-                case Node.ELEMENT_NODE:
-                    String nodeName = node.getLocalName();
-                    if (attributeSet.containsKey(nodeName)) continue;
-                    Node content = getLocalisedContent(element, nodeName);
-                    if (content != null)
-                    {
-                        String contentString;
-                        if (isHTML)
+                Node node = element.getChildNodes().item(i);
+                switch (node.getNodeType())
+                {
+                    case Node.ATTRIBUTE_NODE:
+                        System.out.println(node.getAttributes().toString());
+                        break;
+                    case Node.ELEMENT_NODE:
+                        String nodeName = node.getLocalName();
+                        if (attributeSet.containsKey(nodeName))
+                            continue;
+                        Node content = getLocalisedContent(element, nodeName);
+                        if (content != null)
                         {
-                            contentString = getHTMLContent(content);
-                            attributeSet.put(nodeName, contentString);
+                            String contentString;
+                            if (isHTML)
+                            {
+                                contentString = getHTMLContent(content);
+                                attributeSet.put(nodeName, contentString);
+                            }
+                            else
+                                getContent(content);
                         }
-                        else
-                            getContent(content);
-                    }
-                    break;
-                case Node.TEXT_NODE:
-                    System.out.println(node.getTextContent());
-                    break;
+                        break;
+                    case Node.TEXT_NODE:
+                        System.out.println(node.getTextContent());
+                        break;
+                }
             }
         }
     }

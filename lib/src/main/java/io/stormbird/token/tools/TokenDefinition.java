@@ -199,22 +199,59 @@ public class TokenDefinition {
             }
         }
 
-        public String toString(BigInteger data) throws UnsupportedEncodingException {
+        /**
+         * Converts bitshifted/masked token numeric data into corresponding string.
+         * eg. Attr is 'venue'; choices are "1" -> "Kaliningrad Stadium", "2" -> "Volgograd Arena" etc.
+         * NB 'time' is Unix EPOCH, which is also a mapping.
+         * Since the value may not have a corresponding mapping, but is a valid time we should still return the time value
+         * and interpret it as a local time
+         *
+         * Also - some NF tokens which share a contract with others (eg World Cup, Meetup invites) will have mappings
+         * which intentionally have zero value - eg 'Match' has no lookup value for a meeting. Returning null is a guide for the
+         * token layout not to show the value.
+         *
+         * This will become less relevant once the IFrame system is in place - each token appearance will be defined explicitly.
+         * However it may be necessary for a default display of token attributes for ease of use while potential
+         * users become acquainted with the system.
+         *
+         * @param data
+         * @return
+         * @throws UnsupportedEncodingException
+         */
+        public String toString(BigInteger data) throws UnsupportedEncodingException
+        {
             // TODO: in all cases other than UTF8, syntax should be checked
-                if (as == As.UTF8) {
+            switch (as)
+            {
+                case UTF8:
                     return new String(data.toByteArray(), "UTF8");
-                } else if(as == As.Unsigned){
+
+                case Unsigned:
                     return data.toString();
-                } else if(as == As.Mapping){
+
+                case Mapping:
                     // members might be null, but it is better to throw up ( NullPointerException )
                     // than silently ignore
-                    if (members.containsKey(data)) {
+                    // JB: Existing contracts and tokens throw this error. The wallet 'crashes' each time existing tokens are opened
+                    // due to assumptions made with extra tickets (ie null member is assumed to return null and not display that element).
+                    if (members.containsKey(data))
+                    {
                         return members.get(data);
-                    } else {
-                        throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
                     }
-                }
-                throw new NullPointerException("Missing valid 'as' attribute");
+                    else if (syntax == Syntax.GeneralizedTime)
+                    {
+                        //This is a time entry but without a localised mapped entry. Return the EPOCH time.
+                        return data.toString(10);
+                    }
+                    else
+                    {
+                        return null; // have to revert to this behaviour due to values being zero when tokens are created
+                        //refer to 'AlphaWallet meetup tickets' where 'Match' mapping is null but for FIFA is not.
+                        //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
+                    }
+                default:
+                    throw new NullPointerException("Missing valid 'as' attribute");
+            }
         }
     }
 
@@ -261,8 +298,8 @@ public class TokenDefinition {
         Element name;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
-            String currentNodeLang = (new Locale(name.getAttribute("lang"))).getLanguage();
-            if (currentNodeLang.equals(locale.getLanguage())) {
+            String langAttr = getLocalisationLang(name);
+            if (langAttr.equals(locale.getLanguage())) {
                 return name.getTextContent();
             }
         }
@@ -271,6 +308,23 @@ public class TokenDefinition {
         // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
         if (name != null) return name.getTextContent();
         else return null;
+    }
+
+    private String getLocalisationLang(Element name)
+    {
+        if (name.hasAttributes())
+        {
+            for (int i = 0; i < name.getAttributes().getLength(); i++)
+            {
+                Node thisAttr = name.getAttributes().item(i);
+                if (thisAttr.getLocalName().equals("lang"))
+                {
+                    return thisAttr.getTextContent();
+                }
+            }
+        }
+
+        return "";
     }
 
     Node getLocalisedContent(Node container, String tagName)
@@ -342,26 +396,15 @@ public class TokenDefinition {
             System.out.println("Legacy XML format - no longer supported");
             return;
         }
-        for (int i = 0; i < nList.getLength(); i++)
-        {
-            CrawlAttrs(nList);
-            AttributeType attr = new AttributeType((Element) nList.item(i));
-            if (attr.bitmask != null)
-            {// has <origin> which is from bitmask
-                attributeTypes.put(attr.id, attr);
-            } // TODO: take care of attributeTypes whose value does not originate from bitmask!
-            else if (attr.function != null)
-            {
-                FunctionDefinition fd = new FunctionDefinition();
-                fd.method = attr.function;
-                fd.syntax = attr.syntax;
-                functions.put(attr.id, fd);
-            }
-        }
+
+        //TODO: Needs to be namespace aware
+        CrawlAttrs(nList);
+
         extractFeatureTag(xml);
         extractContractTag(xml);
         extractSignedInfo(xml);
 
+        //TODO: 'appearance' in XML needs to have an HTML attribute
         extractTags(xml, "appearance", true);
         extractTags(xml, "features", false);
     }
@@ -558,7 +601,7 @@ public class TokenDefinition {
                     sb.append(child.getLocalName());
                     sb.append(htmlAttributes(child));
                     sb.append(">");
-                    sb.append(getHTMLContent((Element)child));
+                    sb.append(getHTMLContent(child));
                     sb.append("</");
                     sb.append(child.getLocalName());
                     sb.append(">");
@@ -635,27 +678,6 @@ public class TokenDefinition {
         }
 
         return sb.toString();
-    }
-
-    private String extractTag(Document xml, String localName, String elementName)
-    {
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, localName);
-        Element element = (Element) nList.item(0);
-
-        nList = element.getElementsByTagNameNS(ATTESTATION, elementName);
-        if (nList.getLength() > 0 && nList.item(0).getNodeType() == Node.ELEMENT_NODE)
-        {
-            for (int i = 0; i < nList.item(0).getChildNodes().getLength(); i++)
-            {
-                Node node = nList.item(0).getChildNodes().item(i);
-                if (node.getNodeType() == Node.TEXT_NODE)
-                {
-                    return node.getTextContent().toLowerCase();
-                }
-            }
-        }
-
-        return null;
     }
 
     /* take a token ID in byte-32, find all the fields in it and call back

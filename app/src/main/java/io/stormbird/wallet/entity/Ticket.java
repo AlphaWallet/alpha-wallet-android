@@ -619,11 +619,13 @@ public class Ticket extends Token implements Parcelable
 
                 if (nonFungibleToken.getAttribute("match") != null)
                 {
-                    String catTxt = nonFungibleToken.getAttribute("match").text;
+                    String matchTxt = nonFungibleToken.getAttribute("match").name;
+                    String matchVal = nonFungibleToken.getAttribute("match").text;
 
-                    if (!catTxt.equals("0"))
+                    if (!matchVal.equals("0"))
                     {
-                        textFieldNumero = "M" + catTxt;
+                        String firstChar = matchTxt.length() > 0 ? matchTxt.substring(0,1) : "M";
+                        textFieldNumero = firstChar + matchVal;
                     }
                 }
 

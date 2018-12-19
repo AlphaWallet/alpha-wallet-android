@@ -14,6 +14,7 @@ public class TicketRangeElement
     public int ticketNumber;
     public short venue;
     public short match;
+    public long time = 0;
 
     public TicketRangeElement(AssetDefinitionService assetService, Token token, BigInteger v)
     {
@@ -24,6 +25,7 @@ public class TicketRangeElement
             if (nft.getAttribute("category") != null) category = (short) nft.getAttribute("category").value.intValue();
             if (nft.getAttribute("match") != null) match = (short) nft.getAttribute("match").value.intValue();
             if (nft.getAttribute("venue") != null) venue = (short) nft.getAttribute("venue").value.intValue();
+            if (nft.getAttribute("time") != null) time = nft.getAttribute("time").value.longValue();
         }
     }
 
@@ -32,6 +34,11 @@ public class TicketRangeElement
         Collections.sort(elementList, (e1, e2) -> {
             long w1 = ((long)e1.venue<<32) + ((long)e1.match<<24) + ((long)e1.category<<16) + e1.ticketNumber;
             long w2 = ((long)e2.venue<<32) + ((long)e2.match<<24) + ((long)e2.category<<16) + e2.ticketNumber;
+            if (e1.time != 0 && e2.time != 0)
+            {
+                w1 = e1.time;
+                w2 = e2.time;
+            }
             if (w1 > w2) return 1;
             if (w1 < w2) return -1;
             return 0;

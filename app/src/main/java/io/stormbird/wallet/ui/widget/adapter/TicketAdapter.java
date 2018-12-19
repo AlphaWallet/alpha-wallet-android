@@ -186,6 +186,7 @@ public class TicketAdapter extends TokensAdapter {
     {
         int currentNumber = -1;
         int currentCat = 0;
+        long currentTime = 0;
 
         for (int i = 0; i < sortedList.size(); i++)
         {
@@ -194,12 +195,13 @@ public class TicketAdapter extends TokensAdapter {
             {
                 currentRange.tokenIds.add(e.id);
             }
-            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
+            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
                 items.add((SortedItem)item);
                 currentCat = e.category;
+                currentTime = e.time;
             }
             else
             {

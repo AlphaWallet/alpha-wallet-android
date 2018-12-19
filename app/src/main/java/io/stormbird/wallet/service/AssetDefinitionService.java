@@ -318,7 +318,7 @@ public class AssetDefinitionService
             String dateFormat = format.format(new Date(fileTime));
 
             StringBuilder sb = new StringBuilder();
-            sb.append("https://repo.awallet.io/");
+            sb.append("https://repo.aw.app/");
             sb.append(address);
             String result = null;
 

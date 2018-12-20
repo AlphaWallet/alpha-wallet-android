@@ -619,11 +619,13 @@ public class Ticket extends Token implements Parcelable
 
                 if (nonFungibleToken.getAttribute("match") != null)
                 {
-                    String catTxt = nonFungibleToken.getAttribute("match").text;
+                    String matchTxt = nonFungibleToken.getAttribute("match").name;
+                    String matchVal = nonFungibleToken.getAttribute("match").text;
 
-                    if (!catTxt.equals("0"))
+                    if (!matchVal.equals("0"))
                     {
-                        textFieldNumero = "M" + catTxt;
+                        String firstChar = matchTxt.length() > 0 ? matchTxt.substring(0,1) : "M";
+                        textFieldNumero = firstChar + matchVal;
                     }
                 }
 
@@ -634,12 +636,9 @@ public class Ticket extends Token implements Parcelable
                 }
             }
 
-            if (nonFungibleToken != null && eventTime == 0)
+            if (nonFungibleToken != null && eventTime == 0 && nonFungibleToken.getAttribute("time") != null)
             {
-                if (nonFungibleToken.getAttribute("time") != null)
-                {
-                    eventTime = nonFungibleToken.getAttribute("time").value.longValue();
-                }
+                eventTime = nonFungibleToken.getAttribute("time").value.longValue();
                 String eventTimeStr = nonFungibleToken.getAttribute("time").text;
 
                 try
@@ -762,7 +761,7 @@ public class Ticket extends Token implements Parcelable
     private String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
         String tokenTitle = getFullName();
-        if (nonFungibleToken != null)
+        if (nonFungibleToken != null && nonFungibleToken.getAttribute("category") != null)
         {
             String assetCategory = nonFungibleToken.getAttribute("category").text;
             if (isAlNum(assetCategory)) tokenTitle = assetCategory;

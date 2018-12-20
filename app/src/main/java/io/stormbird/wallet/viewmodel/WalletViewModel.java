@@ -12,6 +12,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -180,7 +181,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         //We encountered an unknown issue during token fetch
         //This is most likely due to a balance recording error
         //log the exception for reference
-        Crashlytics.logException(throwable);
+        if (!BuildConfig.DEBUG) Crashlytics.logException(throwable);
         throwable.printStackTrace();
         onError(throwable);
     }
@@ -239,7 +240,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private void onOpenseaError(Throwable throwable)
     {
-        Crashlytics.logException(throwable);
+        if (!BuildConfig.DEBUG) Crashlytics.logException(throwable);
         throwable.printStackTrace();
         onError(throwable);
     }
@@ -478,7 +479,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private void tkError(Throwable throwable)
     {
-        Crashlytics.logException(throwable);
+        if (!BuildConfig.DEBUG) Crashlytics.logException(throwable);
         throwable.printStackTrace();
         onError(throwable);
         //restart a refresh

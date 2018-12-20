@@ -24,17 +24,8 @@ import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
-import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
-import io.stormbird.wallet.ui.widget.entity.SortedItem;
-import io.stormbird.wallet.ui.widget.entity.TicketSaleSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
-import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
-import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketSaleHolder;
-import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
-import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
+import io.stormbird.wallet.ui.widget.entity.*;
+import io.stormbird.wallet.ui.widget.holder.*;
 
 /**
  * Created by James on 9/02/2018.
@@ -85,6 +76,10 @@ public class TicketAdapter extends TokensAdapter {
             case TokenDescriptionHolder.VIEW_TYPE: {
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService);
             } break;
+            case IFrameHolder.VIEW_TYPE: {
+                holder = new IFrameHolder(R.layout.item_iframe_token, parent, token, assetService);
+            }
+            break;
             case OpenseaHolder.VIEW_TYPE: {
                 holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token);
             } break;
@@ -142,7 +137,14 @@ public class TicketAdapter extends TokensAdapter {
     {
         currentRange = null;
         List<TicketRangeElement> sortedList = generateSortedList(assetService, t, t.getArrayBalance());
-        addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE);
+        //determine what kind of holder we need:
+        int holderType = TokenIdSortedItem.VIEW_TYPE;
+        if (assetService.hasIFrame(t.getAddress()))
+        {
+            holderType = IFrameSortedItem.VIEW_TYPE;
+        }
+
+        addSortedItems(sortedList, t, holderType);
     }
 
     protected List<TicketRangeElement> generateSortedList(AssetDefinitionService assetService, Token token, List<BigInteger> idList)
@@ -165,6 +167,9 @@ public class TicketAdapter extends TokensAdapter {
         T item;
         switch (id)
         {
+            case IFrameHolder.VIEW_TYPE:
+                item = (T) new IFrameSortedItem(range, weight);
+                break;
             case TicketSaleHolder.VIEW_TYPE:
                 item = (T) new TicketSaleSortedItem(range, weight);
                 break;
@@ -181,6 +186,7 @@ public class TicketAdapter extends TokensAdapter {
     {
         int currentNumber = -1;
         int currentCat = 0;
+        long currentTime = 0;
 
         for (int i = 0; i < sortedList.size(); i++)
         {
@@ -189,12 +195,13 @@ public class TicketAdapter extends TokensAdapter {
             {
                 currentRange.tokenIds.add(e.id);
             }
-            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat) //check consecutive seats and zone is still the same, and push final ticket
+            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
                 items.add((SortedItem)item);
                 currentCat = e.category;
+                currentTime = e.time;
             }
             else
             {

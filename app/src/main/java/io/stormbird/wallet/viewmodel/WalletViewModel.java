@@ -190,7 +190,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     /**
      * Stage 2: Fetch opensea tokens (if on mainnet)
      */
-    private void fetchFromOpensea()
+    private void fetchFromOpensea() throws Exception
     {
         List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[0]);
@@ -220,7 +220,10 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         //update the display list for token removals
         List<String> removedTokens = tokensService.getRemovedTokensOfClass(tokens, ERC721Token.class);
 
-        if (!removedTokens.isEmpty()) removeTokens.postValue(removedTokens); //remove from UI
+        if (!removedTokens.isEmpty())
+        {
+            removeTokens.postValue(removedTokens); //remove from UI
+        }
 
         tokensService.clearBalanceOf(ERC721Token.class);
 
@@ -240,9 +243,9 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private void onOpenseaError(Throwable throwable)
     {
-        if (!BuildConfig.DEBUG) Crashlytics.logException(throwable);
-        throwable.printStackTrace();
-        onError(throwable);
+        //This is expected to happen - opensea gets a lot of activity
+        //proceed using the stored data until we no longer get an error
+        onFetchTokensCompletable();
     }
 
     private void storedTokens(Token[] tokens)

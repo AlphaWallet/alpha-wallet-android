@@ -235,7 +235,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void onResume() {
         super.onResume();
         viewModel.setVisibility(isVisible);
-        viewModel.prepare();
     }
 
     private void onTokens(Token[] tokens)

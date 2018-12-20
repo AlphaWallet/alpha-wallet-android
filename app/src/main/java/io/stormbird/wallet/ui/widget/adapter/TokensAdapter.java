@@ -195,7 +195,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token thisToken = tsi.value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    if (token.hasPositiveBalance() || token.isEthereum())
+                    if (token.hasPositiveBalance() || token.isEthereum() || assetService.hasDefinition(token.getAddress()))
                     {
                         tsi.value = token;
                         notifyItemChanged(i, tsi);
@@ -233,7 +233,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         {
             if (token != null &&  //Add token to display list if it's the base currency, or if it has balance
                     (token.isEthereum() ||
-                            (!token.isTerminated() && !token.isBad() && token.hasPositiveBalance())))
+                            (!token.isTerminated() && !token.isBad() &&
+                                    (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))))
             {
                 Log.d(TAG,"ADDING: " + token.getFullName());
                 checkLiveToken(token);

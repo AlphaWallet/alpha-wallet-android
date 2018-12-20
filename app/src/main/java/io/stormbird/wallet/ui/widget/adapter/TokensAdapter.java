@@ -8,13 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-
-import org.web3j.utils.Numeric;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
@@ -26,6 +19,11 @@ import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
+import org.web3j.utils.Numeric;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -36,7 +34,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     private Context context;
     private boolean needsRefresh;
-    private final AssetDefinitionService assetService;
+    protected final AssetDefinitionService assetService;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -89,11 +87,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.onTokenClickListener = onTokenClickListener;
         needsRefresh = true;
         this.assetService = aService;
-    }
-
-    public TokensAdapter() {
-        onTokenClickListener = null;
-        assetService = null;
     }
 
     @Override

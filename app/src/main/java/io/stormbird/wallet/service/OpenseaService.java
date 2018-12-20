@@ -8,6 +8,7 @@ import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.opensea.Asset;
+import io.stormbird.wallet.entity.opensea.OpenseaServiceError;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.json.JSONArray;
@@ -43,55 +44,45 @@ public class OpenseaService {
                 .build();
     }
 
-    public Single<Token[]> getTokens(String address) {
+    public Single<Token[]> getTokens(String address) throws Exception {
         return queryBalance(address)
                 .map(json -> gotOpenseaTokens(json, address));
     }
 
-    private Token[] gotOpenseaTokens(JSONObject object, String address)
+    private Token[] gotOpenseaTokens(JSONObject object, String address) throws Exception
     {
         Map<String, Token> foundTokens = new HashMap<>();
 
-        try
+        if (!object.has("assets"))
         {
-            if (!object.has("assets"))
-            {
-                return new Token[0];
-            }
-            JSONArray assets = object.getJSONArray("assets");
-
-            for (int i = 0; i < assets.length(); i++)
-            {
-                Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
-
-                Token token = foundTokens.get(asset.getAssetContract().getAddress());
-                if (token == null)
-                {
-                    String tokenName = asset.getAssetContract().getName();
-                    String tokenSymbol = asset.getAssetContract().getSymbol();
-
-                    TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
-                    token = new ERC721Token(tInfo, null, System.currentTimeMillis());
-                    token.setTokenWallet(address);
-                    foundTokens.put(asset.getAssetContract().getAddress(), token);
-                }
-
-               ((ERC721Token) token).tokenBalance.add(asset);
-            }
+            throw new OpenseaServiceError("Opensea API Comms failure"); //if we didn't receive any sensible result then
         }
-        catch (JSONException e)
+        JSONArray assets = object.getJSONArray("assets");
+
+        for (int i = 0; i < assets.length(); i++)
         {
-            e.printStackTrace();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
+            Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
+
+            Token token = foundTokens.get(asset.getAssetContract().getAddress());
+            if (token == null)
+            {
+                String tokenName = asset.getAssetContract().getName();
+                String tokenSymbol = asset.getAssetContract().getSymbol();
+
+                TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
+                token = new ERC721Token(tInfo, null, System.currentTimeMillis());
+                token.setTokenWallet(address);
+                foundTokens.put(asset.getAssetContract().getAddress(), token);
+            }
+
+            ((ERC721Token) token).tokenBalance.add(asset);
         }
 
         return foundTokens.values().toArray(new Token[foundTokens.size()]);
     }
 
-    public Single<JSONObject> queryBalance(String address) {
+    public Single<JSONObject> queryBalance(String address)
+    {
         return Single.fromCallable(() -> {
             StringBuilder sb = new StringBuilder();
             sb.append("https://api.opensea.io/api/v1/assets/?owner=");

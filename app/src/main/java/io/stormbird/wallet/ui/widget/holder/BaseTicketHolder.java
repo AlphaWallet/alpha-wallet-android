@@ -1,48 +1,26 @@
 package io.stormbird.wallet.ui.widget.holder;
 
-import java.text.ParseException;
-
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.DateFormat;
-import java.util.BitSet;
-import java.util.Date;
-import java.util.TimeZone;
-import java.math.BigInteger;
-import java.util.Locale;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.util.ZonedDateTime;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
-import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
 public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener
 {
     private TicketRange thisData;
     private Ticket ticket;
-    private OnTicketIdClickListener onTicketClickListener;
+    private OnTokenClickListener onTokenClickListener;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final View activityView;
@@ -78,12 +56,12 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
 
     @Override
     public void onClick(View v) {
-        if (onTicketClickListener != null) {
-            onTicketClickListener.onTicketIdClick(v, thisData);
+        if (onTokenClickListener != null) {
+            onTokenClickListener.onTokenClick(v, ticket, thisData.tokenIds.get(0));
         }
     }
 
-    public void setOnTokenClickListener(OnTicketIdClickListener onTokenClickListener) {
-        this.onTicketClickListener = onTokenClickListener;
+    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
+        this.onTokenClickListener = onTokenClickListener;
     }
 }

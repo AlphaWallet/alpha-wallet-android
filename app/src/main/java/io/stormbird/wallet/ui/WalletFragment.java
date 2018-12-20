@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -225,7 +226,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         return super.onOptionsItemSelected(item);
     }
 
-    private void onTokenClick(View view, Token token) {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
         token = viewModel.getTokenFromService(token);
         token.clickReact(viewModel, context);

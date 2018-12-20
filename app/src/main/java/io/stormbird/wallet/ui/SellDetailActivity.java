@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import io.stormbird.wallet.entity.Token;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
@@ -124,7 +125,7 @@ public class SellDetailActivity extends BaseActivity {
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTicketIdClick, ticket, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new TicketAdapter(this::onTokenClick, ticket, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -539,7 +540,7 @@ public class SellDetailActivity extends BaseActivity {
         viewModel.prepare(ticket);
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
     }

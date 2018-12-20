@@ -23,7 +23,7 @@ import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
 
@@ -34,28 +34,20 @@ import io.stormbird.wallet.ui.widget.holder.*;
 public class TicketAdapter extends TokensAdapter {
     TicketRange currentRange = null;
     final Token token;
-    protected AssetDefinitionService assetService;
     protected OpenseaService openseaService;
 
-    protected OnTicketIdClickListener onTicketIdClickListener;
-
-    public TicketAdapter(OnTicketIdClickListener onTicketIdClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
-        super();
-        assetService = service;
-        this.onTicketIdClickListener = onTicketIdClickListener;
+    public TicketAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
+        super(tokenClickListener, service);
         token = t;
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
         if (t instanceof ERC721Token) setERC721Tokens(t);
     }
 
-    public TicketAdapter(OnTicketIdClickListener onTicketIdClick, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
+    public TicketAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
     {
-        super();
-        this.onTicketIdClickListener = onTicketIdClick;
-        assetService = service;
+        super(tokenClickListener, service);
         this.token = token;
-        //setTicket(ticket);
         if (token instanceof Ticket) setTokenRange(token, ticketIds);
         openseaService = opensea;
         if (token instanceof ERC721Token) setERC721Tokens(token);
@@ -67,7 +59,7 @@ public class TicketAdapter extends TokensAdapter {
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
                 TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
-                tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
+                tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
             } break;
             case TotalBalanceHolder.VIEW_TYPE: {

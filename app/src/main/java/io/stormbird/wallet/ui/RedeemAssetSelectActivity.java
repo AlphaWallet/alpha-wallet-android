@@ -14,6 +14,7 @@ import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.adapter.TicketSaleAdapter;
 import io.stormbird.wallet.viewmodel.RedeemAssetSelectViewModel;
 import io.stormbird.wallet.viewmodel.RedeemAssetSelectViewModelFactory;
@@ -24,6 +25,9 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.TicketRange;
+import org.ethereum.geth.BigInt;
+
+import java.math.BigInteger;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 
@@ -104,7 +108,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, ticket, viewModel.getAssetDefinitionService());
+        adapter = new TicketSaleAdapter(this::onTokenClick, ticket, viewModel.getAssetDefinitionService());
         adapter.setRedeemTicket(ticket);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
@@ -158,7 +162,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
         TicketRange range = adapter.getCheckedItem();
         if (range != null)
         {
-            onTicketIdClick(null, range);
+            onTokenClick(null, ticket, range.tokenIds.get(0));
 
             adapter.setRedeemTicketQuantity(range, ticket);
             RecyclerView list = findViewById(R.id.listTickets);
@@ -189,7 +193,7 @@ public class RedeemAssetSelectActivity extends BaseActivity
         selected.setText(selectionStr);
     }
 
-    private void onTicketIdClick(View v, TicketRange range) {
+    private void onTokenClick(View v, Token token, BigInteger id) {
         currentMenu = R.menu.redeem_menu;
         invalidateOptionsMenu();
 //        adapter.setRedeemTicketQuantity(range, ticket);

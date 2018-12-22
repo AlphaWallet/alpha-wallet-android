@@ -433,9 +433,10 @@ public class WalletViewModel extends BaseViewModel implements Runnable
                 .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .concatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
+                .concatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
                 .subscribeOn(Schedulers.io())
-                .subscribe(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)), this::onError,
-                           () -> { if (nullTokensCheckDisposable != null) nullTokensCheckDisposable.dispose(); });
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onTokenBalanceUpdate, this::onError);
     }
 
     private Observable<List<String>> fetchAllContractAddresses()
@@ -452,6 +453,11 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     {
         Token serviceToken = tokensService.getToken(token.getAddress());
         return (serviceToken != null) ? serviceToken : token;
+    }
+
+    public void refreshAssetDefinedTokens()
+    {
+        firstRun = true;
     }
 
     @Override

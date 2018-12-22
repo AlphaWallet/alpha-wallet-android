@@ -317,7 +317,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     @Override
     public void addedToken()
     {
-
+        viewModel.refreshAssetDefinedTokens(); //we loaded a new token, make balance query check the contract tokens
     }
 
     @Override

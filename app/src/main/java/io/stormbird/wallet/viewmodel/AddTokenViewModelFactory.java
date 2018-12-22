@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
 
@@ -15,6 +16,7 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
     private final SetupTokensInteract setupTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final AssetDefinitionService assetDefinitionService;
 
     public AddTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
@@ -22,18 +24,20 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
             HomeRouter homeRouter,
             SetupTokensInteract setupTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract,
+            AssetDefinitionService assetDefinitionService) {
         this.addTokenInteract = addTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.homeRouter = homeRouter;
         this.setupTokensInteract = setupTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract);
+        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract, assetDefinitionService);
     }
 }

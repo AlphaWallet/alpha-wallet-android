@@ -24,19 +24,22 @@ public class TokensReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        switch (intent.getAction())
+        if (intent != null && intent.getAction() != null)
         {
-            case RESET_WALLET:
-                tokenInterface.resetTokens();
-                break;
-            case ADDED_TOKEN:
-                tokenInterface.addedToken();
-                break;
-            case CHANGED_LOCALE:
-                tokenInterface.changedLocale();
-                break;
-            default:
-                break;
+            switch (intent.getAction())
+            {
+                case RESET_WALLET:
+                    tokenInterface.resetTokens();
+                    break;
+                case ADDED_TOKEN:
+                    tokenInterface.addedToken();
+                    break;
+                case CHANGED_LOCALE:
+                    tokenInterface.changedLocale();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

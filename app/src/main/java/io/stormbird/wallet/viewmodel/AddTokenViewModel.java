@@ -7,6 +7,7 @@ import android.content.Context;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class AddTokenViewModel extends BaseViewModel {
 
@@ -21,6 +22,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final HomeRouter homeRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<Boolean> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> update = new MutableLiveData<>();
@@ -31,13 +33,15 @@ public class AddTokenViewModel extends BaseViewModel {
             HomeRouter homeRouter,
             SetupTokensInteract setupTokenInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract,
+            AssetDefinitionService assetDefinitionService) {
         this.addTokenInteract = addTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.homeRouter = homeRouter;
         this.setupTokensInteract = setupTokenInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public MutableLiveData<Wallet> wallet() {
@@ -53,6 +57,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void onSaved(Token token)
     {
+        assetDefinitionService.getAssetDefinition(token.getAddress());
         progress.postValue(false);
         result.postValue(true);
     }

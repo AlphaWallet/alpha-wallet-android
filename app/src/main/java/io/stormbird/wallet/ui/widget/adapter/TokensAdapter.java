@@ -212,7 +212,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
 
-        if (!updated && !token.isBad() && token.hasPositiveBalance())
+        if (!updated && !token.isBad() && (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))
         {
             needsRefresh = true;
         }
@@ -371,10 +371,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void checkLiveToken(Token t)
     {
-        if (t instanceof Ticket)
-        {
-            t.checkIsMatchedInXML(assetService);
-        }
+        t.checkIsMatchedInXML(assetService);
     }
 
     public void setClear()

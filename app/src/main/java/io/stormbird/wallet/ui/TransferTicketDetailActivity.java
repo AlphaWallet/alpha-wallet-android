@@ -44,6 +44,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
 
 import javax.inject.Inject;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -147,7 +148,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTicketIdClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new TicketAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -522,8 +523,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         }
     }
 
-    private void onTicketIdClick(View view, TicketRange range)
-    {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
     }

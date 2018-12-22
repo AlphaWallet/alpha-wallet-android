@@ -29,6 +29,8 @@ import io.stormbird.wallet.viewmodel.AssetDisplayViewModelFactory;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
 
+import java.math.BigInteger;
+
 import static io.stormbird.wallet.C.Key.TICKET;
 
 /**
@@ -84,7 +86,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
 
-        adapter = new TicketAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
+        adapter = new TicketAdapter(this::onTokenClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         if (token instanceof ERC721Token)
         {
             findViewById(R.id.button_use).setVisibility(View.GONE);
@@ -181,7 +183,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
 
         //TODO: Perform some action when token is clicked

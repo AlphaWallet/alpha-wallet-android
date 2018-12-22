@@ -12,8 +12,8 @@ import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.ui.widget.OnTicketIdClickListener;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
 import io.stormbird.wallet.ui.widget.entity.MarketSaleHeaderSortedItem;
 import io.stormbird.wallet.ui.widget.entity.QuantitySelectorSortedItem;
@@ -44,8 +44,8 @@ public class TicketSaleAdapter extends TicketAdapter {
     private QuantitySelectorHolder quantitySelector;
 
     /* Context ctx is used to initialise assetDefinition in the super class */
-    public TicketSaleAdapter(OnTicketIdClickListener onTicketIdClickListener, Token t, AssetDefinitionService assetService) {
-        super(onTicketIdClickListener, t, assetService, null);
+    public TicketSaleAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService assetService) {
+        super(tokenClickListener, t, assetService, null);
         onTokenCheckListener = this::onTokenCheck;
         selectedTicketRange = null;
     }
@@ -56,12 +56,12 @@ public class TicketSaleAdapter extends TicketAdapter {
         switch (viewType) {
             case TicketHolder.VIEW_TYPE: {
                 TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
-                tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
+                tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
             } break;
             case TicketSaleHolder.VIEW_TYPE: {
                 TicketSaleHolder tokenHolder = new TicketSaleHolder(R.layout.item_ticket, parent, token, assetService);
-                tokenHolder.setOnTokenClickListener(onTicketIdClickListener);
+                tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 tokenHolder.setOnTokenCheckListener(onTokenCheckListener);
                 holder = tokenHolder;
             } break;

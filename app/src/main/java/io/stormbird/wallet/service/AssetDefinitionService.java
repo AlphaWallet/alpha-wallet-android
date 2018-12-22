@@ -2,6 +2,7 @@ package io.stormbird.wallet.service;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -26,6 +27,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 
 
@@ -210,7 +212,7 @@ public class AssetDefinitionService
             Disposable d = fetchXMLFromServer(correctedAddress)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::handleFile, this::onError);
+                    .subscribe(this::handleFileLoad, this::onError);
         }
     }
 
@@ -284,6 +286,12 @@ public class AssetDefinitionService
                 if (!devOverrideContracts.contains(contractAddress)) devOverrideContracts.add(contractAddress);
             }
         }
+    }
+
+    private void handleFileLoad(String address)
+    {
+        handleFile(address);
+        context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
     }
 
     private void handleFile(String address)

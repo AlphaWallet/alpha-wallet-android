@@ -518,6 +518,7 @@ public class Token implements Parcelable
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
     public void addToBurnList(List<Uint16> burnList) { }
     public List<Integer> getBurnList() { return null; }
+    public boolean isMatchedInXML() { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)
     {

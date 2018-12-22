@@ -776,6 +776,7 @@ public class Ticket extends Token implements Parcelable
         isMatchedInXML = networkId >= 1;
     }
 
+    @Override
     public boolean isMatchedInXML()
     {
         return isMatchedInXML;

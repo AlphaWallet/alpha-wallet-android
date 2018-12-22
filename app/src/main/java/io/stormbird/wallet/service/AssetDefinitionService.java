@@ -290,8 +290,11 @@ public class AssetDefinitionService
 
     private void handleFileLoad(String address)
     {
-        handleFile(address);
-        context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
+        if (Address.isAddress(address))
+        {
+            handleFile(address);
+            context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
+        }
     }
 
     private void handleFile(String address)

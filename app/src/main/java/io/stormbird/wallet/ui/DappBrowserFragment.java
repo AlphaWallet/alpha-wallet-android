@@ -361,6 +361,7 @@ public class DappBrowserFragment extends Fragment implements
 
     public void viewBookmarks()
     {
+        if (viewModel == null) return;
         List<String> bookmarks = viewModel.getBookmarks();
         //display in popup
         if (getActivity() == null) return;

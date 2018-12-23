@@ -134,6 +134,12 @@ public class TicketAdapter extends TokensAdapter {
         if (assetService.hasIFrame(t.getAddress()))
         {
             holderType = IFrameSortedItem.VIEW_TYPE;
+            if (sortedList.size() == 0)
+            {
+                //display iframe information
+                IFrameSortedItem item = new IFrameSortedItem(new TicketRange(BigInteger.ZERO, token.getAddress()), 10);
+                items.add(item);
+            }
         }
 
         addSortedItems(sortedList, t, holderType);

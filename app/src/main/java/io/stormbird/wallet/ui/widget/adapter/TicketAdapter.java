@@ -200,6 +200,7 @@ public class TicketAdapter extends TokensAdapter {
                 items.add((SortedItem)item);
                 currentCat = e.category;
                 currentTime = e.time;
+                id = TokenIdSortedItem.VIEW_TYPE;
             }
             else
             {

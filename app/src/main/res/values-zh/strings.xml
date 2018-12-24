@@ -332,7 +332,7 @@
 <string name="enabled">启用</string>
 <string name="disabled">禁止</string>
 <string name="what_is_eth">以太坊是一个建立在区块链技术之上的开发平台，同时具有智能合约功能的操作系统。它是区块链产品和服务的基础技术。\n\nETH/Ether 是一个加密货币，其区块链由以太坊平台生成。 Ether 可以在在账户中互相转移和用来奖励给挖矿者。以太坊提供了一个“图灵完备”的虚拟机，称为以太坊虚拟机(Ethereum Virtual Machine)，简称EVM，用于国际网络中执行交易代码, "Gas", 是一种特别的单位用于Ethereum（以太币）里，它用来衡量一个行为或者一系列行为有多少“工作量”。 </string>
-<string name="why_alphawallet_eth">目前，以太坊是最好区块链技术和开发智能合约应用程序和。AlphaWallet 开发于太坊区块链技术基础上，目前还在不断创新。</string>
+<string name="why_alphawallet_eth">目前，以太坊是开发智能合约应用程序的最佳平台。AlphaWallet 在太坊区块链技术基础之上开发，目前还在不断创新推动以太坊技术的进步。</string>
 <string name="how_i_get_money">您可以将以太币转换为法定货币，并通过任何加密货币市场转移到您的银行账户。</string>
 <string name="how_i_transfer_into_wallet">您可以提供钱包地址给发件人，通过您的钱包地址把ETH转移到您的钱包。</string>
 <string name="ticket_import_valid">门票有效</string>

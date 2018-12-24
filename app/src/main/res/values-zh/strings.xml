@@ -1,98 +1,16 @@
 <resources>
-
     <string name="app_name">AlphaWallet</string>
     <string name="all">全部</string>
     <string name="currency">币类</string>
     <string name="assets">资产类</string>
-    <string name="advanced">高级设置</string>
-    <string name="copy_wallet_address">复制钱包地址</string>
-    <string name="message_attending_venue">场地门票的进入代码</string>
-    <string name="entrance_token_address">输入token地址 %s</string>
-    <string name="hint_contract_name">名称</string>
-    <string name="hint_contract_venue">场馆</string>
-    <string name="hint_contract_date">日期</string>
-    <string name="hint_contract_price">价格</string>
-     
-   <!-- Titles -->
-    <string name="title_email">发送邮件</string>
-    <string name="title_my_address">我的地址</string>
-    <string name="title_my_tokens">我的 Token</string>
-    <string name="title_activity_send">发送</string>
-    <string name="title_activity_confirmation">确认</string>
-    <string name="title_transaction_details">交易明细</string>
-    <string name="suggestion_empty_password_available">密码不可以为空</string>
-
-    <!-- Dialog titles -->
-    <string name="title_dialog_error">错误</string>
-    <string name="title_dialog_handling">正在处理...</string>
-    <string name="title_dialog_watch_out">小心！</string>
-    <string name="title_dialog_add_account">Add wallet</string>
-    <string name="title_dialog_deposit">How would you like to buy?</string>
-
-    <!-- Dialog messages-->
-    <string name="dialog_message">请输入密码来加密你的钱包</string>
-    <string name="dialog_message_unrecoverable_message">如果这台设备重置或者 AlphaWallet被删除，你必须要有备份才可以恢复你的钱包地址.</string>
-    <string name="toast_message_wallet_imported">钱包地址已导入</string>
-    <string name="toast_message_wallet_exported">备份已创建</string>
-    <string name="toast_qr_code_no_address">QR code 未包含合法地址</string>
-
-    <!-- Labels -->
-    <string name="label_from">来自</string>
-    <string name="label_to">To</string>
-    <string name="label_gas_limit">Gas 限制</string>
-    <string name="label_gas_price">Gas 费用</string>
-    <string name="label_network_fee">网络费用</string>
-    <string name="button_ok">OK</string>
-    <string name="hint_recipient_address">接收地址</string>
-    <string name="hint_amount">总数</string>
-    <string name="hint_contract_address">智能合约地址</string>
-
-     
-    <!-- Subtitles -->
-    <string name="subtitle_from">来自</string>
-    <string name="subtitle_to">To</string>
-    <string name="subtitle_gas_fee">Gas 费用</string>
-    <string name="subtitle_transaction_num">交易  #</string>
-    <string name="subtitle_transaction_time">交易时间</string>
-    <string name="subtitle_block_num">Block #</string>
-
-    <!-- Actions -->
-    <string name="action_share">分享</string>
-    <string name="action_more_details">更多细节</string>
-    <string name="action_add_wallet">增加钱包地址</string>
-
-    <string name="action_coinbase">Coinbase</string>
-    <string name="action_shapeshift">Shapeshift (Crypto only)</string>
-    <string name="action_changelly">Changelly</string>
-    <string name="action_wallets">Wallets</string>
-    
-    <!-- Subject -->
-    <string name="subject_transaction_detail">交易细节</string>
-    <string name="error_fail_generate_qr">无法生成 QR Code.</string>
-    <string name="error_invalid_address">地址错误</string>
-    <string name="error_invalid_amount">数量错误</string>
-    <string name="error_transaction_failed">交易失败</string>
-    <string name="error_must_numeric">请输入数字.</string>
-    <string name="transaction_succeeded">交易成功</string>
-    <string name="NA">N/A</string>
-    <string name="error_wallet_not_selected">未选择钱包地址</string>
-    <string name="no_transactions_yet">暂时还没有交易记录</string>
-    <string name="unknown_balance_with_symbol">-- ETH</string>
-    <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy_transaction_value">&#45;&#45; ETH</string>
-    <string name="title_dialog_sending">正在发送...</string>
-    <string name="i_understand">我知道了</string>
-    <string name="scan_qr">从 QR Code 获得地址</string>
-    <string name="info_gas_price">支付更高的 Gas 费用，会让你的交易成本升高，同时会让你的交易被以太坊网络更快处理 </string>
-    <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
-    <string name="title_send_settings">Advanced</string>
-    <!--<string name="title_activity_barcode">Barcode Scan</string>-->
-    <string name="error_add_token">无法添加 token.</string>
-    <string name="error_already_added">已添加</string>
-    <string name="error_export">导出钱包地址失败</string>
-    <string name="error_fail_load_tokens">加载 tokens 列表失败</string>
-    <string name="error_create_wallet">创建钱包地址失败</string>   
-     
+     <string name="advanced">高级设置</string>
+     <string name="copy_wallet_address">复制钱包地址</string>
+     <string name="message_attending_venue">场地门票的进入代码</string>
+     <string name="entrance_token_address">输入token地址 %s</string>
+     <string name="hint_contract_name">名称</string>
+     <string name="hint_contract_venue">场馆</string>
+     <string name="hint_contract_date">日期</string>
+     <string name="hint_contract_price">价格</string>
      <!-- Price -->
      <string name="hint_asking_price">售价 货币单位以太币</string>
      <string name="hint_ticket_selection">票数</string>
@@ -332,7 +250,7 @@
 <string name="enabled">启用</string>
 <string name="disabled">禁止</string>
 <string name="what_is_eth">以太坊是一个建立在区块链技术之上的开发平台，同时具有智能合约功能的操作系统。它是区块链产品和服务的基础技术。\n\nETH/Ether 是一个加密货币，其区块链由以太坊平台生成。 Ether 可以在在账户中互相转移和用来奖励给挖矿者。以太坊提供了一个“图灵完备”的虚拟机，称为以太坊虚拟机(Ethereum Virtual Machine)，简称EVM，用于国际网络中执行交易代码, "Gas", 是一种特别的单位用于Ethereum（以太币）里，它用来衡量一个行为或者一系列行为有多少“工作量”。 </string>
-<string name="why_alphawallet_eth">目前，以太坊是开发智能合约应用程序的最佳平台。AlphaWallet 在太坊区块链技术基础之上开发，目前还在不断创新推动以太坊技术的进步。</string>
+<string name="why_alphawallet_eth">目前，以太坊是最好区块链技术和开发智能合约应用程序和。AlphaWallet 开发于太坊区块链技术基础上，目前还在不断创新。</string>
 <string name="how_i_get_money">您可以将以太币转换为法定货币，并通过任何加密货币市场转移到您的银行账户。</string>
 <string name="how_i_transfer_into_wallet">您可以提供钱包地址给发件人，通过您的钱包地址把ETH转移到您的钱包。</string>
 <string name="ticket_import_valid">门票有效</string>

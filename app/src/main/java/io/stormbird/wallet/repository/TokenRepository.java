@@ -545,14 +545,14 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     case ERC875:
                     case ERC875LEGACY:
-                        balanceArray = getBalanceArray(wallet, tInfo);
-                        burnArray = (token instanceof Ticket) ? ((Ticket)token).getBurnList() : new ArrayList<Integer>();
+                        balanceArray = wrappedCheckBalanceArray(wallet, tInfo, token);
+                        burnArray = token.getBurnList();
                         break;
                     case ERC721:
                         break;
                     case ERC20:
                     case ETHEREUM:
-                        balance = getBalance(wallet, token.tokenInfo);
+                        balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
                     default:
                         break;
@@ -577,6 +577,46 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
+    /**
+     * Checks the balance of a token returning Uint256 value, eg Ethereum, ERC20
+     * If there was a network error the balance is taken from the previously recorded value
+     * @param wallet
+     * @param tokenInfo
+     * @param token
+     * @return
+     */
+    private BigDecimal wrappedCheckUintBalance(Wallet wallet, TokenInfo tokenInfo, Token token) throws Exception
+    {
+        BigDecimal balance = getBalance(wallet, tokenInfo);
+        if (balance.compareTo(BigDecimal.valueOf(-1)) == 0)
+        {
+            balance = token.balance;
+        }
+        return balance;
+    }
+
+    /**
+     * Checks the balance array for an ERC875 token.
+     * The balance function returns a value of -1 in the first entry if there was a comms error.
+     * In the event of a comms error, just use the previously obtained balance of the token
+     * @param wallet
+     * @param tInfo
+     * @param token
+     * @return
+     */
+    private List<BigInteger> wrappedCheckBalanceArray(Wallet wallet, TokenInfo tInfo, Token token) throws Exception
+    {
+        List<BigInteger> balance = getBalanceArray(wallet, tInfo);
+        if (balance.size() > 0
+                && (balance.get(0).compareTo(BigInteger.valueOf(-1)) == 0))
+        {
+            //comms error, use previous token balance
+            balance = token.getArrayBalance();
+        }
+
+        return balance;
+    }
+
     private ObservableTransformer<Token, Token> updateBalance(NetworkInfo network, Wallet wallet) {
         return upstream -> upstream.map(token -> {
             Token newToken = null;
@@ -593,14 +633,14 @@ public class TokenRepository implements TokenRepositoryType {
                     {
                         case ERC875:
                         case ERC875LEGACY:
-                            balanceArray = getBalanceArray(wallet, token.tokenInfo);
-                            burnArray = ((Ticket)token).getBurnList();
+                            balanceArray = wrappedCheckBalanceArray(wallet, token.tokenInfo, token);
+                            burnArray = token.getBurnList();
                             break;
                         case ERC721:
                             break;
                         case ERC20:
                         case ETHEREUM:
-                            balance = getBalance(wallet, token.tokenInfo);
+                            balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                             break;
                         default:
                             break;
@@ -717,47 +757,13 @@ public class TokenRepository implements TokenRepositoryType {
         Function function = balanceOf(wallet.address);
         String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
 
-        if (responseValue == null) return BigDecimal.ZERO;
+        if (responseValue == null) return BigDecimal.valueOf(-1); //early return for network error
 
         List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
         if (response.size() == 1) {
-            BigDecimal retVal = new BigDecimal(((Uint256) response.get(0)).getValue());
-            if (retVal.equals(BigDecimal.valueOf(32)))
-            {
-                return checkValue(retVal, wallet, responseValue);
-            }
-            else
-            {
-                return retVal;
-            }
+            return new BigDecimal(((Uint256) response.get(0)).getValue());
         } else {
             return BigDecimal.ZERO;
-        }
-    }
-
-    /**
-     * This function checks for suspicious contracts. If the value of tokens is 32, this could be an array return.
-     * Parsing the returned value with DynamicArray, if it is an array spec (ie 0x02, then array size etc) then
-     * we can remove this token. However it would be better to display the token as a ticket if the array balance has elements.
-     * TODO: refactor this out using constructor analysis
-     * @param value
-     * @param wallet
-     * @param responseValue
-     * @return
-     */
-    private BigDecimal checkValue(BigDecimal value, Wallet wallet, String responseValue)
-    {
-        org.web3j.abi.datatypes.Function functionCheck = balanceOfArray(wallet.address);
-        List<Type> values = FunctionReturnDecoder.decode(responseValue, functionCheck.getOutputParameters());
-        //is it an array?
-        if (values.isEmpty()) return value;
-        else if (values.size() > 0)
-        {
-            return BigDecimal.valueOf(-1);
-        }
-        else
-        {
-            return value;
         }
     }
 
@@ -783,20 +789,24 @@ public class TokenRepository implements TokenRepositoryType {
 
     private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         List<BigInteger> result = new ArrayList<>();
+        result.add(BigInteger.valueOf(-1));
         try
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
             List<Uint256> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
-            if (indices == null)
-                return result; // return empty array
-            for (Uint256 val : indices)
+            if (indices != null)
             {
-                result.add(val.getValue());
+                result.clear();
+                for (Uint256 val : indices)
+                {
+                    result.add(val.getValue());
+                }
             }
         }
         catch (StringIndexOutOfBoundsException e)
         {
-            //This is probably caused by trying to read the ERC875 balance of an ERC20
+            //contract call error
+            result.clear();
             result.add(BigInteger.valueOf(-1));
         }
         return result;

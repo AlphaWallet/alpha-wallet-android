@@ -895,7 +895,9 @@ public class TokenRepository implements TokenRepositoryType {
             String name = (String)response.get(0).getValue();
             if (assetDefinitionService.getNetworkId(address) > 0)
             {
-                name = name + " " + assetDefinitionService.getAssetDefinition(address).getTokenName();
+                //does name already contain the token type
+                String tokenTypeName = assetDefinitionService.getAssetDefinition(address).getTokenName();
+                if (name != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
             }
             return name;
         } else {

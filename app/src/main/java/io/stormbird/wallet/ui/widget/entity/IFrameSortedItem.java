@@ -31,8 +31,8 @@ public class IFrameSortedItem extends SortedItem<TicketRange>
     @Override
     public boolean areItemsTheSame(SortedItem other)
     {
-        return other.viewType == TicketHolder.VIEW_TYPE
-                && ( ((TicketSaleSortedItem) other).value.tokenIds.size() == value.tokenIds.size()
-                && ((TicketSaleSortedItem) other).value.tokenIds.get(0).compareTo(value.tokenIds.get(0)) == 0);
+        return other.viewType == IFrameHolder.VIEW_TYPE && this.viewType == IFrameHolder.VIEW_TYPE
+                && ( ((IFrameSortedItem) other).value.tokenIds.size() == value.tokenIds.size()
+                && ((IFrameSortedItem) other).value.tokenIds.get(0).compareTo(value.tokenIds.get(0)) == 0);
     }
 }

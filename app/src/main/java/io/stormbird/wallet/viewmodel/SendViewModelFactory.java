@@ -10,6 +10,7 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class SendViewModelFactory implements ViewModelProvider.Factory {
 
@@ -18,22 +19,25 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
     private final ENSInteract ensInteract;
+    private final AssetDefinitionService assetDefinitionService;
 
     public SendViewModelFactory(ConfirmationRouter confirmationRouter,
                                 FetchGasSettingsInteract fetchGasSettingsInteract,
                                 MyAddressRouter myAddressRouter,
                                 FetchTokensInteract fetchTokensInteract,
-                                ENSInteract ensInteract) {
+                                ENSInteract ensInteract,
+                                AssetDefinitionService assetDefinitionService) {
         this.confirmationRouter = confirmationRouter;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.myAddressRouter = myAddressRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.ensInteract = ensInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SendViewModel(confirmationRouter, fetchGasSettingsInteract, myAddressRouter, fetchTokensInteract, ensInteract);
+        return (T) new SendViewModel(confirmationRouter, fetchGasSettingsInteract, myAddressRouter, fetchTokensInteract, ensInteract, assetDefinitionService);
     }
 }

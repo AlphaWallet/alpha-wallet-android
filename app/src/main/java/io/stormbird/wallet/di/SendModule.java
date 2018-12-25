@@ -9,6 +9,7 @@ import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 
 @Module
@@ -18,12 +19,14 @@ class SendModule {
                                                      FetchGasSettingsInteract fetchGasSettingsInteract,
                                                      MyAddressRouter myAddressRouter,
                                                      FetchTokensInteract fetchTokensInteract,
-                                                     ENSInteract ensInteract) {
+                                                     ENSInteract ensInteract,
+                                                     AssetDefinitionService assetDefinitionService) {
         return new SendViewModelFactory(confirmationRouter,
                 fetchGasSettingsInteract,
                 myAddressRouter,
                 fetchTokensInteract,
-                ensInteract);
+                ensInteract,
+                assetDefinitionService);
     }
 
     @Provides

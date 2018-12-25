@@ -4,7 +4,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import android.view.View;
+import android.webkit.WebView;
+import android.widget.LinearLayout;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.interact.ENSInteract;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.crypto.Hash;
 
@@ -44,17 +49,20 @@ public class SendViewModel extends BaseViewModel {
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
     private final ENSInteract ensInteract;
+    private final AssetDefinitionService assetDefinitionService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          FetchGasSettingsInteract fetchGasSettingsInteract,
                          MyAddressRouter myAddressRouter,
                          FetchTokensInteract fetchTokensInteract,
-                         ENSInteract ensInteract) {
+                         ENSInteract ensInteract,
+                         AssetDefinitionService assetDefinitionService) {
         this.confirmationRouter = confirmationRouter;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.myAddressRouter = myAddressRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.ensInteract = ensInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public LiveData<Double> ethPriceReading() { return ethPrice; }
@@ -99,5 +107,15 @@ public class SendViewModel extends BaseViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
+    }
+
+    public boolean hasIFrame(String address)
+    {
+        return assetDefinitionService.hasIFrame(address);
+    }
+
+    public String getTokenData(String address)
+    {
+        return assetDefinitionService.getIntroductionCode(address);
     }
 }

@@ -422,7 +422,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         {
             WebView iFrame = findViewById(R.id.iframe);
             String tokenData = viewModel.getTokenData(token.getAddress());
-            iFrame.loadData(tokenData, "text/html", "utf-8");
+            iFrame.loadData(tokenData, "text/html", "UTF-8");
             viewWrapper.setVisibility(View.VISIBLE);
         }
         catch (Exception e)

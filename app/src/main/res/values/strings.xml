@@ -117,6 +117,7 @@
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>
     <string name="action_changelly">Changelly</string>
     <string name="action_wallets">Wallets</string>
+
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_generate_qr">Could not generate qr code.</string>
@@ -156,6 +157,7 @@
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>
     <string name="hint_contract_price">Price</string>
+
     <!-- Price -->
     <string name="hint_asking_price">Asking price in ETH</string>
     <string name="hint_ticket_selection">Ticket Count</string>
@@ -464,7 +466,7 @@
     <string name="new_version">Version update is available on the AlphaWallet website.</string>
     <string name="confirm_update">Download and Install</string>
     <string name="dialog_later">Later</string>
-    <string name="alphawallet_update">Alphawallet update</string>
+    <string name="alphawallet_update">AlphaWallet update</string>
     <string name="install_error">Unable to update App</string>
     <string name="require_write_permission">Storage write permission not given.</string>
     <string name="dialog_not_again">Skip until next release</string>

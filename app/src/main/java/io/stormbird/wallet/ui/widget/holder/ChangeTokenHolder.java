@@ -13,6 +13,8 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
+import java.math.BigInteger;
+
 public class ChangeTokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1005;
@@ -48,7 +50,7 @@ public class ChangeTokenHolder extends BinderViewHolder<Token> implements View.O
     public void onClick(View v) {
         if (onTokenClickListener != null) {
             enableControl.setChecked(!token.tokenInfo.isEnabled);
-            onTokenClickListener.onTokenClick(v, token);
+            onTokenClickListener.onTokenClick(v, token, BigInteger.ZERO);
         }
     }
 

@@ -5,6 +5,7 @@ import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.TransactionDetailViewModelFactory;
 
 import dagger.Module;
@@ -17,9 +18,10 @@ public class TransactionDetailModule {
     TransactionDetailViewModelFactory provideTransactionDetailViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            ExternalBrowserRouter externalBrowserRouter) {
+            ExternalBrowserRouter externalBrowserRouter,
+            TokensService tokensService) {
         return new TransactionDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, externalBrowserRouter);
+                findDefaultNetworkInteract, findDefaultWalletInteract, externalBrowserRouter, tokensService);
     }
 
     @Provides

@@ -17,7 +17,6 @@ import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
-import io.stormbird.wallet.router.MyTokensRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 
@@ -30,7 +29,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.ui.AssetDisplayActivity;
 
 /**
  * Created by James on 22/01/2018.
@@ -43,7 +41,6 @@ public class AssetDisplayViewModel extends BaseViewModel
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MyTokensRouter myTokensRouter;
     private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SellTicketRouter sellTicketRouter;
@@ -65,7 +62,6 @@ public class AssetDisplayViewModel extends BaseViewModel
             FetchTokensInteract fetchTokensInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
-            MyTokensRouter myTokensRouter,
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -76,7 +72,6 @@ public class AssetDisplayViewModel extends BaseViewModel
             OpenseaService openseaService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.myTokensRouter = myTokensRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.transferTicketRouter = transferTicketRouter;

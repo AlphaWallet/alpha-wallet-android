@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -116,6 +117,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
         isVisible = true;
 
+        viewModel.clearProcess();
+
         return view;
     }
 
@@ -145,7 +148,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         if (isResumed()) { // fragment created
             viewModel.setVisibility(isVisible);
             if (isVisible) {
-                viewModel.reStartTokenUpdate();
+                viewModel.prepare();
             }
         }
     }
@@ -215,10 +218,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 viewModel.showAddToken(getContext());
             }
             break;
-            case R.id.action_edit: {
-                viewModel.showEditTokens(getContext());
-            }
-            break;
             case android.R.id.home: {
                 //adapter.clear();
                 //viewModel.showTransactions(getContext());
@@ -227,7 +226,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         return super.onOptionsItemSelected(item);
     }
 
-    private void onTokenClick(View view, Token token) {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
         token = viewModel.getTokenFromService(token);
         token.clickReact(viewModel, context);
@@ -237,12 +236,10 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void onResume() {
         super.onResume();
         viewModel.setVisibility(isVisible);
-        viewModel.prepare();
     }
 
     private void onTokens(Token[] tokens)
     {
-        for (Token t : tokens) if(t.hasPositiveBalance()) Log.d(TAG, t.getAddress() + " : " + t.getFullName());
         adapter.setTokens(tokens);
     }
 
@@ -320,7 +317,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     @Override
     public void addedToken()
     {
-
+        viewModel.refreshAssetDefinedTokens(); //we loaded a new token, make balance query check the contract tokens
     }
 
     @Override

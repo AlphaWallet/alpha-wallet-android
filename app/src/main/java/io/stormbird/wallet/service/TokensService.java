@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
+import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 
@@ -16,7 +17,7 @@ public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
-    private static Map<String, Integer> interfaceSpecMap = new ConcurrentHashMap<>();
+    private static Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
     private Map<String, Long> updateMap = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private int currentNetwork = 0;
@@ -185,15 +186,25 @@ public class TokensService
         this.currentNetwork = currentNetwork;
     }
 
-    public static void setInterfaceSpec(String address, int functionSpec)
+    public static void setInterfaceSpec(String address, ContractType functionSpec)
     {
         interfaceSpecMap.put(address, functionSpec);
     }
 
-    public int getInterfaceSpec(String address)
+    public ContractType getInterfaceSpec(String address)
     {
+        ContractType result = ContractType.OTHER;
         if (interfaceSpecMap.containsKey(address)) return interfaceSpecMap.get(address);
-        else return 0;
+        else if (tokenMap.containsKey(address))
+        {
+            Token token = tokenMap.get(address);
+            if (token.getInterfaceSpec() != null)
+            {
+                result = tokenMap.get(address).getInterfaceSpec();
+            }
+        }
+
+        return result;
     }
 
     public void setLatestBlock(String address, long block)
@@ -231,25 +242,37 @@ public class TokensService
         }
     }
 
+    /**
+     * Fetch the inverse of the intersection between displayed tokens and the balance received from Opensea
+     * If a token was transferred out then it will no longer be displayed
+     *
+     * @param tokens array of tokens with active balance
+     * @param tokenClass type of token to filter (eg erc721)
+     * @return
+     */
     public List<String> getRemovedTokensOfClass(Token[] tokens, Class<?> tokenClass)
     {
-        List<Token> newTokens = Arrays.asList(tokens);
+        List<String> newTokens = getAddresses(tokens);
         List<Token> oldTokens = getAllClass(tokenClass);
 
         List<String> removedTokens = new ArrayList<>();
 
-        if (oldTokens.size() > newTokens.size())
+        for (Token s : oldTokens)
         {
-            //tokens were removed
-            for (Token t : oldTokens)
-            {
-                if (!newTokens.contains(t))
-                {
-                    removedTokens.add(t.getAddress());
-                }
-            }
+            if (!newTokens.contains(s.getAddress())) removedTokens.add(s.getAddress());
         }
 
         return removedTokens;
+    }
+
+    private List<String> getAddresses(Token[] tokens)
+    {
+        List<String> addresses = new ArrayList<>();
+        for (Token t : tokens)
+        {
+            addresses.add(t.getAddress());
+        }
+
+        return addresses;
     }
 }

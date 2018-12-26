@@ -1,7 +1,10 @@
 package io.stormbird.wallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.math.BigInteger;
 
 /* weiwu: I think this is what intended:
    a transaction is a single unit of logic or work, sometimes made up of multiple operations.
@@ -76,6 +79,34 @@ public class TransactionOperation implements Parcelable {
         else
         {
             return false;
+        }
+    }
+
+    public String getOperationName(Context ctx)
+    {
+        if (contract != null)
+        {
+            return contract.getOperationName(ctx);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String getValue(int decimals)
+    {
+        if (decimals > 1 && value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
+        {
+            return Token.getScaledValue(value, decimals); //represent balance transfers according to 'decimals' contract indicator property
+        }
+        else if (value != null)
+        {
+            return value;
+        }
+        else
+        {
+            return "0";
         }
     }
 }

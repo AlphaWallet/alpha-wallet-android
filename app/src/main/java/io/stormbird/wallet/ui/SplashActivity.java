@@ -15,6 +15,7 @@ import com.crashlytics.android.Crashlytics;
 
 import javax.inject.Inject;
 
+import com.crashlytics.android.core.CrashlyticsCore;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 import io.stormbird.wallet.BuildConfig;
@@ -45,10 +46,10 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        System.out.println();
-        if (BuildConfig.BUILD_TYPE.equals("release")) //only implement Crashalytics for release builds
+        if (!BuildConfig.DEBUG)
         {
-            Fabric.with(this, new Crashlytics());
+            CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+            Fabric.with(this, new Crashlytics.Builder().core(core).build());
         }
 
         // Get the intent that started this activity

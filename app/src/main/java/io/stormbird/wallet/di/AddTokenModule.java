@@ -1,13 +1,12 @@
 package io.stormbird.wallet.di;
 
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
+import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
 
 import dagger.Module;
@@ -22,9 +21,11 @@ public class AddTokenModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             HomeRouter homeRouter,
             SetupTokensInteract setupTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            FetchTransactionsInteract fetchTransactionsInteract,
+            AssetDefinitionService assetDefinitionService) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract);
+                addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract, assetDefinitionService);
     }
 
     @Provides
@@ -53,5 +54,10 @@ public class AddTokenModule {
     @Provides
     SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
         return new SetupTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
+        return new FetchTransactionsInteract(transactionRepository);
     }
 }

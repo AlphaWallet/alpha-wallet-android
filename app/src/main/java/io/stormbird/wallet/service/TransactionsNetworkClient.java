@@ -1,13 +1,16 @@
 package io.stormbird.wallet.service;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
 
+import io.stormbird.wallet.entity.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,33 +19,28 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.EtherscanTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType {
 
-	private final int PAGESIZE = 300;
+	private final int PAGESIZE = 800;
 
     private final OkHttpClient httpClient;
 	private final Gson gson;
 	private final EthereumNetworkRepositoryType networkRepository;
+	private final Context context;
 
 	public TransactionsNetworkClient(
 			OkHttpClient httpClient,
 			Gson gson,
-			EthereumNetworkRepositoryType networkRepository) {
+			EthereumNetworkRepositoryType networkRepository,
+			Context context) {
 		this.httpClient = httpClient;
 		this.gson = gson;
 		this.networkRepository = networkRepository;
+		this.context = context;
 	}
 
 	@Override
@@ -53,21 +51,23 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			List<Transaction> result = new ArrayList<>();
 			try
 			{
-				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, 0, 0);
+				int page = 1;
+				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
 
-				if (response != null)
+				while (response != null)
 				{
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-					    Transaction tx = etx.createTransaction(userAddress);
+					    Transaction tx = etx.createTransaction(userAddress, context);
 					    if (tx != null)
                         {
                             result.add(tx);
                         }
 					}
+					response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
 				}
 			}
 			catch (JSONException e)
@@ -122,10 +122,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 				response = httpClient.newCall(request).execute();
 
 				result = response.body().string();
-				if (result.length() < 80 && result.contains("No transactions found"))
+				if (result != null && result.length() < 80 && result.contains("No transactions found"))
                 {
                     result = null;
                 }
+			}
+			catch (InterruptedIOException e)
+			{
+				//If user switches account or network during a fetch
+				//this exception is going to be thrown because we're terminating the API call
+				//Don't display error
 			}
 			catch (Exception e)
 			{
@@ -157,7 +163,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				NetworkInfo network = networkRepository.getAvailableNetworkList()[0];
 				int page = 1;
-				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page++, PAGESIZE);
+				String response = readTransactions(network, TENZID, String.valueOf(lastBlock), false, page, PAGESIZE);
 
 				while (response != null)
 				{
@@ -202,10 +208,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Single<Integer> checkConstructorArgs(NetworkInfo networkInfo, String address)
+	public Single<ContractType> checkConstructorArgs(NetworkInfo networkInfo, String address)
 	{
 		return Single.fromCallable(() -> {
-			int result = 256;
+			ContractType result = ContractType.OTHER;
 			try
 			{
 				String response = readTransactions(networkInfo, address, "0", true, 1, 5);
@@ -217,11 +223,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
 					for (EtherscanTransaction etx : myTxs)
 					{
-						Transaction tx = etx.createTransaction(null);
+						Transaction tx = etx.createTransaction(null, context);
 						if (tx.isConstructor && tx.operations.length > 0)
 						{
 							TransactionContract ct = tx.operations[0].contract;
-							result = ct.decimals;
+							result = ContractType.values()[ct.decimals];
 							break;
 						}
 					}

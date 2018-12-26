@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Stream;
 
@@ -18,17 +17,17 @@ import static org.junit.Assert.*;
 public class TokenDefinitionTest {
     Stream<BigInteger> ticketIDs = Stream.of(
             // time: 5B2282F0, TPE vs DEN match: 01, category 0C
-            "01015B2282F054504544454E010CCB53", "01015B2282F054504544454E010CCB54",
+            "01015B2282F054504544454E010BCB53", "01015B2282F054504544454E010BCB54",
             // time: 5B23D470, VIE vs SIN match: 02, category 02
             "01015B2282F056494553494E0202CB53", "01015B2282F056494553494E0202CB54"
     ).map(hexstr -> new BigInteger(hexstr, 16));
-    File file = new File("contracts/TicketingContract.xml");
+    File file = new File("src/test/tbml/TicketingContract.xml");
 
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
         TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
-        assertFalse(ticketAsset.attributes.isEmpty());
+        assertFalse(ticketAsset.attributeTypes.isEmpty());
         assertNotEquals(0, ticketAsset.tokenName.length());
 
         // test contract address extraction
@@ -50,7 +49,9 @@ public class TokenDefinitionTest {
         ticketIDs.map(ticketID -> new NonFungibleToken(ticketID, ticketAsset)).forEach(ticket -> {
             assertTrue(BigInteger.valueOf(0xCB53).compareTo(ticket.getAttribute("numero").value) < 1);
             assertTrue(BigInteger.valueOf(0xCB54).compareTo(ticket.getAttribute("numero").value) > -1);
-            assertEquals("№", ticket.getAttribute("numero").name);
+            String nameCheck = ticket.getAttribute("numero").name;
+            final String nameConst = "\u2116";
+            assertEquals(nameConst, nameCheck);
             assertEquals("20180614180000+0300", ticket.getAttribute("time").text);
         });
         /* Epoch, the following test only works from Singapore */

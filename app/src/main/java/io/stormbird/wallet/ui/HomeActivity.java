@@ -251,10 +251,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings: {
-                viewModel.showSettings(this);
-            }
-            break;
             case R.id.action_deposit: {
                 openExchangeDialog();
             }

@@ -105,25 +105,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		});
 	}
 
-	@Override
-	public void setActiveRPC(String rpcURL)
-	{
-		currentActiveRPC = rpcURL;
-	}
-
-	@Override
-	public String getActiveRPC()
-	{
-		if (currentActiveRPC != null)
-		{
-			return currentActiveRPC;
-		}
-		else
-		{
-			return defaultNetwork.rpcServerUrl;
-		}
-	}
-
 	public void setDefaultNetworkInfo(NetworkInfo networkInfo) {
 		defaultNetwork = networkInfo;
 		preferences.setDefaultNetwork(defaultNetwork.name);

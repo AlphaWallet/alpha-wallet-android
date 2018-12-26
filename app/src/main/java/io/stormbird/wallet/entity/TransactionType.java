@@ -19,5 +19,7 @@ public enum TransactionType
     UNKNOWN_FUNCTION,
     INVALID_OPERATION,
     TRANSFER_FROM,
+    ALLOCATE_TO,
+    APPROVE,
     ILLEGAL_VALUE
 };

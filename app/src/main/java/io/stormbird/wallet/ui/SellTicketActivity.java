@@ -102,7 +102,7 @@ public class SellTicketActivity extends BaseActivity {
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService());
+        adapter = new TicketSaleAdapter(this::onTokenClick, token, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -178,7 +178,7 @@ public class SellTicketActivity extends BaseActivity {
         selected.setText(selectionStr);
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
     }

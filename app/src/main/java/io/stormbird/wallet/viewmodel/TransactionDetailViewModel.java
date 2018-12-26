@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
@@ -17,10 +18,12 @@ import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.stormbird.wallet.service.TokensService;
 
 public class TransactionDetailViewModel extends BaseViewModel {
 
     private final ExternalBrowserRouter externalBrowserRouter;
+    private final TokensService tokenService;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -28,8 +31,10 @@ public class TransactionDetailViewModel extends BaseViewModel {
     TransactionDetailViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            ExternalBrowserRouter externalBrowserRouter) {
+            ExternalBrowserRouter externalBrowserRouter,
+            TokensService service) {
         this.externalBrowserRouter = externalBrowserRouter;
+        this.tokenService = service;
 
         findDefaultNetworkInteract
                 .find()
@@ -62,6 +67,11 @@ public class TransactionDetailViewModel extends BaseViewModel {
             sharingIntent.putExtra(Intent.EXTRA_TEXT, shareUri.toString());
             context.startActivity(Intent.createChooser(sharingIntent, "Share via"));
         }
+    }
+
+    public Token getToken(String address)
+    {
+        return tokenService.getToken(address);
     }
 
     @Nullable

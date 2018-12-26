@@ -334,7 +334,6 @@
     <string name="confirm_erc721_transfer">确认转出 Token</string>
     <string name="asset_name">资产名称</string>
     <string name="title_dialog_check_ens">正在查询 ENS</string>
-
     <string name="label_amount_to_transfer">Amount to Transfer</string>
     <string name="title_set_universal_link_expiry">Set MagicLink Expiry:</string>
     <string name="select_camera">Select a Camera</string>
@@ -366,4 +365,6 @@
     <string name="open_on_external_link">Open on %1$s</string>
     <string name="action_reload">Reload</string>
     <string name="confirm_dapp_transaction">Confirm DApp transaction</string>
+    <string name="allocate_to">Allocate To</string>
+    <string name="approve">Approve</string>
 </resources>

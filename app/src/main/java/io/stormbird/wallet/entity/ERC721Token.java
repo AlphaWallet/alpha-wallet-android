@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 
+import org.spongycastle.crypto.tls.ContentType;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
@@ -44,6 +45,7 @@ public class ERC721Token extends Token implements Parcelable
             tokenBalance = new ArrayList<>();
         }
         setTokenNetwork(1); //current only have ERC721 on mainnet
+        setInterfaceSpec(ContractType.ERC721);
     }
 
     private ERC721Token(Parcel in) {
@@ -158,5 +160,37 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public boolean isCurrency() {
         return false;
+    }
+
+    @Override
+    public String getTransactionValue(Transaction transaction, Context ctx)
+    {
+        if (transaction.operations != null && transaction.operations.length > 0)
+        {
+            TransactionOperation operation = transaction.operations[0];
+            return "#" + operation.value;
+        }
+        else
+        {
+            return "-"; //Placeholder - should never see this
+        }
+    }
+
+    @Override
+    protected String addSuffix(String result, Transaction transaction)
+    {
+        return result;
+    }
+
+    @Override
+    public boolean checkIntrinsicType()
+    {
+        return (contractType == ContractType.ERC721);
+    }
+
+    @Override
+    public boolean hasArrayBalance()
+    {
+        return true;
     }
 }

@@ -18,6 +18,7 @@ buildscript {
 	// WARNING WARNING WARNING
 	// you are about to add here a dependency to be used in the Android app
 	// don't do that. add that dependency to app/build.gradle
+        classpath 'com.google.gms:google-services:4.1.0'
     }
 }
 

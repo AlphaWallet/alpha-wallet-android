@@ -8,6 +8,7 @@ import io.stormbird.wallet.repository.entity.RealmToken;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.stormbird.wallet.repository.TokensRealmSource.ACTUAL_BALANCE_INTERVAL;
@@ -18,24 +19,29 @@ import static io.stormbird.wallet.repository.TokensRealmSource.ACTUAL_BALANCE_IN
 
 public class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, List<Integer> burned, long updateBlancaTime)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, List<Integer> burned, long updateBlancaTime, ContractType type)
     {
         Token thisToken;
-        if (tokenInfo.isStormbird)
+        switch (type)
         {
-            if (balances == null)
-            {
-                thisToken = null; //prune this entry out if it doesn't match
-            }
-            else
-            {
+            case ERC875:
+            case ERC875LEGACY:
                 thisToken = new Ticket(tokenInfo, balances, burned, updateBlancaTime);
-            }
+                break;
+            case ERC721:
+                //TODO:
+                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), updateBlancaTime);
+                break;
+            case ERC20:
+            case ETHEREUM:
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+                break;
+            default:
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+                break;
         }
-        else
-        {
-            thisToken = new Token(tokenInfo, balance, updateBlancaTime);
-        }
+
+        thisToken.setInterfaceSpec(type);
 
         return thisToken;
     }
@@ -43,68 +49,73 @@ public class TokenFactory
     public Token createToken(TokenInfo tokenInfo, RealmToken realmItem, long updateBlancaTime)
     {
         Token thisToken;
-        if (tokenInfo.isStormbird)
+        int typeOrdinal = realmItem.getInterfaceSpec();
+        if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
+
+        ContractType type = ContractType.values()[typeOrdinal];
+        String realmBalance = realmItem.getBalance();
+
+        switch (type)
         {
-            String balances = realmItem.getBalance();
-            String burnList = realmItem.getBurnList();
-            thisToken = new Ticket(tokenInfo, balances, burnList, updateBlancaTime);
-        }
-        else
-        {
-            long now = System.currentTimeMillis();
-            BigDecimal balance = TextUtils.isEmpty(realmItem.getBalance()) || realmItem.getUpdatedTime() + ACTUAL_BALANCE_INTERVAL < now
-                ? null : new BigDecimal(realmItem.getBalance());
-            thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+            case ETHEREUM:
+            case ERC20:
+                if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
+                BigDecimal balance = new BigDecimal(realmBalance);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+                thisToken.setInterfaceSpecFromRealm(realmItem);
+                break;
+
+            case ERC875:
+            case ERC875LEGACY:
+                if (realmBalance == null) realmBalance = "";
+                thisToken = new Ticket(tokenInfo, realmBalance, realmItem.getBurnList(), updateBlancaTime);
+                thisToken.setInterfaceSpecFromRealm(realmItem);
+                break;
+
+            case OTHER:
+                balance = new BigDecimal(0);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+                thisToken.setInterfaceSpec(ContractType.OTHER);
+                break;
+
+            default:
+                balance = new BigDecimal(0);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+                thisToken.setInterfaceSpec(ContractType.NOT_SET);
+                break;
+
         }
 
-        thisToken.setInterfaceSpecFromRealm(realmItem);
         thisToken.restoreAuxDataFromRealm(realmItem);
 
         return thisToken;
     }
 
-    public Token createTokenBalance(TokenInfo tokenInfo, RealmToken realmItem, long updateBlancaTime)
+    public Token createToken(TokenInfo tokenInfo, ContractType type)
     {
         Token thisToken;
-        if (tokenInfo.isStormbird)
+        switch (type)
         {
-            String balances = realmItem.getBalance();
-            String burnList = realmItem.getBurnList();
-            if (balances == null) balances = "";
-            thisToken = new Ticket(tokenInfo, balances, burnList, updateBlancaTime);
-        }
-        else
-        {
-            long now = System.currentTimeMillis();
-            String realmBalance = realmItem.getBalance();
-            if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
-            BigDecimal balance = new BigDecimal(realmBalance);
-            thisToken = new Token(tokenInfo, balance, updateBlancaTime);
+            case ERC875:
+            case ERC875LEGACY:
+                thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), new ArrayList<Integer>(), 0);
+                break;
+            case ERC721:
+                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), 0);
+                break;
+            case ERC20:
+            default:
+                thisToken = new Token(
+                        new TokenInfo(tokenInfo.address,
+                                      tokenInfo.name,
+                                      tokenInfo.symbol,
+                                      tokenInfo.decimals,
+                                      true),
+                        null, 0);
+                break;
         }
 
-        thisToken.setInterfaceSpecFromRealm(realmItem);
-        thisToken.restoreAuxDataFromRealm(realmItem);
-
-        return thisToken;
-    }
-
-    public Token createToken(TokenInfo tokenInfo)
-    {
-        Token thisToken;
-        if (tokenInfo.isStormbird)
-        {
-            thisToken = new Ticket(tokenInfo, (List<BigInteger>)null, (List<Integer>)null, 0);
-        }
-        else
-        {
-            thisToken = new Token(
-                    new TokenInfo(tokenInfo.address,
-                            tokenInfo.name,
-                            tokenInfo.symbol,
-                            tokenInfo.decimals,
-                            true),
-                    null, 0);
-        }
+        thisToken.setInterfaceSpec(type);
 
         return thisToken;
     }

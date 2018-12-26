@@ -13,10 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import io.stormbird.wallet.R;
-
-import java.lang.reflect.Field;
 
 public class TabUtils {
     public static void changeTabsFont(Context context, TabLayout tabLayout) {
@@ -41,54 +38,81 @@ public class TabUtils {
             }
         } catch (Resources.NotFoundException nfe) {
             Log.e(TabUtils.class.getSimpleName(), nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            Log.e(TabUtils.class.getSimpleName(), npe.getMessage(), npe);
         }
     }
 
-    public static float dipToPixels(Context context, float dipValue) {
+    private static float dipToPixels(Context context, float dipValue) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 
     public static void reflex(final TabLayout tabLayout){
         tabLayout.post(() -> {
-            try {
+            try
+            {
                 LinearLayout mTabStrip = (LinearLayout) tabLayout.getChildAt(0);
-
                 int dp10 = (int) dipToPixels(tabLayout.getContext(), 10);
-
-                for (int i = 0; i < mTabStrip.getChildCount(); i++) {
-                    View tabView = mTabStrip.getChildAt(i);
-
-
-                    Field mTextViewField = tabView.getClass().getDeclaredField("mTextView");
-                    mTextViewField.setAccessible(true);
-
-                    TextView mTextView = (TextView) mTextViewField.get(tabView);
-
-                    tabView.setPadding(0, 0, 0, 0);
-
-                    int width = 0;
-                    width = mTextView.getWidth();
-                    if (width == 0) {
-                        mTextView.measure(0, 0);
-                        width = mTextView.getMeasuredWidth();
-                    }
-
-                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tabView.getLayoutParams();
-                    params.width = width ;
-                    params.leftMargin = dp10;
-                    params.rightMargin = dp10;
-                    tabView.setLayoutParams(params);
-
-                    tabView.invalidate();
+                for (int i = 0; i < mTabStrip.getChildCount(); i++)
+                {
+                    setTextMargins(mTabStrip.getChildAt(i), dp10);
                 }
-
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
             }
         });
+    }
 
+    private static void setTextMargins(View tabView, int margin) throws Exception
+    {
+        TextView tv = (TextView) getTextView(tabView);
+        if (tv != null)
+        {
+            tabView.setPadding(0, 0, 0, 0);
+
+            int width = 0;
+            width = tv.getWidth();
+            if (width == 0)
+            {
+                tv.measure(0, 0);
+                width = tv.getMeasuredWidth();
+            }
+
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tabView.getLayoutParams();
+            params.width = width;
+            params.leftMargin = margin;
+            params.rightMargin = margin;
+            tabView.setLayoutParams(params);
+
+            tabView.invalidate();
+        }
+    }
+
+    /**
+     * Find the first textView in 'view'
+     * @param view Parent view containing text
+     * @return
+     */
+    private static View getTextView(View view)
+    {
+        View value = null;
+        LinearLayout ll = (LinearLayout) view;
+        for (int i = 0; i < ll.getChildCount(); i++)
+        {
+            View child = ll.getChildAt(i);
+            if (child instanceof TextView)
+            {
+                return child;
+            }
+            if (child instanceof LinearLayout && ((LinearLayout)child).getChildCount() > 0)
+            {
+                return getTextView(child);
+            }
+        }
+
+        return value;
     }
 }

@@ -19,10 +19,7 @@ import io.stormbird.wallet.ui.PurchaseTicketsActivity;
 import io.stormbird.wallet.ui.SellDetailActivity;
 import io.stormbird.wallet.ui.SellTicketActivity;
 import io.stormbird.wallet.ui.SendActivity;
-import io.stormbird.wallet.ui.SettingsActivity;
 import io.stormbird.wallet.ui.SplashActivity;
-import io.stormbird.wallet.ui.TokenChangeCollectionActivity;
-import io.stormbird.wallet.ui.TokensActivity;
 import io.stormbird.wallet.ui.TransactionDetailActivity;
 import io.stormbird.wallet.ui.TransactionsFragment;
 import io.stormbird.wallet.ui.TransferTicketActivity;
@@ -53,10 +50,6 @@ public abstract class BuildersModule {
 	abstract TransactionDetailActivity bindTransactionDetailModule();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = SettingsModule.class)
-	abstract SettingsActivity bindSettingsModule();
-
-	@ActivityScope
 	@ContributesAndroidInjector(modules = SendModule.class)
 	abstract SendActivity bindSendModule();
 
@@ -67,20 +60,12 @@ public abstract class BuildersModule {
 	abstract MyAddressActivity bindMyAddressModule();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = TokensModule.class)
-	abstract TokensActivity bindTokensModule();
-
-	@ActivityScope
 	@ContributesAndroidInjector(modules = GasSettingsModule.class)
 	abstract GasSettingsActivity bindGasSettingsModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = AddTokenModule.class)
 	abstract AddTokenActivity bindAddTokenActivity();
-
-	@ActivityScope
-	@ContributesAndroidInjector(modules = ChangeTokenModule.class)
-	abstract TokenChangeCollectionActivity bindChangeTokenCollectionActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = RedeemSignatureDisplayModule.class)

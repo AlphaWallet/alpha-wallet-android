@@ -112,7 +112,7 @@ public class Token implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(tokenInfo, flags);
-        dest.writeString(balance.toString());
+        dest.writeString(balance == null ? "0" : balance.toString());
         dest.writeLong(updateBlancaTime);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);

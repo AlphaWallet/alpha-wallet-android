@@ -14,6 +14,8 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
+import java.math.BigInteger;
+
 /**
  * Created by James on 13/12/2018.
  * Stormbird in Singapore
@@ -50,39 +52,8 @@ public class IFrameHolder extends BinderViewHolder<TicketRange> implements View.
     {
         try
         {
-            String getContent = assetDefinition.getAppearanceCode(token.getAddress());
-            String getDetails = assetDefinition.getDetailCode(token.getAddress());
+            String getContent = assetDefinition.getIntroductionCode(token.getAddress());
             iFrame.loadData(getContent, "text/html", "utf-8");
-            detailFrame.loadData(getDetails, "text/html", "utf-8");
-
-            if (getDetails != null && getDetails.length() > 0)
-            {
-                iFrame.setOnTouchListener(new View.OnTouchListener() {
-
-                    @Override
-                    public boolean onTouch(View view, MotionEvent event)
-                    {
-                        switch (event.getAction())
-                        {
-                            case MotionEvent.ACTION_DOWN:
-                                if (detailLayout.getVisibility() == View.VISIBLE)
-                                {
-                                    detailLayout.setVisibility(View.GONE);
-                                }
-                                else
-                                {
-                                    detailLayout.setVisibility(View.VISIBLE);
-                                }
-                                break;
-                            case MotionEvent.ACTION_UP:
-                                view.performClick();
-                                break;
-                        }
-
-                        return false;
-                    }
-                });
-            }
         }
         catch (Exception ex)
         {

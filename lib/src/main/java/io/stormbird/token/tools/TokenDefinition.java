@@ -1,5 +1,6 @@
 package io.stormbird.token.tools;
 
+import javax.swing.text.html.HTML;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -345,7 +346,16 @@ public class TokenDefinition {
                     if (node.getLocalName().equals(tagName))
                     {
                         Element element = (Element)node;
-                        String currentNodeLang = (new Locale(element.getAttribute("lang"))).getLanguage();
+                        String currentNodeLang = null;
+                        if (node.hasAttributes())
+                        {
+                            Node attr = node.getAttributes().item(0);
+                            if (attr.getLocalName().equals("lang"))
+                            {
+                                currentNodeLang = attr.getTextContent();
+                            }
+                        }
+                        if (currentNodeLang == null || currentNodeLang.length() == 0) currentNodeLang = (new Locale(element.getAttribute("lang"))).getLanguage();
                         if (currentNodeLang.equals(locale.getLanguage()))
                         {
                             return node;
@@ -594,9 +604,11 @@ public class TokenDefinition {
             switch (child.getNodeType())
             {
                 case Node.TEXT_NODE:
-                    sb.append(child.getTextContent());
+                    String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
+                    sb.append(parsed);
                     break;
                 case Node.ELEMENT_NODE:
+                    if (child.getLocalName().equals("iframe")) continue;
                     sb.append("<");
                     sb.append(child.getLocalName());
                     sb.append(htmlAttributes(child));

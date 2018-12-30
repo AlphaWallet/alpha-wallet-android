@@ -170,7 +170,7 @@ public class AssetDefinitionService
         {
             for (String address : td.addresses.keySet())
             {
-                if (td.addresses.get(address) == networkId && !contractList.contains(address))
+                if ((td.addresses.get(address) == 1 || td.addresses.get(address) == networkId) && !contractList.contains(address))
                 {
                     contractList.add(address);
                 }
@@ -609,7 +609,7 @@ public class AssetDefinitionService
         return hasIframe;
     }
 
-    public String getAppearanceCode(String contractAddr)
+    public String getIntroductionCode(String contractAddr)
     {
         String appearance = "";
         TokenDefinition td = assetDefinitions.get(contractAddr);
@@ -621,7 +621,7 @@ public class AssetDefinitionService
         return appearance;
     }
 
-    public String getDetailCode(String contractAddr)
+    public String getInstructionCode(String contractAddr)
     {
         String appearance = "";
         TokenDefinition td = assetDefinitions.get(contractAddr);

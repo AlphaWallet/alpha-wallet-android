@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -387,7 +388,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
     }
 
-    public void setupTokenContent() { /* This method is copied from Token.java */
+    public void setupTokenContent()
+    {
         balanceEth = findViewById(R.id.balance_eth);
         arrayBalance = findViewById(R.id.balanceArray);
         symbolText = findViewById(R.id.symbol);
@@ -406,6 +408,27 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         balanceEth.setVisibility(View.VISIBLE);
         arrayBalance.setVisibility(View.GONE);
+
+        if (viewModel.hasIFrame(token.getAddress()))
+        {
+            addTokenPage();
+        }
+    }
+
+    private void addTokenPage()
+    {
+        LinearLayout viewWrapper = findViewById(R.id.layout_iframe);
+        try
+        {
+            WebView iFrame = findViewById(R.id.iframe);
+            String tokenData = viewModel.getTokenData(token.getAddress());
+            iFrame.loadData(tokenData, "text/html", "UTF-8");
+            viewWrapper.setVisibility(View.VISIBLE);
+        }
+        catch (Exception e)
+        {
+            viewWrapper.setVisibility(View.GONE);
+        }
     }
 
     public static String getUsdString(double usdPrice)

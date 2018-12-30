@@ -133,7 +133,17 @@ public class TicketAdapter extends TokensAdapter {
         int holderType = TokenIdSortedItem.VIEW_TYPE;
         if (assetService.hasIFrame(t.getAddress()))
         {
-            holderType = IFrameSortedItem.VIEW_TYPE;
+            if (sortedList.size() == 0)
+            {
+                //display iframe information
+                IFrameSortedItem item = new IFrameSortedItem(new TicketRange(BigInteger.ZERO, token.getAddress()), 2);
+                items.add(item);
+            }
+            else
+            {
+                IFrameSortedItem item = new IFrameSortedItem(new TicketRange(sortedList.get(0).id, token.getAddress()), 2);
+                items.add(item);
+            }
         }
 
         addSortedItems(sortedList, t, holderType);
@@ -187,7 +197,7 @@ public class TicketAdapter extends TokensAdapter {
             {
                 currentRange.tokenIds.add(e.id);
             }
-            else if (currentRange == null || e.ticketNumber != currentNumber + 1 || e.category != currentCat || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
+            else if (currentRange == null || (e.ticketNumber != currentNumber + 1 && e.ticketNumber != currentNumber) || e.category != currentCat || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);

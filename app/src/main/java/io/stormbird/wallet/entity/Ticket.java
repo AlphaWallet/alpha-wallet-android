@@ -562,8 +562,10 @@ public class Ticket extends Token implements Parcelable
         TextView cat = activity.findViewById(R.id.cattext);
         TextView details = activity.findViewById(R.id.ticket_details);
         TextView ticketTime = activity.findViewById(R.id.time);
+        LinearLayout dateLayout = activity.findViewById(R.id.datelayout);
         LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
         LinearLayout catLayout = activity.findViewById(R.id.catlayout);
+        boolean detailsShown = false;
 
         int numberOfTickets = range.tokenIds.size();
         if (numberOfTickets > 0)
@@ -638,6 +640,8 @@ public class Ticket extends Token implements Parcelable
 
             if (nonFungibleToken != null && eventTime == 0 && nonFungibleToken.getAttribute("time") != null)
             {
+                detailsShown = true;
+                dateLayout.setVisibility(View.VISIBLE);
                 eventTime = nonFungibleToken.getAttribute("time").value.longValue();
                 String eventTimeStr = nonFungibleToken.getAttribute("time").text;
 
@@ -667,6 +671,10 @@ public class Ticket extends Token implements Parcelable
                     setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
                 }
             }
+            else
+            {
+                dateLayout.setVisibility(View.GONE);
+            }
 
             name.setText(nameStr);
             amount.setText(seatCount);
@@ -679,6 +687,7 @@ public class Ticket extends Token implements Parcelable
             }
             else
             {
+                detailsShown = true;
                 ticketLayout.setVisibility(View.VISIBLE);
                 ticketRange.setText(textFieldVs);
             }
@@ -689,11 +698,12 @@ public class Ticket extends Token implements Parcelable
             }
             else
             {
+                detailsShown = true;
                 catLayout.setVisibility(View.VISIBLE);
                 cat.setText(textFieldNumero);
             }
 
-            if (!assetService.hasDefinition(getAddress()))
+            if (!detailsShown)
             {
                 //remove all info
                 blankTicketExtra(activity);

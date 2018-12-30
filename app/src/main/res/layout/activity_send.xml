@@ -75,6 +75,25 @@
                     android:background="@color/super_light_grey" />
 
                 <LinearLayout
+                    android:id="@+id/layout_iframe"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:visibility="gone"
+                    android:clickable="true">
+
+                    <WebView
+                        android:id="@+id/iframe"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </WebView>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"

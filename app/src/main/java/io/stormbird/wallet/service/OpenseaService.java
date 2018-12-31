@@ -46,10 +46,10 @@ public class OpenseaService {
 
     public Single<Token[]> getTokens(String address, int networkId) throws Exception {
         return queryBalance(address, networkId)
-                .map(json -> gotOpenseaTokens(json, address));
+                .map(json -> gotOpenseaTokens(json, address, networkId));
     }
 
-    private Token[] gotOpenseaTokens(JSONObject object, String address) throws Exception
+    private Token[] gotOpenseaTokens(JSONObject object, String address, int networkId) throws Exception
     {
         Map<String, Token> foundTokens = new HashMap<>();
 
@@ -72,6 +72,7 @@ public class OpenseaService {
                 TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
                 token = new ERC721Token(tInfo, null, System.currentTimeMillis());
                 token.setTokenWallet(address);
+                token.setTokenNetwork(networkId);
                 foundTokens.put(asset.getAssetContract().getAddress(), token);
             }
 

@@ -188,7 +188,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
 
     /**
-     * Stage 2: Fetch opensea tokens (if on mainnet or Rinkeby)
+     * Stage 2: Fetch opensea tokens
      */
     private void fetchFromOpensea() throws Exception
     {
@@ -215,11 +215,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         }
 
         tokensService.clearBalanceOf(ERC721Token.class);
+        tokensService.addTokens(tokens);
 
-        for (Token t : tokens)
-        {
-            tokensService.addTokenUnchecked(t);
-        }
         //Update the tokenCache with ERC721 tokens ready for the display refresh
         tokenCache = tokensService.getAllLiveTokens().toArray(new Token[0]);
 

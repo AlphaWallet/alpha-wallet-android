@@ -50,12 +50,6 @@ public class TokensService
         }
     }
 
-    public Token addTokenUnchecked(Token t)
-    {
-        tokenMap.put(t.getAddress(), t);
-        return t;
-    }
-
     public Token getToken(String addr)
     {
         if (addr != null) return tokenMap.get(addr);

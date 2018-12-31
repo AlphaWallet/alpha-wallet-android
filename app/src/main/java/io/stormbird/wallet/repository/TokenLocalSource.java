@@ -23,7 +23,7 @@ public interface TokenLocalSource {
 
     Single<Token[]> fetchEnabledTokens(NetworkInfo networkInfo, Wallet wallet);
     Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet);
-    Single<Token[]> fetchERC721Tokens(Wallet wallet);
+    Single<Token[]> fetchERC721Tokens(NetworkInfo network, Wallet wallet);
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
     Single<Token[]> fetchEnabledTokensWithBalance(NetworkInfo networkInfo, Wallet wallet);
     //Observable<Token> fetchEnabledTokensSequential(NetworkInfo networkInfo, Wallet wallet);

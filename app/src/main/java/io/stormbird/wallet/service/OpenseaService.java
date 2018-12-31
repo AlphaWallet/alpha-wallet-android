@@ -44,12 +44,12 @@ public class OpenseaService {
                 .build();
     }
 
-    public Single<Token[]> getTokens(String address) throws Exception {
-        return queryBalance(address)
-                .map(json -> gotOpenseaTokens(json, address));
+    public Single<Token[]> getTokens(String address, int networkId) throws Exception {
+        return queryBalance(address, networkId)
+                .map(json -> gotOpenseaTokens(json, address, networkId));
     }
 
-    private Token[] gotOpenseaTokens(JSONObject object, String address) throws Exception
+    private Token[] gotOpenseaTokens(JSONObject object, String address, int networkId) throws Exception
     {
         Map<String, Token> foundTokens = new HashMap<>();
 
@@ -72,6 +72,7 @@ public class OpenseaService {
                 TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true);
                 token = new ERC721Token(tInfo, null, System.currentTimeMillis());
                 token.setTokenWallet(address);
+                token.setTokenNetwork(networkId);
                 foundTokens.put(asset.getAssetContract().getAddress(), token);
             }
 
@@ -81,14 +82,28 @@ public class OpenseaService {
         return foundTokens.values().toArray(new Token[foundTokens.size()]);
     }
 
-    public Single<JSONObject> queryBalance(String address)
+    public Single<JSONObject> queryBalance(String address, int networkId)
     {
         return Single.fromCallable(() -> {
+            String apiBase = "";
+            JSONObject result = new JSONObject("{\"assets\":[]}");
+            switch (networkId)
+            {
+                case 1:
+                    apiBase = "https://api.opensea.io";
+                    break;
+                case 4:
+                    apiBase = "https://rinkeby-api.opensea.io";
+                    break;
+                default:
+                    return result;
+            }
+
             StringBuilder sb = new StringBuilder();
-            sb.append("https://api.opensea.io/api/v1/assets/?owner=");
+            sb.append(apiBase);
+            sb.append("/api/v1/assets/?owner=");
             sb.append(address);
             sb.append("&order_direction=asc");
-            JSONObject result = new JSONObject("{ \"estimated_count\": 0 }");
 
             try {
                 if (balanceAccess.containsKey(address)) {

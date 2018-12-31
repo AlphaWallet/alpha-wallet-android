@@ -356,7 +356,10 @@ public class DappBrowserFragment extends Fragment implements
 
     public void addBookmark()
     {
-        viewModel.addBookmark(getContext(), urlTv.getText().toString());
+        if (urlTv != null && urlTv.getText() != null)
+        {
+            viewModel.addBookmark(getContext(), urlTv.getText().toString());
+        }
     }
 
     public void viewBookmarks()

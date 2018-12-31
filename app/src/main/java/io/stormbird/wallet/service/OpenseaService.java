@@ -85,7 +85,7 @@ public class OpenseaService {
     {
         return Single.fromCallable(() -> {
             String apiBase = "";
-            JSONObject result = new JSONObject("{ \"estimated_count\": 0 }");
+            JSONObject result = new JSONObject("{\"assets\":[]}");
             switch (networkId)
             {
                 case 1:

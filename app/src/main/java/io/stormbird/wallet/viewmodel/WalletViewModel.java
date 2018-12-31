@@ -195,9 +195,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[0]);
 
-        if (updateTokens != null)
-            updateTokens.dispose();
-
         tokens.postValue(tokenCache);
 
         updateTokens = openseaService.getTokens(defaultWallet.getValue().address, defaultNetwork.getValue().chainId)

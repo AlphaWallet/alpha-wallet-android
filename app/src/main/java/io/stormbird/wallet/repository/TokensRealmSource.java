@@ -82,7 +82,7 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         return Single.fromCallable(() -> {
             Date now = new Date();
-            try (Realm realm = realmManager.getERC721RealmInstance(wallet))
+            try (Realm realm = realmManager.getERC721RealmInstance(networkInfo, wallet))
             {
                 realm.beginTransaction();
                 for (Token token : tokens)
@@ -136,7 +136,7 @@ public class TokensRealmSource implements TokenLocalSource {
             Date now = new Date();
             if (token instanceof ERC721Token)
             {
-                saveERC721Token(wallet, token, now);
+                saveERC721Token(networkInfo, wallet, token, now);
             }
             else
             {
@@ -295,16 +295,16 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token[]> fetchERC721Tokens(Wallet wallet)
+    public Single<Token[]> fetchERC721Tokens(NetworkInfo network, Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getERC721RealmInstance(wallet))
+            try (Realm realm = realmManager.getERC721RealmInstance(network, wallet))
             {
                 RealmResults<RealmERC721Token> realmItems = realm.where(RealmERC721Token.class)
                         .sort("addedTime", Sort.ASCENDING)
                         .findAll();
 
-                return convertERC721(realmItems, realm, wallet);
+                return convertERC721(realmItems, realm, network, wallet);
             }
             catch (Exception e)
             {
@@ -611,9 +611,9 @@ public class TokensRealmSource implements TokenLocalSource {
      * @param token
      * @param now
      */
-    private void saveERC721Token(Wallet wallet, Token token, Date now)
+    private void saveERC721Token(NetworkInfo network, Wallet wallet, Token token, Date now)
     {
-        try (Realm realm = realmManager.getERC721RealmInstance(wallet))
+        try (Realm realm = realmManager.getERC721RealmInstance(network, wallet))
         {
             realm.beginTransaction();
             saveERC721Token(realm, wallet, token, now);
@@ -788,7 +788,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return false;
     }
 
-    private Token[] convertERC721(RealmResults<RealmERC721Token> realmItems, Realm realm, Wallet wallet) {
+    private Token[] convertERC721(RealmResults<RealmERC721Token> realmItems, Realm realm, NetworkInfo network, Wallet wallet) {
         int len = realmItems.size();
         Token[] result = new Token[len];
         for (int i = 0; i < len; i++)
@@ -803,6 +803,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
                 result[i] = tf.createERC721Token(realmItem, assets, realmItem.getUpdatedTime());
                 result[i].setTokenWallet(wallet.address);
+                result[i].setTokenNetwork(network.chainId);
             }
         }
         return result;

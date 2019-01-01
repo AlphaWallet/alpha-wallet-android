@@ -188,35 +188,24 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
 
     /**
-     * Stage 2: Fetch opensea tokens (if on mainnet)
+     * Stage 2: Fetch opensea tokens
      */
     private void fetchFromOpensea() throws Exception
     {
         List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[0]);
 
-        if (updateTokens != null) updateTokens.dispose();
+        tokens.postValue(tokenCache);
 
-        if (defaultNetwork.getValue() != null && defaultNetwork.getValue().isMainNetwork)
-        {
-            tokens.postValue(tokenCache);
-
-            updateTokens = openseaService.getTokens(defaultWallet.getValue().address)
-                    //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::gotOpenseaTokens, this::onOpenseaError);
-        }
-        else
-        {
-            onFetchTokensCompletable();
-        }
+        updateTokens = openseaService.getTokens(defaultWallet.getValue().address, defaultNetwork.getValue().chainId)
+                //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::gotOpenseaTokens, this::onOpenseaError);
     }
 
     private void gotOpenseaTokens(Token[] tokens)
     {
-        if (updateTokens != null) updateTokens.dispose();
-
         //update the display list for token removals
         List<String> removedTokens = tokensService.getRemovedTokensOfClass(tokens, ERC721Token.class);
 
@@ -226,11 +215,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         }
 
         tokensService.clearBalanceOf(ERC721Token.class);
+        tokensService.addTokens(tokens);
 
-        for (Token t : tokens)
-        {
-            tokensService.addTokenUnchecked(t);
-        }
         //Update the tokenCache with ERC721 tokens ready for the display refresh
         tokenCache = tokensService.getAllLiveTokens().toArray(new Token[0]);
 

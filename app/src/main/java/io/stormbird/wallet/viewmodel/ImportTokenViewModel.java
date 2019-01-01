@@ -70,6 +70,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
     private final MutableLiveData<String> checkContractNetwork = new MutableLiveData<>();
     private final MutableLiveData<Boolean> ticketNotValid = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> feemasterAvailable = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
     private String univeralImportLink;
@@ -123,6 +124,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<Boolean> invalidLink() { return invalidLink; }
     public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
+    public LiveData<Boolean> feemasterAvailable() { return feemasterAvailable; }
     public double getUSDPrice() { return ethToUsd; };
 
     public void prepare(String importDataStr) {
@@ -532,5 +534,18 @@ public class ImportTokenViewModel extends BaseViewModel
     public TokenDefinition getAssetDefinition(String address)
     {
         return assetDefinitionService.getAssetDefinition(address);
+    }
+
+    public void checkFeemaster(String feemasterServer)
+    {
+        disposable = feeMasterService.checkFeemasterService(feemasterServer, network.getValue().chainId, importToken.getAddress())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleFeemasterAvailability, this::onError);
+    }
+
+    private void handleFeemasterAvailability(Boolean available)
+    {
+        feemasterAvailable.postValue(available);
     }
 }

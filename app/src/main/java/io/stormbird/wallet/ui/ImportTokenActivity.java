@@ -71,6 +71,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private LinearLayout costLayout;
     private int networkId = 0;
+    private boolean usingFeeMaster = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,6 +123,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.network().observe(this, this::onNetwork);
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
         viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
+        viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
 
         ticketRange = null;
 
@@ -233,10 +235,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onImportRange(TicketRange importTokens)
     {
         setTicket(true, false, false);
+        usingFeeMaster = false;
 
         //now update the import token
         ticketRange = importTokens;
-        Token token = viewModel.getImportToken();
         MagicLinkData order = viewModel.getSalesOrder();
 
         String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
@@ -247,11 +249,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(importTokens.contractAddress);
             if (feemasterServer != null)
             {
-                priceETH.setText(R.string.free_import);
+                viewModel.checkFeemaster(feemasterServer);
+                priceETH.setText(R.string.check_feemaster);
+                return;
             }
             else
             {
                 priceETH.setText(R.string.free_import_with_gas);
+                displayImportAction();
             }
 
             priceETH.setVisibility(View.VISIBLE);
@@ -267,8 +272,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             priceUSDLabel.setVisibility(View.VISIBLE);
             Button importTickets = findViewById(R.id.import_ticket);
             importTickets.setText(R.string.action_purchase);
+            displayImportAction();
         }
+    }
 
+    private void displayImportAction()
+    {
+        Token token = viewModel.getImportToken();
         Button importTickets = findViewById(R.id.import_ticket);
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
@@ -292,6 +302,21 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             unVerified.setVisibility(View.VISIBLE);
             textUnverified.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void onFeemasterAvailable(Boolean available)
+    {
+        usingFeeMaster = available;
+        if (available)
+        {
+            priceETH.setText(R.string.free_import);
+        }
+        else
+        {
+            priceETH.setText(R.string.free_import_with_gas);
+        }
+
+        displayImportAction();
     }
 
     private void invalidTime(Integer integer)
@@ -419,7 +444,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                         onProgress(true);
                         Token t = viewModel.getImportToken();
                         String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(t.getAddress());
-                        if (feemasterServer != null)
+                        if (feemasterServer != null && usingFeeMaster)
                         {
                             viewModel.importThroughFeemaster(feemasterServer);
                         }

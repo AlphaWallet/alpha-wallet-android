@@ -34,6 +34,8 @@ public class FeeMasterService
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
+    private static final String API = "api/";
+
     public FeeMasterService(OkHttpClient httpClient,
                             TransactionRepositoryType transactionRepository,
                             PasswordStore passwordStore) {
@@ -160,5 +162,44 @@ public class FeeMasterService
         }
 
         return sb.toString();
+    }
+
+    public Single<Boolean> checkFeemasterService(String url, int chainId, String address)
+    {
+        return Single.fromCallable(() -> {
+            Boolean result = false;
+            try
+            {
+                int index = url.indexOf(API);
+                if (index > 0)
+                {
+                    String pureServerURL = url.substring(0, index + API.length());
+                    MediaType mediaType = MediaType.parse("application/octet-stream");
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(pureServerURL);
+                    sb.append("checkContractIsSupportedForFreeTransfers");
+                    Map<String, String> args = new HashMap<>();
+                    args.put("contractAddress", address);
+                    args.put("networkId", String.valueOf(chainId));
+                    sb.append(formPrologData(args));
+
+                    Request request = new Request.Builder()
+                            .url(sb.toString())
+                            .post(RequestBody.create(mediaType, ""))
+                            .build();
+
+                    okhttp3.Response response = httpClient.newCall(request).execute();
+                    int resultCode = response.code();
+                    if ((resultCode/100) == 2) result = true;
+                    Log.d("RESP", response.body().string());
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return result;
+        });
     }
 }

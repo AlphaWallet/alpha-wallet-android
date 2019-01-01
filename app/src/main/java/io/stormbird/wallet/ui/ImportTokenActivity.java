@@ -316,6 +316,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             priceETH.setText(R.string.free_import_with_gas);
         }
 
+        priceETH.setVisibility(View.VISIBLE);
+        priceUSD.setVisibility(View.GONE);
+        priceUSDLabel.setVisibility(View.GONE);
         displayImportAction();
     }
 

@@ -532,20 +532,31 @@ public class TokenDefinition {
 
         /* if there is no token name in <contract> this breaks;
          * token name shouldn't be in <contract> anyway, re-design pending */
-        tokenName = getLocalisedString(contract,"name");
+        tokenName = getLocalisedString(contract, "name");
 
         /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */
         /* TODO: select the contract of type "holding_contract" */
         nList = contract.getElementsByTagNameNS(ATTESTATION, "address");
-        if (nList.getLength() > 0 && nList.item(0).getNodeType() == Node.ELEMENT_NODE)
+        for (int addrIndex = 0; addrIndex < nList.getLength(); addrIndex++)
         {
-            for (int i = 0; i < nList.item(0).getChildNodes().getLength(); i++)
+            Node node = nList.item(addrIndex);
+            if (node.getNodeType() == Node.ELEMENT_NODE)
             {
-                Node address = nList.item(0).getChildNodes().item(i);
-                if (address.getNodeType() == Node.TEXT_NODE)
+                int network = networkId;
+                if (node.hasAttributes() && node.getAttributes().item(0).getLocalName().equals("network"))
                 {
-                    addresses.put(address.getTextContent().toLowerCase(), networkId);
+                    String networkStr = node.getAttributes().item(0).getNodeValue();
+                    network = Integer.parseInt(networkStr);
+                }
+
+                for (int i = 0; i < node.getChildNodes().getLength(); i++)
+                {
+                    Node address = node.getChildNodes().item(i);
+                    if (address.getNodeType() == Node.TEXT_NODE)
+                    {
+                        addresses.put(address.getTextContent().toLowerCase(), network);
+                    }
                 }
             }
         }

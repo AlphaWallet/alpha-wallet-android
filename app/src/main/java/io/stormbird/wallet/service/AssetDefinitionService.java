@@ -265,7 +265,10 @@ public class AssetDefinitionService
             for (String contractAddress : definition.addresses.keySet())
             {
                 contractAddress = contractAddress.toLowerCase();
-                assetDefinitions.put(contractAddress, definition);
+                if (notOverriden(contractAddress))
+                {
+                    assetDefinitions.put(contractAddress, definition);
+                }
             }
         }
     }
@@ -301,7 +304,7 @@ public class AssetDefinitionService
     {
         //this is file stored on the phone, notify to the main app to reload (use receiver)
         TokenDefinition assetDefinition = loadTokenDefinition(address);
-        if (assetDefinition != null && assetDefinition.attributeTypes.size() > 0 && assetDefinition.addresses.size() > 0)
+        if (assetDefinition != null && assetDefinition.attributeTypes.size() > 0 && assetDefinition.addresses.size() > 0 && notOverriden(address))
         {
             assetDefinitions.put(address.toLowerCase(), assetDefinition);
         }

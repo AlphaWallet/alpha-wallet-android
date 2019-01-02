@@ -41,7 +41,7 @@ public class TicketAdapter extends TokensAdapter {
         token = t;
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
-        if (t instanceof ERC721Token) setERC721Tokens(t);
+        if (t instanceof ERC721Token) setERC721Tokens(t, null);
     }
 
     public TicketAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
@@ -50,7 +50,7 @@ public class TicketAdapter extends TokensAdapter {
         this.token = token;
         if (token instanceof Ticket) setTokenRange(token, ticketIds);
         openseaService = opensea;
-        if (token instanceof ERC721Token) setERC721Tokens(token);
+        if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class TicketAdapter extends TokensAdapter {
         return holder;
     }
 
-    protected void setERC721Tokens(Token token)
+    protected void setERC721Tokens(Token token, String ticketId)
     {
         if (!(token instanceof ERC721Token)) return;
         items.beginBatchedUpdates();
@@ -91,7 +91,10 @@ public class TicketAdapter extends TokensAdapter {
         // populate the ERC721 items
         for (Asset asset : ((ERC721Token)token).tokenBalance)
         {
-            items.add(new AssetSortedItem(asset, weight++));
+            if (ticketId == null || ticketId.equals(asset.getTokenId()))
+            {
+                items.add(new AssetSortedItem(asset, weight++));
+            }
         }
         items.endBatchedUpdates();
     }

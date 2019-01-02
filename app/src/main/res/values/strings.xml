@@ -84,7 +84,7 @@
 
     <!-- Dialog messages-->
     <string name="dialog_message">Enter the password to encrypt your wallet</string>
-    <string name="dialog_message_unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
+    <string name="dialog_message_unrecoverable_message">If this device is replaced or this app is deleted, neither you nor AlphaWallet can recover your funds without a backup.</string>
     <string name="toast_message_wallet_imported">The wallet was imported</string>
     <string name="toast_message_wallet_exported">A backup was created</string>
     <string name="toast_qr_code_no_address">QR code doesn\'t contain valid address</string>
@@ -156,6 +156,7 @@
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>
     <string name="hint_contract_price">Price</string>
+
     <!-- Price -->
     <string name="hint_asking_price">Asking price in ETH</string>
     <string name="hint_ticket_selection">Ticket Count</string>
@@ -280,7 +281,7 @@
     <string name="onboarding_2">Powered by blockchain technology, smart tickets, fraud free</string>
     <string name="onboarding_3">Buy, sell and transfer your favourite tokens</string>
     <string name="help_question1">What is ETH/Ethereum?</string>
-    <string name="help_question2">Why does aWallet use Ethereum?</string>
+    <string name="help_question2">Why does AlphaWallet use Ethereum?</string>
     <string name="help_question3">How do I get my money?</string>
     <string name="help_question4">What is a Seed Phrase?</string>
     <string name="help_question5">How do I transfer ETH into my wallet?</string>
@@ -294,7 +295,7 @@
     <string name="ethereum_blockchain">Ethereum Blockchain</string>
     <string name="issuer">Issuer:</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
-    <string name="root_body">Any \'rooted\' app can access aWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
+    <string name="root_body">Any \'rooted\' app can access AlphaWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
     <string name="toolbar_add_custom_token">Add Custom Token</string>
     <string name="contact_us">Still need help? Contact us</string>
     <string name="confirm_sale_title">Confirm Sale?</string>
@@ -364,8 +365,8 @@
     <string name="eth_detail_a2">You can convert Ethereum to USD and transfer it to your bank account with the following exchange platforms:</string>
     <string name="eth_detail_coinbase"><u>www.coinbase.com</u></string>
     <string name="eth_detail_gemini"><u>www.gemini.com</u></string>
-    <string name="eth_detail_q3">Why does aWallet use Ethereum?</string>
-    <string name="eth_detail_a3">aWallet uses Ethereum instead of currency (USD) because it is a more secure way to manage transactions. Ethereum is also the second of the world\'s biggest cryptocurrencies next to BitCoin.</string>
+    <string name="eth_detail_q3">Why does AlphaWallet use Ethereum?</string>
+    <string name="eth_detail_a3">AlphaWallet uses Ethereum instead of currency (USD) because it is a more secure way to manage transactions. Ethereum is also the second of the world\'s biggest cryptocurrencies next to BitCoin.</string>
     <string name="scan_qr_label">Scan the QR Code or copy the text below:</string>
     <string name="my_wallet_address">My Wallet Address</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>

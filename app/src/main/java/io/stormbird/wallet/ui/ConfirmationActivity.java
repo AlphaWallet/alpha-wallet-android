@@ -243,7 +243,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(transactionBytes);
+        viewModel.prepare();
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -329,6 +329,16 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onDefaultWallet(Wallet wallet) {
         fromAddressText.setText(wallet.address);
+        switch (confirmationType)
+        {
+            case ERC875:
+            case ERC721:
+                viewModel.calculateGasSettings(transactionBytes, true);
+                break;
+            default:
+                viewModel.calculateGasSettings(transactionBytes, false);
+                break;
+        }
     }
 
     private void onTransaction(String hash) {

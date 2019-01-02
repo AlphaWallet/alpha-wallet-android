@@ -61,11 +61,18 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
         });
     }
 
-    public Single<GasSettings> getGasSettings(byte[] transactionBytes) {
+    public Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible) {
         return Single.fromCallable( () -> {
             BigInteger gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT);
             if (transactionBytes != null) {
-                gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
+                if (isNonFungible)
+                {
+                    gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
+                }
+                else
+                {
+                    gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
+                }
                 BigInteger estimate = estimateGasLimit(transactionBytes);
                 if (estimate.compareTo(gasLimit) > 0) gasLimit = estimate;
             }

@@ -3,10 +3,6 @@ package io.stormbird.wallet.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-
-import java.math.BigInteger;
-import java.util.List;
-
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.Ticket;
@@ -21,6 +17,9 @@ import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
+import java.math.BigInteger;
+import java.util.List;
+
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -33,8 +32,6 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final TokensService tokensService;
 
     private final GasSettingsRouter gasSettingsRouter;
-
-    private byte[] transactionBytes = null;
 
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
@@ -85,8 +82,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         return newTransaction;
     }
 
-    public void prepare(byte[] transactionBytes) {
-        this.transactionBytes = transactionBytes;
+    public void prepare() {
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -99,11 +95,15 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
+    }
+
+    public void calculateGasSettings(byte[] transaction, boolean isNonFungible)
+    {
         if (gasSettings.getValue() == null)
         {
             disposable = fetchGasSettingsInteract
-                        .fetch(transactionBytes)
-                        .subscribe(this::onGasSettings, this::onError);
+                    .fetch(transaction, isNonFungible)
+                    .subscribe(this::onGasSettings, this::onError);
         }
     }
 

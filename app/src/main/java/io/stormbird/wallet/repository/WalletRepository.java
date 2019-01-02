@@ -1,22 +1,22 @@
 package io.stormbird.wallet.repository;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.service.AccountKeystoreService;
-
+import io.stormbird.wallet.service.TransactionsNetworkClientType;
+import okhttp3.OkHttpClient;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
 public class WalletRepository implements WalletRepositoryType
 {
@@ -25,6 +25,7 @@ public class WalletRepository implements WalletRepositoryType
 	private final EthereumNetworkRepositoryType networkRepository;
 	private final TransactionsNetworkClientType blockExplorerClient;
 	private final WalletDataRealmSource walletDataRealmSource;
+	private final OkHttpClient httpClient;
 
 	private Map<String, Wallet> walletMap = new HashMap<String, Wallet>();
 
@@ -33,12 +34,14 @@ public class WalletRepository implements WalletRepositoryType
 			AccountKeystoreService accountKeystoreService,
 			EthereumNetworkRepositoryType networkRepository,
 			TransactionsNetworkClientType blockExplorerClient,
-			WalletDataRealmSource walletDataRealmSource) {
+			WalletDataRealmSource walletDataRealmSource,
+			OkHttpClient httpClient) {
 		this.preferenceRepositoryType = preferenceRepositoryType;
 		this.accountKeystoreService = accountKeystoreService;
 		this.networkRepository = networkRepository;
 		this.blockExplorerClient = blockExplorerClient;
 		this.walletDataRealmSource = walletDataRealmSource;
+		this.httpClient = httpClient;
 	}
 
 	@Override
@@ -122,8 +125,8 @@ public class WalletRepository implements WalletRepositoryType
 			//return BigDecimal.valueOf(15.995).movePointRight(18);
 			try {
 				return new BigDecimal(Web3jFactory
-						.build(new org.web3j.protocol.http.HttpService(networkRepository.getActiveRPC()))
-						.ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
+						.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false))
+						.ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
 						.send()
 						.getBalance());
 			}

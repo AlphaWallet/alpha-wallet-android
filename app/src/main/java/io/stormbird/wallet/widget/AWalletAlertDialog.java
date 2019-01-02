@@ -101,6 +101,11 @@ public class AWalletAlertDialog extends Dialog {
         messageText.setText(message);
     }
 
+    public void setMessage(String message) {
+        messageText.setVisibility(View.VISIBLE);
+        messageText.setText(message);
+    }
+
     public void setIcon(int resId) {
         if (resId == NONE) {
             this.icon.setVisibility(View.GONE);

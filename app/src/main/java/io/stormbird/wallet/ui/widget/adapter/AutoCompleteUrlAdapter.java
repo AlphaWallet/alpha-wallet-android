@@ -128,7 +128,7 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
 
         if (!foundValue)
         {
-            history.add(address);
+            this.history.add(address);
             storeHistory();
         }
     }

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import io.stormbird.wallet.R;
@@ -79,7 +80,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        if (! data.isERC20)
+        if (! data.isERC20())
         {
             // TODO: apply styles for none ERC20 contracts
             contractType.setVisibility(View.GONE);
@@ -224,7 +225,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            onTokenClickListener.onTokenClick(v, token);
+            onTokenClickListener.onTokenClick(v, token, BigInteger.ZERO);
         }
     }
 

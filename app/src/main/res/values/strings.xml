@@ -508,4 +508,7 @@
     <string name="confirm_erc721_transfer">Confirm Token Transfer</string>
     <string name="asset_name">Asset Name</string>
     <string name="title_dialog_check_ens">Checking ENS</string>
+    <string name="allocate_to">Allocate To</string>
+    <string name="approve">Approve</string>
+    <string name="check_feemaster">Checking for gas free service</string>
 </resources>

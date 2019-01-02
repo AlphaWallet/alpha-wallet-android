@@ -1,18 +1,17 @@
 package io.stormbird.wallet.ui.widget.entity;
 
 import android.text.format.DateUtils;
-
 import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
+import io.stormbird.wallet.entity.TransactionMeta;
 import io.stormbird.wallet.ui.widget.holder.TransactionHolder;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
+public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> {
 
-    public TransactionSortedItem(int viewType, Transaction value, int order) {
+    public TransactionSortedItem(int viewType, TransactionMeta value, int order) {
         super(viewType, value, 0, order);
     }
 
@@ -26,12 +25,11 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
             //block - so the timestamp was the same. The display flickered between the two transactions.
             if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
             {
-                Transaction oldTx = value;
-                Transaction newTx = (Transaction) other.value;
+                TransactionMeta oldTx = value;
+                TransactionMeta newTx = (TransactionMeta) other.value;
 
-                // Note: This fails if the transaction is badly formed - this is intentional as we need to be certain that
-                //       All failure mechanisms have been removed
-                return oldTx.contentHash.compareTo(newTx.contentHash);
+                //just compare the transaction hash instead
+                return oldTx.hash.compareTo(newTx.hash);
             }
             else
             {
@@ -50,10 +48,9 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
         {
             if (viewType == newItem.viewType)
             {
-                Transaction oldTx = value;
-                Transaction newTx = (Transaction) newItem.value;
+                TransactionMeta oldTx = value;
+                TransactionMeta newTx = (TransactionMeta) newItem.value;
 
-                //return oldTx.contentHash.equals(newTx.contentHash);
                 return oldTx.hash.equals(newTx.hash);
             }
             else
@@ -74,8 +71,8 @@ public class TransactionSortedItem extends TimestampSortedItem<Transaction> {
         {
             if (viewType == other.viewType && viewType == TransactionHolder.VIEW_TYPE)
             {
-                Transaction oldTx = value;
-                Transaction newTx = (Transaction) other.value;
+                TransactionMeta oldTx = value;
+                TransactionMeta newTx = (TransactionMeta) other.value;
 
                 return oldTx.hash.equals(newTx.hash);
             }

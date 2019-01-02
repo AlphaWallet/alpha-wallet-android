@@ -13,19 +13,9 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.opensea.Asset;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ConfirmationRouter;
@@ -33,9 +23,6 @@ import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
-
-import static io.stormbird.wallet.C.ENSCONTRACT;
-import static io.stormbird.wallet.viewmodel.SendViewModel.hashJoin;
 
 /**
  * Created by James on 21/02/2018.
@@ -60,7 +47,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final ConfirmationRouter confirmationRouter;
-    private final FetchTokensInteract fetchTokensInteract;
+    private final ENSInteract ensInteract;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -77,7 +64,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   AssetDefinitionService assetDefinitionService,
                                   TokensService tokensService,
                                   ConfirmationRouter confirmationRouter,
-                                  FetchTokensInteract fetchTokensInteract) {
+                                  ENSInteract ensInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
@@ -88,7 +75,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.confirmationRouter = confirmationRouter;
-        this.fetchTokensInteract = fetchTokensInteract;
+        this.ensInteract = ensInteract;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -188,7 +175,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         if (token.unspecifiedSpec())
         {
             //need to determine the spec
-            disposable = fetchTransactionsInteract.queryInterfaceSpec(token)
+            disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(spec -> onInterfaceSpec(spec, to, contractAddress, indexList, gasPrice, gasLimit), this::onError);
@@ -202,7 +189,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
     }
 
-    private void onInterfaceSpec(Integer spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    private void onInterfaceSpec(ContractType spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
         Token token = tokensService.getToken(contractAddress);
         token.setInterfaceSpec(spec);
@@ -242,54 +229,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void checkENSAddress(String name)
     {
         if (name == null || name.length() < 1) return;
-        disposable = checkENSAddressFunc(name)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(hash -> gotHash(hash, name), this::ensFail);
-    }
-
-    private void gotHash(byte[] resultHash, String name)
-    {
-        disposable = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
+        disposable = ensInteract.checkENSAddress (name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(address -> gotAddress(address, name), this::ensFail);
-    }
-
-    private void ensFail(Throwable error)
-    {
-        ensFail.postValue("");
-    }
-
-    private Single<byte[]> checkENSAddressFunc(final String name)
-    {
-        return Single.fromCallable(() -> {
-            //split name
-            String[] components = name.split("\\.");
-
-            byte[] resultHash = new byte[32];
-            Arrays.fill(resultHash, (byte)0);
-
-            for (int i = (components.length - 1); i >= 0; i--)
-            {
-                String nameComponent = components[i];
-                resultHash = hashJoin(resultHash, nameComponent.getBytes());
-            }
-
-            return resultHash;
-        });
-    }
-
-    private void gotAddress(String returnedAddress, String name)
-    {
-        BigInteger test = Numeric.toBigInt(returnedAddress);
-        if (!test.equals(BigInteger.ZERO))
-        {
-            ensResolve.postValue(returnedAddress);
-        }
-        else
-        {
-            ensFail.postValue(name);
-        }
+                .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
     }
 }

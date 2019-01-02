@@ -29,7 +29,7 @@ public class DateSortedItem extends TimestampSortedItem<Date> {
     }
 
     public static DateSortedItem round(long timeStampInSec) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault()); //Display transactions in phone's native time
         calendar.setTimeInMillis(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
         calendar.set(Calendar.MILLISECOND, 999);
         calendar.set(Calendar.SECOND, 59);

@@ -8,13 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-
-import org.web3j.utils.Numeric;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
@@ -26,6 +19,11 @@ import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
+import org.web3j.utils.Numeric;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -36,7 +34,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     private Context context;
     private boolean needsRefresh;
-    private final AssetDefinitionService assetService;
+    protected final AssetDefinitionService assetService;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -89,11 +87,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.onTokenClickListener = onTokenClickListener;
         needsRefresh = true;
         this.assetService = aService;
-    }
-
-    public TokensAdapter() {
-        onTokenClickListener = null;
-        assetService = null;
     }
 
     @Override
@@ -178,13 +171,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     /**
-     * Leveraging the power of Recycler view:
-     * How I learned to love recycler view not to fight it.
-     * Why assume that Google developers who only look at updating views
-     * don't get exactly what's needed. A simple means to update only when something changes
-     * based on the rules you provide in the 'SortedList' class.
-     *
-     * It works exactly as intended when you simply let it do its job.
+     * Update a single item in the recycler view
      *
      * @param token
      */
@@ -201,13 +188,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token thisToken = tsi.value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    if (token.hasPositiveBalance() || token.isEthereum())
+                    if (token.hasPositiveBalance() || token.isEthereum() || assetService.hasDefinition(token.getAddress()))
                     {
-                        tsi = new TokenSortedItem(token, tsi.weight);
-                        items.add(tsi);
-                        if (token.isEthereum()) notifyItemChanged(i, tsi); //notifyItemChanged(i);
+                        tsi.value = token;
+                        notifyItemChanged(i, tsi);
                     }
-                    else if (!thisToken.isEthereum())
+                    else
                     {
                         items.removeItemAt(i);
                         notifyItemRemoved(i);
@@ -219,12 +205,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
 
-        //New token added
-        //after extensive testing it's better not to take any risks - emptying items and rebuilding the list never fails.
-        //However all other methods (notify range changed, notify dataset etc GPF under heavy stress.
-        //If you want to switch on the view stress test search for 'throw new BadContract' in TokenRepository and uncomment the random throw
-        //this causes tokens to pop in and out of this view very frequently.
-        if (!updated && !token.isBad() && token.hasPositiveBalance())
+        if (!updated && !token.isBad() && (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))
         {
             needsRefresh = true;
         }
@@ -243,7 +224,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         for (Token token : tokens)
         {
-            if (!token.isTerminated() && !token.isBad() && (token.isEthereum() || token.hasPositiveBalance()))
+            if (token != null &&  //Add token to display list if it's the base currency, or if it has balance
+                    (token.isEthereum() ||
+                            (!token.isTerminated() && !token.isBad() &&
+                                    (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))))
             {
                 Log.d(TAG,"ADDING: " + token.getFullName());
                 checkLiveToken(token);
@@ -380,10 +364,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void checkLiveToken(Token t)
     {
-        if (t instanceof Ticket)
-        {
-            t.checkIsMatchedInXML(assetService);
-        }
+        t.checkIsMatchedInXML(assetService);
     }
 
     public void setClear()

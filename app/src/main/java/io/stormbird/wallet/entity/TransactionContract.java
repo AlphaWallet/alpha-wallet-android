@@ -1,7 +1,9 @@
 package io.stormbird.wallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import io.stormbird.wallet.R;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -117,5 +119,21 @@ public class TransactionContract implements Parcelable {
     public String getIndicesString()
     {
         return "";
+    }
+
+    public String getOperationName(Context ctx)
+    {
+        String result = null;
+        if (name != null && name.length() > 0 && name.charAt(0) == '*')
+        {
+            int operationType = Integer.parseInt(name.substring(1));
+            result = ctx.getString(TransactionLookup.typeToName(TransactionType.values()[operationType]));
+        }
+        return result;
+    }
+
+    public String getIndicesSize()
+    {
+        return "0";
     }
 }

@@ -7,16 +7,7 @@ import android.util.Log;
 
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.ServiceErrorException;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
@@ -79,10 +70,11 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> invalidLink = new MutableLiveData<>();
     private final MutableLiveData<String> checkContractNetwork = new MutableLiveData<>();
     private final MutableLiveData<Boolean> ticketNotValid = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> feemasterAvailable = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
     private String univeralImportLink;
-    private Ticket importToken;
+    private Token importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
     private double ethToUsd = 0;
     private TicketRange currentRange;
@@ -132,6 +124,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<Boolean> invalidLink() { return invalidLink; }
     public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
+    public LiveData<Boolean> feemasterAvailable() { return feemasterAvailable; }
     public double getUSDPrice() { return ethToUsd; };
 
     public void prepare(String importDataStr) {
@@ -158,7 +151,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         return network;
     }
-    public Ticket getImportToken() { return importToken; }
+    public Token getImportToken() { return importToken; }
     public MagicLinkData getSalesOrder() { return importOrder; }
 
     private void onNetwork(NetworkInfo networkInfo)
@@ -255,19 +248,27 @@ public class ImportTokenViewModel extends BaseViewModel
     private void setupTokenAddr(String contractAddress)
     {
         disposable = setupTokensInteract
-                .update(contractAddress, false)
+                .update(contractAddress)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::onTokensSetup, this::onError);
+                .subscribe(this::getTokenSpec, this::onError);
+    }
+
+    private void getTokenSpec(TokenInfo info)
+    {
+        disposable = fetchTransactionsInteract.queryInterfaceSpec(info)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(contractSpec -> onTokensSetup(info, contractSpec), this::onError);
     }
 
     //4. Receive token information from blockchain query
-    private void onTokensSetup(TokenInfo tokenInfo)
+    private void onTokensSetup(TokenInfo tokenInfo, ContractType spec)
     {
-        if (tokenInfo != null && tokenInfo.name != null) {
+        if (tokenInfo != null && tokenInfo.name != null)
+        {
             TokenFactory tf = new TokenFactory();
-            importToken = (Ticket)tf.createToken(tokenInfo);
-
+            importToken = tf.createToken(tokenInfo, spec);
             regularBalanceCheck();
         }
         else
@@ -305,8 +306,8 @@ public class ImportTokenViewModel extends BaseViewModel
         List<BigInteger> newBalance = new ArrayList<>();
         for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
         {
-            if (importToken.balanceArray.size() > index) {
-                BigInteger ticketId = importToken.balanceArray.get(index);
+            if (importToken.getArrayBalance().size() > index) {
+                BigInteger ticketId = importToken.getArrayBalance().get(index);
                 if (ticketId.compareTo(BigInteger.ZERO) != 0)
                 {
                     newBalance.add(ticketId); //ticket is there
@@ -342,7 +343,7 @@ public class ImportTokenViewModel extends BaseViewModel
         if (importToken.unspecifiedSpec())
         {
             //establish the interface spec
-            disposable = fetchTransactionsInteract.queryInterfaceSpec(importToken)
+            disposable = fetchTransactionsInteract.queryInterfaceSpec(importToken.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onInterfaceSpec, this::onError);
@@ -354,7 +355,7 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    private void onInterfaceSpec(Integer spec)
+    private void onInterfaceSpec(ContractType spec)
     {
         importToken.setInterfaceSpec(spec);
         importRange.setValue(currentRange);
@@ -514,7 +515,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (importToken != null)
         {
-            disposable = addTokenInteract.add(importToken.tokenInfo, wallet.getValue())
+            disposable = addTokenInteract.add(importToken.tokenInfo, importToken.getInterfaceSpec())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::finishedImport, this::onError);
         }
@@ -533,5 +534,18 @@ public class ImportTokenViewModel extends BaseViewModel
     public TokenDefinition getAssetDefinition(String address)
     {
         return assetDefinitionService.getAssetDefinition(address);
+    }
+
+    public void checkFeemaster(String feemasterServer)
+    {
+        disposable = feeMasterService.checkFeemasterService(feemasterServer, network.getValue().chainId, importToken.getAddress())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::handleFeemasterAvailability, this::onError);
+    }
+
+    private void handleFeemasterAvailability(Boolean available)
+    {
+        feemasterAvailable.postValue(available);
     }
 }

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -54,7 +55,7 @@ import dagger.android.support.AndroidSupportInjection;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
-public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface
+public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface, Runnable
 {
     @Inject
     TransactionsViewModelFactory transactionsViewModelFactory;
@@ -68,6 +69,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private boolean isVisible = false;
     private int networkId = 0;
+    private Handler handler;
 
     RecyclerView list;
 
@@ -80,7 +82,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
 
-        adapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService());
+        adapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService(),
+                                          viewModel.provideTransactionsInteract());
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
 
@@ -106,6 +109,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.clear();
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
+
+        handler = new Handler();
 
         return view;
     }
@@ -172,6 +177,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private void onDefaultWallet(Wallet wallet)
     {
         adapter.setDefaultWallet(wallet);
+        handler.postDelayed(this, 1000); //delay to allow token service list to load
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
@@ -249,5 +255,11 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.clear();
         list.setAdapter(adapter);
         viewModel.abortAndRestart(false);
+    }
+
+    @Override
+    public void run()
+    {
+        viewModel.forceUpdateTransactionView();
     }
 }

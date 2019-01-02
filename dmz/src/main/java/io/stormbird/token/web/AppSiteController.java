@@ -190,11 +190,6 @@ public class AppSiteController {
                             entry -> entry.getKey().toLowerCase(),
                             entry -> new File(entry.getValue())));
             assert addresses != null : "Can't read all XML files";
-        } catch (NullPointerException e) {
-            System.err.println("repository.dir property is not defined in application.properties");
-            System.err.println("Please edit your local copy of application.properties, or");
-            System.err.println("try run with --repository.dir=/dir/to/repo");
-            System.exit(255);
         } catch (NoSuchFileException e) {
             System.err.println("repository.dir property is defined with a non-existing dir: " + repoDir.toString());
             System.err.println("Please edit your local copy of application.properties, or");
@@ -208,6 +203,7 @@ public class AppSiteController {
         if (addresses.size() == 0) { // if no XML file is found
             // the server still can run and wait for someone to dump an XML, but let's assume it's a mistake
             System.err.println("No valid contract XML found in " + repoDir.toString() + ", cowardly not continuing.");
+            System.exit(253);
         } else {
             // the list should be reprinted whenever a new file is added.
             System.out.println("Serving an XML repo with the following contracts:");

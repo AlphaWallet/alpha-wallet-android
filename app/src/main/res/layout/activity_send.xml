@@ -19,6 +19,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="6dp"
             android:layout_alignParentTop="true"
             android:layout_marginBottom="?android:attr/actionBarSize">
 
@@ -74,6 +75,25 @@
                     android:background="@color/super_light_grey" />
 
                 <LinearLayout
+                    android:id="@+id/layout_iframe"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:visibility="gone"
+                    android:clickable="true">
+
+                    <WebView
+                        android:id="@+id/iframe"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </WebView>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -82,51 +102,6 @@
                     android:paddingRight="15dp">
 
                     <include layout="@layout/item_input_address" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_ens"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="5dp"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/ens_address"
-                        android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
-                        android:textSize="10sp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/background_quantity"
-                        android:orientation="horizontal"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:id="@+id/text_ens_resolve"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:fontFamily="@font/font_regular"
-                            android:textColor="@color/holo_blue"
-                            android:textSize="16sp"
-                            android:paddingBottom="8dp"
-                            android:paddingTop="8dp"/>
-
-                    </LinearLayout>
-
                 </LinearLayout>
 
                 <!-- -->

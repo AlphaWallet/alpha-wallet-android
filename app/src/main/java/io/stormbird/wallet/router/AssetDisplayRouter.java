@@ -17,6 +17,7 @@ public class AssetDisplayRouter {
     public void open(Context context, Token ticket) {
         Intent intent = new Intent(context, AssetDisplayActivity.class);
         intent.putExtra(TICKET, ticket);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
     }
 
@@ -24,6 +25,10 @@ public class AssetDisplayRouter {
         Intent intent = new Intent(context, AssetDisplayActivity.class);
         if (isClearStack) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        }
+        else
+        {
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         }
         intent.putExtra(TICKET, ticket);
         context.startActivity(intent);

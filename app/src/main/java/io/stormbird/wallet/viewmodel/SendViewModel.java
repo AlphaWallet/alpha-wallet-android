@@ -4,6 +4,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import android.view.View;
+import android.webkit.WebView;
+import android.widget.LinearLayout;
+import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.wallet.interact.ENSInteract;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.crypto.Hash;
 
@@ -42,18 +48,21 @@ public class SendViewModel extends BaseViewModel {
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
-
-    @Nullable
-    private Disposable ensSearch;
+    private final ENSInteract ensInteract;
+    private final AssetDefinitionService assetDefinitionService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          FetchGasSettingsInteract fetchGasSettingsInteract,
                          MyAddressRouter myAddressRouter,
-                         FetchTokensInteract fetchTokensInteract) {
+                         FetchTokensInteract fetchTokensInteract,
+                         ENSInteract ensInteract,
+                         AssetDefinitionService assetDefinitionService) {
         this.confirmationRouter = confirmationRouter;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.myAddressRouter = myAddressRouter;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.ensInteract = ensInteract;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public LiveData<Double> ethPriceReading() { return ethPrice; }
@@ -94,64 +103,19 @@ public class SendViewModel extends BaseViewModel {
     public void checkENSAddress(String name)
     {
         if (name == null || name.length() < 1) return;
-        ensSearch = checkENSAddressFunc(name)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(hash -> gotHash(hash, name), this::ensFail);
-    }
-
-    private void gotHash(byte[] resultHash, String name)
-    {
-        ensSearch = fetchTokensInteract.callAddressMethod("owner", resultHash, ENSCONTRACT)
+        disposable = ensInteract.checkENSAddress (name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(address -> gotAddress(address, name), this::ensFail);
+                .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
     }
 
-    private void ensFail(Throwable error)
+    public boolean hasIFrame(String address)
     {
-        ensFail.postValue("");
+        return assetDefinitionService.hasIFrame(address);
     }
 
-    private Single<byte[]> checkENSAddressFunc(final String name)
+    public String getTokenData(String address)
     {
-        return Single.fromCallable(() -> {
-            //split name
-            String[] components = name.split("\\.");
-
-            byte[] resultHash = new byte[32];
-            Arrays.fill(resultHash, (byte)0);
-
-            for (int i = (components.length - 1); i >= 0; i--)
-            {
-                String nameComponent = components[i];
-                resultHash = hashJoin(resultHash, nameComponent.getBytes());
-            }
-
-            return resultHash;
-        });
-    }
-
-    private void gotAddress(String returnedAddress, String name)
-    {
-        BigInteger test = Numeric.toBigInt(returnedAddress);
-        if (!test.equals(BigInteger.ZERO))
-        {
-            ensResolve.postValue(returnedAddress);
-        }
-        else
-        {
-            ensFail.postValue(name);
-        }
-    }
-
-    public static byte[] hashJoin(byte[] lastHash, byte[] input)
-    {
-        byte[] joined = new byte[lastHash.length*2];
-
-        byte[] inputHash = Hash.sha3(input);
-        System.arraycopy(lastHash, 0, joined, 0, lastHash.length);
-        System.arraycopy(inputHash, 0, joined, lastHash.length, inputHash.length);
-        return Hash.sha3(joined);
+        return assetDefinitionService.getIntroductionCode(address);
     }
 }

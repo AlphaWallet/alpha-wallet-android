@@ -1,5 +1,6 @@
 package io.stormbird.wallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -295,6 +296,25 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
             case TRANSFER_FROM:
                 interpretTransferFrom(currentAddress, trans);
                 break;
+        }
+    }
+
+    @Override
+    public String getOperationName(Context ctx)
+    {
+        return ctx.getString(TransactionLookup.typeToName(operation));
+    }
+
+    @Override
+    public String getIndicesSize()
+    {
+        if (indices != null)
+        {
+            return String.valueOf(indices.size());
+        }
+        else
+        {
+            return "0";
         }
     }
 }

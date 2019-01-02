@@ -2,6 +2,7 @@ package io.stormbird.wallet.repository;
 
 import android.util.Log;
 
+import io.stormbird.wallet.entity.*;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
@@ -23,10 +24,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
@@ -61,6 +58,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Transaction fetchCachedTransaction(String walletAddr, String hash)
+	{
+		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		Wallet wallet = new Wallet(walletAddr);
+		return inDiskCache.fetchTransaction(networkInfo, wallet, hash);
+	}
+
+	@Override
 	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress) {
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 		return fetchFromNetwork(networkInfo, wallet, lastBlock, userAddress)
@@ -70,7 +75,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getActiveRPC()));
+		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
@@ -87,7 +92,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getActiveRPC()));
+		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
@@ -229,9 +234,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<Integer> queryInterfaceSpec(Token token)
+	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return blockExplorerClient.checkConstructorArgs(networkInfo, token.getAddress());
+		if (tokenInfo.name == null && tokenInfo.symbol == null) return Single.fromCallable(() ->
+																						   { return ContractType.OTHER; });
+		else return blockExplorerClient.checkConstructorArgs(networkInfo, tokenInfo.address);
 	}
 }

@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import io.stormbird.wallet.entity.*;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -30,11 +31,6 @@ import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Address;
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
@@ -75,6 +71,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private LinearLayout costLayout;
     private int networkId = 0;
+    private boolean usingFeeMaster = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -126,6 +123,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.network().observe(this, this::onNetwork);
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
         viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
+        viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
 
         ticketRange = null;
 
@@ -237,10 +235,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onImportRange(TicketRange importTokens)
     {
         setTicket(true, false, false);
+        usingFeeMaster = false;
 
         //now update the import token
         ticketRange = importTokens;
-        Ticket ticket = viewModel.getImportToken();
         MagicLinkData order = viewModel.getSalesOrder();
 
         String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
@@ -251,11 +249,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(importTokens.contractAddress);
             if (feemasterServer != null)
             {
-                priceETH.setText(R.string.free_import);
+                viewModel.checkFeemaster(feemasterServer);
+                priceETH.setText(R.string.check_feemaster);
+                return;
             }
             else
             {
                 priceETH.setText(R.string.free_import_with_gas);
+                displayImportAction();
             }
 
             priceETH.setVisibility(View.VISIBLE);
@@ -271,8 +272,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             priceUSDLabel.setVisibility(View.VISIBLE);
             Button importTickets = findViewById(R.id.import_ticket);
             importTickets.setText(R.string.action_purchase);
+            displayImportAction();
         }
+    }
 
+    private void displayImportAction()
+    {
+        Token token = viewModel.getImportToken();
         Button importTickets = findViewById(R.id.import_ticket);
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
@@ -281,11 +287,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         View baseView = findViewById(android.R.id.content);
 
-        ticket.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+        token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractNetworkId = viewModel.getAssetDefinitionService().getNetworkId(ticket.getAddress());
+        int contractNetworkId = viewModel.getAssetDefinitionService().getNetworkId(token.getAddress());
         if (contractNetworkId == networkId)
         {
             verified.setVisibility(View.VISIBLE);
@@ -298,13 +304,31 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
+    private void onFeemasterAvailable(Boolean available)
+    {
+        usingFeeMaster = available;
+        if (available)
+        {
+            priceETH.setText(R.string.free_import);
+        }
+        else
+        {
+            priceETH.setText(R.string.free_import_with_gas);
+        }
+
+        priceETH.setVisibility(View.VISIBLE);
+        priceUSD.setVisibility(View.GONE);
+        priceUSDLabel.setVisibility(View.GONE);
+        displayImportAction();
+    }
+
     private void invalidTime(Integer integer)
     {
         MagicLinkData order = viewModel.getSalesOrder();
         importTxt.setText(R.string.ticket_range_expired);
 
         setTicket(false, false, true);
-        Ticket t = viewModel.getImportToken();
+        Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
         importText += t.getTokenName(viewModel.getAssetDefinitionService());
@@ -325,7 +349,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
 
         setTicket(false, false, true);
-        Ticket t = viewModel.getImportToken();
+        Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
         importText += t.getTokenName(viewModel.getAssetDefinitionService());
@@ -367,6 +391,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         cDialog.setPrimaryButtonListener(v -> {
             viewModel.performImport();
             cDialog.dismiss();
+            onProgress(true);
         });
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setSecondaryButtonListener(v -> cDialog.dismiss());
@@ -374,6 +399,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void onTransaction(String hash) {
+        onProgress(false);
         hideDialog();
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.transaction_succeeded);
@@ -419,9 +445,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else
                     {
                         onProgress(true);
-                        Ticket t = viewModel.getImportToken();
+                        Token t = viewModel.getImportToken();
                         String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(t.getAddress());
-                        if (feemasterServer != null)
+                        if (feemasterServer != null && usingFeeMaster)
                         {
                             viewModel.importThroughFeemaster(feemasterServer);
                         }

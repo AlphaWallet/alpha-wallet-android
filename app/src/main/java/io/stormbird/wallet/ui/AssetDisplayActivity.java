@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -27,6 +28,8 @@ import io.stormbird.wallet.viewmodel.AssetDisplayViewModel;
 import io.stormbird.wallet.viewmodel.AssetDisplayViewModelFactory;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
+
+import java.math.BigInteger;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 
@@ -70,6 +73,9 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
         progressView.hide();
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
+        refreshLayout.setOnRefreshListener(this::refreshAssets);
         
         list = findViewById(R.id.listTickets);
 
@@ -80,7 +86,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
 
-        adapter = new TicketAdapter(this::onTicketIdClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
+        adapter = new TicketAdapter(this::onTokenClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         if (token instanceof ERC721Token)
         {
             findViewById(R.id.button_use).setVisibility(View.GONE);
@@ -131,6 +137,15 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
+    /**
+     * Useful for volatile assets, this will refresh any volatile data in the token eg dynamic content or images
+     */
+    private void refreshAssets()
+    {
+        adapter.reloadAssets(this);
+        systemView.hide();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
@@ -168,7 +183,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
-    private void onTicketIdClick(View view, TicketRange range) {
+    private void onTokenClick(View view, Token token, BigInteger id) {
         Context context = view.getContext();
 
         //TODO: Perform some action when token is clicked

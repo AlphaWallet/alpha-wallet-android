@@ -22,10 +22,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.text.DateFormat;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.FinishReceiver;
-import io.stormbird.wallet.entity.SignaturePair;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModel;
@@ -59,7 +56,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private FinishReceiver finishReceiver;
 
     private Wallet wallet;
-    private Ticket ticket;
+    private Token token;
     private TicketRangeParcel ticketRange;
 
     TicketAdapter adapter;
@@ -75,7 +72,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         setTitle(getString(R.string.empty));
 
-        ticket = getIntent().getParcelableExtra(TICKET);
+        token = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
@@ -83,7 +80,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
                 .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
-        viewModel.ticket().observe(this, this::onTicket);
+        viewModel.token().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
         viewModel.burnNotice().observe(this, this::onBurned);
 
@@ -94,7 +91,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         View baseView = findViewById(android.R.id.content);
 
-        ticket.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+        token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
         finishReceiver = new FinishReceiver(this);
     }
 
@@ -121,7 +118,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket.tokenInfo.address, ticket, ticketRange.range);
+        viewModel.prepare(token.tokenInfo.address, token, ticketRange.range);
     }
 
     @Override
@@ -181,7 +178,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
     }
 
-    private void onTicket(Ticket ticket)
+    private void onTicket(Token ticket)
     {
 
     }

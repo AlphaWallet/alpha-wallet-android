@@ -2,12 +2,7 @@ package io.stormbird.wallet;
 
 import android.support.annotation.NonNull;
 
-import io.stormbird.wallet.entity.BaseViewCallback;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TradeInstance;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.service.MarketQueueService;
@@ -168,7 +163,13 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<Integer> queryInterfaceSpec(Token token)
+            public Single<ContractType> queryInterfaceSpec(TokenInfo token)
+            {
+                return null;
+            }
+
+            @Override
+            public Transaction fetchCachedTransaction(String walletAddr, String hash)
             {
                 return null;
             }

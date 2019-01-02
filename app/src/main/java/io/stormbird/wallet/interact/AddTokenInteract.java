@@ -2,6 +2,7 @@ package io.stormbird.wallet.interact;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
@@ -19,42 +20,12 @@ public class AddTokenInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<Token> add(TokenInfo tokenInfo, int interfaceSpec) {
+    public Observable<Token> add(TokenInfo tokenInfo, ContractType type) {
         return walletRepository
                 .getDefaultWallet()
                 .flatMap(wallet -> tokenRepository
-                        .addToken(wallet, tokenInfo, interfaceSpec))
+                        .addToken(wallet, tokenInfo, type))
                 .toObservable();
-    }
-
-    /**
-     * Add Token to respository process which is a single not an observable
-     * @param tokenInfo
-     * @return
-     */
-    public Single<Token> addS(TokenInfo tokenInfo) {
-        return walletRepository
-                    .getDefaultWallet()
-                    .flatMap(wallet -> tokenRepository
-                            .addToken(wallet, tokenInfo));
-    }
-
-    public Observable<Token> add(TokenInfo tokenInfo, Wallet wallet) {
-        return tokenRepository
-                        .addToken(wallet, tokenInfo).toObservable();
-    }
-
-    public Observable<Token[]> add(TokenInfo[] tokenInfos) {
-        return walletRepository.getDefaultWallet()
-                .flatMap(wallet -> tokenRepository.addTokens(wallet, tokenInfos))
-                .toObservable();
-
-//        return walletRepository
-//                .getDefaultWallet()
-//                .map(wallet -> tokenRepository
-//                        .addTokens(wallet, tokenInfos))
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)

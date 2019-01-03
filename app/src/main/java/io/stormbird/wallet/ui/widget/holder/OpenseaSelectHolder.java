@@ -8,10 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
+import android.widget.LinearLayout;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.opensea.Asset;
+import io.stormbird.wallet.ui.widget.OnOpenseaAssetCheckListener;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
+
+import java.math.BigInteger;
 
 /**
  * Created by James on 12/11/2018.
@@ -20,11 +25,13 @@ import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
 public class OpenseaSelectHolder extends OpenseaHolder
 {
     private final AppCompatRadioButton select;
-    private OnTokenCheckListener onTokenCheckListener;
+    private OnOpenseaAssetCheckListener onTokenCheckListener;
+    private final LinearLayout ticketLayout;
 
     public OpenseaSelectHolder(int resId, ViewGroup parent, Token token)
     {
         super(resId, parent, token);
+        ticketLayout = findViewById(R.id.layout_select_ticket);
         select = findViewById(R.id.radioBox);
     }
 
@@ -34,6 +41,7 @@ public class OpenseaSelectHolder extends OpenseaHolder
         super.bind(asset, addition);
         select.setVisibility(View.VISIBLE);
 
+        select.setOnCheckedChangeListener(null); //have to invalidate listener first otherwise we trigger cached listener and create infinite loop
         select.setChecked(asset.isChecked);
 
         select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
@@ -41,12 +49,19 @@ public class OpenseaSelectHolder extends OpenseaHolder
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
             {
-                asset.isChecked = b;
+                if (b)
+                {
+                    onTokenCheckListener.onAssetCheck(asset);
+                }
             }
+        });
+
+        ticketLayout.setOnClickListener(v -> {
+            select.setChecked(true);
         });
     }
 
-    public void setOnTokenCheckListener(OnTokenCheckListener onTokenCheckListener)
+    public void setOnTokenCheckListener(OnOpenseaAssetCheckListener onTokenCheckListener)
     {
         this.onTokenCheckListener = onTokenCheckListener;
     }

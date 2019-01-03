@@ -11,6 +11,7 @@ import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.TicketRangeElement;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
@@ -41,6 +42,7 @@ public class TicketSaleAdapter extends TicketAdapter {
 
     private OnTokenCheckListener onTokenCheckListener;
     private TicketRange selectedTicketRange;
+    private Asset selectedAsset;
     private QuantitySelectorHolder quantitySelector;
 
     /* Context ctx is used to initialise assetDefinition in the super class */
@@ -86,7 +88,7 @@ public class TicketSaleAdapter extends TicketAdapter {
             } break;
             case OpenseaHolder.VIEW_TYPE: {
                 holder = new OpenseaSelectHolder(R.layout.item_opensea_token, parent, token);
-                ((OpenseaSelectHolder)holder).setOnTokenCheckListener(onTokenCheckListener);
+                ((OpenseaSelectHolder)holder).setOnTokenCheckListener(this::onOpenseaCheck);
             } break;
         }
 
@@ -106,7 +108,7 @@ public class TicketSaleAdapter extends TicketAdapter {
     {
         if (t instanceof ERC721Token)
         {
-            setERC721Tokens(t);
+            setERC721Tokens(t, null);
         }
         else if (t instanceof Ticket)
         {
@@ -208,6 +210,17 @@ public class TicketSaleAdapter extends TicketAdapter {
         {
             return 0;
         }
+    }
+
+    private void onOpenseaCheck(Asset asset)
+    {
+        if (selectedAsset != null)
+        {
+            selectedAsset.isChecked = false;
+        }
+        asset.isChecked = true;
+        selectedAsset = asset;
+        notifyDataSetChanged();
     }
 
     private void onTokenCheck(TicketRange range) {

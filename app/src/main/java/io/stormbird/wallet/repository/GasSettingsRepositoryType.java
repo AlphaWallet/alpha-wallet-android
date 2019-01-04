@@ -7,5 +7,5 @@ import io.reactivex.Single;
 
 public interface GasSettingsRepositoryType {
     Single<GasSettings> getGasSettings(boolean forTokenTransfer);
-    Single<GasSettings> getGasSettings(byte[] transactionBytes);
+    Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible);
 }

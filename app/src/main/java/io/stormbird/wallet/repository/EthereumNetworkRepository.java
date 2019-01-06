@@ -26,39 +26,58 @@ import static io.stormbird.wallet.C.POA_SYMBOL;
 import static io.stormbird.wallet.C.RINKEBY_NETWORK_NAME;
 import static io.stormbird.wallet.C.ROPSTEN_NETWORK_NAME;
 import static io.stormbird.wallet.C.SOKOL_NETWORK_NAME;
+import static io.stormbird.wallet.C.XDAI_NETWORK_NAME;
+import static io.stormbird.wallet.C.xDAI_SYMBOL;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
+	//TODO make all into constants
+
+	public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+	public static final String CLASSIC_RPC_URL = "https://mewapi.epool.io/";
+	public static final String XDAI_RPC_URL = "https://dai.poa.network";
+	public static final String POA_RPC_URL = "https://core.poa.network/";
+	public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+	public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+	public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+	public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
+
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
-                    "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+                    MAINNET_RPC_URL,
                     "https://etherscan.io/tx/",1, true,
 							"https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api.etherscan.io/"),
            new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
-                    "https://mewapi.epool.io/",
+                    CLASSIC_RPC_URL,
                     "https://gastracker.io/tx/",61, true),
             new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
-                    "https://core.poa.network/",
+                    POA_RPC_URL,
                     "https://poaexplorer.com/txid/search/", 99, false),
-			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL,
-                    "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL, KOVAN_RPC_URL,
                     "https://kovan.etherscan.io/tx/", 42, false,
 							"https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api-kovan.etherscan.io/"),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
-							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+							ROPSTEN_RPC_URL,
                     "https://ropsten.etherscan.io/tx/",3, false,
 							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 					"https://api-ropsten.etherscan.io/"),
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
-                    "https://sokol.poa.network",
+                    SOKOL_RPC_URL,
                     "https://sokol-explorer.poa.network/account/",77, false),
-			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL,
-							"https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL, RINKEBY_RPC_URL,
 							"https://rinkeby.etherscan.io/tx/",4, false,
 							"https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api-rinkeby.etherscan.io/"),
+			new NetworkInfo(XDAI_NETWORK_NAME,
+					xDAI_SYMBOL,
+					XDAI_RPC_URL,
+					"https://blockscout.com/poa/dai/api",
+					100,
+					false,
+					"https://dai.poa.network",
+					"https://blockscout.com/poa/dai/tx"),
 	};
 
 	private final PreferenceRepositoryType preferences;

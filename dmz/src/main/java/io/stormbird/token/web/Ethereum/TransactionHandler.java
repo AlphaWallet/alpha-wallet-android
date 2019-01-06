@@ -29,10 +29,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 public class TransactionHandler
 {
-    private static final String CONTRACT_ADDR = "0x6ae0e6d98955ba13dacf654c4819e6a1886e978f";
     private static final String MAIN_NODEURL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String ROPSTEN_NODEURL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String RINKEBY_NODEURL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 
     private static Web3j mWeb3;
 

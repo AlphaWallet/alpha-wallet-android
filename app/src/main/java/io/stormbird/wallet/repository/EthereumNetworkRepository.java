@@ -31,8 +31,6 @@ import static io.stormbird.wallet.C.xDAI_SYMBOL;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
-	//TODO make all into constants
-
 	public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String CLASSIC_RPC_URL = "https://mewapi.epool.io/";
 	public static final String XDAI_RPC_URL = "https://dai.poa.network";

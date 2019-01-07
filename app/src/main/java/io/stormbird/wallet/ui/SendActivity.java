@@ -80,7 +80,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private double currentEthPrice;
 
     RelativeLayout ethDetailLayout;
-    Button startTransferButton;
     Button copyAddressButton;
     EditText amountEditText;
     AutoCompleteTextView toAddressEditText;
@@ -98,10 +97,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     //Token
     TextView balanceEth;
     TextView symbolText;
-    TextView arrayBalance;
 
     TextView priceUSD;
     LinearLayout priceUSDLayout;
+    
+    private TextView paste;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -198,8 +198,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     private void initViews()
     {
-        amountSymbolText = findViewById(R.id.edit_amount_symbol);
-        amountSymbolText.setText(token.tokenInfo.symbol);
+//        amountSymbolText = findViewById(R.id.edit_amount_symbol);
+//        amountSymbolText.setText(token.tokenInfo.symbol);
         toAddressError = findViewById(R.id.to_address_error);
         amountError = findViewById(R.id.amount_error);
         myAddressText = findViewById(R.id.address);
@@ -208,8 +208,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLayout = findViewById(R.id.layout_usd_price);
 
-        startTransferButton = findViewById(R.id.button_start_transfer);
-        startTransferButton.setOnClickListener(v -> onStartTransfer());
+//        startTransferButton = findViewById(R.id.button_start_transfer);
+//        startTransferButton.setOnClickListener(v -> onStartTransfer());
 
         copyAddressButton = findViewById(R.id.copy_action);
         copyAddressButton.setOnClickListener(v -> copyAddress());
@@ -242,6 +242,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         });
 
         toAddressEditText = findViewById(R.id.edit_to_address);
+        
+        paste = findViewById(R.id.paste);
+        paste.setOnClickListener(v -> {
+            Toast.makeText(this, "paste", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void copyAddress()
@@ -391,7 +396,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     public void setupTokenContent()
     {
         balanceEth = findViewById(R.id.balance_eth);
-        arrayBalance = findViewById(R.id.balanceArray);
         symbolText = findViewById(R.id.symbol);
 
         symbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
@@ -407,7 +411,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         balanceEth.setText(value);
 
         balanceEth.setVisibility(View.VISIBLE);
-        arrayBalance.setVisibility(View.GONE);
 
         if (viewModel.hasIFrame(token.getAddress()))
         {

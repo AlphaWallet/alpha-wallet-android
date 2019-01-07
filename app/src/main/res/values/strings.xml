@@ -509,4 +509,5 @@
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>
+    <string name="erc20_details">ERC20 Details</string>
 </resources>

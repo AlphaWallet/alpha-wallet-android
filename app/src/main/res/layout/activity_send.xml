@@ -19,23 +19,34 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="6dp"
             android:layout_alignParentTop="true"
-            android:layout_marginBottom="?android:attr/actionBarSize">
+            android:layout_marginBottom="?android:attr/actionBarSize"
+            android:layout_marginTop="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/font_semibold"
+                    android:text="Send"
+                    android:textColor="@color/text_dark_gray"
+                    android:textSize="18sp" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
                     android:orientation="horizontal"
                     android:paddingBottom="5dp"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:paddingTop="20dp">
+                    android:paddingRight="20dp">
 
                     <TextView
                         android:id="@+id/balance_eth"
@@ -43,46 +54,39 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="5dp"
                         android:fontFamily="@font/font_light"
-                        android:text="8888888"
-                        android:textColor="@color/text_black"
-                        android:textSize="25sp" />
-
-                    <TextView
-                        android:id="@+id/balanceArray"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:fontFamily="@font/font_light"
-                        android:textColor="@color/text_black"
-                        android:textSize="25sp"
-                        android:visibility="gone" />
+                        android:text="1.2345"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/symbol"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
                         android:fontFamily="@font/font_light"
                         android:text="@string/ethereum"
-                        android:textColor="@color/text_black"
-                        android:textSize="25sp" />
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:text="Available"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="16sp" />
 
                 </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_margin="15dp"
-                    android:background="@color/super_light_grey" />
 
                 <LinearLayout
                     android:id="@+id/layout_iframe"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:visibility="gone"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:visibility="gone">
 
                     <WebView
                         android:id="@+id/iframe"
@@ -97,20 +101,148 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="50dp"
                     android:orientation="vertical"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
 
-                    <include layout="@layout/item_input_address" />
-                </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="Address"
+                        android:textSize="14sp" />
 
-                <!-- -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/edit_to_address"
+                            android:layout_width="match_parent"
+                            android:layout_height="47dp"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toLeftOf="@id/img_scan_qr"
+                            android:background="@drawable/background_round_blue_9dp"
+                            android:completionThreshold="1"
+                            android:fontFamily="@font/font_semibold"
+                            android:hint="Contract Address"
+                            android:imeOptions="actionDone"
+                            android:inputType="text"
+                            android:lines="1"
+                            android:maxLines="1"
+                            android:paddingEnd="60dp"
+                            android:paddingStart="15dp"
+                            android:textColor="@color/text_dark_gray"
+                            android:textColorHint="@color/light_gray"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/paste"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignRight="@id/edit_to_address"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="15dp"
+                            android:fontFamily="@font/font_bold"
+                            android:text="Paste"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="14sp" />
+
+                        <ImageButton
+                            android:id="@+id/img_scan_qr"
+                            android:layout_width="50dp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?android:selectableItemBackground"
+                            android:contentDescription="@string/scan_qr"
+                            android:padding="@dimen/big_padding"
+                            android:src="@mipmap/qr_code_icon" />
+
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginTop="25dp"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="Amount"
+                        android:textSize="14sp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/edit_amount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toLeftOf="@id/img_switch_usd_eth"
+                            android:background="@drawable/background_round_blue_9dp"
+                            android:completionThreshold="1"
+                            android:fontFamily="@font/font_semibold"
+                            android:hint="0.00"
+                            android:imeOptions="actionDone"
+                            android:inputType="text"
+                            android:lines="1"
+                            android:maxLines="1"
+                            android:paddingBottom="15dp"
+                            android:paddingEnd="15dp"
+                            android:paddingStart="15dp"
+                            android:paddingTop="15dp"
+                            android:textColor="@color/text_dark_gray"
+                            android:textColorHint="@color/light_gray"
+                            android:textSize="36sp" />
+
+                        <ImageButton
+                            android:id="@+id/img_switch_usd_eth"
+                            android:layout_width="50dp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?android:selectableItemBackground"
+                            android:contentDescription="@string/scan_qr"
+                            android:padding="@dimen/big_padding"
+                            android:src="@drawable/ic_switch_eth_usd" />
+
+                    </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/amount_error"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/error_invalid_amount"
+                        android:textColor="@color/cancel_red"
+                        android:textSize="12sp"
+                        android:layout_marginTop="10dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/textImportPriceUSD"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/font_regular"
+                        android:paddingLeft="15dp"
+                        android:layout_marginTop="10dp"
+                        android:text="US$0"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="21sp" />
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
+                    android:layout_marginStart="15dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -120,60 +252,49 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="5dp"
-                            android:fontFamily="@font/font_regular"
-                            android:text="@string/label_amount_to_transfer"
-                            android:textAllCaps="true"
-                            android:textColor="@color/light_gray"
-                            android:textSize="10sp" />
+                        <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_gravity="center_horizontal"-->
+                        <!--android:layout_marginBottom="5dp"-->
+                        <!--android:fontFamily="@font/font_regular"-->
+                        <!--android:text="@string/label_amount_to_transfer"-->
+                        <!--android:textAllCaps="true"-->
+                        <!--android:textColor="@color/light_gray"-->
+                        <!--android:textSize="10sp" />-->
 
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                        <!--<RelativeLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content">-->
 
-                            <EditText
-                                android:id="@+id/edit_amount"
-                                android:layout_width="match_parent"
-                                android:layout_height="47dp"
-                                android:layout_alignParentLeft="true"
-                                android:layout_centerVertical="true"
-                                android:background="@drawable/background_quantity"
-                                android:fontFamily="@font/font_semibold"
-                                android:hint="0.00"
-                                android:imeOptions="actionDone"
-                                android:inputType="numberDecimal"
-                                android:paddingStart="15dp"
-                                android:textColor="@color/colorPrimaryDark"
-                                android:textColorHint="@color/light_gray"
-                                android:textSize="21sp" />
+                        <!--<EditText-->
+                        <!--android:id="@+id/edit_amount"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="47dp"-->
+                        <!--android:layout_alignParentLeft="true"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:background="@drawable/background_quantity"-->
+                        <!--android:fontFamily="@font/font_semibold"-->
+                        <!--android:hint="0.00"-->
+                        <!--android:imeOptions="actionDone"-->
+                        <!--android:inputType="numberDecimal"-->
+                        <!--android:paddingStart="15dp"-->
+                        <!--android:textColor="@color/colorPrimaryDark"-->
+                        <!--android:textColorHint="@color/light_gray"-->
+                        <!--android:textSize="21sp" />-->
 
-                            <TextView
-                                android:id="@+id/edit_amount_symbol"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentRight="true"
-                                android:layout_centerVertical="true"
-                                android:layout_marginRight="15dp"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/eth"
-                                android:textColor="@color/semi_dark_grey" />
-                        </RelativeLayout>
+                        <!--<TextView-->
+                        <!--android:id="@+id/edit_amount_symbol"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_alignParentRight="true"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_marginRight="15dp"-->
+                        <!--android:fontFamily="@font/font_regular"-->
+                        <!--android:text="@string/eth"-->
+                        <!--android:textColor="@color/semi_dark_grey" />-->
+                        <!--</RelativeLayout>-->
 
-                        <TextView
-                            android:id="@+id/amount_error"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:fontFamily="@font/font_regular"
-                            android:gravity="center"
-                            android:text="@string/error_invalid_amount"
-                            android:textColor="@color/cancel_red"
-                            android:textSize="12sp"
-                            android:visibility="gone" />
 
                     </LinearLayout>
 
@@ -182,6 +303,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.75"
+                        android:visibility="gone"
                         android:orientation="vertical">
 
                         <View
@@ -200,27 +322,27 @@
                             android:textColor="@color/light_gray"
                             android:textSize="10sp" />
 
-                        <LinearLayout
-                            android:id="@+id/layout_equivalent_usd"
-                            android:layout_width="match_parent"
-                            android:layout_height="47dp"
-                            android:layout_gravity="center"
-                            android:background="@drawable/background_round_grey"
-                            android:orientation="horizontal">
+                        <!--<LinearLayout-->
+                        <!--android:id="@+id/layout_equivalent_usd"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="47dp"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:background="@drawable/background_round_grey"-->
+                        <!--android:orientation="horizontal">-->
 
-                            <TextView
-                                android:id="@+id/textImportPriceUSD"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_weight="1"
-                                android:fontFamily="@font/font_semibold"
-                                android:gravity="center"
-                                android:text="$0"
-                                android:textColor="@color/light_gray"
-                                android:textSize="21sp" />
+                        <!--<TextView-->
+                        <!--android:id="@+id/textImportPriceUSD"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:fontFamily="@font/font_semibold"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="$0"-->
+                        <!--android:textColor="@color/light_gray"-->
+                        <!--android:textSize="21sp" />-->
 
-                        </LinearLayout>
+                        <!--</LinearLayout>-->
 
                     </LinearLayout>
                 </LinearLayout>
@@ -228,74 +350,75 @@
                 <!-- -->
 
                 <!--<LinearLayout-->
-                    <!--android:id="@+id/layout_input_amount"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_gravity="center"-->
-                    <!--android:layout_marginBottom="15dp"-->
-                    <!--android:orientation="vertical"-->
-                    <!--android:paddingLeft="15dp"-->
-                    <!--android:paddingRight="15dp">-->
+                <!--android:id="@+id/layout_input_amount"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:layout_marginBottom="15dp"-->
+                <!--android:orientation="vertical"-->
+                <!--android:paddingLeft="15dp"-->
+                <!--android:paddingRight="15dp">-->
 
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="center_horizontal"-->
-                        <!--android:layout_marginBottom="5dp"-->
-                        <!--android:fontFamily="@font/font_regular"-->
-                        <!--android:text="@string/label_amount_to_transfer"-->
-                        <!--android:textAllCaps="true"-->
-                        <!--android:textColor="@color/light_gray"-->
-                        <!--android:textSize="10sp" />-->
+                <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:layout_marginBottom="5dp"-->
+                <!--android:fontFamily="@font/font_regular"-->
+                <!--android:text="@string/label_amount_to_transfer"-->
+                <!--android:textAllCaps="true"-->
+                <!--android:textColor="@color/light_gray"-->
+                <!--android:textSize="10sp" />-->
 
-                    <!--<RelativeLayout-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content">-->
+                <!--<RelativeLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
 
-                        <!--<EditText-->
-                            <!--android:id="@+id/edit_amount"-->
-                            <!--android:layout_width="match_parent"-->
-                            <!--android:layout_height="47dp"-->
-                            <!--android:layout_alignParentLeft="true"-->
-                            <!--android:layout_centerVertical="true"-->
-                            <!--android:background="@drawable/background_quantity"-->
-                            <!--android:fontFamily="@font/font_semibold"-->
-                            <!--android:hint="@string/hint_input_eth_amount"-->
-                            <!--android:imeOptions="actionDone"-->
-                            <!--android:inputType="numberDecimal"-->
-                            <!--android:paddingEnd="50dp"-->
-                            <!--android:paddingStart="15dp"-->
-                            <!--android:textColor="@color/colorPrimaryDark"-->
-                            <!--android:textColorHint="@color/light_gray"-->
-                            <!--android:textSize="21sp" />-->
+                <!--<EditText-->
+                <!--android:id="@+id/edit_amount"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="47dp"-->
+                <!--android:layout_alignParentLeft="true"-->
+                <!--android:layout_centerVertical="true"-->
+                <!--android:background="@drawable/background_quantity"-->
+                <!--android:fontFamily="@font/font_semibold"-->
+                <!--android:hint="@string/hint_input_eth_amount"-->
+                <!--android:imeOptions="actionDone"-->
+                <!--android:inputType="numberDecimal"-->
+                <!--android:paddingEnd="50dp"-->
+                <!--android:paddingStart="15dp"-->
+                <!--android:textColor="@color/colorPrimaryDark"-->
+                <!--android:textColorHint="@color/light_gray"-->
+                <!--android:textSize="21sp" />-->
 
-                        <!--<TextView-->
-                            <!--android:id="@+id/edit_amount_symbol"-->
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:layout_alignParentRight="true"-->
-                            <!--android:layout_centerVertical="true"-->
-                            <!--android:layout_marginRight="15dp"-->
-                            <!--android:fontFamily="@font/font_regular"-->
-                            <!--android:text="@string/eth"-->
-                            <!--android:textAllCaps="true"-->
-                            <!--android:textColor="@color/semi_dark_grey" />-->
-                    <!--</RelativeLayout>-->
+                <!--<TextView-->
+                <!--android:id="@+id/edit_amount_symbol"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--android:layout_centerVertical="true"-->
+                <!--android:layout_marginRight="15dp"-->
+                <!--android:fontFamily="@font/font_regular"-->
+                <!--android:text="@string/eth"-->
+                <!--android:textAllCaps="true"-->
+                <!--android:textColor="@color/semi_dark_grey" />-->
+                <!--</RelativeLayout>-->
 
-                    <!--<TextView-->
-                        <!--android:id="@+id/amount_error"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_marginTop="10dp"-->
-                        <!--android:fontFamily="@font/font_regular"-->
-                        <!--android:gravity="center"-->
-                        <!--android:text="@string/error_invalid_amount"-->
-                        <!--android:textColor="@color/cancel_red"-->
-                        <!--android:textSize="14sp"-->
-                        <!--android:visibility="gone" />-->
+                <!--<TextView-->
+                <!--android:id="@+id/amount_error"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="10dp"-->
+                <!--android:fontFamily="@font/font_regular"-->
+                <!--android:gravity="center"-->
+                <!--android:text="@string/error_invalid_amount"-->
+                <!--android:textColor="@color/cancel_red"-->
+                <!--android:textSize="14sp"-->
+                <!--android:visibility="gone" />-->
                 <!--</LinearLayout>-->
 
                 <LinearLayout
+                    android:visibility="gone"
                     android:id="@+id/container_my_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -316,45 +439,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button_use"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/selector_button"
-                android:enabled="false"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_use"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="20sp" />
-
-            <include layout="@layout/button_divider" />
-
-            <Button
-                android:id="@+id/button_sell"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/selector_button"
-                android:enabled="false"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_sell"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="20sp" />
-
-            <include layout="@layout/button_divider" />
-
-            <Button
-                android:id="@+id/button_start_transfer"
+                android:id="@+id/button_next"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -364,7 +449,7 @@
                 android:gravity="center"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
-                android:text="@string/action_transfer"
+                android:text="@string/action_next"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />

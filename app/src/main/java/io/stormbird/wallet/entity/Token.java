@@ -159,7 +159,7 @@ public class Token implements Parcelable
 
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showSendToken(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
+        viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
     public String populateIDs(List<Integer> d, boolean keepZeros)

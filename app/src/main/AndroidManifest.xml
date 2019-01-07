@@ -155,6 +155,10 @@
             android:name="io.stormbird.wallet.ui.TokenDetailActivity"
             android:label="@string/token_details"/>
 
+        <activity
+            android:name="io.stormbird.wallet.ui.Erc20DetailActivity"
+            android:label="@string/erc20_details"/>
+
         <service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

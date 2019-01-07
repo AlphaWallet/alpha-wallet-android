@@ -4,6 +4,7 @@ import io.stormbird.wallet.ui.AddTokenActivity;
 import io.stormbird.wallet.ui.AssetDisplayActivity;
 import io.stormbird.wallet.ui.BrowseMarketActivity;
 import io.stormbird.wallet.ui.ConfirmationActivity;
+import io.stormbird.wallet.ui.Erc20DetailActivity;
 import io.stormbird.wallet.ui.GasSettingsActivity;
 import io.stormbird.wallet.ui.HelpActivity;
 import io.stormbird.wallet.ui.HelpFragment;
@@ -138,4 +139,8 @@ public abstract class BuildersModule {
 	@FragmentScope
 	@ContributesAndroidInjector(modules = DappBrowserModule.class)
 	abstract DappBrowserFragment bindDappBrowserFragment();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = Erc20DetailModule.class)
+	abstract Erc20DetailActivity bindErc20DetailActivity();
 }

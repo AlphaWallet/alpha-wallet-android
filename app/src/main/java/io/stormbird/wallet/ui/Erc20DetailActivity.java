@@ -1,28 +1,20 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -39,9 +31,6 @@ import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
-import io.stormbird.wallet.ui.zxing.FullScannerFragment;
-import io.stormbird.wallet.util.BalanceUtils;
-import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModel;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -49,9 +38,6 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 import static io.stormbird.wallet.C.Key.WALLET;
 
 public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemClickListener {
-    private static final String KEY_ADDRESS = "key_address";
-    private static final int BARCODE_READER_REQUEST_CODE = 1;
-
     @Inject
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
@@ -136,7 +122,7 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
 
         receiveBtn = findViewById(R.id.button_receive);
         receiveBtn.setOnClickListener(v -> {
-            new MyAddressRouter().open(this, wallet);
+            viewModel.showMyAddress(this, wallet);
         });
 
         ethDetailLayout = findViewById(R.id.layout_eth_detail);

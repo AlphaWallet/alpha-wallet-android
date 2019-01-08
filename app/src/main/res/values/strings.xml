@@ -510,4 +510,7 @@
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>
     <string name="erc20_details">ERC20 Details</string>
+    <string name="title_send_activity">Send</string>
+    <string name="available">Available</string>
+    <string name="usd_label">US$</string>
 </resources>

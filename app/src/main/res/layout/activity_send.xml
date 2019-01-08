@@ -20,8 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:layout_marginBottom="?android:attr/actionBarSize"
-            android:layout_marginTop="6dp">
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="?android:attr/actionBarSize">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -32,10 +32,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="5dp"
                     android:layout_marginTop="20dp"
+                    android:layout_marginBottom="5dp"
                     android:fontFamily="@font/font_semibold"
-                    android:text="Send"
+                    android:text="@string/title_send_activity"
                     android:textColor="@color/text_dark_gray"
                     android:textSize="18sp" />
 
@@ -44,9 +44,9 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal"
-                    android:paddingBottom="5dp"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp">
+                    android:paddingRight="20dp"
+                    android:paddingBottom="5dp">
 
                     <TextView
                         android:id="@+id/balance_eth"
@@ -54,7 +54,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="5dp"
                         android:fontFamily="@font/font_light"
-                        android:text="1.2345"
                         android:textColor="@color/text_dark_gray"
                         android:textSize="16sp" />
 
@@ -72,7 +71,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_light"
-                        android:text="Available"
+                        android:text="@string/available"
                         android:textColor="@color/text_dark_gray"
                         android:textSize="16sp" />
 
@@ -82,9 +81,9 @@
                     android:id="@+id/layout_iframe"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
                     android:clickable="true"
                     android:visibility="gone">
 
@@ -100,75 +99,19 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="50dp"
+                    android:layout_marginBottom="10dp"
                     android:orientation="vertical"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="Address"
-                        android:textSize="14sp" />
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/edit_to_address"
-                            android:layout_width="match_parent"
-                            android:layout_height="47dp"
-                            android:layout_alignParentLeft="true"
-                            android:layout_centerVertical="true"
-                            android:layout_toLeftOf="@id/img_scan_qr"
-                            android:background="@drawable/background_round_blue_9dp"
-                            android:completionThreshold="1"
-                            android:fontFamily="@font/font_semibold"
-                            android:hint="Contract Address"
-                            android:imeOptions="actionDone"
-                            android:inputType="text"
-                            android:lines="1"
-                            android:maxLines="1"
-                            android:paddingEnd="60dp"
-                            android:paddingStart="15dp"
-                            android:textColor="@color/text_dark_gray"
-                            android:textColorHint="@color/light_gray"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/paste"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_alignRight="@id/edit_to_address"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="15dp"
-                            android:fontFamily="@font/font_bold"
-                            android:text="Paste"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textSize="14sp" />
-
-                        <ImageButton
-                            android:id="@+id/img_scan_qr"
-                            android:layout_width="50dp"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:background="?android:selectableItemBackground"
-                            android:contentDescription="@string/scan_qr"
-                            android:padding="@dimen/big_padding"
-                            android:src="@mipmap/qr_code_icon" />
-
-                    </RelativeLayout>
+                    <include layout="@layout/item_input_address_new" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
                         android:layout_marginTop="25dp"
+                        android:layout_marginBottom="10dp"
                         android:fontFamily="@font/font_semibold"
                         android:text="Amount"
                         android:textSize="14sp" />
@@ -177,28 +120,60 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <AutoCompleteTextView
-                            android:id="@+id/edit_amount"
+                        <RelativeLayout
+                            android:id="@+id/layout_amount"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:layout_centerVertical="true"
                             android:layout_toLeftOf="@id/img_switch_usd_eth"
-                            android:background="@drawable/background_round_blue_9dp"
-                            android:completionThreshold="1"
-                            android:fontFamily="@font/font_semibold"
-                            android:hint="0.00"
-                            android:imeOptions="actionDone"
-                            android:inputType="text"
-                            android:lines="1"
-                            android:maxLines="1"
-                            android:paddingBottom="15dp"
-                            android:paddingEnd="15dp"
-                            android:paddingStart="15dp"
-                            android:paddingTop="15dp"
-                            android:textColor="@color/text_dark_gray"
-                            android:textColorHint="@color/light_gray"
-                            android:textSize="36sp" />
+                            android:background="@drawable/background_round_blue_9dp">
+
+                            <TextView
+                                android:id="@+id/amount_edit_usd_symbol"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/font_semibold"
+                                android:paddingStart="15dp"
+                                android:text="@string/usd_label"
+                                android:textColor="@color/text_dark_gray"
+                                android:textSize="36sp"
+                                android:visibility="gone" />
+
+                            <AutoCompleteTextView
+                                android:id="@+id/edit_amount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_toRightOf="@+id/amount_edit_usd_symbol"
+                                android:background="@color/transparent"
+                                android:completionThreshold="1"
+                                android:fontFamily="@font/font_semibold"
+                                android:hint="0"
+                                android:imeOptions="actionDone"
+                                android:inputType="numberDecimal"
+                                android:lines="1"
+                                android:maxLines="1"
+                                android:paddingStart="15dp"
+                                android:paddingTop="15dp"
+                                android:paddingEnd="15dp"
+                                android:paddingBottom="15dp"
+                                android:textColor="@color/text_dark_gray"
+                                android:textColorHint="@color/light_gray"
+                                android:textSize="36sp" />
+
+                            <TextView
+                                android:id="@+id/amount_edit_token_symbol"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_toRightOf="@id/edit_amount"
+                                android:fontFamily="@font/font_semibold"
+                                android:paddingEnd="15dp"
+                                android:textColor="@color/text_dark_gray"
+                                android:textSize="36sp" />
+
+                        </RelativeLayout>
 
                         <ImageButton
                             android:id="@+id/img_switch_usd_eth"
@@ -210,39 +185,72 @@
                             android:contentDescription="@string/scan_qr"
                             android:padding="@dimen/big_padding"
                             android:src="@drawable/ic_switch_eth_usd" />
-
                     </RelativeLayout>
+
 
                     <TextView
                         android:id="@+id/amount_error"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/error_invalid_amount"
                         android:textColor="@color/cancel_red"
                         android:textSize="12sp"
-                        android:layout_marginTop="10dp"
                         android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/textImportPriceUSD"
+                        android:id="@+id/text_usd_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:layout_weight="1"
                         android:fontFamily="@font/font_regular"
                         android:paddingLeft="15dp"
-                        android:layout_marginTop="10dp"
-                        android:text="US$0"
+                        android:text="US$ 0.00"
                         android:textColor="@color/text_dark_gray"
                         android:textSize="21sp" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_token_equivalent_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/text_token_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/font_regular"
+                            android:text="0.00"
+                            android:textColor="@color/text_dark_gray"
+                            android:textSize="21sp" />
+
+                        <TextView
+                            android:id="@+id/text_token_symbol"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/font_regular"
+                            android:paddingLeft="5dp"
+                            android:text="ETH"
+                            android:textColor="@color/text_dark_gray"
+                            android:textSize="21sp" />
+                    </LinearLayout>
+
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -303,8 +311,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.75"
-                        android:visibility="gone"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
                         <View
                             android:layout_width="15dp"
@@ -418,11 +426,11 @@
                 <!--</LinearLayout>-->
 
                 <LinearLayout
-                    android:visibility="gone"
                     android:id="@+id/container_my_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
                     <include layout="@layout/layout_address" />
                 </LinearLayout>
@@ -447,8 +455,8 @@
                 android:background="@drawable/selector_button"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
-                android:paddingBottom="15dp"
                 android:paddingTop="15dp"
+                android:paddingBottom="15dp"
                 android:text="@string/action_next"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"

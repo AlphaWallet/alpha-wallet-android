@@ -1,7 +1,6 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -15,22 +14,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import io.stormbird.wallet.entity.ENSCallback;
-import io.stormbird.wallet.ui.widget.entity.ENSHandler;
-import org.web3j.abi.datatypes.Address;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -42,27 +34,25 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ENSCallback;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.EthereumInfoRouter;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
+import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.BalanceUtils;
-import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
-import io.stormbird.wallet.util.QRUtils;
 import io.stormbird.wallet.viewmodel.SendViewModel;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 
-public class SendActivity extends BaseActivity implements Runnable, ItemClickListener
-{
-    private static final String KEY_ADDRESS = "key_address";
+public class SendActivity extends BaseActivity implements Runnable, ItemClickListener {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
     @Inject
@@ -78,47 +68,44 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private Token token;
     private String contractAddress;
     private double currentEthPrice;
-
-    RelativeLayout ethDetailLayout;
-    Button copyAddressButton;
-    EditText amountEditText;
-    AutoCompleteTextView toAddressEditText;
-    ImageView qrImageView;
-    ImageButton scanQrImageView;
-    TextView toAddressError;
-    TextView amountError;
-    TextView myAddressText;
-    TextView amountSymbolText;
-    AWalletAlertDialog dialog;
-
+    private boolean usdInput = false;
     private ENSHandler ensHandler;
-    Handler handler;
+    private Handler handler;
+    private AWalletAlertDialog dialog;
 
-    //Token
-    TextView balanceEth;
-    TextView symbolText;
+    private ImageButton scanQrImageView;
+    private TextView toAddressError;
+    private TextView amountError;
+    private TextView tokenBalanceText;
+    private TextView tokenSymbolText;
+    private AutoCompleteTextView amountEditText;
+    private AutoCompleteTextView toAddressEditText;
+    private TextView pasteText;
+    private RelativeLayout amountLayout;
+    private ImageButton switchBtn;
+    private LinearLayout usdValueLayout;
+    private TextView usdLabel;
+    private TextView tokenSymbolLabel;
+    private TextView usdValue;
 
-    TextView priceUSD;
-    LinearLayout priceUSDLayout;
-    
-    private TextView paste;
+    private LinearLayout tokenEquivalentLayout;
+    private TextView tokenEquivalent;
+    private TextView tokenEquivalentSymbol;
+    private Button nextBtn;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
-
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_send);
         toolbar();
         setTitle("");
 
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
-
         handler = new Handler();
 
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS); //contract address
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
@@ -128,99 +115,21 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         myAddress = wallet.address;
 
         setupTokenContent();
-
         initViews();
         setupAddressEditField();
 
-        if (token.addressMatches(myAddress))
-        {
+        if (token.addressMatches(myAddress)) {
             viewModel.startEthereumTicker();
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
-        }
-        else
-        {
+        } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            priceUSDLayout.setVisibility(View.GONE);
+            usdValueLayout.setVisibility(View.GONE);
         }
     }
 
-    private void setupAddressEditField()
-    {
-        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
-        adapterUrl.setListener(this);
-        ENSCallback ensCallback = new ENSCallback()
-        {
-            @Override
-            public void ENSComplete()
-            {
-                onStartTransfer();
-            }
-
-            @Override
-            public void ENSCheck(String name)
-            {
-                viewModel.checkENSAddress(name);
-            }
-        };
-        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
-        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
-        viewModel.ensFail().observe(this, ensHandler::hideENS);
-    }
-
-    private void onNewEthPrice(Double ethPrice)
-    {
-        currentEthPrice = ethPrice;
-        //just got a new eth price
-        //recalculate the equivalent USD price
-        updateUSDValue();
-    }
-
-    private void updateUSDValue()
-    {
-        String amount = amountEditText.getText().toString();
-        if (amount.length() == 0) amount = "0"; //this is to reset the USD equivalent if you delete a large eth value
-        if (isValidAmount(amount))
-        {
-            String usdEquivStr = "$" + getUsdString(Double.valueOf(amount) * currentEthPrice);
-            priceUSD.setText(usdEquivStr);
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            qrImageView = findViewById(R.id.qr_image);
-            qrImageView.setImageBitmap(QRUtils.createQRImage(this, myAddress, qrImageView.getWidth()));
-            qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
-        }
-    }
-
-    private void initViews()
-    {
-//        amountSymbolText = findViewById(R.id.edit_amount_symbol);
-//        amountSymbolText.setText(token.tokenInfo.symbol);
-        toAddressError = findViewById(R.id.to_address_error);
+    private void initViews() {
         amountError = findViewById(R.id.amount_error);
-        myAddressText = findViewById(R.id.address);
-        myAddressText.setText(myAddress);
-        ethDetailLayout = findViewById(R.id.layout_eth_detail);
-        priceUSD = findViewById(R.id.textImportPriceUSD);
-        priceUSDLayout = findViewById(R.id.layout_usd_price);
-
-//        startTransferButton = findViewById(R.id.button_start_transfer);
-//        startTransferButton.setOnClickListener(v -> onStartTransfer());
-
-        copyAddressButton = findViewById(R.id.copy_action);
-        copyAddressButton.setOnClickListener(v -> copyAddress());
-
-        scanQrImageView = findViewById(R.id.img_scan_qr);
-        scanQrImageView.setOnClickListener(v -> {
-            Intent intent = new Intent(this, QRScanningActivity.class);
-            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-//            Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
-//            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-        });
+        usdValueLayout = findViewById(R.id.layout_usd_price);
 
         amountEditText = findViewById(R.id.edit_amount);
         amountEditText.addTextChangedListener(new TextWatcher() {
@@ -237,34 +146,135 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             @Override
             public void afterTextChanged(Editable s) {
                 //update USD price
-                updateUSDValue();
+                updateEquivalentValue();
             }
         });
 
         toAddressEditText = findViewById(R.id.edit_to_address);
-        
-        paste = findViewById(R.id.paste);
-        paste.setOnClickListener(v -> {
-            Toast.makeText(this, "paste", Toast.LENGTH_SHORT).show();
+        toAddressError = findViewById(R.id.to_address_error);
+
+        pasteText = findViewById(R.id.paste);
+        pasteText.setOnClickListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            try {
+                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
+                toAddressEditText.setText(textToPaste);
+            } catch (Exception e) {
+                Log.e(SendActivity.class.getSimpleName(), e.getMessage(), e);
+            }
+        });
+
+        amountLayout = findViewById(R.id.layout_amount);
+        amountLayout.setOnClickListener(v -> {
+            amountEditText.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(amountEditText, InputMethodManager.SHOW_IMPLICIT);
+        });
+
+        usdLabel = findViewById(R.id.amount_edit_usd_symbol);
+
+        tokenSymbolLabel = findViewById(R.id.amount_edit_token_symbol);
+        tokenSymbolLabel.setText(symbol);
+
+        tokenEquivalentLayout = findViewById(R.id.layout_token_equivalent_value);
+        tokenEquivalent = findViewById(R.id.text_token_value);
+        tokenEquivalent.setText("0 ");
+        tokenEquivalentSymbol = findViewById(R.id.text_token_symbol);
+        tokenEquivalentSymbol.setText(symbol);
+        usdValue = findViewById(R.id.text_usd_value);
+
+        switchBtn = findViewById(R.id.img_switch_usd_eth);
+        switchBtn.setOnClickListener(v -> {
+            if (usdInput) {
+                usdInput = false;
+                usdLabel.setVisibility(View.GONE);
+                usdValue.setVisibility(View.VISIBLE);
+                tokenSymbolLabel.setVisibility(View.VISIBLE);
+                tokenEquivalentLayout.setVisibility(View.GONE);
+            } else {
+                usdInput = true;
+                usdLabel.setVisibility(View.VISIBLE);
+                usdValue.setVisibility(View.GONE);
+                tokenSymbolLabel.setVisibility(View.GONE);
+                tokenEquivalentLayout.setVisibility(View.VISIBLE);
+            }
+            updateEquivalentValue();
+        });
+
+        nextBtn = findViewById(R.id.button_next);
+        nextBtn.setOnClickListener(v -> {
+            onNext();
+        });
+
+        scanQrImageView = findViewById(R.id.img_scan_qr);
+        scanQrImageView.setOnClickListener(v -> {
+            Intent intent = new Intent(this, QRScanningActivity.class);
+            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
     }
 
-    private void copyAddress()
-    {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, wallet.address);
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(clip);
-        }
-        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+    private void setupAddressEditField() {
+        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        adapterUrl.setListener(this);
+        ENSCallback ensCallback = new ENSCallback() {
+            @Override
+            public void ENSComplete() {
+                onNext();
+            }
+
+            @Override
+            public void ENSCheck(String name) {
+                viewModel.checkENSAddress(name);
+            }
+        };
+        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
+        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
+        viewModel.ensFail().observe(this, ensHandler::hideENS);
     }
 
-    private void onStartTransfer() {
+    private void onNewEthPrice(Double ethPrice) {
+        currentEthPrice = ethPrice;
+        updateEquivalentValue();
+    }
+
+    private void updateEquivalentValue() {
+        if (usdInput) {
+            String amountStr = amountEditText.getText().toString();
+
+            if (amountStr.length() == 0) {
+                amountStr = "0 " + token.tokenInfo.symbol ;
+                tokenEquivalent.setText(amountStr);
+            } else {
+                double amount = Double.parseDouble(amountStr);
+                double equivalent = amount / currentEthPrice;
+                tokenEquivalent.setText(String.valueOf(equivalent));
+            }
+        } else {
+            String amount = amountEditText.getText().toString();
+            if (amount.length() == 0)
+                amount = "US$ 0";
+                usdValue.setText(amount);
+            if (isValidAmount(amount)) {
+                String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);
+                usdValue.setText(usdEquivStr);
+            }
+        }
+    }
+
+    private void onNext() {
         boolean isValid = true;
 
         dismissKeyboard();
         amountError.setVisibility(View.GONE);
-        final String amount = amountEditText.getText().toString();
+
+
+        String amount = "";
+        if (usdInput) {
+            amount = tokenEquivalent.getText().toString();
+        } else {
+            amount = amountEditText.getText().toString();
+        }
+
         if (!isValidAmount(amount) || !isBalanceEnough(amount)) {
             amountError.setVisibility(View.VISIBLE);
             amountError.setText(R.string.error_invalid_amount);
@@ -275,24 +285,18 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         String to = ensHandler.getAddressFromEditView();
         if (to == null) return;
 
-        if (isValid)
-        {
-            BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amountEditText.getText().toString(), decimals);
+        if (isValid) {
+            BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amount, decimals);
             viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName());
         }
     }
 
-    private void onBack()
-    {
-        if (ethDetailLayout.getVisibility() == View.VISIBLE)
-        {
-            finish();
-        }
+    private void onBack() {
+        finish();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -326,11 +330,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
                     String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
-                    if (barcode == null) barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                    if (barcode == null)
+                        barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                     //if barcode is still null, ensure we don't GPF
-                    if (barcode == null)
-                    {
+                    if (barcode == null) {
                         Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -351,7 +355,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             } else {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
                         "Code: " + String.valueOf(resultCode)
-                        ));
+                ));
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -379,7 +383,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     boolean isBalanceEnough(String eth) {
         try {
             BigDecimal amount = new BigDecimal(BalanceUtils.EthToWei(eth));
-            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(balanceEth.getText().toString()));
+            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(tokenBalanceText.getText().toString()));
             return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
         } catch (Exception e) {
             return false;
@@ -393,12 +397,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
     }
 
-    public void setupTokenContent()
-    {
-        balanceEth = findViewById(R.id.balance_eth);
-        symbolText = findViewById(R.id.symbol);
+    public void setupTokenContent() {
+        tokenBalanceText = findViewById(R.id.balance_eth);
+        tokenSymbolText = findViewById(R.id.symbol);
 
-        symbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
+        tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
                 ? token.tokenInfo.symbol.toUpperCase()
                 : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
@@ -408,48 +411,40 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 ? token.balance.divide(decimalDivisor) : token.balance;
         ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
-        balanceEth.setText(value);
+        tokenBalanceText.setText(value);
 
-        balanceEth.setVisibility(View.VISIBLE);
+        tokenBalanceText.setVisibility(View.VISIBLE);
 
-        if (viewModel.hasIFrame(token.getAddress()))
-        {
+        if (viewModel.hasIFrame(token.getAddress())) {
             addTokenPage();
         }
     }
 
-    private void addTokenPage()
-    {
+    private void addTokenPage() {
         LinearLayout viewWrapper = findViewById(R.id.layout_iframe);
-        try
-        {
+        try {
             WebView iFrame = findViewById(R.id.iframe);
             String tokenData = viewModel.getTokenData(token.getAddress());
             iFrame.loadData(tokenData, "text/html", "UTF-8");
             viewWrapper.setVisibility(View.VISIBLE);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             viewWrapper.setVisibility(View.GONE);
         }
     }
 
-    public static String getUsdString(double usdPrice)
-    {
+    public static String getUsdString(double usdPrice) {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
         return df.format(usdPrice);
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         ensHandler.checkENS();
     }
 
     @Override
-    public void onItemClick(String url)
-    {
+    public void onItemClick(String url) {
         ensHandler.handleHistoryItemClick(url);
     }
 }

@@ -20,8 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="?android:attr/actionBarSize">
+            android:layout_marginBottom="?android:attr/actionBarSize"
+            android:layout_marginTop="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -32,8 +32,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="20dp"
                     android:layout_marginBottom="5dp"
+                    android:layout_marginTop="20dp"
                     android:fontFamily="@font/font_semibold"
                     android:text="@string/title_send_activity"
                     android:textColor="@color/text_dark_gray"
@@ -44,9 +44,9 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal"
+                    android:paddingBottom="5dp"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:paddingBottom="5dp">
+                    android:paddingRight="20dp">
 
                     <TextView
                         android:id="@+id/balance_eth"
@@ -81,9 +81,9 @@
                     android:id="@+id/layout_iframe"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
                     android:clickable="true"
                     android:visibility="gone">
 
@@ -99,8 +99,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="50dp"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="50dp"
                     android:orientation="vertical"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -110,21 +110,21 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="25dp"
                         android:layout_marginBottom="10dp"
+                        android:layout_marginTop="25dp"
                         android:fontFamily="@font/font_semibold"
-                        android:text="Amount"
+                        android:text="@string/amount"
                         android:textSize="14sp" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="65dp">
 
                         <RelativeLayout
                             android:id="@+id/layout_amount"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_toLeftOf="@id/img_switch_usd_eth"
+                            android:layout_height="match_parent"
+                            android:layout_toLeftOf="@id/layout_amount_controls"
                             android:background="@drawable/background_round_blue_9dp">
 
                             <TextView
@@ -154,10 +154,8 @@
                                 android:inputType="numberDecimal"
                                 android:lines="1"
                                 android:maxLines="1"
-                                android:paddingStart="15dp"
-                                android:paddingTop="15dp"
                                 android:paddingEnd="15dp"
-                                android:paddingBottom="15dp"
+                                android:paddingStart="15dp"
                                 android:textColor="@color/text_dark_gray"
                                 android:textColorHint="@color/light_gray"
                                 android:textSize="36sp" />
@@ -175,18 +173,55 @@
 
                         </RelativeLayout>
 
-                        <ImageButton
-                            android:id="@+id/img_switch_usd_eth"
+                        <RelativeLayout
+                            android:id="@+id/layout_amount_controls"
                             android:layout_width="50dp"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:background="?android:selectableItemBackground"
-                            android:contentDescription="@string/scan_qr"
-                            android:padding="@dimen/big_padding"
-                            android:src="@drawable/ic_switch_eth_usd" />
-                    </RelativeLayout>
+                            android:layout_height="match_parent"
+                            android:layout_alignParentEnd="true">
 
+                            <ImageButton
+                                android:id="@+id/img_switch_usd_eth"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:background="?android:selectableItemBackground"
+                                android:padding="@dimen/big_padding"
+                                android:src="@drawable/ic_switch_eth_usd"
+                                android:visibility="gone" />
+
+                            <ImageButton
+                                android:id="@+id/img_quantity_up"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_alignParentTop="true"
+                                android:layout_centerHorizontal="true"
+                                android:background="?android:selectableItemBackground"
+                                android:paddingBottom="10dp"
+                                android:paddingLeft="@dimen/big_padding"
+                                android:paddingRight="@dimen/big_padding"
+                                android:paddingTop="10dp"
+                                android:src="@drawable/ic_quantity_up"
+                                android:visibility="gone" />
+
+                            <ImageButton
+                                android:id="@+id/img_quantity_down"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerHorizontal="true"
+                                android:background="?android:selectableItemBackground"
+                                android:paddingBottom="10dp"
+                                android:paddingLeft="@dimen/big_padding"
+                                android:paddingRight="@dimen/big_padding"
+                                android:paddingTop="10dp"
+                                android:src="@drawable/ic_quantity_down"
+                                android:visibility="gone" />
+                        </RelativeLayout>
+
+                    </RelativeLayout>
 
                     <TextView
                         android:id="@+id/amount_error"
@@ -215,8 +250,8 @@
                         android:id="@+id/layout_token_equivalent_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingLeft="15dp"
                         android:orientation="horizontal"
+                        android:paddingLeft="15dp"
                         android:visibility="gone">
 
                         <TextView
@@ -242,197 +277,6 @@
                             android:textColor="@color/text_dark_gray"
                             android:textSize="21sp" />
                     </LinearLayout>
-
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:id="@+id/layout_input_amount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="center_horizontal"-->
-                        <!--android:layout_marginBottom="5dp"-->
-                        <!--android:fontFamily="@font/font_regular"-->
-                        <!--android:text="@string/label_amount_to_transfer"-->
-                        <!--android:textAllCaps="true"-->
-                        <!--android:textColor="@color/light_gray"-->
-                        <!--android:textSize="10sp" />-->
-
-                        <!--<RelativeLayout-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content">-->
-
-                        <!--<EditText-->
-                        <!--android:id="@+id/edit_amount"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="47dp"-->
-                        <!--android:layout_alignParentLeft="true"-->
-                        <!--android:layout_centerVertical="true"-->
-                        <!--android:background="@drawable/background_quantity"-->
-                        <!--android:fontFamily="@font/font_semibold"-->
-                        <!--android:hint="0.00"-->
-                        <!--android:imeOptions="actionDone"-->
-                        <!--android:inputType="numberDecimal"-->
-                        <!--android:paddingStart="15dp"-->
-                        <!--android:textColor="@color/colorPrimaryDark"-->
-                        <!--android:textColorHint="@color/light_gray"-->
-                        <!--android:textSize="21sp" />-->
-
-                        <!--<TextView-->
-                        <!--android:id="@+id/edit_amount_symbol"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_alignParentRight="true"-->
-                        <!--android:layout_centerVertical="true"-->
-                        <!--android:layout_marginRight="15dp"-->
-                        <!--android:fontFamily="@font/font_regular"-->
-                        <!--android:text="@string/eth"-->
-                        <!--android:textColor="@color/semi_dark_grey" />-->
-                        <!--</RelativeLayout>-->
-
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/layout_usd_price"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.75"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <View
-                            android:layout_width="15dp"
-                            android:layout_height="match_parent"
-                            android:background="@color/white" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="5dp"
-                            android:fontFamily="@font/font_regular"
-                            android:text="@string/equivalent_in_usd"
-                            android:textAllCaps="true"
-                            android:textColor="@color/light_gray"
-                            android:textSize="10sp" />
-
-                        <!--<LinearLayout-->
-                        <!--android:id="@+id/layout_equivalent_usd"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="47dp"-->
-                        <!--android:layout_gravity="center"-->
-                        <!--android:background="@drawable/background_round_grey"-->
-                        <!--android:orientation="horizontal">-->
-
-                        <!--<TextView-->
-                        <!--android:id="@+id/textImportPriceUSD"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_gravity="center"-->
-                        <!--android:layout_weight="1"-->
-                        <!--android:fontFamily="@font/font_semibold"-->
-                        <!--android:gravity="center"-->
-                        <!--android:text="$0"-->
-                        <!--android:textColor="@color/light_gray"-->
-                        <!--android:textSize="21sp" />-->
-
-                        <!--</LinearLayout>-->
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- -->
-
-                <!--<LinearLayout-->
-                <!--android:id="@+id/layout_input_amount"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:layout_marginBottom="15dp"-->
-                <!--android:orientation="vertical"-->
-                <!--android:paddingLeft="15dp"-->
-                <!--android:paddingRight="15dp">-->
-
-                <!--<TextView-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--android:layout_marginBottom="5dp"-->
-                <!--android:fontFamily="@font/font_regular"-->
-                <!--android:text="@string/label_amount_to_transfer"-->
-                <!--android:textAllCaps="true"-->
-                <!--android:textColor="@color/light_gray"-->
-                <!--android:textSize="10sp" />-->
-
-                <!--<RelativeLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content">-->
-
-                <!--<EditText-->
-                <!--android:id="@+id/edit_amount"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="47dp"-->
-                <!--android:layout_alignParentLeft="true"-->
-                <!--android:layout_centerVertical="true"-->
-                <!--android:background="@drawable/background_quantity"-->
-                <!--android:fontFamily="@font/font_semibold"-->
-                <!--android:hint="@string/hint_input_eth_amount"-->
-                <!--android:imeOptions="actionDone"-->
-                <!--android:inputType="numberDecimal"-->
-                <!--android:paddingEnd="50dp"-->
-                <!--android:paddingStart="15dp"-->
-                <!--android:textColor="@color/colorPrimaryDark"-->
-                <!--android:textColorHint="@color/light_gray"-->
-                <!--android:textSize="21sp" />-->
-
-                <!--<TextView-->
-                <!--android:id="@+id/edit_amount_symbol"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_centerVertical="true"-->
-                <!--android:layout_marginRight="15dp"-->
-                <!--android:fontFamily="@font/font_regular"-->
-                <!--android:text="@string/eth"-->
-                <!--android:textAllCaps="true"-->
-                <!--android:textColor="@color/semi_dark_grey" />-->
-                <!--</RelativeLayout>-->
-
-                <!--<TextView-->
-                <!--android:id="@+id/amount_error"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="10dp"-->
-                <!--android:fontFamily="@font/font_regular"-->
-                <!--android:gravity="center"-->
-                <!--android:text="@string/error_invalid_amount"-->
-                <!--android:textColor="@color/cancel_red"-->
-                <!--android:textSize="14sp"-->
-                <!--android:visibility="gone" />-->
-                <!--</LinearLayout>-->
-
-                <LinearLayout
-                    android:id="@+id/container_my_address"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <include layout="@layout/layout_address" />
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
@@ -455,8 +299,8 @@
                 android:background="@drawable/selector_button"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center"
-                android:paddingTop="15dp"
                 android:paddingBottom="15dp"
+                android:paddingTop="15dp"
                 android:text="@string/action_next"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"

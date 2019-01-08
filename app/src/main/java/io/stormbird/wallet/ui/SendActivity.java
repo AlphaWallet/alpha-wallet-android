@@ -83,7 +83,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private TextView pasteText;
     private RelativeLayout amountLayout;
     private ImageButton switchBtn;
-    private LinearLayout usdValueLayout;
+    private ImageButton quantityUpBtn;
+    private ImageButton quantityDownBtn;
     private TextView usdLabel;
     private TextView tokenSymbolLabel;
     private TextView usdValue;
@@ -121,16 +122,18 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (token.addressMatches(myAddress)) {
             viewModel.startEthereumTicker();
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
+            switchBtn.setVisibility(View.VISIBLE);
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            usdValueLayout.setVisibility(View.GONE);
+            usdValue.setVisibility(View.GONE);
+            quantityUpBtn.setVisibility(View.VISIBLE);
+            quantityDownBtn.setVisibility(View.VISIBLE);
         }
     }
 
     private void initViews() {
         amountError = findViewById(R.id.amount_error);
-        usdValueLayout = findViewById(R.id.layout_usd_price);
-
+        
         amountEditText = findViewById(R.id.edit_amount);
         amountEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -200,6 +203,33 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             updateEquivalentValue();
         });
 
+        quantityUpBtn = findViewById(R.id.img_quantity_up);
+        quantityUpBtn.setOnClickListener(v -> {
+            double amount;
+            if (!amountEditText.getText().toString().isEmpty()) {
+                amount = Double.parseDouble(amountEditText.getText().toString());
+            } else {
+                amount = 0;
+            }
+            if (amount < Double.parseDouble(tokenBalanceText.getText().toString())) {
+                amount++;
+            }
+            amountEditText.setText(String.valueOf(amount));
+        });
+
+        quantityDownBtn = findViewById(R.id.img_quantity_down);
+        quantityDownBtn.setOnClickListener(v -> {
+            double amount;
+            if (!amountEditText.getText().toString().isEmpty()
+                    && Double.parseDouble(amountEditText.getText().toString()) >= 1) {
+                amount = Double.parseDouble(amountEditText.getText().toString());
+                amount--;
+            } else {
+                amount = 0;
+            }
+            amountEditText.setText(String.valueOf(amount));
+        });
+
         nextBtn = findViewById(R.id.button_next);
         nextBtn.setOnClickListener(v -> {
             onNext();
@@ -241,7 +271,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             String amountStr = amountEditText.getText().toString();
 
             if (amountStr.length() == 0) {
-                amountStr = "0 " + token.tokenInfo.symbol ;
+                amountStr = "0 " + token.tokenInfo.symbol;
                 tokenEquivalent.setText(amountStr);
             } else {
                 double amount = Double.parseDouble(amountStr);
@@ -252,7 +282,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             String amount = amountEditText.getText().toString();
             if (amount.length() == 0)
                 amount = "US$ 0";
-                usdValue.setText(amount);
+            usdValue.setText(amount);
             if (isValidAmount(amount)) {
                 String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);
                 usdValue.setText(usdEquivStr);

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
@@ -13,265 +12,231 @@
         android:layout_height="match_parent"
         android:background="@drawable/background_card">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp">
-
-            <TextView
-                android:id="@+id/title_confirm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/confirm_transfer_details"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
-            <TextView
-                android:id="@+id/label_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/amount"
-                android:textAllCaps="true"
-                android:textColor="@color/light_gray"
-                android:textSize="10sp" />
-
-            <TextView
-                android:id="@+id/text_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
-                android:fontFamily="@font/font_bold"
-                android:gravity="center"
-                android:text="@string/dummy_transaction_value"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="25sp" />
+            android:layout_marginBottom="?android:actionBarSize">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="20dp"
+                android:paddingRight="10dp">
 
                 <TextView
-                    android:id="@+id/label_from"
+                    android:id="@+id/title_confirm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/label_from"
-                    android:textAllCaps="true"
-                    android:textColor="@color/light_gray"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:id="@+id/text_from"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/background_round_grey"
-                    android:fontFamily="@font/font_semibold"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/font_light"
                     android:gravity="center"
-                    android:padding="15dp"
-                    android:textIsSelectable="true"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/label_to"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/label_to"
-                    android:textAllCaps="true"
-                    android:textColor="@color/light_gray"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:id="@+id/text_to"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/background_round_grey"
-                    android:fontFamily="@font/font_semibold"
-                    android:gravity="center"
-                    android:padding="15dp"
-                    android:textIsSelectable="true"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/label_website"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/font_regular"
-                    android:visibility="gone"
-                    android:text="@string/requester_url"
-                    android:textAllCaps="true"
-                    android:textColor="@color/light_gray"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:id="@+id/text_website"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/background_round_grey"
-                    android:fontFamily="@font/font_semibold"
-                    android:gravity="center"
-                    android:visibility="gone"
-                    android:padding="15dp"
-                    android:textIsSelectable="true"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/label_contract"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/label_contract"
-                    android:textAllCaps="true"
-                    android:visibility="gone"
-                    android:textColor="@color/light_gray"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:id="@+id/text_contract"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/background_round_grey"
-                    android:fontFamily="@font/font_semibold"
-                    android:gravity="center"
-                    android:padding="15dp"
-                    android:visibility="gone"
-                    android:textIsSelectable="true"
-                    android:textSize="14sp" />
+                    android:text="@string/confirm_transfer_details"
+                    android:textColor="@color/text_black"
+                    android:textSize="25sp"
+                    android:visibility="gone" />
 
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
                     android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/text_value"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginRight="10dp"
+                        android:layout_marginBottom="30dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:text="@string/dummy_transaction_value"
+                        android:textColor="@color/cancel_red"
+                        android:textSize="24sp" />
 
-                        <TextView
-                            android:id="@+id/label_gas_price"
-                            android:textColor="@color/light_gray"
-                            android:layout_marginBottom="5dp"
-                            android:fontFamily="@font/font_regular"
-                            android:textAllCaps="true"
-                            android:layout_gravity="center_horizontal"
-                            android:textSize="10sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/label_gas_price" />
-
-                        <TextView
-                            android:id="@+id/text_gas_price"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="10dp"
-                            android:background="@drawable/background_round_grey"
-                            android:fontFamily="@font/font_semibold"
-                            android:gravity="center"
-                            android:padding="15dp"
-                            android:textIsSelectable="true"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/text_symbol"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginBottom="30dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:text="ETH"
+                        android:textColor="@color/text_black"
+                        android:textSize="24sp" />
+                </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/label_gas_limit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/label_gas_limit"
-                            android:textColor="@color/light_gray"
-                            android:layout_marginBottom="5dp"
-                            android:fontFamily="@font/font_regular"
-                            android:textAllCaps="true"
-                            android:layout_gravity="center_horizontal"
-                            android:textSize="10sp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp">
 
-                        <TextView
-                            android:id="@+id/text_gas_limit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="10dp"
-                            android:background="@drawable/background_round_grey"
-                            android:fontFamily="@font/font_semibold"
-                            android:gravity="center"
-                            android:padding="15dp"
-                            android:textIsSelectable="true"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/label_from"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/label_from"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
 
-                        <TextView
-                            android:id="@+id/label_network_fee"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="@color/light_gray"
-                            android:layout_marginBottom="5dp"
-                            android:fontFamily="@font/font_regular"
-                            android:textAllCaps="true"
-                            android:layout_gravity="center_horizontal"
-                            android:textSize="10sp"
-                            android:text="@string/label_network_fee" />
+                    <TextView
+                        android:id="@+id/text_from"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp" />
 
-                        <TextView
-                            android:id="@+id/text_network_fee"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="10dp"
-                            android:background="@drawable/background_round_grey"
-                            android:fontFamily="@font/font_semibold"
-                            android:gravity="center"
-                            android:padding="15dp"
-                            android:textIsSelectable="true"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/label_to"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/label_to"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/text_to"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/label_website"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/requester_url"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/text_website"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/label_contract"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/label_contract"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/text_contract"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/label_gas_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/label_gas_price"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/text_gas_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/label_gas_limit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/label_gas_limit"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/text_gas_limit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/label_network_fee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/label_network_fee"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/text_network_fee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_dark_gray"
+                        android:textIsSelectable="true"
+                        android:textSize="14sp" />
+
                 </LinearLayout>
 
             </LinearLayout>
-
-        </LinearLayout>
+        </ScrollView>
 
         <Button
             android:id="@+id/send_button"
@@ -282,7 +247,7 @@
             android:background="@drawable/selector_button"
             android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:text="@string/action_confirm"
+            android:text="@string/action_send"
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"
             android:textSize="20sp" />

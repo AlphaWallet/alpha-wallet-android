@@ -145,7 +145,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
             @Override
             public void afterTextChanged(Editable s) {
-                //update USD price
                 updateEquivalentValue();
             }
         });
@@ -268,7 +267,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         amountError.setVisibility(View.GONE);
 
 
-        String amount = "";
+        String amount;
         if (usdInput) {
             amount = tokenEquivalent.getText().toString();
         } else {

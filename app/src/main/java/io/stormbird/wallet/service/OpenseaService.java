@@ -79,14 +79,15 @@ public class OpenseaService {
             ((ERC721Token) token).tokenBalance.add(asset);
         }
 
-        return foundTokens.values().toArray(new Token[foundTokens.size()]);
+        return foundTokens.values().toArray(new Token[0]);
     }
 
-    public Single<JSONObject> queryBalance(String address, int networkId)
+    private Single<JSONObject> queryBalance(String address, int networkId)
     {
         return Single.fromCallable(() -> {
             String apiBase = "";
-            JSONObject result = new JSONObject("{\"assets\":[]}");
+            // if no result we should throw an error - this distinguishes a comms error from a zero balance
+            JSONObject result = new JSONObject("{\"noresult\":[]}");
             switch (networkId)
             {
                 case 1:

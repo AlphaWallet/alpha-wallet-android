@@ -4,6 +4,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -23,21 +26,21 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
+import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.EthereumInfoRouter;
-import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
-import io.stormbird.wallet.ui.widget.entity.ENSHandler;
-import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
+import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModel;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 
-public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemClickListener {
+public class Erc20DetailActivity extends BaseActivity {
     @Inject
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
@@ -50,14 +53,11 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
     private Token token;
     private String contractAddress;
     private double currentEthPrice;
-
     RelativeLayout ethDetailLayout;
     AWalletAlertDialog dialog;
 
-    private ENSHandler ensHandler;
     Handler handler;
 
-    //Token
     TextView balanceEth;
     TextView symbolText;
     TextView arrayBalance;
@@ -67,6 +67,10 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
     private TextView usdValueText;
     private Button sendBtn;
     private Button receiveBtn;
+    private RecyclerView list;
+    private ProgressBar progressBar;
+
+    private TransactionsAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +84,10 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
+
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.transactions().observe(this, this::onTransactions);
 
         handler = new Handler();
 
@@ -96,13 +104,43 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
 
         initViews();
 
+        list = findViewById(R.id.list);
+        list.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService(),
+                viewModel.getTransactionsInteract(), R.layout.item_recent_transaction);
+
+        list.setAdapter(adapter);
+
         if (token.addressMatches(myAddress)) {
             viewModel.startEthereumTicker();
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
         } else {
-            //currently we don't evaluate ERC20 token value. TODO: Should we?
             valueDetailsLayout.setVisibility(View.GONE);
         }
+    }
+
+    private void onTransactionClick(View view, Transaction transaction) {
+        viewModel.showDetails(view.getContext(), transaction);
+    }
+
+    private void onTransactions(Transaction[] transactions) {
+        progressBar.setVisibility(View.GONE);
+        list.setVisibility(View.VISIBLE);
+        Transaction[] newArray = new Transaction[3];
+
+        int i = 0;
+        for (int x = transactions.length - 1; x > 0; x--) {
+            if (transactions[x] != null && i < 3) {
+                newArray[i] = transactions[x];
+                i++;
+            } else {
+                break;
+            }
+        }
+
+        adapter.updateRecentTransactions(newArray);
+
+        adapter.notifyDataSetChanged();
     }
 
     private void onNewEthPrice(Double ethPrice) {
@@ -111,6 +149,7 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
     }
 
     private void initViews() {
+        progressBar = findViewById(R.id.progress_bar);
         valueDetailsLayout = findViewById(R.id.layout_value_details);
         usdValueText = findViewById(R.id.usd_value);
 
@@ -173,16 +212,6 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
     }
 
     @Override
-    public void run() {
-        ensHandler.checkENS();
-    }
-
-    @Override
-    public void onItemClick(String url) {
-        ensHandler.handleHistoryItemClick(url);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
@@ -213,5 +242,21 @@ public class Erc20DetailActivity extends BaseActivity implements Runnable, ItemC
         }
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
+        viewModel.cleanUp();
+    }
+
+    private void onDefaultWallet(Wallet wallet) {
+        adapter.setDefaultWallet(wallet);
+        viewModel.fetchTransactions(wallet, contractAddress);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        adapter.setDefaultNetwork(networkInfo);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.prepare();
     }
 }

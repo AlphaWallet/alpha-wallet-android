@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -21,6 +22,9 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
@@ -34,6 +38,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     public static final String DEFAULT_ADDRESS_ADDITIONAL = "default_address";
     public static final String DEFAULT_SYMBOL_ADDITIONAL = "network_symbol";
 
+    private final TextView date;
     private final TextView type;
     private final TextView address;
     private final TextView value;
@@ -49,6 +54,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     public TransactionHolder(int resId, ViewGroup parent, TokensService service, FetchTransactionsInteract interact) {
         super(resId, parent);
 
+        if (resId == R.layout.item_recent_transaction) {
+            date = findViewById(R.id.transaction_date);
+        } else {
+            date = null;
+        }
         typeIcon = findViewById(R.id.type_icon);
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
@@ -100,6 +110,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         else
         {
             fillERC20(txSuccess, transaction);
+        }
+
+        if (date != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            calendar.setTime(new Date(transaction.timeStamp * 1000));
+            date.setText(DateFormat.format("dd MMM yyyy", calendar));
         }
     }
 

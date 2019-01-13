@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
@@ -17,7 +16,7 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/big_margin"
         android:contentDescription="@string/empty"
-        tools:src="@drawable/ic_arrow_downward_black_24dp" />
+        android:src="@drawable/ic_arrow_downward_black_24dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,7 +38,7 @@
                 android:fontFamily="@font/font_light"
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="Sent" />
+                android:text="Sent" />
 
             <TextView
                 android:id="@+id/supplimental"
@@ -49,7 +48,7 @@
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceListItem"
                 android:textSize="12sp"
-                tools:text="" />
+                android:text="" />
         </LinearLayout>
 
         <TextView
@@ -62,7 +61,7 @@
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             android:textSize="12sp"
-            tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFD" />
+            android:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFD" />
     </LinearLayout>
 
     <TextView
@@ -74,5 +73,5 @@
         android:layout_marginEnd="@dimen/big_margin"
         android:fontFamily="@font/font_semibold"
         android:textColor="@color/colorAccent"
-        tools:text="+10" />
+        android:text="+10" />
 </RelativeLayout>

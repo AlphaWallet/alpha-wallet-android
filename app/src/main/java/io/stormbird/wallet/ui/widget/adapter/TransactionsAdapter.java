@@ -161,16 +161,16 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         items.endBatchedUpdates();
     }
 
-    public void updateRecentTransactions(Transaction[] transactions)
-    {
+    public void updateRecentTransactions(Transaction[] transactions) {
         items.beginBatchedUpdates();
 
-        for (Transaction transaction : transactions)
-        {
-            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
-            TransactionSortedItem sortedItem = new TransactionSortedItem(
-                    TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
-            items.add(sortedItem);
+        for (Transaction transaction : transactions) {
+            if (transaction != null) {
+                TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+                TransactionSortedItem sortedItem = new TransactionSortedItem(
+                        TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+                items.add(sortedItem);
+            }
         }
 
         items.endBatchedUpdates();

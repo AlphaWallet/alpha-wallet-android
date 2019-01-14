@@ -10,12 +10,11 @@
         android:id="@+id/transaction_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
         android:layout_alignParentTop="true"
         android:layout_marginBottom="15dp"
         android:fontFamily="@font/font_regular"
-        android:text="Nov 11 2019"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
         android:textColor="@color/text_dark_gray"
         android:textSize="14sp" />
 
@@ -23,11 +22,11 @@
     <RelativeLayout
         android:id="@+id/layout_inner"
         android:layout_width="match_parent"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/transaction_date"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp">
 
         <ImageView
             android:id="@+id/type_icon"
@@ -64,7 +63,8 @@
                 android:maxLines="1"
                 android:text=""
                 android:textAppearance="?attr/textAppearanceListItem"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -101,14 +101,14 @@
             android:layout_height="20dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_chevron_right"/>
+            android:src="@drawable/ic_chevron_right" />
 
     </RelativeLayout>
 
     <View
-        android:layout_below="@id/layout_inner"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/super_light_grey"
-        android:layout_marginTop="20dp" />
+        android:layout_below="@id/layout_inner"
+        android:layout_marginTop="20dp"
+        android:background="@color/super_light_grey" />
 </RelativeLayout>

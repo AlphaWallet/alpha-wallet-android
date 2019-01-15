@@ -249,12 +249,12 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             if (!isSent)
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
-                supplimentalTxt = getString(R.string.label_from) + " " + operation.from;
+                supplimentalTxt = getString(R.string.label_from) + " " + operation.from.substring(0, 18);
             }
             else
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
-                supplimentalTxt = getString(R.string.label_to) + " " + operation.to;
+                supplimentalTxt = getString(R.string.label_to) + " " + operation.to.substring(0, 20);
             }
         }
 

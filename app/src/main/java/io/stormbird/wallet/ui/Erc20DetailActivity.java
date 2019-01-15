@@ -45,6 +45,8 @@ public class Erc20DetailActivity extends BaseActivity {
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
 
+    private static final int HISTORY_LENGTH = 3;
+
     private boolean sendingTokens = false;
     private String myAddress;
     private int decimals;
@@ -126,20 +128,8 @@ public class Erc20DetailActivity extends BaseActivity {
     private void onTransactions(Transaction[] transactions) {
         progressBar.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
-        Transaction[] newArray = new Transaction[3];
 
-        int i = 0;
-        for (int x = transactions.length - 1; x > 0; x--) {
-            if (transactions[x] != null && i < 3) {
-                newArray[i] = transactions[x];
-                i++;
-            } else {
-                break;
-            }
-        }
-
-        adapter.updateRecentTransactions(newArray);
-
+        adapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
         adapter.notifyDataSetChanged();
     }
 

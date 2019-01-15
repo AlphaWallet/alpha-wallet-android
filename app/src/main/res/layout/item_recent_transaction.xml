@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -37,42 +38,24 @@
             android:layout_marginRight="10dp"
             android:src="@drawable/ic_arrow_downward_black_24dp" />
 
-        <LinearLayout
-            android:id="@+id/layout_type"
+        <TextView
+            android:id="@+id/type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/font_regular"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/type_icon"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:maxLines="1"
-                android:text="Sent"
-                android:textAppearance="?attr/textAppearanceListItem"
-                android:textColor="@color/text_dark_gray"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/supplimental"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:maxLines="1"
-                android:text=""
-                android:textAppearance="?attr/textAppearanceListItem"
-                android:textSize="12sp" />
-
-        </LinearLayout>
+            android:maxLines="1"
+            android:text="Sent"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_type"
+            android:layout_below="@id/type"
             android:layout_marginTop="@dimen/small_margin"
             android:ellipsize="end"
             android:fontFamily="@font/font_light"
@@ -91,9 +74,23 @@
             android:layout_marginRight="5dp"
             android:layout_toStartOf="@id/view_details"
             android:fontFamily="@font/font_semibold"
-            android:text="+10"
+            android:text="+10 EDT"
             android:textColor="@color/green"
             android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/supplimental"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="5dp"
+            android:layout_toEndOf="@id/type"
+            android:layout_toStartOf="@id/value"
+            android:maxLines="1"
+            android:text="From 0x00000000000000000000000000"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="@color/green"
+            android:textSize="12sp" />
 
         <ImageView
             android:id="@+id/view_details"

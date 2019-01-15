@@ -99,7 +99,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void fetchTransactions(Wallet wallet, String contractAddress) {
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchNetworkTransactions(wallet, 0, contractAddress)
+                fetchTransactionsInteract.fetchCached(network.getValue(), wallet)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError);

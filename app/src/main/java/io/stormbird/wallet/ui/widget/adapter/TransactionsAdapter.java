@@ -20,8 +20,7 @@ import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TransactionDateHolder;
 import io.stormbird.wallet.ui.widget.holder.TransactionHolder;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int layoutResId = -1;
@@ -161,16 +160,26 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         items.endBatchedUpdates();
     }
 
-    public void updateRecentTransactions(Transaction[] transactions)
+    public void updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
     {
+        //items.beginBatchedUpdates();
+        List<Transaction> txSortList = new ArrayList<>();
+        Collections.addAll(txSortList, transactions);
+        Transaction.sortTranactions(txSortList);
+
         items.beginBatchedUpdates();
 
-        for (Transaction transaction : transactions)
+        for (Transaction transaction : txSortList)
         {
-            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
-            TransactionSortedItem sortedItem = new TransactionSortedItem(
-                    TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
-            items.add(sortedItem);
+            //check this tx relates to the contract
+            if (transaction.isRelated(contractAddress, walletAddress))
+            {
+                TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+                TransactionSortedItem sortedItem = new TransactionSortedItem(
+                        TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+                items.add(sortedItem);
+                if (items.size() == count) break;
+            }
         }
 
         items.endBatchedUpdates();

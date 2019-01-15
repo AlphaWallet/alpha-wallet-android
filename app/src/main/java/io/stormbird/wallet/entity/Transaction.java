@@ -9,6 +9,8 @@ import com.google.gson.annotations.SerializedName;
 import org.web3j.crypto.Hash;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -123,5 +125,34 @@ public class Transaction implements Parcelable {
 		dest.writeString(input);
 		dest.writeString(gasUsed);
 		dest.writeParcelableArray(operations, flags);
+	}
+
+	public static void sortTranactions(List<Transaction> txList)
+	{
+		Collections.sort(txList, (e1, e2) -> {
+			long w1 = e1.timeStamp;
+			long w2 = e2.timeStamp;
+			if (w1 > w2) return -1;
+			if (w1 < w2) return 1;
+			return 0;
+		});
+	}
+
+	public boolean isRelated(String contractAddress, String walletAddress)
+	{
+		TransactionOperation operation = operations == null
+				|| operations.length == 0 ? null : operations[0];
+
+		if (operation == null || operation.contract == null || operation.from == null)
+		{
+			//this is ether transaction
+			if (walletAddress.equals(contractAddress)) return true;
+		}
+		else
+		{
+			if (to.equals(contractAddress)) return true;
+		}
+
+		return false;
 	}
 }

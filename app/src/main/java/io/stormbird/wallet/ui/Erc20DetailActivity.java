@@ -2,7 +2,6 @@ package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -55,16 +54,13 @@ public class Erc20DetailActivity extends BaseActivity {
     private Token token;
     private String contractAddress;
     private double currentEthPrice;
-    RelativeLayout ethDetailLayout;
-    AWalletAlertDialog dialog;
 
-    Handler handler;
-
-    TextView balanceEth;
-    TextView symbolText;
-    TextView arrayBalance;
-    TextView priceUSD;
-
+    private TextView balanceEth;
+    private TextView symbolText;
+    private TextView arrayBalance;
+    private TextView priceUSD;
+    private RelativeLayout ethDetailLayout;
+    private AWalletAlertDialog dialog;
     private LinearLayout valueDetailsLayout;
     private TextView usdValueText;
     private Button sendBtn;
@@ -90,8 +86,6 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
-
-        handler = new Handler();
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS); //contract address
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
@@ -128,6 +122,7 @@ public class Erc20DetailActivity extends BaseActivity {
     private void onTransactions(Transaction[] transactions) {
         progressBar.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
+        adapter.clear();
 
         adapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
         adapter.notifyDataSetChanged();
@@ -231,7 +226,6 @@ public class Erc20DetailActivity extends BaseActivity {
             dialog.dismiss();
         }
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
         viewModel.cleanUp();
     }
 

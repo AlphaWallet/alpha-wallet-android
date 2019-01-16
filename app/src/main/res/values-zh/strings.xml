@@ -337,4 +337,7 @@
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="confirmed_by_stormbird">Confirmed by Stormbird</string>
+    <string name="unconfirmed">Unconfirmed</string>
 </resources>

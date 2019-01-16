@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
@@ -40,7 +39,7 @@
                     android:drawableLeft="@drawable/ic_confirmed"
                     android:drawablePadding="4dp"
                     android:fontFamily="@font/font_semibold"
-                    android:text="Confirmed by Stormbird"
+                    android:text="@string/confirmed_by_stormbird"
                     android:textAllCaps="true"
                     android:textColor="@color/green"
                     android:textSize="12sp" />
@@ -53,220 +52,25 @@
                     android:drawableLeft="@drawable/ic_unconfirmed"
                     android:drawablePadding="4dp"
                     android:fontFamily="@font/font_semibold"
-                    android:text="Unconfirmed"
+                    android:text="@string/unconfirmed"
                     android:textAllCaps="true"
                     android:textColor="@color/cancel_red"
                     android:textSize="12sp"
                     android:visibility="gone" />
             </LinearLayout>
 
-            <LinearLayout
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/token_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp">
-
-                <TextView
-                    android:id="@+id/balance_eth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
-                    android:fontFamily="@font/font_light"
-                    android:textColor="@color/text_black"
-                    android:textSize="21sp"
-                    tools:text="8888888" />
-
-                <TextView
-                    android:id="@+id/balanceArray"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
-                    android:fontFamily="@font/font_light"
-                    android:textColor="@color/text_black"
-                    android:textSize="21sp"
-                    android:visibility="gone"
-                    tools:text="" />
-
-                <TextView
-                    android:id="@+id/symbol"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_light"
-                    android:text="@string/ethereum"
-                    android:textColor="@color/text_black"
-                    android:textSize="21sp" />
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/ethereum_blockchain"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="11sp" />
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="2dp"
-                    android:background="@color/colorPrimaryDark" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/issuer"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/issuer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="2dp"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/ethereum"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="11sp" />
-
-                <View
-                    android:id="@+id/contract_seperator"
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="2dp"
-                    android:background="@color/colorPrimaryDark"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/contract_type"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/erc20"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textSize="11sp"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_value_details"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/background_top_border"
-                android:orientation="horizontal"
-                android:paddingTop="20dp">
-
-                <LinearLayout
-                    android:id="@+id/layout_24_hrs"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/text_24_hrs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="+0%"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/text_24_hrs_sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/twenty_four_hours"
-                        android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
-                        android:textSize="11sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_appreciation"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/text_appreciation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="$0.00"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/text_appreciation_sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/appreciation"
-                        android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
-                        android:textSize="11sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_usd_value"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/usd_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="$0.00"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/usd_value"
-                        android:textAllCaps="true"
-                        android:textColor="@color/light_gray"
-                        android:textSize="11sp" />
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
-                android:layout_marginTop="70dp"
+                android:layout_marginTop="50dp"
                 android:fontFamily="@font/font_regular"
-                android:text="Recent Transactions"
+                android:text="@string/recent_transactions"
                 android:textColor="@color/text_dark_gray"
                 android:textSize="18sp" />
 

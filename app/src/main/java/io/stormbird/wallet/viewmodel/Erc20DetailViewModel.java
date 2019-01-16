@@ -13,6 +13,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticker;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FetchTokensInteract;
@@ -31,6 +32,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private final MutableLiveData<Token> token = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
@@ -43,6 +45,9 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     @Nullable
     private Disposable fetchTransactionDisposable;
+
+    @Nullable
+    private Disposable getBalanceDisposable;
 
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
                                 FetchTokensInteract fetchTokensInteract,
@@ -97,7 +102,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return assetDefinitionService.getIntroductionCode(address);
     }
 
-    public void fetchTransactions(Wallet wallet, String contractAddress) {
+    public void fetchTransactions(Wallet wallet) {
         fetchTransactionDisposable =
                 fetchTransactionsInteract.fetchCached(network.getValue(), wallet)
                         .subscribeOn(Schedulers.io())
@@ -120,6 +125,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
         if (disposable != null && !disposable.isDisposed()) {
             disposable.dispose();
+        }
+
+        if (getBalanceDisposable != null && !getBalanceDisposable.isDisposed()) {
+            getBalanceDisposable.dispose();
         }
     }
 
@@ -159,5 +168,26 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService() {
+        return this.assetDefinitionService;
+    }
+
+    public void updateDefaultBalance(Token token) {
+        getBalanceDisposable = Observable.interval(CHECK_ETHPRICE_INTERVAL, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchTokensInteract
+                        .updateDefaultBalance(token, network.getValue(), wallet.getValue())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onToken, this::onError)).subscribe();
+    }
+
+    private void onToken(Token token) {
+        this.token.postValue(token);
+    }
+
+    public LiveData<Token> token() {
+        return token;
     }
 }

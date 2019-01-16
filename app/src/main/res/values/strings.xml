@@ -513,4 +513,7 @@
     <string name="title_send_activity">Send</string>
     <string name="available">Available</string>
     <string name="usd_label">US$</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="confirmed_by_stormbird">Confirmed by Stormbird</string>
+    <string name="unconfirmed">Unconfirmed</string>
 </resources>

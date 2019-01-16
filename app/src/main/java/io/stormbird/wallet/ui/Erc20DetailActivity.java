@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import javax.inject.Inject;
 
@@ -47,12 +48,10 @@ public class Erc20DetailActivity extends BaseActivity {
     private Token token;
     private String contractAddress;
 
-
     private Button sendBtn;
     private Button receiveBtn;
     private ProgressBar progressBar;
-
-
+    private TextView noTransactionsView;
     private RecyclerView tokenView;
     private RecyclerView recentTransactionsView;
 
@@ -104,8 +103,8 @@ public class Erc20DetailActivity extends BaseActivity {
                 return false;
             }
         });
-        tokenViewAdapter = new TokensAdapter(this,null, viewModel.getAssetDefinitionService());
-        Token[] tokens = { token };
+        tokenViewAdapter = new TokensAdapter(this, null, viewModel.getAssetDefinitionService());
+        Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);
     }
@@ -125,7 +124,7 @@ public class Erc20DetailActivity extends BaseActivity {
         if (token.addressMatches(myAddress)) {
             token.setInterfaceSpec(ContractType.ETHEREUM);
         }
-        Token[] tokens = { token };
+        Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenViewAdapter.notifyDataSetChanged();
     }
@@ -139,19 +138,26 @@ public class Erc20DetailActivity extends BaseActivity {
         recentTransactionsView.setVisibility(View.VISIBLE);
         recentTransactionsAdapter.clear();
 
-        recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
-        recentTransactionsAdapter.notifyDataSetChanged();
+        int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
+
+        if (txCount > 0) {
+            noTransactionsView.setVisibility(View.GONE);
+            recentTransactionsAdapter.notifyDataSetChanged();
+        } else {
+            noTransactionsView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onNewEthPrice(Double ethPrice) {
         tokenViewAdapter.clear();
         token.setInterfaceSpec(ContractType.ETHEREUM);
-        Token[] tokens = { token };
+        Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenViewAdapter.notifyDataSetChanged();
     }
 
     private void initViews() {
+        noTransactionsView = findViewById(R.id.no_recent_transactions);
         progressBar = findViewById(R.id.progress_bar);
 
         sendBtn = findViewById(R.id.button_send);

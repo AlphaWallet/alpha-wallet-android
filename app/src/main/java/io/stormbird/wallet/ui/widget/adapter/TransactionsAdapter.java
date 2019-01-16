@@ -160,9 +160,10 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         items.endBatchedUpdates();
     }
 
-    public void updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
+    public int updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
     {
-        //items.beginBatchedUpdates();
+        int txCount = 0;
+
         List<Transaction> txSortList = new ArrayList<>();
         Collections.addAll(txSortList, transactions);
         Transaction.sortTranactions(txSortList);
@@ -179,10 +180,13 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
                         TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
                 items.add(sortedItem);
                 if (items.size() == count) break;
+                txCount++;
             }
         }
 
         items.endBatchedUpdates();
+
+        return txCount;
     }
 
     public void clear() {

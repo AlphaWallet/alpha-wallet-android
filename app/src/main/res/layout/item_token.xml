@@ -187,7 +187,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_semibold"
-                android:text="+0%"
+                android:text="@string/unknown_balance_without_symbol"
                 android:textSize="15sp" />
 
             <TextView
@@ -215,7 +215,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_semibold"
-                android:text="$0.00"
+                android:text="@string/unknown_balance_without_symbol"
                 android:textSize="15sp" />
 
             <TextView
@@ -243,7 +243,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/font_semibold"
-                android:text="$0.00"
+                android:text="@string/unknown_balance_without_symbol"
                 android:textSize="15sp" />
 
             <TextView

@@ -64,15 +64,48 @@ public class ZonedDateTime {
         if (m.find()) {
             this.timezone = TimeZone.getTimeZone("GMT"+m.group(1));
             isoFormat.setTimeZone(this.timezone);
-        }else{
-            throw new IllegalArgumentException("not Generalised Time");
+            Date date = isoFormat.parse(time);
+            this.time = date.getTime();
+        }
+        else if (isNumeric(time)){
+            //useful for debug, but leads to unexpected errors in unexpected places right before important demos
+            //throw new IllegalArgumentException("not Generalised Time");
+            //No timezone specified, assume time in GMT
+            this.timezone = TimeZone.getTimeZone("GMT");
+            Long timeConv = Long.valueOf(time);
+            this.time = timeConv*1000;
+        }
+        else
+        {
+            //drop through, use current time
+            this.timezone = TimeZone.getTimeZone("GMT");
+            this.time = System.currentTimeMillis();
         }
 
-        Date date = isoFormat.parse(time);
-        this.time = date.getTime();
+
 
 //        DateTimeFormatter generalizedTime = DateTimeFormatter.ofPattern ( "uuuuMMddHHmmss[,S][.S]X" );
 //        OffsetDateTime odt = OffsetDateTime.parse ( time , generalizedTime );
+    }
+
+    private boolean isNumeric(String testStr)
+    {
+        boolean result = false;
+        if (testStr != null && testStr.length() > 0)
+        {
+            result = true;
+            for (int i = 0; i < testStr.length(); i++)
+            {
+                char c = testStr.charAt(i);
+                if (!Character.isDigit(c))
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 
     /* Creating ZonedDateTime from GeneralizedTime */

@@ -11,8 +11,8 @@
         android:id="@+id/transaction_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
         android:layout_alignParentTop="true"
         android:layout_marginBottom="15dp"
         android:fontFamily="@font/font_regular"
@@ -24,8 +24,8 @@
     <RelativeLayout
         android:id="@+id/layout_inner"
         android:layout_width="match_parent"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/transaction_date"
         android:orientation="horizontal">
@@ -35,7 +35,7 @@
             android:layout_width="18sp"
             android:layout_height="18sp"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:src="@drawable/ic_arrow_downward_black_24dp" />
 
         <TextView

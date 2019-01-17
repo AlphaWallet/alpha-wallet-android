@@ -271,7 +271,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             String amountStr = amountEditText.getText().toString();
 
             if (amountStr.length() == 0) {
-                amountStr = "0 " + token.tokenInfo.symbol;
+                amountStr = "0";
                 tokenEquivalent.setText(amountStr);
             } else {
                 double amount = Double.parseDouble(amountStr);
@@ -281,7 +281,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         } else {
             String amount = amountEditText.getText().toString();
             if (amount.length() == 0)
-                amount = "US$ 0";
+                amount = "US$ 0.00";
             usdValue.setText(amount);
             if (isValidAmount(amount)) {
                 String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);

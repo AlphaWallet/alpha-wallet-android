@@ -12,8 +12,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginBottom="15dp"
         android:fontFamily="@font/font_regular"
-        android:paddingEnd="20dp"
         android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         android:text="Nov 11 2019"
         android:textColor="@color/text_dark_gray"
         android:textSize="14sp" />
@@ -24,8 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/transaction_date"
         android:orientation="horizontal"
-        android:paddingEnd="20dp"
-        android:paddingStart="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <ImageView
             android:id="@+id/type_icon"
@@ -78,16 +78,17 @@
         <TextView
             android:id="@+id/supplimental"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="wrap_content"    
             android:layout_centerVertical="true"
             android:layout_marginStart="5dp"
-            android:layout_toEndOf="@id/type"
             android:layout_toStartOf="@id/value"
+            android:layout_toEndOf="@id/type"
             android:maxLines="1"
             android:text="From 0x00000000000000000000000000"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textColor="@color/green"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/view_details"

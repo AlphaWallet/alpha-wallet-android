@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="?android:selectableItemBackground"
+            android:background="@color/transparent"
             android:contentDescription="@string/scan_qr"
             android:padding="@dimen/big_padding"
             android:src="@mipmap/qr_code_icon" />

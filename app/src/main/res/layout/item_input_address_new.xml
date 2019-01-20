@@ -9,9 +9,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:fontFamily="@font/font_semibold"
-        android:text="Address"
+        android:text="@string/signer_address"
         android:textSize="14sp" />
 
     <RelativeLayout
@@ -21,46 +21,53 @@
         <AutoCompleteTextView
             android:id="@+id/edit_to_address"
             android:layout_width="match_parent"
-            android:layout_height="47dp"
-            android:layout_alignParentLeft="true"
+            android:layout_height="33dp"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/img_scan_qr"
+            android:layout_toStartOf="@id/layout_scan_qr"
             android:background="@drawable/background_round_blue_9dp"
             android:completionThreshold="1"
-            android:fontFamily="@font/font_semibold"
-            android:hint="Contract Address"
+            android:fontFamily="@font/font_regular"
+            android:hint="@string/contract_address"
             android:imeOptions="actionDone"
             android:inputType="text"
             android:lines="1"
             android:maxLines="1"
-            android:paddingStart="15dp"
             android:paddingEnd="60dp"
+            android:paddingStart="15dp"
             android:textColor="@color/text_dark_gray"
             android:textColorHint="@color/light_gray"
-            android:textSize="14sp" />
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/paste"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignRight="@id/edit_to_address"
+            android:layout_alignEnd="@id/edit_to_address"
             android:layout_centerVertical="true"
-            android:layout_marginRight="15dp"
+            android:layout_marginEnd="15dp"
             android:fontFamily="@font/font_bold"
-            android:text="Paste"
+            android:text="@string/paste"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="14sp" />
+            android:textSize="11sp" />
 
-        <ImageButton
-            android:id="@+id/img_scan_qr"
-            android:layout_width="50dp"
+
+        <LinearLayout
+            android:id="@+id/layout_scan_qr"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@color/transparent"
-            android:contentDescription="@string/scan_qr"
-            android:padding="@dimen/big_padding"
-            android:src="@mipmap/qr_code_icon" />
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/img_scan_qr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/transparent"
+                android:contentDescription="@string/scan_qr"
+                android:src="@mipmap/qr_code_icon" />
+        </LinearLayout>
 
     </RelativeLayout>
 
@@ -72,7 +79,7 @@
         android:fontFamily="@font/font_regular"
         android:text="@string/error_invalid_address"
         android:textColor="@color/cancel_red"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:visibility="gone" />
 
     <LinearLayout
@@ -91,7 +98,7 @@
             android:fontFamily="@font/font_regular"
             android:textAllCaps="true"
             android:textColor="@color/light_gray"
-            android:textSize="10sp" />
+            android:textSize="11sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -99,7 +106,7 @@
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/font_semibold"
             android:text="@string/ens_address"
-            android:textSize="14sp" />
+            android:textSize="11sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -117,10 +124,10 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center_vertical"
+                android:paddingBottom="8dp"
+                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
                 android:paddingTop="8dp"
-                android:paddingEnd="15dp"
-                android:paddingBottom="8dp"
                 android:textColor="@color/holo_blue"
                 android:textSize="16sp" />
 

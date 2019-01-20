@@ -15,4 +15,5 @@
     <string name="confirmed_by_stormbird">Confirmed by Stormbird</string>
     <string name="unconfirmed">Unconfirmed</string>
     <string name="no_recent_transactions">No recent transactions</string>
+    <string name="paste">Paste</string>
 </resources>

@@ -20,8 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="?android:attr/actionBarSize">
+            android:layout_marginBottom="?android:attr/actionBarSize"
+            android:layout_marginTop="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -32,8 +32,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="20dp"
                     android:layout_marginBottom="5dp"
+                    android:layout_marginTop="20dp"
                     android:fontFamily="@font/font_semibold"
                     android:text="@string/title_send_activity"
                     android:textColor="@color/text_dark_gray"
@@ -44,9 +44,9 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal"
+                    android:paddingBottom="5dp"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:paddingBottom="5dp">
+                    android:paddingRight="20dp">
 
                     <TextView
                         android:id="@+id/balance_eth"
@@ -81,9 +81,9 @@
                     android:id="@+id/layout_iframe"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
                     android:clickable="true"
                     android:visibility="gone">
 
@@ -99,8 +99,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="50dp"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="50dp"
                     android:orientation="vertical"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
@@ -110,8 +110,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="25dp"
                         android:layout_marginBottom="10dp"
+                        android:layout_marginTop="25dp"
                         android:fontFamily="@font/font_semibold"
                         android:text="@string/amount"
                         android:textSize="14sp" />
@@ -154,8 +154,8 @@
                                 android:inputType="numberDecimal"
                                 android:lines="1"
                                 android:maxLines="1"
-                                android:paddingStart="15dp"
                                 android:paddingEnd="15dp"
+                                android:paddingStart="15dp"
                                 android:textColor="@color/text_dark_gray"
                                 android:textColorHint="@color/light_gray"
                                 android:textSize="36sp" />
@@ -194,14 +194,14 @@
                                 android:id="@+id/img_quantity_up"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentTop="true"
                                 android:layout_alignParentEnd="true"
+                                android:layout_alignParentTop="true"
                                 android:layout_centerHorizontal="true"
                                 android:background="@color/transparent"
-                                android:paddingLeft="@dimen/big_padding"
-                                android:paddingTop="10dp"
-                                android:paddingRight="@dimen/big_padding"
                                 android:paddingBottom="10dp"
+                                android:paddingLeft="@dimen/big_padding"
+                                android:paddingRight="@dimen/big_padding"
+                                android:paddingTop="10dp"
                                 android:src="@drawable/ic_quantity_up"
                                 android:visibility="gone" />
 
@@ -209,14 +209,14 @@
                                 android:id="@+id/img_quantity_down"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
                                 android:layout_alignParentBottom="true"
+                                android:layout_alignParentEnd="true"
                                 android:layout_centerHorizontal="true"
                                 android:background="@color/transparent"
-                                android:paddingLeft="@dimen/big_padding"
-                                android:paddingTop="10dp"
-                                android:paddingRight="@dimen/big_padding"
                                 android:paddingBottom="10dp"
+                                android:paddingLeft="@dimen/big_padding"
+                                android:paddingRight="@dimen/big_padding"
+                                android:paddingTop="10dp"
                                 android:src="@drawable/ic_quantity_down"
                                 android:visibility="gone" />
                         </RelativeLayout>
@@ -284,11 +284,11 @@
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_gravity="center"
-            android:background="@color/button_disabled"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="20dp">
 
             <Button
                 android:id="@+id/button_next"
@@ -296,15 +296,15 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/selector_button"
-                android:fontFamily="@font/font_regular"
+                android:background="@drawable/selector_round_button"
+                android:fontFamily="@font/font_semibold"
                 android:gravity="center"
-                android:paddingTop="15dp"
                 android:paddingBottom="15dp"
+                android:paddingTop="15dp"
                 android:text="@string/action_next"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
     </RelativeLayout>

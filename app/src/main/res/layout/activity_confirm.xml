@@ -22,8 +22,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingLeft="10dp"
-                android:paddingTop="20dp"
-                android:paddingRight="10dp">
+                android:paddingRight="10dp"
+                android:paddingTop="20dp">
 
                 <TextView
                     android:id="@+id/title_confirm"
@@ -49,8 +49,8 @@
                         android:id="@+id/text_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
                         android:layout_marginBottom="30dp"
+                        android:layout_marginRight="10dp"
                         android:fontFamily="@font/font_regular"
                         android:gravity="center"
                         android:text="@string/dummy_transaction_value"
@@ -101,8 +101,8 @@
                         android:id="@+id/label_to"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/label_to"
                         android:textColor="@color/text_dark_gray"
@@ -123,8 +123,8 @@
                         android:id="@+id/label_website"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/requester_url"
                         android:textColor="@color/text_dark_gray"
@@ -147,8 +147,8 @@
                         android:id="@+id/label_contract"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/label_contract"
                         android:textColor="@color/text_dark_gray"
@@ -171,8 +171,8 @@
                         android:id="@+id/label_gas_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/label_gas_price"
                         android:textColor="@color/text_dark_gray"
@@ -193,8 +193,8 @@
                         android:id="@+id/label_gas_limit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/label_gas_limit"
                         android:textColor="@color/text_dark_gray"
@@ -215,8 +215,8 @@
                         android:id="@+id/label_network_fee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/label_network_fee"
                         android:textColor="@color/text_dark_gray"
@@ -236,21 +236,27 @@
                 </LinearLayout>
 
             </LinearLayout>
+
         </ScrollView>
 
         <Button
             android:id="@+id/send_button"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
+            android:layout_marginBottom="30dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/selector_round_button"
+            android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:text="@string/action_send"
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:textSize="16sp" />
+
     </RelativeLayout>
 
 </LinearLayout>

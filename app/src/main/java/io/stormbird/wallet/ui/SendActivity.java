@@ -326,7 +326,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

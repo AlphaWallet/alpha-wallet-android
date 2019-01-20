@@ -40,7 +40,7 @@
 	<color name="light_gray">#9b9b9b</color>
 	<color name="super_light_grey">#ececec</color>
 	<color name="button_green">#69c800</color>
-	<color name="button_disabled">#406326</color>
+	<color name="button_disabled">#b4cd99</color>
 	<color name="greyf6">#f6f6f6</color>
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>

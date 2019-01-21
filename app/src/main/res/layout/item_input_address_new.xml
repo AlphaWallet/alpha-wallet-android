@@ -86,6 +86,7 @@
         android:id="@+id/layout_ens"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
         android:layout_marginTop="5dp"
         android:orientation="vertical"
         android:visibility="gone">
@@ -103,14 +104,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/font_semibold"
             android:text="@string/ens_address"
-            android:textSize="11sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="33dp"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
             android:background="@drawable/background_round_blue_9dp"
@@ -122,14 +123,16 @@
                 android:layout_height="47dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:fontFamily="@font/font_semibold"
+                android:fontFamily="@font/font_regular"
                 android:gravity="center_vertical"
+                android:lines="1"
+                android:maxLines="1"
                 android:paddingBottom="8dp"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
                 android:paddingTop="8dp"
-                android:textColor="@color/holo_blue"
-                android:textSize="16sp" />
+                android:textColor="@color/text_dark_gray"
+                android:textSize="11sp" />
 
         </LinearLayout>
     </LinearLayout>

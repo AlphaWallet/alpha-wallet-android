@@ -12,13 +12,6 @@
 This repo contains the Android app and a few server side
 components. This project directory is specific for the Android app.
 
-Since submodules are in use you will need to use this command sequence to clone:
-
-If you are updating a branch use this:
-
-git checkout <branch you are switching to>
-git submodule update --init --recursive
-
 ## Deploying with fastlane
 
 `fastlane screengrab` - take screenshots

@@ -51,7 +51,8 @@ public class Erc20DetailActivity extends BaseActivity {
     private Button sendBtn;
     private Button receiveBtn;
     private ProgressBar progressBar;
-    private TextView noTransactionsView;
+    private LinearLayout noTransactionsLayout;
+    private TextView noTransactionsSubText;
     private RecyclerView tokenView;
     private RecyclerView recentTransactionsView;
 
@@ -66,6 +67,7 @@ public class Erc20DetailActivity extends BaseActivity {
         toolbar();
         setTitle("");
         getIntentData();
+        myAddress = wallet.address;
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
@@ -80,7 +82,6 @@ public class Erc20DetailActivity extends BaseActivity {
 
         setUpRecentTransactionsView();
 
-        myAddress = wallet.address;
         if (token.addressMatches(myAddress)) {
             viewModel.startEthereumTicker();
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
@@ -139,12 +140,12 @@ public class Erc20DetailActivity extends BaseActivity {
         recentTransactionsAdapter.clear();
 
         int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
-
-        if (txCount > 0) {
-            noTransactionsView.setVisibility(View.GONE);
-            recentTransactionsAdapter.notifyDataSetChanged();
+        
+        if (txCount < 1) {
+            noTransactionsLayout.setVisibility(View.VISIBLE);
         } else {
-            noTransactionsView.setVisibility(View.VISIBLE);
+            noTransactionsLayout.setVisibility(View.GONE);
+            recentTransactionsAdapter.notifyDataSetChanged();
         }
     }
 
@@ -157,7 +158,17 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void initViews() {
-        noTransactionsView = findViewById(R.id.no_recent_transactions);
+        noTransactionsLayout = findViewById(R.id.layout_no_recent_transactions);
+        noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
+
+        if (token.addressMatches(myAddress)) {
+            noTransactionsSubText.setText(getString(R.string.no_recent_transactions_subtext,
+                    getString(R.string.no_recent_transactions_subtext_ether)));
+        } else {
+            noTransactionsSubText.setText(getString(R.string.no_recent_transactions_subtext,
+                    getString(R.string.no_recent_transactions_subtext_tokens)));
+        }
+
         progressBar = findViewById(R.id.progress_bar);
 
         sendBtn = findViewById(R.id.button_send);

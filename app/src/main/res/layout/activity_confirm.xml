@@ -15,7 +15,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="?android:actionBarSize">
+            android:layout_marginBottom="100dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -239,23 +239,28 @@
 
         </ScrollView>
 
-        <Button
-            android:id="@+id/send_button"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="30dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="30dp"
-            android:background="@drawable/selector_round_button"
-            android:fontFamily="@font/font_semibold"
+            android:background="@color/white"
             android:gravity="center"
-            android:text="@string/action_send"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="16sp" />
+            android:padding="20dp">
+
+            <Button
+                android:id="@+id/send_button"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_round_button"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:text="@string/action_send"
+                android:textAllCaps="false"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp" />
+        </LinearLayout>
+
 
     </RelativeLayout>
 

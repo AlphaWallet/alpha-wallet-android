@@ -193,6 +193,8 @@ public class TransactionsViewModel extends BaseViewModel
         Log.d(TAG, "Found " + transactions.length + " Cached transactions");
         updateDisplay(transactions);
 
+        transactionCount = transactions.length;
+
         for (Transaction tx : transactions)
         {
             txMap.put(tx.hash, tx);
@@ -237,6 +239,7 @@ public class TransactionsViewModel extends BaseViewModel
                 txMap.put(tx.hash, tx);
                 newTxs.add(tx);
                 if (Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
+                transactionCount++;
             }
         }
 
@@ -273,7 +276,7 @@ public class TransactionsViewModel extends BaseViewModel
         //stop the spinner
         progress.postValue(false);
         Log.d(TAG, "Enumerating tokens");
-        transactionCount += txMap.size();
+        //transactionCount += txMap.size();
         txContractList.clear();
 
         if (wallet.getValue() != null)

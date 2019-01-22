@@ -337,4 +337,6 @@
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>
+    <string name="invalid_transaction">Invalid Transaction</string>
+    <string name="contains_no_data">DApp transaction contains no data</string>
 </resources>

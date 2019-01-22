@@ -10,6 +10,7 @@ import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -93,8 +94,10 @@ public class FetchTokensInteract {
 
     public Observable<Token> updateBalance(String address, Token token)
     {
+        if (token == null) return Observable.fromCallable(() -> {
+            return new Token(null, BigDecimal.ZERO, 0);
+        });
         return tokenRepository.fetchActiveTokenBalance(address, token)
-                //.map(updateToken -> mapToPair(updateToken, so))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

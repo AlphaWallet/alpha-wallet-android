@@ -7,203 +7,201 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <ScrollView
+
+    <RelativeLayout
+        android:id="@+id/layout_eth_detail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_card"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:visibility="visible">
 
-        <RelativeLayout
-            android:id="@+id/layout_eth_detail"
+        <LinearLayout
+            android:id="@+id/allz"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:visibility="visible">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/allz"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="30dp"
-                    android:paddingRight="30dp"
-                    android:paddingTop="30dp">
-
-                    <TextView
-                        android:id="@+id/text_confirmed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:drawableLeft="@drawable/ic_confirmed"
-                        android:drawablePadding="4dp"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="@string/confirmed_by_stormbird"
-                        android:textAllCaps="true"
-                        android:textColor="@color/green"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/text_unconfirmed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:drawableLeft="@drawable/ic_unconfirmed"
-                        android:drawablePadding="4dp"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="@string/unconfirmed"
-                        android:textAllCaps="true"
-                        android:textColor="@color/cancel_red"
-                        android:textSize="12sp"
-                        android:visibility="gone" />
-                </LinearLayout>
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/token_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="50dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/recent_transactions"
-                    android:textColor="@color/text_dark_gray"
-                    android:textSize="18sp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="15dp"
-                    android:background="@color/super_light_grey" />
-
-                <LinearLayout
-                    android:id="@+id/layout_transactions"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <ProgressBar
-                        android:id="@+id/progress_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="20dp" />
-
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/list"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone" />
-
-
-                    <LinearLayout
-                        android:id="@+id/layout_no_recent_transactions"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/no_recent_transactions"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginTop="20dp"
-                            android:fontFamily="@font/font_light"
-                            android:text="@string/no_recent_transactions"
-                            android:textColor="@color/text_dark_gray"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/no_recent_transactions_subtext"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:fontFamily="@font/font_regular"
-                            android:text="@string/no_recent_transactions_subtext"
-                            android:textColor="@color/text_dark_gray"
-                            android:textSize="13sp" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_iframe"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:clickable="true"
-                    android:visibility="gone">
-
-                    <WebView
-                        android:id="@+id/iframe"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                    </WebView>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutButtons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/allz"
-                android:layout_gravity="center"
                 android:orientation="horizontal"
-                android:paddingBottom="30dp"
-                android:paddingEnd="20dp"
-                android:paddingStart="20dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="30dp"
+                android:paddingRight="30dp"
                 android:paddingTop="30dp">
 
-                <Button
-                    android:id="@+id/button_send"
-                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/selector_round_button"
-                    android:enabled="true"
+                <TextView
+                    android:id="@+id/text_confirmed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:drawableLeft="@drawable/ic_confirmed"
+                    android:drawablePadding="4dp"
                     android:fontFamily="@font/font_semibold"
-                    android:gravity="center"
-                    android:paddingBottom="15dp"
-                    android:paddingTop="15dp"
-                    android:text="@string/action_send"
-                    android:textAllCaps="false"
-                    android:textColor="@color/button_text_color"
-                    android:textSize="16sp" />
+                    android:text="@string/confirmed_by_stormbird"
+                    android:textAllCaps="true"
+                    android:textColor="@color/green"
+                    android:textSize="12sp" />
 
-                <Button
-                    android:id="@+id/button_receive"
-                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/selector_round_button"
+                <TextView
+                    android:id="@+id/text_unconfirmed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:drawableLeft="@drawable/ic_unconfirmed"
+                    android:drawablePadding="4dp"
                     android:fontFamily="@font/font_semibold"
-                    android:gravity="center"
-                    android:paddingBottom="15dp"
-                    android:paddingTop="15dp"
-                    android:text="Receive"
-                    android:textAllCaps="false"
-                    android:textColor="@color/button_text_color"
-                    android:textSize="16sp" />
+                    android:text="@string/unconfirmed"
+                    android:textAllCaps="true"
+                    android:textColor="@color/cancel_red"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/token_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="50dp"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/recent_transactions"
+                android:textColor="@color/text_dark_gray"
+                android:textSize="18sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/super_light_grey" />
+
+            <LinearLayout
+                android:id="@+id/layout_transactions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="100dp"
+                android:orientation="vertical">
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+
+                <LinearLayout
+                    android:id="@+id/layout_no_recent_transactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/no_recent_transactions"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginTop="20dp"
+                        android:fontFamily="@font/font_light"
+                        android:text="@string/no_recent_transactions"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/no_recent_transactions_subtext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/no_recent_transactions_subtext"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="13sp" />
+                </LinearLayout>
 
             </LinearLayout>
-        </RelativeLayout>
-    </ScrollView>
 
+            <LinearLayout
+                android:id="@+id/layout_iframe"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:clickable="true"
+                android:visibility="gone">
+
+                <WebView
+                    android:id="@+id/iframe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </WebView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="20dp"
+            android:paddingEnd="20dp"
+            android:paddingStart="20dp"
+            android:paddingTop="20dp">
+
+            <Button
+                android:id="@+id/button_send"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/selector_round_button"
+                android:enabled="true"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                android:text="@string/action_send"
+                android:textAllCaps="false"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/button_receive"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/selector_round_button"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                android:text="Receive"
+                android:textAllCaps="false"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

@@ -281,9 +281,13 @@ public class ImportTokenViewModel extends BaseViewModel
     //4a. Receive balance
     private void onBalance(Token token)
     {
-        if (token != null && token instanceof Ticket)
+        if (token.tokenInfo != null)
         {
-            importToken = (Ticket) token;
+            importToken = token;
+        }
+        else if (getBalanceDisposable != null && !getBalanceDisposable.isDisposed())
+        {
+            getBalanceDisposable.dispose();
         }
     }
 

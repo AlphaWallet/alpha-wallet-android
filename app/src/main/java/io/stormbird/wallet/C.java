@@ -54,6 +54,7 @@ public abstract class C {
     public static final String EXTRA_NETWORK_NAME = "NETWORK_NAME";
     public static final String EXTRA_NETWORK_MAINNET = "NETWORK_MAINNET";
     public static final String EXTRA_ENS_DETAILS = "ENS_DETAILS";
+    public static final String EXTRA_HAS_DEFINITION = "HAS_TOKEN_DEF";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";

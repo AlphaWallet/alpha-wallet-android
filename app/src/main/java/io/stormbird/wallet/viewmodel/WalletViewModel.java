@@ -320,7 +320,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     @Override
     public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
         boolean isToken = !address.equalsIgnoreCase(defaultWallet().getValue().address);
-        erc20DetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token);
+        boolean hasDefinition = assetDefinitionService.hasDefinition(address);
+        erc20DetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
     }
 
     @Override

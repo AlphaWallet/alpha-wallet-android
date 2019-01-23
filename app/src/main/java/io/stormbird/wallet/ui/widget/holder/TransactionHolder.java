@@ -249,24 +249,15 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             if (!isSent)
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
-                supplimentalTxt = getString(R.string.label_from) + " " + operation.from.substring(0, 18);
             }
             else
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
-                supplimentalTxt = getString(R.string.label_to) + " " + operation.to.substring(0, 20);
             }
         }
 
         address.setText(name);
         value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
-
-        if (supplimentalTxt.length() > 0)
-        {
-            supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-            supplimental.setText(supplimentalTxt);
-            supplimental.setTextSize(10.0f);
-        }
 
         setSuccessIndicator(txSuccess, supplimentalTxt);
 

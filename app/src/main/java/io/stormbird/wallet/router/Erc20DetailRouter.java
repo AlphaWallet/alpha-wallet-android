@@ -20,10 +20,11 @@ public class Erc20DetailRouter {
         intent.putExtra(C.EXTRA_SYMBOL, symbol);
         intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.putExtra(C.EXTRA_HAS_DEFINITION, false);
         context.startActivity(intent);
     }
 
-    public void open(Context context, String address, String symbol, int decimals, boolean isToken, Wallet wallet, Token token) {
+    public void open(Context context, String address, String symbol, int decimals, boolean isToken, Wallet wallet, Token token, boolean hasDefinition) {
         Intent intent = new Intent(context, Erc20DetailActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, isToken);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
@@ -32,6 +33,7 @@ public class Erc20DetailRouter {
         intent.putExtra(WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN_ID, token);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.putExtra(C.EXTRA_HAS_DEFINITION, hasDefinition);
         context.startActivity(intent);
     }
 }

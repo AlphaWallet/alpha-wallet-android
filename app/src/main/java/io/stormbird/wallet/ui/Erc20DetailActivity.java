@@ -41,6 +41,7 @@ public class Erc20DetailActivity extends BaseActivity {
     private static final int HISTORY_LENGTH = 3;
 
     private boolean sendingTokens = false;
+    private boolean hasDefinition = false;
     private String myAddress;
     private int decimals;
     private String symbol;
@@ -118,6 +119,7 @@ public class Erc20DetailActivity extends BaseActivity {
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        hasDefinition = getIntent().getBooleanExtra(C.EXTRA_HAS_DEFINITION, false);
     }
 
     private void onTokenData(Token token) {
@@ -181,6 +183,16 @@ public class Erc20DetailActivity extends BaseActivity {
         receiveBtn.setOnClickListener(v -> {
             viewModel.showMyAddress(this, wallet);
         });
+
+        if (hasDefinition)
+        {
+            findViewById(R.id.text_confirmed).setVisibility(View.VISIBLE);
+            findViewById(R.id.text_unconfirmed).setVisibility(View.GONE);
+        }
+        else
+        {
+            findViewById(R.id.layout_confirmed).setVisibility(View.GONE);
+        }
     }
 
     private void addTokenPage() {

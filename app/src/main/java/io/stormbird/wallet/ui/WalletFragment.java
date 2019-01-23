@@ -240,7 +240,10 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onTokens(Token[] tokens)
     {
-        adapter.setTokens(tokens);
+        if (tokens != null)
+        {
+            adapter.setTokens(tokens);
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

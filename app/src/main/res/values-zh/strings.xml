@@ -345,4 +345,6 @@
     <string name="no_recent_transactions_subtext">When you send or receive %1$s,\n your transactions will appear here</string>
     <string name="no_recent_transactions_subtext_ether">ether</string>
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
+    <string name="invalid_transaction">Invalid Transaction</string>
+    <string name="contains_no_data">DApp transaction contains no data</string>
 </resources>

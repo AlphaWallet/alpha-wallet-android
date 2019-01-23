@@ -17,20 +17,24 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
     public static final String PLATFORM_APPLICATION_ARN = "arn:aws:sns:us-west-2:400248756644:app/GCM/AlphaWallet-Android";
 
     @Override
-    public void onNewToken(String token) {
-        CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(),
-                IDENTITY_POOL_ID,
-                Regions.US_WEST_2
-        );
-        AmazonSNSClient snsClient = new AmazonSNSClient(credentialsProvider);
-        snsClient.setRegion(Region.getRegion(Regions.US_WEST_2));
-        CreatePlatformEndpointRequest request = new CreatePlatformEndpointRequest();
-        request.setPlatformApplicationArn(PLATFORM_APPLICATION_ARN);
-        request.setToken(token);
-        try {
+    public void onNewToken(String token)
+    {
+        try
+        {
+            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                    getApplicationContext(),
+                    IDENTITY_POOL_ID,
+                    Regions.US_WEST_2
+            );
+            AmazonSNSClient snsClient = new AmazonSNSClient(credentialsProvider);
+            snsClient.setRegion(Region.getRegion(Regions.US_WEST_2));
+            CreatePlatformEndpointRequest request = new CreatePlatformEndpointRequest();
+            request.setPlatformApplicationArn(PLATFORM_APPLICATION_ARN);
+            request.setToken(token);
             CreatePlatformEndpointResult result = snsClient.createPlatformEndpoint(request);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Log.e(TAG, e.getMessage(), e);
         }
         super.onNewToken(token);

@@ -143,16 +143,19 @@ public class Transaction implements Parcelable {
 		TransactionOperation operation = operations == null
 				|| operations.length == 0 ? null : operations[0];
 
-		if (!value.equals("0") && error.equals("0"))
+		if (walletAddress.equals(contractAddress)
+				&& !value.equals("0") && error.equals("0"))
         {
-			//this is ether transaction
-			if (walletAddress.equals(contractAddress)) return true;
+			 //looking at ETH history and this is transaction involving eth
+			 return true;
+		}
+		else if (to.equals(contractAddress))
+		{
+			return true;
 		}
 		else
 		{
-			if (to.equals(contractAddress)) return true;
+			return false;
 		}
-
-		return false;
 	}
 }

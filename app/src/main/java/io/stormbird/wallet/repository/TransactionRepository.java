@@ -91,6 +91,27 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
+		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+
+		TransactionData txData = new TransactionData();
+
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
+				.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
+				.flatMap(signedMessage -> Single.fromCallable( () -> {
+					txData.signature = Numeric.toHexString(signedMessage);
+					EthSendTransaction raw = web3j
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
+							.send();
+					if (raw.hasError()) {
+						throw new Exception(raw.getError().getMessage());
+					}
+					txData.txHash = raw.getTransactionHash();
+					return txData;
+				})).subscribeOn(Schedulers.io());
+	}
+
+	@Override
 	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
 		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
@@ -105,6 +126,28 @@ public class TransactionRepository implements TransactionRepositoryType {
 						throw new Exception(raw.getError().getMessage());
 					}
 					return raw.getTransactionHash();
+				})).subscribeOn(Schedulers.io());
+	}
+
+	@Override
+	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
+		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+
+		TransactionData txData = new TransactionData();
+
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
+				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, networkRepository.getDefaultNetwork().chainId))
+				.flatMap(signedMessage -> Single.fromCallable( () -> {
+					txData.signature = Numeric.toHexString(signedMessage);
+					EthSendTransaction raw = web3j
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
+							.send();
+					if (raw.hasError()) {
+						throw new Exception(raw.getError().getMessage());
+					}
+					txData.txHash = raw.getTransactionHash();
+					return txData;
 				})).subscribeOn(Schedulers.io());
 	}
 

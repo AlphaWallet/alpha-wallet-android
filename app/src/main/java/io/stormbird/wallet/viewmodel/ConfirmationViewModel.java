@@ -97,6 +97,8 @@ public class ConfirmationViewModel extends BaseViewModel {
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+
+        fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
     }
 
     private void onCreateTransaction(String transaction) {
@@ -129,7 +131,6 @@ public class ConfirmationViewModel extends BaseViewModel {
     private void onGasPrice(BigInteger currentGasPrice)
     {
         if (this.gasSettingsOverride != null) return;
-
         if (this.gasSettings.getValue() != null)
         {
             GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);

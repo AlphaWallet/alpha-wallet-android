@@ -245,7 +245,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(this);
     }
 
     private void onProgress(boolean shouldShowProgress) {

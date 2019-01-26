@@ -11,6 +11,14 @@
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="confirmed_by_stormbird">Confirmed by Stormbird</string>
+    <string name="unconfirmed">Unconfirmed</string>
+    <string name="no_recent_transactions">You have no transactions yet</string>
+    <string name="paste">Paste</string>
+    <string name="no_recent_transactions_subtext">When you send or receive %1$s,\n your transactions will appear here</string>
+    <string name="no_recent_transactions_subtext_ether">ether</string>
+    <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Invalid Transaction</string>
     <string name="contains_no_data">DApp transaction contains no data</string>
 </resources>

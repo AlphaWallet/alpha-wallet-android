@@ -130,7 +130,7 @@
     <string name="no_transactions_yet">No transactions yet!</string>
     <string name="unknown_balance_with_symbol">-- ETH</string>
     <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy_transaction_value">&#45;&#45; ETH</string>
+    <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">Sending...</string>
     <string name="i_understand">I understand</string>
     <string name="scan_qr">Get address from QR Code</string>
@@ -431,7 +431,7 @@
     <string name="ticket_market_purchase">Market Purchase</string>
     <string name="ticket_redeem">Redeem</string>
     <string name="ticket_receive_from">Receive From</string>
-    <string name="ticket_transfer_to">Transfer To</string>
+    <string name="ticket_transfer_to">Transfer</string>
     <string name="ticket_transfer">Transfer</string>
     <string name="ticket_transfer_from">Transfer From</string>
     <string name="ticket_load_new_tickets">Load New Tickets</string>
@@ -509,6 +509,18 @@
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>
+    <string name="erc20_details">ERC20 Details</string>
+    <string name="title_send_activity">Send</string>
+    <string name="available">Available</string>
+    <string name="usd_label">US$</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="confirmed_by_stormbird">Confirmed by Stormbird</string>
+    <string name="unconfirmed">Unconfirmed</string>
+    <string name="no_recent_transactions">You have no transactions yet</string>
+    <string name="paste">Paste</string>
+    <string name="no_recent_transactions_subtext">When you send or receive %1$s,\n your transactions will appear here</string>
+    <string name="no_recent_transactions_subtext_ether">ether</string>
+    <string name="no_recent_transactions_subtext_tokens">tokens</string>
     <string name="invalid_transaction">Invalid Transaction</string>
     <string name="contains_no_data">DApp transaction contains no data</string>
 </resources>

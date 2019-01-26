@@ -20,10 +20,10 @@ import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TransactionDateHolder;
 import io.stormbird.wallet.ui.widget.holder.TransactionHolder;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+    private int layoutResId = -1;
 
     private final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
@@ -79,13 +79,28 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         setHasStableIds(true);
     }
 
+    public TransactionsAdapter(OnTransactionClickListener onTransactionClickListener, TokensService service,
+                               FetchTransactionsInteract fetchTransactionsInteract, int layoutResId) {
+        this.onTransactionClickListener = onTransactionClickListener;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
+        tokensService = service;
+        setHasStableIds(true);
+        this.layoutResId = layoutResId;
+    }
+
     @Override
     public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+        int resId;
+        if (this.layoutResId != -1) {
+            resId = R.layout.item_recent_transaction;
+        } else {
+            resId = R.layout.item_transaction;
+        }
         BinderViewHolder holder = null;
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE: {
                 TransactionHolder transactionHolder
-                        = new TransactionHolder(R.layout.item_transaction, parent, tokensService, fetchTransactionsInteract);
+                        = new TransactionHolder(resId, parent, tokensService, fetchTransactionsInteract);
                 transactionHolder.setOnTransactionClickListener(onTransactionClickListener);
                 holder = transactionHolder;
             } break;
@@ -143,6 +158,35 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
 
         items.endBatchedUpdates();
+    }
+
+    public int updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
+    {
+        int txCount = 0;
+
+        List<Transaction> txSortList = new ArrayList<>();
+        Collections.addAll(txSortList, transactions);
+        Transaction.sortTranactions(txSortList);
+
+        items.beginBatchedUpdates();
+
+        for (Transaction transaction : txSortList)
+        {
+            //check this tx relates to the contract
+            if (transaction.isRelated(contractAddress, walletAddress))
+            {
+                TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+                TransactionSortedItem sortedItem = new TransactionSortedItem(
+                        TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+                items.add(sortedItem);
+                if (items.size() == count) break;
+                txCount++;
+            }
+        }
+
+        items.endBatchedUpdates();
+
+        return txCount;
     }
 
     public void clear() {

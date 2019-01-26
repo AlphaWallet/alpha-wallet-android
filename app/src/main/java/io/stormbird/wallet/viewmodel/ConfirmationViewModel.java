@@ -4,10 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.token.tools.Numeric;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
@@ -24,6 +21,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
+    private final MutableLiveData<TransactionData> newDappTransaction = new MutableLiveData<>();
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
@@ -80,6 +78,10 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public LiveData<String> sendTransaction() {
         return newTransaction;
+    }
+
+    public LiveData<TransactionData> sendDappTransaction() {
+        return newDappTransaction;
     }
 
     public void prepare() {
@@ -147,18 +149,23 @@ public class ConfirmationViewModel extends BaseViewModel {
         if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
-                    .subscribe(this::onCreateTransaction,
+                    .createWithSig(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
+                    .subscribe(this::onCreateDappTransaction,
                                this::onError);
         }
         else
         {
             byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
-                    .subscribe(this::onCreateTransaction,
+                    .createWithSig(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
+                    .subscribe(this::onCreateDappTransaction,
                                this::onError);
         }
+    }
+
+    private void onCreateDappTransaction(TransactionData txData) {
+        progress.postValue(false);
+        newDappTransaction.postValue(txData);
     }
 
     public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit)

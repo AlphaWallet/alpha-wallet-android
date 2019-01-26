@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import io.stormbird.wallet.entity.*;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -26,11 +27,6 @@ import dagger.android.AndroidInjection;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ConfirmationType;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.FinishReceiver;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.util.BalanceUtils;
@@ -222,6 +218,7 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.gasSettings().observe(this, this::onGasSettings);
         viewModel.sendTransaction().observe(this, this::onTransaction);
+        viewModel.sendDappTransaction().observe(this, this::onDappTransaction);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -367,6 +364,31 @@ public class ConfirmationActivity extends BaseActivity {
         dialog.show();
     }
 
+    private void onDappTransaction(TransactionData txData) {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(txData.txHash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", txData.txHash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+        });
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
+            intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
+            intent.putExtra(C.EXTRA_HEXDATA, txData.signature);
+            intent.putExtra(C.EXTRA_SUCCESS, true);
+            sendBroadcast(intent);
+
+            finish();
+        });
+        dialog.show();
+    }
+
     private void onGasSettings(GasSettings gasSettings) {
         String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
         gasPriceText.setText(gasPrice);
@@ -399,6 +421,15 @@ public class ConfirmationActivity extends BaseActivity {
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
+            if (confirmationType == WEB3TRANSACTION)
+            {
+                Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
+                intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
+                intent.putExtra(C.EXTRA_HEXDATA, "0x0000");
+                intent.putExtra(C.EXTRA_SUCCESS, false);
+                sendBroadcast(intent);
+            }
+            finish();
         });
         dialog.show();
     }

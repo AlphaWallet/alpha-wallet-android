@@ -40,6 +40,9 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
 
+	public static final int MAINNET_ID = 1;
+
+
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
                     MAINNET_RPC_URL,

@@ -15,6 +15,7 @@ import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
@@ -32,6 +33,8 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final TokensService tokensService;
 
     private final GasSettingsRouter gasSettingsRouter;
+
+    private GasSettings gasSettingsOverride = null;
 
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
@@ -81,8 +84,18 @@ public class ConfirmationViewModel extends BaseViewModel {
     public LiveData<String> sendTransaction() {
         return newTransaction;
     }
+    
+    public LiveData<TransactionData> sendDappTransaction() {
+        return newDappTransaction;
+    }
 
-    public void prepare() {
+    public void overrideGasSettings(GasSettings settings)
+    {
+        gasSettingsOverride = settings;
+        gasSettings.postValue(settings);
+    }
+
+    public void prepare(ConfirmationActivity ctx) {
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -115,6 +128,20 @@ public class ConfirmationViewModel extends BaseViewModel {
         gasSettingsRouter.open(context, gasSettings.getValue());
     }
 
+<<<<<<< Updated upstream
+=======
+    private void onGasPrice(BigInteger currentGasPrice)
+    {
+        if (this.gasSettingsOverride != null) return;
+
+        if (this.gasSettings.getValue() != null)
+        {
+            GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
+            this.gasSettings.postValue(updateSettings);
+        }
+    }
+
+>>>>>>> Stashed changes
     public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
         //generate a list of integers
         Ticket t = new Ticket(null, "0", "0", 0);

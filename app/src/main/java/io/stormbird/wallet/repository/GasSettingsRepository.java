@@ -30,6 +30,11 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
     public GasSettingsRepository(EthereumNetworkRepositoryType networkRepository) {
         this.networkRepository = networkRepository;
 
+        switch (networkRepository.getDefaultNetwork().chainId)
+        {
+            case 100:
+        }
+
         cachedGasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
         gasSettingsDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l ->

@@ -26,6 +26,7 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
 {
     private final EthereumNetworkRepositoryType networkRepository;
     private BigInteger cachedGasPrice;
+    private int currentChainId;
     private Disposable gasSettingsDisposable;
 
     private final MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
@@ -35,16 +36,26 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
     public GasSettingsRepository(EthereumNetworkRepositoryType networkRepository) {
         this.networkRepository = networkRepository;
 
-        switch (networkRepository.getDefaultNetwork().chainId)
-        {
-            case 100:
-        }
+        setCachedPrice();
 
-        cachedGasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
         gasSettingsDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l ->
                         fetchGasSettings()
                 ).subscribe();
+    }
+
+    private void setCachedPrice()
+    {
+        this.currentChainId = networkRepository.getDefaultNetwork().chainId;
+        switch (networkRepository.getDefaultNetwork().chainId)
+        {
+            case EthereumNetworkRepository.XDAI_ID:
+                cachedGasPrice = new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
+                break;
+            default:
+                cachedGasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
+                break;
+        }
     }
 
     private void fetchGasSettings() {
@@ -59,6 +70,11 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
             {
                 cachedGasPrice = price.getGasPrice();
                 gasPrice.postValue(cachedGasPrice);
+            }
+            else if (networkRepository.getDefaultNetwork().chainId != currentChainId)
+            {
+                //didn't update the current price correctly, switch to default:
+                setCachedPrice();
             }
         } catch (Exception ex) {
             // silently

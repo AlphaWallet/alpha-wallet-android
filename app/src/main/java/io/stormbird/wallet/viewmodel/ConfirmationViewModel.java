@@ -9,6 +9,7 @@ import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
@@ -141,10 +142,17 @@ public class ConfirmationViewModel extends BaseViewModel {
         gasSettingsRouter.open(context, gasSettings.getValue(), defaultNetwork.chainId);
     }
 
+    /**
+     * Only update from the network price if:
+     * - user hasn't overriden the default/network settings
+     * - network is not xDai (which is priced at 1 GWei).
+     * @param currentGasPrice
+     */
     private void onGasPrice(BigInteger currentGasPrice)
     {
-        if (this.gasSettingsOverride != null) return;
-        if (this.gasSettings.getValue() != null)
+        if (this.gasSettings.getValue() != null //protect against race condition
+                && this.gasSettingsOverride == null //only update if user hasn't overriden
+                && defaultNetwork.chainId != EthereumNetworkRepository.XDAI_ID) //don't update xDai from received value
         {
             GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
             this.gasSettings.postValue(updateSettings);

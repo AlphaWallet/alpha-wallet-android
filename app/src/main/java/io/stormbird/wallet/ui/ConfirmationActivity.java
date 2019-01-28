@@ -425,7 +425,7 @@ public class ConfirmationActivity extends BaseActivity {
             {
                 Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
                 intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
-                intent.putExtra(C.EXTRA_HEXDATA, "0x0000");
+                intent.putExtra(C.EXTRA_HEXDATA, "0x0000"); //Placeholder signature - transaction failed
                 intent.putExtra(C.EXTRA_SUCCESS, false);
                 sendBroadcast(intent);
             }

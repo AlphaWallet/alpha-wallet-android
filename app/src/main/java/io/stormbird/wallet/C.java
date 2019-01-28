@@ -57,6 +57,7 @@ public abstract class C {
     public static final String EXTRA_HAS_DEFINITION = "HAS_TOKEN_DEF";
     public static final String EXTRA_SUCCESS = "TX_SUCCESS";
     public static final String EXTRA_HEXDATA = "TX_HEX";
+    public static final String EXTRA_NETWORKID = "NET_ID";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";
@@ -90,7 +91,7 @@ public abstract class C {
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_MAX = 300000L;
     public static final long GAS_PRICE_MIN = 1000000000L;
-    public static final long NETWORK_FEE_MAX = 90000000000000000L;
+    public static final long NETWORK_FEE_MAX = 30000000000000000L;
     public static final int ETHER_DECIMALS = 18;
 
     //FOR DEMOS ETC

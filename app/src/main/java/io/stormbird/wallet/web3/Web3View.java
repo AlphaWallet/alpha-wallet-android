@@ -45,18 +45,18 @@ public class Web3View extends WebView {
 
     public Web3View(@NonNull Context context) {
         super(context);
-        init(context);
+        init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        init(context);
+        init();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class Web3View extends WebView {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void init(Context ctx) {
+    private void init() {
         jsInjectorClient = new JsInjectorClient(getContext());
         webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
         WebSettings webSettings = super.getSettings();

@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentActivity;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.*;
@@ -44,18 +45,18 @@ public class Web3View extends WebView {
 
     public Web3View(@NonNull Context context) {
         super(context);
-        init();
+        init(context);
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        init();
+        init(context);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class Web3View extends WebView {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void init() {
+    private void init(Context ctx) {
         jsInjectorClient = new JsInjectorClient(getContext());
         webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
         WebSettings webSettings = super.getSettings();
@@ -249,6 +250,11 @@ public class Web3View extends WebView {
             }
         }
     };
+
+    public void setActivity(FragmentActivity activity)
+    {
+        webViewClient.setActivity(activity);
+    }
 
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;

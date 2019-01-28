@@ -109,6 +109,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void initView(View view) {
         web3 = view.findViewById(R.id.web3view);
+        web3.setActivity(getActivity());
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);

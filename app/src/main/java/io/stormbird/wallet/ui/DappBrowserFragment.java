@@ -60,7 +60,7 @@ import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        URLLoadInterface, ItemClickListener
+        URLLoadInterface, ItemClickListener, SignTransactionInterface
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
 
@@ -81,6 +81,8 @@ public class DappBrowserFragment extends Fragment implements
     private AutoCompleteUrlAdapter adapter;
     private URLLoadReceiver URLReceiver;
 
+    private SignDappTransactionReceiver transactionReceiver;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -97,6 +99,9 @@ public class DappBrowserFragment extends Fragment implements
             String url = getArguments().getString("url");
             loadUrl(url);
         }
+
+        transactionReceiver = new SignDappTransactionReceiver(getActivity(), this);
+
         return view;
     }
 
@@ -305,6 +310,7 @@ public class DappBrowserFragment extends Fragment implements
         {
             //display transaction error
             onInvalidTransaction();
+            web3.onSignCancel(transaction);
         }
         else
         {
@@ -447,6 +453,19 @@ public class DappBrowserFragment extends Fragment implements
         catch (SignatureException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void signTransaction(Web3Transaction transaction, String txHex, boolean success)
+    {
+        if (success)
+        {
+            web3.onSignTransactionSuccessful(transaction, txHex);
+        }
+        else
+        {
+            web3.onSignCancel(transaction);
         }
     }
 }

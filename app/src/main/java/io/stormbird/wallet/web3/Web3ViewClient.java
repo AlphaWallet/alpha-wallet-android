@@ -1,8 +1,12 @@
 package io.stormbird.wallet.web3;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.net.http.SslError;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.webkit.SslErrorHandler;
@@ -14,6 +18,8 @@ import android.webkit.WebViewClient;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
+import io.stormbird.wallet.R;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import okhttp3.HttpUrl;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -25,6 +31,8 @@ public class Web3ViewClient extends WebViewClient {
 
     private final JsInjectorClient jsInjectorClient;
     private final UrlHandlerManager urlHandlerManager;
+
+    private Activity context;
 
     private boolean isInjected;
 
@@ -142,13 +150,33 @@ public class Web3ViewClient extends WebViewClient {
     }
 
     @Override
-    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-        handler.proceed();
+    public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error)
+    {
+        AWalletAlertDialog aDialog = new AWalletAlertDialog(context);
+        aDialog.setTitle(R.string.title_dialog_error);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
+        aDialog.setMessage(R.string.ssl_cert_invalid);
+        aDialog.setButtonText(R.string.dialog_approve);
+        aDialog.setButtonListener(v -> {
+            handler.proceed();
+            aDialog.dismiss();
+        });
+        aDialog.setSecondaryButtonText(R.string.action_cancel);
+        aDialog.setButtonListener(v -> {
+            handler.cancel();
+            aDialog.dismiss();
+        });
+        aDialog.show();
     }
 
     public void onReload() {
         synchronized (lock) {
             isInjected = false;
         }
+    }
+
+    public void setActivity(FragmentActivity activity)
+    {
+        this.context = activity;
     }
 }

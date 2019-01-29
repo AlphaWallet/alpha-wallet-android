@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentActivity;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.*;
@@ -249,6 +250,11 @@ public class Web3View extends WebView {
             }
         }
     };
+
+    public void setActivity(FragmentActivity activity)
+    {
+        webViewClient.setActivity(activity);
+    }
 
     private class WrapWebViewClient extends WebViewClient {
         private final Web3ViewClient internalClient;

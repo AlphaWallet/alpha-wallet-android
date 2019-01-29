@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import io.stormbird.wallet.entity.*;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -26,11 +27,6 @@ import dagger.android.AndroidInjection;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ConfirmationType;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.FinishReceiver;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.util.BalanceUtils;
@@ -62,6 +58,7 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView fromAddressText;
     private TextView toAddressText;
     private TextView valueText;
+    private TextView symbolText;
     private TextView gasPriceText;
     private TextView gasLimitText;
     private TextView networkFeeText;
@@ -71,7 +68,6 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView websiteText;
     private Button sendButton;
     private TextView title;
-    private TextView labelAmount;
 
     private BigDecimal amount;
     private int decimals;
@@ -101,6 +97,7 @@ public class ConfirmationActivity extends BaseActivity {
         fromAddressText = findViewById(R.id.text_from);
         toAddressText = findViewById(R.id.text_to);
         valueText = findViewById(R.id.text_value);
+        symbolText = findViewById(R.id.text_symbol);
         gasPriceText = findViewById(R.id.text_gas_price);
         gasLimitText = findViewById(R.id.text_gas_limit);
         networkFeeText = findViewById(R.id.text_network_fee);
@@ -110,7 +107,6 @@ public class ConfirmationActivity extends BaseActivity {
         websiteLabel = findViewById(R.id.label_website);
         websiteText = findViewById(R.id.text_website);
         title = findViewById(R.id.title_confirm);
-        labelAmount = findViewById(R.id.label_amount);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -133,14 +129,16 @@ public class ConfirmationActivity extends BaseActivity {
 
         switch (confirmationType) {
             case ETH:
-                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
+                symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
             case ERC20:
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
-                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
+                symbolText.setText(symbol);
                 transactionBytes = TokenRepository.createTokenTransferData(toAddress, amount.toBigInteger());
                 break;
             case ERC875:
@@ -155,6 +153,7 @@ public class ConfirmationActivity extends BaseActivity {
                 toAddress = "Stormbird market";
                 break;
             case WEB3TRANSACTION:
+                title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_dapp_transaction);
                 toAddress = transaction.recipient.toString();
                 if (transaction.contract != null)
@@ -183,22 +182,24 @@ public class ConfirmationActivity extends BaseActivity {
                 }
 
                 BigDecimal ethAmount = Convert.fromWei(transaction.value.toString(10), Convert.Unit.ETHER);
-                amountString = getEthString(ethAmount.doubleValue()) + " " + ETH_SYMBOL;
+                amountString = getEthString(ethAmount.doubleValue());
+                symbolText.setText(ETH_SYMBOL);
                 transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 break;
             case ERC721:
                 String contractName = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_erc721_transfer);
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 String contractTxt = contractAddress + " " + contractName;
-                labelAmount.setText(R.string.asset_name);
                 contractAddrText.setText(contractTxt);
                 amountString = symbol;
                 transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr);
                 break;
             default:
-                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString() + " " + symbol;
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
+                symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
         }
@@ -217,6 +218,7 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.gasSettings().observe(this, this::onGasSettings);
         viewModel.sendTransaction().observe(this, this::onTransaction);
+        viewModel.sendDappTransaction().observe(this, this::onDappTransaction);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.pushToast().observe(this, this::displayToast);
@@ -243,7 +245,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(this);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -362,6 +364,31 @@ public class ConfirmationActivity extends BaseActivity {
         dialog.show();
     }
 
+    private void onDappTransaction(TransactionData txData) {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setMessage(txData.txHash);
+        dialog.setButtonText(R.string.copy);
+        dialog.setButtonListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("transaction hash", txData.txHash);
+            clipboard.setPrimaryClip(clip);
+            dialog.dismiss();
+        });
+        dialog.setOnDismissListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
+            intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
+            intent.putExtra(C.EXTRA_HEXDATA, txData.signature);
+            intent.putExtra(C.EXTRA_SUCCESS, true);
+            sendBroadcast(intent);
+
+            finish();
+        });
+        dialog.show();
+    }
+
     private void onGasSettings(GasSettings gasSettings) {
         String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
         gasPriceText.setText(gasPrice);
@@ -394,6 +421,15 @@ public class ConfirmationActivity extends BaseActivity {
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
+            if (confirmationType == WEB3TRANSACTION)
+            {
+                Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
+                intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
+                intent.putExtra(C.EXTRA_HEXDATA, "0x0000"); //Placeholder signature - transaction failed
+                intent.putExtra(C.EXTRA_SUCCESS, false);
+                sendBroadcast(intent);
+            }
+            finish();
         });
         dialog.show();
     }

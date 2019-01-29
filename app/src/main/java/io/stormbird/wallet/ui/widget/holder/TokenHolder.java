@@ -11,11 +11,11 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -95,6 +95,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                         ? token.tokenInfo.symbol.toUpperCase()
                         : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
 
+            animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
         } catch (Exception ex) {
             fillEmpty();
@@ -126,6 +127,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     }
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
+        stopTextAnimation();
         String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
                 ? EMPTY_BALANCE
                 : ethBalance.multiply(new BigDecimal(ticker.price))
@@ -170,13 +172,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             valColor = ContextCompat.getColor(getContext(), R.color.light_gray);
             textAppreciationSub.setText(R.string.appreciation);
-            textAppreciationSub.setTextColor(valColor);
+            textAppreciation.setTextColor(valColor);
         }
         else
         {
             valColor = ContextCompat.getColor(getContext(), R.color.red);
             textAppreciationSub.setText(R.string.depreciation);
-            textAppreciationSub.setTextColor(valColor);
+            textAppreciation.setTextColor(valColor);
             appreciation = appreciation.multiply(BigDecimal.valueOf(-1));
         }
 
@@ -231,5 +233,23 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
+    }
+
+    private void animateTextWhileWaiting() {
+        Animation anim = new AlphaAnimation(0.0f, 1.0f);
+        anim.setDuration(450);
+        anim.setStartOffset(20);
+        anim.setRepeatMode(Animation.REVERSE);
+        anim.setRepeatCount(Animation.INFINITE);
+
+        text24Hours.startAnimation(anim);
+        textAppreciation.startAnimation(anim);
+        balanceCurrency.startAnimation(anim);
+    }
+
+    private void stopTextAnimation() {
+        text24Hours.clearAnimation();
+        textAppreciation.clearAnimation();
+        balanceCurrency.clearAnimation();
     }
 }

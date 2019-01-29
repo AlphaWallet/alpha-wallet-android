@@ -138,4 +138,8 @@ public class BaseViewModel extends ViewModel
 	public void showRedeemToken(Context context, Token token) {
 		//do nothing
 	}
+
+	public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
+		//do nothing
+	}
 }

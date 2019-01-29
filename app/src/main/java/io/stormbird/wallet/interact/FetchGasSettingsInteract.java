@@ -1,6 +1,7 @@
 package io.stormbird.wallet.interact;
 
 
+import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.repository.GasSettingsRepositoryType;
@@ -22,6 +23,11 @@ public class FetchGasSettingsInteract {
 
     public Single<GasSettings> fetch(byte[] transactionBytes, boolean isNonFungible) {
         return repository.getGasSettings(transactionBytes, isNonFungible);
+    }
+
+    public MutableLiveData<BigInteger> gasPriceUpdate()
+    {
+        return repository.gasPriceUpdate();
     }
 
     public Single<GasSettings> fetchDefault(boolean tokenTransfer) {

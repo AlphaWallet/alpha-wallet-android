@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.router.Erc20DetailRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
@@ -17,6 +18,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
+    private final Erc20DetailRouter erc20DetailRouter;
     private final AssetDisplayRouter assetDisplayRouter;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -31,6 +33,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
+                                  Erc20DetailRouter erc20DetailRouter,
                                   AssetDisplayRouter assetDisplayRouter,
                                   FindDefaultNetworkInteract findDefaultNetworkInteract,
                                   FindDefaultWalletInteract findDefaultWalletInteract,
@@ -44,6 +47,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
+        this.erc20DetailRouter = erc20DetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -64,6 +68,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
+                erc20DetailRouter,
                 assetDisplayRouter,
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,

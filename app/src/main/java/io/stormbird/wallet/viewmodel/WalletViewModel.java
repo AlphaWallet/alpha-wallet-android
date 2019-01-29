@@ -6,6 +6,8 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
+
 import com.crashlytics.android.Crashlytics;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -17,6 +19,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
+import io.stormbird.wallet.router.Erc20DetailRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
@@ -44,6 +47,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
+    private final Erc20DetailRouter erc20DetailRouter;
     private final AssetDisplayRouter assetDisplayRouter;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
@@ -79,6 +83,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
+            Erc20DetailRouter erc20DetailRouter,
             AssetDisplayRouter assetDisplayRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
@@ -93,6 +98,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
+        this.erc20DetailRouter = erc20DetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
@@ -309,6 +315,13 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         boolean isToken = true;
         if (address.equalsIgnoreCase(defaultWallet().getValue().address)) isToken = false;
         sendTokenRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token);
+    }
+
+    @Override
+    public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
+        boolean isToken = !address.equalsIgnoreCase(defaultWallet().getValue().address);
+        boolean hasDefinition = assetDefinitionService.hasDefinition(address);
+        erc20DetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
     }
 
     @Override

@@ -1,14 +1,17 @@
 package io.stormbird.wallet.repository;
 
 
+import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.GasSettings;
 
+import io.stormbird.wallet.util.BalanceUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.http.HttpService;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +28,9 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
     private BigInteger cachedGasPrice;
     private Disposable gasSettingsDisposable;
 
-    private final static long FETCH_GAS_PRICE_INTERVAL = 60;
+    private final MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
+
+    private final static long FETCH_GAS_PRICE_INTERVAL = 30;
 
     public GasSettingsRepository(EthereumNetworkRepositoryType networkRepository) {
         this.networkRepository = networkRepository;
@@ -45,10 +50,20 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
             EthGasPrice price = web3j
                     .ethGasPrice()
                     .send();
-            cachedGasPrice = price.getGasPrice();
+            if (price.getGasPrice().compareTo(BalanceUtils.gweiToWei(BigDecimal.ONE)) >= 0)
+            {
+                cachedGasPrice = price.getGasPrice();
+                gasPrice.postValue(cachedGasPrice);
+            }
         } catch (Exception ex) {
             // silently
         }
+    }
+
+    @Override
+    public MutableLiveData<BigInteger> gasPriceUpdate()
+    {
+        return gasPrice;
     }
 
     public Single<GasSettings> getGasSettings(boolean forTokenTransfer) {

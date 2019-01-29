@@ -15,6 +15,10 @@ public abstract class C {
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
     public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
 
+    public static final String ETHEREUM_TICKER_NAME = "ethereum";
+    public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
+    public static final String XDAI_TICKER_NAME = "dai";
+
     public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TIKER = "poa";
 

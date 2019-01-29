@@ -12,6 +12,7 @@ import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
@@ -84,10 +85,12 @@ public class ConfirmationViewModel extends BaseViewModel {
         return newDappTransaction;
     }
 
-    public void prepare() {
+    public void prepare(ConfirmationActivity ctx) {
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+
+        fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
     }
 
     private void onCreateTransaction(String transaction) {
@@ -115,6 +118,15 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void openGasSettings(Activity context) {
         gasSettingsRouter.open(context, gasSettings.getValue());
+    }
+
+    private void onGasPrice(BigInteger currentGasPrice)
+    {
+        if (this.gasSettings.getValue() != null)
+        {
+            GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
+            this.gasSettings.postValue(updateSettings);
+        }
     }
 
     public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {

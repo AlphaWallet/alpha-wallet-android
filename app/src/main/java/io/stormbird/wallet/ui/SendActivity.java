@@ -304,9 +304,15 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             amount = amountEditText.getText().toString();
         }
 
-        if (!isValidAmount(amount) || !isBalanceEnough(amount)) {
+        if (!isValidAmount(amount)) {
             amountError.setVisibility(View.VISIBLE);
             amountError.setText(R.string.error_invalid_amount);
+            isValid = false;
+        }
+
+        if (!isBalanceEnough(amount)) {
+            amountError.setVisibility(View.VISIBLE);
+            amountError.setText(R.string.error_insufficient_funds);
             isValid = false;
         }
 

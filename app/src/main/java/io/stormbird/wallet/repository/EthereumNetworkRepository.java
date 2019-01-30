@@ -46,7 +46,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							100,
 							false,
 							"https://dai.poa.network",
-							"https://blockscout.com/poa/dai/tx"),
+							"https://blockscout.com/poa/dai/tx", XDAI_TICKER_NAME),
       new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
                     POA_RPC_URL,
                     "https://poaexplorer.com/txid/search/", 99, false, ETHEREUM_TICKER_NAME),

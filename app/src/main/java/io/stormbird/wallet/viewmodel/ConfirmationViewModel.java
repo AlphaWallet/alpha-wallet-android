@@ -87,7 +87,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     public LiveData<String> sendTransaction() {
         return newTransaction;
     }
-    
+
     public LiveData<TransactionData> sendDappTransaction() {
         return newDappTransaction;
     }

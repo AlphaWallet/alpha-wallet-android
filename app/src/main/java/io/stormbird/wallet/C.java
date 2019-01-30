@@ -9,11 +9,15 @@ public abstract class C {
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
     public static final String POA_NETWORK_NAME = "POA Network";
-    public static final String XDAI_NETWORK_NAME = "XDAI Network";
+    public static final String XDAI_NETWORK_NAME = "xDai Network";
     public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
     public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
     public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
+
+    public static final String ETHEREUM_TICKER_NAME = "ethereum";
+    public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
+    public static final String XDAI_TICKER_NAME = "dai";
 
     public static final String ETHEREUM_TICKER = "ethereum";
     public static final String POA_TIKER = "poa";

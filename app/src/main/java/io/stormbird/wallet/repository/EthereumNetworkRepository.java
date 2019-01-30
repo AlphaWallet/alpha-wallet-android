@@ -16,18 +16,7 @@ import java.util.Set;
 
 import io.reactivex.Single;
 
-import static io.stormbird.wallet.C.CLASSIC_NETWORK_NAME;
-import static io.stormbird.wallet.C.ETC_SYMBOL;
-import static io.stormbird.wallet.C.ETHEREUM_NETWORK_NAME;
-import static io.stormbird.wallet.C.ETH_SYMBOL;
-import static io.stormbird.wallet.C.KOVAN_NETWORK_NAME;
-import static io.stormbird.wallet.C.POA_NETWORK_NAME;
-import static io.stormbird.wallet.C.POA_SYMBOL;
-import static io.stormbird.wallet.C.RINKEBY_NETWORK_NAME;
-import static io.stormbird.wallet.C.ROPSTEN_NETWORK_NAME;
-import static io.stormbird.wallet.C.SOKOL_NETWORK_NAME;
-import static io.stormbird.wallet.C.XDAI_NETWORK_NAME;
-import static io.stormbird.wallet.C.xDAI_SYMBOL;
+import static io.stormbird.wallet.C.*;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
@@ -45,10 +34,11 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
                     MAINNET_RPC_URL,
                     "https://etherscan.io/tx/",1, true,
 							"https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-							"https://api.etherscan.io/"),
-           new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
+							"https://api.etherscan.io/",
+							ETHEREUM_TICKER_NAME),
+      new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://gastracker.io/tx/",61, true),
+                    "https://gastracker.io/tx/",61, true, CLASSIC_TICKER_NAME),
 			new NetworkInfo(XDAI_NETWORK_NAME,
 							xDAI_SYMBOL,
 							XDAI_RPC_URL,
@@ -57,25 +47,25 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							false,
 							"https://dai.poa.network",
 							"https://blockscout.com/poa/dai/tx"),
-            new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
+      new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
                     POA_RPC_URL,
-                    "https://poaexplorer.com/txid/search/", 99, false),
+                    "https://poaexplorer.com/txid/search/", 99, false, ETHEREUM_TICKER_NAME),
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL, KOVAN_RPC_URL,
                     "https://kovan.etherscan.io/tx/", 42, false,
 							"https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-							"https://api-kovan.etherscan.io/"),
+							"https://api-kovan.etherscan.io/", ETHEREUM_TICKER_NAME),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
 							ROPSTEN_RPC_URL,
                     "https://ropsten.etherscan.io/tx/",3, false,
 							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-					"https://api-ropsten.etherscan.io/"),
+					"https://api-ropsten.etherscan.io/", ETHEREUM_TICKER_NAME),
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
                     SOKOL_RPC_URL,
-                    "https://sokol-explorer.poa.network/account/",77, false),
+                    "https://sokol-explorer.poa.network/account/",77, false, ETHEREUM_TICKER_NAME),
 			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL, RINKEBY_RPC_URL,
 							"https://rinkeby.etherscan.io/tx/",4, false,
 							"https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-							"https://api-rinkeby.etherscan.io/"),
+              "https://api-rinkeby.etherscan.io/", ETHEREUM_TICKER_NAME),
 	};
 
 	private final PreferenceRepositoryType preferences;
@@ -144,6 +134,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	@Override
     public Single<Ticker> getTicker() {
         return Single.fromObservable(tickerService
-                .fetchTickerPrice(getByName(ETHEREUM_NETWORK_NAME).name));
+                .fetchTickerPrice(defaultNetwork.tickerId));
     }
 }

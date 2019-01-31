@@ -7,7 +7,9 @@ import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
@@ -29,21 +31,26 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final MarketQueueService marketQueueService;
     private final TokensService tokensService;
-
+    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
+
+    private GasSettings gasSettingsOverride = null;
+    private NetworkInfo defaultNetwork;
 
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
                                  CreateTransactionInteract createTransactionInteract,
                                  GasSettingsRouter gasSettingsRouter,
                                  MarketQueueService marketQueueService,
-                                 TokensService tokensService) {
+                                 TokensService tokensService,
+                                 FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
         this.marketQueueService = marketQueueService;
         this.tokensService = tokensService;
+        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
 
     public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
@@ -85,12 +92,27 @@ public class ConfirmationViewModel extends BaseViewModel {
         return newDappTransaction;
     }
 
-    public void prepare(ConfirmationActivity ctx) {
+    public void overrideGasSettings(GasSettings settings)
+    {
+        gasSettingsOverride = settings;
+        gasSettings.postValue(settings);
+    }
+
+    public void prepare(ConfirmationActivity ctx)
+    {
+        disposable = findDefaultNetworkInteract
+                .find()
+                .subscribe(this::onDefaultNetwork, this::onError);
+
+        fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
+        defaultNetwork = networkInfo;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
-
-        fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
     }
 
     private void onCreateTransaction(String transaction) {
@@ -117,12 +139,20 @@ public class ConfirmationViewModel extends BaseViewModel {
     }
 
     public void openGasSettings(Activity context) {
-        gasSettingsRouter.open(context, gasSettings.getValue());
+        gasSettingsRouter.open(context, gasSettings.getValue(), defaultNetwork.chainId);
     }
 
+    /**
+     * Only update from the network price if:
+     * - user hasn't overriden the default/network settings
+     * - network is not xDai (which is priced at 1 GWei).
+     * @param currentGasPrice
+     */
     private void onGasPrice(BigInteger currentGasPrice)
     {
-        if (this.gasSettings.getValue() != null)
+        if (this.gasSettings.getValue() != null //protect against race condition
+                && this.gasSettingsOverride == null //only update if user hasn't overriden
+                && defaultNetwork.chainId != EthereumNetworkRepository.XDAI_ID) //don't update xDai from received value
         {
             GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
             this.gasSettings.postValue(updateSettings);

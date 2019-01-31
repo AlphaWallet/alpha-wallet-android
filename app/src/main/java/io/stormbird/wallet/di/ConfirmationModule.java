@@ -3,11 +3,9 @@ package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.repository.GasSettingsRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
-import io.stormbird.wallet.repository.TransactionRepositoryType;
-import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
@@ -25,9 +23,10 @@ public class ConfirmationModule {
             CreateTransactionInteract createTransactionInteract,
             GasSettingsRouter gasSettingsRouter,
             MarketQueueService marketQueueService,
-            TokensService tokensService
+            TokensService tokensService,
+            FindDefaultNetworkInteract findDefaultNetworkInteract
     ) {
-        return new ConfirmationViewModelFactory(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter, marketQueueService, tokensService);
+        return new ConfirmationViewModelFactory(findDefaultWalletInteract, fetchGasSettingsInteract, createTransactionInteract, gasSettingsRouter, marketQueueService, tokensService, findDefaultNetworkInteract);
     }
 
     @Provides
@@ -48,5 +47,11 @@ public class ConfirmationModule {
     @Provides
     GasSettingsRouter provideGasSettingsRouter() {
         return new GasSettingsRouter();
+    }
+
+    @Provides
+    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
+            EthereumNetworkRepositoryType networkRepository) {
+        return new FindDefaultNetworkInteract(networkRepository);
     }
 }

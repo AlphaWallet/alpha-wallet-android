@@ -10,10 +10,11 @@ import io.stormbird.wallet.ui.GasSettingsActivity;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
 
 public class GasSettingsRouter {
-    public void open(Activity context, GasSettings gasSettings) {
+    public void open(Activity context, GasSettings gasSettings, int chainId) {
         Intent intent = new Intent(context, GasSettingsActivity.class);
         intent.putExtra(C.EXTRA_GAS_PRICE, gasSettings.gasPrice.toString());
         intent.putExtra(C.EXTRA_GAS_LIMIT, gasSettings.gasLimit.toString());
+        intent.putExtra(C.EXTRA_NETWORKID, chainId);
         context.startActivityForResult(intent, GasSettingsViewModel.SET_GAS_SETTINGS);
     }
 }

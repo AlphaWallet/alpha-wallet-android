@@ -21,6 +21,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModelFactory;
@@ -37,6 +38,8 @@ public class GasSettingsActivity extends BaseActivity {
     private TextView gasPriceInfoText;
     private TextView gasLimitInfoText;
     private Button saveButton;
+
+    private BigInteger granularity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,26 +73,36 @@ public class GasSettingsActivity extends BaseActivity {
 
         BigInteger gasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
         BigInteger gasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
+        int chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, EthereumNetworkRepository.MAINNET_ID);
         BigInteger gasLimitMin = BigInteger.valueOf(C.GAS_LIMIT_MIN);
         BigInteger gasLimitMax = BigInteger.valueOf(C.GAS_LIMIT_MAX);
         BigInteger gasPriceMin = BigInteger.valueOf(C.GAS_PRICE_MIN);
         BigInteger networkFeeMax = BigInteger.valueOf(C.NETWORK_FEE_MAX);
+        BigDecimal gasPriceMaxGwei;
 
-        final int gasPriceMinGwei = BalanceUtils.weiToGweiBI(gasPriceMin).intValue();
-        gasPriceSlider.setMax(BalanceUtils
-                .weiToGweiBI(networkFeeMax.divide(gasLimitMax))
-                .subtract(BigDecimal.valueOf(gasPriceMinGwei))
-                .intValue());
-        int gasPriceProgress = BalanceUtils
-                .weiToGweiBI(gasPrice)
-                .subtract(BigDecimal.valueOf(gasPriceMinGwei))
-                .intValue();
-        gasPriceSlider.setProgress(gasPriceProgress);
+        // The math here is to keep the gas intervals clean
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.XDAI_ID:
+                granularity = BalanceUtils.gweiToWei(BigDecimal.ONE.divide(BigDecimal.valueOf(100)));
+                gasPriceSlider.setMax(100);
+                break;
+            default:
+                gasPriceMaxGwei = BalanceUtils
+                        .weiToGweiBI(networkFeeMax.divide(gasLimitMax));
+                granularity = BalanceUtils.gweiToWei(gasPriceMaxGwei.divide(BigDecimal.valueOf(100)));
+                gasPriceSlider.setMax(99);
+                break;
+        }
+
+        gasPriceSlider.setProgress(((gasPrice.subtract(gasPriceMin)).divide(granularity)).intValue());
         gasPriceSlider.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
                     @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        viewModel.gasPrice().setValue(BalanceUtils.gweiToWei(BigDecimal.valueOf(progress + gasPriceMinGwei)));
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+                    {
+                        BigInteger scaledProgress = BigInteger.valueOf(progress).multiply(granularity);
+                        viewModel.gasPrice().setValue(scaledProgress.add(gasPriceMin));
                     }
 
                     @Override

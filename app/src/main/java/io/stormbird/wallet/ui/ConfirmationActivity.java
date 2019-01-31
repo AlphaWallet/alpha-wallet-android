@@ -441,7 +441,8 @@ public class ConfirmationActivity extends BaseActivity {
                 BigInteger gasPrice = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_PRICE));
                 BigInteger gasLimit = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_LIMIT));
                 GasSettings settings = new GasSettings(gasPrice, gasLimit);
-                viewModel.gasSettings().postValue(settings);
+                viewModel.overrideGasSettings(settings);
+                //viewModel.gasSettings().postValue(settings);
             }
         }
     }

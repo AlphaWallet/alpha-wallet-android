@@ -29,41 +29,50 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
 
+	public static final int MAINNET_ID = 1;
+	public static final int CLASSIC_ID = 61;
+	public static final int POA_ID = 99;
+	public static final int KOVAN_ID = 42;
+	public static final int ROPSTEN_ID = 3;
+	public static final int SOKOL_ID = 77;
+	public static final int RINKEBY_ID = 4;
+	public static final int XDAI_ID = 100;
+
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
                     MAINNET_RPC_URL,
-                    "https://etherscan.io/tx/",1, true,
+                    "https://etherscan.io/tx/",MAINNET_ID, true,
 							"https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api.etherscan.io/",
 							ETHEREUM_TICKER_NAME),
       new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://gastracker.io/tx/",61, true, CLASSIC_TICKER_NAME),
+					  "https://gastracker.io/tx/",CLASSIC_ID, true, CLASSIC_TICKER_NAME),
 			new NetworkInfo(XDAI_NETWORK_NAME,
 							xDAI_SYMBOL,
 							XDAI_RPC_URL,
 							"https://blockscout.com/poa/dai/api",
-							100,
+							XDAI_ID,
 							false,
 							"https://dai.poa.network",
 							"https://blockscout.com/poa/dai/tx", XDAI_TICKER_NAME),
       new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
                     POA_RPC_URL,
-                    "https://poaexplorer.com/txid/search/", 99, false, ETHEREUM_TICKER_NAME),
+                    "https://poaexplorer.com/txid/search/", POA_ID, false, ETHEREUM_TICKER_NAME),
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL, KOVAN_RPC_URL,
-                    "https://kovan.etherscan.io/tx/", 42, false,
+                    "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
 							"https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api-kovan.etherscan.io/", ETHEREUM_TICKER_NAME),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
 							ROPSTEN_RPC_URL,
-                    "https://ropsten.etherscan.io/tx/",3, false,
+                    "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
 							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 					"https://api-ropsten.etherscan.io/", ETHEREUM_TICKER_NAME),
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
                     SOKOL_RPC_URL,
-                    "https://sokol-explorer.poa.network/account/",77, false, ETHEREUM_TICKER_NAME),
+                    "https://sokol-explorer.poa.network/account/",SOKOL_ID, false, ETHEREUM_TICKER_NAME),
 			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL, RINKEBY_RPC_URL,
-							"https://rinkeby.etherscan.io/tx/",4, false,
+							"https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
 							"https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
               "https://api-rinkeby.etherscan.io/", ETHEREUM_TICKER_NAME),
 	};
@@ -71,7 +80,6 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	private final PreferenceRepositoryType preferences;
     private final TickerService tickerService;
     private NetworkInfo defaultNetwork;
-    private String currentActiveRPC;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
 
     public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService) {

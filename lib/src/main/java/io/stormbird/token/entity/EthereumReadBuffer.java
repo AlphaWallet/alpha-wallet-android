@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.stormbird.token.tools.Numeric;
@@ -93,10 +94,30 @@ public class EthereumReadBuffer extends DataInputStream
         return i & 0x00000000ffffffffL; // long is always 64 bits
     }
 
+    public List<BigInteger> readTokenIdsFromSpawnableLink(byte[] orderBytesFromLink)
+    {
+        List<BigInteger> tokenIds = new ArrayList<>();
+        byte[] tokenBytes = new byte[]{};
+        int sigPos = orderBytesFromLink.length - 65; //the last 65 bytes are the signature params
+        int tokenPos = 28; //tokens start at this byte
+        int index = 0;
+        for(int i = tokenPos; i < sigPos; i++)
+        {
+            tokenBytes[index] = orderBytesFromLink[i];
+            index++;
+        }
+        for(int i = 0; i < tokenBytes.length; i+=32)
+        {
+            BigInteger tokenId = new BigInteger(Arrays.copyOfRange(tokenBytes, i, i + 32));
+            tokenIds.add(tokenId);
+        }
+        return tokenIds;
+    }
+
     public int[] readCompressedIndices(int indiciesLength) throws IOException
     {
         byte[] readBuffer = new byte[indiciesLength];
-        read(readBuffer);
+        int bufferLength = read(readBuffer);
         int index = 0;
         int state = 0;
 

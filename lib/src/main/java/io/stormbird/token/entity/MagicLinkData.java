@@ -8,9 +8,13 @@ import java.util.List;
 public class MagicLinkData
 {
     public long expiry;
+    public byte[] prefix;
+    public BigInteger nonce;
     public double price;
     public BigInteger priceWei;
+    public List<BigInteger> tokenIds;
     public int[] tickets;
+    public BigInteger amount;
     public int ticketStart;
     public int ticketCount;
     public String contractAddress;
@@ -18,7 +22,7 @@ public class MagicLinkData
     public byte[] message;
     public String ownerAddress;
     public String contractName;
-    public int contractType;
+    public byte contractType;
 
     public List<BigInteger> balanceInfo = null;
 

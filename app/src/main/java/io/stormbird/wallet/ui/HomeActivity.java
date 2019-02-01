@@ -42,10 +42,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DownloadInterface;
-import io.stormbird.wallet.entity.DownloadReceiver;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -62,7 +59,7 @@ import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -75,11 +72,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
-    private NewSettingsFragment settingsFragment;
-    private DappBrowserFragment dappBrowserFragment;
+    private final NewSettingsFragment settingsFragment;
+    private final DappBrowserFragment dappBrowserFragment;
+    private final TransactionsFragment transactionsFragment;
+    private final WalletFragment walletFragment;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
+
+    public HomeActivity()
+    {
+        dappBrowserFragment = new DappBrowserFragment();
+        transactionsFragment = new TransactionsFragment();
+        settingsFragment = new NewSettingsFragment();
+        walletFragment = new WalletFragment(this);
+    }
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -96,8 +103,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         toolbar();
 
-        dappBrowserFragment = new DappBrowserFragment();
-        settingsFragment = new NewSettingsFragment();
         viewPager = findViewById(R.id.view_pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -151,9 +156,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (getIntent() != null && getIntent().getStringExtra("url") != null) {
             String url = getIntent().getStringExtra("url");
 
-            if (dappBrowserFragment == null) {
-                dappBrowserFragment = new DappBrowserFragment();
-            }
             Bundle bundle = new Bundle();
             bundle.putString("url", url);
             dappBrowserFragment.setArguments(bundle);
@@ -230,7 +232,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (viewPager.getCurrentItem())
         {
             case DAPP_BROWSER:
-                if (dappBrowserFragment == null) dappBrowserFragment = new DappBrowserFragment();
                 if (dappBrowserFragment.getUrlIsBookmark())
                 {
                     getMenuInflater().inflate(R.menu.menu_added, menu);
@@ -410,6 +411,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
+    @Override
+    public void TokensReady()
+    {
+        transactionsFragment.tokensReady();
+    }
+
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
@@ -419,17 +426,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         public Fragment getItem(int position) {
             switch (position) {
                 case DAPP_BROWSER:
-                    if (dappBrowserFragment == null) dappBrowserFragment = new DappBrowserFragment();
                     return dappBrowserFragment;
                 case WALLET:
-                    return new WalletFragment();
+                    return walletFragment;
                 case SETTINGS:
-                    if (settingsFragment == null) settingsFragment = new NewSettingsFragment();
                     return settingsFragment;
                 case TRANSACTIONS:
-                    return new TransactionsFragment();
+                    return transactionsFragment;
                 default:
-                    return new WalletFragment();
+                    return walletFragment;
             }
         }
 

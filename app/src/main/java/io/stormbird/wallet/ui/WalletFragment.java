@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,13 +27,9 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInterface;
-import io.stormbird.wallet.entity.TokensReceiver;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
@@ -61,10 +58,22 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
+    private FragmentMessenger homeMessager;
     private int networkId = 0;
 
     private Wallet wallet;
     private boolean isVisible;
+
+    @SuppressLint("ValidFragment")
+    public WalletFragment(FragmentMessenger messenger)
+    {
+        homeMessager = messenger;
+    }
+
+    public WalletFragment()
+    {
+
+    }
 
     @Nullable
     @Override
@@ -100,6 +109,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.endUpdate().observe(this, this::checkTokens);
         viewModel.checkAddr().observe(this, this::updateTitle);
+        viewModel.tokensReady().observe(this, this::tokensReady);
         //viewModel.refreshTokens().observe(this, this::refreshTokens);
 
         adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
@@ -307,6 +317,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private void refreshTokens(Boolean aBoolean)
     {
         viewModel.fetchTokens();
+    }
+
+    private void tokensReady(Boolean dummy)
+    {
+        homeMessager.TokensReady();
     }
 
     @Override

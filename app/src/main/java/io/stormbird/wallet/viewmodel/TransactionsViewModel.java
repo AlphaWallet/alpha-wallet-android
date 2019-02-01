@@ -288,7 +288,7 @@ public class TransactionsViewModel extends BaseViewModel
                     .filter(token -> !token.isTerminated())
                     .filter(token -> !token.independentUpdate())//don't scan ERC721 transactions
                     .concatMap(this::checkSpec)
-                    .filter(token -> token.checkIntrinsicType()) //Don't scan tokens that appear to be setup incorrectly
+                    .filter(Token::checkIntrinsicType) //Don't scan tokens that appear to be setup incorrectly
                     .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
@@ -303,6 +303,8 @@ public class TransactionsViewModel extends BaseViewModel
     private Observable<Token> checkSpec(Token token)
     {
         return Observable.fromCallable(() -> {
+            if (token.checkIntrinsicType()) return token;
+
             ContractType fromService = tokensService.getInterfaceSpec(token.getAddress());
             token.setInterfaceSpec(fromService);
 

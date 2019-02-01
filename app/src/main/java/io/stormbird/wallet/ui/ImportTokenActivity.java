@@ -13,8 +13,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -25,6 +27,7 @@ import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
@@ -33,6 +36,8 @@ import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SystemView;
 
 import static io.stormbird.token.tools.Convert.getEthString;
+import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
+import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.IMPORT_STRING;
 
@@ -56,6 +61,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView priceUSD;
     private TextView priceUSDLabel;
     private TextView importTxt;
+    private TextView importHeader;
 
     private AppCompatRadioButton verified;
     private AppCompatRadioButton unVerified;
@@ -66,6 +72,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private LinearLayout costLayout;
     private int networkId = 0;
     private boolean usingFeeMaster = false;
+
+    private static final String CURRENCY_FEEMASTER = "https://app.awallet.io:80/api/";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,6 +91,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         priceETH = findViewById(R.id.textImportPrice);
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLabel = findViewById(R.id.fiat_price_txt);
+        importHeader = findViewById(R.id.import_header);
         priceETH.setVisibility(View.GONE);
         priceUSD.setVisibility(View.GONE);
         priceUSDLabel.setVisibility(View.GONE);
@@ -126,14 +135,25 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void checkContractNetwork(String contractAddress)
     {
-        int checkNetworkId = viewModel.getAssetDefinitionService().getNetworkId(contractAddress);
-        if (checkNetworkId > 0)
+        //check for currency link - currently only xDAI
+        MagicLinkData data = viewModel.getSalesOrder();
+        switch (data.contractType)
         {
-            viewModel.switchNetwork(checkNetworkId);
-        }
-        else
-        {
-            viewModel.checkTokenNetwork(contractAddress);
+            case currencyLink:
+                //only xDAI, need to check for currencyDrop methods:
+                viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
+                break;
+            default:
+                int checkNetworkId = viewModel.getAssetDefinitionService().getNetworkId(contractAddress);
+                if (checkNetworkId > 0)
+                {
+                    viewModel.switchNetwork(checkNetworkId);
+                }
+                else
+                {
+                    viewModel.checkTokenNetwork(contractAddress, "name");
+                }
+                break;
         }
     }
 
@@ -233,12 +253,24 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         ticketRange = importTokens;
         MagicLinkData order = viewModel.getSalesOrder();
 
-        String ethPrice = getEthString(order.price) + " " + ETH_SYMBOL;
+        //get current symbol
+        String networkSymbol = viewModel.network().getValue().symbol;
+        String ethPrice = getEthString(order.price) + " " + networkSymbol;
         String priceUsd = "$" + getUsdString(viewModel.getUSDPrice() * order.price);
 
         if (order.price == 0)
         {
-            String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(importTokens.contractAddress);
+            String feemasterServer;
+            switch (order.contractType)
+            {
+                case currencyLink:
+                    feemasterServer = CURRENCY_FEEMASTER;
+                    break;
+                default:
+                    feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(viewModel.getSalesOrder().contractAddress);
+                    break;
+            }
+
             if (feemasterServer != null)
             {
                 viewModel.checkFeemaster(feemasterServer);
@@ -275,15 +307,42 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
 
-        importTxt.setText(R.string.ticket_import_valid);
-
+        MagicLinkData data = viewModel.getSalesOrder();
+        //Customise button text
         View baseView = findViewById(android.R.id.content);
 
-        token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+        switch (data.contractType)
+        {
+            case spawnable:
+                importTxt.setText(R.string.token_spawn_valid);
+                importHeader.setText(R.string.import_spawnable);
+                importTickets.setText(R.string.spawn);
+                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                break;
+            case currencyLink:
+                importTxt.setText(R.string.currency_drop);
+                importHeader.setText(R.string.currency_import);
+                importTickets.setText(R.string.action_import);
+                setTicket(false, false, false); //switch off all ticket info
+                //show currency to import
+                LinearLayout currencyCard = findViewById(R.id.layout_currency_import);
+                currencyCard.setVisibility(View.VISIBLE);
+                TextView currency = findViewById(R.id.text_currency_message);
+                BigDecimal ethValue = Convert.fromWei(Convert.toWei(new BigDecimal(data.amount), Convert.Unit.SZABO), Convert.Unit.ETHER);
+                String networkSymbol = viewModel.network().getValue().symbol;
+                String message = getString(R.string.you_will_receive) + " " + ethValue.toPlainString() + " " + networkSymbol;
+                currency.setText(message);
+                findViewById(R.id.text_total_cost).setVisibility(View.GONE);
+                break;
+            default:
+                importTxt.setText(R.string.ticket_import_valid);
+                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                break;
+        }
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractNetworkId = viewModel.getAssetDefinitionService().getNetworkId(token.getAddress());
+        int contractNetworkId = viewModel.getAssetDefinitionService().getNetworkId(viewModel.getSalesOrder().contractAddress);
         if (contractNetworkId == networkId)
         {
             verified.setVisibility(View.VISIBLE);
@@ -437,17 +496,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     else
                     {
                         onProgress(true);
-                        Token t = viewModel.getImportToken();
-                        String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(t.getAddress());
-                        if (feemasterServer != null && usingFeeMaster)
-                        {
-                            viewModel.importThroughFeemaster(feemasterServer);
-                        }
-                        else
-                        {
-                            viewModel.performImport();
-                        }
+                        completeImport();
                     }
+                }
+                else if (viewModel.getSalesOrder().contractType == currencyLink)
+                {
+                    onProgress(true);
+                    completeCurrencyImport();
                 }
                 break;
             case R.id.cancel_button:
@@ -455,6 +510,32 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 new HomeRouter().open(this, true);
                 finish();
                 break;
+        }
+    }
+
+    private void completeImport()
+    {
+        String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(viewModel.getSalesOrder().contractAddress);
+        if (feemasterServer != null && usingFeeMaster)
+        {
+            viewModel.importThroughFeemaster(feemasterServer);
+        }
+        else
+        {
+            viewModel.performImport();
+        }
+    }
+
+    private void completeCurrencyImport()
+    {
+        //attempt to import through the server
+        if (usingFeeMaster)
+        {
+            viewModel.importThroughFeemaster(CURRENCY_FEEMASTER);
+        }
+        else
+        {
+            viewModel.performImport();
         }
     }
 

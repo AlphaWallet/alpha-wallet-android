@@ -83,7 +83,7 @@ public class PurchaseTicketsViewModel extends BaseViewModel
     {
         Token token = tokensService.getToken(marketInstance.magicLink.contractAddress);
         //ok let's try to drive this guy through
-        final byte[] tradeData = generateReverseTradeData(marketInstance.magicLink, token);
+        final byte[] tradeData = generateReverseTradeData(marketInstance.magicLink, token, null);
         //quick sanity check, dump price
         BigInteger milliWei = Convert.fromWei(marketInstance.magicLink.priceWei.toString(), Convert.Unit.FINNEY).toBigInteger();
         double recreatePrice = milliWei.doubleValue() / 1000.0;

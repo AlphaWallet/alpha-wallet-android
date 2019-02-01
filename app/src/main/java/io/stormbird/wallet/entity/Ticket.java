@@ -813,6 +813,19 @@ public class Ticket extends Token implements Parcelable
                 Collections.emptyList());
     }
 
+    public Function getSpawnPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
+    {
+        return new Function(
+                "spawnPassTo",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
+                              getDynArray(tokenIds),
+                              new org.web3j.abi.datatypes.generated.Uint8(v),
+                              new org.web3j.abi.datatypes.generated.Bytes32(r),
+                              new org.web3j.abi.datatypes.generated.Bytes32(s),
+                              new org.web3j.abi.datatypes.Address(recipient)),
+                Collections.emptyList());
+    }
+
     public Function getTransferFunction(String to, List<BigInteger> indices)
     {
         return new Function(

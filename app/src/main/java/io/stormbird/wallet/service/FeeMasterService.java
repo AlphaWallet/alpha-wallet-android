@@ -24,6 +24,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
 
 public class FeeMasterService
@@ -64,9 +65,73 @@ public class FeeMasterService
 
     public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, int networkId, MagicLinkData order)
     {
-        return generateTicketString(order.tickets)
-                .flatMap(ticketStr -> sendFeemasterTransaction(url, networkId, wallet.address, order.expiry, ticketStr, order.signature))
-                .toObservable();
+        switch (order.contractType)
+        {
+            case currencyLink:
+                return sendFeemasterCurrencyTransaction(url, networkId, wallet.address, order);
+            default:
+                return generateTicketString(order.tickets)
+                        .flatMap(ticketStr -> sendFeemasterTransaction(url, networkId, wallet.address, order.expiry, ticketStr, order.signature))
+                        .toObservable();
+        }
+    }
+
+    /*
+@RequestMapping(value = "/claimFreeCurrency", method = RequestMethod.POST)
+public ResponseEntity claimFreeCurrency(
+        @RequestParam(value= "prefix") String prefix,
+        @RequestParam(value="recipient") String recipient,
+        @RequestParam(value="amount") String amount,
+        @RequestParam(value="expiry") String expiry,
+        @RequestParam(value="nonce") String nonce,
+        @RequestParam(value = "v") String v,
+        @RequestParam(value = "r") String r,
+        @RequestParam(value = "s") String s,
+        @RequestParam(value= "networkId") String networkId,
+        @RequestParam(value= "contractAddress") String contractAddress
+ */
+
+    private Observable<Integer> sendFeemasterCurrencyTransaction(String url, int networkId, String address, MagicLinkData order)
+    {
+        return Observable.fromCallable(() -> {
+            Sign.SignatureData sigData = sigFromByteArray(order.signature);
+            Integer result = 500; //fail by default
+            try
+            {
+                MediaType mediaType = MediaType.parse("application/octet-stream");
+                StringBuilder sb = new StringBuilder();
+                sb.append(url);
+                sb.append("claimFreeCurrency");
+                Map<String, String> args = new HashMap<>();
+                args.put("prefix", Numeric.toHexString(order.prefix));
+                args.put("recipient", address);
+                args.put("amount", order.amount.toString(10));
+                args.put("expiry", String.valueOf(order.expiry));
+                args.put("nonce", order.nonce.toString(10));
+                args.put("networkId", String.valueOf(networkId));
+                args.put("r", Numeric.toHexString(sigData.getR()));
+                args.put("s", Numeric.toHexString(sigData.getS()));
+                args.put("v", Integer.toHexString(sigData.getV()));
+                args.put("contractAddress", order.contractAddress);
+                sb.append(formPrologData(args));
+
+                Request request = new Request.Builder()
+                        .url(sb.toString())
+                        .post(RequestBody.create(mediaType, ""))
+                        .build();
+
+                okhttp3.Response response = httpClient.newCall(request).execute();
+
+                result = response.code();
+                Log.d("RESP", response.body().string());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return result;
+        });
     }
 
     private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry)
@@ -185,7 +250,7 @@ public class FeeMasterService
 
                     Request request = new Request.Builder()
                             .url(sb.toString())
-                            .post(RequestBody.create(mediaType, ""))
+                            .get()
                             .build();
 
                     okhttp3.Response response = httpClient.newCall(request).execute();

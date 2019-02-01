@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import io.reactivex.Single;
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
@@ -19,10 +20,12 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
 import io.stormbird.wallet.ui.ImportTokenActivity;
+import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +38,9 @@ import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
 
+import static io.stormbird.token.tools.ParseMagicLink.*;
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.entity.MagicLinkParcel.generateReverseTradeData;
 
 /**
@@ -79,6 +84,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private List<BigInteger> availableBalance = new ArrayList<>();
     private double ethToUsd = 0;
     private TicketRange currentRange;
+    private int networkCount;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -210,7 +216,16 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void loadToken()
     {
-        fetchTokens();
+        switch (importOrder.contractType)
+        {
+            case currencyLink:
+                updateToken(); //don't check contract
+                break;
+            default:
+                fetchTokens();
+                break;
+        }
+
         getEthereumTicker(); //simultaneously fetch the current eth price
     }
 
@@ -310,38 +325,61 @@ public class ImportTokenViewModel extends BaseViewModel
     //5. We have token information and balance. Check if the import order is still valid.
     private void updateToken()
     {
-        List<BigInteger> newBalance = new ArrayList<>();
-        for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
+        switch (importOrder.contractType)
         {
-            if (importToken.getArrayBalance().size() > index) {
-                BigInteger ticketId = importToken.getArrayBalance().get(index);
-                if (ticketId.compareTo(BigInteger.ZERO) != 0)
+            case spawnable:
+                //TODO: Check if this spawnable is still valid.
+                //      Can we determine if this is the case by inquiring a contract method?
+                currentRange = new TicketRange(importOrder.tokenIds.get(0), importToken.getAddress());
+                for (int i = 1; i < importOrder.tokenIds.size(); i++)
                 {
-                    newBalance.add(ticketId); //ticket is there
+                    currentRange.tokenIds.add(importOrder.tokenIds.get(i));
                 }
-            }
-        }
+                importRange.setValue(currentRange);
+                break;
+            case currencyLink:
+                //setup UI for currency import
+                currentRange = null;
+                importRange.setValue(currentRange);
+                break;
+            case unassigned:
+            case normal:
+            case customizable:
+                List<BigInteger> newBalance = new ArrayList<>();
+                for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
+                {
+                    if (importToken.getArrayBalance().size() > index)
+                    {
+                        BigInteger ticketId = importToken.getArrayBalance().get(index);
+                        if (ticketId.compareTo(BigInteger.ZERO) != 0)
+                        {
+                            newBalance.add(ticketId); //ticket is there
+                        }
+                    }
+                }
 
-        long validTime = checkExpiry();
+                long validTime = checkExpiry();
 
-        if (newBalance.size() == 0 || newBalance.size() != importOrder.tickets.length)
-        {
-            //tickets already imported
-            invalidRange.setValue(newBalance.size());
-        }
-        else if (validTime < 0)
-        {
-            invalidTime.setValue((int)validTime);
-        }
-        else if (balanceChange(newBalance))
-        {
-            availableBalance = newBalance;
-            currentRange = new TicketRange(availableBalance.get(0), importToken.getAddress());
-            for (int i = 1; i < availableBalance.size(); i++)
-            {
-                currentRange.tokenIds.add(availableBalance.get(i));
-            }
-            determineInterface();
+                if (newBalance.size() == 0 || newBalance.size() != importOrder.tickets.length)
+                {
+                    //tickets already imported
+                    invalidRange.setValue(newBalance.size());
+                }
+                else if (validTime < 0)
+                {
+                    invalidTime.setValue((int) validTime);
+                }
+                else if (balanceChange(newBalance))
+                {
+                    availableBalance = newBalance;
+                    currentRange = new TicketRange(availableBalance.get(0), importToken.getAddress());
+                    for (int i = 1; i < availableBalance.size(); i++)
+                    {
+                        currentRange.tokenIds.add(availableBalance.get(i));
+                    }
+                    determineInterface();
+                }
+                break;
         }
     }
 
@@ -436,7 +474,7 @@ public class ImportTokenViewModel extends BaseViewModel
             initParser();
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             //calculate gas settings
-            final byte[] tradeData = generateReverseTradeData(order, importToken);
+            final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             disposable = fetchGasSettingsInteract
                     .fetch(tradeData, true)
                     .subscribe(this::performImportFinal, this::onError);
@@ -454,7 +492,7 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             //ok let's try to drive this guy through
-            final byte[] tradeData = generateReverseTradeData(order, importToken);
+            final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             Log.d(TAG, "Approx value of trade: " + order.price);
             //now push the transaction
             disposable = createTransactionInteract
@@ -563,7 +601,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void checkFeemaster(String feemasterServer)
     {
-        disposable = feeMasterService.checkFeemasterService(feemasterServer, network.getValue().chainId, importToken.getAddress())
+        disposable = feeMasterService.checkFeemasterService(feemasterServer, network.getValue().chainId, importOrder.contractAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleFeemasterAvailability, this::onError);
@@ -574,34 +612,41 @@ public class ImportTokenViewModel extends BaseViewModel
         feemasterAvailable.postValue(available);
     }
 
-    public void checkTokenNetwork(String contractAddress)
+    public void checkTokenNetwork(String contractAddress, String method)
     {
         //determine which network the contract is on.
         //first try the current default
         if (network.getValue() != null)
         {
             //try this network
-            disposable = fetchTokensInteract.getContractName(contractAddress, network.getValue().chainId)
+            disposable = fetchTokensInteract.getContractResponse(contractAddress, network.getValue().chainId, method)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::tryDefault, this::onError);
+                    .subscribe(response -> tryDefault(response, method), this::onError);
         }
         else
         {
-            testNetworks();
+            testNetworks(method);
         }
     }
 
-    private void testNetworks()
+    private void testNetworks(String method)
     {
+        networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
         //test all the networks
+
         disposable = Observable.fromCallable(this::getNetworkIds)
                 .flatMapIterable(networkId -> networkId)
-                .flatMap(networkId -> fetchTokensInteract.getContractName(importOrder.contractAddress, networkId))
+                .flatMap(networkId -> fetchTokensInteract.getContractResponse(importOrder.contractAddress, networkId, method))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::testNetworkResult, this::onError);
+                .subscribe(this::testNetworkResult, this::onTestError);
+    }
 
+    private void onTestError(Throwable throwable)
+    {
+        checkNetworkCount();
+        onError(throwable);
     }
 
     private List<Integer> getNetworkIds()
@@ -620,13 +665,26 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             switchToNetworkId(result.chainId);
         }
+        else
+        {
+            checkNetworkCount();
+        }
     }
 
-    private void tryDefault(ContractResult result)
+    private void checkNetworkCount()
+    {
+        networkCount--;
+        if (networkCount == 0)
+        {
+            invalidLink.postValue(true);
+        }
+    }
+
+    private void tryDefault(ContractResult result, String method)
     {
         if (result.name.equals(TokenRepository.INVALID_CONTRACT))
         {
-            testNetworks();
+            testNetworks(method);
         }
         else
         {

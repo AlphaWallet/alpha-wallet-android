@@ -1,11 +1,10 @@
-package io.stormbird.wallet.views;
+package io.awallet.crypto.alphawallet.views;
 
 
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 
-@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class ScreengrabTest {
 

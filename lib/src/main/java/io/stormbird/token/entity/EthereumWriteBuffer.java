@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 import io.stormbird.token.tools.Convert;
 import io.stormbird.token.tools.Numeric;
@@ -66,6 +67,14 @@ public class EthereumWriteBuffer extends DataOutputStream
                 uint16[1] = (byte) (i & 0xFF);
                 write(uint16);
             }
+        }
+    }
+
+    public void writeTokenIds(List<BigInteger> tokenIds) throws IOException
+    {
+        for (BigInteger tokenId : tokenIds)
+        {
+            write(Numeric.toBytesPadded(tokenId, 32));
         }
     }
 

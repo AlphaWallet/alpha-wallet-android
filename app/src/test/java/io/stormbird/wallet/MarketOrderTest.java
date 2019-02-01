@@ -181,6 +181,12 @@ public class MarketOrderTest
             }
 
             @Override
+            public Observable<ContractResult> queryInterfaceSpec(TokenInfo tokenInfo, NetworkInfo networkInfo)
+            {
+                return null;
+            }
+
+            @Override
             public Transaction fetchCachedTransaction(String walletAddr, String hash)
             {
                 return null;

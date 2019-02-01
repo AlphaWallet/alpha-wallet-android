@@ -9,6 +9,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.BadContract;
 import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -1123,6 +1124,30 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
+    public static byte[] createSpawnPassTo(Token token, BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
+    {
+        Function function = ((Ticket)token).getSpawnPassToFunction(expiry, tokenIds, v, r, s, recipient);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
+    public static byte[] createDropCurrency(MagicLinkData order, int v, byte[] r, byte[] s, String recipient)
+    {
+        Function function = new Function(
+                "dropCurrency",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint32(order.nonce),
+                              new org.web3j.abi.datatypes.generated.Uint32(order.amount),
+                              new org.web3j.abi.datatypes.generated.Uint32(order.expiry),
+                              new org.web3j.abi.datatypes.generated.Uint8(v),
+                              new org.web3j.abi.datatypes.generated.Bytes32(r),
+                              new org.web3j.abi.datatypes.generated.Bytes32(s),
+                              new org.web3j.abi.datatypes.Address(recipient)),
+                Collections.emptyList());
+
+        String encodedFunction = FunctionEncoder.encode(function);
+        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
+    }
+
     private Token[] mapToTokens(TokenInfo[] items) {
         int len = items.length;
         Token[] tokens = new Token[len];
@@ -1133,11 +1158,14 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<ContractResult> getTokenName(String address, int chainId)
+    public Single<ContractResult> getTokenResponse(String address, int chainId, String method)
     {
         return Single.fromCallable(() -> {
             ContractResult contractResult = new ContractResult(INVALID_CONTRACT, chainId);
-            org.web3j.abi.datatypes.Function function = nameOf();
+            org.web3j.abi.datatypes.Function function = new Function(method,
+                                                                     Arrays.<Type>asList(),
+                                                                     Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+
             Wallet temp = new Wallet(null);
             String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);
             if (responseValue == null) return contractResult;

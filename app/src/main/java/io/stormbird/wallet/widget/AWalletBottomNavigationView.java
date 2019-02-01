@@ -9,9 +9,9 @@ import android.widget.LinearLayout;
 import io.stormbird.wallet.R;
 
 public class AWalletBottomNavigationView extends LinearLayout {
-    public static final int DAPP_BROWSER = 0;
-    public static final int WALLET = 1;
-    public static final int TRANSACTIONS = 2;
+    public static final int WALLET = 0;
+    public static final int TRANSACTIONS = 1;
+    public static final int DAPP_BROWSER = 2;
     public static final int SETTINGS = 3;
     public static final int MARKETPLACE = 4;
 

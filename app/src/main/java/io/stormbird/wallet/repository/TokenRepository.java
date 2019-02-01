@@ -53,6 +53,7 @@ public class TokenRepository implements TokenRepositoryType {
     private final TransactionLocalSource transactionsLocalCache;
     private final AssetDefinitionService assetDefinitionService;
     private final TickerService tickerService;
+    private final TransactionRepositoryType transactionRepository;
     private Web3j web3j;
     private boolean useBackupNode = false;
     private NetworkInfo network;
@@ -65,7 +66,8 @@ public class TokenRepository implements TokenRepositoryType {
             TokenLocalSource localSource,
             TransactionLocalSource transactionsLocalCache,
             TickerService tickerService,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TransactionRepositoryType transactionRepository) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.walletRepository = walletRepository;
         this.tokenNetworkService = tokenNetworkService;
@@ -74,6 +76,7 @@ public class TokenRepository implements TokenRepositoryType {
         this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.assetDefinitionService = assetDefinitionService;
+        this.transactionRepository = transactionRepository;
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
@@ -541,7 +544,8 @@ public class TokenRepository implements TokenRepositoryType {
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
-                switch (token.getInterfaceSpec())
+                ContractType interfaceSpec = token.getInterfaceSpec();
+                switch (interfaceSpec)
                 {
                     case ERC875:
                     case ERC875LEGACY:
@@ -554,11 +558,19 @@ public class TokenRepository implements TokenRepositoryType {
                     case ETHEREUM:
                         balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
+                    case OTHER:
+                        Log.d(TAG, "Name: " + token.tokenInfo.name);
+                        if (token.tokenInfo.name != null)
+                        {
+                            //re-check the contract signature:
+                            interfaceSpec = transactionRepository.queryInterfaceSpec(token.tokenInfo).blockingGet();
+                        }
+                        break;
                     default:
                         break;
                 }
 
-                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis(), token.getInterfaceSpec());
+                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis(), interfaceSpec);
                 updated.patchAuxData(token); //perform any updates we need here
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);

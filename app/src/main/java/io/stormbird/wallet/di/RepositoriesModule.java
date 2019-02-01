@@ -128,7 +128,8 @@ public class RepositoriesModule {
             TokenLocalSource tokenLocalSource,
             TransactionLocalSource inDiskCache,
             TickerService tickerService,
-			AssetDefinitionService assetDefinitionService) {
+			AssetDefinitionService assetDefinitionService,
+			TransactionRepositoryType transactionRepository) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
 	            walletRepository,
@@ -136,7 +137,8 @@ public class RepositoriesModule {
                 tokenLocalSource,
                 inDiskCache,
                 tickerService,
-				assetDefinitionService);
+				assetDefinitionService,
+				transactionRepository);
     }
 
 	@Singleton

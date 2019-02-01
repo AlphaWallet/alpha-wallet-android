@@ -55,7 +55,7 @@ import dagger.android.support.AndroidSupportInjection;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
-public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface, Runnable
+public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface
 {
     @Inject
     TransactionsViewModelFactory transactionsViewModelFactory;
@@ -177,7 +177,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private void onDefaultWallet(Wallet wallet)
     {
         adapter.setDefaultWallet(wallet);
-        handler.postDelayed(this, 1000); //delay to allow token service list to load
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
@@ -226,6 +225,11 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.openDeposit(view.getContext(), uri);
     }
 
+    public void tokensReady()
+    {
+        viewModel.forceUpdateTransactionView();
+    }
+
     @Override
     public void resetTokens()
     {
@@ -255,11 +259,5 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.clear();
         list.setAdapter(adapter);
         viewModel.abortAndRestart(false);
-    }
-
-    @Override
-    public void run()
-    {
-        viewModel.forceUpdateTransactionView();
     }
 }

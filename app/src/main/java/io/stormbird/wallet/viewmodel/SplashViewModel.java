@@ -33,7 +33,6 @@ import io.stormbird.wallet.repository.PreferenceRepositoryType;
 
 import static io.stormbird.wallet.C.DEFAULT_NETWORK;
 import static io.stormbird.wallet.C.DOWNLOAD_READY;
-import static io.stormbird.wallet.C.HARD_CODED_KEY;
 import static io.stormbird.wallet.C.OVERRIDE_DEFAULT_NETWORK;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
@@ -146,8 +145,7 @@ public class SplashViewModel extends ViewModel {
 
     private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
-        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
-        return tokenInfo;
+        return new TokenInfo(address, name, symbol, decimals, true, isStormBird);
     }
 
     public void createNewWallet()

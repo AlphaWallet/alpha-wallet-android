@@ -488,10 +488,7 @@ public class AssetDefinitionService
         {
             String extension = f.getName().substring(index + 1).toLowerCase();
             String name = f.getName().substring(0, index).toLowerCase();
-            if (extension.equals("xml") && Address.isAddress(name))
-            {
-                return true;
-            }
+            return extension.equals("xml") && Address.isAddress(name);
         }
 
         return false;

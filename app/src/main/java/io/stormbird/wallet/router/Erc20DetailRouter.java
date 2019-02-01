@@ -8,7 +8,6 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.Erc20DetailActivity;
-import io.stormbird.wallet.ui.SendActivity;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 

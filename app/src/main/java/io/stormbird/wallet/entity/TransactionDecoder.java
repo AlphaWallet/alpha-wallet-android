@@ -6,7 +6,6 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,8 +86,7 @@ public class TransactionDecoder
         return thisData;
     }
 
-    private ParseStage setFunction(String input, int length) throws Exception
-    {
+    private ParseStage setFunction(String input, int length) {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
 
@@ -113,10 +111,9 @@ public class TransactionDecoder
     {
         ARGS,
         SIGNATURE
-    };
+    }
 
-    private ParseStage getParams(String input) throws Exception
-    {
+    private ParseStage getParams(String input) {
         state = ARGS;
         BigInteger count;
         StringBuilder sb = new StringBuilder();

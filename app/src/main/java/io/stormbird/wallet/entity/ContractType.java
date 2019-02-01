@@ -14,4 +14,4 @@ public enum ContractType
     ERC875,
     OTHER,
     CREATION //Placeholder for generic, should be at end of list
-};
+}

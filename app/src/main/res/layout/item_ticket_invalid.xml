@@ -10,7 +10,6 @@
     android:orientation="horizontal">
 
     <android.support.v7.widget.AppCompatRadioButton
-        android:id="@+id/radioBox_overlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -44,7 +43,6 @@
             android:text="" />
 
         <TextView
-            android:id="@+id/text_invalid_ticket"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"

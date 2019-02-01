@@ -39,7 +39,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
-        byte   subv = (byte)(sig[64]);
+        byte   subv = sig[64];
         if (subv < 27) subv += 27;
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
@@ -48,8 +48,6 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         BigInteger r = new BigInteger(1, subrRev);
         BigInteger s = new BigInteger(1, subsRev);
 
-        Sign.SignatureData ecSig = new Sign.SignatureData(subv, subrRev, subsRev);
-
-        return ecSig;
+        return new Sign.SignatureData(subv, subrRev, subsRev);
     }
 }

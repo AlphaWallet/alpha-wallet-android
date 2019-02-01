@@ -62,7 +62,7 @@ public class MarketplaceEventAdapter extends RecyclerView.Adapter<BinderViewHold
     }
 
     public void setMarketplaceEvents(MarketplaceEvent[] marketplaceEvents) {
-        items.beginBatchedUpdates();;
+        items.beginBatchedUpdates();
         items.clear();
         int i = 0;
         for (MarketplaceEvent marketplaceEvent : marketplaceEvents) {

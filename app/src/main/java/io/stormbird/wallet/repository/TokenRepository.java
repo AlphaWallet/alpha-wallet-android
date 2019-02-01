@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
@@ -787,7 +786,7 @@ public class TokenRepository implements TokenRepositoryType {
         }).subscribeOn(Schedulers.io());
     }
 
-    private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+    private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) {
         List<BigInteger> result = new ArrayList<>();
         result.add(BigInteger.valueOf(-1));
         try
@@ -817,14 +816,13 @@ public class TokenRepository implements TokenRepositoryType {
         if (!useBackupNode)
         {
             final Event event = new Event("TransferFrom",
-                                          Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                                          Arrays.asList(new TypeReference<Address>()
                                           {
                                           }, new TypeReference<Address>()
                                           {
                                           }),
-                                          Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Uint16>>()
-                                          {
-                                          }));
+                    Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {
+                    }));
             EthFilter filter = new EthFilter(DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING, contractAddr);
             filter.addSingleTopic(EventEncoder.encode(event));
             return web3j.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
@@ -936,44 +934,51 @@ public class TokenRepository implements TokenRepositoryType {
 
     private static org.web3j.abi.datatypes.Function nameOf() {
         return new Function("name",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function boolParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Bool>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param, BigInteger value) {
         return new Function(param,
-                            Arrays.asList(new Uint256(value)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Collections.singletonList(new Uint256(value)),
+                Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function intParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Uint>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function symbolOf() {
         return new Function("symbol",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function decimalsOf() {
         return new Function("decimals",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Uint8>() {
+                }));
     }
 
     private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
@@ -1016,7 +1021,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet) throws Exception {
+            Function function, String contractAddress, Wallet wallet) {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
@@ -1051,7 +1056,7 @@ public class TokenRepository implements TokenRepositoryType {
      * @throws Exception
      */
     private String callMainNetSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet) throws Exception {
+            Function function, String contractAddress, Wallet wallet) {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
@@ -1126,15 +1131,14 @@ public class TokenRepository implements TokenRepositoryType {
                 long now = System.currentTimeMillis();
                 Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
                 if (isStormbird == null) isStormbird = false;
-                TokenInfo result = new TokenInfo(
+
+                return new TokenInfo(
                         address,
                         getName(address),
                         getContractData(address, stringParam("symbol"), ""),
                         getDecimals(address),
                         true,
                         isStormbird);
-
-                return result;
             }
             catch (Exception e)
             {

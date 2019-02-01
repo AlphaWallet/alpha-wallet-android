@@ -1,7 +1,5 @@
 package io.stormbird.wallet.di;
 
-import javax.inject.Singleton;
-
 import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
@@ -9,16 +7,13 @@ import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.SetupTokensInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
-import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
-import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 
 import dagger.Module;

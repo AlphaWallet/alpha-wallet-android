@@ -25,7 +25,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.TicketRange;
-import org.ethereum.geth.BigInt;
 
 import java.math.BigInteger;
 

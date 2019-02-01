@@ -2,14 +2,7 @@ package io.stormbird.wallet;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.web3j.crypto.CipherException;
-import org.web3j.crypto.WalletFile;
-
-import java.io.UnsupportedEncodingException;
 
 /**
  * Created by marat on 11/22/17.

@@ -20,7 +20,6 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/title_transaction_details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -58,7 +57,6 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/from_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
@@ -78,7 +76,6 @@
                 tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF" />
 
             <TextView
-                android:id="@+id/to_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
@@ -117,7 +114,6 @@
                 tools:text="" />
 
             <TextView
-                android:id="@+id/gas_fee_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
@@ -136,7 +132,6 @@
                 tools:text="0.000044" />
 
             <TextView
-                android:id="@+id/txn_hash_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
@@ -155,7 +150,6 @@
                 tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF" />
 
             <TextView
-                android:id="@+id/txn_time_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
@@ -174,7 +168,6 @@
                 tools:text="September 4, 2017 at 2:32:12 PM" />
 
             <TextView
-                android:id="@+id/block_hash_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"

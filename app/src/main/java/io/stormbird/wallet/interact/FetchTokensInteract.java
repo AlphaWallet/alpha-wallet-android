@@ -1,10 +1,8 @@
 package io.stormbird.wallet.interact;
 
-import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.OrderContractAddressPair;
 import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.entity.Wallet;
@@ -12,9 +10,7 @@ import io.stormbird.wallet.repository.TokenRepositoryType;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;

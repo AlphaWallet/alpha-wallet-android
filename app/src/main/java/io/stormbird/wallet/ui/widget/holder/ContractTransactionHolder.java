@@ -17,9 +17,6 @@ import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.TransactionOperation;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
 /**

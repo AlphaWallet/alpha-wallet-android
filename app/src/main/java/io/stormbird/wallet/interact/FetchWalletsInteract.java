@@ -1,6 +1,5 @@
 package io.stormbird.wallet.interact;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 import io.stormbird.wallet.entity.NetworkInfo;

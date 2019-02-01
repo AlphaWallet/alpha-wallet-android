@@ -14,22 +14,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.stormbird.wallet.entity.*;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
@@ -470,8 +464,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
-        String formatted = df.format(usdPrice);
-        return formatted;
+        return df.format(usdPrice);
     }
 
     public static String getMagiclinkFromClipboard(Context ctx)

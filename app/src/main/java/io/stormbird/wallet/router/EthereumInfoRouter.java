@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import io.stormbird.wallet.ui.EthereumInfoActivity;
-import io.stormbird.wallet.ui.HelpActivity;
 
 public class EthereumInfoRouter {
     public void open(Context context) {

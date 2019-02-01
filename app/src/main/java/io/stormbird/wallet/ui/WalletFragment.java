@@ -1,9 +1,7 @@
 package io.stormbird.wallet.ui;
 
-import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,7 +30,6 @@ import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInterface;
 import io.stormbird.wallet.entity.TokensReceiver;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;

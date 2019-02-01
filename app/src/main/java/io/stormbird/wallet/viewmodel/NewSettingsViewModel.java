@@ -1,7 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
 
-import android.app.Fragment;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -27,10 +26,7 @@ import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.reactivex.disposables.Disposable;
-import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
-
-import static io.stormbird.wallet.C.CHANGED_LOCALE;
 
 public class NewSettingsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;

@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
+
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 

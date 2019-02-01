@@ -11,7 +11,7 @@ public class MarketplaceEvent implements Parcelable {
     }
 
     private MarketplaceEvent(Parcel in) {
-        eventName = new String(in.readString());
+        eventName = in.readString();
     }
 
     public String getEventName() {

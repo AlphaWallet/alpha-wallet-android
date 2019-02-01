@@ -8,7 +8,6 @@ import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ConfirmationType;
 import io.stormbird.wallet.ui.ConfirmationActivity;
-import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;

@@ -15,12 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.ErrorEnvelope;

@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.ui.SellDetailActivity;
 import io.stormbird.wallet.ui.TransferTicketDetailActivity;
 
 import static io.stormbird.wallet.C.EXTRA_STATE;

@@ -19,7 +19,7 @@ public class TokenSortedItem extends SortedItem<Token> {
     public boolean areContentsTheSame(SortedItem newItem) {
         if (viewType == newItem.viewType)
         {
-            Token oldToken = (Token) value;
+            Token oldToken = value;
             Token newToken = (Token) newItem.value;
 
             if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
@@ -52,11 +52,10 @@ public class TokenSortedItem extends SortedItem<Token> {
     {
         if (viewType == other.viewType)
         {
-            Token oldToken = (Token) value;
+            Token oldToken = value;
             Token newToken = (Token) other.value;
 
-            if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
-            else return true;
+            return oldToken.getAddress().equals(newToken.getAddress());
         }
         else
         {

@@ -9,11 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import io.stormbird.wallet.R;
-
-import dagger.android.AndroidInjection;
 
 public class FilterDialog extends Dialog {
     private Spinner spinnerDate;

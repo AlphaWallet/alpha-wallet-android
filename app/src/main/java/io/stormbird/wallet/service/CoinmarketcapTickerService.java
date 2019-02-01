@@ -74,7 +74,7 @@ public class CoinmarketcapTickerService implements TickerService {
     private final static class ApiErrorOperator <T> implements ObservableOperator<T, Response<T>> {
 
         @Override
-        public Observer<? super Response<T>> apply(Observer<? super T> observer) throws Exception {
+        public Observer<? super Response<T>> apply(Observer<? super T> observer) {
             return new DisposableObserver<Response<T>>() {
                 @Override
                 public void onNext(Response<T> response) {

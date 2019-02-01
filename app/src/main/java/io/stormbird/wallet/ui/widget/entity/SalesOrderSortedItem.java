@@ -1,6 +1,5 @@
 package io.stormbird.wallet.ui.widget.entity;
 
-import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.ui.widget.holder.OrderHolder;
 import io.stormbird.token.entity.MagicLinkData;
 

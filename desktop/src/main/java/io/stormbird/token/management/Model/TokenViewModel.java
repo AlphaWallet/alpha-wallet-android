@@ -50,17 +50,17 @@ public class TokenViewModel extends TokenDefinition {
             ComboBoxDataModel model = new ComboBoxDataModel();
             //model.setBitmask(key);
             List<Map<BigInteger, String>> membersList = new ArrayList<Map<BigInteger, String>>();
-            String idCombined="";
-            String labelName="";
+            StringBuilder idCombined= new StringBuilder();
+            StringBuilder labelName= new StringBuilder();
             for(String id: bitmaskIdsMap.get(bitmask)) {
                 AttributeType attr = ad.attributeTypes.get(id);
                 membersList.add(ad.getConvertedMappingMembersByKey(id));
                 //membersList.add(attr.members);
-                labelName+=attr.name+",";
-                idCombined+=id+"_";
+                labelName.append(attr.name).append(",");
+                idCombined.append(id).append("_");
             }
-            model.setId(idCombined.replaceFirst(".$",""));
-            model.setName(labelName.replaceFirst(".$",""));
+            model.setId(idCombined.toString().replaceFirst(".$",""));
+            model.setName(labelName.toString().replaceFirst(".$",""));
             List<ComboBoxDataModel.ComboBoxOption> options=model.convertToComboBoxDataModel(membersList);
             model.setComboBoxOptions(options.toArray(new ComboBoxDataModel.ComboBoxOption[options.size()]));
             this.comboBoxDataModelList.add(model);

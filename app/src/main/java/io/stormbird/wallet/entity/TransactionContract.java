@@ -3,7 +3,6 @@ package io.stormbird.wallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import io.stormbird.wallet.R;
 
 import java.math.BigInteger;
 import java.util.List;

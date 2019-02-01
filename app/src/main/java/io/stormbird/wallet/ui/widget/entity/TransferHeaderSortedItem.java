@@ -1,7 +1,6 @@
 package io.stormbird.wallet.ui.widget.entity;
 
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.ui.widget.holder.SalesOrderHeaderHolder;
 import io.stormbird.wallet.ui.widget.holder.TransferHeaderHolder;
 
 /**

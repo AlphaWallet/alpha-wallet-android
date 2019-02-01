@@ -71,7 +71,6 @@ public final class Convert {
     {
         DecimalFormat df = new DecimalFormat("#.#####");
         df.setRoundingMode(RoundingMode.CEILING);
-        String formatted = df.format(ethPrice);
-        return formatted;
+        return df.format(ethPrice);
     }
 }

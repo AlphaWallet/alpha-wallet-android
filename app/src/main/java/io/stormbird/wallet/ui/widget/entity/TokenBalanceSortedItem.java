@@ -2,9 +2,6 @@ package io.stormbird.wallet.ui.widget.entity;
 
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
-import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
-
-import java.math.BigDecimal;
 
 /**
  * Created by James on 12/02/2018.

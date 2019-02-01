@@ -1,12 +1,9 @@
 package io.stormbird.wallet.entity;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
-
-import org.web3j.crypto.Hash;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -149,13 +146,6 @@ public class Transaction implements Parcelable {
 			 //looking at ETH history and this is transaction involving eth
 			 return true;
 		}
-		else if (to.equals(contractAddress))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		else return to.equals(contractAddress);
 	}
 }

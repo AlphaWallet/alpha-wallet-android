@@ -1,7 +1,6 @@
 package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.*;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;

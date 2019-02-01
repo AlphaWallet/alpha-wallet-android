@@ -32,7 +32,6 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/purchase_layout_top"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -40,7 +39,6 @@
                     android:paddingRight="15dp">
 
                     <TextView
-                        android:id="@+id/title_purchase_ticket"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
@@ -96,7 +94,6 @@
                     android:paddingTop="20dp">
 
                     <LinearLayout
-                        android:id="@+id/fiat_layout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -106,7 +103,6 @@
                         android:paddingRight="30dp">
 
                         <TextView
-                            android:id="@+id/fiat_txt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/font_light"

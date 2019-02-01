@@ -6,7 +6,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -625,8 +624,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) throws Exception
-    {
+    private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) {
         ERC721Token e;
         if (token instanceof ERC721Token)
         {
@@ -852,8 +850,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return result;
     }
 
-    private Token[] convertBalance(RealmResults<RealmToken> realmItems, long now, Wallet wallet, int network) throws Exception
-    {
+    private Token[] convertBalance(RealmResults<RealmToken> realmItems, long now, Wallet wallet, int network) {
         TokenFactory tf = new TokenFactory();
         List<Token> tokenList = new ArrayList<>();
         for (RealmToken realmItem : realmItems)

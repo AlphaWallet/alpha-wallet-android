@@ -120,14 +120,12 @@ public class QRSelectionTest
             }
 
             @Override
-            public void unlockAccount(Wallet signer, String signerPassword) throws Exception
-            {
+            public void unlockAccount(Wallet signer, String signerPassword) {
 
             }
 
             @Override
-            public void lockAccount(Wallet signer, String signerPassword) throws Exception
-            {
+            public void lockAccount(Wallet signer, String signerPassword) {
 
             }
 
@@ -261,16 +259,14 @@ public class QRSelectionTest
         return address;
     }
 
-    public static Sign.SignatureData sigFromBase64Fix(byte[] sig) throws Exception
-    {
+    public static Sign.SignatureData sigFromBase64Fix(byte[] sig) {
         byte subv = (byte) (sig[64] + 27);
         if (subv > 30)
             subv -= 27;
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
         byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);
-        Sign.SignatureData ecSig = new Sign.SignatureData(subv, subrRev, subsRev);
 
-        return ecSig;
+        return new Sign.SignatureData(subv, subrRev, subsRev);
     }
 }

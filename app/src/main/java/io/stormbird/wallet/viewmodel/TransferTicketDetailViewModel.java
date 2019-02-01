@@ -5,13 +5,10 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.opensea.Asset;
@@ -139,7 +136,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         //This is what we must sign.
         byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
         try {
-            linkMessage = parser.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
+            linkMessage = ParseMagicLink.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
         } catch (SalesOrderMalformed e) {
             //TODO: Display appropriate error to user
         }
@@ -152,16 +149,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private void gotSignature(byte[] signature)
     {
-        try
-        {
-            String universalLink = parser.completeUniversalLink(linkMessage, signature);
-            //Now open the share icon
-            universalLinkReady.postValue(universalLink);
-        }
-        catch (SalesOrderMalformed sm) {
-            //TODO: Display appropriate error to user
-            sm.printStackTrace();
-        }
+        String universalLink = parser.completeUniversalLink(linkMessage, signature);
+        //Now open the share icon
+        universalLinkReady.postValue(universalLink);
     }
 
     public void openTransferState(Context context, Token token, String ticketIds, int transferStatus)

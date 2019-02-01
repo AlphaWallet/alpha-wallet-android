@@ -6,10 +6,8 @@ import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.stormbird.wallet.router.SellDetailRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.viewmodel.SellTicketModelFactory;
 import io.stormbird.wallet.viewmodel.TransferTicketViewModelFactory;
 
 import dagger.Module;

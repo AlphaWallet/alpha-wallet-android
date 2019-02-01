@@ -9,22 +9,12 @@ import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.entity.OrderContractAddressPair;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.MarketBuyRouter;
 import io.stormbird.wallet.service.MarketQueueService;
-import io.stormbird.wallet.ui.widget.entity.SalesOrderSortedItem;
 
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-import org.web3j.utils.Numeric;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.math.BigInteger;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

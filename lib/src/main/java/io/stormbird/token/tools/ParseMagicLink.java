@@ -7,9 +7,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.stormbird.token.entity.CryptoFunctionsInterface;
 import io.stormbird.token.entity.EthereumReadBuffer;
 import io.stormbird.token.entity.EthereumWriteBuffer;
@@ -229,7 +226,7 @@ public class ParseMagicLink
      * @param expiry Unsigned UNIX timestamp of offer expiry
      * @return First part of Universal Link (requires signature of trade bytes to be added)
      */
-    public static byte[] generateLeadingLinkBytes(byte type, int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+    private static byte[] generateLeadingLinkBytes(byte type, int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
     {
         try
         {
@@ -266,20 +263,13 @@ public class ParseMagicLink
         return generateLeadingLinkBytes((byte)0x00, ticketSendIndexList, contractAddress, priceWei, expiry);
     }
 
-    public byte[] getTradeBytes(int[] ticketSendIndexList, String contractAddress, String ethPrice, long expiry)
-    {
-        BigInteger wei = Convert.toWei(String.valueOf(ethPrice), Convert.Unit.FINNEY).toBigInteger();
-        return getTradeBytes(ticketSendIndexList, contractAddress, wei, expiry);
-    }
-
     public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature) throws SalesOrderMalformed
     {
         byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
         return completeUniversalLink(leading, signature);
     }
 
-    public String completeUniversalLink(byte[] message, byte[] signature) throws SalesOrderMalformed
-    {
+    public String completeUniversalLink(byte[] message, byte[] signature) {
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);
         System.arraycopy(signature, 0, completeLink, message.length, signature.length);
@@ -292,18 +282,5 @@ public class ParseMagicLink
 
         //this trade can be claimed by anyone who pushes the transaction through and has the sig
         return sb.toString();
-    }
-
-    public boolean isValidOrder(MagicLinkData data)
-    {
-        //check this order is not corrupt
-        //first check the owner address - we should already have called getOwnerKey
-        boolean isValid = true;
-
-        if (data.ownerAddress == null || data.ownerAddress.length() < 20) isValid = false;
-        if (data.contractAddress == null || data.contractAddress.length() < 20) isValid = false;
-        if (data.message == null) isValid = false;
-
-        return isValid;
     }
 }

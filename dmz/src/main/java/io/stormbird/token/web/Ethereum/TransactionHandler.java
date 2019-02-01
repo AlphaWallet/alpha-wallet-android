@@ -131,8 +131,9 @@ public class TransactionHandler
 
     private static org.web3j.abi.datatypes.Function stringParam(String param) {
         return new Function(param,
-                            Arrays.<Type>asList(),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
     }
 
     private static org.web3j.abi.datatypes.Function balanceOfArray(String owner) {

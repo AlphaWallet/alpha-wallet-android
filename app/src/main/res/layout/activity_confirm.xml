@@ -77,7 +77,6 @@
                     android:paddingRight="10dp">
 
                     <TextView
-                        android:id="@+id/label_from"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -98,7 +97,6 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/label_to"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -168,7 +166,6 @@
                         android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/label_gas_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -190,7 +187,6 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/label_gas_limit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -212,7 +208,6 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/label_network_fee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"

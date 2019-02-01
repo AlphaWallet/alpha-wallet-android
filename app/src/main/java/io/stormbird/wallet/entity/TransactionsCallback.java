@@ -6,5 +6,5 @@ package io.stormbird.wallet.entity;
 
 public interface TransactionsCallback
 {
-    public void recieveTransactions(Transaction[] txList);
+    void recieveTransactions(Transaction[] txList);
 }

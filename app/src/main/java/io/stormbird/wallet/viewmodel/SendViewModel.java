@@ -4,37 +4,22 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import android.view.View;
-import android.webkit.WebView;
-import android.widget.LinearLayout;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.interact.ENSInteract;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.crypto.Hash;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
-
-import static io.stormbird.wallet.C.ENSCONTRACT;
 
 public class SendViewModel extends BaseViewModel {
     private static final long CHECK_ETHPRICE_INTERVAL = 10;

@@ -28,7 +28,6 @@ import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
 import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
-import static org.web3j.crypto.TransactionEncoder.encode;
 
 public class TransactionRepository implements TransactionRepositoryType {
 

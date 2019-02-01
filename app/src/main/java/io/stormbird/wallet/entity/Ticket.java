@@ -5,7 +5,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -245,7 +244,7 @@ public class Ticket extends Token implements Parcelable
         int[] indicies = new int[indexList.size()];
         int i = 0;
         for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
-            indicies[i] = (int)iterator.next();
+            indicies[i] = iterator.next();
         }
         return indicies;
     }
@@ -806,22 +805,22 @@ public class Ticket extends Token implements Parcelable
     {
         return new Function(
                 "trade",
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
                                     getDynArray(indices),
                                     new org.web3j.abi.datatypes.generated.Uint8(v),
                                     new org.web3j.abi.datatypes.generated.Bytes32(r),
                                     new org.web3j.abi.datatypes.generated.Bytes32(s)),
-                Collections.<TypeReference<?>>emptyList());
+                Collections.emptyList());
     }
 
     public Function getTransferFunction(String to, List<BigInteger> indices)
     {
         return new Function(
                 "transfer",
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(to),
+                Arrays.asList(new org.web3j.abi.datatypes.Address(to),
                                     getDynArray(indices)
                                 ),
-                Collections.<TypeReference<?>>emptyList());
+                Collections.emptyList());
     }
 
     @Override
@@ -890,7 +889,7 @@ public class Ticket extends Token implements Parcelable
     private enum InterfaceType
     {
         NotSpecified, UsingUint16, UsingUint256
-    };
+    }
 
     @Override
     public boolean checkIntrinsicType()

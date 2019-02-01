@@ -63,8 +63,7 @@ public class TradeInstance
         Date date = new Date(expire*1000L);
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM HH:mm z");
         //sdf.setTimeZone(TimeZone.getTimeZone("GMT-4"));
-        String formattedDate = sdf.format(date);
-        return formattedDate;
+        return sdf.format(date);
     }
 
     public byte[] getSignatureBytes(int index)

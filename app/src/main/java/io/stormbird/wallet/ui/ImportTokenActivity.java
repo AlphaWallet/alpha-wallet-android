@@ -139,9 +139,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
         else
         {
-            //TODO: attempt to determine which network the contract is on.
-            //TODO: Use Etherscan to ping the networks sequentially
-            viewModel.loadToken();
+            viewModel.checkTokenNetwork(contractAddress);
         }
     }
 

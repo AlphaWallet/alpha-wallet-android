@@ -32,6 +32,7 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 import rx.functions.Func1;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static io.stormbird.wallet.C.XDAI_NETWORK_NAME;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -58,6 +60,8 @@ public class TokenRepository implements TokenRepositoryType {
     private boolean useBackupNode = false;
     private NetworkInfo network;
     private Disposable disposable;
+
+    public static final String INVALID_CONTRACT = "<invalid>";
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -421,7 +425,7 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
             Wallet temp = new Wallet(null);
-            String responseValue = callMainNetSmartContractFunction(function, address, temp);
+            String responseValue = callCustomNetSmartContractFunction(function, address, temp, EthereumNetworkRepository.MAINNET_ID);
 
             if (responseValue == null) return BURN_ADDRESS;
 
@@ -1051,7 +1055,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     /**
-     * Call smart contract function on mainnet contract. This would be used for things like ENS lookup
+     * Call smart contract function on custom network contract. This would be used for things like ENS lookup
      * Currently because it's tied to a mainnet contract address there's no circumstance it would work
      * outside of mainnet. Users may be confused if their namespace doesn't work, even if they're currently
      * using testnet.
@@ -1062,24 +1066,26 @@ public class TokenRepository implements TokenRepositoryType {
      * @return
      * @throws Exception
      */
-    private String callMainNetSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet) throws Exception {
+    private String callCustomNetSmartContractFunction(
+            Function function, String contractAddress, Wallet wallet, int chainId) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
         {
-            Web3j mainNet;
-            if (network.isMainNetwork)
+            Web3j localConnection;
+            if (network.chainId == chainId)
             {
-                mainNet = web3j;
+                localConnection = web3j;
             }
             else
             {
-                mainNet = Web3jFactory.build(new org.web3j.protocol.http.HttpService(ethereumNetworkRepository.getAvailableNetworkList()[0].rpcServerUrl));
+                //find network info
+                NetworkInfo info = getNetworkInfoFromChainId(chainId);
+                localConnection = Web3jFactory.build(new org.web3j.protocol.http.HttpService(info.rpcServerUrl));
             }
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
-            EthCall response = mainNet.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+            EthCall response = localConnection.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
         }
@@ -1130,6 +1136,28 @@ public class TokenRepository implements TokenRepositoryType {
         return tokens;
     }
 
+    @Override
+    public Single<String> getTokenName(String address, int chainId)
+    {
+        return Single.fromCallable(() -> {
+            org.web3j.abi.datatypes.Function function = nameOf();
+            Wallet temp = new Wallet(null);
+            String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);
+            if (responseValue == null) return INVALID_CONTRACT;
+
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1)
+            {
+                return (String) response.get(0).getValue();
+            }
+            else
+            {
+                return INVALID_CONTRACT;
+            }
+        });
+    }
+
     private Single<TokenInfo> setupTokensFromLocal(String address)
     {
         return Single.fromCallable(() -> {
@@ -1154,6 +1182,21 @@ public class TokenRepository implements TokenRepositoryType {
                 return null;
             }
         });
+    }
+
+    private NetworkInfo getNetworkInfoFromChainId(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getDefaultNetwork();
+        for (NetworkInfo n : ethereumNetworkRepository.getAvailableNetworkList())
+        {
+            if (n.chainId == chainId)
+            {
+                info = n;
+                break;
+            }
+        }
+
+        return info;
     }
 
     private Single<TokenInfo[]> setupTokensFromLocal(String[] addresses)

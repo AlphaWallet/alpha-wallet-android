@@ -11,7 +11,9 @@ import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
@@ -569,5 +571,102 @@ public class ImportTokenViewModel extends BaseViewModel
     private void handleFeemasterAvailability(Boolean available)
     {
         feemasterAvailable.postValue(available);
+    }
+
+    public void checkTokenNetwork(String contractAddress)
+    {
+        //determine which network the contract is on.
+        //first try the current default
+        if (network.getValue() != null)
+        {
+            //try this network
+            disposable = fetchTokensInteract.getContractName(contractAddress, network.getValue().chainId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::tryDefault, this::onError);
+        }
+        else
+        {
+            testNetworks();
+        }
+    }
+
+    private void testNetworks()
+    {
+        //test all the networks
+        disposable = Observable.fromCallable(this::getNetworkIds)
+                .flatMapIterable(networkId -> networkId)
+                .flatMap(networkId -> fetchTokensInteract.getContractName(importOrder.contractAddress, networkId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(name -> testNetworkResult(name, chainId), this::onError);
+
+    }
+
+    private List<Integer> getNetworkIds()
+    {
+        List<Integer> networkIds = new ArrayList<>();
+        for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
+        {
+            networkIds.add(networkInfo.chainId);
+        }
+        return networkIds;
+    }
+
+    private void testNetworkResult(String name, int chainId)
+    {
+        if (name.equals(TokenRepository.INVALID_CONTRACT))
+        {
+            //determine next network and try it
+            boolean useNext = false;
+            for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
+            {
+                if (networkInfo.chainId == chainId) useNext = true;
+                else if (useNext)
+                {
+                    testNetwork(networkInfo.chainId);
+                    useNext = false;
+                    break;
+                }
+            }
+
+            if (useNext) //tested final network, no contract found
+            {
+                invalidLink.postValue(true);
+            }
+        }
+        else
+        {
+            //Success, found the contract on this chain
+            switchToNetworkId(chainId);
+        }
+    }
+
+    private void tryDefault(String s)
+    {
+        if (s.equals(TokenRepository.INVALID_CONTRACT))
+        {
+            testNetwork(EthereumNetworkRepository.MAINNET_ID);
+        }
+        else
+        {
+            loadToken(); //proceed
+        }
+    }
+
+    private void switchToNetworkId(int chainId)
+    {
+        for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
+        {
+            if (networkInfo.chainId == chainId)
+            {
+                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
+                network.setValue(networkInfo);
+                loadToken();
+                return;
+            }
+        }
+
+        invalidLink.postValue(true);
     }
 }

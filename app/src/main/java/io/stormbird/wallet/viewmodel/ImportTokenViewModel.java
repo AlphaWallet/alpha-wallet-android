@@ -1,24 +1,21 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
+import io.stormbird.wallet.ui.ImportTokenActivity;
 import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
@@ -57,6 +54,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final FetchGasSettingsInteract fetchGasSettingsInteract;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -93,7 +91,8 @@ public class ImportTokenViewModel extends BaseViewModel
                          AddTokenInteract addTokenInteract,
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
-                         FetchTransactionsInteract fetchTransactionsInteract) {
+                         FetchTransactionsInteract fetchTransactionsInteract,
+                         FetchGasSettingsInteract fetchGasSettingsInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -104,6 +103,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
     }
 
     private void initParser()
@@ -432,13 +432,31 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             initParser();
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            //calculate gas settings
+            final byte[] tradeData = generateReverseTradeData(order, importToken);
+            disposable = fetchGasSettingsInteract
+                    .fetch(tradeData, true)
+                    .subscribe(this::performImportFinal, this::onError);
+        }
+        catch (SalesOrderMalformed e)
+        {
+            e.printStackTrace(); // TODO: add user interface handling of the exception.
+            error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Import Error."));
+        }
+    }
+
+    private void performImportFinal(GasSettings settings)
+    {
+        try
+        {
+            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken);
             Log.d(TAG, "Approx value of trade: " + order.price);
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                            Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
+                            settings.gasPrice, settings.gasLimit, tradeData)
                     .subscribe(this::onCreateTransaction, this::onError);
 
             addTokenWatchToWallet();

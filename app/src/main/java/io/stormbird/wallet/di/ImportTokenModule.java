@@ -2,20 +2,8 @@ package io.stormbird.wallet.di;
 
 import javax.inject.Singleton;
 
-import io.stormbird.wallet.interact.AddTokenInteract;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetupTokensInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
-import io.stormbird.wallet.repository.PreferenceRepositoryType;
-import io.stormbird.wallet.repository.TokenRepositoryType;
-import io.stormbird.wallet.repository.TransactionRepositoryType;
-import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.TickerService;
@@ -42,9 +30,10 @@ public class ImportTokenModule {
             AddTokenInteract addTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             AssetDefinitionService assetDefinitionService,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract,
+            FetchGasSettingsInteract fetchGasSettingsInteract) {
         return new ImportTokenViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract);
+                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, fetchGasSettingsInteract);
     }
 
     @Provides
@@ -83,5 +72,10 @@ public class ImportTokenModule {
     @Provides
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
         return new FetchTransactionsInteract(transactionRepository);
+    }
+
+    @Provides
+    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
+        return new FetchGasSettingsInteract(gasSettingsRepository);
     }
 }

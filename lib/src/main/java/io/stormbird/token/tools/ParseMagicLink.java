@@ -87,6 +87,7 @@ public class ParseMagicLink
      * bytes32: 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
      *
      */
+
     public MagicLinkData parseUniversalLink(String link) throws SalesOrderMalformed
     {
         final String importTemplate = "https://app.awallet.io/";
@@ -109,35 +110,23 @@ public class ParseMagicLink
 
     private MagicLinkData parseNonSpawnableLinks(String linkData, boolean encoded) throws IOException
     {
-        long szabo = 0;
         byte[] orderBytes = cryptoInterface.Base64Decode(linkData);
         //if link is encoded, remove the encoding byte
         if(encoded) orderBytes = Arrays.copyOfRange(orderBytes, 1, orderBytes.length - 1);
-        MagicLinkData data = new MagicLinkData();
-        ByteArrayInputStream bas = new ByteArrayInputStream(orderBytes);
-        EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-        szabo = ds.toUnsignedLong(ds.readInt());
-        data.expiry = ds.toUnsignedLong(ds.readInt());
-        data.priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
-        data.contractAddress = ds.readAddress();
-        data.tickets = ds.readCompressedIndices(ds.available() - 65);
-        data.ticketCount = data.tickets.length;
-        //now read signature
-        ds.readSignature(data.signature);
-        ds.close();
-        //now we have to build the message that the contract is expecting the signature for
-        data.message = getTradeBytes(data);
-        BigInteger microEth = Convert.fromWei(new BigDecimal(data.priceWei), Convert.Unit.SZABO).abs().toBigInteger();
-        data.price = microEth.doubleValue() / 1000000.0;
-        return data;
+        return getDataFromLinks(false, orderBytes);
     }
 
     private MagicLinkData parseSpawnableLinks(String linkData) throws IOException
     {
-        long szabo = 0;
         byte[] orderBytes = cryptoInterface.Base64Decode(linkData);
         //remove encoding byte
         orderBytes = Arrays.copyOfRange(orderBytes, 1, orderBytes.length - 1);
+        return getDataFromLinks(true, orderBytes);
+    }
+
+    private MagicLinkData getDataFromLinks(boolean spawnable, byte[] orderBytes) throws IOException
+    {
+        long szabo = 0;
         MagicLinkData data = new MagicLinkData();
         ByteArrayInputStream bas = new ByteArrayInputStream(orderBytes);
         EthereumReadBuffer ds = new EthereumReadBuffer(bas);
@@ -145,8 +134,16 @@ public class ParseMagicLink
         data.expiry = ds.toUnsignedLong(ds.readInt());
         data.priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
         data.contractAddress = ds.readAddress();
-        data.tokenIds = ds.readTokenIdsFromSpawnableLink(orderBytes);
-        data.ticketCount = data.tokenIds.size();
+        if(spawnable)
+        {
+            data.tokenIds = ds.readTokenIdsFromSpawnableLink(orderBytes);
+            data.ticketCount = data.tokenIds.size();
+        }
+        else
+        {
+            data.tickets = ds.readCompressedIndices(ds.available() - 65);
+            data.ticketCount = data.tickets.length;
+        }
         //now read signature
         ds.readSignature(data.signature);
         ds.close();
@@ -154,7 +151,6 @@ public class ParseMagicLink
         data.message = getTradeBytes(data);
         BigInteger microEth = Convert.fromWei(new BigDecimal(data.priceWei), Convert.Unit.SZABO).abs().toBigInteger();
         data.price = microEth.doubleValue() / 1000000.0;
-
         return data;
     }
 
@@ -221,9 +217,10 @@ public class ParseMagicLink
         return signature;
     }
 
-    private MagicLinkData getMagicLinkDataFromURL(String linkData) throws SalesOrderMalformed {
-        byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
+    private MagicLinkData getMagicLinkDataFromURL(String linkData) throws SalesOrderMalformed
+    {
         MagicLinkData data = new MagicLinkData();
+        byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
         try
         {
             ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
@@ -238,7 +235,7 @@ public class ParseMagicLink
                 case spawnable:
                     return parseSpawnableLinks(linkData);
                 case customizable:
-                    //Not yet implemented so default to spawnable
+                    //not yet implemented so default to spawnable
                     return parseSpawnableLinks(linkData);
                 case currencyLink:
                     return parseCurrencyLinks(linkData);

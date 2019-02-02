@@ -3,12 +3,10 @@ package io.stormbird.wallet.di;
 import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
@@ -25,7 +23,6 @@ public class DappBrowserModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            FetchGasSettingsInteract fetchGasSettingsInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter) {
         return new DappBrowserViewModelFactory(
@@ -33,7 +30,6 @@ public class DappBrowserModule {
                 findDefaultWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
-                fetchGasSettingsInteract,
                 fetchTokensInteract,
                 confirmationRouter);
     }
@@ -58,11 +54,6 @@ public class DappBrowserModule {
     @Provides
     CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
         return new CreateTransactionInteract(transactionRepository, passwordStore);
-    }
-
-    @Provides
-    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
-        return new FetchGasSettingsInteract(gasSettingsRepository);
     }
 
     @Provides

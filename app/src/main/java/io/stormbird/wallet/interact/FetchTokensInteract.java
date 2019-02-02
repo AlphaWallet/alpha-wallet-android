@@ -1,13 +1,6 @@
 package io.stormbird.wallet.interact;
 
-import io.stormbird.wallet.entity.MagicLinkParcel;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.OrderContractAddressPair;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 
 import java.math.BigDecimal;
@@ -78,9 +71,9 @@ public class FetchTokensInteract {
         return tokenRepository.fetchLatestBlockNumber();
     }
 
-    public Single<String> getContractName(String address, int chainId)
+    public Observable<ContractResult> getContractName(String address, int chainId)
     {
-        return tokenRepository.getTokenName(address, chainId);
+        return tokenRepository.getTokenName(address, chainId).toObservable();
     }
 
     public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)

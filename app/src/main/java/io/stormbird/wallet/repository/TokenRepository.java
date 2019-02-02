@@ -1137,23 +1137,25 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<String> getTokenName(String address, int chainId)
+    public Single<ContractResult> getTokenName(String address, int chainId)
     {
         return Single.fromCallable(() -> {
+            ContractResult contractResult = new ContractResult(INVALID_CONTRACT, chainId);
             org.web3j.abi.datatypes.Function function = nameOf();
             Wallet temp = new Wallet(null);
             String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);
-            if (responseValue == null) return INVALID_CONTRACT;
+            if (responseValue == null) return contractResult;
 
             List<Type> response = FunctionReturnDecoder.decode(
                     responseValue, function.getOutputParameters());
             if (response.size() == 1)
             {
-                return (String) response.get(0).getValue();
+                contractResult.name = (String) response.get(0).getValue();
+                return contractResult;
             }
             else
             {
-                return INVALID_CONTRACT;
+                return contractResult;
             }
         });
     }

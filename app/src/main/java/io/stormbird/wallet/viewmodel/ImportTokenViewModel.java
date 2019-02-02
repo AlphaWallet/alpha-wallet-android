@@ -7,6 +7,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import io.reactivex.Single;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
@@ -599,7 +600,7 @@ public class ImportTokenViewModel extends BaseViewModel
                 .flatMap(networkId -> fetchTokensInteract.getContractName(importOrder.contractAddress, networkId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(name -> testNetworkResult(name, chainId), this::onError);
+                .subscribe(this::testNetworkResult, this::onError);
 
     }
 
@@ -613,40 +614,19 @@ public class ImportTokenViewModel extends BaseViewModel
         return networkIds;
     }
 
-    private void testNetworkResult(String name, int chainId)
+    private void testNetworkResult(ContractResult result)
     {
-        if (name.equals(TokenRepository.INVALID_CONTRACT))
+        if (!result.name.equals(TokenRepository.INVALID_CONTRACT))
         {
-            //determine next network and try it
-            boolean useNext = false;
-            for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
-            {
-                if (networkInfo.chainId == chainId) useNext = true;
-                else if (useNext)
-                {
-                    testNetwork(networkInfo.chainId);
-                    useNext = false;
-                    break;
-                }
-            }
-
-            if (useNext) //tested final network, no contract found
-            {
-                invalidLink.postValue(true);
-            }
-        }
-        else
-        {
-            //Success, found the contract on this chain
-            switchToNetworkId(chainId);
+            switchToNetworkId(result.chainId);
         }
     }
 
-    private void tryDefault(String s)
+    private void tryDefault(ContractResult result)
     {
-        if (s.equals(TokenRepository.INVALID_CONTRACT))
+        if (result.name.equals(TokenRepository.INVALID_CONTRACT))
         {
-            testNetwork(EthereumNetworkRepository.MAINNET_ID);
+            testNetworks();
         }
         else
         {

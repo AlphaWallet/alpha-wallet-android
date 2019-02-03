@@ -69,7 +69,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private Token[] tokenCache = null;
     private boolean isVisible = false;
     private int checkCounter;
-    private Context context;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -110,6 +109,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         this.openseaService = openseaService;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        checkCounter = 0;
     }
 
     public LiveData<Token[]> tokens() {
@@ -165,7 +165,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         if (defaultNetwork.getValue() != null && defaultWallet.getValue() != null)
         {
             tokenCache = null;
-            checkCounter = 0;
             tokensService.setCurrentAddress(defaultWallet.getValue().address);
             tokensService.setCurrentNetwork(defaultNetwork.getValue().chainId);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultNetwork.getValue(), defaultWallet.getValue())
@@ -411,7 +410,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
                 .flatMapIterable(address -> address)
                 .flatMap(setupTokensInteract::addToken)
                 .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .filter(token -> (token != null && (token.tokenInfo.name != null || token.tokenInfo.symbol != null)))
                 .subscribeOn(Schedulers.io())
@@ -439,7 +438,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
                 .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .concatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
-                .concatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
+                .concatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTokenBalanceUpdate, this::onError);
@@ -527,5 +526,11 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         {
             fetchKnownContracts.postValue(defaultNetwork.getValue().chainId);
         }
+    }
+
+    public void resetAndFetchTokens()
+    {
+        checkCounter = 0;
+        fetchTokens();
     }
 }

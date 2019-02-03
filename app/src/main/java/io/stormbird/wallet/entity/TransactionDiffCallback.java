@@ -4,12 +4,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.SortedList;
 
-import io.stormbird.wallet.ui.widget.entity.DateSortedItem;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
 
-import java.io.DataInputStream;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by James on 15/03/2018.
@@ -90,7 +87,7 @@ public class TransactionDiffCallback extends DiffUtil.Callback {
 
                 if (oldTc.getClass() != newTc.getClass()) return false;
 
-                if (oldTc.name == null && newTc.name != null) return false;
+                return oldTc.name != null || newTc.name == null;
             }
             //
             //if (newTx.operations == null || newTx.operations.length == 0 || newTx.operations[0].contract == null) return true;

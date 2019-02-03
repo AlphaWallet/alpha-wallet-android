@@ -1,11 +1,8 @@
 package io.stormbird.wallet.service;
 
 
-import android.arch.lifecycle.MutableLiveData;
 import android.util.Base64;
 
-import io.stormbird.wallet.entity.MessagePair;
-import io.stormbird.wallet.entity.SignaturePair;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
@@ -257,8 +254,7 @@ public class ImportTokenService {
         return recoveredKey;
     }
 
-    public static Sign.SignatureData sigFromByteArray(byte[] sig) throws Exception
-    {
+    public static Sign.SignatureData sigFromByteArray(byte[] sig) {
         byte   subv = (byte)(sig[64] + 27);
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
@@ -267,9 +263,7 @@ public class ImportTokenService {
         BigInteger r = new BigInteger(1, subrRev);
         BigInteger s = new BigInteger(1, subsRev);
 
-        Sign.SignatureData ecSig = new Sign.SignatureData(subv, subrRev, subsRev);
-
-        return ecSig;
+        return new Sign.SignatureData(subv, subrRev, subsRev);
     }
 
     private String formEncodedData(Map<String, String> data)
@@ -298,7 +292,7 @@ public class ImportTokenService {
                 first = false;
             }
 
-            sb.append(key + "=" + value);
+            sb.append(key).append("=").append(value);
         }
 
         return sb.toString();

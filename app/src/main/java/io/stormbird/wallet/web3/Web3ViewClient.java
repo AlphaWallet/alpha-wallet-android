@@ -1,8 +1,6 @@
 package io.stormbird.wallet.web3;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.net.http.SslError;
 import android.os.Build;
 import android.support.annotation.RequiresApi;

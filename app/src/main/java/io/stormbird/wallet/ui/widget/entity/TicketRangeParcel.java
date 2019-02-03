@@ -34,11 +34,11 @@ public class TicketRangeParcel implements Parcelable
         List tIds = new ArrayList<>();
         for (Object o : readObjArray)
         {
-            tIds.add((BigInteger)o);
+            tIds.add(o);
         }
 
-        Boolean isChecked = (in.readInt() == 1) ? true : false;
-        Boolean isBurned = (in.readInt() == 1) ? true : false;
+        Boolean isChecked = in.readInt() == 1;
+        Boolean isBurned = in.readInt() == 1;
 
         String contractAddress = in.readString();
 

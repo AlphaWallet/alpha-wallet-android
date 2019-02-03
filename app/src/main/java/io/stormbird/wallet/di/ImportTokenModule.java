@@ -1,16 +1,12 @@
 package io.stormbird.wallet.di;
 
-import javax.inject.Singleton;
-
+import dagger.Module;
+import dagger.Provides;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
-import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
-
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Created by James on 9/03/2018.

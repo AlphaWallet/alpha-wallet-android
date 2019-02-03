@@ -1,6 +1,5 @@
 package io.stormbird.wallet.interact;
 
-import io.reactivex.ObservableSource;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 

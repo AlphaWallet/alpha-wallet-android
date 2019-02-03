@@ -57,7 +57,6 @@ public class HelpAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setHelpItems(List<HelpItem> helpItems) {
         items.beginBatchedUpdates();
-        ;
         items.clear();
         int i = 0;
         for (HelpItem helpItem : helpItems) {
@@ -74,9 +73,7 @@ public class HelpAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
 
-        HelpHolder helpHolder = new HelpHolder(R.layout.item_help, parent);
-
-        holder = helpHolder;
+        holder = new HelpHolder(R.layout.item_help, parent);
 
         return holder;
     }

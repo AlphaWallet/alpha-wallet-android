@@ -3,11 +3,10 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
-;import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
-import io.stormbird.wallet.service.ImportTokenService;
 
 /**
  * Created by James on 9/03/2018.

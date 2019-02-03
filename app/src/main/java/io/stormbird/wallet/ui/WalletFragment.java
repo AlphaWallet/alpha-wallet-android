@@ -1,10 +1,8 @@
 package io.stormbird.wallet.ui;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,30 +11,25 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import dagger.android.support.AndroidSupportInjection;
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
 import io.stormbird.wallet.viewmodel.WalletViewModelFactory;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
+
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Map;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -110,7 +103,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.endUpdate().observe(this, this::checkTokens);
         viewModel.checkAddr().observe(this, this::updateTitle);
         viewModel.tokensReady().observe(this, this::tokensReady);
-        //viewModel.refreshTokens().observe(this, this::refreshTokens);
 
         adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);

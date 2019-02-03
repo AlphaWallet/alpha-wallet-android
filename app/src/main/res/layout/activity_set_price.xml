@@ -44,7 +44,6 @@
                         android:textSize="25sp" />
 
                     <TextView
-                        android:id="@+id/text_eth_subtext"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_light"
@@ -87,7 +86,6 @@
                             android:orientation="horizontal">
 
                             <LinearLayout
-                                android:id="@+id/layout_price_per_ticket"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -155,7 +153,6 @@
                                 android:background="@color/white" />
 
                             <LinearLayout
-                                android:id="@+id/layout_ticket_count"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -189,7 +186,6 @@
                                         android:layout_weight="1">
 
                                         <ImageView
-                                            android:id="@+id/img_quantity_add"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:layout_centerInParent="true"
@@ -217,7 +213,6 @@
                                         android:layout_weight="1">
 
                                         <ImageView
-                                            android:id="@+id/img_quantity_minus"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:layout_centerInParent="true"
@@ -242,7 +237,6 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/fiat_layout"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
@@ -253,7 +247,6 @@
                             android:paddingRight="10dp">
 
                             <TextView
-                                android:id="@+id/fiat_txt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/font_light"
@@ -367,7 +360,6 @@
                             android:orientation="horizontal">
 
                             <LinearLayout
-                                android:id="@+id/layout_expiry_date"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -407,7 +399,6 @@
                                         android:textSize="18sp" />
 
                                     <ImageView
-                                        android:id="@+id/icon_expiry_date"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_alignParentRight="true"
@@ -435,7 +426,6 @@
                                 android:background="@color/white" />
 
                             <LinearLayout
-                                android:id="@+id/layout_expiry_time"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -475,7 +465,6 @@
                                         android:textSize="18sp" />
 
                                     <ImageView
-                                        android:id="@+id/icon_expiry_time"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_alignParentRight="true"

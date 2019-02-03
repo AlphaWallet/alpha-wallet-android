@@ -23,8 +23,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.SalesOrderMalformed;

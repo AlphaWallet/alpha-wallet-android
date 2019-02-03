@@ -175,7 +175,6 @@
         android:paddingTop="20dp">
 
         <LinearLayout
-            android:id="@+id/layout_24_hrs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -203,7 +202,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/layout_appreciation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -231,7 +229,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/layout_usd_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

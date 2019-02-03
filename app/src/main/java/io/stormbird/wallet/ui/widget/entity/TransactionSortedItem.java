@@ -1,7 +1,7 @@
 package io.stormbird.wallet.ui.widget.entity;
 
 import android.text.format.DateUtils;
-import io.stormbird.wallet.entity.Transaction;
+
 import io.stormbird.wallet.entity.TransactionMeta;
 import io.stormbird.wallet.ui.widget.holder.TransactionHolder;
 

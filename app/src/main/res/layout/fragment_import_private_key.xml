@@ -6,13 +6,11 @@
     android:background="@color/white">
 
     <ScrollView
-        android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="?android:attr/actionBarSize">
 
         <LinearLayout
-            android:id="@+id/import_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/big_margin"

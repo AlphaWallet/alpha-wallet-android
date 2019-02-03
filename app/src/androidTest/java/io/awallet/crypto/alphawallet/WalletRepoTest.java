@@ -1,35 +1,8 @@
 package io.stormbird.wallet;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PreferenceRepositoryType;
-import io.stormbird.wallet.repository.SharedPreferenceRepository;
-import io.stormbird.wallet.repository.WalletRepository;
-import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.GethKeystoreAccountService;
-
-import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.reactivex.observers.TestObserver;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class WalletRepoTest {

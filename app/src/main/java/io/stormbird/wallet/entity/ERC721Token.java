@@ -5,10 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 
-import org.spongycastle.crypto.tls.ContentType;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -120,7 +118,7 @@ public class ERC721Token extends Token implements Parcelable
         {
             BigInteger tokenIdBI = new BigInteger(tokenId);
             List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenIdBI));
-            List<TypeReference<?>> returnTypes = Collections.<TypeReference<?>>emptyList();
+            List<TypeReference<?>> returnTypes = Collections.emptyList();
             function = new Function("transfer", params, returnTypes);
         }
         catch (NumberFormatException e)

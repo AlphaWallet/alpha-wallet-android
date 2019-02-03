@@ -3,7 +3,7 @@ package io.stormbird.token.management;
 import io.stormbird.token.management.Model.ComboBoxDataModel;
 import io.stormbird.token.management.Model.TextFieldDataModel;
 import io.stormbird.token.management.Model.TokenViewModel;
-import io.stormbird.token.tools.TokenDefinition;
+
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
@@ -152,7 +152,7 @@ public class TokenID extends JFrame{
                 public void keyReleased(KeyEvent e) {
                     try {
                         BigInteger encodedValue = BigInteger.valueOf(0);
-                        String inputStr = textFieldInput.getText().toString();
+                        String inputStr = textFieldInput.getText();
                         if (inputStr != null && inputStr.length() > 0) {
                             if (model.as.equals("UTF8")) {
                                 byte[] bytes = inputStr.getBytes(Charset.forName("UTF-8"));
@@ -219,15 +219,15 @@ public class TokenID extends JFrame{
         }
     }
     private void updateTokenIDField(){
-        String tokenidStr="";
+        StringBuilder tokenidStr= new StringBuilder();
         BigInteger tokenid=BigInteger.valueOf(0);
         for(String key:encodedValueMap.keySet()){
             tokenid=tokenid.or(encodedValueMap.get(key));
         }
-        tokenidStr=tokenid.toString(16);
+        tokenidStr = new StringBuilder(tokenid.toString(16));
         while (tokenidStr.length() < 64) {
-            tokenidStr = "0" + tokenidStr;
+            tokenidStr.insert(0, "0");
         }
-        this.fieldTokenID.setText(tokenidStr.toUpperCase());
+        this.fieldTokenID.setText(tokenidStr.toString().toUpperCase());
     }
 }

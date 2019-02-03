@@ -1,17 +1,7 @@
 package io.stormbird.wallet.entity;
 
-import android.util.Log;
-
-import org.web3j.utils.Numeric;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -107,8 +97,7 @@ public class SignaturePair
     /**
      * The reverse of generateSelection - used in scanning the QR code.
      */
-    public static List<Integer> buildIndexList(String selection) throws Exception
-    {
+    public static List<Integer> buildIndexList(String selection) {
         List<Integer> intList = new ArrayList<>();
         final int NIBBLE = 4;
         //one: convert to bigint
@@ -175,13 +164,6 @@ public class SignaturePair
 
     public boolean isValid()
     {
-        if (selectionStr == null || selectionStr.length() == 0)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return selectionStr != null && selectionStr.length() != 0;
     }
 }

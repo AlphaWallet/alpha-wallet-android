@@ -2,7 +2,6 @@ package io.stormbird.wallet.ui.widget.entity;
 
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.ui.widget.holder.IFrameHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketHolder;
 
 /**
  * Created by James on 14/12/2018.

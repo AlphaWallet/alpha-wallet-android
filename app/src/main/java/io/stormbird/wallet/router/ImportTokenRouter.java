@@ -6,7 +6,6 @@ import android.content.Intent;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 
 import static io.stormbird.wallet.C.IMPORT_STRING;
-import static io.stormbird.wallet.C.Key.MARKETPLACE_EVENT;
 
 /**
  * Created by James on 9/03/2018.

@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import io.reactivex.Observable;
@@ -448,9 +447,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     {
         return Observable.fromCallable(() -> {
             //populate contracts from service
-            List<String> contracts = assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
 
-            return contracts;
+            return assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
         });
     }
 

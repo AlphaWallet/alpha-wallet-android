@@ -469,8 +469,7 @@ public class SellDetailActivity extends BaseActivity {
         BigInteger maxValue = new BigInteger(1, max);
         if (microEth > maxValue.longValue()) microEth = 0; //check on UI screen if amount is more than we can handle
         //now convert to Wei
-        BigInteger weiValue = Convert.toWei(Long.toString(microEth), Convert.Unit.SZABO).toBigInteger();
-        return weiValue;
+        return Convert.toWei(Long.toString(microEth), Convert.Unit.SZABO).toBigInteger();
     }
 
     boolean isValidAmount(String eth) {

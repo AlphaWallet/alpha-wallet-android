@@ -128,7 +128,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
     public LiveData<Boolean> feemasterAvailable() { return feemasterAvailable; }
-    public double getUSDPrice() { return ethToUsd; };
+    public double getUSDPrice() { return ethToUsd; }
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
@@ -232,7 +232,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (token.addressMatches(importOrder.contractAddress) && (token instanceof Ticket))
         {
-            importToken = (Ticket) token;
+            importToken = token;
             regularBalanceCheck(); //fetch balance and display
         }
     }

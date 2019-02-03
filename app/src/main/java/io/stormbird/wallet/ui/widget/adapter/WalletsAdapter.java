@@ -4,17 +4,12 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Map;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.WalletHolder;
-
-import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {

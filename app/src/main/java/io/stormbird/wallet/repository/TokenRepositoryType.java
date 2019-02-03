@@ -1,20 +1,14 @@
 package io.stormbird.wallet.repository;
 
 import io.stormbird.wallet.entity.*;
-import org.web3j.protocol.core.methods.response.Transaction;
-
-import io.reactivex.SingleSource;
 
 import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import rx.functions.Action1;
 
 public interface TokenRepositoryType {
 

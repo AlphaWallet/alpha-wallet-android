@@ -6,11 +6,9 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.OpenseaService;
 
 /**
  * Created by James on 9/02/2018.

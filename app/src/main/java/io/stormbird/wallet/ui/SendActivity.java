@@ -342,10 +342,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 onBack();
                 break;
             }
-            case R.id.action_info: {
-                new EthereumInfoRouter().open(this);
-                break;
-            }
             case R.id.action_qr:
                 viewModel.showContractInfo(this, contractAddress);
                 break;

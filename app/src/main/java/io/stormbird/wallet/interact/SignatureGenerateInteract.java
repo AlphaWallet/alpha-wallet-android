@@ -6,7 +6,6 @@ import io.stormbird.wallet.entity.MessagePair;
 import io.stormbird.wallet.entity.SignaturePair;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Single;

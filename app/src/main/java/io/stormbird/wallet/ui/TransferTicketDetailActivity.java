@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
 import dagger.android.AndroidInjection;
-import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -331,7 +330,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 break;
             case TRANSFER_USING_LINK:
                 //generate link
-                viewModel.generateUniversalLink(((Ticket)token).getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
+                viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
                 break;
             case TRANSFER_TO_ADDRESS:
                 //transfer using eth

@@ -17,7 +17,6 @@
             android:layout_alignParentTop="true" />
 
         <TextView
-            android:id="@+id/title_redeem_ticket"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         >
         <ImageView
-            android:id="@+id/imageView2"
             app:srcCompat="@mipmap/backup_warning"
             android:layout_gravity="center_horizontal"
             android:layout_marginEnd="8dp"
@@ -23,7 +22,6 @@
             android:layout_height="68dp"
             />
         <TextView
-            android:id="@+id/backup_title"
             android:text="@string/message_no_backup"
             android:textColor="@color/black"
             android:textSize="24sp"
@@ -35,7 +33,6 @@
             android:layout_height="wrap_content"
             />
         <TextView
-            android:id="@+id/textView"
             android:text="@string/backup_warning_text"
             android:textAlignment="center"
             android:gravity="center_horizontal"

@@ -9,7 +9,6 @@
 
 
     <RelativeLayout
-        android:id="@+id/layout_eth_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_card"
@@ -18,7 +17,6 @@
         android:visibility="visible">
 
         <LinearLayout
-            android:id="@+id/allz"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -83,7 +81,6 @@
                 android:background="@color/super_light_grey" />
 
             <LinearLayout
-                android:id="@+id/layout_transactions"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="100dp"
@@ -110,7 +107,6 @@
                     android:visibility="gone">
 
                     <TextView
-                        android:id="@+id/no_recent_transactions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"

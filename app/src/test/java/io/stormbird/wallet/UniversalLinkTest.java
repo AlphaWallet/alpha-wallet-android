@@ -14,7 +14,6 @@ import org.web3j.crypto.Sign;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -97,7 +96,7 @@ public class UniversalLinkTest
 //    }
 
     @Test
-    public void UniversalLinksSignerAddressShouldBeRecoverable() throws SalesOrderMalformed, SignatureException {
+    public void UniversalLinksSignerAddressShouldBeRecoverable() throws SalesOrderMalformed {
         for (String link : links) {
             MagicLinkData order = parser.parseUniversalLink(link);
             parser.getOwnerKey(order);
@@ -189,9 +188,8 @@ public class UniversalLinkTest
         int milliEth = (int)(ethValue*1000.0f);
 
         //now convert to ETH
-        BigInteger weiValue = Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
 
-        return weiValue;
+        return Convert.toWei(String.valueOf(milliEth), Convert.Unit.FINNEY).toBigInteger();
     }
 
     private byte[] getSignature(byte[] message) throws SalesOrderMalformed {

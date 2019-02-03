@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class QRExtractorTest {
 
     @Test
-    public void extractingIsCorrect() throws Exception {
+    public void extractingIsCorrect() {
 
         QRURLParser parser = QRURLParser.getInstance();
 

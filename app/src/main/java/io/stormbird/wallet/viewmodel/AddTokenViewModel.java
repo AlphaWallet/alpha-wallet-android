@@ -64,8 +64,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, boolean isStormBird)
     {
-        TokenInfo tokenInfo = new TokenInfo(address, name, symbol, decimals, true, isStormBird);
-        return tokenInfo;
+        return new TokenInfo(address, name, symbol, decimals, true, isStormBird);
     }
 
     public void setupTokens(String addr) {

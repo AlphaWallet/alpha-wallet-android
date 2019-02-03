@@ -19,7 +19,7 @@ public class BalanceUtils {
         return usd.toString();
     }
 
-    public static String EthToWei(String eth) throws Exception {
+    public static String EthToWei(String eth) {
         BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(weiInEth));
         return wei.toBigInteger().toString();
     }

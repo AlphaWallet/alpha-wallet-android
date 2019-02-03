@@ -27,7 +27,6 @@
         android:padding="20dp">
 
         <TextView
-            android:id="@+id/requester_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -49,7 +48,6 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/address_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -177,7 +175,6 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/btn_approve"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"

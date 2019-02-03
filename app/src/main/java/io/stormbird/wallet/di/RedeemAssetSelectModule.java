@@ -4,7 +4,6 @@ import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.RedeemSignatureDisplayRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.RedeemAssetSelectViewModelFactory;

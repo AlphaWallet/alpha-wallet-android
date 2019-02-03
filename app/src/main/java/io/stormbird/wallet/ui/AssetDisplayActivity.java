@@ -10,13 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.FinishReceiver;

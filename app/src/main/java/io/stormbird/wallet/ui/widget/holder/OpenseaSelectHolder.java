@@ -9,14 +9,11 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
 import android.widget.LinearLayout;
-import io.stormbird.token.entity.TicketRange;
+
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.widget.OnOpenseaAssetCheckListener;
-import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
-
-import java.math.BigInteger;
 
 /**
  * Created by James on 12/11/2018.

@@ -7,7 +7,6 @@ import io.reactivex.annotations.NonNull;
 import io.stormbird.wallet.interact.ENSInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;

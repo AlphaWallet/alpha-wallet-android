@@ -137,7 +137,6 @@
                     android:paddingTop="@dimen/big_margin">
 
                     <TextView
-                        android:id="@+id/label_network_fee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"

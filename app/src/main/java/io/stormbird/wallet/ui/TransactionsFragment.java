@@ -1,15 +1,11 @@
 package io.stormbird.wallet.ui;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.SharedPreferences;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
@@ -22,32 +18,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import io.stormbird.token.tools.TokenDefinition;
-import org.xml.sax.SAXException;
-
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.HelpItem;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.TokenInterface;
 import io.stormbird.wallet.entity.TokensReceiver;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.ui.widget.adapter.HelpAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
-import io.stormbird.wallet.util.RootUtil;
-import io.stormbird.wallet.viewmodel.HelpViewModel;
-import io.stormbird.wallet.viewmodel.HelpViewModelFactory;
 import io.stormbird.wallet.viewmodel.TransactionsViewModel;
 import io.stormbird.wallet.viewmodel.TransactionsViewModelFactory;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.EmptyTransactionsView;
 import io.stormbird.wallet.widget.SystemView;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 

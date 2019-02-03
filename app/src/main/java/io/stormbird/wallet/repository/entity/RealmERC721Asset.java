@@ -5,7 +5,6 @@ import java.util.List;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
-import io.stormbird.wallet.entity.opensea.AssetContract;
 import io.stormbird.wallet.entity.opensea.Trait;
 
 /**

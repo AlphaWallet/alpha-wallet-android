@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.RedeemSignatureDisplayRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 

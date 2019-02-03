@@ -12,8 +12,7 @@ public class LocaleUtils {
         Locale mLocale = new Locale(locale);
         Locale intermediate = new Locale(base); //ensure we get the language name in the correct language eg 'English', 'Inglis' etc.
         String displayLanguage = mLocale.getDisplayLanguage(intermediate);
-        String formattedDisplay = displayLanguage.substring(0, 1).toUpperCase() + displayLanguage.substring(1);
-        return formattedDisplay;
+        return displayLanguage.substring(0, 1).toUpperCase() + displayLanguage.substring(1);
     }
 
     public static void setLocale(Context context, String locale) {

@@ -1,11 +1,9 @@
 package io.stormbird.token.entity;
 
 import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.util.ZonedDateTime;
 
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 /**
  * Created by weiwu on 1/3/18.  Each NonFungibleToken is a

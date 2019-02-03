@@ -5,11 +5,9 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.util.SortedList;
 
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Created by James on 15/03/2018.
@@ -84,8 +82,7 @@ public class TokenDiffCallback extends DiffUtil.Callback {
         }
         else if (oldItem instanceof BigDecimal)
         {
-            boolean same = ((BigDecimal) oldItem).compareTo((BigDecimal) newItem) == 0;
-            return same;
+            return ((BigDecimal) oldItem).compareTo((BigDecimal) newItem) == 0;
         }
         else
         {
@@ -101,14 +98,8 @@ public class TokenDiffCallback extends DiffUtil.Callback {
             {
                 return false;
             }
-            else if (oldToken.ticker != null && newToken.ticker != null && !oldToken.ticker.percentChange24h.equals(newToken.ticker.percentChange24h))
-            {
-                return false; //checking if ticker has updated
-            }
             else
-            {
-                return true;
-            }
+                return oldToken.ticker == null || newToken.ticker == null || oldToken.ticker.percentChange24h.equals(newToken.ticker.percentChange24h);
         }
     }
 

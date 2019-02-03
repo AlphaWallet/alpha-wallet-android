@@ -22,4 +22,4 @@ public enum TransactionType
     ALLOCATE_TO,
     APPROVE,
     ILLEGAL_VALUE
-};
+}

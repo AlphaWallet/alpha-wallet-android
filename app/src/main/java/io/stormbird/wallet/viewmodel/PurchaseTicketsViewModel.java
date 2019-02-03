@@ -11,7 +11,6 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 
@@ -21,7 +20,6 @@ import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * Created by James on 23/02/2018.

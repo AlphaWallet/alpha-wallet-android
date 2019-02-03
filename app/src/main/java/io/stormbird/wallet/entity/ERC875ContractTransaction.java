@@ -8,8 +8,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.stormbird.wallet.R;
-
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 

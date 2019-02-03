@@ -66,8 +66,7 @@ public class TabUtils {
         });
     }
 
-    private static void setTextMargins(View tabView, int margin) throws Exception
-    {
+    private static void setTextMargins(View tabView, int margin) {
         TextView tv = (TextView) getTextView(tabView);
         if (tv != null)
         {

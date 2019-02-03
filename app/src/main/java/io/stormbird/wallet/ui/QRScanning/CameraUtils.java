@@ -52,13 +52,10 @@ public class CameraUtils
             }
 
             List<String> supportedFlashModes = parameters.getSupportedFlashModes();
-            if (supportedFlashModes == null || supportedFlashModes.isEmpty() || supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)) {
-                return false;
-            }
+            return supportedFlashModes != null && !supportedFlashModes.isEmpty() && (supportedFlashModes.size() != 1 || !supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF));
         } else {
             return false;
         }
 
-        return true;
     }
 }

@@ -159,12 +159,12 @@ public class MarketOrderTest
             }
 
             @Override
-            public void unlockAccount(Wallet signer, String signerPassword) throws Exception {
+            public void unlockAccount(Wallet signer, String signerPassword) {
 
             }
 
             @Override
-            public void lockAccount(Wallet signer, String signerPassword) throws Exception {
+            public void lockAccount(Wallet signer, String signerPassword) {
 
             }
 

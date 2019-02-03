@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.math.BigInteger;
-
 /* weiwu: I think this is what intended:
    a transaction is a single unit of logic or work, sometimes made up of multiple operations.
  */

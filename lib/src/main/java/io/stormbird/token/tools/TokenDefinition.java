@@ -457,7 +457,7 @@ public class TokenDefinition {
         NodeList nList;
         nList = xml.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "KeyName");
         if (nList.getLength() > 0) {
-            this.keyName = ((Element) nList.item(0)).getTextContent();
+            this.keyName = nList.item(0).getTextContent();
         }
         return; // even if the document is signed, often it doesn't have KeyName
     }

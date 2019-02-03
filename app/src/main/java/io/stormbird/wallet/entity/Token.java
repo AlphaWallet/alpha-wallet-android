@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 
 import io.stormbird.token.entity.TicketRange;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -312,14 +311,7 @@ public class Token implements Parcelable
     {
         String checkAddress = Numeric.cleanHexPrefix(contractAddress);
         String ourAddress = Numeric.cleanHexPrefix(getAddress());
-        if (ourAddress.equalsIgnoreCase(checkAddress))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return ourAddress.equalsIgnoreCase(checkAddress);
     }
 
     public boolean isCurrency()
@@ -513,7 +505,8 @@ public class Token implements Parcelable
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
     public void setRealmBurn(RealmToken realmToken, List<Integer> burnList) { }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
-    public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; };
+    public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
+
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
     public void addToBurnList(List<Uint16> burnList) { }

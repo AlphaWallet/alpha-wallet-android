@@ -15,8 +15,8 @@ public class HelpItem implements Parcelable {
     }
 
     private HelpItem(Parcel in) {
-        question = new String(in.readString());
-        answer = new String(in.readString());
+        question = in.readString();
+        answer = in.readString();
     }
 
     public String getQuestion() {

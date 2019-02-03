@@ -1,7 +1,6 @@
 package io.stormbird.wallet.service;
 
 import android.content.Context;
-import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,7 +19,6 @@ import java.util.Map;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.BaseViewCallback;
 import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.entity.TradeInstance;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.PasswordStore;
@@ -358,7 +356,7 @@ public class MarketQueueService {
                 sb.append("/");
             }
 
-            sb.append(key + "/" + value);
+            sb.append(key).append("/").append(value);
         }
 
         return sb.toString();
@@ -390,7 +388,7 @@ public class MarketQueueService {
                 first = false;
             }
 
-            sb.append(key + "=" + value);
+            sb.append(key).append("=").append(value);
         }
 
         return sb.toString();
@@ -409,7 +407,7 @@ public class MarketQueueService {
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
-        byte   subv = (byte)(sig[64]);
+        byte   subv = sig[64];
         if (subv < 27) subv += 27;
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
@@ -418,8 +416,6 @@ public class MarketQueueService {
         BigInteger r = new BigInteger(1, subrRev);
         BigInteger s = new BigInteger(1, subsRev);
 
-        Sign.SignatureData ecSig = new Sign.SignatureData(subv, subrRev, subsRev);
-
-        return ecSig;
+        return new Sign.SignatureData(subv, subrRev, subsRev);
     }
 }

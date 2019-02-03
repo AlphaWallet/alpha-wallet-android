@@ -1,24 +1,20 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
-import android.arch.lifecycle.Observer;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.entity.OrderContractAddressPair;
 import io.stormbird.wallet.ui.widget.OnSalesOrderClickListener;
 import io.stormbird.wallet.ui.widget.entity.SalesOrderSortedItem;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.OrderHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
 import io.stormbird.token.entity.MagicLinkData;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 

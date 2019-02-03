@@ -2,11 +2,9 @@ package io.stormbird.wallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
 
 import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 

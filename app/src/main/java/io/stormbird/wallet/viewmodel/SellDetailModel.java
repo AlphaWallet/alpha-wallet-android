@@ -124,7 +124,7 @@ public class SellDetailModel extends BaseViewModel {
 
         byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, price, expiry);
         try {
-            linkMessage = parser.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, expiry);
+            linkMessage = ParseMagicLink.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, expiry);
         } catch (SalesOrderMalformed e) {
             //TODO: Display appropriate error to user
         }
@@ -143,25 +143,13 @@ public class SellDetailModel extends BaseViewModel {
     private void gotSignature(byte[] signature)
     {
         initParser();
-        try {
-            String universalLink = parser.completeUniversalLink(linkMessage, signature);
-            //Now open the share icon
-            universalLinkReady.postValue(universalLink);
-        }
-        catch (SalesOrderMalformed sm)
-        {
-            //TODO: Display appropriate error to user
-            sm.printStackTrace();
-        }
+        String universalLink = parser.completeUniversalLink(linkMessage, signature);
+        //Now open the share icon
+        universalLinkReady.postValue(universalLink);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
-    }
-
-    public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)
-    {
-        assetDisplayRouter.open(ctx, ticket, isClearStack);
     }
 }

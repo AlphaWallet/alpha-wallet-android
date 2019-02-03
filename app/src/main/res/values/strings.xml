@@ -1,15 +1,8 @@
 <resources>
-    <string name="title_request">My Address</string>
-    <string name="action_sign_in">Create</string>
-    <string name="action_sign_in_short">Create</string>
 
     <!-- String related to sending -->
-    <string name="prompt_to">To</string>
     <string name="action_send">Send</string>
 
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="action_settings">Settings</string>
     <string name="title_account_list">Wallets</string>
@@ -17,21 +10,10 @@
     <string name="copy">Copy to clipboard</string>
     <string name="sent">Sent</string>
     <string name="received">Received</string>
-    <string name="title_activity_settings">Settings</string>
-    <string name="network_label">Network</string>
     <string name="ok">Ok</string>
-    <string name="scan_barcode_button">Scan</string>
     <string name="barcode_error_format">Invalid barcode format: %s</string>
     <string name="title_delete_account">Are you sure you want to delete wallet?</string>
-    <string name="telegram">Telegram Group</string>
 
-    <string name="title_community">Community</string>
-    <string name="title_opensource">Open source development</string>
-    <string name="title_source_code">Source code</string>
-    <string name="title_report_bug">Report a bug</string>
-    <string name="title_rate">Rate us on Play Store</string>
-    <string name="title_support">Support</string>
-    <string name="title_donate">Donate</string>
     <string name="error_import">Error importing keystore</string>
     <string name="backup_warning_text">
         Since only you control your money, you\'ll need to save your backup keystore in case this app is deleted. \n\n
@@ -39,22 +21,11 @@
     </string>
     <string name="message_no_backup">No backup, no Ethereum.</string>
     <string name="error_deleting_account">Error deleting wallet</string>
-    <string name="error_deleting_account_with_details">Error deleting wallet %s</string>
-    <string name="error_passwords_must_match">Passwords must match.</string>
-    <string name="label_confirm_new_password">Confirm new password</string>
-    <string name="label_new_password">New password</string>
-    <string name="activity_title_backup">Backup: %s…</string>
-    <string name="action_backup">Backup</string>
-    <string name="title_privacy_policy">Privacy Policy</string>
-    <string name="title_terms">Terms and Conditions</string>
-    <string name="title_version">Version</string>
-    <string name="title_tokens">My Tokens</string>
     <string name="unlock_screen_title_android">Unlock screen</string>
     <string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
     <string name="do_manage_make_backup">Did you manage to make a backup?</string>
     <string name="yes_continue">Yes, continue</string>
     <string name="no_repeat">No, repeat</string>
-    <string name="gas_fee_title">Gas Fee (Gwei)</string>
     <string name="transfer">Transfer %s</string>
     <string name="action_buy">Buy</string>
     <string name="empty" />
@@ -67,9 +38,7 @@
     <string name="no_tokens">No tokens found.</string>
 
     <!-- Titles -->
-    <string name="title_email">Email us</string>
     <string name="title_my_address">My Address</string>
-    <string name="title_my_tokens">My Tokens</string>
     <string name="title_activity_send">Send</string>
     <string name="title_activity_confirmation">Confirm</string>
     <string name="title_transaction_details">Transaction Details</string>
@@ -96,9 +65,6 @@
     <string name="label_gas_price">Gas Price</string>
     <string name="label_network_fee">Network Fee</string>
     <string name="button_ok">OK</string>
-    <string name="hint_recipient_address">Recipient address</string>
-    <string name="hint_amount">Amount</string>
-    <string name="hint_contract_address">Contract address</string>
 
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
@@ -116,7 +82,6 @@
     <string name="action_coinbase">Coinbase</string>
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>
     <string name="action_changelly">Changelly</string>
-    <string name="action_wallets">Wallets</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_generate_qr">Could not generate qr code.</string>
@@ -128,7 +93,6 @@
     <string name="NA">N/A</string>
     <string name="error_wallet_not_selected">Wallet is not selected</string>
     <string name="no_transactions_yet">No transactions yet!</string>
-    <string name="unknown_balance_with_symbol">-- ETH</string>
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">Sending...</string>
@@ -150,46 +114,31 @@
     <string name="assets">Assets</string>
     <string name="advanced">Advanced Options</string>
     <string name="copy_wallet_address">Copy Wallet Address</string>
-    <string name="message_attending_venue">Entry Code for Venue Ticket</string>
-    <string name="entrance_token_address">Entrance token address %s</string>
     <string name="hint_contract_name">Name</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Date</string>
     <string name="hint_contract_price">Price</string>
     <!-- Price -->
-    <string name="hint_asking_price">Asking price in ETH</string>
-    <string name="hint_ticket_selection">Ticket Count</string>
     <string name="action_use">Redeem</string>
     <string name="action_sell">Sell</string>
     <string name="action_transfer">Transfer</string>
-    <string name="hint_token_balance">Balance</string>
     <string name="address">address</string>
     <string name="action_redeem">Redeem</string>
-    <string name="hint_ids">Enter Ticket IDs</string>
     <string name="add_ids_to_redeem">Tickets Redeemed</string>
     <string name="title_use_token">Use Token</string>
-    <string name="ticket_transfer_title">Transfer Ticket</string>
     <string name="token_balance">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
-    <string name="action_edit_tokens">Edit tokens</string>
     <string name="token_name">%1$s (%2$s)</string>
     <string name="copy_addr_to_clipboard">copy address to clipboard</string>
-    <string name="hint_ids_to_sell">Enter Ticket IDs to place on market</string>
     <string name="create_sell_order">Create Sales Order</string>
-    <string name="selection">selection:</string>
     <string name="select_tickets">Select Tickets to Sell:</string>
     <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
-    <string name="market_buy_title">Browse Ticket Market</string>
     <string name="marketplace_title">Marketplace</string>
     <string name="title_marketplace">Marketplace</string>
-    <string name="quantity_to_purchase">Quantity of Tickets</string>
     <string name="action_purchase">Purchase</string>
-    <string name="title_market_purchase">Purchase Tickets</string>
     <string name="view_listings">View Listings</string>
-    <string name="show_marketplace">Show Marketplace</string>
     <string name="search">Search</string>
     <string name="toolbar_header_wallet">Wallet</string>
-    <string name="toolbar_header_marketplace">Marketplace</string>
     <string name="toolbar_header_settings">Settings</string>
     <string name="toolbar_header_help">Help \u0026 FAQ</string>
     <string name="toolbar_ethereum_info">Ethereum Info</string>
@@ -197,12 +146,9 @@
     <string name="settings_my_wallet_address">My Wallet Address</string>
     <string name="settings_notification">Notifications</string>
     <string name="settings_logout">Log Out</string>
-    <string name="title_redeem_token">Redeem Asset</string>
     <string name="title_redeem">Redeem Ticket</string>
     <string name="title_show_tickets">Token Inventory</string>
-    <string name="quantity_to_redeem">Quantity to Redeem</string>
     <string name="waiting_for_blockchain">Waiting for blockchain …</string>
-    <string name="set_price_subtext">Your price is set in Ethereum (ETH), a blockchain crypto currency. Once sold, <b>you will receive Ethereum (ETH)</b> which can be converted to USD and transferred to your bank acccount.</string>
     <string name="btn_text_apply">Apply</string>
     <string name="filter_by">Filter by:</string>
     <string name="filter_date_label">Date</string>
@@ -212,11 +158,9 @@
     <string name="set_a_price">Set a Price:</string>
     <string name="learn_more_about_ethereum">Learn more about Ethereum</string>
     <string name="price_per_ticket">Price Per Ticket</string>
-    <string name="action_marketplaceSale">Marketplace</string>
     <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
     <string name="transfer_tickets">Transfer Tickets</string>
     <string name="link_valid_until">The MagicLink will be valid until %1s %2s</string>
-    <string name="transfer_method">Transfer Method:</string>
     <string name="generate_pick_up_link">Generate a MagicLink</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
@@ -259,13 +203,11 @@
         <item>DD/MM/YY</item>
     </string-array>
     <string name="eth">ETH</string>
-    <string name="recommended_market_price">Recommended Market Price per Ticket</string>
     <string name="quantity_of_tickets">Quantity of Tickets</string>
     <string name="total_cost_label">Total Cost:</string>
     <string name="equivalent_in_usd">Equivalent in USD</string>
     <string name="total_cost">%s ETH</string>
     <string name="select_quantity_tickets">Select Quantity of Tickets</string>
-    <string name="range_formatter">%1d - %2d</string>
     <string name="redeemed">Redeemed</string>
     <string name="ticket_redeemed">Your ticket has been redeemed</string>
     <string name="filter">Filter</string>
@@ -273,9 +215,6 @@
     <string name="filter_search_class">Class</string>
     <string name="filter_search_seats">No. of Seats Together</string>
     <string name="search_label_match">Match</string>
-    <string name="label_min">Min</string>
-    <string name="label_max">Max</string>
-    <string name="label_price">Price</string>
     <string name="onboarding_1">Hold all your Crypto assets in one place</string>
     <string name="onboarding_2">Powered by blockchain technology, smart tickets, fraud free</string>
     <string name="onboarding_3">Buy, sell and transfer your favourite tokens</string>
@@ -295,10 +234,8 @@
     <string name="issuer">Issuer:</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Any \'rooted\' app can access aWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
-    <string name="toolbar_add_custom_token">Add Custom Token</string>
     <string name="contact_us">Still need help? Contact us</string>
     <string name="confirm_sale_title">Confirm Sale?</string>
-    <string name="confirm_sale_small_text">You will receive:</string>
     <string name="dialog_cancel_back">Cancel and Go Back</string>
     <string name="seekbar_max">Max</string>
     <string name="seekbar_min">Min</string>
@@ -309,12 +246,8 @@
     <string name="label_transfer_ticket_detail">Transfer Ticket Details</string>
     <string name="label_transfer_ticket">Transfer Ticket</string>
     <string name="select_tickets_transfer">Select Tickets to Transfer:</string>
-    <string name="confirm_transfer_title">Confirm Transfer?</string>
     <string name="label_order_details">Order Details</string>
     <string name="dialog_go_to_listings">Go to My Listings</string>
-    <string name="backup_key_title">Congratulations!</string>
-    <string name="backup_key_message">You are the only one in the whole universe who knows your key. Be aware that anyone who has your key has your assets, so please keep it safe. Do not share it with anyone and do not lose it.</string>
-    <string name="backup_key_button_text">View your Currency</string>
     <string name="dialog_marketplace_success">Your tickets have been put up for sale in the Marketplace</string>
     <string name="dialog_process_error">Trade not processed</string>
     <string name="dialog_ok">OK</string>
@@ -323,22 +256,17 @@
     <string name="tickets">Tickets</string>
     <string name="failed">Failed</string>
     <string name="total_cost_for_x_tickets">Total cost for %1d %2s:</string>
-    <string name="import_ticket">Import Tickets</string>
     <string name="title_import_token">Import Tickets</string>
     <string name="action_cancel">Cancel</string>
     <string name="confirm_purchase">Confirm Purchase</string>
     <string name="bad_import_link">Invalid Import Link</string>
     <string name="bad_import_link_body">Import link contains an error; please re-request the link</string>
-    <string name="burned">REDEEMED</string>
-    <string name="marketplace">Marketplace</string>
     <string name="depreciation">DEPRECIATION</string>
     <string name="ticket_unavailable">Unavailable</string>
     <string name="generate_free_transfer_link">Create free transfer link?</string>
     <string name="send_universal_link">Share MagicLink</string>
     <string name="generate_sale_transfer_link">Generate MagicLink</string>
     <string name="place_tickets_marketplace">List on marketplace</string>
-    <string name="send_universal_sale_link">Share MagicLink</string>
-    <string name="market_listing"></string>
     <string name="invalid_ticket">Invalid Ticket</string>
     <string name="hint_time">--:--</string>
     <string name="link_expiry_time">MagicLink Expiry Time</string>
@@ -346,18 +274,10 @@
     <string name="error_date">Please select expiry date</string>
     <string name="error_invalid_quantity">Input must be greater than 0</string>
     <string name="link_expiry_date">MagicLink Expiry Date</string>
-    <string name="send_email">Send Email</string>
-    <string name="send_sms_whatsapp">Send SMS / WhatsApp</string>
-    <string name="input_wallet_address">Input Wallet Address</string>
-    <string name="use_qr_code_scanner">Use QR Code Scanner</string>
-    <string name="title_send">Send %s</string>
     <string name="amount">Amount</string>
-    <string name="show_my_address">Show My Address</string>
     <string name="confirm_transfer_details">Confirm Transfer Details</string>
     <string name="advanced_settings">Advanced Settings</string>
     <string name="action_confirm">Confirm</string>
-    <string name="label_amount_to_transfer">Amount to Transfer</string>
-    <string name="action_info">Info</string>
     <string name="eth_detail_q1">What is Ethereum?</string>
     <string name="eth_detail_a1">ETH is short for Ethereum. Ethereum is a crypto currency (similar to BitCoin) running on blockchain technology.</string>
     <string name="eth_detail_q2">How do I convert Ethereum into cash?</string>
@@ -369,16 +289,9 @@
     <string name="scan_qr_label">Scan the QR Code or copy the text below:</string>
     <string name="my_wallet_address">My Wallet Address</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
-    <string name="action_universal_link">MagicLink</string>
     <string name="action_marketplace">Marketplace</string>
-    <string name="sell_thru_universal_link">Sell through a MagicLink</string>
     <string name="universal_link_expiry_on">MagicLink expiry on:</string>
     <string name="confirm_sale_total">Total: %s</string>
-    <string name="share_universal_link">Share MagicLink</string>
-    <string name="select_option_to_transfer">Select Option to Transfer</string>
-    <string name="hint_input_eth_amount">0.00</string>
-    <string name="label_my_address">My Address</string>
-    <string name="action_copy_alt">Copy</string>
     <string name="set_universal_link_expiry">Set MagicLink Expiry:</string>
     <string name="tickets_selected">%1s %2s Selected</string>
     <string name="eth_per_ticket_w_value">%s ETH/Ticket</string>
@@ -393,8 +306,6 @@
     <string name="erc20">ERC 20</string>
     <string name="erc875">ERC 875</string>
     <string name="erc875legacy">ERC 875*</string>
-    <string name="enabled">Enabled</string>
-    <string name="disabled">Disabled</string>
     <string name="what_is_eth">Ethereum is an open-source, public, blockchain-based distributed computing platform and operating system featuring smart contract (scripting) functionality. It is the infrastructure for blockchain products and services.\n\nETH/Ether is a cryptocurrency whose blockchain is generated by the Ethereum platform. Ether can be transferred between accounts and used to compensate participant mining nodes for computations performed. Ethereum provides a decentralised Turing-complete virtual machine, the Ethereum Virtual Machine (EVM), which can execute scripts using an international network of public nodes. "Gas", an internal transaction pricing mechanism, is used to mitigate spam and allocate resources on the network.</string>
     <string name="why_alphawallet_eth">Currently, Ethereum is the best and largest blockchain for developing smart contract application and services. AlphaWallet starts with supporting Ethereum blockchain and helps improving its technology.</string>
     <string name="how_i_get_money">You can convert Ethereum to fiat money and transfer it to your bank account through any cryptocurrency exchange.</string>
@@ -419,30 +330,21 @@
     <string name="hint_contract_decimals">Decimals</string>
     <string name="title_add_token">Add Custom Token</string>
     <string name="suggestion_private_key">Private key has to be 64 characters long</string>
-    <string name="select_camera">Select a Camera</string>
     <integer name="viewfinder_border_width">15</integer>
     <integer name="viewfinder_border_length">160</integer>
-    <string name="formats">Formats</string>
-    <string name="choose_formats">Choose Formats</string>
     <string name="qr_scanner">QR Scanner</string>
     <string name="dialog_title_select_locale">Select Locale:</string>
     <string name="settings_locale_lang">Locale</string>
-    <string name="settings_network">Network</string>
-    <string name="ticket_market_purchase">Market Purchase</string>
     <string name="ticket_redeem">Redeem</string>
     <string name="ticket_receive_from">Receive From</string>
     <string name="ticket_transfer_to">Transfer</string>
-    <string name="ticket_transfer">Transfer</string>
     <string name="ticket_transfer_from">Transfer From</string>
     <string name="ticket_load_new_tickets">Load New Tickets</string>
     <string name="ticket_pass_from">Receive From Magiclink Free</string>
     <string name="ticket_pass_to">Magiclink Transfer</string>
     <string name="ticket_terminate_contract">Terminate Contract</string>
     <string name="ticket_contract_constructor">Constructor</string>
-    <string name="ticket_receive_from_magiclink">Receive From Magiclink</string>
     <string name="ticket_invalid_op">Invalid Operation</string>
-    <string name="ticket_expired_contract">Expired Contract</string>
-    <string name="ticket_unknown_contract">Unknown Contract</string>
     <string name="ticket_admin_redeem">Admin Redeem</string>
     <string name="ticket_magiclink_pickup">Receive from Magiclink</string> <!-- receive ticket from magic link -->
     <string name="ticket_magiclink_transfer">Magiclink Transfer</string> <!-- transfer out of our wallet by magiclink -->
@@ -450,7 +352,6 @@
     <string name="ticket_magiclink_purchase">Magiclink Purchase</string>
 
     <string name="action_next">Next</string>
-    <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
     <string name="action_contract_info">Contract Info</string>
     <string name="contract_address">Contract Address</string>
@@ -479,10 +380,6 @@
     <string name="dialog_title_sign_message">Sign Message</string>
     <string name="dialog_reject">Reject</string>
     <string name="dialog_approve">Approve</string>
-    <string name="popup_verification_success">Verification Successful</string>
-    <string name="popup_verification_failed">Verification Failed</string>
-    <string name="dialog_sign_transaction_success">Sign Transaction Successful</string>
-    <string name="dialog_sign_transaction_failed">Sign Transaction Failed</string>
     <string name="transaction_value">Transaction Value</string>
     <string name="dialog_title_sign_transaction">Sign Transaction</string>
     <string name="action_view_bookmarks">View Bookmarks</string>
@@ -504,7 +401,6 @@
     <string name="confirm_dapp_transaction">Confirm DApp transaction"</string>
     <string name="ens_address">Resolved Address</string>
     <string name="confirm_erc721_transfer">Confirm Token Transfer</string>
-    <string name="asset_name">Asset Name</string>
     <string name="title_dialog_check_ens">Checking ENS</string>
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>

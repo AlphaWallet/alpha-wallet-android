@@ -7,12 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * Created by James on 12/02/2018.

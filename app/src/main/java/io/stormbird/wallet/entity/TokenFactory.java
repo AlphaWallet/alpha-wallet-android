@@ -1,7 +1,5 @@
 package io.stormbird.wallet.entity;
 
-import android.text.TextUtils;
-
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.repository.entity.RealmERC721Token;
 import io.stormbird.wallet.repository.entity.RealmToken;
@@ -10,8 +8,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.stormbird.wallet.repository.TokensRealmSource.ACTUAL_BALANCE_INTERVAL;
 
 /**
  * Created by James on 27/01/2018.

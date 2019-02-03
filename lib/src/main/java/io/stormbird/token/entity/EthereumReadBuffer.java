@@ -16,13 +16,11 @@ import io.stormbird.token.tools.Numeric;
 public class EthereumReadBuffer extends DataInputStream
 {
     private final byte[] readBuffer;
-    private final byte[] readBuffer4;
 
     public EthereumReadBuffer(InputStream in)
     {
         super(in);
         readBuffer = new byte[32];
-        readBuffer4 = new byte[4];
     }
 
     public BigInteger readBI() throws IOException
@@ -91,8 +89,7 @@ public class EthereumReadBuffer extends DataInputStream
     /*
      * equivalent of Integer.readUnsignedLong
      */
-    public long toUnsignedLong(int i) throws IOException
-    {
+    public long toUnsignedLong(int i) {
         return i & 0x00000000ffffffffL; // long is always 64 bits
     }
 

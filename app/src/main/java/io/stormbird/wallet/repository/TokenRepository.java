@@ -32,16 +32,13 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 import rx.functions.Func1;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
-import static io.stormbird.wallet.C.XDAI_NETWORK_NAME;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -803,7 +800,7 @@ public class TokenRepository implements TokenRepositoryType {
         }).subscribeOn(Schedulers.io());
     }
 
-    private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+    private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) {
         List<BigInteger> result = new ArrayList<>();
         result.add(BigInteger.valueOf(-1));
         try
@@ -833,14 +830,13 @@ public class TokenRepository implements TokenRepositoryType {
         if (!useBackupNode)
         {
             final Event event = new Event("TransferFrom",
-                                          Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                                          Arrays.asList(new TypeReference<Address>()
                                           {
                                           }, new TypeReference<Address>()
                                           {
                                           }),
-                                          Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Uint16>>()
-                                          {
-                                          }));
+                    Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {
+                    }));
             EthFilter filter = new EthFilter(DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING, contractAddr);
             filter.addSingleTopic(EventEncoder.encode(event));
             return web3j.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
@@ -1168,15 +1164,14 @@ public class TokenRepository implements TokenRepositoryType {
                 long now = System.currentTimeMillis();
                 Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
                 if (isStormbird == null) isStormbird = false;
-                TokenInfo result = new TokenInfo(
+
+                return new TokenInfo(
                         address,
                         getName(address),
                         getContractData(address, stringParam("symbol"), ""),
                         getDecimals(address),
                         true,
                         isStormbird);
-
-                return result;
             }
             catch (Exception e)
             {

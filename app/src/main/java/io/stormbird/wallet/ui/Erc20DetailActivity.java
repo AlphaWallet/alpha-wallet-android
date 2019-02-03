@@ -219,10 +219,6 @@ public class Erc20DetailActivity extends BaseActivity {
                 finish();
                 break;
             }
-            case R.id.action_info: {
-                new EthereumInfoRouter().open(this);
-                break;
-            }
             case R.id.action_qr:
                 viewModel.showContractInfo(this, contractAddress);
                 break;

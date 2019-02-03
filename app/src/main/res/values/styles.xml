@@ -34,48 +34,4 @@
         <item name="android:textSize">20sp</item>
     </style>
 
-    <style name="AppTheme.Toolbar.Title.AWallet" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">25sp</item>
-        <item name="android:fontFamily">@font/font_light</item>
-        <item name="android:layout_gravity">center</item>
-    </style>
-
-    <style name="ToolbarTextAppearance">
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:shadowDx">1</item>
-        <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">2</item>
-        <item name="android:shadowColor">?colorAccent</item>
-    </style>
-
-    <style name="ToolbarTextAppearance.Title">
-        <item name="android:textSize">20sp</item>
-    </style>
-
-    <style name="ToolbarTextAppearance.Subtitle">
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="MyToolbar">
-        <item name="theme">@style/ThemeOverlay.AppCompat.Dark</item>
-        <item name="android:background">?colorPrimary</item>
-    </style>
-
-    <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
-        <item name="tabTextAppearance">@style/TabDarkTextAppearance</item>
-        <item name="tabSelectedTextColor">@android:color/white</item>
-    </style>
-
-    <style name="TabDarkTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/semitransparentWhite</item>
-        <item name="textAllCaps">true</item>
-    </style>
-    <style name="TabLightTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/colorPrimaryDark</item>
-        <item name="textAllCaps">true</item>
-    </style>
-
 </resources>

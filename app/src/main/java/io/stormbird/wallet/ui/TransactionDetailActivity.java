@@ -18,7 +18,6 @@ import io.stormbird.wallet.viewmodel.TransactionDetailViewModel;
 import io.stormbird.wallet.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Locale;
 

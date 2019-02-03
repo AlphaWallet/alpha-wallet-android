@@ -2,7 +2,6 @@ package io.stormbird.wallet.ui.widget.entity;
 
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.holder.RedeemTicketHolder;
-import io.stormbird.wallet.ui.widget.holder.SalesOrderHeaderHolder;
 
 /**
  * Created by James on 13/02/2018.

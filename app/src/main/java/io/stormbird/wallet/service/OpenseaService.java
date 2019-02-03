@@ -12,7 +12,6 @@ import io.stormbird.wallet.entity.opensea.OpenseaServiceError;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -44,7 +43,7 @@ public class OpenseaService {
                 .build();
     }
 
-    public Single<Token[]> getTokens(String address, int networkId) throws Exception {
+    public Single<Token[]> getTokens(String address, int networkId) {
         return queryBalance(address, networkId)
                 .map(json -> gotOpenseaTokens(json, address, networkId));
     }

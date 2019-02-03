@@ -8,8 +8,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
-
 /**
  * Created by James on 4/03/2018.
  *

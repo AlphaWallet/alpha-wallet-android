@@ -46,7 +46,7 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import javax.inject.Inject;
-import java.lang.reflect.Method;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;

@@ -13,7 +13,7 @@ public class CompletableErrorProxyOperator implements CompletableOperator {
     }
 
     @Override
-    public CompletableObserver apply(CompletableObserver observer) throws Exception {
+    public CompletableObserver apply(CompletableObserver observer) {
         return new DisposableCompletableObserver() {
             @Override
             public void onComplete() {

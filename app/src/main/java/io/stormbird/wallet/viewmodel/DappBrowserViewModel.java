@@ -34,27 +34,23 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
-    private GasSettings internalGasSettings = null;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            FetchGasSettingsInteract fetchGasSettingsInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
-        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
     }
@@ -121,21 +117,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-        if (gasSettings.getValue() == null)
-        {
-            disposable = fetchGasSettingsInteract
-                    .fetch(false)
-                    .subscribe(this::onGasSettings, this::onError);
-        }
-    }
-
-    private void onGasSettings(GasSettings gasSettings) {
-        this.gasSettings.postValue(gasSettings);
-        internalGasSettings = gasSettings;
-
-        disposable = fetchTokensInteract.getEthereumTicker()
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::onTicker, this::onError);
     }
 
     private void onTicker(Ticker ticker)

@@ -52,10 +52,13 @@ public class TokenRepository implements TokenRepositoryType {
     private final TransactionLocalSource transactionsLocalCache;
     private final AssetDefinitionService assetDefinitionService;
     private final TickerService tickerService;
+    private final TransactionRepositoryType transactionRepository;
     private Web3j web3j;
     private boolean useBackupNode = false;
     private NetworkInfo network;
     private Disposable disposable;
+
+    public static final String INVALID_CONTRACT = "<invalid>";
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -64,7 +67,8 @@ public class TokenRepository implements TokenRepositoryType {
             TokenLocalSource localSource,
             TransactionLocalSource transactionsLocalCache,
             TickerService tickerService,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TransactionRepositoryType transactionRepository) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.walletRepository = walletRepository;
         this.tokenNetworkService = tokenNetworkService;
@@ -73,6 +77,7 @@ public class TokenRepository implements TokenRepositoryType {
         this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.assetDefinitionService = assetDefinitionService;
+        this.transactionRepository = transactionRepository;
         buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
@@ -417,7 +422,7 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
             Wallet temp = new Wallet(null);
-            String responseValue = callMainNetSmartContractFunction(function, address, temp);
+            String responseValue = callCustomNetSmartContractFunction(function, address, temp, EthereumNetworkRepository.MAINNET_ID);
 
             if (responseValue == null) return BURN_ADDRESS;
 
@@ -540,7 +545,8 @@ public class TokenRepository implements TokenRepositoryType {
                 List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
-                switch (token.getInterfaceSpec())
+                ContractType interfaceSpec = token.getInterfaceSpec();
+                switch (interfaceSpec)
                 {
                     case ERC875:
                     case ERC875LEGACY:
@@ -553,11 +559,19 @@ public class TokenRepository implements TokenRepositoryType {
                     case ETHEREUM:
                         balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
+                    case OTHER:
+                        Log.d(TAG, "Name: " + token.tokenInfo.name);
+                        if (token.tokenInfo.name != null)
+                        {
+                            //re-check the contract signature:
+                            interfaceSpec = transactionRepository.queryInterfaceSpec(token.tokenInfo).blockingGet();
+                        }
+                        break;
                     default:
                         break;
                 }
 
-                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis(), token.getInterfaceSpec());
+                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis(), interfaceSpec);
                 updated.patchAuxData(token); //perform any updates we need here
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);
@@ -934,51 +948,44 @@ public class TokenRepository implements TokenRepositoryType {
 
     private static org.web3j.abi.datatypes.Function nameOf() {
         return new Function("name",
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Utf8String>() {
-                }));
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param) {
         return new Function(param,
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Utf8String>() {
-                }));
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function boolParam(String param) {
         return new Function(param,
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Bool>() {
-                }));
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param, BigInteger value) {
         return new Function(param,
-                Collections.singletonList(new Uint256(value)),
-                Collections.singletonList(new TypeReference<Utf8String>() {
-                }));
+                            Arrays.asList(new Uint256(value)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function intParam(String param) {
         return new Function(param,
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Uint>() {
-                }));
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function symbolOf() {
         return new Function("symbol",
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Utf8String>() {
-                }));
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function decimalsOf() {
         return new Function("decimals",
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Uint8>() {
-                }));
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
     private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
@@ -1021,7 +1028,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet) {
+            Function function, String contractAddress, Wallet wallet) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
@@ -1044,7 +1051,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     /**
-     * Call smart contract function on mainnet contract. This would be used for things like ENS lookup
+     * Call smart contract function on custom network contract. This would be used for things like ENS lookup
      * Currently because it's tied to a mainnet contract address there's no circumstance it would work
      * outside of mainnet. Users may be confused if their namespace doesn't work, even if they're currently
      * using testnet.
@@ -1055,24 +1062,26 @@ public class TokenRepository implements TokenRepositoryType {
      * @return
      * @throws Exception
      */
-    private String callMainNetSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet) {
+    private String callCustomNetSmartContractFunction(
+            Function function, String contractAddress, Wallet wallet, int chainId) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
         {
-            Web3j mainNet;
-            if (network.isMainNetwork)
+            Web3j localConnection;
+            if (network.chainId == chainId)
             {
-                mainNet = web3j;
+                localConnection = web3j;
             }
             else
             {
-                mainNet = Web3jFactory.build(new org.web3j.protocol.http.HttpService(ethereumNetworkRepository.getAvailableNetworkList()[0].rpcServerUrl));
+                //find network info
+                NetworkInfo info = getNetworkInfoFromChainId(chainId);
+                localConnection = Web3jFactory.build(new org.web3j.protocol.http.HttpService(info.rpcServerUrl));
             }
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
-            EthCall response = mainNet.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+            EthCall response = localConnection.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
         }
@@ -1123,6 +1132,30 @@ public class TokenRepository implements TokenRepositoryType {
         return tokens;
     }
 
+    @Override
+    public Single<ContractResult> getTokenName(String address, int chainId)
+    {
+        return Single.fromCallable(() -> {
+            ContractResult contractResult = new ContractResult(INVALID_CONTRACT, chainId);
+            org.web3j.abi.datatypes.Function function = nameOf();
+            Wallet temp = new Wallet(null);
+            String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);
+            if (responseValue == null) return contractResult;
+
+            List<Type> response = FunctionReturnDecoder.decode(
+                    responseValue, function.getOutputParameters());
+            if (response.size() == 1)
+            {
+                contractResult.name = (String) response.get(0).getValue();
+                return contractResult;
+            }
+            else
+            {
+                return contractResult;
+            }
+        });
+    }
+
     private Single<TokenInfo> setupTokensFromLocal(String address)
     {
         return Single.fromCallable(() -> {
@@ -1146,6 +1179,21 @@ public class TokenRepository implements TokenRepositoryType {
                 return null;
             }
         });
+    }
+
+    private NetworkInfo getNetworkInfoFromChainId(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getDefaultNetwork();
+        for (NetworkInfo n : ethereumNetworkRepository.getAvailableNetworkList())
+        {
+            if (n.chainId == chainId)
+            {
+                info = n;
+                break;
+            }
+        }
+
+        return info;
     }
 
     private Single<TokenInfo[]> setupTokensFromLocal(String[] addresses)

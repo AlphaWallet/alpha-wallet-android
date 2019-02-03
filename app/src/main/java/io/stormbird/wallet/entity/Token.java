@@ -621,7 +621,8 @@ public class Token implements Parcelable
         int networkId = assetService.getNetworkId(getAddress());
         if (networkId >= 1)
         {
-            return assetService.getAssetDefinition(getAddress()).getTokenName();
+            if (tokenInfo.name != null) return tokenInfo.name;
+            else return assetService.getAssetDefinition(getAddress()).getTokenName();
         }
         else
         {

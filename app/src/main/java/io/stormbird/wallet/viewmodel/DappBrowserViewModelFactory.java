@@ -18,7 +18,6 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final FetchGasSettingsInteract fetchGasSettingsInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
 
@@ -27,14 +26,12 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             FindDefaultWalletInteract findDefaultWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
-            FetchGasSettingsInteract fetchGasSettingsInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
-        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
     }
@@ -47,7 +44,6 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
-                fetchGasSettingsInteract,
                 fetchTokensInteract,
                 confirmationRouter);
     }

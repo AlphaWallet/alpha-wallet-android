@@ -40,6 +40,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> checkTokens = new MutableLiveData<>();
     private final MutableLiveData<List<String>> removeTokens = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
 
     private final MutableLiveData<String> checkAddr = new MutableLiveData<>();
 
@@ -120,6 +121,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     public LiveData<Boolean> endUpdate() { return checkTokens; }
     public LiveData<String> checkAddr() { return checkAddr; }
     public LiveData<List<String>> removeTokens() { return removeTokens; }
+    public LiveData<Boolean> tokensReady() { return tokensReady; }
 
     @Override
     protected void onCleared() {
@@ -249,6 +251,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     {
         progress.postValue(false);
         tokens.postValue(tokenCache);
+        tokensReady.postValue(true);
 
         if (updateTokens != null && !updateTokens.isDisposed())
         {

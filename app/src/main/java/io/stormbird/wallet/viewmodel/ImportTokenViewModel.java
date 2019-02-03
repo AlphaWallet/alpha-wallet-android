@@ -540,7 +540,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (importToken != null)
         {
-            disposable = addTokenInteract.add(importToken.tokenInfo, importToken.getInterfaceSpec())
+            disposable = addTokenInteract.add(importToken.tokenInfo, importToken.getInterfaceSpec(), wallet.getValue())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::finishedImport, this::onError);
         }

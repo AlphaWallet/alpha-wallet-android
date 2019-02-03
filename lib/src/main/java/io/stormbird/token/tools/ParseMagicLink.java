@@ -108,28 +108,30 @@ public class ParseMagicLink
         }
     }
 
-    private MagicLinkData parseNonSpawnableLinks(String linkData, boolean encoded) throws IOException
+    private MagicLinkData parseNonSpawnableLinks(String linkData, boolean encoded, EthereumReadBuffer ds) throws IOException
     {
         byte[] orderBytes = cryptoInterface.Base64Decode(linkData);
         //if link is encoded, remove the encoding byte
         if(encoded) orderBytes = Arrays.copyOfRange(orderBytes, 1, orderBytes.length - 1);
-        return getDataFromLinks(false, orderBytes);
+        return getDataFromLinks(false, orderBytes, ds);
     }
 
-    private MagicLinkData parseSpawnableLinks(String linkData) throws IOException
+    private MagicLinkData parseSpawnableLinks(String linkData, EthereumReadBuffer ds) throws IOException
     {
         byte[] orderBytes = cryptoInterface.Base64Decode(linkData);
         //remove encoding byte
         orderBytes = Arrays.copyOfRange(orderBytes, 1, orderBytes.length - 1);
-        return getDataFromLinks(true, orderBytes);
+        return getDataFromLinks(true, orderBytes, ds);
     }
 
-    private MagicLinkData getDataFromLinks(boolean spawnable, byte[] orderBytes) throws IOException
+    private MagicLinkData getDataFromLinks(
+            boolean spawnable,
+            byte[] orderBytes,
+            EthereumReadBuffer ds
+    ) throws IOException
     {
         long szabo = 0;
         MagicLinkData data = new MagicLinkData();
-        ByteArrayInputStream bas = new ByteArrayInputStream(orderBytes);
-        EthereumReadBuffer ds = new EthereumReadBuffer(bas);
         szabo = ds.toUnsignedLong(ds.readInt());
         data.expiry = ds.toUnsignedLong(ds.readInt());
         data.priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
@@ -172,14 +174,12 @@ public class ParseMagicLink
     }
 
     //Note: currency links handle the unit in szabo directly, no need to parse to wei or vice versa
-    private MagicLinkData parseCurrencyLinks(String linkData) throws IOException
+    private MagicLinkData parseCurrencyLinks(String linkData, EthereumReadBuffer ds) throws IOException
     {
         byte[] orderBytes = cryptoInterface.Base64Decode(linkData);
         //remove encoding byte
         orderBytes = Arrays.copyOfRange(orderBytes, 1, orderBytes.length - 1);
         MagicLinkData data = new MagicLinkData();
-        ByteArrayInputStream bas = new ByteArrayInputStream(orderBytes);
-        EthereumReadBuffer ds = new EthereumReadBuffer(bas);
         byte[] nonceBytes = Arrays.copyOfRange(orderBytes, 8, 11);
         byte[] amountBytes = Arrays.copyOfRange(orderBytes, 12, 15);
         byte[] contractAddressBytes = Arrays.copyOfRange(orderBytes, 20, 39);
@@ -226,21 +226,23 @@ public class ParseMagicLink
             ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
             data.contractType = ds.readByte();
+            //reset EthereumReadBuffer after reading encoding byte
+            ds.reset();
             switch (data.contractType)
             {
                 case unassigned:
-                    return parseNonSpawnableLinks(linkData, false);
+                    return parseNonSpawnableLinks(linkData, false, ds);
                 case normal:
-                    return parseNonSpawnableLinks(linkData, true);
+                    return parseNonSpawnableLinks(linkData, true, ds);
                 case spawnable:
-                    return parseSpawnableLinks(linkData);
+                    return parseSpawnableLinks(linkData, ds);
                 case customizable:
                     //not yet implemented so default to spawnable
-                    return parseSpawnableLinks(linkData);
+                    return parseSpawnableLinks(linkData, ds);
                 case currencyLink:
-                    return parseCurrencyLinks(linkData);
+                    return parseCurrencyLinks(linkData, ds);
                 default:
-                    return parseNonSpawnableLinks(linkData, false);
+                    return parseNonSpawnableLinks(linkData, false, ds);
             }
         } catch (Exception e) {
             throw new SalesOrderMalformed();

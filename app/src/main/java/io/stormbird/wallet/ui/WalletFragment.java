@@ -20,6 +20,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
@@ -310,7 +311,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
      */
     private void refreshTokens(Boolean aBoolean)
     {
-        viewModel.fetchTokens();
+        viewModel.resetAndFetchTokens();
     }
 
     private void tokensReady(Boolean dummy)
@@ -328,6 +329,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
             case EthereumNetworkRepository.XDAI_ID:
                 index = R.array.xDAI;
                 break;
+            case EthereumNetworkRepository.MAINNET_ID:
+                index = R.array.MainNet;
+                break;
             default:
                 break;
         }
@@ -336,6 +340,12 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         {
             String[] strArray = getResources().getStringArray(index);
             knownContracts.addAll(Arrays.asList(strArray));
+            //initially assume all contracts added from XML have ERC20 interface
+            //TODO: Handle querying delegate contracts
+            for (String addr : strArray)
+            {
+                TokensService.setInterfaceSpec(addr, ContractType.ERC20);
+            }
         }
 
         viewModel.checkKnownContracts(knownContracts);

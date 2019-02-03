@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="MainNet" network="1"></string-array>
+    <string-array name="xDAI" network="100">
+        <item>0x6a814843de5967cf94d7720ce15cba8b0da81967</item>
+        <item>0x94819805310cf736198df0de856b0ff5584f0903</item>
+        <item>0xdec31651bec1fbbff392aa7de956d6ee4559498b</item>
+        <item>0xa95d505e6933cb790ed3431805871efe4e6bbafd</item>
+        <item>0xbdc3df563a3959a373916b724c683d69ba4097f7</item>
+        <item>0x6e251ee9cadf0145babfd3b64664a9d7f941fcc3</item>
+        <item>0x3e50bf6703fc132a94e4baff068db2055655f11b</item>
+        <item>0xa16b70e8fad839e62abba2d962e4ca5a28af9e76</item>
+    </string-array>
+</resources>

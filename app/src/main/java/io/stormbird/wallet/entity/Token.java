@@ -416,7 +416,7 @@ public class Token implements Parcelable
 
     public boolean checkTokenWallet(String address)
     {
-        return tokenWallet.equals(address);
+        return tokenWallet.equalsIgnoreCase(address);
     }
 
     public boolean checkTokenNetwork(int currentNetwork)// setTokenWallet(String tokenWallet)

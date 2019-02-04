@@ -51,7 +51,7 @@ public class AddTokenViewModel extends BaseViewModel {
     public void save(String address, String symbol, int decimals, String name, boolean isStormBird) {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
-                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType))
+                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
                 .subscribe(this::onSaved, this::onError);
     }
 

@@ -366,7 +366,7 @@ public class TransactionsViewModel extends BaseViewModel
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
                 .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
                 .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address))) //add to database
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet().getValue())) //add to database
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())

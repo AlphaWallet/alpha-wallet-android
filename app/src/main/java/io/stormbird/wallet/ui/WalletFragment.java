@@ -19,6 +19,8 @@ import android.widget.TextView;
 import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
@@ -29,7 +31,7 @@ import io.stormbird.wallet.widget.SystemView;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
+import java.util.*;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -103,6 +105,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.endUpdate().observe(this, this::checkTokens);
         viewModel.checkAddr().observe(this, this::updateTitle);
         viewModel.tokensReady().observe(this, this::tokensReady);
+        viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
         adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
@@ -308,12 +311,44 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
      */
     private void refreshTokens(Boolean aBoolean)
     {
-        viewModel.fetchTokens();
+        viewModel.resetAndFetchTokens();
     }
 
     private void tokensReady(Boolean dummy)
     {
         homeMessager.TokensReady();
+    }
+
+    private void fetchKnownContracts(Integer networkId)
+    {
+        //fetch list of contracts for this network from the XML contract directory
+        List<String> knownContracts = new ArrayList<>();
+        int index = 0;
+        switch (networkId)
+        {
+            case EthereumNetworkRepository.XDAI_ID:
+                index = R.array.xDAI;
+                break;
+            case EthereumNetworkRepository.MAINNET_ID:
+                index = R.array.MainNet;
+                break;
+            default:
+                break;
+        }
+
+        if (index != 0)
+        {
+            String[] strArray = getResources().getStringArray(index);
+            knownContracts.addAll(Arrays.asList(strArray));
+            //initially assume all contracts added from XML have ERC20 interface
+            //TODO: Handle querying delegate contracts
+            for (String addr : strArray)
+            {
+                TokensService.setInterfaceSpec(addr, ContractType.ERC20);
+            }
+        }
+
+        viewModel.checkKnownContracts(knownContracts);
     }
 
     @Override

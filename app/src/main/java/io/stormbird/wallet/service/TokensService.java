@@ -170,7 +170,7 @@ public class TokensService
 
     public void setCurrentAddress(String currentAddress)
     {
-        this.currentAddress = currentAddress;
+        this.currentAddress = currentAddress.toLowerCase();
     }
     public String getCurrentAddress() { return this.currentAddress; }
 
@@ -181,11 +181,25 @@ public class TokensService
 
     public static void setInterfaceSpec(String address, ContractType functionSpec)
     {
-        interfaceSpecMap.put(address, functionSpec);
+        interfaceSpecMap.put(address.toLowerCase(), functionSpec);
+    }
+
+    public static ContractType checkInterfaceSpec(String address)
+    {
+        ContractType type = interfaceSpecMap.get(address.toLowerCase());
+        if (type != null)
+        {
+            return type;
+        }
+        else
+        {
+            return ContractType.NOT_SET;
+        }
     }
 
     public ContractType getInterfaceSpec(String address)
     {
+        address = address.toLowerCase();
         ContractType result = ContractType.OTHER;
         if (interfaceSpecMap.containsKey(address)) return interfaceSpecMap.get(address);
         else if (tokenMap.containsKey(address))

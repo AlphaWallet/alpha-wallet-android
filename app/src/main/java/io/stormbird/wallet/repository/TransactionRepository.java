@@ -3,6 +3,7 @@ package io.stormbird.wallet.repository;
 import android.util.Log;
 
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.TokensService;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
@@ -279,8 +280,15 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		if (tokenInfo.name == null && tokenInfo.symbol == null) return Single.fromCallable(() ->
-																						   { return ContractType.OTHER; });
+		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
+		if (tokenInfo.name == null && tokenInfo.symbol == null)
+		{
+			return Single.fromCallable(() -> ContractType.OTHER);
+		}
+		else if (checked != ContractType.NOT_SET && checked != ContractType.OTHER)
+		{
+			return Single.fromCallable(() -> checked);
+		}
 		else return blockExplorerClient.checkConstructorArgs(networkInfo, tokenInfo.address);
 	}
 }

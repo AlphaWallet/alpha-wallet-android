@@ -41,6 +41,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private final MutableLiveData<Boolean> checkTokens = new MutableLiveData<>();
     private final MutableLiveData<List<String>> removeTokens = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
+    private final MutableLiveData<Integer> fetchKnownContracts = new MutableLiveData<>();
 
     private final MutableLiveData<String> checkAddr = new MutableLiveData<>();
 
@@ -67,7 +68,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private Token[] tokenCache = null;
     private boolean isVisible = false;
-    private boolean firstRun = true;
     private int checkCounter;
 
     @Nullable
@@ -109,6 +109,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         this.openseaService = openseaService;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        checkCounter = 0;
     }
 
     public LiveData<Token[]> tokens() {
@@ -122,6 +123,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     public LiveData<String> checkAddr() { return checkAddr; }
     public LiveData<List<String>> removeTokens() { return removeTokens; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
+    public LiveData<Integer> fetchKnownContracts() { return fetchKnownContracts; }
 
     @Override
     protected void onCleared() {
@@ -163,7 +165,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         if (defaultNetwork.getValue() != null && defaultWallet.getValue() != null)
         {
             tokenCache = null;
-            checkCounter = 0;
             tokensService.setCurrentAddress(defaultWallet.getValue().address);
             tokensService.setCurrentNetwork(defaultNetwork.getValue().chainId);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultNetwork.getValue(), defaultWallet.getValue())
@@ -402,14 +403,14 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         }
     }
 
-    private void setContractAddresses()
+    public void checkKnownContracts(List<String> extraAddresses)
     {
-        disposable = fetchAllContractAddresses()
+        disposable = fetchAllContractAddresses(extraAddresses)
                 .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
-                .flatMap(tokenAddress -> setupTokensInteract.addToken(tokenAddress))
+                .flatMap(setupTokensInteract::addToken)
                 .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .filter(token -> (token != null && (token.tokenInfo.name != null || token.tokenInfo.symbol != null)))
                 .subscribeOn(Schedulers.io())
@@ -437,18 +438,24 @@ public class WalletViewModel extends BaseViewModel implements Runnable
                 .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .concatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
-                .concatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address)))
+                .concatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTokenBalanceUpdate, this::onError);
     }
 
-    private Observable<List<String>> fetchAllContractAddresses()
+    private Observable<List<String>> fetchAllContractAddresses(List<String> extraAddrs)
     {
         return Observable.fromCallable(() -> {
             //populate contracts from service
 
-            return assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
+            List<String> contracts = assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
+            for (String addr: extraAddrs)
+            {
+                if (!contracts.contains(addr)) contracts.add(addr);
+            }
+
+            return contracts;
         });
     }
 
@@ -460,7 +467,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     public void refreshAssetDefinedTokens()
     {
-        firstRun = true;
+        checkCounter = 0;
     }
 
     @Override
@@ -515,11 +522,15 @@ public class WalletViewModel extends BaseViewModel implements Runnable
             balanceTimerDisposable = null;
         }
 
-        if (firstRun)
+        if (checkCounter == 1)
         {
-            firstRun = false;
-            //get the XML address
-            setContractAddresses();
+            fetchKnownContracts.postValue(defaultNetwork.getValue().chainId);
         }
+    }
+
+    public void resetAndFetchTokens()
+    {
+        checkCounter = 0;
+        fetchTokens();
     }
 }

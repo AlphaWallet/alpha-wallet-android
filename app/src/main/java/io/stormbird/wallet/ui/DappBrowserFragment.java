@@ -81,8 +81,6 @@ public class DappBrowserFragment extends Fragment implements
     private AutoCompleteUrlAdapter adapter;
     private URLLoadReceiver URLReceiver;
 
-    private SignDappTransactionReceiver transactionReceiver;
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,8 +97,6 @@ public class DappBrowserFragment extends Fragment implements
             String url = getArguments().getString("url");
             loadUrl(url);
         }
-
-        transactionReceiver = new SignDappTransactionReceiver(getActivity(), this);
 
         return view;
     }

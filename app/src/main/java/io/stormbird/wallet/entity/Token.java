@@ -217,7 +217,25 @@ public class Token implements Parcelable
                 ? balance.divide(decimalDivisor) : balance;
         ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
-        holder.balanceEth.setText(value);
+        if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
+        {
+            ethBalance = balance.divide(decimalDivisor);
+            //fractional value. How to represent?
+            value = getMinimalString(ethBalance.toPlainString());
+            if (value.length() > 6)
+            {
+                holder.balanceEth.setText(R.string.dust_value);
+            }
+            else
+            {
+                holder.balanceEth.setText(value);
+            }
+        }
+        else
+        {
+            holder.balanceEth.setText(value);
+        }
+
         holder.issuer.setText(R.string.ethereum);
 
         if (isEthereum())
@@ -255,6 +273,26 @@ public class Token implements Parcelable
     public List<Integer> ticketIdStringToIndexList(String userList)
     {
         return null;
+    }
+
+    private String getMinimalString(String value)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (char c : value.toCharArray())
+        {
+            switch (c)
+            {
+                case '.':
+                case '0':
+                    sb.append(c);
+                    break;
+                default:
+                    sb.append(c);
+                    return sb.toString();
+            }
+        }
+
+        return sb.toString();
     }
 
     public String intArrayToString(List<BigInteger> idList, boolean keepZeros)

@@ -1,6 +1,9 @@
 package io.stormbird.wallet.web3;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -16,9 +19,11 @@ import android.webkit.WebViewClient;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
+import android.widget.Toast;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import okhttp3.HttpUrl;
+import retrofit2.http.Url;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.N;
@@ -70,7 +75,14 @@ public class Web3ViewClient extends WebViewClient {
             isInjected = false;
         }
         String urlToOpen = urlHandlerManager.handle(url);
-        if (!url.startsWith("http")) {
+        //manually handle trusted intents
+        if (handleTrustedApps(url))
+        {
+            return true;
+        }
+
+        if (!url.startsWith("http"))
+        {
             result = true;
         }
         if (isMainFrame && isRedirect) {
@@ -176,5 +188,55 @@ public class Web3ViewClient extends WebViewClient {
     public void setActivity(FragmentActivity activity)
     {
         this.context = activity;
+    }
+
+    //Handling of trusted apps
+    //1. Telegram
+    private boolean handleTrustedApps(String url)
+    {
+        //get list
+        String[] strArray = context.getResources().getStringArray(R.array.TrustedApps);
+        for (String item : strArray)
+        {
+            String[] split = item.split(",");
+            if (url.startsWith(split[1]))
+            {
+                intentTryApp(split[0], url);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void intentTryApp(String appId, String msg)
+    {
+        final boolean isAppInstalled = isAppAvailable(appId);
+        if (isAppInstalled)
+        {
+            Intent myIntent = new Intent(Intent.ACTION_VIEW);
+            myIntent.setPackage(appId);
+            myIntent.setData(Uri.parse(msg));
+            myIntent.putExtra(Intent.EXTRA_TEXT, msg);
+            context.startActivity(myIntent);
+        }
+        else
+        {
+            Toast.makeText(context, "Required App not Installed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isAppAvailable(String appName)
+    {
+        PackageManager pm = context.getPackageManager();
+        try
+        {
+            pm.getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
+            return true;
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            return false;
+        }
     }
 }

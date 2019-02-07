@@ -9,7 +9,7 @@ import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 import okhttp3.OkHttpClient;
-import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
@@ -124,7 +124,7 @@ public class WalletRepository implements WalletRepositoryType
 		return Single.fromCallable(() -> {
 			//return BigDecimal.valueOf(15.995).movePointRight(18);
 			try {
-				return new BigDecimal(Web3jFactory
+				return new BigDecimal(Web3j
 						.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false))
 						.ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
 						.send()

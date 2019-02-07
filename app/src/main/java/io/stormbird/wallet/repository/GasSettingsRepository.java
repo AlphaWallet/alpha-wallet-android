@@ -7,7 +7,6 @@ import io.stormbird.wallet.entity.GasSettings;
 
 import io.stormbird.wallet.util.BalanceUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.http.HttpService;
 
@@ -60,7 +59,7 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
 
     private void fetchGasSettings() {
 
-        final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+        final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
         try {
             EthGasPrice price = web3j

@@ -18,19 +18,15 @@ import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.*;
-import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
-import rx.functions.Func1;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -95,7 +91,7 @@ public class TokenRepository implements TokenRepositoryType {
 
         HttpService publicNodeService = new HttpService(defaultNetwork.rpcServerUrl, client, false);
 
-        web3j = Web3jFactory.build(publicNodeService);
+        web3j = Web3j.build(publicNodeService);
 
         //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
         disposable = getIsSyncing()
@@ -125,7 +121,7 @@ public class TokenRepository implements TokenRepositoryType {
     private void switchToBackupNode()
     {
         org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(network.backupNodeUrl);
-        web3j = Web3jFactory.build(publicNodeService);
+        web3j = Web3j.build(publicNodeService);
     }
 
     private Single<Boolean> getIsSyncing()
@@ -696,13 +692,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public rx.Subscription memPoolListener(SubscribeWrapper subscriber)
+    public Disposable memPoolListener(SubscribeWrapper subscriber)
     {
         if (!useBackupNode)
         {
-            return web3j.pendingTransactionObservable()
-                    .subscribeOn(rx.schedulers.Schedulers.newThread())
-                    .subscribe(subscriber.scanReturn, subscriber.onError);
+            return web3j.pendingTransactionFlowable().subscribe(subscriber::scanReturn);
         }
         else
         {
@@ -825,44 +819,15 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    public rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
+    public Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
     {
-        if (!useBackupNode)
-        {
-            final Event event = new Event("TransferFrom",
-                                          Arrays.asList(new TypeReference<Address>()
-                                          {
-                                          }, new TypeReference<Address>()
-                                          {
-                                          }),
-                    Collections.singletonList(new TypeReference<DynamicArray<Uint16>>() {
-                    }));
-            EthFilter filter = new EthFilter(DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING, contractAddr);
-            filter.addSingleTopic(EventEncoder.encode(event));
-            return web3j.ethLogObservable(filter).map(new Func1<org.web3j.protocol.core.methods.response.Log, TransferFromEventResponse>()
-            {
-                @Override
-                public TransferFromEventResponse call(org.web3j.protocol.core.methods.response.Log log)
-                {
-                    EventValues eventValues = extractEventParameters(event, log);
-                    TransferFromEventResponse typedResponse = new TransferFromEventResponse();
-                    typedResponse._from = (String) eventValues.getIndexedValues().get(0).getValue();
-                    typedResponse._to = (String) eventValues.getIndexedValues().get(1).getValue();
-                    typedResponse._indices = (List<Uint16>) eventValues.getNonIndexedValues().get(0).getValue();
-                    return typedResponse;
-                }
-            });
-        }
-        else
-        {
-            return rx.Observable.fromCallable(() -> {
-                TransferFromEventResponse event = new TransferFromEventResponse();
-                event._from = "";
-                event._to = "";
-                event._indices = null;
-                return event;
-            });
-        }
+        return Observable.fromCallable(() -> {
+            TransferFromEventResponse event = new TransferFromEventResponse();
+            event._from = "";
+            event._to = "";
+            event._indices = null;
+            return event;
+        });
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function, T type) throws Exception
@@ -1077,7 +1042,7 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 //find network info
                 NetworkInfo info = getNetworkInfoFromChainId(chainId);
-                localConnection = Web3jFactory.build(new org.web3j.protocol.http.HttpService(info.rpcServerUrl));
+                localConnection = Web3j.build(new org.web3j.protocol.http.HttpService(info.rpcServerUrl));
             }
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);

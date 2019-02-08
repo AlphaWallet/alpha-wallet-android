@@ -15,7 +15,6 @@ import io.stormbird.wallet.interact.MemPoolInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 
-
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
@@ -58,7 +57,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private final MutableLiveData<String> selection = new MutableLiveData<>();
     private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
 
-    private rx.Subscription memPoolSubscription;
+    private Disposable memPoolSubscription;
     private List<Integer> ticketIndicies;
 
     @Nullable
@@ -114,7 +113,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
-        if (!memPoolSubscription.isUnsubscribed()) {
+        if (memPoolSubscription != null && !memPoolSubscription.isDisposed()) {
             closeListener()
                     .subscribeOn(Schedulers.newThread())
                     .subscribe();
@@ -171,7 +170,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         if (getBalanceDisposable != null) {
             getBalanceDisposable.dispose();
         }
-        if (!memPoolSubscription.isUnsubscribed()) {
+        if (!memPoolSubscription.isDisposed()) {
             closeListener()
                     .subscribeOn(Schedulers.newThread())
                     .subscribe();
@@ -185,7 +184,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     {
         return Single.fromCallable(() -> {
             try {
-                memPoolSubscription.unsubscribe();
+                memPoolSubscription.dispose();
                 return true;
             } catch (NetworkOnMainThreadException th) {
                 // Ignore all errors, it's not important source.
@@ -220,7 +219,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
 
     private void startMemoryPoolListener() {
         memPoolSubscription = memoryPoolInteract.burnListener(token.getValue().getAddress())
-                .subscribeOn(rx.schedulers.Schedulers.newThread())
+                .subscribeOn(Schedulers.newThread())
                 .subscribe(this::receiveBurnNotification, this::onBurnError);
     }
 
@@ -238,7 +237,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     //restart the listener - sometimes blockchain throws a wobbly
     private void onBurnError(Throwable throwable)
     {
-        if (!memPoolSubscription.isUnsubscribed()) memPoolSubscription.unsubscribe();
+        if (!memPoolSubscription.isDisposed()) memPoolSubscription.dispose();
         startMemoryPoolListener();
     }
 

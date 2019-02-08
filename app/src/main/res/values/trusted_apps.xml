@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="TrustedApps">
+        <item>org.telegram.messenger,tg:join?invite=</item>
+    </string-array>
+</resources>

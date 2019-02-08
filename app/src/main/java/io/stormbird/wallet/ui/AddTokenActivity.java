@@ -18,6 +18,7 @@ import android.widget.Toast;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.ErrorEnvelope;
@@ -53,6 +54,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public InputView symbolInputView;
     public InputView decimalsInputView;
     public InputView nameInputview;
+    private String contractAddress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,6 +69,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         symbolInputView = findViewById(R.id.input_symbol);
         decimalsInputView = findViewById(R.id.input_decimal);
         nameInputview = findViewById(R.id.input_name);
+
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
 
         progressLayout = findViewById(R.id.layout_progress);
 
@@ -114,6 +118,17 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         });
 
         setTitle(R.string.empty);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (contractAddress != null)
+        {
+            inputAddressView.setAddress(contractAddress.toLowerCase());
+            contractAddress = null;
+        }
     }
 
     private void showProgress(Boolean shouldShowProgress) {

@@ -160,8 +160,8 @@ public class HomeViewModel extends BaseViewModel {
         externalBrowserRouter.open(context, uri);
     }
 
-    public void showAddToken(Context context) {
-        addTokenRouter.open(context);
+    public void showAddToken(Context context, String address) {
+        addTokenRouter.open(context, address);
     }
 
     public void setLocale(HomeActivity activity)

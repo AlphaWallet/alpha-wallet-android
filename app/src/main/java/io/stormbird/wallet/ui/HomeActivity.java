@@ -43,6 +43,7 @@ import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -58,6 +59,7 @@ import static io.stormbird.wallet.widget.AWalletBottomNavigationView.MARKETPLACE
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
+import static io.stormbird.wallet.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
 {
@@ -79,6 +81,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
+
+    public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
 
     public HomeActivity()
     {
@@ -253,7 +257,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add: {
-                viewModel.showAddToken(this);
+                viewModel.showAddToken(this, null);
             }
             break;
             case android.R.id.home: {
@@ -280,6 +284,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case R.id.action_share: {
                 dappBrowserFragment.share();
+                return true;
+            }
+            case R.id.action_scan: {
+                Intent intent = new Intent(this, QRScanningActivity.class);
+                startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
+                return true;
             }
         }
         return super.onOptionsItemSelected(item);
@@ -411,6 +421,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void TokensReady()
     {
         transactionsFragment.tokensReady();
+    }
+
+    @Override
+    public void AddToken(String address)
+    {
+        viewModel.showAddToken(this, address);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -597,8 +613,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode)
+        {
+            case DAPP_BARCODE_READER_REQUEST_CODE:
+                dappBrowserFragment.handleQRCode(resultCode, data, this);
+                break;
+            default:
+                break;
+        }
     }
 
     @SuppressLint("RestrictedApi")

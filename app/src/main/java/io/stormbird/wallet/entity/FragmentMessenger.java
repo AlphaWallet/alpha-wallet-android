@@ -7,4 +7,5 @@ package io.stormbird.wallet.entity;
 public interface FragmentMessenger
 {
     void TokensReady();
+    void AddToken(String address);
 }

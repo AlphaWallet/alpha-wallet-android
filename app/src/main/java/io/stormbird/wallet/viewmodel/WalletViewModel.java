@@ -310,7 +310,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 //    }
 
     public void showAddToken(Context context) {
-        addTokenRouter.open(context);
+        addTokenRouter.open(context, null);
     }
 
     @Override

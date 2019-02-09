@@ -131,7 +131,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
                 ? EMPTY_BALANCE
                 : ethBalance.multiply(new BigDecimal(ticker.price))
-                .setScale(2, RoundingMode.HALF_UP)
+                .setScale(2, RoundingMode.HALF_DOWN)
                 .stripTrailingZeros()
                 .toPlainString();
         String formattedPercents = "";

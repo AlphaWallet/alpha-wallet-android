@@ -215,7 +215,7 @@ public class Token implements Parcelable
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;
-        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
+        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
@@ -592,7 +592,7 @@ public class Token implements Parcelable
         BigDecimal value = new BigDecimal(valueStr);
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
         int scale = 4;
-        return value.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+        return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
     }
 
     public String getTransactionValue(Transaction transaction, Context context)

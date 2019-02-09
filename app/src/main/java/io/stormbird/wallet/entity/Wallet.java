@@ -59,7 +59,7 @@ public class Wallet implements Parcelable {
 	public void setWalletBalance(BigDecimal balanceBD)
 	{
 		 balance = weiToEth(balanceBD)
-				.setScale(4, RoundingMode.HALF_UP)
+				.setScale(4, RoundingMode.HALF_DOWN)
 				.stripTrailingZeros().toPlainString();
 	}
 }

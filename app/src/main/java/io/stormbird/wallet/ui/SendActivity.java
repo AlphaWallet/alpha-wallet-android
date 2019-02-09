@@ -439,7 +439,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? token.balance.divide(decimalDivisor) : token.balance;
-        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros();
+        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         tokenBalanceText.setText(value);
 

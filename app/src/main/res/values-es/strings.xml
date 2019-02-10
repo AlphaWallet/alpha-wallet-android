@@ -28,4 +28,9 @@
     <string name="currency_drop">Take Currency Drop</string>
     <string name="currency_import">Currency Import</string>
     <string name="you_will_receive">you will receive</string>
+    <string name="action_scan_dapp">Scan QR Code</string>
+    <string name="toast_invalid_code">Invalid Scan Result</string>
+    <string name="address_found">Ethereum Address</string>
+    <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
+    <string name="dialog_load_as_contract">Load Token</string>
 </resources>

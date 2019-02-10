@@ -3,11 +3,11 @@ package io.stormbird.wallet.repository;
 import android.util.Log;
 
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.TokensService;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.rlp.RlpEncoder;
@@ -74,7 +74,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
@@ -91,7 +91,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
@@ -112,7 +112,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
@@ -130,7 +130,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
-		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
@@ -279,8 +279,15 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		if (tokenInfo.name == null && tokenInfo.symbol == null) return Single.fromCallable(() ->
-																						   { return ContractType.OTHER; });
+		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
+		if (tokenInfo.name == null && tokenInfo.symbol == null)
+		{
+			return Single.fromCallable(() -> ContractType.OTHER);
+		}
+		else if (checked != ContractType.NOT_SET && checked != ContractType.OTHER)
+		{
+			return Single.fromCallable(() -> checked);
+		}
 		else return blockExplorerClient.checkConstructorArgs(networkInfo, tokenInfo.address);
 	}
 }

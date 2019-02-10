@@ -20,12 +20,9 @@ public class AddTokenInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<Token> add(TokenInfo tokenInfo, ContractType type) {
-        return walletRepository
-                .getDefaultWallet()
-                .flatMap(wallet -> tokenRepository
-                        .addToken(wallet, tokenInfo, type))
-                .toObservable();
+    public Observable<Token> add(TokenInfo tokenInfo, ContractType type, Wallet wallet) {
+        return tokenRepository
+                        .addToken(wallet, tokenInfo, type).toObservable();
     }
 
     public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)

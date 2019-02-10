@@ -1,5 +1,6 @@
 package io.stormbird.wallet.repository;
 
+import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.entity.*;
 
 import java.math.BigInteger;
@@ -23,8 +24,8 @@ public interface TokenRepositoryType {
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address);
     Single<TokenInfo[]> update(String[] address);
-    rx.Subscription memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
-    rx.Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
+    Disposable memPoolListener(SubscribeWrapper wrapper); //only listen to transactions relating to this address
+    Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
     Single<Token> callTokenFunctions(Token token, AssetDefinitionService service);
     Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);

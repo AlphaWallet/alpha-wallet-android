@@ -31,6 +31,8 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
+import io.stormbird.wallet.ui.zxing.FullScannerFragment;
+import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
@@ -46,7 +48,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import javax.inject.Inject;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -57,6 +58,7 @@ import java.util.List;
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+import static io.stormbird.wallet.ui.HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
@@ -81,8 +83,6 @@ public class DappBrowserFragment extends Fragment implements
     private AutoCompleteUrlAdapter adapter;
     private URLLoadReceiver URLReceiver;
 
-    private SignDappTransactionReceiver transactionReceiver;
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,8 +99,6 @@ public class DappBrowserFragment extends Fragment implements
             String url = getArguments().getString("url");
             loadUrl(url);
         }
-
-        transactionReceiver = new SignDappTransactionReceiver(getActivity(), this);
 
         return view;
     }
@@ -466,6 +464,73 @@ public class DappBrowserFragment extends Fragment implements
         else
         {
             web3.onSignCancel(transaction);
+        }
+    }
+
+    public void scanQR()
+    {
+        //scanning intent
+        Intent intent = new Intent(getContext(), QRScanningActivity.class);
+        startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
+    }
+
+    public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)
+    {
+        //result
+        String qrCode = null;
+        if (resultCode == FullScannerFragment.SUCCESS && data != null)
+        {
+            qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+        }
+
+        if (qrCode != null)
+        {
+            //detect if this is an address
+            if (isAddressValid(qrCode))
+            {
+                DisplayAddressFound(qrCode, messenger);
+            }
+            else
+            {
+                //attempt to go to site
+                loadUrl(qrCode);
+            }
+        }
+        else
+        {
+            Toast.makeText(getContext(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void DisplayAddressFound(String address, FragmentMessenger messenger)
+    {
+        resultDialog = new AWalletAlertDialog(getActivity());
+        resultDialog.setIcon(AWalletAlertDialog.ERROR);
+        resultDialog.setTitle(getString(R.string.address_found));
+        resultDialog.setMessage(getString(R.string.is_address));
+        resultDialog.setButtonText(R.string.dialog_load_as_contract);
+        resultDialog.setButtonListener(v -> {
+            messenger.AddToken(address);
+            resultDialog.dismiss();
+        });
+        resultDialog.setSecondaryButtonText(R.string.action_cancel);
+        resultDialog.setSecondaryButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.setCancelable(true);
+        resultDialog.show();
+    }
+
+    private boolean isAddressValid(String address)
+    {
+        try
+        {
+            new org.web3j.abi.datatypes.Address(address);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
         }
     }
 }

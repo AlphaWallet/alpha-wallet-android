@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="MainNet" network="1">
+        <item>0x056fd409e1d7a124bd7017459dfea2f387b6d5cd</item>
+        <item>0x8e870d67f660d95d5be530380d0ec0bd388289e1</item>
+        <item>0x0000000000085d4780B73119b644AE5ecd22b376</item>
+        <item>0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48</item>
+        <item>0xa74476443119A942dE498590Fe1f2454d7D4aC0d</item>
+        <item>0x98f2ab72198f2e64527bdb28931f60c0f77ac2fc</item>
+        <item>0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359</item>
+    </string-array>
+    <string-array name="xDAI" network="100">
+        <item>0x6a814843de5967cf94d7720ce15cba8b0da81967</item>
+        <item>0x94819805310cf736198df0de856b0ff5584f0903</item>
+        <item>0xdec31651bec1fbbff392aa7de956d6ee4559498b</item>
+        <item>0xa95d505e6933cb790ed3431805871efe4e6bbafd</item>
+        <item>0xbdc3df563a3959a373916b724c683d69ba4097f7</item>
+        <item>0x6e251ee9cadf0145babfd3b64664a9d7f941fcc3</item>
+        <item>0x3e50bf6703fc132a94e4baff068db2055655f11b</item>
+        <item>0xa16b70e8fad839e62abba2d962e4ca5a28af9e76</item>
+    </string-array>
+</resources>

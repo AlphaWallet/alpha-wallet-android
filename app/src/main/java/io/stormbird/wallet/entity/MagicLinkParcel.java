@@ -16,6 +16,8 @@ import io.stormbird.token.entity.MessageData;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
 
+import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
+import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class MagicLinkParcel implements Parcelable
@@ -95,20 +97,32 @@ public class MagicLinkParcel implements Parcelable
         return 0;
     }
 
-    public static byte[] generateReverseTradeData(MagicLinkData order, Token token)
+    public static byte[] generateReverseTradeData(MagicLinkData order, Token token, String recipient)
     {
         byte[] data = null;
         try
         {
+            List<BigInteger> tokenElements = new ArrayList<>();
             BigInteger expiry = BigInteger.valueOf(order.expiry);
-            List<BigInteger> ticketIndices = new ArrayList<>();
-            for (int ticketIndex : order.tickets) {
-                ticketIndices.add(BigInteger.valueOf(ticketIndex));
-            }
             //convert to signature representation
             Sign.SignatureData sellerSig = sigFromByteArray(order.signature);
 
-            data = TokenRepository.createTrade(token, expiry, ticketIndices, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+            switch (order.contractType)
+            {
+                case spawnable:
+                    data = TokenRepository.createSpawnPassTo(token, expiry, order.tokenIds, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
+                    break;
+                case currencyLink:
+                    // for testing only, we would be using an intermediate server
+                    data = TokenRepository.createDropCurrency(order, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
+                    break;
+                default:
+                    for (int ticketIndex : order.tickets) {
+                        tokenElements.add(BigInteger.valueOf(ticketIndex));
+                    }
+                    data = TokenRepository.createTrade(token, expiry, tokenElements, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+                    break;
+            }
         }
         catch (Exception e)
         {

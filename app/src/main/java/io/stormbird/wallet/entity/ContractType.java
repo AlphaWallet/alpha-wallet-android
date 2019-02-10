@@ -13,5 +13,6 @@ public enum ContractType
     ERC875LEGACY,
     ERC875,
     OTHER,
+    CURRENCY,
     CREATION //Placeholder for generic, should be at end of list
 }

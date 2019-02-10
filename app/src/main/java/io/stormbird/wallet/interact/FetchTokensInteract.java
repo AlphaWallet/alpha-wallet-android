@@ -68,9 +68,9 @@ public class FetchTokensInteract {
         return tokenRepository.fetchLatestBlockNumber();
     }
 
-    public Observable<ContractResult> getContractName(String address, int chainId)
+    public Observable<ContractResult> getContractResponse(String address, int chainId, String method)
     {
-        return tokenRepository.getTokenName(address, chainId).toObservable();
+        return tokenRepository.getTokenResponse(address, chainId, method).toObservable();
     }
 
     public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)

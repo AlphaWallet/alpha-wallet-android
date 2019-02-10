@@ -1,6 +1,10 @@
 package io.stormbird.token.entity;
 
 
+import io.stormbird.token.tools.Numeric;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +12,13 @@ import java.util.List;
 public class MagicLinkData
 {
     public long expiry;
+    public byte[] prefix;
+    public BigInteger nonce;
     public double price;
     public BigInteger priceWei;
+    public List<BigInteger> tokenIds;
     public int[] tickets;
+    public BigInteger amount;
     public int ticketStart;
     public int ticketCount;
     public String contractAddress;
@@ -18,7 +26,7 @@ public class MagicLinkData
     public byte[] message;
     public String ownerAddress;
     public String contractName;
-    public int contractType;
+    public byte contractType;
 
     public List<BigInteger> balanceInfo = null;
 
@@ -53,5 +61,28 @@ public class MagicLinkData
         newBalance.removeAll(balance);
 
         return (oldBalance.size() != 0 || newBalance.size() != 0);
+    }
+
+    public byte[] formCurrencyDropLinkMessage()
+    {
+        try
+        {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
+
+            wb.write(prefix);
+            wb.writeUnsigned4(nonce.longValue());
+            wb.writeUnsigned4(amount.longValue());
+            wb.writeUnsigned4(expiry);
+            wb.writeAddress(contractAddress);
+            wb.flush();
+            wb.close();
+            return buffer.toByteArray();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

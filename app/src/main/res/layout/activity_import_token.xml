@@ -21,6 +21,7 @@
             android:paddingRight="15dp">
 
             <TextView
+                android:id="@+id/import_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -41,6 +42,8 @@
             <include layout="@layout/item_ticket_overlay" />
 
             <include layout="@layout/item_ticket_invalid" />
+
+            <include layout="@layout/item_currency_import" />
 
             <TextView
                 android:id="@+id/textImport"
@@ -66,6 +69,7 @@
                 android:visibility="gone">
 
                 <TextView
+                    android:id="@+id/text_total_cost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_light"

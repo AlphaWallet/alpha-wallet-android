@@ -288,6 +288,9 @@ public class TransactionDecoder
         addFunction("setApprovalForAll(address,bool)", ERC721, false);
         addFunction("getApproved(address,address,uint256)", ERC721, false);
         addFunction("isApprovedForAll(address,address)", ERC721, false);
+
+        addFunction("dropCurrency(uint32,uint32,uint32,uint8,bytes32,bytes32,address)", CURRENCY, true);
+        addFunction("withdraw(uint256)", CURRENCY, false); //0x2e1a7d4d0000000000000000000000000000000000000000000000000000000000000001
     }
 
     public void addScanFunction(String methodSignature, boolean hasSig)
@@ -301,7 +304,6 @@ public class TransactionDecoder
         Map<ContractType, Integer> functionCount = new HashMap<>();
         ContractType highestType = OTHER;
         int highestCount = 0;
-        boolean hasBalanceFunction = false;
 
         for (String signature : functionList.keySet())
         {
@@ -310,7 +312,6 @@ public class TransactionDecoder
             if (index >= 0)
             {
                 FunctionData data = functionList.get(signature);
-                if (data.functionName.equals("balanceOf")) hasBalanceFunction = true;
                 for (ContractType type : data.contractType)
                 {
                     int count = 0;
@@ -326,7 +327,7 @@ public class TransactionDecoder
             }
         }
 
-        if (highestCount > 2)
+        if (highestCount >= 2)
         {
             return highestType;
         }

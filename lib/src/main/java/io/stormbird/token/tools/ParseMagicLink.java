@@ -1,12 +1,15 @@
 package io.stormbird.token.tools;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
+
 import io.stormbird.token.entity.CryptoFunctionsInterface;
 import io.stormbird.token.entity.EthereumReadBuffer;
 import io.stormbird.token.entity.EthereumWriteBuffer;
@@ -15,15 +18,22 @@ import io.stormbird.token.entity.MessageData;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.entity.UnsignedLong;
 
-
 /**
  * Created by James on 21/02/2018.
  */
 
 public class ParseMagicLink
 {
-    public final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
-                                                            Convert.Unit.SZABO).toBigInteger();
+    private final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
+            Convert.Unit.SZABO).toBigInteger();
+    //link formats
+    public static final byte unassigned = 0x00;
+    public static final byte normal = 0x01;
+    public static final byte spawnable = 0x02;
+    public static final byte customizable = 0x03;
+    public static final byte currencyLink = 0x04;
+
+    private static final String CURRENCY_LINK_PREFIX = "XDAIDROP";
 
     private CryptoFunctionsInterface cryptoInterface;
 
@@ -81,6 +91,7 @@ public class ParseMagicLink
      * bytes32: 30818B896B7D240F56C59EBDF209062EE54DA7A3590905739674DCFDCECF3E9B
      *
      */
+
     public MagicLinkData parseUniversalLink(String link) throws SalesOrderMalformed
     {
         final String importTemplate = "https://app.awallet.io/";
@@ -89,11 +100,11 @@ public class ParseMagicLink
         {
             offset += importTemplate.length();
             String linkData = link.substring(offset);
-            return createFromLink(linkData);
+            return getMagicLinkDataFromURL(linkData);
         }
         else if (link.length() > 60)
         {
-            return createFromLink(link);
+            return getMagicLinkDataFromURL(link);
         }
         else
         {
@@ -101,69 +112,90 @@ public class ParseMagicLink
         }
     }
 
-    private MagicLinkData createFromLink (String linkData) throws SalesOrderMalformed {
-        byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
-        long szabo;
+    private MagicLinkData getDataFromLinks(MagicLinkData data, EthereumReadBuffer ds) throws IOException
+    {
+        long szabo = ds.toUnsignedLong(ds.readInt());
+        data.expiry = ds.toUnsignedLong(ds.readInt());
+        data.priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
+        data.contractAddress = ds.readAddress();
+        switch (data.contractType)
+        {
+            case spawnable:
+                data.tokenIds = ds.readTokenIdsFromSpawnableLink(ds.available() - 65);
+                data.ticketCount = data.tokenIds.size();
+                break;
+            default:
+                data.tickets = ds.readCompressedIndices(ds.available() - 65);
+                data.ticketCount = data.tickets.length;
+                break;
+        }
 
+        //now read signature
+        ds.readSignature(data.signature);
+        ds.close();
+        //now we have to build the message that the contract is expecting the signature for
+        data.message = getTradeBytes(data);
+        BigInteger microEth = Convert.fromWei(new BigDecimal(data.priceWei), Convert.Unit.SZABO).abs().toBigInteger();
+        data.price = microEth.doubleValue() / 1000000.0;
+        return data;
+    }
+
+    //Note: currency links handle the unit in szabo directly, no need to parse to wei or vice versa
+    private MagicLinkData parseCurrencyLinks(MagicLinkData data, EthereumReadBuffer ds) throws IOException
+    {
+        data.prefix = ds.readBytes(8);
+        data.nonce = ds.readBI(4);
+        data.amount = ds.readBI(4);
+        data.expiry = ds.toUnsignedLong(ds.readInt());
+        data.contractAddress = ds.readAddress();
+        data.priceWei = BigInteger.ZERO;
+        data.price = 0;
+        ds.readSignature(data.signature);
+        ds.close();
+
+        //now we have to build the message that the contract is expecting the signature for
+        data.message = getTradeBytes(data);
+        return data;
+    }
+
+    private MagicLinkData getMagicLinkDataFromURL(String linkData) throws SalesOrderMalformed
+    {
         MagicLinkData data = new MagicLinkData();
-        //read the order
+        byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
         try
         {
             ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
-
             data.contractType = ds.readByte();
 
             switch (data.contractType)
             {
-                case 0x00:
-                    data.contractType = 1;
+                case unassigned:
                     ds.reset();
-                    break;
+                    //drop through
+                case normal:
+                case spawnable:
+                case customizable:
+                    return getDataFromLinks(data, ds);
+                case currencyLink:
+                    return parseCurrencyLinks(data, ds);
                 default:
-                    break;
+                    return getDataFromLinks(data, ds);
             }
-
-            szabo = ds.toUnsignedLong(ds.readInt());
-            data.expiry = ds.toUnsignedLong(ds.readInt());
-            data.priceWei = Convert.toWei(BigDecimal.valueOf(szabo), Convert.Unit.SZABO).toBigInteger();
-            data.contractAddress = ds.readAddress();
-            //ticketCount = ds.available() / 2;
-            data.tickets = ds.readCompressedIndices(ds.available() - 65);
-            data.ticketCount = data.tickets.length;
-            //now read signature
-            ds.readSignature(data.signature);
-            ds.close();
-        } catch (IOException e) {
-            throw new SalesOrderMalformed();
-        } catch (StringIndexOutOfBoundsException f) {
-            throw new SalesOrderMalformed();
         } catch (Exception e) {
             throw new SalesOrderMalformed();
         }
-
-        //now we have to build the message that the contract is expecting the signature for
-        data.message = getTradeBytes(data);
-
-        BigInteger microEth = Convert.fromWei(new BigDecimal(data.priceWei), Convert.Unit.SZABO).abs().toBigInteger();
-        data.price = microEth.doubleValue() / 1000000.0;
-
-        return data;
     }
 
     /**
      * ECRecover the owner address from a sales order
      *
-     * @return
+     * @return string address of the owner
      */
     public String getOwnerKey(MagicLinkData data) {
         data.ownerAddress = "0x";
         try {
-            BigInteger recoveredKey = cryptoInterface.signedMessageToKey(getTradeBytes(data), data.signature);
-
-            //Sign.SignatureData sigData = MarketQueueService.sigFromByteArray(signature);
-            //BigInteger recoveredKey = Sign.signedMessageToKey(getTradeBytes(), sigData);
-
+            BigInteger recoveredKey = cryptoInterface.signedMessageToKey(data.message, data.signature);
             data.ownerAddress += cryptoInterface.getAddressFromKey(recoveredKey);
         }
         catch (Exception e)
@@ -175,7 +207,49 @@ public class ParseMagicLink
 
     private byte[] getTradeBytes(MagicLinkData data)
     {
-        return getTradeBytes(data.tickets, data.contractAddress, data.priceWei, data.expiry);
+        switch (data.contractType)
+        {
+            case unassigned:
+            case normal:
+            case customizable:
+                return getTradeBytes(data.tickets, data.contractAddress, data.priceWei, data.expiry);
+            case spawnable:
+                return getSpawnableBytes(data.tokenIds, data.contractAddress, data.priceWei, data.expiry);
+            case currencyLink:
+                return getCurrencyBytes(data.contractAddress, data.amount, data.expiry, data.nonce.longValue());//data.formCurrencyDropLinkMessage();
+            default:
+                return getTradeBytes(data.tickets, data.contractAddress, data.priceWei, data.expiry);
+        }
+    }
+
+    public byte[] getSpawnableBytes(List<BigInteger> tokenIds, String contractAddress, BigInteger priceWei, long expiry)
+    {
+        try {
+            //form the transaction we need to push to buy
+            //trade bytes
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            DataOutputStream ds = new DataOutputStream(buffer);
+
+            UnsignedLong expiryUL = UnsignedLong.create(expiry);
+
+            BigInteger addrBI = new BigInteger(Numeric.cleanHexPrefix(contractAddress), 16);
+            ds.write(Numeric.toBytesPadded(priceWei, 32));
+            ds.write(Numeric.toBytesPadded(expiryUL, 32));
+            ds.write(Numeric.toBytesPadded(addrBI, 20));
+
+            for (BigInteger tokenId : tokenIds)
+            {
+                ds.write(Numeric.toBytesPadded(tokenId, 32));
+            }
+            ds.flush();
+            ds.close();
+            return buffer.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public byte[] getTradeBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry)
@@ -200,10 +274,8 @@ public class ParseMagicLink
                 uint16[1] = (byte) (i & 0xFF);
                 ds.write(uint16);
             }
-
             ds.flush();
             ds.close();
-
             return buffer.toByteArray();
         }
         catch (IOException e)
@@ -226,17 +298,22 @@ public class ParseMagicLink
      * @param expiry Unsigned UNIX timestamp of offer expiry
      * @return First part of Universal Link (requires signature of trade bytes to be added)
      */
-    private static byte[] generateLeadingLinkBytes(byte type, int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+
+    private static byte[] generateLeadingLinkBytes(
+            byte type,
+            int[] ticketSendIndexList,
+            List<BigInteger> tokenIds,
+            String contractAddress,
+            BigInteger priceWei,
+            long expiry
+    ) throws SalesOrderMalformed
     {
         try
         {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
 
-            if (type > 0)
-            {
-                wb.writeByte(type);
-            }
+            wb.writeByte(type);
 
             if (priceWei.compareTo(maxPrice) > 0) {
                 throw new SalesOrderMalformed("Order's price too high to be used in a link");
@@ -244,8 +321,59 @@ public class ParseMagicLink
             wb.write4ByteMicroEth(priceWei);
             wb.writeUnsigned4(expiry);
             wb.writeAddress(contractAddress);
-            wb.writeCompressedIndices(ticketSendIndexList);
+            switch (type)
+            {
+                case spawnable:
+                    wb.writeTokenIds(tokenIds);
+                    break;
+                default:
+                    wb.writeCompressedIndices(ticketSendIndexList);
+                    break;
+            }
 
+            wb.flush();
+            wb.close();
+
+            return buffer.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public byte[] getCurrencyBytes(String contractAddress, BigInteger szaboAmount, long expiry, long nonce)
+    {
+        try
+        {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
+
+            wb.write(CURRENCY_LINK_PREFIX.getBytes());
+            wb.writeUnsigned4(nonce);
+            wb.writeUnsigned4(szaboAmount);
+            wb.writeUnsigned4(expiry);
+            wb.writeAddress(contractAddress);
+            wb.flush();
+            wb.close();
+            return buffer.toByteArray();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static byte[] generateCurrencyLink(byte[] currencyBytes)
+    {
+        try
+        {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            EthereumWriteBuffer wb = new EthereumWriteBuffer(buffer);
+            wb.writeByte(currencyLink);
+            wb.write(currencyBytes);
             wb.flush();
             wb.close();
 
@@ -260,7 +388,12 @@ public class ParseMagicLink
 
     public static byte[] generateLeadingLinkBytes(int[] ticketSendIndexList, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
     {
-        return generateLeadingLinkBytes((byte)0x00, ticketSendIndexList, contractAddress, priceWei, expiry);
+        return generateLeadingLinkBytes(normal, ticketSendIndexList, null, contractAddress, priceWei, expiry);
+    }
+
+    public static byte[] generateSpawnableLeadingLinkBytes(List<BigInteger> tokenIds, String contractAddress, BigInteger priceWei, long expiry) throws SalesOrderMalformed
+    {
+        return generateLeadingLinkBytes(spawnable, null, tokenIds, contractAddress, priceWei, expiry);
     }
 
     public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature) throws SalesOrderMalformed
@@ -273,13 +406,10 @@ public class ParseMagicLink
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);
         System.arraycopy(signature, 0, completeLink, message.length, signature.length);
-
         StringBuilder sb = new StringBuilder();
-
         sb.append("https://app.awallet.io/");
         byte[] b64 = cryptoInterface.Base64Encode(completeLink);
         sb.append(new String(b64));
-
         //this trade can be claimed by anyone who pushes the transaction through and has the sig
         return sb.toString();
     }

@@ -1,7 +1,7 @@
 package io.stormbird.token.web;
 
 import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.util.ZonedDateTime;
+import io.stormbird.token.util.DateTimeFactory;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
@@ -157,7 +157,7 @@ public class AppSiteController {
             sides += " - " + token.getAttribute("countryB").text;
             model.addAttribute("ticketSides", sides);
             model.addAttribute("ticketDate",
-                    new ZonedDateTime(token.getAttribute("time")).format(dateFormat));
+                               DateTimeFactory.getDateTime(token.getAttribute("time")).format(dateFormat));
             model.addAttribute("ticketMatch", token.getAttribute("match").text);
             model.addAttribute("ticketCategory", token.getAttribute("category").text);
             break; // we only need 1 token's info. rest assumed to be the same

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.repository;
 
+import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenTicker;
@@ -34,4 +35,6 @@ public interface TokenLocalSource {
     void setTokenTerminated(NetworkInfo network, Wallet wallet, Token token);
 
     Single<Token[]> saveERC721Tokens(NetworkInfo defaultNetwork, Wallet wallet, Token[] tokens);
+
+    Disposable storeBlockRead(Token token, NetworkInfo network, Wallet wallet);
 }

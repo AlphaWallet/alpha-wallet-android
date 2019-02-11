@@ -14,6 +14,8 @@ import java.util.Map;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -457,6 +459,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 result = tf.createToken(info, realmToken, realmToken.getUpdatedTime());//; new Token(info, balance, realmItem.getUpdatedTime());
                 result.setTokenWallet(wallet.address);
                 result.setTokenNetwork(network.chainId);
+                result.lastBlockCheck = realmToken.getLastBlock();
             }
         }
         catch (Exception ex)
@@ -544,6 +547,48 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
+    @Override
+    public Disposable storeBlockRead(Token token, NetworkInfo network, Wallet wallet)
+    {
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+                    @Override
+                    public void onStart()
+                    {
+                        realm = realmManager.getRealmInstance(network, wallet);
+                        RealmToken realmToken = realm.where(RealmToken.class)
+                                .equalTo("address", token.tokenInfo.address)
+                                .findFirst();
+
+                        if (realmToken != null)
+                        {
+                            TransactionsRealmCache.addRealm();
+                            realm.beginTransaction();
+                            token.setRealmLastBlock(realmToken);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        realm.commitTransaction();
+                        TransactionsRealmCache.subRealm();
+                        realm.close();
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            realm.close();
+                        }
+                    }
+                });
+    }
+
     private void saveToken(NetworkInfo networkInfo, Wallet wallet, Token token, Date currentTime) {
         Realm realm = null;
         try {
@@ -586,7 +631,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setAddedTime(currentTime.getTime());
                     token.setRealmInterfaceSpec(realmToken);
                     token.setRealmAuxData(realmToken);
-                    //token.setRealmBalance(realmToken);
                     realmToken.setEnabled(true);
                     realm.commitTransaction();
                     TransactionsRealmCache.subRealm();

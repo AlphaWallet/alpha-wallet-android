@@ -17,7 +17,6 @@ public class TokensService
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private List<String> terminationList = new ArrayList<>();
     private static Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
-    private Map<String, Long> updateMap = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private int currentNetwork = 0;
 
@@ -212,17 +211,6 @@ public class TokensService
         }
 
         return result;
-    }
-
-    public void setLatestBlock(String address, long block)
-    {
-        updateMap.put(address, block);
-    }
-
-    public long getLatestBlock(String address)
-    {
-        if (updateMap.containsKey(address)) return updateMap.get(address);
-        else return 0;
     }
 
     public List<Token> getAllClass(Class<?> tokenClass)

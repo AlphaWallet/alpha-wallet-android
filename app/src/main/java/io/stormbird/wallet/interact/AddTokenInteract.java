@@ -2,10 +2,8 @@ package io.stormbird.wallet.interact;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Wallet;
+import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -34,5 +32,10 @@ public class AddTokenInteract {
     {
         if (token.hasPositiveBalance()) return tokenRepository.callTokenFunctions(token, service).toObservable();
         else return Observable.fromCallable(() -> token);
+    }
+
+    public Disposable updateBlockRead(Token token, NetworkInfo network, Wallet wallet)
+    {
+        return tokenRepository.updateBlockRead(token, network, wallet);
     }
 }

@@ -40,6 +40,7 @@ public class Token implements Parcelable
     private short tokenNetwork;
     private boolean requiresAuxRefresh = true;
     protected ContractType contractType;
+    public long lastBlockCheck = 0;
 
     public TokenTicker ticker;
     protected Map<String, String> auxData;
@@ -54,6 +55,11 @@ public class Token implements Parcelable
         tokenInfo = in.readParcelable(TokenInfo.class.getClassLoader());
         balance = new BigDecimal(in.readString());
         updateBlancaTime = in.readLong();
+        int readType = in.readInt();
+        if (readType <= ContractType.CREATION.ordinal())
+        {
+            contractType = ContractType.values()[readType];
+        }
         int size = in.readInt();
         if (size > 0)
         {
@@ -113,6 +119,7 @@ public class Token implements Parcelable
         dest.writeParcelable(tokenInfo, flags);
         dest.writeString(balance == null ? "0" : balance.toString());
         dest.writeLong(updateBlancaTime);
+        dest.writeInt(contractType.ordinal());
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -504,6 +511,11 @@ public class Token implements Parcelable
                 fromRealm = ContractType.NOT_SET;
             this.contractType = fromRealm;
         }
+    }
+
+    public void setRealmLastBlock(RealmToken realmToken)
+    {
+        realmToken.setLastBlock(lastBlockCheck);
     }
 
     /**

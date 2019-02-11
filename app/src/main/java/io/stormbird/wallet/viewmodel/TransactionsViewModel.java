@@ -63,7 +63,6 @@ public class TransactionsViewModel extends BaseViewModel
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private List<Transaction> txContractList = new ArrayList<>();
     private int transactionCount;
-    private boolean restoreRequired = false;
     private long latestBlock = 0;
 
     TransactionsViewModel(
@@ -140,6 +139,19 @@ public class TransactionsViewModel extends BaseViewModel
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
+    public void restartIfRequired()
+    {
+        if (defaultNetwork().getValue() == null
+                || defaultWallet().getValue() == null)
+        {
+            prepare();
+        }
+        else
+        {
+            startTransactionRefresh();
+        }
+    }
+
     /**
      * 1. Get all transactions on wallet address.
      * First check wallet address is still valid (user may have restarted process)
@@ -207,13 +219,6 @@ public class TransactionsViewModel extends BaseViewModel
      */
     private void fetchNetworkTransactions()
     {
-        if (restoreRequired)
-        {
-            latestBlock = 0;
-            txMap.clear();
-            restoreRequired = false;
-        }
-
         Log.d(TAG, "Fetching network transactions.");
         //now fetch new transactions on main account
         //find block number of last transaction
@@ -285,10 +290,10 @@ public class TransactionsViewModel extends BaseViewModel
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
-                    .filter(token -> !token.independentUpdate())//don't scan ERC721 transactions
+                    .filter(token -> !token.independentUpdate()) //don't scan ERC721 transactions
                     .concatMap(this::checkSpec)
                     .filter(Token::checkIntrinsicType) //Don't scan tokens that appear to be setup incorrectly
-                    .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), tokensService.getLatestBlock(token.getAddress()), wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                    .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), token.lastBlockCheck, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .subscribe(this::onContractTransactions, this::onError, this::siftUnknownTransactions);
@@ -328,10 +333,15 @@ public class TransactionsViewModel extends BaseViewModel
 
     private Transaction[] setLatestBlock(Transaction[] transactions)
     {
-        for (Transaction tx : transactions)
+        if (transactions.length > 0)
         {
-            tokensService.setLatestBlock(tx.to, latestBlock);
-            break;
+            Transaction lastTx = transactions[transactions.length - 1];
+            Token t = tokensService.getToken(lastTx.to);
+            if (t != null)
+            {
+                t.lastBlockCheck = Long.parseLong(lastTx.blockNumber);
+                addTokenInteract.updateBlockRead(t, defaultNetwork().getValue(), defaultWallet().getValue());
+            }
         }
 
         return transactions;
@@ -415,7 +425,6 @@ public class TransactionsViewModel extends BaseViewModel
         if (fetchTransactionDisposable == null)
         {
             handler.removeCallbacks(startFetchTransactionsTask);
-            restoreRequired = true;
             fetchTransactions(true);
         }
         else
@@ -561,13 +570,10 @@ public class TransactionsViewModel extends BaseViewModel
         if (tx.operations != null && tx.operations.length > 0 && tx.operations[0] != null)
         {
             TransactionContract ct = tx.operations[0].contract;
-            if (ct instanceof ERC875ContractTransaction && ((ERC875ContractTransaction)ct).operation == TransactionType.ILLEGAL_VALUE)
-            {
-                restoreRequired = true;
-            }
+            return (ct instanceof ERC875ContractTransaction && ((ERC875ContractTransaction) ct).operation == TransactionType.ILLEGAL_VALUE);
         }
 
-        return restoreRequired;
+        return false;
     }
 
     public TokensService getTokensService()

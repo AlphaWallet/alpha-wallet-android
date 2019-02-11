@@ -85,6 +85,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private double ethToUsd = 0;
     private TicketRange currentRange;
     private int networkCount;
+    private boolean foundNetwork;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -206,12 +207,11 @@ public class ImportTokenViewModel extends BaseViewModel
                 {
                     ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
                     network.setValue(networkInfo);
-                    break;
+                    return;
                 }
             }
+            invalidLink.postValue(true);
         }
-
-        loadToken();
     }
 
     public void loadToken()
@@ -604,7 +604,12 @@ public class ImportTokenViewModel extends BaseViewModel
         disposable = feeMasterService.checkFeemasterService(feemasterServer, network.getValue().chainId, importOrder.contractAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFeemasterAvailability, this::onError);
+                .subscribe(this::handleFeemasterAvailability, this::onFeeMasterError);
+    }
+
+    private void onFeeMasterError(Throwable throwable)
+    {
+        feemasterAvailable.postValue(false);
     }
 
     private void handleFeemasterAvailability(Boolean available)
@@ -632,11 +637,13 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void testNetworks(String method)
     {
+        foundNetwork = false;
         networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
         //test all the networks
 
         disposable = Observable.fromCallable(this::getNetworkIds)
                 .flatMapIterable(networkId -> networkId)
+                .filter(networkId -> !foundNetwork)
                 .flatMap(networkId -> fetchTokensInteract.getContractResponse(importOrder.contractAddress, networkId, method))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -661,9 +668,11 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void testNetworkResult(ContractResult result)
     {
-        if (!result.name.equals(TokenRepository.INVALID_CONTRACT))
+        if (!foundNetwork && !result.name.equals(TokenRepository.INVALID_CONTRACT))
         {
-            switchToNetworkId(result.chainId);
+            foundNetwork = true;
+            switchNetwork(result.chainId);
+            loadToken();
         }
         else
         {
@@ -690,21 +699,5 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             loadToken(); //proceed
         }
-    }
-
-    private void switchToNetworkId(int chainId)
-    {
-        for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
-        {
-            if (networkInfo.chainId == chainId)
-            {
-                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
-                network.setValue(networkInfo);
-                loadToken();
-                return;
-            }
-        }
-
-        invalidLink.postValue(true);
     }
 }

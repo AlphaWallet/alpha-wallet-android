@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import io.stormbird.token.util.DateTime;
+import io.stormbird.token.util.DateTimeFactory;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
@@ -31,7 +33,6 @@ import java.util.Locale;
 
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
-import io.stormbird.token.util.ZonedDateTime;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -268,7 +269,7 @@ public class Ticket extends Token implements Parcelable
         String time = nonFungibleToken.getAttribute("time").text;
         String locality = nonFungibleToken.getAttribute("locality").text;
         try {
-            ZonedDateTime datetime = new ZonedDateTime(time);
+            DateTime datetime = DateTimeFactory.getDateTime(time);
             time = datetime.format(new SimpleDateFormat("hh:mm", Locale.ENGLISH));
         } catch (ParseException e) {
             // time is returned as un-parsed, original string
@@ -642,33 +643,23 @@ public class Ticket extends Token implements Parcelable
             {
                 detailsShown = true;
                 dateLayout.setVisibility(View.VISIBLE);
-                eventTime = nonFungibleToken.getAttribute("time").value.longValue();
-                String eventTimeStr = nonFungibleToken.getAttribute("time").text;
+                DateTime eventDateTime;
 
                 try
                 {
-                    if (isAlNum(eventTimeStr))
-                    {
-                        ZonedDateTime datetime = new ZonedDateTime(eventTimeStr);
-                        ticketDate.setText(datetime.format(date));
-                        if (time == null)
-                        {
-                            ticketTime.setVisibility(View.GONE);
-                        }
-                        else
-                        {
-                            ticketTime.setText(datetime.format(time));
-                            ticketTime.setVisibility(View.VISIBLE);
-                        }
-                    }
-                    else
-                    {
-                        setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
-                    }
+                    eventDateTime = DateTimeFactory.getDateTime(nonFungibleToken.getAttribute("time"));
                 }
                 catch (ParseException | IllegalArgumentException e)
                 {
-                    setDateFromTokenID(ticketDate, ticketTime, eventTime, date, time);
+                    detailsShown = false;
+                    eventDateTime = DateTimeFactory.getCurrentTime();
+                }
+
+                ticketDate.setText(eventDateTime.format(date));
+                if (eventDateTime.isZoned())
+                {
+                    ticketTime.setText(eventDateTime.format(time));
+                    ticketTime.setVisibility(View.VISIBLE);
                 }
             }
             else
@@ -741,31 +732,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return result;
-    }
-
-    private void setDateFromTokenID(TextView ticketDate, TextView ticketTime, long eventTime, DateFormat date, DateFormat time)
-    {
-        if (eventTime == 0)
-        {
-            eventTime = System.currentTimeMillis()/1000;
-            time = null;
-        }
-
-        Calendar calendar = GregorianCalendar.getInstance(); //UTC time
-        calendar.setTimeInMillis(eventTime * 1000);
-        date.setTimeZone(calendar.getTimeZone());
-
-        ticketDate.setText(date.format(calendar.getTime()));
-        if (time != null)
-        {
-            time.setTimeZone(calendar.getTimeZone());
-            ticketTime.setText(time.format(calendar.getTime()));
-            ticketTime.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            ticketTime.setVisibility(View.GONE);
-        }
     }
 
     private String getTokenTitle(NonFungibleToken nonFungibleToken)

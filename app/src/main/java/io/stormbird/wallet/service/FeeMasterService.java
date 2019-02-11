@@ -76,29 +76,12 @@ public class FeeMasterService
         }
     }
 
-    /*
-@RequestMapping(value = "/claimFreeCurrency", method = RequestMethod.POST)
-public ResponseEntity claimFreeCurrency(
-        @RequestParam(value= "prefix") String prefix,
-        @RequestParam(value="recipient") String recipient,
-        @RequestParam(value="amount") String amount,
-        @RequestParam(value="expiry") String expiry,
-        @RequestParam(value="nonce") String nonce,
-        @RequestParam(value = "v") String v,
-        @RequestParam(value = "r") String r,
-        @RequestParam(value = "s") String s,
-        @RequestParam(value= "networkId") String networkId,
-        @RequestParam(value= "contractAddress") String contractAddress
- */
-
     private Observable<Integer> sendFeemasterCurrencyTransaction(String url, int networkId, String address, MagicLinkData order)
     {
         return Observable.fromCallable(() -> {
-            Sign.SignatureData sigData = sigFromByteArray(order.signature);
             Integer result = 500; //fail by default
             try
             {
-                MediaType mediaType = MediaType.parse("application/octet-stream");
                 StringBuilder sb = new StringBuilder();
                 sb.append(url);
                 sb.append("claimFreeCurrency");
@@ -109,21 +92,9 @@ public ResponseEntity claimFreeCurrency(
                 args.put("expiry", String.valueOf(order.expiry));
                 args.put("nonce", order.nonce.toString(10));
                 args.put("networkId", String.valueOf(networkId));
-                args.put("r", Numeric.toHexString(sigData.getR()));
-                args.put("s", Numeric.toHexString(sigData.getS()));
-                args.put("v", Integer.toHexString(sigData.getV()));
+                addSignature(args, order.signature);
                 args.put("contractAddress", order.contractAddress);
-                sb.append(formPrologData(args));
-
-                Request request = new Request.Builder()
-                        .url(sb.toString())
-                        .post(RequestBody.create(mediaType, ""))
-                        .build();
-
-                okhttp3.Response response = httpClient.newCall(request).execute();
-
-                result = response.code();
-                Log.d("RESP", response.body().string());
+                result = postRequest(sb, args);
             }
             catch (Exception e)
             {
@@ -167,13 +138,19 @@ public ResponseEntity claimFreeCurrency(
         });
     }
 
+    private void addSignature(Map<String, String> args, byte[] sig)
+    {
+        Sign.SignatureData sigData = sigFromByteArray(sig);
+        args.put("r", Numeric.toHexString(sigData.getR()));
+        args.put("s", Numeric.toHexString(sigData.getS()));
+        args.put("v", Integer.toHexString(sigData.getV()));
+    }
+
     private Single<Integer> sendFeemasterTransaction(String url, int networkId, String toAddress, long expiry, String indices, byte[] tradeSig) {
         return Single.fromCallable(() -> {
-            Sign.SignatureData sigData = sigFromByteArray(tradeSig);
             Integer result = 500; //fail by default
             try
             {
-                MediaType mediaType = MediaType.parse("application/octet-stream");
                 StringBuilder sb = new StringBuilder();
                 sb.append(url);
                 Map<String, String> args = new HashMap<>();
@@ -181,20 +158,8 @@ public ResponseEntity claimFreeCurrency(
                 args.put("indices", indices);
                 args.put("expiry", String.valueOf(expiry));
                 args.put("networkId", String.valueOf(networkId));
-                args.put("r", Numeric.toHexString(sigData.getR()));
-                args.put("s", Numeric.toHexString(sigData.getS()));
-                args.put("v", Integer.toHexString(sigData.getV()));
-                sb.append(formPrologData(args));
-
-                Request request = new Request.Builder()
-                        .url(sb.toString())
-                        .post(RequestBody.create(mediaType, ""))
-                        .build();
-
-                okhttp3.Response response = httpClient.newCall(request).execute();
-
-                result = response.code();
-                Log.d("RESP", response.body().string());
+                addSignature(args, tradeSig);
+                result = postRequest(sb, args);
             }
             catch (Exception e)
             {
@@ -203,6 +168,21 @@ public ResponseEntity claimFreeCurrency(
 
             return result;
         });
+    }
+
+    private Integer postRequest(StringBuilder sb, Map<String, String> args) throws Exception
+    {
+        MediaType mediaType = MediaType.parse("application/octet-stream");
+        sb.append(formPrologData(args));
+
+        Request request = new Request.Builder()
+                .url(sb.toString())
+                .post(RequestBody.create(mediaType, ""))
+                .build();
+
+        okhttp3.Response response = httpClient.newCall(request).execute();
+
+        return response.code();
     }
 
     private String formPrologData(Map<String, String> data)
@@ -239,13 +219,11 @@ public ResponseEntity claimFreeCurrency(
                 if (index > 0)
                 {
                     String pureServerURL = url.substring(0, index + API.length());
-                    MediaType mediaType = MediaType.parse("application/octet-stream");
                     StringBuilder sb = new StringBuilder();
                     sb.append(pureServerURL);
                     sb.append("checkContractIsSupportedForFreeTransfers");
                     Map<String, String> args = new HashMap<>();
                     args.put("contractAddress", address);
-                    args.put("networkId", String.valueOf(chainId));
                     sb.append(formPrologData(args));
 
                     Request request = new Request.Builder()

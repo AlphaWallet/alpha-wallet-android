@@ -140,7 +140,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         switch (data.contractType)
         {
             case currencyLink:
-                //only xDAI, need to check for currencyDrop methods:
+                //for currency drop link, check xDai first, then other networks
+                viewModel.switchNetwork(EthereumNetworkRepository.XDAI_ID);
                 viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
                 break;
             default:

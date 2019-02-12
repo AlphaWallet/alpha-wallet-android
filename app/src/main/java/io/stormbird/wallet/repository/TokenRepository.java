@@ -547,10 +547,6 @@ public class TokenRepository implements TokenRepositoryType {
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
                 ContractType interfaceSpec = token.getInterfaceSpec();
-                if (token.getAddress().equalsIgnoreCase("0xe8b3bee5997a32ec995678bee6e948b809f2cb13"))
-                {
-                    System.out.println("yoless");
-                }
                 switch (interfaceSpec)
                 {
                     case ERC875:

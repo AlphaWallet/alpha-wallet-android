@@ -38,6 +38,8 @@ public class TransactionsViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> showEmpty = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Boolean> clearAdapter = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> refreshAdapter = new MutableLiveData<>();
+    private final MutableLiveData<Transaction[]> newTransactions = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -64,6 +66,7 @@ public class TransactionsViewModel extends BaseViewModel
     private List<Transaction> txContractList = new ArrayList<>();
     private int transactionCount;
     private long latestBlock = 0;
+    private boolean hasNewTransactions;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -128,8 +131,10 @@ public class TransactionsViewModel extends BaseViewModel
     public LiveData<Transaction[]> transactions() {
         return transactions;
     }
+    public LiveData<Transaction[]> newTransactions() { return newTransactions; }
     public LiveData<Boolean> showEmpty() { return showEmpty; }
-    public LiveData<Boolean>  clearAdapter() { return clearAdapter; }
+    public LiveData<Boolean> clearAdapter() { return clearAdapter; }
+    public LiveData<Boolean> refreshAdapter() { return refreshAdapter; }
 
     public void prepare()
     {
@@ -160,6 +165,7 @@ public class TransactionsViewModel extends BaseViewModel
     private void fetchTransactions(boolean shouldShowProgress) {
         showEmpty.postValue(false);
         latestBlock = 0;
+        hasNewTransactions = false;
         if (wallet.getValue() != null)
         {
             if (fetchTransactionDisposable == null)
@@ -200,8 +206,7 @@ public class TransactionsViewModel extends BaseViewModel
      * @param transactions transaction array returned from query
      */
     private void onTransactions(Transaction[] transactions) {
-        Log.d(TAG, "Found " + transactions.length + " Cached transactions");
-        updateDisplay(transactions);
+        this.transactions.postValue(transactions);
 
         transactionCount = transactions.length;
 
@@ -243,12 +248,14 @@ public class TransactionsViewModel extends BaseViewModel
                 newTxs.add(tx);
                 if (Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
                 transactionCount++;
+                hasNewTransactions = true;
             }
         }
 
         if (newTxs.size() > 0)
         {
             Log.d(TAG, "Found " + transactions.length + " Network transactions");
+            newTransactions.postValue(newTxs.toArray(new Transaction[0]));
             //store new transactions, so they will appear in the transaction view, then update the view
             disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), newTxs.toArray(new Transaction[0]))
                     .subscribeOn(Schedulers.io())
@@ -342,6 +349,7 @@ public class TransactionsViewModel extends BaseViewModel
                 t.lastBlockCheck = Long.parseLong(lastTx.blockNumber);
                 addTokenInteract.updateBlockRead(t, defaultNetwork().getValue(), defaultWallet().getValue());
             }
+            hasNewTransactions = true;
         }
 
         return transactions;
@@ -356,7 +364,7 @@ public class TransactionsViewModel extends BaseViewModel
     //if we find unknown tokens fetch them and add to the token watch list
     private void siftUnknownTransactions()
     {
-        transactions.postValue(txContractList.toArray(new Transaction[0]));
+        newTransactions.postValue(txContractList.toArray(new Transaction[0]));
         txContractList.clear();
 
         fetchTransactionDisposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), txMap.values().toArray(new Transaction[0]))
@@ -380,7 +388,7 @@ public class TransactionsViewModel extends BaseViewModel
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(this::updateTokenService, this::onError, this::scanForTerminatedTokens);
+                .subscribe(this::updateTokenService, this::onError, this::finishTransactionScanCycle);
 
         if (transactionCount == 0)
         {
@@ -402,10 +410,7 @@ public class TransactionsViewModel extends BaseViewModel
     //update the display for newly fetched tokens
     private void updateDisplay(Transaction[] transactions)
     {
-        if (transactions.length > 0)
-        {
-            this.transactions.postValue(transactions);
-        }
+        Log.d(TAG,"New Network Tx: " + transactions.length);
     }
 
     private Transaction[] removeFromMapTx(Transaction[] transactions)
@@ -504,35 +509,16 @@ public class TransactionsViewModel extends BaseViewModel
         isVisible = visibility;
     }
 
-    private void scanForTerminatedTokens()
+    private void finishTransactionScanCycle()
     {
         progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
         fetchTransactionDisposable = null;
+        if (hasNewTransactions)
+        {
+            refreshAdapter.postValue(true);
+            hasNewTransactions = false;
+        }
         checkIfRegularUpdateNeeded();
-
-        //run through the map and see if there were any tokens that have been terminated
-        handleTerminatedContracts = Observable.fromCallable(tokensService::getTerminationList)
-                .flatMapIterable(address -> address)
-                .map(address -> setupTokensInteract.terminateToken(tokensService.getToken(address), defaultWallet().getValue(), defaultNetwork().getValue()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::onTokenForTermination, this::onScanError, this::wipeTerminationList);
-    }
-
-    private void onScanError(Throwable throwable)
-    {
-        if (handleTerminatedContracts != null && !handleTerminatedContracts.isDisposed()) handleTerminatedContracts.dispose();
-    }
-
-    private void wipeTerminationList()
-    {
-        if (handleTerminatedContracts != null && !handleTerminatedContracts.isDisposed()) handleTerminatedContracts.dispose();
-        tokensService.clearTerminationList();
-    }
-
-    private void onTokenForTermination(Token token)
-    {
-        System.out.print("Terminated: " + token.getAddress());
     }
 
     /**
@@ -554,6 +540,7 @@ public class TransactionsViewModel extends BaseViewModel
                 Token t = tokensService.getToken(tx.to);
                 if (t != null) setupTokensInteract.terminateToken(tokensService.getToken(t.getAddress()),
                                                                   defaultWallet().getValue(), defaultNetwork().getValue());
+                tokensService.setTerminationFlag();
                 break;
             }
         }

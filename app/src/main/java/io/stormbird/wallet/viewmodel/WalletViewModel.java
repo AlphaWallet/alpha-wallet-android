@@ -484,6 +484,8 @@ public class WalletViewModel extends BaseViewModel implements Runnable
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokenBalanceUpdate, this::tkError, this::onFetchTokensBalanceCompletable);
+
+            checkForTerminatedTokens();
         }
     }
 
@@ -491,6 +493,14 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     {
         tokenUpdate.postValue(token);
         tokensService.addToken(token);
+    }
+
+    private void checkForTerminatedTokens()
+    {
+        if (tokensService.getTerminationReport())
+        {
+            refreshTokens.postValue(true);
+        }
     }
 
     private void tkError(Throwable throwable)

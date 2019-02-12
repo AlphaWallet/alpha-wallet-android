@@ -455,9 +455,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void terminateToken(Token token, Wallet wallet, NetworkInfo network)
+    public Disposable terminateToken(Token token, Wallet wallet, NetworkInfo network)
     {
-        localSource.setTokenTerminated(network, wallet, token);
+        return localSource.setTokenTerminated(token, network, wallet);
     }
 
     @Override

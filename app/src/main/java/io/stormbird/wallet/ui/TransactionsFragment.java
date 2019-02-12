@@ -84,6 +84,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.showEmpty().observe(this, this::showEmptyTx);
         viewModel.clearAdapter().observe(this, this::clearAdapter);
+        viewModel.refreshAdapter().observe(this, this::refreshAdapter);
+        viewModel.newTransactions().observe(this, this::onNewTransactions);
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
@@ -144,6 +146,11 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onTransactions(Transaction[] transaction) {
         adapter.updateTransactions(transaction);
+    }
+
+    private void onNewTransactions(Transaction[] transactions)
+    {
+        adapter.addNewTransactions(transactions);
     }
 
     @Override
@@ -237,5 +244,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.clear();
         list.setAdapter(adapter);
         viewModel.abortAndRestart(false);
+    }
+
+    private void refreshAdapter(Boolean aBoolean)
+    {
+        adapter.notifyDataSetChanged();
     }
 }

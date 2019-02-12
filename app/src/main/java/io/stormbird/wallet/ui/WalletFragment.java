@@ -311,6 +311,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
      */
     private void refreshTokens(Boolean aBoolean)
     {
+        adapter.clear();
         viewModel.resetAndFetchTokens();
     }
 

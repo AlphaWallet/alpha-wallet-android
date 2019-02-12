@@ -33,7 +33,7 @@ public interface TokenRepositoryType {
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
     Single<BigInteger> fetchLatestBlockNumber();
 
-    void terminateToken(Token token, Wallet wallet, NetworkInfo network);
+    Disposable terminateToken(Token token, Wallet wallet, NetworkInfo network);
 
     Single<Token[]> addERC721(Wallet wallet, Token[] tokens);
     Single<String> callAddressMethod(String method, byte[] resultHash, String address);

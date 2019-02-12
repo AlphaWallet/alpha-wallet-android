@@ -15,10 +15,10 @@ import static io.stormbird.wallet.C.ETHER_DECIMALS;
 public class TokensService
 {
     private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
-    private List<String> terminationList = new ArrayList<>();
     private static Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private int currentNetwork = 0;
+    private boolean tokenTerminated = false;
 
     public TokensService() {
 
@@ -124,19 +124,16 @@ public class TokensService
         return tokens;
     }
 
-    public void scheduleForTermination(String address)
+    public boolean getTerminationReport()
     {
-        if (!terminationList.contains(address)) terminationList.add(address);
+        boolean terminated = tokenTerminated;
+        tokenTerminated = false;
+        return terminated;
     }
 
-    public List<String> getTerminationList()
+    public void setTerminationFlag()
     {
-        return terminationList;
-    }
-
-    public void clearTerminationList()
-    {
-        terminationList.clear();
+        tokenTerminated = true; //walletView picks this up to perform a refresh
     }
 
     public void addTokens(Token[] tokens)

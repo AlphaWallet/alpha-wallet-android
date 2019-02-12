@@ -144,9 +144,10 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         return position;
     }
 
-    public void updateTransactions(Transaction[] transactions)
+    public int updateTransactions(Transaction[] transactions)
     {
-        items.beginBatchedUpdates();
+        if (transactions.length == 0) return 0;
+        int oldSize = items.size();
 
         for (Transaction transaction : transactions)
         {
@@ -158,6 +159,17 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
 
         items.endBatchedUpdates();
+        return items.size() - oldSize;
+    }
+
+    public void addNewTransactions(Transaction[] transactions)
+    {
+        if (transactions.length == 0) return;
+        int itemsChanged = updateTransactions(transactions);
+        if (itemsChanged > 0)
+        {
+            notifyItemRangeInserted(0, itemsChanged + 1);
+        }
     }
 
     public int updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)

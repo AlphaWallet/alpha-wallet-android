@@ -30,6 +30,8 @@ import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
 import io.stormbird.wallet.widget.InputAddressView;
 import io.stormbird.wallet.widget.InputView;
 
+import static io.stormbird.wallet.C.ADDED_TOKEN;
+
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
 
     @Inject
@@ -118,6 +120,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         });
 
         setTitle(R.string.empty);
+
+        viewModel.prepare();
     }
 
     @Override
@@ -172,9 +176,11 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onSaved(boolean result) {
-        if (result) {
-            viewModel.showTokens(this);
+    private void onSaved(boolean result)
+    {
+        if (result)
+        {
+            sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
             finish();
         }
     }

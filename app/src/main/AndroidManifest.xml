@@ -159,23 +159,23 @@
             android:name="io.stormbird.wallet.ui.Erc20DetailActivity"
             android:label="@string/erc20_details"/>
 
-        <service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+        <!--<service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.google.firebase.MESSAGING_EVENT" />-->
+            <!--</intent-filter>-->
+        <!--</service>-->
 
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
+        <!--<meta-data-->
+            <!--android:name="preloaded_fonts"-->
+            <!--android:resource="@array/preloaded_fonts" />-->
 
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_alpha" />
+        <!--<meta-data-->
+            <!--android:name="com.google.firebase.messaging.default_notification_icon"-->
+            <!--android:resource="@mipmap/ic_alpha" />-->
 
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorAccent" />
+        <!--<meta-data-->
+            <!--android:name="com.google.firebase.messaging.default_notification_color"-->
+            <!--android:resource="@color/colorAccent" />-->
 
     </application>
 

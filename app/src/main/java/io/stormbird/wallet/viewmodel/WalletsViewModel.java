@@ -61,6 +61,8 @@ public class WalletsViewModel extends BaseViewModel
 	private final MutableLiveData<Map<String, Wallet>> updateBalance = new MutableLiveData<>();
 	private final MutableLiveData<Map<String, String>> namedWallets = new MutableLiveData<>();
 	private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
+	private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
+
 
 	private NetworkInfo currentNetwork;
 	private Map<String, Wallet> walletBalances = new HashMap<>();
@@ -88,7 +90,7 @@ public class WalletsViewModel extends BaseViewModel
 		this.fetchTokensInteract = fetchTokensInteract;
 		this.findDefaultNetworkInteract = findDefaultNetworkInteract;
 
-		fetchWallets();
+		findNetwork();
 	}
 
 	public LiveData<Wallet[]> wallets()
@@ -99,6 +101,11 @@ public class WalletsViewModel extends BaseViewModel
 	public LiveData<Map<String, String>> namedWallets()
 	{
 		return namedWallets;
+	}
+
+	public LiveData<NetworkInfo> defaultNetwork()
+	{
+		return defaultNetwork;
 	}
 
 	public LiveData<Wallet> defaultWallet()
@@ -162,6 +169,7 @@ public class WalletsViewModel extends BaseViewModel
 
 	private void onDefaultNetwork(NetworkInfo networkInfo)
 	{
+		defaultNetwork.postValue(networkInfo);
 		if (currentNetwork == null || networkInfo.chainId != currentNetwork.chainId)
 		{
 			walletBalances.clear();
@@ -354,5 +362,10 @@ public class WalletsViewModel extends BaseViewModel
 	public void showHome(Context context)
 	{
 		homeRouter.open(context, true);
+	}
+
+	public NetworkInfo getNetwork()
+	{
+		return currentNetwork;
 	}
 }

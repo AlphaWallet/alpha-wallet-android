@@ -243,8 +243,6 @@ public class Token implements Parcelable
             holder.balanceEth.setText(value);
         }
 
-        holder.issuer.setText(R.string.ethereum);
-
         if (isEthereum())
         {
             holder.textAppreciationSub.setText(R.string.appreciation);

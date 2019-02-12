@@ -432,12 +432,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void confirmPurchaseDialog() {
         hideDialog();
+        String currencySymbol = viewModel.getNetwork().symbol;
         MagicLinkData order = viewModel.getSalesOrder();
         cDialog = new AWalletConfirmationDialog(this);
         cDialog.setTitle(R.string.confirm_purchase);
         String ticketLabel = order.ticketCount > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         cDialog.setSmallText(getString(R.string.total_cost_for_x_tickets, order.ticketCount, ticketLabel));
-        cDialog.setMediumText(getString(R.string.total_cost, getEthString(order.price)));
+        cDialog.setMediumText(getString(R.string.total_cost, getEthString(order.price), currencySymbol));
         cDialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setPrimaryButtonListener(v -> {

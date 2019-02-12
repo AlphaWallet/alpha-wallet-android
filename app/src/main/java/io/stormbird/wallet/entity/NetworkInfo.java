@@ -50,4 +50,12 @@ public class NetworkInfo {
         this.etherscanTxUrl = etherscanTxUrl;
         this.tickerId = tickerId;
     }
+
+    public String getShortName()
+    {
+        int index = this.name.indexOf(" (Test)");
+        if (index > 0) return this.name.substring(0, index);
+        else if (this.name.length() > 10) return this.symbol;
+        else return this.name;
+    }
 }

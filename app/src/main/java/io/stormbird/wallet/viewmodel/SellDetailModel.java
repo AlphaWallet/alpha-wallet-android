@@ -77,6 +77,9 @@ public class SellDetailModel extends BaseViewModel {
     }
     public LiveData<Double> ethereumPrice() { return ethereumPrice; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
+    public LiveData<NetworkInfo> defaultNetwork() { return defaultNetwork; }
+
+    public NetworkInfo getNetwork() { return defaultNetwork.getValue(); }
 
     public void prepare(Ticket ticket) {
         this.ticket = ticket;

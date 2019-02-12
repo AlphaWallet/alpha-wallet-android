@@ -22,8 +22,10 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
@@ -49,11 +51,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final View contractSeparator;
     public final LinearLayout layoutValueDetails;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
+    private final TextView blockchain;
+    private final NetworkInfo networkInfo;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService)
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, NetworkInfo network)
     {
         super(resId, parent);
 
@@ -73,8 +77,10 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         layoutStatus = findViewById(R.id.layout_status);
         textPending = findViewById(R.id.status_pending);
         textIncomplete = findViewById(R.id.status_incomplete);
+        blockchain = findViewById(R.id.text_chain);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
+        networkInfo = network;
     }
 
     @Override
@@ -88,9 +94,9 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         try
         {
-            String displayTxt = assetDefinition.getIssuerName(token.getAddress());
+            blockchain.setText(getString(R.string.blockchain, networkInfo.getShortName()));
+            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), networkInfo);
             issuer.setText(displayTxt);
-            // We handled NPE. Exception handling is expensive, but not impotent here -james brown
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
                         : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));

@@ -27,6 +27,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -102,8 +103,14 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.updateBalance().observe(this, this::onUpdatedBalance);
         viewModel.namedWallets().observe(this, this::onNamedWallets);
         viewModel.lastENSScanBlock().observe(this, this::onScanBlockReceived);
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
 
         refreshLayout.setOnRefreshListener(this::onSwipeRefresh);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
+        adapter.setNetwork(networkInfo);
     }
 
     private void onSwipeRefresh()

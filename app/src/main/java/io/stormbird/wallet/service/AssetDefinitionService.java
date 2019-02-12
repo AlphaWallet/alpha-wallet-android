@@ -15,6 +15,8 @@ import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Address;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.xml.sax.SAXException;
@@ -185,7 +187,7 @@ public class AssetDefinitionService
      * @param contractAddress
      * @return
      */
-    public String getIssuerName(String contractAddress)
+    public String getIssuerName(String contractAddress, NetworkInfo network)
     {
         //only specify the issuer name if we're on mainnet, otherwise default to 'Ethereum'
         //TODO: Remove the main-net stipulation once we do multi-XML handling
@@ -198,10 +200,18 @@ public class AssetDefinitionService
             String issuer = definition.getKeyName();
             return (issuer == null || issuer.length() == 0) ? context.getString(R.string.stormbird) : issuer;
         }
+        else if (network != null)
+        {
+            return network.getShortName();
+        }
         else
         {
             return context.getString(R.string.ethereum);
         }
+    }
+    public String getIssuerName(String contractAddress)
+    {
+        return getIssuerName(contractAddress, null);
     }
 
     private void loadScriptFromServer(String correctedAddress)

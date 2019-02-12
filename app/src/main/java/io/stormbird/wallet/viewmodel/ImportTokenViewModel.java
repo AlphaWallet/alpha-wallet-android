@@ -700,4 +700,9 @@ public class ImportTokenViewModel extends BaseViewModel
             loadToken(); //proceed
         }
     }
+
+    public NetworkInfo getNetwork()
+    {
+        return network.getValue();
+    }
 }

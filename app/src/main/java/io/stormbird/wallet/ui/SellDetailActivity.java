@@ -19,7 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.*;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
@@ -37,9 +37,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.FinishReceiver;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.SellDetailModel;
@@ -122,6 +119,7 @@ public class SellDetailActivity extends BaseActivity {
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
         viewModel.universalLinkReady().observe(this, this::linkReady);
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
@@ -148,9 +146,12 @@ public class SellDetailActivity extends BaseActivity {
         confirmPricePerTicketText = findViewById(R.id.text_confirm_price_per_ticket);
         confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
 
-        setupPage();
-
         finishReceiver = new FinishReceiver(this);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
+        setupPage();
     }
 
     @Override
@@ -204,12 +205,14 @@ public class SellDetailActivity extends BaseActivity {
         expiryDateEditText.setOnClickListener(v -> datePickerDialog.show());
         expiryTimeEditText.setOnClickListener(v -> timePickerDialog.show());
 
+        String currencySymbol = viewModel.getNetwork().symbol;
+
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue));
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
-        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, getEthString(sellPriceValue)));
-        confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr));
+        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, currencySymbol, getEthString(sellPriceValue)));
+        confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr, currencySymbol));
     }
 
     void showQuantityLayout()
@@ -482,13 +485,14 @@ public class SellDetailActivity extends BaseActivity {
 
     private void linkReady(String universalLink) {
         //how many tickets are we selling?
+        String currencySymbol = viewModel.getNetwork().symbol;
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue));
+        String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
 
         String qty = String.valueOf(quantity) + " " + unit + "\n" +
                 String.valueOf(getEthString(sellPriceValue)) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
-                getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
+                getString(R.string.confirm_sale_total, totalCostStr, currencySymbol) + "\n\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);

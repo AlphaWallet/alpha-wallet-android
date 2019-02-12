@@ -945,42 +945,49 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void setTokenTerminated(NetworkInfo network, Wallet wallet, Token token)
+    public Disposable setTokenTerminated(Token token, NetworkInfo network, Wallet wallet)
     {
-        Realm realm = null;
-        try
-        {
-            realm = realmManager.getRealmInstance(network, wallet);
-            RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", token.tokenInfo.address)
-                    .findFirst();
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
 
-            TransactionsRealmCache.addRealm();
-            realm.beginTransaction();
-            if (realmToken == null)
-            {
-                createBlankToken(realm, token);
-            }
-            else
-            {
-                token.setIsTerminated(realmToken);
-            }
-            realm.commitTransaction();
-        }
-        catch (Exception ex)
-        {
-            if (realm != null && realm.isInTransaction())
-            {
-                realm.cancelTransaction();
-            }
-        }
-        finally
-        {
-            if (realm != null)
-            {
-                realm.close();
-                TransactionsRealmCache.subRealm();
-            }
-        }
+                    @Override
+                    public void onStart()
+                    {
+                        realm = realmManager.getRealmInstance(network, wallet);
+                        RealmToken realmToken = realm.where(RealmToken.class)
+                                .equalTo("address", token.tokenInfo.address)
+                                .findFirst();
+
+                        TransactionsRealmCache.addRealm();
+                        realm.beginTransaction();
+                        if (realmToken == null)
+                        {
+                            createBlankToken(realm, token);
+                        }
+                        else
+                        {
+                            token.setIsTerminated(realmToken);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        realm.commitTransaction();
+                        TransactionsRealmCache.subRealm();
+                        realm.close();
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            realm.close();
+                        }
+                    }
+                });
     }
 }

@@ -183,6 +183,8 @@ public class EtherscanTransaction
                             op.contract.setType(-1);
                             break;
                         case "endContract()":
+                        case "selfdestruct()":
+                        case "kill()":
                             o = generateERC875Op();
                             op = o[0];
                             ct = op.contract;

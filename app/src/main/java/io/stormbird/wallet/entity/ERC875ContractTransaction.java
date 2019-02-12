@@ -30,6 +30,12 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         return ERC875_CONTRACT_TYPE;
     }
 
+    @Override
+    public TransactionType getOperationType()
+    {
+        return operation;
+    }
+
     public ERC875ContractTransaction()
     {
         address = "";

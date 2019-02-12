@@ -148,4 +148,10 @@ public class Transaction implements Parcelable {
 		}
 		else return to.equals(contractAddress);
 	}
+
+    public TransactionContract getOperation()
+    {
+		return operations == null
+				|| operations.length == 0 ? null : operations[0].contract;
+    }
 }

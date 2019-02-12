@@ -26,6 +26,11 @@ public class TransactionContract implements Parcelable {
         return NORMAL_CONTRACT_TYPE;
     }
 
+    public TransactionType getOperationType()
+    {
+        return TransactionType.UNKNOWN;
+    }
+
     private TransactionContract(Parcel in) {
         address = in.readString();
         name = in.readString();

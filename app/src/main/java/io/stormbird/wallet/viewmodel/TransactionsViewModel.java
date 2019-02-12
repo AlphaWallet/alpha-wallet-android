@@ -169,7 +169,6 @@ public class TransactionsViewModel extends BaseViewModel
 
                 fetchTransactionDisposable =
                         fetchTransactionsInteract.fetchCached(network.getValue(), wallet.getValue())
-                                .flatMap(this::checkForContractTerminator)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(this::onTransactions, this::onError, this::fetchNetworkTransactions);
@@ -326,6 +325,7 @@ public class TransactionsViewModel extends BaseViewModel
         disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions)
                 .map(this::setLatestBlock)
                 .map(this::removeFromMapTx)
+                .map(this::checkForContractTerminator)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(this::updateTransactionMap, this::onError);
@@ -540,40 +540,24 @@ public class TransactionsViewModel extends BaseViewModel
      * @param transactions
      * @return
      */
-    private Observable<Transaction[]> checkForContractTerminator(Transaction[] transactions)
+    private Transaction[] checkForContractTerminator(Transaction[] transactions)
     {
-        return Observable.fromCallable(() -> {
-            for (Transaction tx : transactions)
-            {
-                if (tx != null)
-                {
-                    if (checkForIllegalType(tx)) break;
-                    if (tx.input != null && tx.input.length() == 10)
-                    {
-                        Token t = tokensService.getToken(tx.to);
-                        if (t != null && !t.isTerminated()
-                                && isEndContract(tx.input))
-                        {
-                            //write to database this contract is terminated
-                            setupTokensInteract.terminateToken(tokensService.getToken(t.getAddress()),
-                                                               defaultWallet().getValue(), defaultNetwork().getValue());
-                        }
-                    }
-                }
-            }
-            return transactions;
-        });
-    }
+        if (transactions.length == 0) return transactions;
 
-    private boolean checkForIllegalType(Transaction tx)
-    {
-        if (tx.operations != null && tx.operations.length > 0 && tx.operations[0] != null)
+        for (int index = transactions.length - 1; index >= 0; index--)
         {
-            TransactionContract ct = tx.operations[0].contract;
-            return (ct instanceof ERC875ContractTransaction && ((ERC875ContractTransaction) ct).operation == TransactionType.ILLEGAL_VALUE);
+            Transaction tx = transactions[index];
+            TransactionContract ct = tx == null ?
+                    null : tx.getOperation();
+            if (ct != null && ct.getOperationType() == TransactionType.TERMINATE_CONTRACT)
+            {
+                Token t = tokensService.getToken(tx.to);
+                if (t != null) setupTokensInteract.terminateToken(tokensService.getToken(t.getAddress()),
+                                                                  defaultWallet().getValue(), defaultNetwork().getValue());
+                break;
+            }
         }
-
-        return false;
+        return transactions;
     }
 
     public TokensService getTokensService()

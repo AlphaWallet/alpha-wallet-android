@@ -187,7 +187,7 @@ public class AssetDefinitionService
      * @param contractAddress
      * @return
      */
-    public String getIssuerName(String contractAddress, NetworkInfo network)
+    public String getIssuerName(String contractAddress, String network)
     {
         //only specify the issuer name if we're on mainnet, otherwise default to 'Ethereum'
         //TODO: Remove the main-net stipulation once we do multi-XML handling
@@ -202,7 +202,7 @@ public class AssetDefinitionService
         }
         else if (network != null)
         {
-            return network.getShortName();
+            return network;
         }
         else
         {
@@ -534,7 +534,7 @@ public class AssetDefinitionService
      * @param address
      * @param result
      * @return
-     * @throws IOException
+     * @throws
      */
     private File storeFile(String address, String result) throws IOException
     {

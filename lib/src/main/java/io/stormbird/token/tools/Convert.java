@@ -1,6 +1,7 @@
 package io.stormbird.token.tools;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -69,6 +70,14 @@ public final class Convert {
 
     public static String getEthString(double ethPrice)
     {
+        DecimalFormat df = new DecimalFormat("#.#####");
+        df.setRoundingMode(RoundingMode.CEILING);
+        return df.format(ethPrice);
+    }
+
+    public static String getEthStringSzabo(BigInteger szabo)
+    {
+        BigDecimal ethPrice = fromWei(toWei(new BigDecimal(szabo), Unit.SZABO), Unit.ETHER);
         DecimalFormat df = new DecimalFormat("#.#####");
         df.setRoundingMode(RoundingMode.CEILING);
         return df.format(ethPrice);

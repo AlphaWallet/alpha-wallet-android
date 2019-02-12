@@ -19,6 +19,7 @@ import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.*;
+import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
@@ -56,6 +57,9 @@ public class TokenRepository implements TokenRepositoryType {
     private Disposable disposable;
 
     public static final String INVALID_CONTRACT = "<invalid>";
+
+    private static final int NODE_COMMS_ERROR = -1;
+    private static final int CONTRACT_BALANCE_NULL = -2;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -543,6 +547,10 @@ public class TokenRepository implements TokenRepositoryType {
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
                 ContractType interfaceSpec = token.getInterfaceSpec();
+                if (token.getAddress().equalsIgnoreCase("0xe8b3bee5997a32ec995678bee6e948b809f2cb13"))
+                {
+                    System.out.println("yoless");
+                }
                 switch (interfaceSpec)
                 {
                     case ERC875:
@@ -599,7 +607,7 @@ public class TokenRepository implements TokenRepositoryType {
     private BigDecimal wrappedCheckUintBalance(Wallet wallet, TokenInfo tokenInfo, Token token) throws Exception
     {
         BigDecimal balance = getBalance(wallet, tokenInfo);
-        if (balance.compareTo(BigDecimal.valueOf(-1)) == 0)
+        if (balance.compareTo(BigDecimal.valueOf(NODE_COMMS_ERROR)) == 0)
         {
             balance = token.balance;
         }
@@ -608,7 +616,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     /**
      * Checks the balance array for an ERC875 token.
-     * The balance function returns a value of -1 in the first entry if there was a comms error.
+     * The balance function returns a value of NODE_COMMS_ERROR in the first entry if there was a comms error.
      * In the event of a comms error, just use the previously obtained balance of the token
      * @param wallet
      * @param tInfo
@@ -618,79 +626,23 @@ public class TokenRepository implements TokenRepositoryType {
     private List<BigInteger> wrappedCheckBalanceArray(Wallet wallet, TokenInfo tInfo, Token token) throws Exception
     {
         List<BigInteger> balance = getBalanceArray(wallet, tInfo);
-        if (balance.size() > 0
-                && (balance.get(0).compareTo(BigInteger.valueOf(-1)) == 0))
+
+        if (balance.size() > 0)
         {
-            //comms error, use previous token balance
-            balance = token.getArrayBalance();
+            BigInteger firstVal = balance.get(0);
+            if (firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
+            {
+                //comms error, use previous token balance
+                balance = token.getArrayBalance();
+            }
+            else if (firstVal.compareTo(BigInteger.valueOf(CONTRACT_BALANCE_NULL)) == 0)
+            {
+                //token could have been terminated
+                balance.clear();
+            }
         }
 
         return balance;
-    }
-
-    private ObservableTransformer<Token, Token> updateBalance(NetworkInfo network, Wallet wallet) {
-        return upstream -> upstream.map(token -> {
-            Token newToken = null;
-            TokenFactory tFactory = new TokenFactory();
-            long now = System.currentTimeMillis();
-            long minUpdateBalanceTime = now - BALANCE_UPDATE_INTERVAL;
-            BigDecimal balance = null;
-            List<BigInteger> balanceArray = null;
-            List<Integer> burnArray = null;
-            TokenInfo tInfo = token.tokenInfo;
-            if (token.balance == null || token.updateBlancaTime < minUpdateBalanceTime) {
-                try {
-                    switch (token.getInterfaceSpec())
-                    {
-                        case ERC875:
-                        case ERC875LEGACY:
-                            balanceArray = wrappedCheckBalanceArray(wallet, token.tokenInfo, token);
-                            burnArray = token.getBurnList();
-                            break;
-                        case ERC721:
-                            break;
-                        case ERC20:
-                        case ETHEREUM:
-                            balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
-                            break;
-                        default:
-                            break;
-                    }
-
-                    newToken = tFactory.createToken(tInfo, balance, balanceArray, burnArray, now, token.getInterfaceSpec());
-                    localSource.updateTokenBalance(network, wallet, token);
-                    newToken.patchAuxData(token);
-                } catch (Throwable th) { /* Quietly */ }
-            }
-            return newToken;
-        });
-    }
-
-    private TokenInfo changeToERC20Token(Token token)
-    {
-        return new TokenInfo(token.tokenInfo.address,
-                                        token.tokenInfo.name,
-                                        token.tokenInfo.symbol,
-                                        token.tokenInfo.decimals,
-                                        true, false);
-    }
-
-    private TokenInfo changeToERC875Token(Token token)
-    {
-        return new TokenInfo(token.tokenInfo.address, token.tokenInfo.name, token.tokenInfo.symbol, token.tokenInfo.decimals, true, true);
-    }
-
-    private SingleTransformer<Token[], Token[]> attachEthereum(NetworkInfo network, Wallet wallet)
-    {
-        return upstream -> Single.zip(
-                upstream, attachEth(network, wallet),
-                (tokens, ethToken) ->
-                {
-                    List<Token> result = new ArrayList<>();
-                    result.add(ethToken);
-                    result.addAll(Arrays.asList(tokens));
-                    return result.toArray(new Token[result.size()]);
-                });
     }
 
     @Override
@@ -798,17 +750,17 @@ public class TokenRepository implements TokenRepositoryType {
 
     private List<BigInteger> getBalanceArray(Wallet wallet, TokenInfo tokenInfo) {
         List<BigInteger> result = new ArrayList<>();
-        result.add(BigInteger.valueOf(-1));
+        result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         try
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            List<Uint256> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
+            List<Type> indices = callSmartContractFunctionArray(function, tokenInfo.address, wallet);
             if (indices != null)
             {
                 result.clear();
-                for (Uint256 val : indices)
+                for (Type val : indices)
                 {
-                    result.add(val.getValue());
+                    result.add((BigInteger)val.getValue());
                 }
             }
         }
@@ -816,7 +768,7 @@ public class TokenRepository implements TokenRepositoryType {
         {
             //contract call error
             result.clear();
-            result.add(BigInteger.valueOf(-1));
+            result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         }
         return result;
     }
@@ -976,11 +928,18 @@ public class TokenRepository implements TokenRepositoryType {
 
             String value = ethCall.getValue();
             List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
+            Object o;
             if (values.isEmpty())
-                return null;
-
-            Type T = values.get(0);
-            Object o = T.getValue();
+            {
+                values = new ArrayList<Type>();
+                values.add((Type)new Int256(CONTRACT_BALANCE_NULL));
+                o = (List)values;
+            }
+            else
+            {
+                Type T = values.get(0);
+                o = T.getValue();
+            }
             return (List) o;
         }
         catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
@@ -1027,10 +986,9 @@ public class TokenRepository implements TokenRepositoryType {
      * @param contractAddress
      * @param wallet
      * @return
-     * @throws Exception
      */
     private String callCustomNetSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet, int chainId) throws Exception {
+            Function function, String contractAddress, Wallet wallet, int chainId)  {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try

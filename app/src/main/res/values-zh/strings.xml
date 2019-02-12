@@ -96,7 +96,7 @@
     <string name="quantity_of_tickets">门票数量</string>
     <string name="total_cost_label">总价:</string>
     <string name="equivalent_in_usd">相当于USD</string>
-    <string name="total_cost">%s ETH</string>
+    <string name="total_cost">%s %s</string>
     <string name="select_quantity_tickets">选择门票数量</string>
     <string name="redeemed">已兑换</string>
     <string name="ticket_redeemed">你的门票已经被兑换</string>
@@ -181,10 +181,10 @@
     <string name="copied_to_clipboard">复制到剪切板</string>
     <string name="action_marketplace">市场</string>
     <string name="universal_link_expiry_on">MagicLink链接过期时间:</string>
-    <string name="confirm_sale_total">总共: %s</string>
+    <string name="confirm_sale_total">总共: %1s %2s</string>
     <string name="set_universal_link_expiry">设置MagicLink链接过期时间:</string>
     <string name="tickets_selected">%1s %2s 选中</string>
-    <string name="eth_per_ticket_w_value">%s ETH/门票</string>
+    <string name="eth_per_ticket_w_value">%1s %2s/门票</string>
     <string name="universal_link_info">创建一个MagicLink链接让卖家来购买你的门票.</string>
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">在MagicLink链接过期之前，任何人都可以通过点击此链接来买到你的门票.</string>

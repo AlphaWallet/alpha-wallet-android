@@ -206,7 +206,7 @@
     <string name="quantity_of_tickets">Quantity of Tickets</string>
     <string name="total_cost_label">Total Cost:</string>
     <string name="equivalent_in_usd">Equivalent in USD</string>
-    <string name="total_cost">%s ETH</string>
+    <string name="total_cost">%1s %2s</string>
     <string name="select_quantity_tickets">Select Quantity of Tickets</string>
     <string name="redeemed">Redeemed</string>
     <string name="ticket_redeemed">Your ticket has been redeemed</string>
@@ -291,10 +291,10 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="action_marketplace">Marketplace</string>
     <string name="universal_link_expiry_on">MagicLink expiry on:</string>
-    <string name="confirm_sale_total">Total: %s</string>
+    <string name="confirm_sale_total">Total: %1s %2s</string>
     <string name="set_universal_link_expiry">Set MagicLink Expiry:</string>
     <string name="tickets_selected">%1s %2s Selected</string>
-    <string name="eth_per_ticket_w_value">%s ETH/Ticket</string>
+    <string name="eth_per_ticket_w_value">%1s %2s/Ticket</string>
     <string name="universal_link_info">A MagicLink will be created to allow buyers to purchase your tickets.</string>
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">Before the link expires, anyone with the MagicLink can purchase your tickets with one click.</string>
@@ -433,4 +433,5 @@
     <string name="address_found">Ethereum Address</string>
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Load Token</string>
+    <string name="blockchain">%1$s Blockchain</string>
 </resources>

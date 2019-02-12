@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
@@ -34,6 +35,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private Context context;
     private boolean needsRefresh;
     protected final AssetDefinitionService assetService;
+    protected NetworkInfo network;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -98,7 +100,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService);
+                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, network);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
                 setAnimation(holder.itemView);
@@ -401,5 +403,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
+    }
+
+    public void setDefaultNetwork(NetworkInfo networkInfo)
+    {
+        network = networkInfo;
     }
 }

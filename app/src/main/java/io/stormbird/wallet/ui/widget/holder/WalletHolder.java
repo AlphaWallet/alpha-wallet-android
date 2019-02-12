@@ -26,12 +26,14 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final ImageView deleteAction;
 	private final TextView address;
 	private final TextView balance;
+	private final TextView currency;
     private final ImageView exportAction;
     private final LinearLayout ethLayout;
     private WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
 	private WalletsAdapter.OnWalletDeleteListener onWalletDeleteListener;
 	private WalletsAdapter.OnExportWalletListener onExportWalletListener;
 	private Wallet wallet;
+	private String currencySymbol;
 
 	public WalletHolder(int resId, ViewGroup parent) {
 		super(resId, parent);
@@ -43,6 +45,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		address = findViewById(R.id.address);
 		balance = findViewById(R.id.balance_eth);
 		ethLayout = findViewById(R.id.layout_eth);
+		currency = findViewById(R.id.text_currency);
 
 		address.setOnClickListener(this);
 		defaultAction.setOnClickListener(this);
@@ -75,6 +78,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		deleteAction.setVisibility(
 		        addition.getBoolean(IS_DEFAULT_ADDITION, false) && !addition.getBoolean(IS_LAST_ITEM, false)
                     ? View.GONE : View.VISIBLE);
+		currency.setText(currencySymbol);
 	}
 
 	public void setOnSetWalletDefaultListener(WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener) {
@@ -110,4 +114,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
             } break;
 		}
 	}
+
+    public void setCurrencySymbol(String symbol)
+    {
+		currencySymbol = symbol;
+    }
 }

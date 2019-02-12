@@ -214,7 +214,6 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
 
-        tokenHolder.issuer.setText(asset.getIssuerName(getAddress()));
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         if (contractType == ContractType.ERC875LEGACY)

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import java.util.Map;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.WalletHolder;
@@ -21,6 +22,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder>
 	private Wallet[] wallets = new Wallet[0];
 
 	private Wallet defaultWallet = null;
+	private NetworkInfo network;
 
 	public WalletsAdapter(
 			OnSetWalletDefaultListener onSetWalletDefaultListener,
@@ -30,6 +32,11 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder>
 		this.onSetWalletDefaultListener = onSetWalletDefaultListener;
 		this.onWalletDeleteListener = onWalletDeleteListener;
 		this.onExportWalletListener = onExportWalletListener;
+	}
+
+	public void setNetwork(NetworkInfo network)
+	{
+		this.network = network;
 	}
 
 	@Override
@@ -44,6 +51,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder>
 				h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
 				h.setOnWalletDeleteListener(onWalletDeleteListener);
 				h.setOnExportWalletListener(onExportWalletListener);
+				h.setCurrencySymbol(network.symbol);
 				binderViewHolder = h;
 			}
 		}

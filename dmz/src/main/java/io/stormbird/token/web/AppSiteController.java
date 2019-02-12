@@ -35,6 +35,9 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
 
 import static io.stormbird.token.tools.Convert.getEthString;
+import static io.stormbird.token.tools.Convert.getEthStringSzabo;
+import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
+import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 
 
 @Controller
@@ -74,15 +77,31 @@ public class AppSiteController {
             throws IOException, SAXException, NoHandlerFoundException
     {
         MagicLinkData data;
-        File xml = null;
-        TokenDefinition definition = null;
         model.addAttribute("base64", universalLink);
-        try {
+        try
+        {
             data = parser.parseUniversalLink(universalLink);
-        } catch(SalesOrderMalformed e) {
+        }
+        catch (SalesOrderMalformed e)
+        {
             return "error"; // TODO: give nice error
         }
         parser.getOwnerKey(data);
+
+        switch (data.contractType)
+        {
+            case currencyLink:
+                return handleCurrencyLink(data, agent, model);
+            case spawnable:
+            default:
+                return handleTokenLink(data, agent, model);
+        }
+    }
+
+    private String handleTokenLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
+    {
+        TokenDefinition definition = null;
+        File xml = null;
         for (String address : addresses.keySet()) {
             xml = addresses.get(address);
             // TODO: when xml-schema-v1 is merged, produce a new "default XML" to fill the role of fallback.
@@ -131,6 +150,31 @@ public class AppSiteController {
             model.addAttribute("tokenAvailable", "available");
         }
         return "index";
+    }
+
+    private String handleCurrencyLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
+    {
+        model.addAttribute("link", data);
+        model.addAttribute("linkValue", getEthStringSzabo(data.amount));
+        model.addAttribute("title", "XDAI Currency Drop");
+        model.addAttribute("currency", "XDai"); //TODO: detect network and fill correct value
+
+        try {
+            updateContractInfo(model, data.contractAddress);
+        } catch (Exception e) {
+            /* The link points to a non-existing contract - most
+             * likely from a different chainID. Now, if Ethereum node
+             * is offline, this may get triggered too. */
+            model.addAttribute("tokenAvailable", "unattainable");
+            return "currency";
+        }
+
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
+            model.addAttribute("tokenAvailable", "expired");
+        } else {
+            model.addAttribute("tokenAvailable", "available");
+        }
+        return "currency";
     }
 
     private void updateContractInfo(Model model, String contractAddress) {

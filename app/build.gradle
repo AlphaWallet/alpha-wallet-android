@@ -161,18 +161,11 @@ dependencies {
 
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
 
-    implementation 'com.google.firebase:firebase-core:16.0.7'
-    implementation 'com.google.firebase:firebase-messaging:17.3.4'
-
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':tn')
-
-    //Base SDK
-    implementation 'com.amazonaws:aws-android-sdk-sns:2.2.8'
 }
 
 // WARNING WARNING WARNING
 // don't add any additional things here without first search "China" in this file
 
-apply plugin: 'com.google.gms.google-services'

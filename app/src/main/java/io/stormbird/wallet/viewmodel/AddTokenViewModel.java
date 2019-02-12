@@ -72,6 +72,10 @@ public class AddTokenViewModel extends BaseViewModel {
         if (defaultNetwork.getValue() == null) {
             findDefaultNetwork();
         }
+        else if (wallet.getValue() == null) {
+            findWallet();
+        }
+
         disposable = setupTokensInteract
                 .update(addr)
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
@@ -85,6 +89,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
+        findWallet();
     }
 
     public LiveData<Boolean> result() {
@@ -95,10 +100,17 @@ public class AddTokenViewModel extends BaseViewModel {
         return update;
     }
 
-    public void showTokens(Context context) {
+    public void showTokens(Context context)
+    {
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(w -> homeRouter.open(context, true), this::onError);
+    }
+
+    private void findWallet()
+    {
+        disposable = findDefaultWalletInteract.find()
+                .subscribe(wallet::setValue, this::onError);
     }
 
     private void onTokensSetup(TokenInfo tokenData) {
@@ -112,5 +124,10 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public LiveData<TokenInfo> tokenInfo() {
         return tokenInfo;
+    }
+
+    public void prepare()
+    {
+        findDefaultNetwork();
     }
 }

@@ -83,6 +83,7 @@ public class TokenFactory
         }
 
         thisToken.restoreAuxDataFromRealm(realmItem);
+        thisToken.lastBlockCheck = realmItem.getLastBlock();
 
         return thisToken;
     }

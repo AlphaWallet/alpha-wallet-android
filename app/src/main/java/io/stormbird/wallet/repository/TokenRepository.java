@@ -573,6 +573,7 @@ public class TokenRepository implements TokenRepositoryType {
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);
                 updated.setTokenNetwork(network.chainId);
+                updated.lastBlockCheck = token.lastBlockCheck;
                 return updated;
             }
             catch (BadContract e)
@@ -1241,5 +1242,11 @@ public class TokenRepository implements TokenRepositoryType {
             indexedValues.add(value);
         }
         return new EventValues(indexedValues, nonIndexedValues);
+    }
+
+    @Override
+    public Disposable updateBlockRead(Token token, NetworkInfo network, Wallet wallet)
+    {
+        return localSource.storeBlockRead(token, network, wallet);
     }
 }

@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
@@ -51,8 +50,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private Dialog dialog;
 
     private boolean isVisible = false;
-    private int networkId = 0;
-    private Handler handler;
 
     RecyclerView list;
 
@@ -93,7 +90,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
 
-        handler = new Handler();
+        viewModel.prepare();
 
         return view;
     }
@@ -120,8 +117,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onResume() {
         super.onResume();
         viewModel.setVisibility(isVisible);
-        viewModel.abortAndRestart(true);
-        viewModel.prepare();
+        viewModel.restartIfRequired();
     }
 
     @Override
@@ -165,7 +161,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
         adapter.setDefaultNetwork(networkInfo);
-        networkId = networkInfo.chainId;
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {

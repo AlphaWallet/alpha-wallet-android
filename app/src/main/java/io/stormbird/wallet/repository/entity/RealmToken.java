@@ -19,6 +19,7 @@ public class RealmToken extends RealmObject {
     private int nullCheckCount = 0;
     private int interfaceSpec;
     private String auxData;
+    private long lastBlockRead;
 
     public int getDecimals() {
         return decimals;
@@ -142,4 +143,10 @@ public class RealmToken extends RealmObject {
     {
         this.auxData = auxData;
     }
+
+    public void setLastBlock(long lastBlockCheck)
+    {
+        this.lastBlockRead = lastBlockCheck;
+    }
+    public long getLastBlock() { return lastBlockRead; }
 }

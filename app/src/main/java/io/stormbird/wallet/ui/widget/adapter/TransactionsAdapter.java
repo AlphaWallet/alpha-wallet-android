@@ -159,6 +159,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
 
         items.endBatchedUpdates();
+        if (oldSize > 0) oldSize -= 1;
         return items.size() - oldSize;
     }
 
@@ -168,7 +169,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         int itemsChanged = updateTransactions(transactions);
         if (itemsChanged > 0)
         {
-            notifyItemRangeInserted(0, itemsChanged + 1);
+            notifyItemRangeInserted(0, itemsChanged);
         }
     }
 

@@ -155,11 +155,17 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return network;
     }
 
+    public NetworkInfo getNetwork()
+    {
+        return network.getValue();
+    }
+
     public LiveData<Wallet> defaultWallet() {
         return wallet;
     }
 
-    public void prepare() {
+    public void prepare()
+    {
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()

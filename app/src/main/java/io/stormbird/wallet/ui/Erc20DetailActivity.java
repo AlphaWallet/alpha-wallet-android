@@ -79,10 +79,6 @@ public class Erc20DetailActivity extends BaseActivity {
 
         initViews();
 
-        setUpTokenView();
-
-        setUpRecentTransactionsView();
-
         if (token.addressMatches(myAddress)) {
             viewModel.startEthereumTicker();
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
@@ -106,13 +102,18 @@ public class Erc20DetailActivity extends BaseActivity {
             }
         });
         tokenViewAdapter = new TokensAdapter(this, null, viewModel.getAssetDefinitionService());
+        tokenViewAdapter.setDefaultNetwork(viewModel.getNetwork());
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);
+
+        if (viewModel.hasIFrame(token.getAddress())) {
+            addTokenPage();
+        }
     }
 
     private void getIntentData() {
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS); //contract address
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
@@ -175,8 +176,14 @@ public class Erc20DetailActivity extends BaseActivity {
 
         sendBtn = findViewById(R.id.button_send);
         sendBtn.setOnClickListener(v -> {
-            new SendTokenRouter().open(this, myAddress, symbol, decimals, sendingTokens, wallet, token);
-
+            if (sendingTokens)
+            {
+                new SendTokenRouter().open(this, token.getAddress(), symbol, decimals, sendingTokens, wallet, token);
+            }
+            else
+            {
+                new SendTokenRouter().open(this, myAddress, symbol, decimals, sendingTokens, wallet, token);
+            }
         });
 
         receiveBtn = findViewById(R.id.button_receive);
@@ -239,6 +246,8 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
+        setUpTokenView();
+        setUpRecentTransactionsView();
         recentTransactionsAdapter.setDefaultNetwork(networkInfo);
     }
 

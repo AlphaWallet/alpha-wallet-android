@@ -79,6 +79,18 @@ public class SellDetailModel extends BaseViewModel {
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<NetworkInfo> defaultNetwork() { return defaultNetwork; }
 
+    public String getSymbol(String fallback)
+    {
+        if (defaultNetwork.getValue() != null)
+        {
+            return defaultNetwork.getValue().symbol;
+        }
+        else
+        {
+            return fallback;
+        }
+    }
+
     public NetworkInfo getNetwork() { return defaultNetwork.getValue(); }
 
     public void prepare(Ticket ticket) {

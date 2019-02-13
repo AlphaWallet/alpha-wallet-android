@@ -28,10 +28,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import javax.inject.Inject;
 
@@ -153,6 +150,7 @@ public class SellDetailActivity extends BaseActivity {
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
+        adapter.setDefaultNetwork(networkInfo);
         setupPage();
     }
 
@@ -325,7 +323,8 @@ public class SellDetailActivity extends BaseActivity {
         return result;
     }
 
-    private void initQuantitySelector() {
+    private void initQuantitySelector()
+    {
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
@@ -404,13 +403,14 @@ public class SellDetailActivity extends BaseActivity {
         }
     }
 
-    private void updateSellPrice(int quantity) {
+    private void updateSellPrice(int quantity)
+    {
         if (!sellPrice.getText().toString().isEmpty()) {
             try {
                 sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getNetwork().symbol));
+                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getSymbol(getString(R.string.eth))));
                 updateUSDBalance();
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException|MissingFormatArgumentException e) {
                 //silent fail, just don't update
             }
         }

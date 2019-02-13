@@ -54,7 +54,6 @@ public class TokenRepository implements TokenRepositoryType {
     private Web3j web3j;
     private boolean useBackupNode = false;
     private NetworkInfo network;
-    private Disposable disposable;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -97,45 +96,6 @@ public class TokenRepository implements TokenRepositoryType {
         HttpService publicNodeService = new HttpService(defaultNetwork.rpcServerUrl, client, false);
 
         web3j = Web3j.build(publicNodeService);
-
-        //test main node, if it's not working then use backup Infura node. If it's not working then we can't listen on the pool
-        disposable = getIsSyncing()
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::receiveSyncing, this::checkFail);
-    }
-
-    private void receiveSyncing(Boolean b)
-    {
-        //have a valid connection and node is done syncing, no need to use infura
-        if (b == null || b)
-        {
-            useBackupNode = true;
-            switchToBackupNode();
-        }
-
-        disposable.dispose();
-    }
-
-    private void checkFail(Throwable failMsg)
-    {
-        useBackupNode = true;
-        switchToBackupNode();
-        disposable.dispose();
-    }
-
-    private void switchToBackupNode()
-    {
-        org.web3j.protocol.http.HttpService publicNodeService = new org.web3j.protocol.http.HttpService(network.backupNodeUrl);
-        web3j = Web3j.build(publicNodeService);
-    }
-
-    private Single<Boolean> getIsSyncing()
-    {
-        return Single.fromCallable(() -> {
-            EthSyncing status = web3j.ethSyncing()
-                    .send();
-            return status.isSyncing();
-        });
     }
 
     @Override

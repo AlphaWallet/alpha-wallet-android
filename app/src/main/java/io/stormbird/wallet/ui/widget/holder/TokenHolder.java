@@ -94,8 +94,9 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         try
         {
-            blockchain.setText(getString(R.string.blockchain, networkInfo.getShortName()));
-            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), networkInfo);
+            String networkName = networkInfo != null ? networkInfo.getShortName() : getString(R.string.ethereum);
+            blockchain.setText(getString(R.string.blockchain, networkName));
+            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), networkName);
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()

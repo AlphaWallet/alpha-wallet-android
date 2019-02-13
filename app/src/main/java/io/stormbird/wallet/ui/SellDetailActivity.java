@@ -97,6 +97,7 @@ public class SellDetailActivity extends BaseActivity {
     private TextView confirmQuantityText;
     private TextView confirmPricePerTicketText;
     private TextView confirmTotalCostText;
+    private TextView currencyText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -145,6 +146,7 @@ public class SellDetailActivity extends BaseActivity {
         confirmQuantityText = findViewById(R.id.text_confirm_quantity);
         confirmPricePerTicketText = findViewById(R.id.text_confirm_price_per_ticket);
         confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
+        currencyText = findViewById(R.id.text_currency);
 
         finishReceiver = new FinishReceiver(this);
     }
@@ -209,10 +211,10 @@ public class SellDetailActivity extends BaseActivity {
 
         int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue));
+        String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
-        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, currencySymbol, getEthString(sellPriceValue)));
-        confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr, currencySymbol));
+        confirmPricePerTicketText.setText(getString(R.string.eth_per_ticket_w_value, getEthString(sellPriceValue), currencySymbol));
+        confirmTotalCostText.setText(getString(R.string.confirm_sale_total, totalCostStr));
     }
 
     void showQuantityLayout()
@@ -225,6 +227,8 @@ public class SellDetailActivity extends BaseActivity {
         quantityLayout.setVisibility(View.VISIBLE);
         universalLinkDetailsLayout.setVisibility(View.GONE);
         titleSetPrice.setText(R.string.set_a_price);
+        currencyText.setText(viewModel.getNetwork().symbol);
+        totalCostText.setText(getString(R.string.currency_00, viewModel.getNetwork().symbol));
         addSellPriceListener();
     }
 
@@ -404,7 +408,7 @@ public class SellDetailActivity extends BaseActivity {
         if (!sellPrice.getText().toString().isEmpty()) {
             try {
                 sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue)));
+                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getNetwork().symbol));
                 updateUSDBalance();
             } catch (NumberFormatException e) {
                 //silent fail, just don't update
@@ -491,8 +495,8 @@ public class SellDetailActivity extends BaseActivity {
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
 
         String qty = String.valueOf(quantity) + " " + unit + "\n" +
-                String.valueOf(getEthString(sellPriceValue)) + " " + getResources().getString(R.string.eth_per_ticket) + "\n" +
-                getString(R.string.confirm_sale_total, totalCostStr, currencySymbol) + "\n\n" +
+                String.valueOf(getEthString(sellPriceValue)) + " " + getString(R.string.eth_per_ticket, currencySymbol) + "\n" +
+                getString(R.string.confirm_sale_total, totalCostStr) + "\n\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
         AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);

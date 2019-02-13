@@ -158,7 +158,7 @@
     <string name="set_a_price">Set a Price:</string>
     <string name="learn_more_about_ethereum">Learn more about Ethereum</string>
     <string name="price_per_ticket">Price Per Ticket</string>
-    <string name="set_price_subtext_abr">Set price in Ethereum (ETH)</string>
+    <string name="set_price_subtext_abr">Set price in %1s (%2s)</string>
     <string name="transfer_tickets">Transfer Tickets</string>
     <string name="link_valid_until">The MagicLink will be valid until %1s %2s</string>
     <string name="generate_pick_up_link">Generate a MagicLink</string>
@@ -228,7 +228,7 @@
     <string name="usd_value">USD Value</string>
     <string name="my_listings">My Listings</string>
     <string name="fifa_2018">FIFA 2018</string>
-    <string name="eth_per_ticket">ETH/Ticket</string>
+    <string name="eth_per_ticket">%1s/Ticket</string>
     <string name="ethereum">Ethereum</string>
     <string name="ethereum_blockchain">Ethereum Blockchain</string>
     <string name="issuer">Issuer:</string>
@@ -291,7 +291,7 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="action_marketplace">Marketplace</string>
     <string name="universal_link_expiry_on">MagicLink expiry on:</string>
-    <string name="confirm_sale_total">Total: %1s %2s</string>
+    <string name="confirm_sale_total">Total: %s</string>
     <string name="set_universal_link_expiry">Set MagicLink Expiry:</string>
     <string name="tickets_selected">%1s %2s Selected</string>
     <string name="eth_per_ticket_w_value">%1s %2s/Ticket</string>
@@ -434,4 +434,5 @@
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Load Token</string>
     <string name="blockchain">%1$s Blockchain</string>
+    <string name="currency_00">0.00 %s</string>
 </resources>

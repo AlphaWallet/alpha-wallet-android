@@ -96,7 +96,7 @@
     <string name="quantity_of_tickets">门票数量</string>
     <string name="total_cost_label">总价:</string>
     <string name="equivalent_in_usd">相当于USD</string>
-    <string name="total_cost">%s %s</string>
+    <string name="total_cost">%1s %2s</string>
     <string name="select_quantity_tickets">选择门票数量</string>
     <string name="redeemed">已兑换</string>
     <string name="ticket_redeemed">你的门票已经被兑换</string>
@@ -118,7 +118,7 @@
     <string name="usd_value">USD价值</string>
     <string name="my_listings">我的出售列表</string>
     <string name="fifa_2018">FIFA 2018世界杯</string>
-    <string name="eth_per_ticket">以太币/门票</string>
+    <string name="eth_per_ticket">%1s/门票</string>
     <string name="ethereum">以太坊</string>
     <string name="ethereum_blockchain">基于以太坊智能合约</string>
     <string name="issuer">发行方:</string>
@@ -181,7 +181,7 @@
     <string name="copied_to_clipboard">复制到剪切板</string>
     <string name="action_marketplace">市场</string>
     <string name="universal_link_expiry_on">MagicLink链接过期时间:</string>
-    <string name="confirm_sale_total">总共: %1s %2s</string>
+    <string name="confirm_sale_total">总共: %s</string>
     <string name="set_universal_link_expiry">设置MagicLink链接过期时间:</string>
     <string name="tickets_selected">%1s %2s 选中</string>
     <string name="eth_per_ticket_w_value">%1s %2s/门票</string>

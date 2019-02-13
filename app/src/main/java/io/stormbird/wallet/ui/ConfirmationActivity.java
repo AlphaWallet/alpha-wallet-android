@@ -12,20 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import io.stormbird.wallet.entity.*;
-import org.web3j.utils.Convert;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.util.BalanceUtils;
@@ -34,7 +26,12 @@ import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.token.entity.TicketRange;
+import org.web3j.utils.Convert;
+
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.List;
 
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
@@ -50,9 +47,6 @@ public class ConfirmationActivity extends BaseActivity {
     ConfirmationViewModel viewModel;
 
     private FinishReceiver finishReceiver;
-
-//    private SystemView systemView;
-//    private ProgressView progressView;
 
     private TextView fromAddressText;
     private TextView toAddressText;
@@ -221,6 +215,7 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.progress().observe(this, this::onProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
         finishReceiver = new FinishReceiver(this);
     }
 
@@ -271,9 +266,13 @@ public class ConfirmationActivity extends BaseActivity {
         unregisterReceiver(finishReceiver);
     }
 
-    private void onSend() {
-        GasSettings gasSettings = viewModel.gasSettings().getValue();
+    private void onSend()
+    {
+        viewModel.getGasForSending(confirmationType, this);
+    }
 
+    private void onSendGasSettings(GasSettings gasSettings)
+    {
         switch (confirmationType) {
             case ETH:
                 viewModel.createTransaction(

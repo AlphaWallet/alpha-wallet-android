@@ -4,11 +4,14 @@ package io.stormbird.wallet.interact;
 import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.GasSettings;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 
 import java.math.BigInteger;
 
 import io.reactivex.Single;
+
+import static io.stormbird.wallet.repository.EthereumNetworkRepository.XDAI_ID;
 
 public class FetchGasSettingsInteract {
     private final GasSettingsRepositoryType repository;
@@ -30,9 +33,14 @@ public class FetchGasSettingsInteract {
         return repository.gasPriceUpdate();
     }
 
-    public Single<GasSettings> fetchDefault(boolean tokenTransfer) {
+    public Single<GasSettings> fetchDefault(boolean tokenTransfer, NetworkInfo networkInfo) {
         return Single.fromCallable(() -> {
             BigInteger gasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
+            if (networkInfo.chainId == XDAI_ID)
+            {
+                gasPrice = new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
+            }
+
             BigInteger gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT);
             if (tokenTransfer) {
                 gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);

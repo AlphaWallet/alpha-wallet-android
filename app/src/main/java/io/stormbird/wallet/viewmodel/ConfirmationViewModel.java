@@ -25,6 +25,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> newDappTransaction = new MutableLiveData<>();
+    private final MutableLiveData<GasSettings> sendGasSettings = new MutableLiveData<>();
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
@@ -84,6 +85,10 @@ public class ConfirmationViewModel extends BaseViewModel {
         return gasSettings;
     }
 
+    public MutableLiveData<GasSettings> sendGasSettings() {
+        return sendGasSettings;
+    }
+
     public LiveData<String> sendTransaction() {
         return newTransaction;
     }
@@ -132,6 +137,31 @@ public class ConfirmationViewModel extends BaseViewModel {
                     .fetch(transaction, isNonFungible)
                     .subscribe(this::onGasSettings, this::onError);
         }
+    }
+
+    public void getGasForSending(ConfirmationType confirmationType, Activity context)
+    {
+        if (gasSettings.getValue() == null)
+        {
+            //deal with problem where gas settings are still null
+            disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, defaultNetwork)
+                    .subscribe(this::onSendGasSettings, throwable -> onGasError(throwable, context));
+        }
+        else
+        {
+            sendGasSettings.postValue(gasSettings.getValue());
+        }
+    }
+
+    private void onSendGasSettings(GasSettings gasSettings)
+    {
+        sendGasSettings.postValue(gasSettings);
+    }
+
+    private void onGasError(Throwable throwable, Activity context)
+    {
+        //unknown problem. Has been observed once from crashlytics, send user to gas screen in this case
+        openGasSettings(context);
     }
 
     private void onGasSettings(GasSettings gasSettings) {

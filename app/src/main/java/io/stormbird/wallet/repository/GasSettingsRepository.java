@@ -45,8 +45,13 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
 
     private void setCachedPrice()
     {
-        this.currentChainId = networkRepository.getDefaultNetwork().chainId;
-        switch (networkRepository.getDefaultNetwork().chainId)
+        if (networkRepository.getDefaultNetwork() != null)
+        {
+            this.currentChainId = networkRepository.getDefaultNetwork().chainId;
+        }
+        else currentChainId = EthereumNetworkRepository.MAINNET_ID;
+
+        switch (currentChainId)
         {
             case EthereumNetworkRepository.XDAI_ID:
                 cachedGasPrice = new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);

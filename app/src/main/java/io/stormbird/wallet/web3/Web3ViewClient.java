@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
+import android.provider.SyncStateContract;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Map;
 
 import android.widget.Toast;
@@ -118,11 +120,18 @@ public class Web3ViewClient extends WebViewClient {
             return null;
         }
 
+        //check for known extensions
+        if (handleTrustedExtension(request.getUrl().toString()))
+        {
+            return null;
+        }
+
         HttpUrl httpUrl = HttpUrl.parse(request.getUrl().toString());
         if (httpUrl == null) {
             return null;
         }
         Map<String, String> headers = request.getRequestHeaders();
+
         JsInjectorResponse response;
         try {
             response = jsInjectorClient.loadUrl(httpUrl.toString(), headers);
@@ -191,7 +200,6 @@ public class Web3ViewClient extends WebViewClient {
     }
 
     //Handling of trusted apps
-    //1. Telegram
     private boolean handleTrustedApps(String url)
     {
         //get list
@@ -202,6 +210,22 @@ public class Web3ViewClient extends WebViewClient {
             if (url.startsWith(split[1]))
             {
                 intentTryApp(split[0], url);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean handleTrustedExtension(String url)
+    {
+        String[] strArray = context.getResources().getStringArray(R.array.TrustedExtensions);
+        for (String item : strArray)
+        {
+            String[] split = item.split(",");
+            if (url.endsWith(split[1]))
+            {
+                useKnownOpenIntent(split[0], url);
                 return true;
             }
         }
@@ -224,6 +248,28 @@ public class Web3ViewClient extends WebViewClient {
         {
             Toast.makeText(context, "Required App not Installed", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void useKnownOpenIntent(String type, String url)
+    {
+        Intent openIntent = new Intent(Intent.ACTION_VIEW);
+        openIntent.setDataAndType(Uri.parse(url), type);
+        Intent intent = Intent.createChooser(openIntent, "Open using");
+        if (isIntentAvailable(intent))
+        {
+            context.startActivity(intent);
+        }
+        else
+        {
+            Toast.makeText(context, "Required App not Installed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isIntentAvailable(Intent intent)
+    {
+        final PackageManager packageManager = context.getPackageManager();
+        List list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
     }
 
     private boolean isAppAvailable(String appName)

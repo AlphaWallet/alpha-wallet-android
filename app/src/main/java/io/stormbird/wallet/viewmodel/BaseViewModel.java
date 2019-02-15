@@ -80,13 +80,14 @@ public class BaseViewModel extends ViewModel
 		}
 		else
 		{
-			if (throwable.getCause() == null || TextUtils.isEmpty(throwable.getCause().getMessage()))
+			String message = throwable.getMessage();
+			if (TextUtils.isEmpty(message))
 			{
 				error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
 			}
 			else
 			{
-				error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getCause().getMessage(), throwable));
+				error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, message, throwable));
 			}
 		}
 	}

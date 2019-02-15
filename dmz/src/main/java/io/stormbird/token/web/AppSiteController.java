@@ -93,6 +93,7 @@ public class AppSiteController {
             case currencyLink:
                 return handleCurrencyLink(data, agent, model);
             case spawnable:
+                return handleSpawnableLink(data, agent, model);
             default:
                 return handleTokenLink(data, agent, model);
         }
@@ -100,24 +101,7 @@ public class AppSiteController {
 
     private String handleTokenLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
     {
-        TokenDefinition definition = null;
-        File xml = null;
-        for (String address : addresses.keySet()) {
-            xml = addresses.get(address);
-            // TODO: when xml-schema-v1 is merged, produce a new "default XML" to fill the role of fallback.
-            if (address.equals(data.contractAddress)) { // this works as contractAddress is always in lowercase
-                break;
-            }
-        }
-        if (xml == null) {
-            /* this is impossible to happen, because at least 1 xml should present or main() bails out */
-            throw new NoHandlerFoundException("GET", "/" + data.contractAddress, new HttpHeaders());
-        }
-        try(FileInputStream in = new FileInputStream(xml)) {
-            // TODO: give more detail in the error
-            // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
-            definition = new TokenDefinition(in, new Locale("en"));
-        }
+        TokenDefinition definition = getTokenDefinition(data.contractAddress);
 
         model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
@@ -177,12 +161,126 @@ public class AppSiteController {
         return "currency";
     }
 
+    private String handleSpawnableLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
+    {
+        TokenDefinition definition = getTokenDefinition(data.contractAddress);
+
+        String tokenName = definition.getTokenName();
+
+        model.addAttribute("tokenName", definition.getTokenName());
+        model.addAttribute("link", data);
+        model.addAttribute("linkPrice", getEthString(data.price));
+
+        try {
+            updateContractInfo(model, data.contractAddress);
+        } catch (Exception e) {
+            /* The link points to a non-existing contract - most
+             * likely from a different chainID. Now, if Ethereum node
+             * is offline, this may get triggered too. */
+            model.addAttribute("tokenAvailable", "unattainable");
+            return "spawnable";
+        }
+
+        try {
+            updateTokenInfoForSpawnable(model, data, definition);
+        } catch (Exception e) {
+            /* although contract is okay, we can't getting
+             * tokens. This could be caused by a wrong signature. The
+             * case that the tokens are redeemd is handled inside, not
+             * as an exception */
+            model.addAttribute("tokenAvailable", "unavailable");
+            return "spawnable";
+        }
+
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
+            model.addAttribute("tokenAvailable", "expired");
+        } else {
+            model.addAttribute("tokenAvailable", "available");
+        }
+        return "spawnable";
+    }
+
+    private TokenDefinition getTokenDefinition(String contractAddress) throws IOException, SAXException, NoHandlerFoundException
+    {
+        File xml = null;
+        TokenDefinition definition;
+        for (String address : addresses.keySet()) {
+            xml = addresses.get(address);
+            // TODO: when xml-schema-v1 is merged, produce a new "default XML" to fill the role of fallback.
+            if (address.equals(contractAddress)) { // this works as contractAddress is always in lowercase
+                break;
+            }
+        }
+        if (xml == null) {
+            /* this is impossible to happen, because at least 1 xml should present or main() bails out */
+            throw new NoHandlerFoundException("GET", "/" + contractAddress, new HttpHeaders());
+        }
+        try(FileInputStream in = new FileInputStream(xml)) {
+            // TODO: give more detail in the error
+            // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
+            definition = new TokenDefinition(in, new Locale("en"));
+        }
+
+        return definition;
+    }
+
     private void updateContractInfo(Model model, String contractAddress) {
         //find out the contract name, symbol and balance
         //have to use blocking gets here
         //TODO: we should be able to update components here instead of waiting
         String contractName = txHandler.getName(contractAddress);
         model.addAttribute("contractName", contractName);
+    }
+
+    private void updateTokenInfoForSpawnable(Model model, MagicLinkData data, TokenDefinition definition) throws Exception {
+        // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
+
+        List<NonFungibleToken> selection = Arrays.stream(data.tokenIds.toArray(new BigInteger[0]))
+                .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
+                .map(tokenId -> new NonFungibleToken(tokenId, definition))
+                .collect(Collectors.toList());
+
+        for (NonFungibleToken token : selection)
+        {
+            int index = 1;
+            for (String key : token.getAttributes().keySet())
+            {
+                String def = "attr" + index;
+                String val = "val" + index;
+                NonFungibleToken.Attribute attr = token.getAttribute(key);
+                switch (key)
+                {
+                    case "time":
+                        model.addAttribute("ticketDate", DateTimeFactory.getDateTime(attr).format(dateFormat));
+                        break;
+
+                    case "numero":
+                        model.addAttribute(key, attr.text);
+                        break;
+
+                    default:
+                        model.addAttribute(def, attr.name);
+                        model.addAttribute(val, attr.text);
+                        index++;
+                        break;
+                }
+            }
+
+            for (;index < 3;index++)
+            {
+                model.addAttribute("attr"+index, "");
+                model.addAttribute("val"+index, "");
+            }
+
+            //prevent page from failing if attribute didn't contain numero
+            if (!model.containsAttribute("numero"))
+            {
+                model.addAttribute("numero", "1");
+            }
+
+            break; // we only need 1 token's info. rest assumed to be the same
+        }
     }
 
     private void updateTokenInfo(Model model, MagicLinkData data, TokenDefinition definition) throws Exception {

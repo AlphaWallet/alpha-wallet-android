@@ -30,6 +30,11 @@ public class NonFungibleToken
 
     protected HashMap<String, Attribute> attributes;
 
+    public HashMap<String, Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
     public Attribute getAttribute(String attributeId) {
         if (attributes != null)
         {

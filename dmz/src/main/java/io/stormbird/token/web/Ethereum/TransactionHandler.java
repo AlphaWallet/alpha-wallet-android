@@ -1,5 +1,6 @@
 package io.stormbird.token.web.Ethereum;
 
+import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -11,6 +12,7 @@ import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import io.stormbird.token.entity.BadContract;
@@ -30,8 +33,10 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 public class TransactionHandler
 {
     private static final String MAIN_NODEURL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String XDAI_NODE = "https://dai.poa.network";
 
     private static Web3j mWeb3;
+    private static Web3j mWeb3xdai;
 
     public TransactionHandler()
     {
@@ -41,6 +46,7 @@ public class TransactionHandler
 
         HttpService service = new HttpService(MAIN_NODEURL, builder.build(), false);
         mWeb3 = Web3j.build(service);
+        mWeb3xdai = Web3j.build(new HttpService(XDAI_NODE, builder.build(), false));
 
         try
         {
@@ -102,25 +108,36 @@ public class TransactionHandler
     private String callSmartContractFunction(
             Function function, String contractAddress) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
+        return makeEthCall(
+                org.web3j.protocol.core.methods.request.Transaction
+                        .createEthCallTransaction(null, contractAddress, encodedFunction));
+    }
 
-        org.web3j.protocol.core.methods.request.Transaction transaction
-                = createEthCallTransaction(null, contractAddress, encodedFunction);
-        EthCall response = mWeb3.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+    private String makeEthCall(Transaction transaction) throws ExecutionException, InterruptedException
+    {
+        org.web3j.protocol.core.methods.response.EthCall ethCall = mWeb3.ethCall(transaction,
+                DefaultBlockParameterName.LATEST)
+                .sendAsync().get();
 
-        return response.getValue();
+        String value = ethCall.getValue();
+        if (value.equals("0x"))
+        {
+            ethCall = mWeb3xdai.ethCall(transaction, DefaultBlockParameterName.LATEST)
+                    .sendAsync().get();
+            value = ethCall.getValue();
+        }
+
+        return value;
     }
 
     private List callSmartContractFunctionArray(
             org.web3j.abi.datatypes.Function function, String contractAddress, String address) throws Exception
     {
         String encodedFunction = FunctionEncoder.encode(function);
-        org.web3j.protocol.core.methods.response.EthCall ethCall = mWeb3.ethCall(
+        String value = makeEthCall(
                 org.web3j.protocol.core.methods.request.Transaction
-                        .createEthCallTransaction(address, contractAddress, encodedFunction),
-                DefaultBlockParameterName.LATEST)
-                .sendAsync().get();
+                        .createEthCallTransaction(address, contractAddress, encodedFunction));
 
-        String value = ethCall.getValue();
         List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
         if (values.isEmpty()) return null;
 

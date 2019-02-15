@@ -57,7 +57,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_light"
             android:maxLines="1"
-            android:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFD"
+            android:text="Pending Transaction ..."
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             android:textColor="@color/text_dark_gray"
             android:textSize="12sp"
@@ -71,7 +71,7 @@
             android:layout_marginRight="5dp"
             android:layout_toStartOf="@id/view_details"
             android:fontFamily="@font/font_semibold"
-            android:text="+10 EDT"
+            android:text=""
             android:textColor="@color/green"
             android:textSize="18sp" />
 

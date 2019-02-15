@@ -61,7 +61,7 @@
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             android:textSize="12sp"
-            android:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFD" />
+            android:text="Transaction pending ..." />
     </LinearLayout>
 
     <TextView
@@ -73,5 +73,5 @@
         android:layout_marginEnd="@dimen/big_margin"
         android:fontFamily="@font/font_semibold"
         android:textColor="@color/colorAccent"
-        android:text="+10" />
+        android:text="..." />
 </RelativeLayout>

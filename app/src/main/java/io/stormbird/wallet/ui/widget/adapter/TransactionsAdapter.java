@@ -149,6 +149,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         if (transactions.length == 0) return 0;
         int oldSize = items.size();
 
+        items.beginBatchedUpdates();
         for (Transaction transaction : transactions)
         {
             TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
@@ -159,17 +160,22 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
 
         items.endBatchedUpdates();
-        if (oldSize > 0) oldSize -= 1;
         return items.size() - oldSize;
     }
 
     public void addNewTransactions(Transaction[] transactions)
     {
         if (transactions.length == 0) return;
+        DateSortedItem lastDate = items.size() > 0 ? (DateSortedItem)items.get(0) : null;
         int itemsChanged = updateTransactions(transactions);
         if (itemsChanged > 0)
         {
-            notifyItemRangeInserted(0, itemsChanged);
+            int startItem = 0;
+            if (lastDate != null && lastDate.areItemsTheSame(items.get(0)))
+            {
+                startItem = 1;
+            }
+            notifyItemRangeChanged(startItem, items.size() - startItem);
         }
     }
 

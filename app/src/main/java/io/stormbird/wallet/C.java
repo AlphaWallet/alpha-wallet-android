@@ -106,8 +106,10 @@ public abstract class C {
 
     public static final String DEFAULT_NETWORK = ETHEREUM_NETWORK_NAME;
 
+    public static final String TELEGRAM_PACKAGE_NAME = "org.telegram.messenger";
     public static final String TWITTER_PACKAGE_NAME = "com.twitter.android";
     public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
+    public static final String AWALLET_TELEGRAM_URL = "https://t.me/AlphaWalletGroup";
     public static final String AWALLET_TWITTER_ID = "twitter://user?user_id=938624096123764736";
     public static final String AWALLET_FACEBOOK_ID = "fb://page/1958651857482632";
     public static final String AWALLET_TWITTER_URL = "https://twitter.com/Alpha_wallet";

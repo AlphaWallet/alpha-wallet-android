@@ -435,4 +435,5 @@
     <string name="dialog_load_as_contract">Load Token</string>
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00">0.00 %s</string>
+    <string name="telegram">Telegram</string>
 </resources>

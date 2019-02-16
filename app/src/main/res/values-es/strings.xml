@@ -33,4 +33,5 @@
     <string name="address_found">Ethereum Address</string>
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Load Token</string>
+    <string name="telegram">Telegram</string>
 </resources>

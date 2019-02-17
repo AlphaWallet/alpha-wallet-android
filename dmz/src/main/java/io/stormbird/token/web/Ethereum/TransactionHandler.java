@@ -1,6 +1,5 @@
 package io.stormbird.token.web.Ethereum;
 
-import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -13,13 +12,11 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -27,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.stormbird.token.entity.BadContract;
 import okhttp3.OkHttpClient;
-
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TransactionHandler
 {
@@ -42,18 +37,18 @@ public class TransactionHandler
     private static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     private static final String SOKOL_RPC_URL = "https://sokol.poa.network";
 
-    //server prefixes
-    private static final String mainnetMagicLinkPrefix = "https://aw.app/";
-    private static final String legacyMagicLinkPrefix = "https://app.awallet.io/";
-    private static final String classicMagicLinkPrefix = "https://classic.aw.app/";
-    private static final String callistoMagicLinkPrefix = "https://callisto.aw.app/";
-    private static final String kovanMagicLinkPrefix = "https://kovan.aw.app/";
-    private static final String ropstenMagicLinkPrefix = "https://ropsten.aw.app/";
-    private static final String rinkebyMagicLinkPrefix = "https://rinkeby.aw.app/";
-    private static final String poaMagicLinkPrefix = "https://poa.aw.app/";
-    private static final String sokolMagicLinkPrefix = "https://sokol.aw.app/";
-    private static final String xDaiMagicLinkPrefix = "https://xdai.aw.app/";
-    private static final String customMagicLinkPrefix = "https://custom.aw.app/";
+    //domains for DMZ
+    private static final String mainnetMagicLinkDomain = "aw.app";
+    private static final String legacyMagicLinkDomain = "app.awallet.io";
+    private static final String classicMagicLinkDomain = "classic.aw.app";
+    private static final String callistoMagicLinkDomain = "callisto.aw.app";
+    private static final String kovanMagicLinkDomain = "kovan.aw.app";
+    private static final String ropstenMagicLinkDomain = "ropsten.aw.app";
+    private static final String rinkebyMagicLinkDomain = "rinkeby.aw.app";
+    private static final String poaMagicLinkDomain = "poa.aw.app";
+    private static final String sokolMagicLinkDomain = "sokol.aw.app";
+    private static final String xDaiMagicLinkDomain = "xdai.aw.app";
+    private static final String customMagicLinkDomain = "custom.aw.app";
 
     //network ids
     private static final int MAINNET_NETWORK_ID = 1;
@@ -123,27 +118,30 @@ public class TransactionHandler
         }
     }
 
-    //For testing you will not have the correct url (localhost)
+    //For testing you will not have the correct domain (localhost)
     //To test, alter the else statement to return the network you wish to test
-    public static int getNetworkIdFromDomain(String url) {
-        if (url.contains(mainnetMagicLinkPrefix)) {
-            return MAINNET_NETWORK_ID;
-        } else if (url.contains(classicMagicLinkPrefix)) {
-            return CLASSIC_NETWORK_ID;
-        } else if (url.contains(kovanMagicLinkPrefix)) {
-            return KOVAN_NETWORK_ID;
-        } else if (url.contains(ropstenMagicLinkPrefix)) {
-            return ROPSTEN_NETWORK_ID;
-        } else if (url.contains(rinkebyMagicLinkPrefix)) {
-            return RINKEBY_NETWORK_ID;
-        } else if (url.contains(poaMagicLinkPrefix)) {
-            return POA_NETWORK_ID;
-        } else if (url.contains(sokolMagicLinkPrefix)) {
-            return SOKOL_NETWORK_ID;
-        } else if (url.contains(xDaiMagicLinkPrefix)) {
-            return XDAI_NETWORK_ID;
-        } else {
-            return MAINNET_NETWORK_ID;
+    public static int getNetworkIdFromDomain(String domain) {
+        switch(domain) {
+            case mainnetMagicLinkDomain:
+                return MAINNET_NETWORK_ID;
+            case legacyMagicLinkDomain:
+                return MAINNET_NETWORK_ID;
+            case classicMagicLinkDomain:
+                return CLASSIC_NETWORK_ID;
+            case kovanMagicLinkDomain:
+                return KOVAN_NETWORK_ID;
+            case ropstenMagicLinkDomain:
+                return ROPSTEN_NETWORK_ID;
+            case rinkebyMagicLinkDomain:
+                return RINKEBY_NETWORK_ID;
+            case poaMagicLinkDomain:
+                return POA_NETWORK_ID;
+            case sokolMagicLinkDomain:
+                return SOKOL_NETWORK_ID;
+            case xDaiMagicLinkDomain:
+                return XDAI_NETWORK_ID;
+            default:
+                return MAINNET_NETWORK_ID;
         }
     }
 

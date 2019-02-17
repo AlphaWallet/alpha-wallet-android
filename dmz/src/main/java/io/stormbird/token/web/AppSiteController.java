@@ -79,7 +79,8 @@ public class AppSiteController {
     )
             throws IOException, SAXException, NoHandlerFoundException
     {
-        networkId = TransactionHandler.getNetworkIdFromDomain(request.getRequestURI());
+        String domain = request.getServerName();
+        networkId = TransactionHandler.getNetworkIdFromDomain(domain);
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
         try

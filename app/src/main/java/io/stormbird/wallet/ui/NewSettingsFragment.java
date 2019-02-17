@@ -116,6 +116,16 @@ public class NewSettingsFragment extends Fragment {
             viewModel.showHelp(getContext());
         });
 
+        final LinearLayout layoutTelegram = view.findViewById(R.id.layout_telegram);
+        layoutTelegram.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(C.AWALLET_TELEGRAM_URL));
+            if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME)) {
+                intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
+            }
+            startActivity(intent);
+        });
+
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
         layoutTwitter.setOnClickListener(v -> {
             Intent intent;
@@ -150,8 +160,7 @@ public class NewSettingsFragment extends Fragment {
         });
 
         layoutEnableXML = view.findViewById(R.id.layout_xml_override);
-        if (checkWritePermission() == false)
-        {
+        if (checkWritePermission() == false) {
             layoutEnableXML.setVisibility(View.VISIBLE);
             layoutEnableXML.setOnClickListener(v -> {
                 //ask OS to ask user if we can use the 'AlphaWallet' directory
@@ -162,8 +171,17 @@ public class NewSettingsFragment extends Fragment {
         return view;
     }
 
-    private void updateNotificationState()
-    {
+    private boolean isAppAvailable(String packageName) {
+        PackageManager pm = getActivity().getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void updateNotificationState() {
         boolean state = viewModel.getNotificationState();
         notificationState.setChecked(state);
     }
@@ -183,8 +201,7 @@ public class NewSettingsFragment extends Fragment {
         viewModel.prepare();
     }
 
-    private void showXMLOverrideDialog()
-    {
+    private void showXMLOverrideDialog() {
         AWalletConfirmationDialog cDialog = new AWalletConfirmationDialog(getActivity());
         cDialog.setTitle(R.string.enable_xml_override_dir);
         cDialog.setSmallText(R.string.explain_xml_override);
@@ -202,29 +219,22 @@ public class NewSettingsFragment extends Fragment {
         cDialog.show();
     }
 
-    private boolean checkWritePermission()
-    {
+    private boolean checkWritePermission() {
         return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    public void refresh()
-    {
-        if (layoutEnableXML != null)
-        {
-            if (checkWritePermission())
-            {
+    public void refresh() {
+        if (layoutEnableXML != null) {
+            if (checkWritePermission()) {
                 layoutEnableXML.setVisibility(View.GONE);
-            }
-            else
-            {
+            } else {
                 layoutEnableXML.setVisibility(View.VISIBLE);
             }
         }
     }
 
-    private void askWritePermission()
-    {
+    private void askWritePermission() {
         final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
         Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
         ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);

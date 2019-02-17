@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -22,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.SalesOrderMalformed;
@@ -33,7 +31,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
-
+import javax.servlet.http.HttpServletRequest;
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.Convert.getEthStringSzabo;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
@@ -47,24 +45,24 @@ public class AppSiteController {
 
     private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
-    private static TransactionHandler txHandler = new TransactionHandler();
     private static Map<String, File> addresses;
+    private int networkId = 1; //default to mainnet
+    private static final String appleAssociationConfig = "{\n" +
+            "  \"applinks\": {\n" +
+            "    \"apps\": [],\n" +
+            "    \"details\": [\n" +
+            "      {\n" +
+            "        \"appID\": \"LRAW5PL536.com.stormbird.alphawallet\",\n" +
+            "        \"paths\": [ \"*\" ]\n" +
+            "      }\n" +
+            "    ]\n" +
+            "  }\n" +
+            "}";
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
     public String getAppleDeepLinkConfigure() {
-        //return "apple-app-site-association";
-        return "{\n" +
-                "  \"applinks\": {\n" +
-                "    \"apps\": [],\n" +
-                "    \"details\": [\n" +
-                "      {\n" +
-                "        \"appID\": \"LRAW5PL536.com.stormbird.alphawallet\",\n" +
-                "        \"paths\": [ \"*\" ]\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  }\n" +
-                "}";
+        return appleAssociationConfig;
     }
 
     @GetMapping("/")
@@ -73,9 +71,15 @@ public class AppSiteController {
     }
 
     @GetMapping(value = "/{UniversalLink}")
-    public String handleUniversalLink(@PathVariable("UniversalLink") String universalLink, @RequestHeader("User-Agent") String agent, Model model)
+    public String handleUniversalLink(
+            @PathVariable("UniversalLink") String universalLink,
+            @RequestHeader("User-Agent") String agent,
+            Model model,
+            HttpServletRequest request
+    )
             throws IOException, SAXException, NoHandlerFoundException
     {
+        networkId = TransactionHandler.getNetworkIdFromDomain(request.getRequestURI());
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
         try
@@ -84,10 +88,9 @@ public class AppSiteController {
         }
         catch (SalesOrderMalformed e)
         {
-            return "error"; // TODO: give nice error
+            return "error: " + e;
         }
         parser.getOwnerKey(data);
-
         switch (data.contractType)
         {
             case currencyLink:
@@ -99,7 +102,11 @@ public class AppSiteController {
         }
     }
 
-    private String handleTokenLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
+    private String handleTokenLink(
+            MagicLinkData data,
+            String agent,
+            Model model
+    ) throws IOException, SAXException, NoHandlerFoundException
     {
         TokenDefinition definition = getTokenDefinition(data.contractAddress);
 
@@ -136,12 +143,18 @@ public class AppSiteController {
         return "index";
     }
 
-    private String handleCurrencyLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
+    private String handleCurrencyLink(
+            MagicLinkData data,
+            String agent,
+            Model model
+    ) throws IOException, SAXException, NoHandlerFoundException
     {
+        //TODO localise
+        String networkName = TransactionHandler.getNetworkNameById(networkId);
         model.addAttribute("link", data);
         model.addAttribute("linkValue", getEthStringSzabo(data.amount));
-        model.addAttribute("title", "XDAI Currency Drop");
-        model.addAttribute("currency", "XDai"); //TODO: detect network and fill correct value
+        model.addAttribute("title", networkName + " Currency Drop");
+        model.addAttribute("currency", networkName);
 
         try {
             updateContractInfo(model, data.contractAddress);
@@ -161,7 +174,11 @@ public class AppSiteController {
         return "currency";
     }
 
-    private String handleSpawnableLink(MagicLinkData data, String agent, Model model) throws IOException, SAXException, NoHandlerFoundException
+    private String handleSpawnableLink(
+            MagicLinkData data,
+            String agent,
+            Model model
+    ) throws IOException, SAXException, NoHandlerFoundException
     {
         TokenDefinition definition = getTokenDefinition(data.contractAddress);
 
@@ -228,6 +245,7 @@ public class AppSiteController {
         //find out the contract name, symbol and balance
         //have to use blocking gets here
         //TODO: we should be able to update components here instead of waiting
+        TransactionHandler txHandler = new TransactionHandler(networkId);
         String contractName = txHandler.getName(contractAddress);
         model.addAttribute("contractName", contractName);
     }
@@ -283,7 +301,12 @@ public class AppSiteController {
         }
     }
 
-    private void updateTokenInfo(Model model, MagicLinkData data, TokenDefinition definition) throws Exception {
+    private void updateTokenInfo(
+            Model model,
+            MagicLinkData data,
+            TokenDefinition definition
+    ) throws Exception {
+        TransactionHandler txHandler = new TransactionHandler(networkId);
         // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);

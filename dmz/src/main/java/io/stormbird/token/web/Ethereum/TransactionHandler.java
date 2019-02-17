@@ -32,22 +32,130 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 public class TransactionHandler
 {
-    private static final String MAIN_NODEURL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String XDAI_NODE = "https://dai.poa.network";
+    //node urls
+    private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
+    private static final String XDAI_RPC_URL = "https://dai.poa.network";
+    private static final String POA_RPC_URL = "https://core.poa.network/";
+    private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String SOKOL_RPC_URL = "https://sokol.poa.network";
+
+    //server prefixes
+    private static final String mainnetMagicLinkPrefix = "https://aw.app/";
+    private static final String legacyMagicLinkPrefix = "https://app.awallet.io/";
+    private static final String classicMagicLinkPrefix = "https://classic.aw.app/";
+    private static final String callistoMagicLinkPrefix = "https://callisto.aw.app/";
+    private static final String kovanMagicLinkPrefix = "https://kovan.aw.app/";
+    private static final String ropstenMagicLinkPrefix = "https://ropsten.aw.app/";
+    private static final String rinkebyMagicLinkPrefix = "https://rinkeby.aw.app/";
+    private static final String poaMagicLinkPrefix = "https://poa.aw.app/";
+    private static final String sokolMagicLinkPrefix = "https://sokol.aw.app/";
+    private static final String xDaiMagicLinkPrefix = "https://xdai.aw.app/";
+    private static final String customMagicLinkPrefix = "https://custom.aw.app/";
+
+    //network ids
+    private static final int MAINNET_NETWORK_ID = 1;
+    private static final int CLASSIC_NETWORK_ID = 61;
+    private static final int KOVAN_NETWORK_ID = 42;
+    private static final int ROPSTEN_NETWORK_ID = 3;
+    private static final int RINKEBY_NETWORK_ID = 4;
+    private static final int POA_NETWORK_ID = 99;
+    private static final int SOKOL_NETWORK_ID = 77;
+    private static final int XDAI_NETWORK_ID = 100;
+
+    //network names
+    private static final String ETHEREUM_NETWORK = "Ethereum";
+    private static final String CLASSIC_NETWORK = "Ethereum Classic";
+    private static final String KOVAN_NETWORK = "Kovan";
+    private static final String ROPSTEN_NETWORK = "Ropsten";
+    private static final String RINKEBY_NETWORK = "Rinkeby";
+    private static final String POA_NETWORK = "POA";
+    private static final String SOKOL_NETWORK = "Sokol";
+    private static final String XDAI_NETWORK = "xDAI";
 
     private static Web3j mWeb3;
-    private static Web3j mWeb3xdai;
 
-    public TransactionHandler()
+    public static String getNetworkNameById(int networkId) {
+        switch (networkId) {
+            case MAINNET_NETWORK_ID:
+                return ETHEREUM_NETWORK;
+            case KOVAN_NETWORK_ID:
+                return KOVAN_NETWORK;
+            case ROPSTEN_NETWORK_ID:
+                return ROPSTEN_NETWORK;
+            case RINKEBY_NETWORK_ID:
+                return RINKEBY_NETWORK;
+            case POA_NETWORK_ID:
+                return POA_NETWORK;
+            case SOKOL_NETWORK_ID:
+                return SOKOL_NETWORK;
+            case CLASSIC_NETWORK_ID:
+                return CLASSIC_NETWORK;
+            case XDAI_NETWORK_ID:
+                return XDAI_NETWORK;
+            default:
+                return ETHEREUM_NETWORK;
+        }
+    }
+
+    private String getNodeURLByNetworkId(int networkId) {
+        switch (networkId) {
+            case MAINNET_NETWORK_ID:
+                return MAINNET_RPC_URL;
+            case KOVAN_NETWORK_ID:
+                return KOVAN_RPC_URL;
+            case ROPSTEN_NETWORK_ID:
+                return ROPSTEN_RPC_URL;
+            case RINKEBY_NETWORK_ID:
+                return RINKEBY_RPC_URL;
+            case POA_NETWORK_ID:
+                return POA_RPC_URL;
+            case SOKOL_NETWORK_ID:
+                return SOKOL_RPC_URL;
+            case CLASSIC_NETWORK_ID:
+                return CLASSIC_RPC_URL;
+            case XDAI_NETWORK_ID:
+                return XDAI_RPC_URL;
+            default:
+                return MAINNET_RPC_URL;
+        }
+    }
+
+    //For testing you will not have the correct url (localhost)
+    //To test, alter the else statement to return the network you wish to test
+    public static int getNetworkIdFromDomain(String url) {
+        if (url.contains(mainnetMagicLinkPrefix)) {
+            return MAINNET_NETWORK_ID;
+        } else if (url.contains(classicMagicLinkPrefix)) {
+            return CLASSIC_NETWORK_ID;
+        } else if (url.contains(kovanMagicLinkPrefix)) {
+            return KOVAN_NETWORK_ID;
+        } else if (url.contains(ropstenMagicLinkPrefix)) {
+            return ROPSTEN_NETWORK_ID;
+        } else if (url.contains(rinkebyMagicLinkPrefix)) {
+            return RINKEBY_NETWORK_ID;
+        } else if (url.contains(poaMagicLinkPrefix)) {
+            return POA_NETWORK_ID;
+        } else if (url.contains(sokolMagicLinkPrefix)) {
+            return SOKOL_NETWORK_ID;
+        } else if (url.contains(xDaiMagicLinkPrefix)) {
+            return XDAI_NETWORK_ID;
+        } else {
+            return MAINNET_NETWORK_ID;
+        }
+    }
+
+    public TransactionHandler(int networkId)
     {
+        String nodeURL = getNodeURLByNetworkId(networkId);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);
 
-        HttpService service = new HttpService(MAIN_NODEURL, builder.build(), false);
+        HttpService service = new HttpService(nodeURL, builder.build(), false);
         mWeb3 = Web3j.build(service);
-        mWeb3xdai = Web3j.build(new HttpService(XDAI_NODE, builder.build(), false));
-
         try
         {
             Web3ClientVersion web3ClientVersion = mWeb3.web3ClientVersion().sendAsync().get();
@@ -118,16 +226,7 @@ public class TransactionHandler
         org.web3j.protocol.core.methods.response.EthCall ethCall = mWeb3.ethCall(transaction,
                 DefaultBlockParameterName.LATEST)
                 .sendAsync().get();
-
-        String value = ethCall.getValue();
-        if (value.equals("0x"))
-        {
-            ethCall = mWeb3xdai.ethCall(transaction, DefaultBlockParameterName.LATEST)
-                    .sendAsync().get();
-            value = ethCall.getValue();
-        }
-
-        return value;
+        return ethCall.getValue();
     }
 
     private List callSmartContractFunctionArray(

@@ -402,6 +402,7 @@ public class ParseMagicLink
         return completeUniversalLink(leading, signature);
     }
 
+    //TODO add multiple subdomains here
     public String completeUniversalLink(byte[] message, byte[] signature) {
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);

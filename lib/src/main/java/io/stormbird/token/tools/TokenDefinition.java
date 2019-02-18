@@ -114,7 +114,6 @@ public class TokenDefinition {
             for(Node node=attr.getFirstChild();
                 node!=null; node=node.getNextSibling()){
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    System.out.println("\nFound a name field: " + node.getNodeName());
                     Element origin = (Element) node;
                     String label = node.getLocalName();
                     switch (label)
@@ -172,30 +171,6 @@ public class TokenDefinition {
             for (int i = 0; i < nList.getLength(); i++) {
                 option = (Element) nList.item(i);
                 members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option, "value"));
-            }
-        }
-
-        private void getFunctions(Element mapping) {
-            Element option;
-            Node functionDef;
-            for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling()){
-                if (child.getNodeType() == Node.ELEMENT_NODE) {
-                    option = (Element) child;
-                    String type = child.getLocalName();
-                    String functionName = option.getAttribute("name");
-                    //TODO: Get child elements; inputs and input param keys
-
-                    switch (type)
-                    {
-                        case "function":
-                            function = functionName;
-                            //TODO Read inputs from child node
-                            //String inputSpec = getChildElement(child, );
-                            break;
-                        default:
-                            break;
-                    }
-                }
             }
         }
 

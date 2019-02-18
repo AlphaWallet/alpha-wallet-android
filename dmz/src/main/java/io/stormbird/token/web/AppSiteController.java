@@ -58,6 +58,7 @@ public class AppSiteController {
             "    ]\n" +
             "  }\n" +
             "}";
+    private String domain = "aw.app";
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -67,7 +68,7 @@ public class AppSiteController {
 
     @GetMapping("/")
     public RedirectView home(RedirectAttributes attributes){
-        return new RedirectView("http://alphawallet.io");
+        return new RedirectView("http://alphawallet.com");
     }
 
     @GetMapping(value = "/{UniversalLink}")
@@ -79,7 +80,7 @@ public class AppSiteController {
     )
             throws IOException, SAXException, NoHandlerFoundException
     {
-        String domain = request.getServerName();
+        domain = request.getServerName();
         networkId = TransactionHandler.getNetworkIdFromDomain(domain);
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
@@ -307,6 +308,7 @@ public class AppSiteController {
             MagicLinkData data,
             TokenDefinition definition
     ) throws Exception {
+        model.addAttribute("domain", domain);
         TransactionHandler txHandler = new TransactionHandler(networkId);
         // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);

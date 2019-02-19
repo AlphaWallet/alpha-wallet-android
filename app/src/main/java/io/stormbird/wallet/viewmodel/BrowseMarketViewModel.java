@@ -78,7 +78,8 @@ public class BrowseMarketViewModel extends BaseViewModel
         if (parser == null)
         {
             cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(cryptoFunctions);
+            //TODO get chain id if need be
+            parser = new ParseMagicLink(1, cryptoFunctions);
         }
     }
 

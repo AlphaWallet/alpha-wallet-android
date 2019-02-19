@@ -59,6 +59,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
+					int chainId = networkInfo.chainId;
 					for (EtherscanTransaction etx : myTxs)
 					{
 					    Transaction tx = etx.createTransaction(userAddress, context);
@@ -221,6 +222,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
+					int chainId = networkInfo.chainId;
 					for (EtherscanTransaction etx : myTxs)
 					{
 						Transaction tx = etx.createTransaction(null, context);

@@ -97,7 +97,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         if (parser == null)
         {
             cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(cryptoFunctions);
+            parser = new ParseMagicLink(this.defaultNetwork.getValue().chainId, cryptoFunctions);
         }
     }
 

@@ -10,9 +10,8 @@ import android.widget.TextView;
 
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
-import org.web3j.abi.TypeReference;
+
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
@@ -23,9 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -746,7 +743,7 @@ public class Ticket extends Token implements Parcelable
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        int networkId = assetService.getNetworkId(getAddress());
+        int networkId = assetService.getChainId(getAddress());
         isMatchedInXML = networkId >= 1;
     }
 

@@ -6,10 +6,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
-
 import io.stormbird.token.entity.CryptoFunctionsInterface;
 import io.stormbird.token.entity.EthereumReadBuffer;
 import io.stormbird.token.entity.EthereumWriteBuffer;
@@ -26,6 +23,7 @@ public class ParseMagicLink
 {
     private final static BigInteger maxPrice = Convert.toWei(BigDecimal.valueOf(0xFFFFFFFFL),
             Convert.Unit.SZABO).toBigInteger();
+
     //link formats
     public static final byte unassigned = 0x00;
     public static final byte normal = 0x01;
@@ -34,22 +32,15 @@ public class ParseMagicLink
     public static final byte currencyLink = 0x04;
 
     private static final String CURRENCY_LINK_PREFIX = "XDAIDROP";
-
     private CryptoFunctionsInterface cryptoInterface;
+    private String magicLinkUrlPrefix;
 
-    public ParseMagicLink()
+    public ParseMagicLink(int chainId, CryptoFunctionsInterface cryptInf)
     {
-
-    }
-
-    public ParseMagicLink(CryptoFunctionsInterface cryptInf)
-    {
+        MagicLinkData magicLinkData = new MagicLinkData();
         cryptoInterface = cryptInf;
-    }
-
-    public void setCryptoInterface(CryptoFunctionsInterface cryptInf)
-    {
-        cryptoInterface = cryptInf;
+        String domain = magicLinkData.getMagicLinkDomainFromNetworkId(chainId);
+        magicLinkUrlPrefix = magicLinkData.formMagicLinkURLPrefixFromDomain(domain);
     }
 
     public MessageData readByteMessage(byte[] message, byte[] sig, int ticketCount) throws SalesOrderMalformed
@@ -94,11 +85,10 @@ public class ParseMagicLink
 
     public MagicLinkData parseUniversalLink(String link) throws SalesOrderMalformed
     {
-        final String importTemplate = "https://app.awallet.io/";
-        int offset = link.indexOf(importTemplate);
+        int offset = link.indexOf(magicLinkUrlPrefix);
         if (offset > -1)
         {
-            offset += importTemplate.length();
+            offset += magicLinkUrlPrefix.length();
             String linkData = link.substring(offset);
             return getMagicLinkDataFromURL(linkData);
         }
@@ -152,7 +142,6 @@ public class ParseMagicLink
         data.price = 0;
         ds.readSignature(data.signature);
         ds.close();
-
         //now we have to build the message that the contract is expecting the signature for
         data.message = getTradeBytes(data);
         return data;
@@ -402,13 +391,13 @@ public class ParseMagicLink
         return completeUniversalLink(leading, signature);
     }
 
-    //TODO add multiple subdomains here
-    public String completeUniversalLink(byte[] message, byte[] signature) {
+    public String completeUniversalLink(byte[] message, byte[] signature)
+    {
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);
         System.arraycopy(signature, 0, completeLink, message.length, signature.length);
         StringBuilder sb = new StringBuilder();
-        sb.append("https://app.awallet.io/");
+        sb.append(magicLinkUrlPrefix);
         byte[] b64 = cryptoInterface.Base64Encode(completeLink);
         sb.append(new String(b64));
         //this trade can be claimed by anyone who pushes the transaction through and has the sig

@@ -12,7 +12,7 @@ It currently functions:
 
 A universal link is like this:
 
-    https://app.awallet.io/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICfENh9BG3IRgrrkXGuLWKddxeI/PpXzaZ/RdyUxbrKi4MSEHa8NMnKTyjVw7uODNrpcboqSWZfIrHCFoug/YGegb
+    https://aw.app/AAGGoFq1tAC8mhAmpLxvC6i75IbR0J2lcys55AECAwQFBgcICfENh9BG3IRgrrkXGuLWKddxeI/PpXzaZ/RdyUxbrKi4MSEHa8NMnKTyjVw7uODNrpcboqSWZfIrHCFoug/YGegb
 
 The part portion of the link is entirely made of a single base64 string. At the moment '/' (slash) is a part of the base64 string; in the future, we will use a 64-character set that is web-safe. The format of the data encoded in base-64 is explained in UniversalLinkTest.java. Put it simply, it closely resembles an order to the MarketQueue, with some limitations.
 

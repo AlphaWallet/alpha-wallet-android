@@ -55,6 +55,7 @@ public class SplashActivity extends BaseActivity {
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
+        ImportTokenActivity importTokenActivity = new ImportTokenActivity();
 
         if (data != null)
         {
@@ -63,7 +64,7 @@ public class SplashActivity extends BaseActivity {
         else
         {
             //try the clipboard
-            importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
+            importData = importTokenActivity.getMagiclinkFromClipboard(this);
         }
 
         splashViewModel = ViewModelProviders.of(this, splashViewModelFactory)

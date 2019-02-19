@@ -122,11 +122,16 @@ public class HomeViewModel extends BaseViewModel {
     private boolean checkWalletNotEqual(Wallet wallet, String importData)
     {
         boolean filterPass = false;
+        int chainId = this.defaultNetwork.getValue().chainId;
 
         try
         {
-            if (cryptoFunctions == null) cryptoFunctions = new CryptoFunctions();
-            if (parser == null) parser = new ParseMagicLink(cryptoFunctions);
+            if (cryptoFunctions == null) {
+                cryptoFunctions = new CryptoFunctions();
+            }
+            if (parser == null) {
+                parser = new ParseMagicLink(chainId, cryptoFunctions);
+            }
 
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);

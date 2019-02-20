@@ -127,7 +127,7 @@ EPUQyp2aDrV1aug=
     <t:feature type="magic-link">
       <t:include>valid</t:include>
       <t:exclude>discounted</t:exclude>
-      <t:prefix>https://app.awallet.io/</t:prefix>
+      <t:prefix>https://aw.app/</t:prefix>
       <t:message lang="en" type="exclude">%name% can't be traded with MagicLink</t:message>
       <t:message type="include">Only %name% can be traded with MagicLink</t:message>
       <t:message lang="zh" type="exclude">%name% 不能用MagicLink交易</t:message>
@@ -136,7 +136,7 @@ EPUQyp2aDrV1aug=
     <t:feature type="transfer-link">
       <t:exclude>discounted</t:exclude>
       <t:exclude>invited</t:exclude>
-      <t:prefix>https://app.awallet.io/</t:prefix>
+      <t:prefix>https://aw.app/</t:prefix>
       <t:message lang="en" type="exclude">%name% can't be traded on the market</t:message>
       <t:message lang="zh" type="exclude">%name% 不能再在市场上交易</t:message>
     </t:feature>

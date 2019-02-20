@@ -121,7 +121,7 @@ public class ImportTokenViewModel extends BaseViewModel
         if (parser == null)
         {
             cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(cryptoFunctions);
+            parser = new ParseMagicLink(this.network.getValue().chainId, cryptoFunctions);
         }
     }
 

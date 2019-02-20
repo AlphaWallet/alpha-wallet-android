@@ -26,7 +26,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -780,7 +779,7 @@ public class TokenRepository implements TokenRepositoryType {
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
             String name = (String)response.get(0).getValue();
-            if (assetDefinitionService.getNetworkId(address) > 0)
+            if (assetDefinitionService.getChainId(address) > 0)
             {
                 //does name already contain the token type
                 String tokenTypeName = assetDefinitionService.getAssetDefinition(address).getTokenName();

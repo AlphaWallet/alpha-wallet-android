@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class UniversalLinkTypeTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+    private static ParseMagicLink parser = new ParseMagicLink(1, new CryptoFunctions());
 
     /**
      * these values give the key format, ie

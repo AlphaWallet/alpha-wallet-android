@@ -43,10 +43,9 @@ import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 @RequestMapping("/")
 public class AppSiteController {
 
-    private static ParseMagicLink parser = new ParseMagicLink();
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static Map<String, File> addresses;
-    private int networkId = 1; //default to mainnet
+    private int chainId = 1; //default to mainnet
     private static final String appleAssociationConfig = "{\n" +
             "  \"applinks\": {\n" +
             "    \"apps\": [],\n" +
@@ -59,6 +58,7 @@ public class AppSiteController {
             "  }\n" +
             "}";
     private String domain = "aw.app";
+    private final MagicLinkData magicLinkData = new MagicLinkData();
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -81,7 +81,8 @@ public class AppSiteController {
             throws IOException, SAXException, NoHandlerFoundException
     {
         domain = request.getServerName();
-        networkId = TransactionHandler.getNetworkIdFromDomain(domain);
+        chainId = magicLinkData.getNetworkIdFromDomain(domain);
+        ParseMagicLink parser = new ParseMagicLink(chainId, new CryptoFunctions());
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
         try
@@ -152,7 +153,7 @@ public class AppSiteController {
     ) throws IOException, SAXException, NoHandlerFoundException
     {
         //TODO localise
-        String networkName = TransactionHandler.getNetworkNameById(networkId);
+        String networkName = magicLinkData.getNetworkNameById(chainId);
         model.addAttribute("link", data);
         model.addAttribute("linkValue", getEthStringSzabo(data.amount));
         model.addAttribute("title", networkName + " Currency Drop");
@@ -247,7 +248,7 @@ public class AppSiteController {
         //find out the contract name, symbol and balance
         //have to use blocking gets here
         //TODO: we should be able to update components here instead of waiting
-        TransactionHandler txHandler = new TransactionHandler(networkId);
+        TransactionHandler txHandler = new TransactionHandler(chainId);
         String contractName = txHandler.getName(contractAddress);
         model.addAttribute("contractName", contractName);
     }
@@ -309,7 +310,7 @@ public class AppSiteController {
             TokenDefinition definition
     ) throws Exception {
         model.addAttribute("domain", domain);
-        TransactionHandler txHandler = new TransactionHandler(networkId);
+        TransactionHandler txHandler = new TransactionHandler(chainId);
         // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
@@ -344,8 +345,6 @@ public class AppSiteController {
 
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
         SpringApplication.run(AppSiteController.class, args);
-        parser.setCryptoInterface(cryptoFunctions);
-
         try (Stream<Path> dirStream = Files.walk(repoDir)) {
             addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
                     .filter(Files::isRegularFile)

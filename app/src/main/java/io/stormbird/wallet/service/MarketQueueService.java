@@ -74,19 +74,15 @@ public class MarketQueueService {
         if (parser == null)
         {
             cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(cryptoFunctions);
+            //TODO get network properly if need be
+            parser = new ParseMagicLink(1, cryptoFunctions);
         }
     }
 
     //TODO: hook up retrofit2 instead of doing
     private void buildConnector()
     {
-//        marketQueueConnector = new Retrofit.Builder()
-//                .baseUrl(MARKET_QUEUE_URL)
-//                .client(httpClient)
-//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//                .build()
-//                .create(ApiMarketQueue.class);
+
     }
 
     private void processMarketTrades(TradeInstance trades)
@@ -145,13 +141,6 @@ public class MarketQueueService {
                 String args = formEncodedData(paramData);
                 String url = MARKET_QUEUE_URL + urlProlog + args;
                 response = writeToQueue(url, buffer.toByteArray(), true);
-
-//                String ownerAddress = "";
-//                //see if we can extract the user address
-//                Sign.SignatureData sigData = sigFromByteArray(trades.getSignatureBytes(0));
-//                BigInteger recoveredKey = Sign.signedMessageToKey(trade, sigData);
-//                ownerAddress = "0x" + Keys.getAddress(recoveredKey);
-//                System.out.println(ownerAddress);
             }
             catch (Exception e)
             {
@@ -233,12 +222,6 @@ public class MarketQueueService {
         return Single.fromCallable(() ->
         {
             long initialExpiry = (System.currentTimeMillis() / 1000L) + MARKET_INTERVAL;
-            //TODO: replace this with a computation observable something like this:
-//            Flowable.range(0, TRADE_AMOUNT)
-//                    .observeOn(Schedulers.computation())
-//                    .map(v -> getTradeMessageAndSignature...)
-//                    .blockingSubscribe(this::addTradeSequence, this::onError, this::onAllTransactions);
-
             transactionRepository.unlockAccount(wallet, password);
             //Recover public key
             BigInteger recoveredKey = ecRecoverPublicKey(wallet, password);

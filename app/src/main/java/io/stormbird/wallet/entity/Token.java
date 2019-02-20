@@ -666,7 +666,7 @@ public class Token implements Parcelable
     public String getTokenName(AssetDefinitionService assetService)
     {
         //see if this token is covered by any contract
-        int networkId = assetService.getNetworkId(getAddress());
+        int networkId = assetService.getChainId(getAddress());
         if (networkId >= 1)
         {
             if (tokenInfo.name != null) return tokenInfo.name;

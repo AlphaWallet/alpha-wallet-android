@@ -50,28 +50,20 @@ public class FeeMasterService
         if (parser == null)
         {
             cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(cryptoFunctions);
+            //TODO get chainId if need be
+            parser = new ParseMagicLink(1, cryptoFunctions);
         }
     }
 
-    //first generate and then sign the message
-    public Observable<Integer> generateAndSendFeemasterTransaction(String url, Wallet wallet, int networkId, String toAddress, Ticket ticket, long expiry, String indices)
-    {
-        return generateTicketArray(indices, ticket)
-                .flatMap(indicesArray -> getTradeSig(wallet, indicesArray, ticket.getAddress(), BigInteger.ZERO, expiry))
-                .flatMap(tradeSig -> sendFeemasterTransaction(url, networkId, toAddress, expiry, indices, tradeSig))
-                .toObservable();
-    }
-
-    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, int networkId, MagicLinkData order)
+    public Observable<Integer> handleFeemasterImport(String url, Wallet wallet, int chainId, MagicLinkData order)
     {
         switch (order.contractType)
         {
             case currencyLink:
-                return sendFeemasterCurrencyTransaction(url, networkId, wallet.address, order);
+                return sendFeemasterCurrencyTransaction(url, chainId, wallet.address, order);
             default:
                 return generateTicketString(order.tickets)
-                        .flatMap(ticketStr -> sendFeemasterTransaction(url, networkId, wallet.address, order.expiry, ticketStr, order.signature))
+                        .flatMap(ticketStr -> sendFeemasterTransaction(url, chainId, wallet.address, order.expiry, ticketStr, order.signature))
                         .toObservable();
         }
     }

@@ -552,7 +552,7 @@ public class AssetDefinitionService
         return file;
     }
 
-    public int getNetworkId(String address)
+    public int getChainId(String address)
     {
         TokenDefinition definition = getAssetDefinition(address);
         if (definition != null)

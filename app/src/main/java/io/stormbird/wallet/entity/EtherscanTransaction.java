@@ -42,6 +42,12 @@ public class EtherscanTransaction
     private static TransactionDecoder decoder = null;
     private static TransactionDecoder ensDecoder = null;
     private static ParseMagicLink parser = null;
+    private int chainId;
+
+    public EtherscanTransaction(int chainId)
+    {
+        this.chainId = chainId;
+    }
 
     public Transaction createTransaction(String walletAddress, Context ctx)
     {
@@ -49,7 +55,7 @@ public class EtherscanTransaction
         TransactionOperation[] o;
         TransactionInput f = null;
         if (decoder == null) decoder = new TransactionDecoder();
-        if (parser == null) parser = new ParseMagicLink();
+        if (parser == null) parser = new ParseMagicLink(chainId, new CryptoFunctions());
 
         if (contractAddress.length() > 0)
         {

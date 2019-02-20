@@ -12,16 +12,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-
 import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.TicketRange;
@@ -34,11 +30,9 @@ import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SystemView;
-
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
-import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.IMPORT_STRING;
 
 /**
@@ -70,10 +64,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private RelativeLayout verifiedLayer;
 
     private LinearLayout costLayout;
-    private int networkId = 0;
+    private int chainId = 0;
     private boolean usingFeeMaster = false;
 
-    private static final String CURRENCY_FEEMASTER = "https://app.awallet.io:80/api/";
+    private String paymasterUrlPrefix = "https://aw.app:80/api"; //default
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -145,7 +139,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
                 break;
             default:
-                int checkNetworkId = viewModel.getAssetDefinitionService().getNetworkId(contractAddress);
+                int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
                 if (checkNetworkId > 0)
                 {
                     viewModel.switchNetwork(checkNetworkId);
@@ -160,7 +154,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void onNetwork(NetworkInfo networkInfo)
     {
-        networkId = networkInfo.chainId;
+        chainId = networkInfo.chainId;
+        MagicLinkData magicLinkData = new MagicLinkData();
+        String domain = magicLinkData.getMagicLinkDomainFromNetworkId(chainId);
+        paymasterUrlPrefix = magicLinkData.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
     }
@@ -261,20 +258,20 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         if (order.price == 0)
         {
-            String feemasterServer;
+            String paymasterUrlPrefix;
             switch (order.contractType)
             {
                 case currencyLink:
-                    feemasterServer = CURRENCY_FEEMASTER;
+                    paymasterUrlPrefix = this.paymasterUrlPrefix;
                     break;
                 default:
-                    feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(viewModel.getSalesOrder().contractAddress);
+                    paymasterUrlPrefix = viewModel.getAssetDefinitionService().getFeemasterAPI(viewModel.getSalesOrder().contractAddress);
                     break;
             }
 
-            if (feemasterServer != null)
+            if (paymasterUrlPrefix != null)
             {
-                viewModel.checkFeemaster(feemasterServer);
+                viewModel.checkFeemaster(paymasterUrlPrefix);
                 priceETH.setText(R.string.check_feemaster);
                 return;
             }
@@ -343,8 +340,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractNetworkId = viewModel.getAssetDefinitionService().getNetworkId(viewModel.getSalesOrder().contractAddress);
-        if (contractNetworkId == networkId)
+        int contractChainId = viewModel.getAssetDefinitionService().getChainId(viewModel.getSalesOrder().contractAddress);
+        if (contractChainId == chainId)
         {
             verified.setVisibility(View.VISIBLE);
             textVerified.setVisibility(View.VISIBLE);
@@ -533,7 +530,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         //attempt to import through the server
         if (usingFeeMaster)
         {
-            viewModel.importThroughFeemaster(CURRENCY_FEEMASTER);
+            viewModel.importThroughFeemaster(paymasterUrlPrefix);
         }
         else
         {
@@ -548,10 +545,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         return df.format(usdPrice);
     }
 
-    public static String getMagiclinkFromClipboard(Context ctx)
+    public String getMagiclinkFromClipboard(Context ctx)
     {
-        String magiclink = null;
-
+        String magicLink = null;
         try
         {
             //try clipboard data
@@ -562,14 +558,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 //see if text is a magic link
                 if (text != null && text.length() > 60 && text.length() < 300)
                 {
-                    //could be magiclink
+                    //could be magicLink
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
-                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
+                    ParseMagicLink parser = new ParseMagicLink(this.chainId, cryptoFunctions);
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
                     if (Address.isAddress(order.contractAddress) && order.tickets.length > 0)
                     {
-                        magiclink = text.toString();
-                        //now clear the clipboard - we only ever do this if it's definitely a magiclink in the clipboard
+                        magicLink = text.toString();
+                        //now clear the clipboard - we only ever do this if it's definitely a magicLink in the clipboard
                         ClipData clipData = ClipData.newPlainText("", "");
                         clipboard.setPrimaryClip(clipData);
                     }
@@ -578,10 +574,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
         catch (Exception e)
         {
-            //not a magiclink
-            magiclink = null;
+            //not a magicLink
+            magicLink = null;
         }
 
-        return magiclink;
+        return magicLink;
     }
 }

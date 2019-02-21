@@ -143,4 +143,7 @@ public abstract class C {
     public enum TokenStatus {
         DEFAULT, PENDING, INCOMPLETE
     }
+
+    public static final String GOOGLE_SEARCH_PREFIX = "http://www.google.com/search?q=";
+    public static final String HTTP_PREFIX = "http://";
 }

@@ -2,10 +2,18 @@ package io.stormbird.wallet.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import io.stormbird.wallet.C;
+
 public class Utils {
+
+
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
         return (int) TypedValue.applyDimension(
@@ -19,7 +27,17 @@ public class Utils {
         if (URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
             return url;
         } else {
-            return "http://" + url;
+            if (isValidUrl(url)) {
+                return C.HTTP_PREFIX + url;
+            } else {
+                return C.GOOGLE_SEARCH_PREFIX + url;
+            }
         }
+    }
+
+    public static boolean isValidUrl(String url) {
+        Pattern p = Patterns.WEB_URL;
+        Matcher m = p.matcher(url.toLowerCase());
+        return m.matches();
     }
 }

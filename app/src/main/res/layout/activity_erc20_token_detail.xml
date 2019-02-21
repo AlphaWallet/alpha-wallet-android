@@ -7,8 +7,8 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-
     <RelativeLayout
+        android:id="@+id/layout_eth_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_card"
@@ -17,6 +17,62 @@
         android:visibility="visible">
 
         <LinearLayout
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="20dp"
+            android:paddingEnd="20dp"
+            android:paddingStart="20dp"
+            android:paddingTop="20dp">
+
+            <Button
+                android:id="@+id/button_send"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/selector_round_button"
+                android:enabled="true"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                android:text="@string/action_send"
+                android:textAllCaps="false"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/button_receive"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/selector_round_button"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                android:text="Receive"
+                android:textAllCaps="false"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layoutButtons">
+
+        <LinearLayout
+            android:id="@+id/allz"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -81,6 +137,7 @@
                 android:background="@color/super_light_grey" />
 
             <LinearLayout
+                android:id="@+id/layout_transactions"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="100dp"
@@ -98,7 +155,6 @@
                     android:layout_height="wrap_content"
                     android:visibility="gone" />
 
-
                 <LinearLayout
                     android:id="@+id/layout_no_recent_transactions"
                     android:layout_width="match_parent"
@@ -107,6 +163,7 @@
                     android:visibility="gone">
 
                     <TextView
+                        android:id="@+id/no_recent_transactions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -138,6 +195,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:clickable="true"
+                android:orientation="vertical"
                 android:visibility="gone">
 
                 <WebView
@@ -150,55 +208,7 @@
             </LinearLayout>
 
         </LinearLayout>
+        </ScrollView>
 
-        <LinearLayout
-            android:id="@+id/layoutButtons"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_alignParentBottom="true"
-            android:layout_gravity="center"
-            android:background="@color/white"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingBottom="20dp"
-            android:paddingEnd="20dp"
-            android:paddingStart="20dp"
-            android:paddingTop="20dp">
-
-            <Button
-                android:id="@+id/button_send"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:enabled="true"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_send"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/button_receive"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="Receive"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-        </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

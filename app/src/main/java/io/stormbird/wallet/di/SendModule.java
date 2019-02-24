@@ -5,6 +5,7 @@ import dagger.Provides;
 import io.stormbird.wallet.interact.ENSInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
@@ -20,13 +21,15 @@ class SendModule {
                                                      MyAddressRouter myAddressRouter,
                                                      FetchTokensInteract fetchTokensInteract,
                                                      ENSInteract ensInteract,
-                                                     AssetDefinitionService assetDefinitionService) {
+                                                     AssetDefinitionService assetDefinitionService,
+                                                     EthereumNetworkRepositoryType networkRepositoryType) {
         return new SendViewModelFactory(confirmationRouter,
                 fetchGasSettingsInteract,
                 myAddressRouter,
                 fetchTokensInteract,
                 ensInteract,
-                assetDefinitionService);
+                assetDefinitionService,
+                networkRepositoryType);
     }
 
     @Provides

@@ -1,9 +1,11 @@
 package io.stormbird.wallet;
 
+import io.stormbird.wallet.entity.QrUrlResult;
 import io.stormbird.wallet.util.QRURLParser;
 
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +19,8 @@ import static org.junit.Assert.assertTrue;
 public class QRExtractorTest {
 
     @Test
-    public void extractingIsCorrect() {
+    public void extractingIsCorrect()
+    {
 
         QRURLParser parser = QRURLParser.getInstance();
 
@@ -93,45 +96,62 @@ public class QRExtractorTest {
     @Test
     public void parseQRURLTest() {
         QRURLParser parser = QRURLParser.getInstance();
-        QRURLParser.QrUrlResult result;
+        QrUrlResult result;
         Map<String, String> params;
 
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?k1=v1");
         assertTrue("protocol".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
 
-        params = new HashMap<>();
-        params.put("k1", "v1");
-        assertTrue(params.equals(result.getParameters()));
+        assertTrue(result.getFunctionDetail().equals("(k1{v1})"));
 
         // No parameters
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ");
         assertTrue("protocol".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
 
-        params = new HashMap<>();
-        assertTrue(params.equals(result.getParameters()));
+        assertTrue(result.getFunction().length() == 0);
 
         // No parameters
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?");
         assertTrue("protocol".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
-
-        params = new HashMap<>();
-        assertTrue(params.equals(result.getParameters()));
+        assertTrue(result.getFunction().length() == 0);
 
         // Multiple query params
         result = parser.parse("naga coin:0x0000000000000000000000000000000000000XyZ?k1=v1&k2=v2");
         assertTrue("naga coin".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000xyz".equals(result.getAddress()));
 
-        params = new HashMap<>();
-        params.put("k1", "v1");
-        params.put("k2", "v2");
-        assertTrue(params.equals(result.getParameters()));
+        assertTrue(result.getFunctionDetail().equals("(k1{v1},k2{v2})"));
 
         // Too many ':'
         result = parser.parse("something:coin:0x0000000000000000000000000000000000000XyZ?k1=v1&k2=v2");
         assertTrue(result == null);
+
+        //Test EIP681
+        result = parser.parse("ethereum:0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359?value=2.014e18");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359".equals(result.getAddress()));
+        assertTrue(new BigInteger("2014000000000000000",10).equals(result.getValue()));
+        assertTrue(1 == result.chainId);
+
+        result = parser.parse("ethereum:0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359@100?value=2.014e18");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359".equals(result.getAddress()));
+        assertTrue(100 == result.chainId);
+
+        result = parser.parse("ethereum:0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7@100/transfer?address=0x8e23ee67d1332ad560396262c48ffbb01f93d052&uint256=1");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue("0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7".equals(result.getAddress()));
+        assertTrue(result.getFunction().equals("transfer(address,uint256)"));
+
+        result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/pay?uint256=100000&value=1000&gasPrice=700000&gasLimit=27500");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
+        assertTrue(result.getFunction().equals("pay(uint256)"));
+        assertTrue(result.getGasPrice().equals(BigInteger.valueOf(700000)));
+        assertTrue(result.getGasLimit().equals(BigInteger.valueOf(27500)));
+        assertTrue(new BigInteger("1000",10).equals(result.getValue()));
     }
 }

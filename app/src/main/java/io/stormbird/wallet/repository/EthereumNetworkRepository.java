@@ -103,6 +103,20 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	}
 
 	@Override
+	public String getNameById(int id)
+	{
+		for (NetworkInfo network : NETWORKS)
+		{
+			if (id == network.chainId)
+			{
+				return network.name;
+			}
+		}
+
+		return "Unknown: " + id;
+	}
+
+	@Override
 	public NetworkInfo getDefaultNetwork() {
 		return defaultNetwork;
 	}

@@ -21,6 +21,7 @@ import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
@@ -195,5 +196,17 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public LiveData<Token> token() {
         return token;
+    }
+
+    public void showSendToken(Context ctx, Token token)
+    {
+        new SendTokenRouter().open(ctx, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
+                                   true, wallet.getValue(), token, network.getValue().chainId);
+    }
+
+    public void showSendToken(Context ctx, String address, Token token)
+    {
+        new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
+                                   false, wallet.getValue(), token, network.getValue().chainId);
     }
 }

@@ -3,6 +3,8 @@ package io.stormbird.wallet.util;
 import io.stormbird.wallet.entity.EthereumProtocolParser;
 import io.stormbird.wallet.entity.QrUrlResult;
 
+import static io.stormbird.wallet.entity.EthereumProtocolParser.ADDRESS_LENGTH;
+
 /**
  * Created by marat on 10/11/17.
  * Parses out protocol, address and parameters from a URL originating in QR codes used by wallets &
@@ -34,13 +36,22 @@ public class QRURLParser {
 
     // Be lenient and allow invalid characters in address
     private static boolean isValidAddress(String address) {
-        return address.length() > 5; // could be ENS address
+        if (address == null || address.length() < 2) return false;
+        return !address.startsWith("0x") || address.length() == ADDRESS_LENGTH;
     }
 
     private static String extractAddress(String str) {
         String address;
         try {
-            address = str.toLowerCase();
+            if (str.startsWith("0x"))
+            {
+                address = str.substring(0, ADDRESS_LENGTH).toLowerCase();
+            }
+            else
+            {
+                String[] split = str.split("[/&@?=]");
+                address = split.length > 0 ? split[0] : null;
+            }
         } catch (StringIndexOutOfBoundsException ex) {
             return null;
         }

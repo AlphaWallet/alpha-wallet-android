@@ -12,6 +12,7 @@ import java.util.List;
  */
 public class EthereumProtocolParser
 {
+    public static final int ADDRESS_LENGTH = 42;
     public EthereumProtocolParser()
     {
 
@@ -25,9 +26,12 @@ public class EthereumProtocolParser
         {
             List<DataItem> stream = tokeniseStream(data);
             if (stream.size() == 0) return null;
-            if (stream.get(0).type != DataType.STRING) return null;
+            DataItem address = stream.get(0);
+            if (address.type != DataType.STRING) return null;
+            if (address.value.length() < 2) return null;
+            if (address.value.startsWith("0x") && address.value.length() != ADDRESS_LENGTH) return null;
 
-            result = new QrUrlResult(protocol, stream.get(0).value.toLowerCase());
+            result = new QrUrlResult(protocol, address.value.toLowerCase());
             ParseState readState = ParseState.ADDRESS;
 
             String type = null;

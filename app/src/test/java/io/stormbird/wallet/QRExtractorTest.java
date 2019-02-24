@@ -60,6 +60,12 @@ public class QRExtractorTest {
         extractedString = parser.extractAddressFromQrString("0x0000000000000000000000000000000000000000?value=0");
         assertTrue("0x0000000000000000000000000000000000000000".equals(extractedString));
 
+        extractedString = parser.extractAddressFromQrString("jappodonks.ethereum.eth?value=0");
+        assertTrue("jappodonks.ethereum.eth".equals(extractedString));
+
+        extractedString = parser.extractAddressFromQrString("jappodonks.ethereum.eth");
+        assertTrue("jappodonks.ethereum.eth".equals(extractedString));
+
         // Address with a different protocol
         extractedString = parser.extractAddressFromQrString("OMG:0x0000000000000000000000000000000000000000");
         assertTrue("0x0000000000000000000000000000000000000000".equals(extractedString));
@@ -91,6 +97,9 @@ public class QRExtractorTest {
         // Negative: null when address too short
         extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000abc?value=0invalid");
         assertTrue(extractedString == null);
+
+        extractedString = parser.extractAddressFromQrString("ethereum:jappodonks.ethereum.eth?value=0invalid");
+        assertTrue(extractedString.equals("jappodonks.ethereum.eth"));
     }
 
     @Test

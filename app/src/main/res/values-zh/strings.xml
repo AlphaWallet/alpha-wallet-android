@@ -298,4 +298,9 @@
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Load Token</string>
     <string name="telegram">Telegram</string>
+    <string name="wrong_chain">Please switch to %s in settings</string>
+    <string name="wrong_token">Switch to token at address: %s</string>
+    <string name="wrong_token_title">Different token requested</string>
+    <string name="transfer_request">Transfer request</string>
+    <string name="token_transfer_request">Token transfer request</string>
 </resources>

@@ -436,4 +436,10 @@
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00">0.00 %s</string>
     <string name="telegram">Telegram</string>
+    <string name="wrong_chain">Please switch to %s in settings</string>
+    <string name="wrong_chain_title">Wallet set to wrong chain</string>
+    <string name="wrong_token">Switch to token at address: %s</string>
+    <string name="wrong_token_title">Different token requested</string>
+    <string name="transfer_request">Transfer request</string>
+    <string name="token_transfer_request">Token transfer request</string>
 </resources>

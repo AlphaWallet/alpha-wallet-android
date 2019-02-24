@@ -178,11 +178,11 @@ public class Erc20DetailActivity extends BaseActivity {
         sendBtn.setOnClickListener(v -> {
             if (sendingTokens)
             {
-                new SendTokenRouter().open(this, token.getAddress(), symbol, decimals, sendingTokens, wallet, token);
+                viewModel.showSendToken(this, token);
             }
             else
             {
-                new SendTokenRouter().open(this, myAddress, symbol, decimals, sendingTokens, wallet, token);
+                viewModel.showSendToken(this, myAddress, token);
             }
         });
 

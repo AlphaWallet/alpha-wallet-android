@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import io.stormbird.wallet.interact.ENSInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
 import java.math.BigInteger;
@@ -35,19 +36,22 @@ public class SendViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final ENSInteract ensInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final EthereumNetworkRepositoryType networkRepository;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          FetchGasSettingsInteract fetchGasSettingsInteract,
                          MyAddressRouter myAddressRouter,
                          FetchTokensInteract fetchTokensInteract,
                          ENSInteract ensInteract,
-                         AssetDefinitionService assetDefinitionService) {
+                         AssetDefinitionService assetDefinitionService,
+                         EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
         this.confirmationRouter = confirmationRouter;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.myAddressRouter = myAddressRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.ensInteract = ensInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.networkRepository = ethereumNetworkRepositoryType;
     }
 
     public LiveData<Double> ethPriceReading() { return ethPrice; }
@@ -65,6 +69,11 @@ public class SendViewModel extends BaseViewModel {
     public void showContractInfo(Context ctx, String contractAddress)
     {
         myAddressRouter.open(ctx, contractAddress);
+    }
+
+    public String getChainName(int chainId)
+    {
+        return networkRepository.getNameById(chainId);
     }
 
     public void startEthereumTicker()

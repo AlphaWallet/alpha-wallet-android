@@ -22,4 +22,6 @@ public interface EthereumNetworkRepositoryType {
 	void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
 	Single<Ticker> getTicker();
+
+	String getNameById(int id);
 }

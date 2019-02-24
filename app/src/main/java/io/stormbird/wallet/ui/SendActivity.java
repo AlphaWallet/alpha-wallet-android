@@ -34,10 +34,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ENSCallback;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.EthereumInfoRouter;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.ENSHandler;
@@ -51,6 +49,7 @@ import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
+import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 
 public class SendActivity extends BaseActivity implements Runnable, ItemClickListener {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -72,6 +71,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private ENSHandler ensHandler;
     private Handler handler;
     private AWalletAlertDialog dialog;
+    private int chainId;
 
     private ImageButton scanQrImageView;
     private TextView toAddressError;
@@ -113,6 +113,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
         myAddress = wallet.address;
 
         setupTokenContent();
@@ -365,22 +366,36 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
                     //if barcode is still null, ensure we don't GPF
                     if (barcode == null) {
-                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                        displayScanError();
                         return;
                     }
 
                     QRURLParser parser = QRURLParser.getInstance();
-                    String extracted_address = parser.extractAddressFromQrString(barcode);
-                    if (extracted_address == null) {
-                        dialog = new AWalletAlertDialog(this);
-                        dialog.setIcon(AWalletAlertDialog.ERROR);
-                        dialog.setTitle(R.string.toast_qr_code_no_address);
-                        dialog.setButtonText(R.string.dialog_ok);
-                        dialog.setButtonListener(v -> dialog.dismiss());
-                        dialog.show();
-                        return;
+                    QrUrlResult result = parser.parse(barcode);
+                    String extracted_address = null;
+                    if (result != null)
+                    {
+                        extracted_address = result.getAddress();
+                        switch (result.getProtocol())
+                        {
+                            case "address":
+                                break;
+                            case "ethereum":
+                                //EIP681 protocol
+                                validateEIP681Request(result);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        toAddressEditText.setText(extracted_address);
                     }
-                    toAddressEditText.setText(extracted_address);
+
+                    if (extracted_address == null)
+                    {
+                        displayScanError();
+                    }
                 }
             } else {
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
@@ -390,6 +405,77 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void validateEIP681Request(QrUrlResult result)
+    {
+        //check chain
+        if (result.chainId == 0)
+        {
+            displayScanError();
+        }
+        else if (result.chainId != chainId)
+        {
+            //name of correct chain
+            String chainName = viewModel.getChainName(result.chainId);
+            String message = getString(R.string.wrong_chain, chainName);
+            displayScanError(R.string.wrong_chain_title, message);
+        }
+        else if (result.getFunction().length() == 0 && !sendingTokens)
+        {
+            //correct chain and asset type
+            String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            amountEditText.setText(ethAmount);
+            TextView sendText = findViewById(R.id.text_payment_request);
+            sendText.setVisibility(View.VISIBLE);
+            sendText.setText(R.string.transfer_request);
+        }
+        else if (result.getFunction().length() > 0 && result.getAddress().equals(token.getAddress()))
+        {
+            //sending ERC20 and we're on the correct asset
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
+            BigDecimal sendAmount = new BigDecimal(result.weiValue);
+            BigDecimal erc20Amount = token.tokenInfo.decimals > 0
+                    ? sendAmount.divide(decimalDivisor) : sendAmount;
+            String erc20AmountStr = erc20Amount.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            amountEditText.setText(erc20AmountStr);
+
+            //show function which will be called:
+            TextView sendText = findViewById(R.id.text_payment_request);
+            sendText.setVisibility(View.VISIBLE);
+            sendText.setText(R.string.token_transfer_request);
+
+            TextView contractText = findViewById(R.id.text_contract_call);
+            contractText.setVisibility(View.VISIBLE);
+            contractText.setText(result.functionDetail);
+        }
+        else
+        {
+            //TODO: fetch Token name
+            String message = getString(R.string.wrong_token, result.getAddress());
+            displayScanError(R.string.wrong_token_title, message);
+        }
+    }
+
+    private void displayScanError()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.toast_qr_code_no_address);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void displayScanError(int titleId, String message)
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(titleId);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
     @Override
@@ -444,22 +530,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenBalanceText.setText(value);
 
         tokenBalanceText.setVisibility(View.VISIBLE);
-
-        if (viewModel.hasIFrame(token.getAddress())) {
-            addTokenPage();
-        }
-    }
-
-    private void addTokenPage() {
-        LinearLayout viewWrapper = findViewById(R.id.layout_iframe);
-        try {
-            WebView iFrame = findViewById(R.id.iframe);
-            String tokenData = viewModel.getTokenData(token.getAddress());
-            iFrame.loadData(tokenData, "text/html", "UTF-8");
-            viewWrapper.setVisibility(View.VISIBLE);
-        } catch (Exception e) {
-            viewWrapper.setVisibility(View.GONE);
-        }
     }
 
     public static String getUsdString(double usdPrice) {

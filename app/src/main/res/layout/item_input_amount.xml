@@ -145,6 +145,19 @@
         android:textColor="@color/text_dark_gray"
         android:textSize="21sp" />
 
+    <TextView
+        android:id="@+id/text_contract_call"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1"
+        android:fontFamily="@font/font_regular"
+        android:paddingLeft="15dp"
+        android:text=""
+        android:textColor="@color/text_dark_gray"
+        android:visibility="gone"
+        android:textSize="18sp" />
+
     <LinearLayout
         android:id="@+id/layout_token_equivalent_value"
         android:layout_width="wrap_content"

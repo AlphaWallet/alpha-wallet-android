@@ -152,7 +152,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_qr) {
-            viewModel.showContractInfo(this, token.getAddress());
+            viewModel.showContractInfo(this, token);
         }
         return super.onOptionsItemSelected(item);
     }

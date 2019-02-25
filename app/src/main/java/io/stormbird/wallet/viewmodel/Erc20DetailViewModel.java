@@ -72,12 +72,12 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return ethPrice;
     }
 
-    public void showMyAddress(Context context, Wallet wallet) {
-        myAddressRouter.open(context, wallet);
+    public void showMyAddress(Context context, Wallet wallet, Token token) {
+        myAddressRouter.open(context, wallet, token);
     }
 
-    public void showContractInfo(Context ctx, String contractAddress) {
-        myAddressRouter.open(ctx, contractAddress);
+    public void showContractInfo(Context ctx, Token token) {
+        myAddressRouter.open(ctx, wallet.getValue(), token);
     }
 
     public void startEthereumTicker() {

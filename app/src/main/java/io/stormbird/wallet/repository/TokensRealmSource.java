@@ -374,8 +374,7 @@ public class TokensRealmSource implements TokenLocalSource {
                                 rawItem.getContract(),
                                 rawItem.getPrice(),
                                 rawItem.getPercentChange24h(),
-                                rawItem.getImage(),
-                                rawItem.isStormbird()));
+                                rawItem.getImage()));
                     }
                 }
                 realm.commitTransaction();
@@ -498,7 +497,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setName(token.tokenInfo.name);
                     realmToken.setSymbol(token.tokenInfo.symbol);
                     realmToken.setDecimals(token.tokenInfo.decimals);
-                    realmToken.setStormbird(token.tokenInfo.isStormbird);
                 }
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmAuxData(realmToken);

@@ -1069,16 +1069,13 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 long now = System.currentTimeMillis();
-                Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
-                if (isStormbird == null) isStormbird = false;
 
                 return new TokenInfo(
                         address,
                         getName(address),
                         getContractData(address, stringParam("symbol"), ""),
                         getDecimals(address),
-                        true,
-                        isStormbird);
+                        true);
             }
             catch (Exception e)
             {
@@ -1113,15 +1110,12 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     long now = System.currentTimeMillis();
                     String name = getName(address);
-                    Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
-                    if (isStormbird == null) isStormbird = false;
                     TokenInfo result = new TokenInfo(
                             address,
                             name,
                             getContractData(address, stringParam("symbol"), ""),
                             getDecimals(address),
-                            true,
-                            isStormbird);
+                            true);
 
                     tokenList.add(result);
                 }

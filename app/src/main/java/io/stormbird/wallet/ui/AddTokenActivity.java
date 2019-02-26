@@ -50,8 +50,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     LinearLayout progressLayout;
 
-    public boolean isStormbird = false;
-
     public InputAddressView inputAddressView;
     public InputView symbolInputView;
     public InputView decimalsInputView;
@@ -260,7 +258,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
 
         if (isValid) {
-            viewModel.save(address, symbol, decimals, name, isStormbird);
+            viewModel.save(address, symbol, decimals, name);
         }
     }
 }

@@ -120,7 +120,7 @@ public class TokenFactory
     public TokenInfo createTokenInfo(RealmToken realmItem)
     {
         return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
-                realmItem.getDecimals(), true, realmItem.isStormbird());
+                realmItem.getDecimals(), true);
     }
 
     public Token createERC721Token(RealmERC721Token realmItem, List<Asset> assets, long updateTime)

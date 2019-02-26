@@ -380,7 +380,6 @@ public class Token implements Parcelable
         if (tokenInfo.name != null && realmToken.getName() != null) return true;
         if (tokenInfo.symbol != null && realmToken.getSymbol() == null) return true;
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
-        if (tokenInfo.isStormbird != realmToken.isStormbird()) return true;
         if (checkAuxDataChanged(realmToken)) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);

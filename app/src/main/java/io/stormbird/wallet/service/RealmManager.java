@@ -16,6 +16,14 @@ public class RealmManager {
 
     public Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
         String name = getName(networkInfo, wallet);
+        return getRealmInstance(name);
+    }
+
+    public Realm getRealmInstance(Wallet wallet) {
+        return getRealmInstance(wallet.address + "-db.realm");
+    }
+
+    private Realm getRealmInstance(String name) {
         RealmConfiguration config = realmConfigurations.get(name);
         if (config == null) {
             config = new RealmConfiguration.Builder()
@@ -34,30 +42,11 @@ public class RealmManager {
 
     public Realm getERC721RealmInstance(NetworkInfo network, Wallet wallet) {
         String name = get721Name(network, wallet);
-        RealmConfiguration config = realmConfigurations.get(name);
-        if (config == null) {
-            config = new RealmConfiguration.Builder()
-                    .name(name)
-                    .schemaVersion(BuildConfig.DB_VERSION)
-                    .deleteRealmIfMigrationNeeded()
-                    .build();
-            realmConfigurations.put(name, config);
-        }
-        return Realm.getInstance(config);
+        return getRealmInstance(name);
     }
 
     public Realm getWalletDataRealmInstance() {
-        String name = "WalletData-db.realm";
-        RealmConfiguration config = realmConfigurations.get(name);
-        if (config == null) {
-            config = new RealmConfiguration.Builder()
-                    .name(name)
-                    .schemaVersion(BuildConfig.DB_VERSION)
-                    .deleteRealmIfMigrationNeeded()
-                    .build();
-            realmConfigurations.put(name, config);
-        }
-        return Realm.getInstance(config);
+        return getRealmInstance("WalletData-db.realm");
     }
 
     private String get721Name(NetworkInfo network, Wallet wallet) {

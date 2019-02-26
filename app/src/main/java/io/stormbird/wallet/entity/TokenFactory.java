@@ -107,7 +107,8 @@ public class TokenFactory
                                       tokenInfo.name,
                                       tokenInfo.symbol,
                                       tokenInfo.decimals,
-                                      true),
+                                      true,
+                                      tokenInfo.chainId),
                         null, 0);
                 break;
         }
@@ -120,12 +121,12 @@ public class TokenFactory
     public TokenInfo createTokenInfo(RealmToken realmItem)
     {
         return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
-                realmItem.getDecimals(), true);
+                realmItem.getDecimals(), true, realmItem.getChainId());
     }
 
     public Token createERC721Token(RealmERC721Token realmItem, List<Asset> assets, long updateTime)
     {
-        TokenInfo tf = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(), 0, true);
+        TokenInfo tf = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(), 0, true, 0);
         return new ERC721Token(tf, assets, updateTime);
     }
 }

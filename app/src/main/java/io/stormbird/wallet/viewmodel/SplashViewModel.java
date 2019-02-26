@@ -143,9 +143,9 @@ public class SplashViewModel extends ViewModel {
         return createWallet;
     }
 
-    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name)
+    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, int chainId)
     {
-        return new TokenInfo(address, name, symbol, decimals, true);
+        return new TokenInfo(address, name, symbol, decimals, true, chainId);
     }
 
     public void createNewWallet()

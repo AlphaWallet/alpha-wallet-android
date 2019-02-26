@@ -11,9 +11,10 @@ public class TokenInfo implements Parcelable {
     public final String name;
     public final String symbol;
     public final int decimals;
+    public final int chainId;
     public boolean isEnabled;
 
-    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled) {
+    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, int chainId) {
         if (address != null)
         {
             this.address = address.toLowerCase();
@@ -26,6 +27,7 @@ public class TokenInfo implements Parcelable {
         this.symbol = symbol != null ? symbol.toUpperCase() : null;
         this.decimals = decimals;
         this.isEnabled = isEnabled;
+        this.chainId = chainId;
     }
 
     public TokenInfo(Parcel in) {
@@ -34,6 +36,7 @@ public class TokenInfo implements Parcelable {
         symbol = in.readString();
         decimals = in.readInt();
         isEnabled = in.readInt() == 1;
+        chainId = in.readInt();
     }
 
     public static final Creator<TokenInfo> CREATOR = new Creator<TokenInfo>() {
@@ -60,6 +63,7 @@ public class TokenInfo implements Parcelable {
         dest.writeString(symbol);
         dest.writeInt(decimals);
         dest.writeInt(isEnabled ? 1 : 0);
+        dest.writeInt(chainId);
     }
 
     public void addTokenSetupPage(AddTokenActivity layout) {

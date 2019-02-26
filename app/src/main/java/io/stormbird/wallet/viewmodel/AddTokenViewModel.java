@@ -48,8 +48,8 @@ public class AddTokenViewModel extends BaseViewModel {
         return wallet;
     }
 
-    public void save(String address, String symbol, int decimals, String name) {
-        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name);
+    public void save(String address, String symbol, int decimals, String name, int chainId) {
+        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, chainId);
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
                 .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
                 .subscribe(this::onSaved, this::onError);
@@ -62,9 +62,9 @@ public class AddTokenViewModel extends BaseViewModel {
         result.postValue(true);
     }
 
-    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name)
+    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, int chainId)
     {
-        return new TokenInfo(address, name, symbol, decimals, true);
+        return new TokenInfo(address, name, symbol, decimals, true, chainId);
     }
 
     public void setupTokens(String addr) {

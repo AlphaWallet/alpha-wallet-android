@@ -163,7 +163,7 @@ public class TokenRepository implements TokenRepositoryType {
             Token eth = localSource.getTokenBalance(network, wallet, wallet.address);
             if (eth == null)
             {
-                TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
+                TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true, network.chainId);
                 BigDecimal balance = BigDecimal.ZERO;
                 eth = new Token(info, balance, System.currentTimeMillis());
                 eth.setTokenNetwork(network.chainId);
@@ -453,7 +453,7 @@ public class TokenRepository implements TokenRepositoryType {
                                 operation.contract.name,
                                 operation.contract.symbol,
                                 operation.contract.decimals,
-                                true), null, 0));
+                                true, network.chainId), null, 0));
                     }
                     return Single.just(result.toArray(new Token[result.size()]));
                 });
@@ -634,7 +634,8 @@ public class TokenRepository implements TokenRepositoryType {
                         if (b != null) balance = b.balance;
                         else balance = BigDecimal.ZERO;
                     }
-                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true);
+                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
+                                                   network.chainId);
                     Token eth = new Token(info, balance, System.currentTimeMillis());
                     eth.setIsEthereum();
                     eth.setTokenNetwork(network.chainId);
@@ -1075,7 +1076,7 @@ public class TokenRepository implements TokenRepositoryType {
                         getName(address),
                         getContractData(address, stringParam("symbol"), ""),
                         getDecimals(address),
-                        true);
+                        true, ethereumNetworkRepository.getDefaultNetwork().chainId);
             }
             catch (Exception e)
             {
@@ -1115,7 +1116,7 @@ public class TokenRepository implements TokenRepositoryType {
                             name,
                             getContractData(address, stringParam("symbol"), ""),
                             getDecimals(address),
-                            true);
+                            true, ethereumNetworkRepository.getDefaultNetwork().chainId);
 
                     tokenList.add(result);
                 }

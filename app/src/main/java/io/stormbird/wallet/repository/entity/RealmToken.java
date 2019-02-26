@@ -14,8 +14,6 @@ public class RealmToken extends RealmObject {
     private String balance;
     private boolean isEnabled;
     private int tokenId;
-    private String burnList;
-    private int nullCheckCount = 0;
     private int interfaceSpec;
     private String auxData;
     private long lastBlockRead;
@@ -77,15 +75,6 @@ public class RealmToken extends RealmObject {
         this.balance = balance;
     }
 
-    public String getBurnList()
-    {
-        return burnList;
-    }
-    public void setBurnList(String burnList)
-    {
-        this.burnList = burnList;
-    }
-
     public boolean getEnabled() {
         return isEnabled;
     }
@@ -104,14 +93,6 @@ public class RealmToken extends RealmObject {
     public void setTokenId(int tokenId)
     {
         this.tokenId = tokenId;
-    }
-
-    public int updateNullCheckCount() { return nullCheckCount++; }
-    public void setNullCheckCount(int count) { nullCheckCount = count; }
-
-    public int getNullCheckCount()
-    {
-        return nullCheckCount;
     }
 
     public int getInterfaceSpec()

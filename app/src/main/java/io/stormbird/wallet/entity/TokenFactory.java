@@ -15,14 +15,14 @@ import java.util.List;
 
 public class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, List<Integer> burned, long updateBlancaTime, ContractType type)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type)
     {
         Token thisToken;
         switch (type)
         {
             case ERC875:
             case ERC875LEGACY:
-                thisToken = new Ticket(tokenInfo, balances, burned, updateBlancaTime);
+                thisToken = new Ticket(tokenInfo, balances, updateBlancaTime);
                 break;
             case ERC721:
                 //TODO:
@@ -64,7 +64,7 @@ public class TokenFactory
             case ERC875:
             case ERC875LEGACY:
                 if (realmBalance == null) realmBalance = "";
-                thisToken = new Ticket(tokenInfo, realmBalance, realmItem.getBurnList(), updateBlancaTime);
+                thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime);
                 thisToken.setInterfaceSpecFromRealm(realmItem);
                 break;
 
@@ -95,7 +95,7 @@ public class TokenFactory
         {
             case ERC875:
             case ERC875LEGACY:
-                thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), new ArrayList<Integer>(), 0);
+                thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), 0);
                 break;
             case ERC721:
                 thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), 0);

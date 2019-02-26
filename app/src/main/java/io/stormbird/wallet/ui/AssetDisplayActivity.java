@@ -49,7 +49,6 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private Token token;
     private TicketAdapter adapter;
     private String balance = null;
-    private String burnList = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -122,14 +121,13 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         if (t instanceof Ticket)
         {
             token = t;
-            if (!token.getBurnListStr().equals(burnList) || !t.getFullBalance().equals(balance))
+            if (!t.getFullBalance().equals(balance))
             {
                 adapter.setToken(token);
                 RecyclerView list = findViewById(R.id.listTickets);
                 list.setAdapter(null);
                 list.setAdapter(adapter);
                 balance = token.getFullBalance();
-                burnList = token.getBurnListStr();
             }
         }
     }

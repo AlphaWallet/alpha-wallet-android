@@ -32,9 +32,8 @@ public class TokenSortedItem extends SortedItem<Token> {
             {
                 Ticket oTick = (Ticket) oldToken;
                 Ticket nTick = (Ticket) newToken;
-                if (oTick.getBurnList() == null || nTick.getBurnList() == null) return false;
 
-                return (oTick.getBurnList().equals(nTick.getBurnList())) && oTick.isMatchedInXML() == nTick.isMatchedInXML();
+                return oTick.isMatchedInXML() == nTick.isMatchedInXML();
             }
 
             //TODO: balance value gone stale

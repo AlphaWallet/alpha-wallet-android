@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.stormbird.token.entity.TicketRange;
@@ -32,17 +33,13 @@ public class TicketRangeParcel implements Parcelable
     {
         Object[] readObjArray = in.readArray(Object.class.getClassLoader());
         List tIds = new ArrayList<>();
-        for (Object o : readObjArray)
-        {
-            tIds.add(o);
-        }
+        tIds.addAll(Arrays.asList(readObjArray));
 
-        Boolean isChecked = in.readInt() == 1;
-        Boolean isBurned = in.readInt() == 1;
+        boolean isChecked = in.readInt() == 1;
 
         String contractAddress = in.readString();
 
-        range = new TicketRange(tIds, contractAddress, isBurned, isChecked);
+        range = new TicketRange(tIds, contractAddress, isChecked);
     }
 
     @Override
@@ -56,7 +53,6 @@ public class TicketRangeParcel implements Parcelable
     {
         dest.writeArray(range.tokenIds.toArray());
         dest.writeInt(range.isChecked ? 1:0);
-        dest.writeInt(range.isBurned ? 1:0);
         dest.writeString(range.contractAddress);
     }
 

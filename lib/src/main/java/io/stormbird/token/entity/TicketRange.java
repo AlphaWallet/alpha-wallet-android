@@ -18,7 +18,6 @@ public class TicketRange
     //public int seatCount;
     public boolean isChecked;
     public String contractAddress; // Should this be address or actual token?
-    public final boolean isBurned;
 
     public List<BigInteger> tokenIds;
 
@@ -28,24 +27,13 @@ public class TicketRange
         tokenIds = new ArrayList<>();
         tokenIds.add(tokenId);
         this.isChecked = false;
-        this.isBurned = false;
     }
 
-    public TicketRange(BigInteger tokenId, String contractAddress, boolean isBurned)
-    {
-        this.contractAddress = contractAddress;
-        tokenIds = new ArrayList<>();
-        tokenIds.add(tokenId);
-        this.isChecked = false;
-        this.isBurned = isBurned;
-    }
-
-    public TicketRange(List<BigInteger> tokenIds, String contractAddress, boolean isBurned, boolean isChecked)
+    public TicketRange(List<BigInteger> tokenIds, String contractAddress, boolean isChecked)
     {
         this.contractAddress = contractAddress;
         this.tokenIds = tokenIds;
         this.isChecked = isChecked;
-        this.isBurned = isBurned;
     }
 
     public void selectSubRange(int count)

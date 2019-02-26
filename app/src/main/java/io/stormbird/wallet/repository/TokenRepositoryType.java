@@ -28,7 +28,6 @@ public interface TokenRepositoryType {
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
     Single<Token> callTokenFunctions(Token token, AssetDefinitionService service);
-    Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList);
     Single<Ticker> getEthTicker();
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
     Single<BigInteger> fetchLatestBlockNumber();

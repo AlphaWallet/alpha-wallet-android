@@ -93,10 +93,6 @@ public class Token implements Parcelable
         return getStringBalance();
     }
 
-    public String getBurnListStr() {
-        return "";
-    }
-
     public static final Creator<Token> CREATOR = new Creator<Token>() {
         @Override
         public Token createFromParcel(Parcel in) {
@@ -550,14 +546,11 @@ public class Token implements Parcelable
         return null;
     }
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList) { }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
-    public void addToBurnList(List<Uint16> burnList) { }
-    public List<Integer> getBurnList() { return new ArrayList<>(); }
     public boolean isMatchedInXML() { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)

@@ -403,12 +403,6 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable setBurnList(Wallet wallet, Token token, List<Integer> burnList) {
-        NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        return Completable.fromAction(() -> localSource.updateTokenBurn(network, wallet, token, burnList));
-    }
-
-    @Override
     public Observable<TokenInfo> update(String contractAddr) {
         return setupTokensFromLocal(contractAddr).toObservable();
     }
@@ -502,7 +496,6 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 List<BigInteger> balanceArray = null;
-                List<Integer> burnArray = null;
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
                 ContractType interfaceSpec = token.getInterfaceSpec();
@@ -511,7 +504,6 @@ public class TokenRepository implements TokenRepositoryType {
                     case ERC875:
                     case ERC875LEGACY:
                         balanceArray = wrappedCheckBalanceArray(wallet, tInfo, token);
-                        burnArray = token.getBurnList();
                         break;
                     case ERC721:
                         break;
@@ -531,7 +523,7 @@ public class TokenRepository implements TokenRepositoryType {
                         break;
                 }
 
-                Token updated = tFactory.createToken(tInfo, balance, balanceArray, burnArray, System.currentTimeMillis(), interfaceSpec);
+                Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec);
                 updated.patchAuxData(token); //perform any updates we need here
                 localSource.updateTokenBalance(network, wallet, updated);
                 updated.setTokenWallet(wallet.address);

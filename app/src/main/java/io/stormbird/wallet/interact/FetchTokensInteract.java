@@ -49,13 +49,6 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Completable updateBalance(Wallet wallet, Token token, List<Integer> burnList) {
-        return tokenRepository
-                        .setBurnList(wallet, token, burnList)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Observable<Token> fetchEth(NetworkInfo network, Wallet wallet)
     {
         return tokenRepository.getEthBalance(network, wallet).toObservable()

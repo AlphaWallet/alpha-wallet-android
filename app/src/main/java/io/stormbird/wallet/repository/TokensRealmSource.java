@@ -387,31 +387,6 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void updateTokenBurn(NetworkInfo network, Wallet wallet, Token token, List<Integer> burn) {
-        Realm realm = null;
-        try {
-            realm = realmManager.getRealmInstance(wallet);
-            RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", token.tokenInfo.address)
-                    .equalTo("chainId", network.chainId)
-                    .findFirst();
-            realm.beginTransaction();
-            if (realmToken != null) {
-                token.setRealmBurn(realmToken, burn);
-            }
-            realm.commitTransaction();
-        } catch (Exception ex) {
-            if (realm != null && realm.isInTransaction()) {
-                realm.cancelTransaction();
-            }
-        } finally {
-            if (realm != null) {
-                realm.close();
-            }
-        }
-    }
-
-    @Override
     public Token getTokenBalance(NetworkInfo network, Wallet wallet, String address)
     {
         Token result = null;
@@ -472,7 +447,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmAuxData(realmToken);
-                realmToken.setNullCheckCount(0);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
             }
@@ -582,7 +556,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmAuxData(realmToken);
                 realmToken.setEnabled(true);
-                realmToken.setBurnList("");
                 realmToken.setChainId(token.tokenInfo.chainId);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
@@ -905,8 +878,7 @@ public class TokensRealmSource implements TokenLocalSource {
         realmToken.setDecimals(0);
         realmToken.setUpdatedTime(-1);
         realmToken.setAddedTime(-1);
-        realmToken.setEnabled(true);
-        realmToken.setBurnList("");
+        realmToken.setEnabled(false);
         realmToken.setInterfaceSpec(0);
         realmToken.setChainId(token.tokenInfo.chainId);
     }

@@ -49,27 +49,22 @@ import io.stormbird.wallet.viewmodel.BaseViewModel;
 public class Ticket extends Token implements Parcelable
 {
     private final List<BigInteger> balanceArray;
-    private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
 
-    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = balances;
-        burnIndices = burned;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime);
         this.balanceArray = stringHexToBigIntegerList(balances);
-        burnIndices = stringIntsToIntegerList(burnList);
     }
 
     private Ticket(Parcel in) {
         super(in);
         balanceArray = new ArrayList<>();
-        burnIndices = new ArrayList<Integer>();
         int objSize = in.readInt();
-        int burnSize = in.readInt();
         int interfaceOrdinal = in.readInt();
         contractType = ContractType.values()[interfaceOrdinal];
         if (objSize > 0)
@@ -79,17 +74,6 @@ public class Ticket extends Token implements Parcelable
             {
                 BigInteger val = (BigInteger)o;
                 balanceArray.add(val);
-            }
-        }
-
-        if (burnSize > 0)
-        {
-            Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
-            //check to see if burn notice is needed
-            for (Object o : readBurnArray)
-            {
-                Integer val = (Integer)o;
-                burnIndices.add(val);
             }
         }
     }
@@ -126,10 +110,8 @@ public class Ticket extends Token implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(balanceArray.size());
-        dest.writeInt(burnIndices.size());
         dest.writeInt(contractType.ordinal());
         if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
-        if (burnIndices.size() > 0) dest.writeArray(burnIndices.toArray());
     }
 
     /**
@@ -153,24 +135,6 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(idList, true);
     }
 
-    //Burn handling
-    @Override
-    public void addToBurnList(List<Uint16> burnUpdate)
-    {
-        for (Uint16 b : burnUpdate) {
-            Integer index = b.getValue().intValue();
-
-            //lookup index
-            if (balanceArray.size() > index)
-            {
-                BigInteger value = balanceArray.get(index);
-                if (value.compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
-                    burnIndices.add(index);
-                }
-            }
-        }
-    }
-
     @Override
     public int getTicketCount()
     {
@@ -189,12 +153,6 @@ public class Ticket extends Token implements Parcelable
     public void setRealmBalance(RealmToken realmToken)
     {
         realmToken.setBalance(intArrayToString(balanceArray, true));
-    }
-
-    @Override
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
-    {
-        realmToken.setBurnList(integerListToString(burnList, false));
     }
 
     @Override
@@ -222,9 +180,6 @@ public class Ticket extends Token implements Parcelable
             tokenHolder.contractType.setText(R.string.erc875);
         }
 
-        //tokenHolder.text24HoursSub.setText(R.string.burned);
-        //tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
-        //tokenHolder.textAppreciationSub.setText(R.string.marketplace);
         tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
@@ -245,33 +200,6 @@ public class Ticket extends Token implements Parcelable
         }
         return indicies;
     }
-
-    @Override
-    public List<Integer> getBurnList()
-    {
-        return burnIndices;
-    }
-
-    @Override
-    public String getBurnListStr() {
-        return integerListToString(burnIndices, false);
-    }
-
-    public String getTicketInfo(NonFungibleToken nonFungibleToken)
-    {
-        String teamA = nonFungibleToken.getAttribute("countryA").text;
-        String teamB = nonFungibleToken.getAttribute("countryB").text;
-        String time = nonFungibleToken.getAttribute("time").text;
-        String locality = nonFungibleToken.getAttribute("locality").text;
-        try {
-            DateTime datetime = DateTimeFactory.getDateTime(time);
-            time = datetime.format(new SimpleDateFormat("hh:mm", Locale.ENGLISH));
-        } catch (ParseException e) {
-            // time is returned as un-parsed, original string
-        }
-        return time + locality + "\n\n" + teamA + " vs " + teamB;
-    }
-
 
     /*************************************
      *

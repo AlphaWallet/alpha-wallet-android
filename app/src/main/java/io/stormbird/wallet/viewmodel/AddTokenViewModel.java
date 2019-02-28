@@ -77,7 +77,7 @@ public class AddTokenViewModel extends BaseViewModel {
         }
 
         disposable = setupTokensInteract
-                .update(addr)
+                .update(addr, getNetworkInfo().chainId)
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
     }
 
@@ -99,6 +99,8 @@ public class AddTokenViewModel extends BaseViewModel {
     public LiveData<Boolean> update() {
         return update;
     }
+
+    public NetworkInfo getNetworkInfo() { return defaultNetwork.getValue(); }
 
     public void showTokens(Context context)
     {

@@ -113,7 +113,7 @@ public class SellDetailModel extends BaseViewModel {
 
         //now get the ticker
         disposable = findDefaultNetworkInteract
-                .getTicker()
+                .getTicker(defaultNetwork.getValue().chainId)
                 .subscribe(this::onTicker, this::onError);
     }
 

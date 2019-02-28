@@ -11,7 +11,6 @@ public class RealmTokenTicker extends RealmObject {
     private long createdTime;
     private String id;
     private String image;
-    private boolean isStormbird;
     private long updatedTime;
 
     public String getId() {
@@ -68,15 +67,5 @@ public class RealmTokenTicker extends RealmObject {
 
     public void setUpdatedTime(long updatedTime) {
         this.updatedTime = updatedTime;
-    }
-
-    public boolean isStormbird()
-    {
-        return isStormbird;
-    }
-
-    public void setIsStormbird(boolean setting)
-    {
-        this.isStormbird = setting;
     }
 }

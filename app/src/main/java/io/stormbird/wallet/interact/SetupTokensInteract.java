@@ -32,8 +32,8 @@ public class SetupTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<TokenInfo> update(String address) {
-        return tokenRepository.update(address)
+    public Observable<TokenInfo> update(String address, int chainId) {
+        return tokenRepository.update(address, chainId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -54,7 +54,7 @@ public class SetupTokensInteract {
             //process the remaining transactions
             for (Transaction t : transactions)
             {
-                Token localToken = tokensService.getToken(t.to);
+                Token localToken = tokensService.getToken(t.chainId, t.to);
 
                 if (t.input != null && t.input.length() > 2 && localToken == null && !unknownTokens.contains(t.to))
                 {
@@ -74,9 +74,9 @@ public class SetupTokensInteract {
         });
     }
 
-    public Observable<TokenInfo> addToken(String address)
+    public Observable<TokenInfo> addToken(String address, int chainId)
     {
-        return tokenRepository.update(address);
+        return tokenRepository.update(address, chainId);
     }
 
     public Token terminateToken(Token token, Wallet wallet, NetworkInfo network)

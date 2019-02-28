@@ -12,6 +12,7 @@ import io.reactivex.Single;
 public interface EthereumNetworkRepositoryType {
 
 	NetworkInfo getDefaultNetwork();
+	NetworkInfo getNetworkByChain(int chainId);
 
 	Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
 
@@ -21,7 +22,7 @@ public interface EthereumNetworkRepositoryType {
 
 	void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
-	Single<Ticker> getTicker();
+	Single<Ticker> getTicker(int chainId);
 
 	String getNameById(int id);
 }

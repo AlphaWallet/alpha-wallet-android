@@ -15,6 +15,10 @@ public class TokenInfo implements Parcelable {
     public boolean isEnabled;
 
     public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, int chainId) {
+        if (address.contains("-"))
+        {
+            address = address.split("-")[0];
+        }
         if (address != null)
         {
             this.address = address.toLowerCase();

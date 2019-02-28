@@ -191,7 +191,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
         //generate a list of integers
-        Ticket t = new Ticket(null, "0", "0", 0);
+        Ticket t = new Ticket(null, "0", 0, "");
         List<Integer> sends = t.stringIntsToIntegerList(indexSendList);
         List<Integer> iDs = t.stringIntsToIntegerList(idList);
 
@@ -251,13 +251,13 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId)
     {
-        Token token = tokensService.getToken(contractAddress);
+        Token token = tokensService.getToken(defaultNetwork.chainId, contractAddress);
         return TokenRepository.createERC721TransferFunction(to, token, tokenId);
     }
 
     public byte[] getERC875TransferBytes(String to, String contractAddress, String tokenIds)
     {
-        Token token = tokensService.getToken(contractAddress);
+        Token token = tokensService.getToken(defaultNetwork.chainId, contractAddress);
         return TokenRepository.createTicketTransferData(to, tokenIds, token);
     }
 }

@@ -14,5 +14,6 @@ public enum ContractType
     ERC875,
     OTHER,
     CURRENCY,
+    DELETED_ACCOUNT,
     CREATION //Placeholder for generic, should be at end of list
 }

@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
+
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
     public static final int FILTER_ALL = 0;
@@ -35,7 +37,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private Context context;
     private boolean needsRefresh;
     protected final AssetDefinitionService assetService;
-    protected NetworkInfo network;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -100,7 +101,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, network);
+                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
                 setAnimation(holder.itemView);
@@ -186,12 +187,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             {
                 TokenSortedItem tsi = (TokenSortedItem)si;
                 Token thisToken = tsi.value;
-                if (thisToken.getAddress().equals(token.getAddress()))
+                if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
                 {
-                    if (token.hasPositiveBalance() || token.isEthereum() || assetService.hasDefinition(token.getAddress()))
+                    if (canDisplayToken(token))
                     {
-                        tsi.value = token;
-                        notifyItemChanged(i, tsi);
+                        items.add(new TokenSortedItem(token, calculateWeight(token)));
+                        //notifyItemChanged(i, tsi);
                     }
                     else
                     {
@@ -199,16 +200,25 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                         notifyItemRemoved(i);
                         notifyDataSetChanged();
                     }
-                    updated = true;
+                    //updated = true;
                     break;
                 }
             }
         }
 
-        if (!updated && !token.isBad() && (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))
-        {
-            needsRefresh = true;
-        }
+//        if (!updated && !token.isBad() && (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))
+//        {
+//            needsRefresh = true;
+//        }
+    }
+
+    private boolean canDisplayToken(Token token)
+    {
+        //Add token to display list if it's the base currency, or if it has balance
+        return token != null &&  //Add token to display list if it's the base currency, or if it has balance
+                ((token.isEthereum() && token.tokenInfo.chainId == MAINNET_ID) ||
+                        (!token.isTerminated() && !token.isBad() &&
+                                (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress()))));
     }
 
     private void populateTokens(Token[] tokens)
@@ -224,12 +234,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         for (Token token : tokens)
         {
-            if (token != null &&  //Add token to display list if it's the base currency, or if it has balance
-                    (token.isEthereum() ||
-                            (!token.isTerminated() && !token.isBad() &&
-                                    (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))))
+            if (canDisplayToken(token))
             {
-                Log.d(TAG,"ADDING: " + token.getFullName());
+                String nativeEth = "";
+                if (token.isEthereum()) nativeEth = " Native";
+                Log.d(TAG,"ADDING: " + token.getFullName() + nativeEth);
                 checkLiveToken(token);
                 switch (filterType)
                 {
@@ -276,7 +285,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         int weight = 0;
         String tokenName = token.getFullName();
-        if(token.isEthereum()) return 1;
+        if(token.isEthereum()) return token.tokenInfo.chainId;
         if(token.isBad()) return Integer.MAX_VALUE;
 
         int i = 4;
@@ -403,10 +412,5 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
-    }
-
-    public void setDefaultNetwork(NetworkInfo networkInfo)
-    {
-        network = networkInfo;
     }
 }

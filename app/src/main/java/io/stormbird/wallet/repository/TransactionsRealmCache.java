@@ -131,6 +131,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     Transaction t = convert(realmTx);
                     Transaction replacement = txMap.get(t.hash);
 
+                    if (t.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
+                    {
+                        System.out.println("yoless");
+                    }
+
                     //replace transaction but don't store invalid operations
                     if (replacement != null)
                     {
@@ -162,6 +167,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 for (Transaction transaction : txMap.values()) {
                     //Log.d(TAG, "Attempting to store: " + transaction.hash);
                     //don't store any transaction that
+                    if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
+                    {
+                        System.out.println("yoless");
+                    }
                     if (isBadTransaction(transaction))
                     {
                         //Log.d(TAG, "No Store");
@@ -171,6 +180,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     {
                         instance.beginTransaction();
                         RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
+                        if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
+                        {
+                            System.out.println("yoless");
+                        }
                         fill(instance, item, transaction);
                         instance.commitTransaction();
                     }
@@ -236,6 +249,12 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setGasPrice(transaction.gasPrice);
         item.setInput(transaction.input);
         item.setGasUsed(transaction.gasUsed);
+        item.setChainId(transaction.chainId);
+
+        if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
+        {
+            System.out.println("yoless");
+        }
 
         int len = item.getOperations().size();
 
@@ -319,6 +338,12 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setGasPrice(transaction.gasPrice);
         item.setInput(transaction.input);
         item.setGasUsed(transaction.gasUsed);
+        item.setChainId(transaction.chainId);
+
+        if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
+        {
+            System.out.println("yoless");
+        }
 
         //Log.d(TAG, "Write Tx " + transaction.hash + " : Sz: " + transaction.operations.length);
 
@@ -425,6 +450,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getGasPrice(),
                 rawItem.getInput(),
                 rawItem.getGasUsed(),
+                rawItem.getChainId(),
                 operations
                 );
     }

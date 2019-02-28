@@ -258,7 +258,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
 
         if (isValid) {
-            viewModel.save(address, symbol, decimals, name);
+            viewModel.save(address, symbol, decimals, name, viewModel.getNetworkInfo().chainId);
         }
     }
 }

@@ -22,6 +22,7 @@ public class RealmERC721Token extends RealmObject
     private long updatedTime;
     private String tokenIdList;
     private String schemaName;
+    private int chainId;
 
     public String getSymbol() {
         return symbol;
@@ -92,5 +93,15 @@ public class RealmERC721Token extends RealmObject
     public void setSchemaName(String schemaName)
     {
         this.schemaName = schemaName;
+    }
+
+    public int getChainId()
+    {
+        return chainId;
+    }
+
+    public void setChainId(int chainId)
+    {
+        this.chainId = chainId;
     }
 }

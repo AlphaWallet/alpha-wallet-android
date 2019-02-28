@@ -76,11 +76,11 @@ public class SendViewModel extends BaseViewModel {
         return networkRepository.getNameById(chainId);
     }
 
-    public void startEthereumTicker()
+    public void startEthereumTicker(int chainId)
     {
         disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .getEthereumTicker()
+                        .getEthereumTicker(chainId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTicker, this::onError)).subscribe();

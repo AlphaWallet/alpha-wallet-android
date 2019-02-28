@@ -67,6 +67,7 @@ public class ConfirmationActivity extends BaseActivity {
     private String contractAddress;
     private String amountStr;
     private String toAddress;
+    private Token token;
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
@@ -113,6 +114,7 @@ public class ConfirmationActivity extends BaseActivity {
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         String amountString;
 
         amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));

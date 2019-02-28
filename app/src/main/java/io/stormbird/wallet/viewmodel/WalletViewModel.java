@@ -55,7 +55,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -74,8 +73,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     private Disposable balanceTimerDisposable;
     @Nullable
     private Disposable updateTokens;
-    @Nullable
-    private Disposable nullTokensCheckDisposable;
     @Nullable
     private Disposable balanceCheckDisposable;
 
@@ -166,8 +163,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         {
             tokenCache = null;
             tokensService.setCurrentAddress(defaultWallet.getValue().address);
-            tokensService.setCurrentNetwork(defaultNetwork.getValue().chainId);
-            updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultNetwork.getValue(), defaultWallet.getValue())
+            updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultWallet.getValue())
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokens, this::onTokenFetchError, this::fetchFromOpensea);
@@ -194,18 +190,19 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         onError(throwable);
     }
 
-
     /**
      * Stage 2: Fetch opensea tokens
      */
-    private void fetchFromOpensea() throws Exception
+    private void fetchFromOpensea()
     {
         List<Token> serviceList = tokensService.getAllLiveTokens();
         tokenCache = serviceList.toArray(new Token[0]);
 
         tokens.postValue(tokenCache);
 
-        updateTokens = openseaService.getTokens(defaultWallet.getValue().address, defaultNetwork.getValue().chainId)
+        String network = findDefaultNetworkInteract.getNetworkName(defaultNetwork.getValue().chainId);
+
+        updateTokens = openseaService.getTokens(defaultWallet.getValue().address, defaultNetwork.getValue().chainId, network)
                 //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -366,7 +363,6 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        tokensService.setCurrentNetwork(networkInfo.chainId);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -408,7 +404,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         disposable = fetchAllContractAddresses(extraAddresses)
                 .flatMap(tokensService::reduceToUnknown)
                 .flatMapIterable(address -> address)
-                .flatMap(setupTokensInteract::addToken)
+                .flatMap(address -> setupTokensInteract.addToken(address, defaultNetwork.getValue().chainId))
                 .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
@@ -432,10 +428,10 @@ public class WalletViewModel extends BaseViewModel implements Runnable
     {
         // Check contracts that returned a null but we didn't see them destroyed yet.
         // Sometimes the network times out or some other issue.
-        nullTokensCheckDisposable = Observable.fromCallable(tokensService::getAllTokens)
+        disposable = Observable.fromCallable(tokensService::getAllTokens)
                 .flatMapIterable(token -> token)
                 .filter(token -> (token.tokenInfo.name == null && !token.isTerminated()))
-                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress()))
+                .concatMap(token -> fetchTokensInteract.getTokenInfo(token.getAddress(), defaultNetwork.getValue().chainId))
                 .filter(tokenInfo -> (tokenInfo.name != null))
                 .concatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                 .concatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
@@ -461,7 +457,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
 
     public Token getTokenFromService(Token token)
     {
-        Token serviceToken = tokensService.getToken(token.getAddress());
+        Token serviceToken = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
         return (serviceToken != null) ? serviceToken : token;
     }
 
@@ -479,7 +475,7 @@ public class WalletViewModel extends BaseViewModel implements Runnable
                     .flatMapIterable(token -> token)
                     .filter(token -> (token.tokenInfo.name != null && !token.isTerminated() && !token.independentUpdate())) //don't check terminated or ERC721
                     .filter(token -> (checkCounter%2 == 0 || token.hasPositiveBalance() || token.isEthereum())) //only check zero balance tokens every other cycle
-                    .concatMap(token -> fetchTokensInteract.updateDefaultBalance(token, defaultNetwork.getValue(), defaultWallet.getValue()))
+                    .concatMap(token -> fetchTokensInteract.updateDefaultBalance(token, defaultWallet.getValue()))
                     .concatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

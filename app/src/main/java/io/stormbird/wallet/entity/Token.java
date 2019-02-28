@@ -37,18 +37,21 @@ public class Token implements Parcelable
     public long updateBlancaTime;
     public boolean balanceIsLive = false;
     private String tokenWallet;
-    private short tokenNetwork;
     private boolean requiresAuxRefresh = true;
     protected ContractType contractType;
     public long lastBlockCheck = 0;
+    private final String shortNetworkName;
+
+    public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
     protected Map<String, String> auxData;
 
-    public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime) {
+    public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName) {
         this.tokenInfo = tokenInfo;
         this.balance = balance;
         this.updateBlancaTime = updateBlancaTime;
+        this.shortNetworkName = networkName;
     }
 
     protected Token(Parcel in) {
@@ -56,6 +59,7 @@ public class Token implements Parcelable
         balance = new BigDecimal(in.readString());
         updateBlancaTime = in.readLong();
         int readType = in.readInt();
+        shortNetworkName = in.readString();
         if (readType <= ContractType.CREATION.ordinal())
         {
             contractType = ContractType.values()[readType];
@@ -116,6 +120,7 @@ public class Token implements Parcelable
         dest.writeString(balance == null ? "0" : balance.toString());
         dest.writeLong(updateBlancaTime);
         dest.writeInt(contractType.ordinal());
+        dest.writeString(shortNetworkName);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -157,18 +162,10 @@ public class Token implements Parcelable
         return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
     }
 
-    public BigInteger getIntAddress() { return Numeric.toBigInt(tokenInfo.address); }
-
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
-
-    public String populateIDs(List<Integer> d, boolean keepZeros)
-    {
-        return "";
-    }
-    public static final String EMPTY_BALANCE = "\u2014\u2014";
 
     public boolean needsUpdate()
     {
@@ -457,20 +454,11 @@ public class Token implements Parcelable
         return tokenWallet.equalsIgnoreCase(address);
     }
 
-    public boolean checkTokenNetwork(int currentNetwork)// setTokenWallet(String tokenWallet)
-    {
-        return tokenNetwork == currentNetwork;
-    }
-
     public void setTokenWallet(String address)
     {
         this.tokenWallet = address;
     }
 
-    public void setTokenNetwork(int tokenNetwork)
-    {
-        this.tokenNetwork = (short)tokenNetwork;
-    }
 
     public void patchAuxData(Token token)
     {
@@ -498,11 +486,7 @@ public class Token implements Parcelable
         }
         else
         {
-            //sanity check
-            ContractType fromRealm = ContractType.values()[realm.getInterfaceSpec()];
-            if (fromRealm == ContractType.ETHEREUM && !tokenInfo.symbol.contains(ETH_SYMBOL))
-                fromRealm = ContractType.NOT_SET;
-            this.contractType = fromRealm;
+            this.contractType = ContractType.values()[realm.getInterfaceSpec()];
         }
     }
 
@@ -516,7 +500,6 @@ public class Token implements Parcelable
      */
     public void setInterfaceSpec(ContractType type) { contractType = type; }
     public ContractType getInterfaceSpec() { return contractType; }
-    public boolean isOldSpec() { return false; }
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         return null;

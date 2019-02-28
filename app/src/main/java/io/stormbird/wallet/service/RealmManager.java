@@ -40,8 +40,8 @@ public class RealmManager {
         return wallet.address + "-" + networkInfo.name + "-db.realm";
     }
 
-    public Realm getERC721RealmInstance(NetworkInfo network, Wallet wallet) {
-        String name = get721Name(network, wallet);
+    public Realm getERC721RealmInstance(Wallet wallet) {
+        String name = get721Name(wallet);
         return getRealmInstance(name);
     }
 
@@ -49,7 +49,7 @@ public class RealmManager {
         return getRealmInstance("WalletData-db.realm");
     }
 
-    private String get721Name(NetworkInfo network, Wallet wallet) {
-        return wallet.address + "-" + network.chainId + "-721-db.realm";
+    private String get721Name(Wallet wallet) {
+        return wallet.address + "-721-db.realm";
     }
 }

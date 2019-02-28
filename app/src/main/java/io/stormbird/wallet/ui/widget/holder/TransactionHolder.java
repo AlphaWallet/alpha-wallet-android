@@ -120,7 +120,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         int colourResource;
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
         String name = tokensService.getTokenName(ct.address);
-        Token token = tokensService.getToken(ct.address);
+        Token token = tokensService.getToken(trans.chainId, ct.address);
 
         address.setText(name);
         supplimental.setTextSize(12.0f);
@@ -228,7 +228,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String name = tokensService.getTokenName(operation.contract.address);
         String symbol = tokensService.getTokenSymbol(operation.contract.address);
         int decimals = tokensService.getTokenDecimals(operation.contract.address);
-        Token token = tokensService.getToken(operation.contract.address);
+        Token token = tokensService.getToken(transaction.chainId, operation.contract.address);
 
         String from = operation.from;
 

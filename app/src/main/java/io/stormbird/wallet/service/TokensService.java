@@ -14,10 +14,10 @@ import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
 public class TokensService
 {
-    private Map<String, Token> tokenMap = new ConcurrentHashMap<>();
+    private final Map<String, Token> tokenMap = new ConcurrentHashMap<>();
     private static Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Token> currencies = new ConcurrentHashMap<>();
     private String currentAddress = null;
-    private int currentNetwork = 0;
     private boolean tokenTerminated = false;
 
     public TokensService() {
@@ -31,7 +31,12 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
-        if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
+        if (t.isEthereum())
+        {
+            currencies.put(t.tokenInfo.chainId, t);
+            if (t.tokenInfo.chainId == 1) tokenMap.put(t.getAddress(), t);
+        }
+        else if (t.checkTokenWallet(currentAddress))
         {
             tokenMap.put(t.getAddress(), t);
             setSpec(t);
@@ -48,9 +53,19 @@ public class TokensService
         }
     }
 
-    public Token getToken(String addr)
+    public Token getToken(int chainId, String addr)
     {
-        if (addr != null) return tokenMap.get(addr);
+        if (addr != null)
+        {
+            if (addr.equals(currentAddress))
+            {
+                return currencies.get(chainId);
+            }
+            else
+            {
+                return tokenMap.get(addr);
+            }
+        }
         else return null;
     }
 
@@ -103,7 +118,6 @@ public class TokensService
     public void clearTokens()
     {
         currentAddress = "";
-        currentNetwork = 0;
         tokenMap.clear();
     }
 
@@ -118,8 +132,10 @@ public class TokensService
         tokens.add(tokenMap.get(currentAddress)); //currency token goes first
         for (Token t : tokenMap.values())
         {
-            if (!t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t)) tokens.add(t);
+            if (!t.isEthereum() && !t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t)) tokens.add(t);
         }
+
+        tokens.addAll(new ArrayList(currencies.values()));
 
         return tokens;
     }
@@ -141,11 +157,7 @@ public class TokensService
         for (Token t : tokens)
         {
             t.setRequireAuxRefresh();
-            if (t.checkTokenNetwork(currentNetwork) && t.checkTokenWallet(currentAddress))
-            {
-                tokenMap.put(t.getAddress(), t);
-                setSpec(t);
-            }
+            addToken(t);
         }
     }
 
@@ -169,11 +181,6 @@ public class TokensService
         this.currentAddress = currentAddress.toLowerCase();
     }
     public String getCurrentAddress() { return this.currentAddress; }
-
-    public void setCurrentNetwork(int currentNetwork)
-    {
-        this.currentNetwork = currentNetwork;
-    }
 
     public static void setInterfaceSpec(String address, ContractType functionSpec)
     {

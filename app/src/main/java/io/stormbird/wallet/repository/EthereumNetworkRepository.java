@@ -12,7 +12,9 @@ import io.stormbird.wallet.service.TickerService;
 
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
 
@@ -21,7 +23,7 @@ import static io.stormbird.wallet.C.*;
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
 	public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-	public static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
+	public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
 	public static final String XDAI_RPC_URL = "https://dai.poa.network";
 	public static final String POA_RPC_URL = "https://core.poa.network/";
 	public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -37,6 +39,8 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final int SOKOL_ID = 77;
 	public static final int RINKEBY_ID = 4;
 	public static final int XDAI_ID = 100;
+
+	private final Map<Integer, NetworkInfo> networkMap;
 
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
 			new NetworkInfo(ETHEREUM_NETWORK_NAME, ETH_SYMBOL,
@@ -89,6 +93,12 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		if (defaultNetwork == null) {
 			defaultNetwork = NETWORKS[0];
 		}
+
+		networkMap = new ConcurrentHashMap<>();
+		for (NetworkInfo network : NETWORKS)
+		{
+			networkMap.put(network.chainId, network);
+		}
 	}
 
 	private NetworkInfo getByName(String name) {
@@ -105,20 +115,19 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	@Override
 	public String getNameById(int id)
 	{
-		for (NetworkInfo network : NETWORKS)
-		{
-			if (id == network.chainId)
-			{
-				return network.name;
-			}
-		}
-
-		return "Unknown: " + id;
+		if (networkMap.containsKey(id)) return networkMap.get(id).name;
+		else return "Unknown: " + id;
 	}
 
 	@Override
 	public NetworkInfo getDefaultNetwork() {
 		return defaultNetwork;
+	}
+
+	@Override
+	public NetworkInfo getNetworkByChain(int chainId)
+	{
+		return networkMap.get(chainId);
 	}
 
 	// fetches the last transaction nonce; if it's identical to the last used one then increment by one
@@ -154,8 +163,9 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	}
 
 	@Override
-    public Single<Ticker> getTicker() {
+    public Single<Ticker> getTicker(int chainId) {
+    	NetworkInfo network = networkMap.get(chainId);
         return Single.fromObservable(tickerService
-                .fetchTickerPrice(defaultNetwork.tickerId));
+                .fetchTickerPrice(network.tickerId));
     }
 }

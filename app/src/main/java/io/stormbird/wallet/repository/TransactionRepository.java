@@ -278,13 +278,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
 	{
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
+		NetworkInfo networkInfo = networkRepository.getNetworkByChain(tokenInfo.chainId);
 		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
 		if (tokenInfo.name == null && tokenInfo.symbol == null)
 		{
-			return Single.fromCallable(() -> ContractType.OTHER);
+			return Single.fromCallable(() -> ContractType.DELETED_ACCOUNT);
 		}
-		else if (checked != ContractType.NOT_SET && checked != ContractType.OTHER)
+		else if (checked != ContractType.NOT_SET)
 		{
 			return Single.fromCallable(() -> checked);
 		}

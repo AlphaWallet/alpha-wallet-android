@@ -18,6 +18,7 @@ public class RealmTransaction extends RealmObject {
     private String gasUsed;
     private String input;
     private String error;
+    private int chainId;
     private RealmList<RealmTransactionOperation> operations;
 
     public String getHash() {
@@ -118,5 +119,15 @@ public class RealmTransaction extends RealmObject {
 
     public RealmList<RealmTransactionOperation> getOperations() {
         return operations;
+    }
+
+    public int getChainId()
+    {
+        return chainId;
+    }
+
+    public void setChainId(int chainId)
+    {
+        this.chainId = chainId;
     }
 }

@@ -35,6 +35,7 @@ public class Transaction implements Parcelable {
     public final String input;
     public final TransactionOperation[] operations;
     public final String error;
+    public final int chainId;
 
     public boolean isConstructor = false;
 
@@ -51,6 +52,7 @@ public class Transaction implements Parcelable {
 			String gasPrice,
 			String input,
 			String gasUsed,
+            int chainId,
             TransactionOperation[] operations) {
         this.hash = hash;
         this.error = error;
@@ -64,6 +66,7 @@ public class Transaction implements Parcelable {
 		this.gasPrice = gasPrice;
 		this.input = input;
 		this.gasUsed = gasUsed;
+		this.chainId = chainId;
 		this.operations = operations;
 	}
 
@@ -81,6 +84,7 @@ public class Transaction implements Parcelable {
 		gasPrice = in.readString();
 		input = in.readString();
 		gasUsed = in.readString();
+		chainId = in.readInt();
 		Parcelable[] parcelableArray = in.readParcelableArray(TransactionOperation.class.getClassLoader());
 		TransactionOperation[] operations = null;
 		if (parcelableArray != null)
@@ -121,6 +125,7 @@ public class Transaction implements Parcelable {
 		dest.writeString(gasPrice);
 		dest.writeString(input);
 		dest.writeString(gasUsed);
+		dest.writeInt(chainId);
 		dest.writeParcelableArray(operations, flags);
 	}
 

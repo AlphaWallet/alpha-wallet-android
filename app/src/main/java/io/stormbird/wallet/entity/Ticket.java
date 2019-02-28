@@ -51,13 +51,13 @@ public class Ticket extends Token implements Parcelable
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
 
-    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime);
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName);
         this.balanceArray = balances;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime);
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName);
         this.balanceArray = stringHexToBigIntegerList(balances);
     }
 
@@ -724,12 +724,6 @@ public class Ticket extends Token implements Parcelable
                                     getDynArray(indices)
                                 ),
                 Collections.emptyList());
-    }
-
-    @Override
-    public boolean isOldSpec()
-    {
-        return (contractType == ContractType.ERC875LEGACY);
     }
 
     @Override

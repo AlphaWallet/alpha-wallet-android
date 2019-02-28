@@ -7,33 +7,30 @@ import io.stormbird.wallet.entity.TokenTicker;
 import io.stormbird.wallet.entity.Wallet;
 
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
 public interface TokenLocalSource {
-    Single<Token[]> saveTokensList(NetworkInfo networkInfo, Wallet wallet, Token[] items);
-    Single<Token> saveToken(NetworkInfo networkInfo, Wallet wallet, Token token);
+    Single<Token> saveToken(Wallet wallet, Token token);
     Completable saveTokens(NetworkInfo networkInfo, Wallet wallet, Token[] items);
     void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
     Token getTokenBalance(NetworkInfo network, Wallet wallet, String address);
-    void updateTokenDestroyed(NetworkInfo network, Wallet wallet, Token token);
+    Map<Integer, Token> getTokenBalances(Wallet wallet, String address);
     void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled);
 
-    Single<Token[]> fetchEnabledTokens(NetworkInfo networkInfo, Wallet wallet);
     Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet);
-    Single<Token[]> fetchERC721Tokens(NetworkInfo network, Wallet wallet);
+    Single<Token[]> fetchERC721Tokens(Wallet wallet);
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
-    Single<Token[]> fetchEnabledTokensWithBalance(NetworkInfo networkInfo, Wallet wallet);
-    //Observable<Token> fetchEnabledTokensSequential(NetworkInfo networkInfo, Wallet wallet);
-    Observable<List<Token>> fetchEnabledTokensSequentialList(NetworkInfo networkInfo, Wallet wallet);
+    Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet);
     Completable saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers);
     Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens);
 
     Disposable setTokenTerminated(Token token, NetworkInfo network, Wallet wallet);
 
-    Single<Token[]> saveERC721Tokens(NetworkInfo defaultNetwork, Wallet wallet, Token[] tokens);
+    Single<Token[]> saveERC721Tokens(Wallet wallet, Token[] tokens);
 
     Disposable storeBlockRead(Token token, NetworkInfo network, Wallet wallet);
 }

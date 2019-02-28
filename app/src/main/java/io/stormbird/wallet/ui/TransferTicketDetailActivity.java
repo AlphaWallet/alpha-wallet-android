@@ -495,7 +495,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         viewModel.createTicketTransfer(
                 to,
-                token.getAddress(),
+                token,
                 token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true),
                 Contract.GAS_PRICE,
                 Contract.GAS_LIMIT);

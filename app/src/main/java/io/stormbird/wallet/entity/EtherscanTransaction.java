@@ -42,14 +42,8 @@ public class EtherscanTransaction
     private static TransactionDecoder decoder = null;
     private static TransactionDecoder ensDecoder = null;
     private static ParseMagicLink parser = null;
-    private int chainId;
 
-    public EtherscanTransaction(int chainId)
-    {
-        this.chainId = chainId;
-    }
-
-    public Transaction createTransaction(String walletAddress, Context ctx)
+    public Transaction createTransaction(String walletAddress, Context ctx, int chainId)
     {
         boolean isConstructor = false;
         TransactionOperation[] o;
@@ -214,7 +208,7 @@ public class EtherscanTransaction
         }
 
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
-            gasUsed, o);
+            gasUsed, chainId, o);
 
         if (o.length > 0)
         {

@@ -59,10 +59,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
-					int chainId = networkInfo.chainId;
 					for (EtherscanTransaction etx : myTxs)
 					{
-					    Transaction tx = etx.createTransaction(userAddress, context);
+					    Transaction tx = etx.createTransaction(userAddress, context, networkInfo.chainId);
 					    if (tx != null)
                         {
                             result.add(tx);
@@ -222,10 +221,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
-					int chainId = networkInfo.chainId;
 					for (EtherscanTransaction etx : myTxs)
 					{
-						Transaction tx = etx.createTransaction(null, context);
+						Transaction tx = etx.createTransaction(null, context, networkInfo.chainId);
 						if (tx.isConstructor && tx.operations.length > 0)
 						{
 							TransactionContract ct = tx.operations[0].contract;

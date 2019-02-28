@@ -81,7 +81,7 @@ public class PurchaseTicketsViewModel extends BaseViewModel
 
     public void buyRange(MagicLinkParcel marketInstance)
     {
-        Token token = tokensService.getToken(marketInstance.magicLink.contractAddress);
+        Token token = tokensService.getToken(1, marketInstance.magicLink.contractAddress);
         //ok let's try to drive this guy through
         final byte[] tradeData = generateReverseTradeData(marketInstance.magicLink, token, null);
         //quick sanity check, dump price

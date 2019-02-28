@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
     android:background="@drawable/background_marketplace_event"
     android:clickable="true"
-    android:orientation="vertical"
-    android:paddingBottom="20dp"
-    android:paddingLeft="23dp"
-    android:paddingRight="23dp"
-    android:paddingTop="20dp">
+    android:layout_marginBottom="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
 
     <ImageView
         android:id="@+id/icon"
@@ -20,51 +15,67 @@
         android:layout_marginStart="@dimen/big_margin"
         android:contentDescription="@string/empty"
         android:src="@mipmap/token_logo"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/status_pending"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/background_status_pending"
+        android:fontFamily="@font/font_bold"
+        android:text="@string/status_pending"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/text_chain_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/background_status_pending"
+        android:fontFamily="@font/font_bold"
+        android:padding="2dp"
+        android:text="xDAI"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/status_incomplete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="7dp"
+        android:background="@drawable/background_status_incomplete"
+        android:fontFamily="@font/font_bold"
+        android:text="@string/status_incomplete_data"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="9sp"
         android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/layout_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="14dp"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/status_pending"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="7dp"
-            android:background="@drawable/background_status_pending"
-            android:fontFamily="@font/font_bold"
-            android:paddingBottom="4dp"
-            android:paddingLeft="13dp"
-            android:paddingRight="13dp"
-            android:paddingTop="4dp"
-            android:text="@string/status_pending"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="9sp"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/status_incomplete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_status_incomplete"
-            android:fontFamily="@font/font_bold"
-            android:paddingBottom="4dp"
-            android:paddingLeft="13dp"
-            android:paddingRight="13dp"
-            android:paddingTop="4dp"
-            android:text="@string/status_incomplete_data"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="9sp"
-            android:visibility="gone" />
-    </LinearLayout>
+        android:orientation="vertical"
+        android:paddingBottom="20dp"
+        android:paddingLeft="23dp"
+        android:paddingRight="23dp"
+        android:paddingTop="20dp">
 
     <LinearLayout
+        android:id="@+id/layout_balance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -101,8 +112,8 @@
 
     </LinearLayout>
 
-
     <LinearLayout
+        android:id="@+id/layout_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -172,6 +183,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:background="@drawable/background_top_border"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         android:paddingTop="20dp">
 
@@ -255,4 +267,5 @@
                 android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

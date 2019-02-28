@@ -45,19 +45,18 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView text24HoursSub;
     public final TextView textAppreciationSub;
     public final TextView contractType;
-    public final LinearLayout layoutStatus;
+    public final TextView chainName;
     public final TextView textPending;
     public final TextView textIncomplete;
     public final View contractSeparator;
     public final LinearLayout layoutValueDetails;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView blockchain;
-    private final NetworkInfo networkInfo;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, NetworkInfo network)
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService)
     {
         super(resId, parent);
 
@@ -74,13 +73,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         layoutValueDetails = findViewById(R.id.layout_value_details);
-        layoutStatus = findViewById(R.id.layout_status);
         textPending = findViewById(R.id.status_pending);
         textIncomplete = findViewById(R.id.status_incomplete);
         blockchain = findViewById(R.id.text_chain);
+        chainName = findViewById(R.id.text_chain_name);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
-        networkInfo = network;
     }
 
     @Override
@@ -92,11 +90,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             contractType.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
         }
+
         try
         {
-            String networkName = networkInfo != null ? networkInfo.getShortName() : getString(R.string.ethereum);
-            blockchain.setText(getString(R.string.blockchain, networkName));
-            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), networkName);
+            blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
+            chainName.setText(token.getNetworkName());
+            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), token.getNetworkName());
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
@@ -110,7 +109,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     }
 
     private void setPending(int qty) {
-        layoutStatus.setVisibility(View.VISIBLE);
         textPending.setVisibility(View.VISIBLE);
         if (qty > 0) {
             textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
@@ -120,7 +118,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     }
 
     private void setIncompleteData(int qty) {
-        layoutStatus.setVisibility(View.VISIBLE);
         textIncomplete.setVisibility(View.VISIBLE);
         if (qty > 0) {
             textIncomplete.setText(getContext().getString(R.string.status_incomplete_data_with_qty, String.valueOf(qty)));
@@ -130,7 +127,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     }
 
     private void hideStatusBlocks() {
-        layoutStatus.setVisibility(View.GONE);
+        textIncomplete.setVisibility(View.GONE);
+        textPending.setVisibility(View.GONE);
     }
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {

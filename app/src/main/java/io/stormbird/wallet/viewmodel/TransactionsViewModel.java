@@ -343,7 +343,7 @@ public class TransactionsViewModel extends BaseViewModel
         if (transactions.length > 0)
         {
             Transaction lastTx = transactions[transactions.length - 1];
-            Token t = tokensService.getToken(lastTx.to);
+            Token t = tokensService.getToken(lastTx.chainId, lastTx.to);
             if (t != null)
             {
                 t.lastBlockCheck = Long.parseLong(lastTx.blockNumber);
@@ -382,7 +382,7 @@ public class TransactionsViewModel extends BaseViewModel
     private void queryUnknownTokens(List<String> unknownTokens)
     {
         fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
-                .flatMap(setupTokensInteract::addToken) //fetch tokenInfo
+                .flatMap(address -> setupTokensInteract.addToken(address, network.getValue().chainId)) //fetch tokenInfo
                 .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet().getValue())) //add to database
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
@@ -537,8 +537,8 @@ public class TransactionsViewModel extends BaseViewModel
                     null : tx.getOperation();
             if (ct != null && ct.getOperationType() == TransactionType.TERMINATE_CONTRACT)
             {
-                Token t = tokensService.getToken(tx.to);
-                if (t != null) setupTokensInteract.terminateToken(tokensService.getToken(t.getAddress()),
+                Token t = tokensService.getToken(tx.chainId, tx.to);
+                if (t != null) setupTokensInteract.terminateToken(tokensService.getToken(t.tokenInfo.chainId, t.getAddress()),
                                                                   defaultWallet().getValue(), defaultNetwork().getValue());
                 tokensService.setTerminationFlag();
                 break;

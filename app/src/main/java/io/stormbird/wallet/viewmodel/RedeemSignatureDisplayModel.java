@@ -124,7 +124,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         progress.postValue(true);
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .updateDefaultBalance(this.token.getValue(), defaultNetwork.getValue(), defaultWallet.getValue())
+                        .updateDefaultBalance(this.token.getValue(), defaultWallet.getValue())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onToken, this::onError)).subscribe();

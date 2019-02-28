@@ -21,8 +21,8 @@ public class FetchTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<TokenInfo> getTokenInfo(String address) {
-        return tokenRepository.update(address);
+    public Observable<TokenInfo> getTokenInfo(String address, int chainId) {
+        return tokenRepository.update(address, chainId);
     }
 
     public Observable<Token[]> fetchStored(Wallet wallet) {
@@ -31,14 +31,14 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token> fetchStoredToken(Wallet wallet, String tokenAddress) {
-        return tokenRepository.fetchCachedSingleToken(wallet.address, tokenAddress)
+    public Observable<Token> fetchStoredToken(NetworkInfo network, Wallet wallet, String tokenAddress) {
+        return tokenRepository.fetchCachedSingleToken(network, wallet.address, tokenAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token[]> fetchStoredWithEth(NetworkInfo network, Wallet wallet) {
-        return tokenRepository.fetchActiveStoredPlusEth(network, wallet.address)
+    public Observable<Token[]> fetchStoredWithEth(Wallet wallet) {
+        return tokenRepository.fetchActiveStoredPlusEth(wallet.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -56,9 +56,9 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<BigInteger> getLatestBlock()
+    public Single<BigInteger> getLatestBlock(int chainId)
     {
-        return tokenRepository.fetchLatestBlockNumber();
+        return tokenRepository.fetchLatestBlockNumber(chainId);
     }
 
     public Observable<ContractResult> getContractResponse(String address, int chainId, String method)
@@ -66,9 +66,9 @@ public class FetchTokensInteract {
         return tokenRepository.getTokenResponse(address, chainId, method).toObservable();
     }
 
-    public Observable<Token> updateDefaultBalance(Token token, NetworkInfo network, Wallet wallet)
+    public Observable<Token> updateDefaultBalance(Token token, Wallet wallet)
     {
-        return tokenRepository.fetchActiveTokenBalance(token, network, wallet)
+        return tokenRepository.fetchActiveTokenBalance(wallet.address, token)
                 .subscribeOn(Schedulers.io());
     }
 
@@ -83,16 +83,16 @@ public class FetchTokensInteract {
     public Observable<Token> updateBalance(String address, Token token)
     {
         if (token == null) return Observable.fromCallable(() -> {
-            return new Token(null, BigDecimal.ZERO, 0);
+            return new Token(null, BigDecimal.ZERO, 0, "");
         });
         return tokenRepository.fetchActiveTokenBalance(address, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<Ticker> getEthereumTicker()
+    public Single<Ticker> getEthereumTicker(int chainId)
     {
-        return tokenRepository.getEthTicker();
+        return tokenRepository.getEthTicker(chainId);
     }
 
     private OrderContractAddressPair mapToPair(Token token, MagicLinkData so)

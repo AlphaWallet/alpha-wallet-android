@@ -80,10 +80,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
         myAddressRouter.open(ctx, contractAddress);
     }
 
-    public void startEthereumTicker() {
+    public void startEthereumTicker(int chainId) {
         disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .getEthereumTicker()
+                        .getEthereumTicker(chainId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTicker, this::onError)).subscribe();
@@ -184,7 +184,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public void updateDefaultBalance(Token token) {
         getBalanceDisposable = Observable.interval(CHECK_ETHPRICE_INTERVAL, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .updateDefaultBalance(token, network.getValue(), wallet.getValue())
+                        .updateDefaultBalance(token, wallet.getValue())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onToken, this::onError)).subscribe();

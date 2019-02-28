@@ -150,7 +150,6 @@ public class SellDetailActivity extends BaseActivity {
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
-        adapter.setDefaultNetwork(networkInfo);
         setupPage();
     }
 

@@ -149,8 +149,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager) {
-	    return new TokensRealmSource(realmManager);
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
+	    return new TokensRealmSource(realmManager, ethereumNetworkRepository);
     }
 
 	@Singleton

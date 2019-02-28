@@ -217,32 +217,30 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus);
     }
 
-    public void createTicketTransfer(String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    public void createTicketTransfer(String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
-        Token token = tokensService.getToken(contractAddress);
         if (token.unspecifiedSpec())
         {
             //need to determine the spec
             disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(spec -> onInterfaceSpec(spec, to, contractAddress, indexList, gasPrice, gasLimit), this::onError);
+                    .subscribe(spec -> onInterfaceSpec(spec, to, token, indexList, gasPrice, gasLimit), this::onError);
         }
         else
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data)
                     .subscribe(this::onCreateTransaction, this::onError);
         }
     }
 
-    private void onInterfaceSpec(ContractType spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    private void onInterfaceSpec(ContractType spec, String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
-        Token token = tokensService.getToken(contractAddress);
         token.setInterfaceSpec(spec);
         TokensService.setInterfaceSpec(token.getAddress(), spec);
-        createTicketTransfer(to, contractAddress, indexList, gasPrice, gasLimit);
+        createTicketTransfer(to, token, indexList, gasPrice, gasLimit);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

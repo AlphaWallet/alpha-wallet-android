@@ -69,9 +69,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
     }
 
-    public Token getToken(String address)
+    public Token getToken(int chainId, String address)
     {
-        return tokenService.getToken(address);
+        return tokenService.getToken(chainId, address);
     }
 
     @Nullable

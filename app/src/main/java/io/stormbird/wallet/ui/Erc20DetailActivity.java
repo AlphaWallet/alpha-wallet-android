@@ -80,7 +80,7 @@ public class Erc20DetailActivity extends BaseActivity {
         initViews();
 
         if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker();
+            viewModel.startEthereumTicker(token.tokenInfo.chainId);
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
         }
     }
@@ -102,7 +102,6 @@ public class Erc20DetailActivity extends BaseActivity {
             }
         });
         tokenViewAdapter = new TokensAdapter(this, null, viewModel.getAssetDefinitionService());
-        tokenViewAdapter.setDefaultNetwork(viewModel.getNetwork());
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);

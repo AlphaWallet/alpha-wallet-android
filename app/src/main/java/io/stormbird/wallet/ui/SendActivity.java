@@ -121,7 +121,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker();
+            viewModel.startEthereumTicker(token.tokenInfo.chainId);
             viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
             switchBtn.setVisibility(View.VISIBLE);
         } else {

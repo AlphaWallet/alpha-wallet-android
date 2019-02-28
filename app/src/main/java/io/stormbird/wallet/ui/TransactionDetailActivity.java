@@ -68,7 +68,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        token = viewModel.getToken(transaction.to);
+        token = viewModel.getToken(transaction.chainId, transaction.to);
 
         String operationName = null;
         if (token != null)
@@ -101,7 +101,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
         if (token == null && (transaction.input == null || transaction.input.equals("0x")))
         {
-            token = viewModel.getToken(wallet.address);
+            token = viewModel.getToken(networkInfo.chainId, wallet.address);
             prefix = (isSent ? "-" : "+");
         }
 

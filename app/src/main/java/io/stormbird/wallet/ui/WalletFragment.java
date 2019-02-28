@@ -285,8 +285,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
         networkId = networkInfo.chainId;
-        adapter.setDefaultNetwork(networkInfo);
-//        setBottomMenu(R.menu.menu_main_network);
     }
 
     private void onBalanceChanged(Map<String, String> balance) {

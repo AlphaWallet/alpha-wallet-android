@@ -50,6 +50,7 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
+import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 public class SendActivity extends BaseActivity implements Runnable, ItemClickListener {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -530,12 +531,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenBalanceText.setText(value);
 
         tokenBalanceText.setVisibility(View.VISIBLE);
-    }
-
-    public static String getUsdString(double usdPrice) {
-        DecimalFormat df = new DecimalFormat("#.##");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return df.format(usdPrice);
     }
 
     @Override

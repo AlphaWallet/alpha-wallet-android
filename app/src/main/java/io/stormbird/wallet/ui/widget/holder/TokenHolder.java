@@ -16,18 +16,18 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
-import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenTicker;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.ui.widget.OnTokenClickListener;
+import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
+
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
@@ -133,12 +133,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         stopTextAnimation();
-        String converted = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                ? EMPTY_BALANCE
-                : ethBalance.multiply(new BigDecimal(ticker.price))
-                .setScale(2, RoundingMode.HALF_DOWN)
-                .stripTrailingZeros()
-                .toPlainString();
+        BigDecimal usdBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.HALF_DOWN);
+        String converted = getUsdString(usdBalance.doubleValue());
         String formattedPercents = "";
         int color = Color.RED;
         double percentage = 0;
@@ -187,12 +183,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             appreciation = appreciation.multiply(BigDecimal.valueOf(-1));
         }
 
-        //BigDecimal appreciation = balance.subtract(balance.divide((BigDecimal.valueOf(percentage).add(BigDecimal.ONE))) );
-        String convertedAppreciation =
-                appreciation
-                .setScale(2, RoundingMode.HALF_UP)
-                .stripTrailingZeros()
-                .toPlainString();
+        String convertedAppreciation = getUsdString(appreciation.doubleValue());
 
         lbl = getString(R.string.token_balance,
                 ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",

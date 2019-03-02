@@ -363,12 +363,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenBalanceText.setVisibility(View.VISIBLE);
     }
 
-    public static String getUsdString(double usdPrice) {
-        DecimalFormat df = new DecimalFormat("#.##");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return df.format(usdPrice);
-    }
-
     @Override
     public void run() {
         ensHandler.checkENS();

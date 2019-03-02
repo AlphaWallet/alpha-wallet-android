@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
 import java.math.BigDecimal;
@@ -131,24 +132,36 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     {
         //check for currency link - currently only xDAI
         MagicLinkData data = viewModel.getSalesOrder();
-        switch (data.contractType)
+        if (data.chainId > 0)
         {
-            case currencyLink:
-                //for currency drop link, check xDai first, then other networks
-                viewModel.switchNetwork(EthereumNetworkRepository.XDAI_ID);
-                viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
-                break;
-            default:
-                int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
-                if (checkNetworkId > 0)
-                {
-                    viewModel.switchNetwork(checkNetworkId);
-                }
-                else
-                {
-                    viewModel.checkTokenNetwork(contractAddress, "name");
-                }
-                break;
+            viewModel.switchNetwork(data.chainId);
+            viewModel.loadToken();
+        }
+        else
+        {
+            //Legacy support
+            switch (data.contractType)
+            {
+                case currencyLink:
+                    //for currency drop link, check xDai first, then other networks
+                    viewModel.switchNetwork(EthereumNetworkRepository.XDAI_ID);
+                    viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
+                    break;
+                default:
+                    //TODO: The line of code below will return a potentially incorrect value
+                    //TODO: if there are two contracts on different chains with the same address (owned by same key)
+                    int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
+                    if (checkNetworkId > 0)
+                    {
+                        viewModel.switchNetwork(checkNetworkId);
+                        viewModel.loadToken();
+                    }
+                    else
+                    {
+                        viewModel.checkTokenNetwork(contractAddress, "name");
+                    }
+                    break;
+            }
         }
     }
 
@@ -156,7 +169,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     {
         chainId = networkInfo.chainId;
         MagicLinkData magicLinkData = new MagicLinkData();
-        String domain = magicLinkData.getMagicLinkDomainFromNetworkId(chainId);
+        String domain = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
         paymasterUrlPrefix = magicLinkData.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
@@ -560,7 +573,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 {
                     //could be magicLink
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
-                    ParseMagicLink parser = new ParseMagicLink(this.chainId, cryptoFunctions);
+                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
                     if (Address.isAddress(order.contractAddress) && order.tickets.length > 0)
                     {

@@ -168,9 +168,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onNetwork(NetworkInfo networkInfo)
     {
         chainId = networkInfo.chainId;
-        MagicLinkData magicLinkData = new MagicLinkData();
         String domain = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
-        paymasterUrlPrefix = magicLinkData.formPaymasterURLPrefixFromDomain(domain);
+        paymasterUrlPrefix = MagicLinkInfo.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
     }

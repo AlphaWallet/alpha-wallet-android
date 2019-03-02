@@ -86,6 +86,7 @@ public class AppSiteController {
         try
         {
             data = parser.parseUniversalLink(universalLink);
+            data.chainId = MagicLinkInfo.getNetworkIdFromDomain(domain);
         }
         catch (SalesOrderMalformed e)
         {

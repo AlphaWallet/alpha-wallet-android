@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class UniversalLinkTypeTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(1, new CryptoFunctions());
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
 
     /**
      * these values give the key format, ie
@@ -58,7 +58,7 @@ public class UniversalLinkTypeTest
         byte[] linkMessage = ParseMagicLink.generateCurrencyLink(tradeBytes);
 
         //now complete the link by adding the signature on the end
-        String universalLink = parser.completeUniversalLink(linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(1,linkMessage, signature);
 
         System.out.println(universalLink);
 

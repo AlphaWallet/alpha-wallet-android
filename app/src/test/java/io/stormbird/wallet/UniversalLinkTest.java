@@ -34,7 +34,7 @@ import io.stormbird.token.tools.ParseMagicLink;
 
 public class UniversalLinkTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(1, new CryptoFunctions());
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
 
     final String[] links = { "https://aw.app/AAAAAFroO8yg2x-t8XoYKvHWEk8mRcRZuarNIgwNDg9OYA205_-QZURILYlNp6astOo-RkQMSSefIzMWHKdjcGsc3kAaHfHYi7rrLTgmUfAMaQjFB_u8G0EbB8HewJwDAA==",
             "https://aw.app/AB6EgFroX2xm8IymiSAXpF2m-3kqjpRvy-PYZRQVFhcYAlMtOEau6TvoUT-lN5HoxjxlErC2T0LJ-1u4DmORCdoVs-UNTIL33W_OJ6jGJy2ocqEyWBmV-RiYPIzQlHq0mwE=",
@@ -135,7 +135,7 @@ public class UniversalLinkTest
                 byte[] signature = getSignature(tradeBytes);
 
                 //finally generate link
-                data.link = parser.generateUniversalLink(data.tickets, CONTRACT_ADDR, data.price, data.expiry, signature);
+                data.link = parser.generateUniversalLink(data.tickets, CONTRACT_ADDR, data.price, data.expiry, signature, 1);
 
                 orders.add(data);
             }

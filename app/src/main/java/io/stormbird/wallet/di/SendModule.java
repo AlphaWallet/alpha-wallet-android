@@ -17,16 +17,12 @@ import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 class SendModule {
     @Provides
     SendViewModelFactory provideSendViewModelFactory(ConfirmationRouter confirmationRouter,
-                                                     FetchGasSettingsInteract fetchGasSettingsInteract,
                                                      MyAddressRouter myAddressRouter,
-                                                     FetchTokensInteract fetchTokensInteract,
                                                      ENSInteract ensInteract,
                                                      AssetDefinitionService assetDefinitionService,
                                                      EthereumNetworkRepositoryType networkRepositoryType) {
         return new SendViewModelFactory(confirmationRouter,
-                fetchGasSettingsInteract,
                 myAddressRouter,
-                fetchTokensInteract,
                 ensInteract,
                 assetDefinitionService,
                 networkRepositoryType);
@@ -38,18 +34,8 @@ class SendModule {
     }
 
     @Provides
-    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
-        return new FetchGasSettingsInteract(gasSettingsRepository);
-    }
-
-    @Provides
     MyAddressRouter provideMyAddressRouter() {
         return new MyAddressRouter();
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
     }
 
     @Provides

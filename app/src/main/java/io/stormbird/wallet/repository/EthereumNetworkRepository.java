@@ -21,7 +21,7 @@ import static io.stormbird.wallet.C.*;
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
 	public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-	public static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
+	public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
 	public static final String XDAI_RPC_URL = "https://dai.poa.network";
 	public static final String POA_RPC_URL = "https://core.poa.network/";
 	public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";

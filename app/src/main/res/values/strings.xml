@@ -442,4 +442,6 @@
     <string name="wrong_token_title">Different token requested</string>
     <string name="transfer_request">Transfer request</string>
     <string name="token_transfer_request">Token transfer request</string>
+    <string name="generate_payment_request">Generate Payment Request</string>
+    <string name="enter_the_requested_amount">Enter the requested amount:</string>
 </resources>

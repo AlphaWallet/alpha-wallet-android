@@ -159,9 +159,9 @@ public class AssetDisplayViewModel extends BaseViewModel
         transferTicketRouter.open(context, ticket);
     }
 
-    public void showContractInfo(Context ctx, String address)
+    public void showContractInfo(Context ctx, Token token)
     {
-        myAddressRouter.open(ctx, address);
+        myAddressRouter.open(ctx, defaultWallet.getValue(), token);
     }
 
     public void sellTicketRouter(Context ctx, Token token) {

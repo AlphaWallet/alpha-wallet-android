@@ -9,12 +9,19 @@
     <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
+        android:id="@+id/layout_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/background_card"
         android:orientation="vertical"
         android:paddingLeft="15dp"
         android:paddingRight="15dp">
+
+        <LinearLayout
+            android:id="@+id/layout_select_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
         <TextView
             android:id="@+id/title_my_address"
@@ -67,6 +74,40 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_define_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/font_light"
+                android:gravity="center"
+                android:text="@string/generate_payment_request"
+                android:textColor="@color/text_black"
+                android:textSize="25sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_light"
+                android:gravity="center"
+                android:text="@string/enter_the_requested_amount"
+                android:textColor="@color/text_black"
+                android:textSize="16sp" />
+
+            <include layout="@layout/item_input_amount" />
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/qr_image"

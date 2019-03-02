@@ -188,7 +188,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
         receiveBtn = findViewById(R.id.button_receive);
         receiveBtn.setOnClickListener(v -> {
-            viewModel.showMyAddress(this, wallet);
+            viewModel.showMyAddress(this, wallet, token);
         });
 
         if (hasDefinition)
@@ -227,7 +227,7 @@ public class Erc20DetailActivity extends BaseActivity {
                 break;
             }
             case R.id.action_qr:
-                viewModel.showContractInfo(this, contractAddress);
+                viewModel.showContractInfo(this, token);
                 break;
         }
         return false;

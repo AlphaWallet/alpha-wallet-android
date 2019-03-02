@@ -573,7 +573,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onComplete()
                     {
-                        realm.commitTransaction();
+                        if (realm.isInTransaction()) realm.commitTransaction();
                         TransactionsRealmCache.subRealm();
                         realm.close();
                     }
@@ -975,7 +975,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onComplete()
                     {
-                        realm.commitTransaction();
+                        if (realm.isInTransaction()) realm.commitTransaction();
                         TransactionsRealmCache.subRealm();
                         realm.close();
                     }

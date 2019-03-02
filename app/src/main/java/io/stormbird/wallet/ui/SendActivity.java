@@ -48,6 +48,7 @@ import io.stormbird.wallet.viewmodel.SendViewModel;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
+import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
@@ -277,8 +278,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 tokenEquivalent.setText(amountStr);
             } else {
                 double amount = Double.parseDouble(amountStr);
-                double equivalent = amount / currentEthPrice;
-                tokenEquivalent.setText(String.valueOf(equivalent));
+                String ethValue = getEthString(amount / currentEthPrice);
+                tokenEquivalent.setText(String.valueOf(ethValue));
             }
         } else {
             String amount = amountEditText.getText().toString();

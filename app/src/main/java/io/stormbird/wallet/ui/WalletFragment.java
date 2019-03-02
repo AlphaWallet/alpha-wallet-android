@@ -39,6 +39,7 @@ import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
+@SuppressLint("ValidFragment")
 public class WalletFragment extends Fragment implements View.OnClickListener, TokenInterface
 {
     private static final String TAG = "WFRAG";
@@ -53,21 +54,14 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
-    private FragmentMessenger homeMessager;
-    private int networkId = 0;
+    private final FragmentMessenger homeMessager;
 
-    private Wallet wallet;
     private boolean isVisible;
 
     @SuppressLint("ValidFragment")
     public WalletFragment(FragmentMessenger messenger)
     {
         homeMessager = messenger;
-    }
-
-    public WalletFragment()
-    {
-
     }
 
     @Nullable
@@ -278,13 +272,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onDefaultWallet(Wallet wallet)
     {
-        this.wallet = wallet;
         viewModel.fetchTokens();
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
-        networkId = networkInfo.chainId;
         adapter.setDefaultNetwork(networkInfo);
 //        setBottomMenu(R.menu.menu_main_network);
     }
@@ -317,7 +309,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void tokensReady(Boolean dummy)
     {
-        homeMessager.TokensReady();
+        if (homeMessager != null) homeMessager.TokensReady();
     }
 
     private void fetchKnownContracts(Integer networkId)

@@ -7,13 +7,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
-import io.stormbird.token.entity.CryptoFunctionsInterface;
-import io.stormbird.token.entity.EthereumReadBuffer;
-import io.stormbird.token.entity.EthereumWriteBuffer;
-import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.MessageData;
-import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.entity.UnsignedLong;
+
+import io.stormbird.token.entity.*;
 
 /**
  * Created by James on 21/02/2018.
@@ -33,14 +28,10 @@ public class ParseMagicLink
 
     private static final String CURRENCY_LINK_PREFIX = "XDAIDROP";
     private CryptoFunctionsInterface cryptoInterface;
-    private String magicLinkUrlPrefix;
 
-    public ParseMagicLink(int chainId, CryptoFunctionsInterface cryptInf)
+    public ParseMagicLink(CryptoFunctionsInterface cryptInf)
     {
-        MagicLinkData magicLinkData = new MagicLinkData();
         cryptoInterface = cryptInf;
-        String domain = magicLinkData.getMagicLinkDomainFromNetworkId(chainId);
-        magicLinkUrlPrefix = magicLinkData.formMagicLinkURLPrefixFromDomain(domain);
     }
 
     public MessageData readByteMessage(byte[] message, byte[] sig, int ticketCount) throws SalesOrderMalformed
@@ -85,16 +76,15 @@ public class ParseMagicLink
 
     public MagicLinkData parseUniversalLink(String link) throws SalesOrderMalformed
     {
+        int chainId = MagicLinkInfo.identifyChainId(link);
+        String magicLinkUrlPrefix = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
+
         int offset = link.indexOf(magicLinkUrlPrefix);
         if (offset > -1)
         {
-            offset += magicLinkUrlPrefix.length();
+            offset += magicLinkUrlPrefix.length() + 1;
             String linkData = link.substring(offset);
-            return getMagicLinkDataFromURL(linkData);
-        }
-        else if (link.length() > 60)
-        {
-            return getMagicLinkDataFromURL(link);
+            return getMagicLinkDataFromURL(linkData, chainId);
         }
         else
         {
@@ -147,9 +137,10 @@ public class ParseMagicLink
         return data;
     }
 
-    private MagicLinkData getMagicLinkDataFromURL(String linkData) throws SalesOrderMalformed
+    private MagicLinkData getMagicLinkDataFromURL(String linkData, int chainId) throws SalesOrderMalformed
     {
         MagicLinkData data = new MagicLinkData();
+        data.chainId = chainId;
         byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
         try
         {
@@ -385,19 +376,19 @@ public class ParseMagicLink
         return generateLeadingLinkBytes(spawnable, null, tokenIds, contractAddress, priceWei, expiry);
     }
 
-    public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature) throws SalesOrderMalformed
+    public String generateUniversalLink(int[] thisTickets, String contractAddr, BigInteger price, long expiry, byte[] signature, int chainId) throws SalesOrderMalformed
     {
         byte[] leading = generateLeadingLinkBytes(thisTickets, contractAddr, price, expiry);
-        return completeUniversalLink(leading, signature);
+        return completeUniversalLink(chainId, leading, signature);
     }
 
-    public String completeUniversalLink(byte[] message, byte[] signature)
+    public String completeUniversalLink(int chainId, byte[] message, byte[] signature)
     {
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);
         System.arraycopy(signature, 0, completeLink, message.length, signature.length);
         StringBuilder sb = new StringBuilder();
-        sb.append(magicLinkUrlPrefix);
+        sb.append(MagicLinkInfo.generatePrefix(chainId));
         byte[] b64 = cryptoInterface.Base64Encode(completeLink);
         sb.append(new String(b64));
         //this trade can be claimed by anyone who pushes the transaction through and has the sig

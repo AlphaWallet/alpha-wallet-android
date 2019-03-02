@@ -64,7 +64,6 @@ public class ImportTokenViewModel extends BaseViewModel
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FetchGasSettingsInteract fetchGasSettingsInteract;
 
-    private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -120,8 +119,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (parser == null)
         {
-            cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(this.network.getValue().chainId, cryptoFunctions);
+            parser = new ParseMagicLink(new CryptoFunctions());
         }
     }
 
@@ -139,9 +137,9 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
-        disposable = findDefaultNetworkInteract
+        disposable = findDefaultWalletInteract
                 .find()
-                .subscribe(this::onNetwork, this::onError);
+                .subscribe(this::onWallet, this::onError);
     }
 
     @Override
@@ -164,15 +162,6 @@ public class ImportTokenViewModel extends BaseViewModel
     public Token getImportToken() { return importToken; }
     public MagicLinkData getSalesOrder() { return importOrder; }
 
-    private void onNetwork(NetworkInfo networkInfo)
-    {
-        network.setValue(networkInfo);
-        network.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onWallet, this::onError);
-    }
-
     //1. Receive the default wallet (if any), then decode the import order
     private void onWallet(Wallet wallet) {
         initParser();
@@ -183,7 +172,7 @@ public class ImportTokenViewModel extends BaseViewModel
             importOrder = parser.parseUniversalLink(univeralImportLink);
             //ecrecover the owner
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
-            //got to step 2. - get cached tokens
+            //see if we picked up a network from the link
             checkContractNetwork.postValue(importOrder.contractAddress);
         }
         catch (SalesOrderMalformed e)
@@ -592,11 +581,6 @@ public class ImportTokenViewModel extends BaseViewModel
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
-    }
-
-    public TokenDefinition getAssetDefinition(String address)
-    {
-        return assetDefinitionService.getAssetDefinition(address);
     }
 
     public void checkFeemaster(String feemasterServer)

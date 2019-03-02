@@ -37,7 +37,35 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="app.wallet.io"
+                    android:host="aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="classic.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="kovan.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="ropsten.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="rinkeby.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="poa.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="sokol.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="xdai.aw.app"
                     android:pathPrefix="/"
                     android:scheme="https" />
                 <data

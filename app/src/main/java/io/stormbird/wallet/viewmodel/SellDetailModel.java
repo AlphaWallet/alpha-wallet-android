@@ -4,11 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
@@ -34,7 +30,6 @@ public class SellDetailModel extends BaseViewModel {
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
 
     private Ticket ticket;
-    private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -67,8 +62,7 @@ public class SellDetailModel extends BaseViewModel {
     {
         if (parser == null)
         {
-            cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(this.defaultNetwork.getValue().chainId, cryptoFunctions);
+            parser = new ParseMagicLink(new CryptoFunctions());
         }
     }
 
@@ -158,7 +152,7 @@ public class SellDetailModel extends BaseViewModel {
     private void gotSignature(byte[] signature)
     {
         initParser();
-        String universalLink = parser.completeUniversalLink(linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(defaultNetwork.getValue().chainId, linkMessage, signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }

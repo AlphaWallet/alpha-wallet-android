@@ -38,7 +38,6 @@ public class BrowseMarketViewModel extends BaseViewModel
     private static final long CHECK_MARKET_INTERVAL = 30;
 
     private static ParseMagicLink parser;
-    private static CryptoFunctions cryptoFunctions;
     private final MarketQueueService marketQueueService;
     private final MarketBuyRouter marketBuyRouter;
     private final FetchTokensInteract fetchTokensInteract;
@@ -77,9 +76,7 @@ public class BrowseMarketViewModel extends BaseViewModel
     {
         if (parser == null)
         {
-            cryptoFunctions = new CryptoFunctions();
-            //TODO get chain id if need be
-            parser = new ParseMagicLink(1, cryptoFunctions);
+            parser = new ParseMagicLink(new CryptoFunctions());
         }
     }
 

@@ -1,39 +1,17 @@
 package io.stormbird.token.entity;
 
+import java.util.HashMap;
+import java.util.Map;
 
-import io.stormbird.token.tools.Numeric;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-public class MagicLinkData
+/**
+ * Created by James on 2/03/2019.
+ * Stormbird in Singapore
+ */
+public class MagicLinkInfo
 {
-    public long expiry;
-    public byte[] prefix;
-    public BigInteger nonce;
-    public double price;
-    public BigInteger priceWei;
-    public List<BigInteger> tokenIds;
-    public int[] tickets;
-    public BigInteger amount;
-    public int ticketStart;
-    public int ticketCount;
-    public String contractAddress;
-    public byte[] signature = new byte[65];
-    public byte[] message;
-    public String ownerAddress;
-    public String contractName;
-    public byte contractType;
-    public int chainId;
-
-    public List<BigInteger> balanceInfo = null;
-  
     //node urls
     private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
+    private static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
     private static final String XDAI_RPC_URL = "https://dai.poa.network";
     private static final String POA_RPC_URL = "https://core.poa.network/";
     private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -55,6 +33,7 @@ public class MagicLinkData
     private static final String customMagicLinkDomain = "custom.aw.app";
 
     //network ids
+    private static final int LEGACY_VALUE = 0;
     private static final int MAINNET_NETWORK_ID = 1;
     private static final int CLASSIC_NETWORK_ID = 61;
     private static final int KOVAN_NETWORK_ID = 42;
@@ -74,7 +53,9 @@ public class MagicLinkData
     private static final String SOKOL_NETWORK = "Sokol";
     private static final String XDAI_NETWORK = "xDAI";
 
-    public String getNetworkNameById(int networkId) {
+
+
+    public static String getNetworkNameById(int networkId) {
         switch (networkId) {
             case MAINNET_NETWORK_ID:
                 return ETHEREUM_NETWORK;
@@ -97,7 +78,7 @@ public class MagicLinkData
         }
     }
 
-    public String getNodeURLByNetworkId(int networkId) {
+    public static String getNodeURLByNetworkId(int networkId) {
         switch (networkId) {
             case MAINNET_NETWORK_ID:
                 return MAINNET_RPC_URL;
@@ -120,8 +101,10 @@ public class MagicLinkData
         }
     }
 
-    public String getMagicLinkDomainFromNetworkId(int networkId) {
+    public static String getMagicLinkDomainFromNetworkId(int networkId) {
         switch (networkId) {
+            case LEGACY_VALUE:
+                return legacyMagicLinkDomain;
             case MAINNET_NETWORK_ID:
                 return mainnetMagicLinkDomain;
             case KOVAN_NETWORK_ID:
@@ -145,7 +128,7 @@ public class MagicLinkData
 
     //For testing you will not have the correct domain (localhost)
     //To test, alter the else statement to return the network you wish to test
-    public int getNetworkIdFromDomain(String domain) {
+    public static int getNetworkIdFromDomain(String domain) {
         switch(domain) {
             case mainnetMagicLinkDomain:
                 return MAINNET_NETWORK_ID;
@@ -170,47 +153,29 @@ public class MagicLinkData
         }
     }
 
-    public String formMagicLinkURLPrefixFromDomain(String domain)
+    public static int identifyChainId(String link)
     {
-        return "https://" + domain + "/";
-    }
-
-    public String formPaymasterURLPrefixFromDomain(String domain)
-    {
-        return "https://" + domain + ":80/api/";
-    }
-
-    public boolean isValidOrder()
-    {
-        //check this order is not corrupt
-        //first check the owner address - we should already have called getOwnerKey
-        boolean isValid = true;
-
-        if (this.ownerAddress == null || this.ownerAddress.length() < 20) isValid = false;
-        if (this.contractAddress == null || this.contractAddress.length() < 20) isValid = false;
-        if (this.message == null) isValid = false;
-
-        return isValid;
-    }
-
-    public boolean balanceChange(List<BigInteger> balance)
-    {
-        //compare two balances
-        //quick return, if sizes are different there's a change
-        if (balanceInfo == null)
+        int chainId = 0;
+        //split out the chainId from the magiclink
+        int index = link.indexOf(mainnetMagicLinkDomain);
+        int dSlash = link.indexOf("://");
+        int legacy = link.indexOf(legacyMagicLinkDomain);
+        //try new style link
+        if (index > 0 && dSlash > 0)
         {
-            balanceInfo = new ArrayList<>(); //initialise the balance list
-            return true;
+            String domain = link.substring(dSlash+3, index + mainnetMagicLinkDomain.length());
+            chainId = getNetworkIdFromDomain(domain);
         }
-        if (balance.size() != balanceInfo.size()) return true;
+        else if (legacy > 0)
+        {
+            chainId = 0;
+        }
 
-        List<BigInteger> oldBalance = new ArrayList<>(balanceInfo);
-        List<BigInteger> newBalance = new ArrayList<>(balance);
-
-        oldBalance.removeAll(balanceInfo);
-        newBalance.removeAll(balance);
-
-        return (oldBalance.size() != 0 || newBalance.size() != 0);
+        return chainId;
     }
 
+    public static String generatePrefix(int chainId)
+    {
+        return "https://" + getMagicLinkDomainFromNetworkId(chainId) + "/";
+    }
 }

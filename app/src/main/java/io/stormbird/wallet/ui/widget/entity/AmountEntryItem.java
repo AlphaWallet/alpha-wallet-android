@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
+import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 /**
@@ -174,9 +175,7 @@ public class AmountEntryItem
             } else {
                 double amount = Double.parseDouble(amountStr);
                 equivalent = amount / currentEthPrice;
-                DecimalFormat df = new DecimalFormat("0.#####");
-                df.setRoundingMode(RoundingMode.CEILING);
-                tokenEquivalent.setText(df.format(equivalent));
+                tokenEquivalent.setText(getEthString(equivalent));
             }
             callback.amountChanged(String.valueOf(equivalent));
         } else

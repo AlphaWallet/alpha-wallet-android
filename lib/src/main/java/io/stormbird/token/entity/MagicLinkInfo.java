@@ -55,7 +55,7 @@ public class MagicLinkInfo
 
 
 
-    private static String getNetworkNameById(int networkId) {
+    public static String getNetworkNameById(int networkId) {
         switch (networkId) {
             case MAINNET_NETWORK_ID:
                 return ETHEREUM_NETWORK;
@@ -78,7 +78,7 @@ public class MagicLinkInfo
         }
     }
 
-    private static String getNodeURLByNetworkId(int networkId) {
+    public static String getNodeURLByNetworkId(int networkId) {
         switch (networkId) {
             case MAINNET_NETWORK_ID:
                 return MAINNET_RPC_URL;

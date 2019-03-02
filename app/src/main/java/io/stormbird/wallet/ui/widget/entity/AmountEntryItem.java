@@ -174,8 +174,8 @@ public class AmountEntryItem
                 tokenEquivalent.setText(amountStr);
             } else {
                 double amount = Double.parseDouble(amountStr);
-                String ethValue = getEthString(amount / currentEthPrice);
-                tokenEquivalent.setText(ethValue);
+                equivalent = amount / currentEthPrice;
+                tokenEquivalent.setText(getEthString(equivalent));
             }
             callback.amountChanged(String.valueOf(equivalent));
         } else

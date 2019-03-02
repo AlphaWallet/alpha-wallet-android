@@ -32,7 +32,7 @@ public class MagicLinkData
 
     //node urls
     private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
+    private static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     private static final String XDAI_RPC_URL = "https://dai.poa.network";
     private static final String POA_RPC_URL = "https://core.poa.network/";
     private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";

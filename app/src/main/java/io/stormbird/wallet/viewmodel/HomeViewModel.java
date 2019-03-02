@@ -44,7 +44,6 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
-    private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
 
     private final ExternalBrowserRouter externalBrowserRouter;
     private final ImportTokenRouter importTokenRouter;
@@ -102,8 +101,6 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public LiveData<Wallet[]> wallets() { return wallets; }
-
-    public LiveData<Long> lastENSScanBlock() { return lastENSScanBlock; }
 
     public void prepare() {
         progress.postValue(false);
@@ -264,39 +261,6 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         wallets.postValue(join.values().toArray(new Wallet[0]));
-    }
-
-    public void checkENSNames(Wallet[] wallets, long lastBlockChecked)
-    {
-        if (wallets.length > 0)
-        {
-            disposable = fetchWalletsInteract.scanForNames(wallets, lastBlockChecked)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onENSScanResult, this::onError);
-        }
-    }
-
-    private void onENSScanResult(WalletUpdate update)
-    {
-        //check for any change
-        if (update.wallets.size() > 0)
-        {
-            disposable = fetchWalletsInteract.storeWallets(update.wallets.values().toArray(new Wallet[0]), true)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onWritten, this::onError);
-
-            for (Wallet w : wallets.getValue())
-            {
-                if (update.wallets.containsKey(w.address))
-                {
-                    w.ENSname = update.wallets.get(w.address).ENSname;
-                }
-            }
-        }
-
-        lastENSScanBlock.postValue(update.lastBlock);
     }
 
     private void onWritten(Integer wrote)

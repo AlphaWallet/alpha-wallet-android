@@ -78,11 +78,6 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
 
         initViews();
-
-        if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker();
-            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
-        }
     }
 
     private void setUpRecentTransactionsView() {
@@ -252,8 +247,20 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        //stop updates
+        viewModel.cleanUp();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         viewModel.prepare();
+
+        if (token.addressMatches(myAddress)) {
+            viewModel.startEthereumTicker();
+            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
+        }
     }
 }

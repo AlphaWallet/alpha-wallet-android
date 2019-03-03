@@ -87,7 +87,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dappBrowserFragment = new DappBrowserFragment();
         transactionsFragment = new TransactionsFragment();
         settingsFragment = new NewSettingsFragment();
-        walletFragment = new WalletFragment(this);
+        walletFragment = new WalletFragment();
     }
 
     @Override
@@ -199,6 +199,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         viewModel.showImportLink(this, clipText.toString());
                     }
                 }
+            }
+
+            if (walletFragment != null)
+            {
+                walletFragment.setTokenInterface(this);
             }
         }
         catch (Exception e)

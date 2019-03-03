@@ -39,7 +39,6 @@ import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
-@SuppressLint("ValidFragment")
 public class WalletFragment extends Fragment implements View.OnClickListener, TokenInterface
 {
     private static final String TAG = "WFRAG";
@@ -54,15 +53,9 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
-    private final FragmentMessenger homeMessager;
+    private FragmentMessenger homeMessager;
 
     private boolean isVisible;
-
-    @SuppressLint("ValidFragment")
-    public WalletFragment(FragmentMessenger messenger)
-    {
-        homeMessager = messenger;
-    }
 
     @Nullable
     @Override
@@ -119,6 +112,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.clearProcess();
 
         return view;
+    }
+
+    public void setTokenInterface(FragmentMessenger messenger)
+    {
+        homeMessager = messenger;
     }
 
     private void refreshList()

@@ -156,6 +156,7 @@ public class AppSiteController {
         model.addAttribute("linkValue", getEthStringSzabo(data.amount));
         model.addAttribute("title", networkName + " Currency Drop");
         model.addAttribute("currency", networkName);
+        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
 
         try {
             updateContractInfo(model, data);

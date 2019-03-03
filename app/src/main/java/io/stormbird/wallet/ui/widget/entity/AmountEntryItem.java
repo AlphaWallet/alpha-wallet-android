@@ -125,18 +125,6 @@ public class AmountEntryItem
             updateEquivalentValue();
         });
 
-        if (isEth)
-        {
-            startEthereumTicker();
-            switchBtn.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            usdValue.setVisibility(View.GONE);
-            quantityUpBtn.setVisibility(View.VISIBLE);
-            quantityDownBtn.setVisibility(View.VISIBLE);
-        }
-
         quantityUpBtn = activity.findViewById(R.id.img_quantity_up);
         quantityUpBtn.setOnClickListener(v -> {
             double amount;
@@ -162,6 +150,18 @@ public class AmountEntryItem
             amountEditText.setText(String.valueOf(amount));
             callback.amountChanged(String.valueOf(amount));
         });
+
+        if (isEth)
+        {
+            startEthereumTicker();
+            switchBtn.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            usdValue.setVisibility(View.GONE);
+            quantityUpBtn.setVisibility(View.VISIBLE);
+            quantityDownBtn.setVisibility(View.VISIBLE);
+        }
     }
 
     private void updateEquivalentValue() {

@@ -106,7 +106,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (token.isEthereum()) //Currently only allow request for native chain currency
+        if (token == null || token.isEthereum()) //Currently only allow request for native chain currency, can get here via routes where token is not set.
         {
             getMenuInflater().inflate(R.menu.menu_receive, menu);
         }

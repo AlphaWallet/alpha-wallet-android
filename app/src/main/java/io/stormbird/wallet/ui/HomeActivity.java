@@ -42,7 +42,11 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.DownloadInterface;
+import io.stormbird.wallet.entity.DownloadReceiver;
+import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.FragmentMessenger;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
@@ -76,6 +80,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final DappBrowserFragment dappBrowserFragment;
     private final TransactionsFragment transactionsFragment;
     private final WalletFragment walletFragment;
+    private String walletTitle;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -144,6 +149,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.wallets().observe(this, this::onWallets);
         viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
+        viewModel.walletName().observe(this, this::onWalletName);
 
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
             showPage(SETTINGS);
@@ -166,6 +172,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.refreshWallets();
     }
 
+    private void onWalletName(String name) {
+        if (name != null && !name.isEmpty()) {
+            walletTitle = name;
+        } else {
+            walletTitle = getString(R.string.toolbar_header_wallet);
+        }
+
+        if (viewPager.getCurrentItem() == WALLET) {
+                setTitle(walletTitle);
+        }
+    }
+
     private void onWallets(Wallet[] wallets)
     {
 
@@ -181,6 +199,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onResume() {
         super.onResume();
         viewModel.prepare();
+        viewModel.getWalletName();
         checkRoot();
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -375,7 +394,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case WALLET: {
                 viewPager.setCurrentItem(WALLET);
-                setTitle(getString(R.string.toolbar_header_wallet));
+                if (walletTitle == null || walletTitle.isEmpty()) {
+                    setTitle(getString(R.string.toolbar_header_wallet));
+                }
+                else {
+                    setTitle(walletTitle);
+                }
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);
                 invalidateOptionsMenu();

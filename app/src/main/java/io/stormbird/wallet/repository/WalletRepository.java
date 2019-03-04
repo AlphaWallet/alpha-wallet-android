@@ -60,6 +60,7 @@ public class WalletRepository implements WalletRepositoryType
 				{
 					if (walletBalances.get(w.address) != null)
 					{
+						w.name = walletBalances.get(w.address).name;
 						w.balance = walletBalances.get(w.address).balance;
 						w.ENSname = walletBalances.get(w.address).ENSname;
 					}
@@ -148,6 +149,17 @@ public class WalletRepository implements WalletRepositoryType
 	public Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet)
 	{
 		return walletDataRealmSource.storeWallets(wallets, isMainNet);
+	}
+
+	@Override
+	public Single<Integer> storeWallet(Wallet wallet)
+	{
+		return walletDataRealmSource.storeWallet(wallet);
+	}
+
+	@Override
+	public Single<String> getName(String address) {
+		return walletDataRealmSource.getName(address);
 	}
 
 	private Wallet[] storeWalletsInMap(Wallet[] wallets)

@@ -76,6 +76,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<String> checkContractNetwork = new MutableLiveData<>();
     private final MutableLiveData<Boolean> ticketNotValid = new MutableLiveData<>();
     private final MutableLiveData<Boolean> feemasterAvailable = new MutableLiveData<>();
+    private final MutableLiveData<ErrorEnvelope> txError = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
     private String univeralImportLink;
@@ -133,6 +134,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<String> checkContractNetwork() { return checkContractNetwork; }
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
     public LiveData<Boolean> feemasterAvailable() { return feemasterAvailable; }
+    public LiveData<ErrorEnvelope> txError() { return txError; }
     public double getUSDPrice() { return ethToUsd; }
 
     public void prepare(String importDataStr) {
@@ -442,17 +444,17 @@ public class ImportTokenViewModel extends BaseViewModel
 //        }
 //    }
 
-    public void onError(Throwable throwable) {
+    public void onTransactionError(Throwable throwable) {
         if (throwable.getCause() instanceof ServiceErrorException)
         {
             if (((ServiceErrorException) throwable.getCause()).code == C.ErrorCode.ALREADY_ADDED)
             {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
+                txError.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
             }
         }
         else
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
+            txError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
         }
     }
 
@@ -466,7 +468,7 @@ public class ImportTokenViewModel extends BaseViewModel
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             disposable = fetchGasSettingsInteract
                     .fetch(tradeData, true)
-                    .subscribe(this::performImportFinal, this::onError);
+                    .subscribe(this::performImportFinal, this::onTransactionError);
         }
         catch (SalesOrderMalformed e)
         {
@@ -487,7 +489,7 @@ public class ImportTokenViewModel extends BaseViewModel
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
                             settings.gasPrice, settings.gasLimit, tradeData)
-                    .subscribe(this::onCreateTransaction, this::onError);
+                    .subscribe(this::onCreateTransaction, this::onTransactionError);
 
             addTokenWatchToWallet();
         }
@@ -507,7 +509,7 @@ public class ImportTokenViewModel extends BaseViewModel
             disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), network.getValue().chainId, order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::processFeemasterResult, this::onError);
+                    .subscribe(this::processFeemasterResult, this::onTransactionError);
 
             addTokenWatchToWallet();
         }

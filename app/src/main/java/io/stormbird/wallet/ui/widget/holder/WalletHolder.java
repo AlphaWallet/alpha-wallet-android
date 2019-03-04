@@ -1,8 +1,11 @@
 package io.stormbird.wallet.ui.widget.holder;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -13,6 +16,7 @@ import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.ui.WalletActionsActivity;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
@@ -34,6 +38,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private WalletsAdapter.OnExportWalletListener onExportWalletListener;
 	private Wallet wallet;
 	private String currencySymbol;
+	private TextView walletName;
+
+	private final ImageView more;
 
 	public WalletHolder(int resId, ViewGroup parent) {
 		super(resId, parent);
@@ -46,11 +53,33 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		balance = findViewById(R.id.balance_eth);
 		ethLayout = findViewById(R.id.layout_eth);
 		currency = findViewById(R.id.text_currency);
+		walletName = findViewById(R.id.wallet_name);
+		more = findViewById(R.id.btn_more);
 
 		address.setOnClickListener(this);
 		defaultAction.setOnClickListener(this);
 		deleteAction.setOnClickListener(this);
 		exportAction.setOnClickListener(this);
+		more.setOnClickListener(this);
+
+		balance.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable editable) {
+				if (!editable.toString().isEmpty()) {
+					more.setEnabled(true);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -71,13 +100,18 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		{
 			address.setText(wallet.address);
 		}
+		if (wallet.name != null && !wallet.name.isEmpty()) {
+			walletName.setText(wallet.name);
+		} else {
+			walletName.setText("--");
+		}
 		balance.setText(wallet.balance);
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		defaultAction.setEnabled(true);
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
-		deleteAction.setVisibility(
-		        addition.getBoolean(IS_DEFAULT_ADDITION, false) && !addition.getBoolean(IS_LAST_ITEM, false)
-                    ? View.GONE : View.VISIBLE);
+//		deleteAction.setVisibility(
+//		        addition.getBoolean(IS_DEFAULT_ADDITION, false) && !addition.getBoolean(IS_LAST_ITEM, false)
+//                    ? View.GONE : View.VISIBLE);
 		currency.setText(currencySymbol);
 	}
 
@@ -101,17 +135,28 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 				if (onSetWalletDefaultListener != null) {
 					onSetWalletDefaultListener.onSetDefault(wallet);
 				}
-			} break;
+				break;
+			}
 			case R.id.delete_action: {
 				if (onWalletDeleteListener != null) {
 					onWalletDeleteListener.onDelete(wallet);
 				}
-			} break;
+				break;
+			}
             case R.id.export_action: {
                 if (onExportWalletListener != null) {
                     onExportWalletListener.onExport(wallet);
                 }
-            } break;
+				break;
+            }
+			case R.id.btn_more: {
+				Intent intent = new Intent(getContext(), WalletActionsActivity.class);
+				intent.putExtra("wallet", wallet);
+				intent.putExtra("currency", currencySymbol);
+				getContext().startActivity(intent);
+				break;
+			}
+
 		}
 	}
 

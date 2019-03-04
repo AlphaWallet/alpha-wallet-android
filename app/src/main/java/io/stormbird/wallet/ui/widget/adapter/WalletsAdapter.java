@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui.widget.adapter;
 
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import java.util.Map;
@@ -114,6 +115,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder>
 			{
 				wallet.balance = balances.get(wallet.address).balance;
 				wallet.ENSname = balances.get(wallet.address).ENSname;
+				wallet.name = balances.get(wallet.address).name;
 			}
 		}
 		notifyDataSetChanged();

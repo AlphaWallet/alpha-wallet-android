@@ -55,6 +55,8 @@ public class WalletsActivity extends BaseActivity implements
 
     private WalletsAdapter adapter;
 
+    private RecyclerView list;
+    private SwipeRefreshLayout refreshLayout;
     private SystemView systemView;
     private BackupWarningView backupWarning;
     private Dialog dialog;
@@ -67,30 +69,18 @@ public class WalletsActivity extends BaseActivity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_wallets);
-        // Init toolbar
         toolbar();
         setTitle(R.string.empty);
+        initViews();
+    }
 
-        adapter = new WalletsAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
-        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
-        systemView = findViewById(R.id.system_view);
-        backupWarning = findViewById(R.id.backup_warning);
-
-        RecyclerView list = findViewById(R.id.list);
-
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setAdapter(adapter);
-
-        systemView.attachRecyclerView(list);
-        systemView.attachSwipeRefreshLayout(refreshLayout);
-        backupWarning.setOnPositiveClickListener(this::onNowBackup);
-        backupWarning.setOnNegativeClickListener(this::onLaterBackup);
-
+    @Override
+    protected void onResume() {
+        super.onResume();
         viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
                 .get(WalletsViewModel.class);
-
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.error().observe(this, this::onError);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.wallets().observe(this, this::onFetchWallet);
@@ -103,25 +93,42 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.updateBalance().observe(this, this::onUpdatedBalance);
         viewModel.namedWallets().observe(this, this::onNamedWallets);
         viewModel.lastENSScanBlock().observe(this, this::onScanBlockReceived);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.findNetwork();
+    }
 
+    private void initViews() {
+        systemView = findViewById(R.id.system_view);
+        backupWarning = findViewById(R.id.backup_warning);
+        refreshLayout = findViewById(R.id.refresh_layout);
+        list = findViewById(R.id.list);
+        list.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new WalletsAdapter(this::onSetWalletDefault, this::onDeleteWallet, this::onExportWallet);
+        list.setAdapter(adapter);
+
+        systemView.attachRecyclerView(list);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
+        backupWarning.setOnPositiveClickListener(this::onNowBackup);
+        backupWarning.setOnNegativeClickListener(this::onLaterBackup);
         refreshLayout.setOnRefreshListener(this::onSwipeRefresh);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
         adapter.setNetwork(networkInfo);
+        if (getIntent() != null) {
+            if (getIntent().getBooleanExtra("shouldRefresh", false)) {
+                viewModel.refreshWallets();
+            }
+        }
     }
 
-    private void onSwipeRefresh()
-    {
+    private void onSwipeRefresh() {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         long lastBlockChecked = pref.getLong(ENS_SCAN_BLOCK, 0);
         viewModel.swipeRefreshWallets(0); //check all records
     }
 
-    private void onScanBlockReceived(long blockNumber)
-    {
+    private void onScanBlockReceived(long blockNumber) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = pref.edit();
         editor.putLong(ENS_SCAN_BLOCK, blockNumber).apply();
@@ -190,19 +197,17 @@ public class WalletsActivity extends BaseActivity implements
 
         if (requestCode == IMPORT_REQUEST_CODE) {
             showToolbar();
-            if (resultCode == RESULT_OK)
-            {
+            if (resultCode == RESULT_OK) {
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
                 onScanBlockReceived(0); //reset scan block
                 //set as isSetDefault
-				Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
-				if (importedWallet != null)
-				{
-				    isSetDefault = true;
-				    walletChange = true;
-					viewModel.setDefaultWallet(importedWallet);
-				}
+                Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
+                if (importedWallet != null) {
+                    isSetDefault = true;
+                    walletChange = true;
+                    viewModel.setDefaultWallet(importedWallet);
+                }
             }
         } else if (requestCode == SHARE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -259,13 +264,11 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.importWallet(this);
     }
 
-    private void onUpdatedBalance(Map<String, Wallet> balances)
-    {
+    private void onUpdatedBalance(Map<String, Wallet> balances) {
         adapter.updateWalletBalances(balances);
     }
 
-    private void onNamedWallets(Map<String, String> walletNames)
-    {
+    private void onNamedWallets(Map<String, String> walletNames) {
         adapter.updateWalletNames(walletNames);
     }
 
@@ -283,8 +286,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onChangeDefaultWallet(Wallet wallet) {
-        if (walletChange)
-        {
+        if (walletChange) {
             walletChange = false;
             sendBroadcast(new Intent(RESET_WALLET));
         }
@@ -315,10 +317,10 @@ public class WalletsActivity extends BaseActivity implements
     private void onCreatedWallet(Wallet wallet) {
         hideToolbar();
         //set new wallet
-		viewModel.setDefaultWallet(wallet);
-		isSetDefault = true;
+        viewModel.setDefaultWallet(wallet);
+        isSetDefault = true;
         walletChange = true;
-		//backupWarning.show(wallet);
+        //backupWarning.show(wallet);
     }
 
     private void onLaterBackup(View view, Wallet wallet) {

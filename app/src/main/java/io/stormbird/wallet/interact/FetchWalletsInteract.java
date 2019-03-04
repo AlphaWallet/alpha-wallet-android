@@ -41,6 +41,11 @@ public class FetchWalletsInteract {
 		return accountRepository.storeWallets(wallets, isMainNet);
 	}
 
+	public Single<Integer> storeWallet(Wallet wallet)
+	{
+		return accountRepository.storeWallet(wallet);
+	}
+
 	public Map<String, Wallet> getWalletMap(NetworkInfo network)
 	{
 		return accountRepository.getWalletMap(network);

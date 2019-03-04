@@ -150,6 +150,12 @@ public class WalletRepository implements WalletRepositoryType
 		return walletDataRealmSource.storeWallets(wallets, isMainNet);
 	}
 
+	@Override
+	public Single<Integer> storeWallet(Wallet wallet)
+	{
+		return walletDataRealmSource.storeWallet(wallet);
+	}
+
 	private Wallet[] storeWalletsInMap(Wallet[] wallets)
 	{
 		for (Wallet wallet : wallets)

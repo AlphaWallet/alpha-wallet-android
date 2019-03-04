@@ -31,4 +31,5 @@ public interface WalletRepositoryType {
 	Map<String, Wallet> getWalletMap(NetworkInfo network);
 
 	Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
+	Single<Integer> storeWallet(Wallet wallet);
 }

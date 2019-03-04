@@ -23,8 +23,25 @@ import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
 class WalletActionsModule {
 	@Provides
 	WalletActionsViewModelFactory provideWalletActionsViewModelFactory(
+			DeleteWalletInteract deleteWalletInteract,
+			ExportWalletInteract exportWalletInteract,
 			FetchWalletsInteract fetchWalletsInteract) {
-		return new WalletActionsViewModelFactory(fetchWalletsInteract);
+		return new WalletActionsViewModelFactory(
+				deleteWalletInteract,
+				exportWalletInteract,
+				fetchWalletsInteract);
+	}
+
+	@Provides
+	DeleteWalletInteract provideDeleteAccountInteract(
+			WalletRepositoryType accountRepository, PasswordStore store) {
+		return new DeleteWalletInteract(accountRepository, store);
+	}
+
+	@Provides
+	ExportWalletInteract provideExportWalletInteract(
+			WalletRepositoryType walletRepository, PasswordStore passwordStore) {
+		return new ExportWalletInteract(walletRepository, passwordStore);
 	}
 
 	@Provides

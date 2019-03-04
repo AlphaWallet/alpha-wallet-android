@@ -61,6 +61,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		deleteAction.setOnClickListener(this);
 		exportAction.setOnClickListener(this);
 		more.setOnClickListener(this);
+		more.setEnabled(false);
 
 		balance.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -153,6 +154,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 				Intent intent = new Intent(getContext(), WalletActionsActivity.class);
 				intent.putExtra("wallet", wallet);
 				intent.putExtra("currency", currencySymbol);
+				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				getContext().startActivity(intent);
 				break;
 			}

@@ -9,25 +9,34 @@
     <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
-        android:layout_marginTop="?android:actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?android:actionBarSize"
         android:background="@drawable/background_card"
         android:orientation="vertical"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
         android:paddingTop="20dp">
+
+        <TextView
+            android:id="@+id/wallet_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/font_bold"
+            android:gravity="center"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:textColor="@color/text_black"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/wallet_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_bold"
+            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:text="0.00 ETH"
             android:textColor="@color/text_black"
-            android:textSize="20sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/wallet_address"
@@ -44,6 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:fontFamily="@font/font_semibold"
             android:text="@string/wallet_name"
             android:textSize="14sp" />
@@ -53,12 +64,15 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginBottom="10sp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:background="@drawable/background_round_blue_9dp"
             android:completionThreshold="1"
             android:fontFamily="@font/font_regular"
             android:imeOptions="actionDone"
             android:inputType="text"
             android:lines="1"
+            android:maxLength="30"
             android:maxLines="1"
             android:paddingEnd="60dp"
             android:paddingStart="15dp"
@@ -106,9 +120,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/selector_round_button"
+            android:enabled="false"
             android:fontFamily="@font/font_semibold"
             android:gravity="center"
-            android:enabled="false"
             android:text="@string/action_save"
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"

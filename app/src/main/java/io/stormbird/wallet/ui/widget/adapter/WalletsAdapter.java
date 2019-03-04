@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import io.stormbird.wallet.R;
@@ -15,20 +18,14 @@ import io.stormbird.wallet.ui.widget.holder.WalletHolder;
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
-    private final OnWalletDeleteListener onWalletDeleteListener;
-    private final OnExportWalletListener onExportWalletListener;
-
-    private Wallet[] wallets = new Wallet[0];
+    private ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
     private NetworkInfo network;
 
     public WalletsAdapter(
-            OnSetWalletDefaultListener onSetWalletDefaultListener,
-            OnWalletDeleteListener onWalletDeleteListener,
-            OnExportWalletListener onExportWalletListener) {
+            OnSetWalletDefaultListener onSetWalletDefaultListener) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
-        this.onWalletDeleteListener = onWalletDeleteListener;
-        this.onExportWalletListener = onExportWalletListener;
+        this.wallets = new ArrayList<>();
     }
 
     @Override
@@ -38,8 +35,6 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             case WalletHolder.VIEW_TYPE: {
                 WalletHolder h = new WalletHolder(R.layout.item_wallet_manage, parent);
                 h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
-                h.setOnWalletDeleteListener(onWalletDeleteListener);
-                h.setOnExportWalletListener(onExportWalletListener);
                 if (network != null) {
                     h.setCurrencySymbol(network.symbol);
                 }
@@ -53,7 +48,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         switch (getItemViewType(position)) {
             case WalletHolder.VIEW_TYPE: {
-                Wallet wallet = wallets[position];
+                Wallet wallet = wallets.get(position);
                 Bundle bundle = new Bundle();
                 bundle.putBoolean(
                         WalletHolder.IS_DEFAULT_ADDITION,
@@ -67,7 +62,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public int getItemCount() {
-        return wallets.length;
+        return wallets.size();
     }
 
     @Override
@@ -77,6 +72,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setNetwork(NetworkInfo network) {
         this.network = network;
+        notifyDataSetChanged();
     }
 
     public void setDefaultWallet(Wallet wallet) {
@@ -85,7 +81,11 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void setWallets(Wallet[] wallets) {
-        this.wallets = wallets == null ? new Wallet[0] : wallets;
+        this.wallets.clear();
+        if (wallets != null) {
+            List<Wallet> walletList = Arrays.asList(wallets);
+            this.wallets.addAll(walletList);
+        }
         notifyDataSetChanged();
     }
 

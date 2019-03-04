@@ -40,10 +40,8 @@ public class WalletsViewModel extends BaseViewModel {
 
     private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
-    private final DeleteWalletInteract deleteWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final ExportWalletInteract exportWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
 
@@ -54,14 +52,10 @@ public class WalletsViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
-    private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
-    private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
-    private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Wallet>> updateBalance = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> namedWallets = new MutableLiveData<>();
     private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
-
 
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
@@ -69,21 +63,17 @@ public class WalletsViewModel extends BaseViewModel {
     WalletsViewModel(
             CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
-            DeleteWalletInteract deleteWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            ExportWalletInteract exportWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
-        this.deleteWalletInteract = deleteWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.importWalletRouter = importWalletRouter;
-        this.exportWalletInteract = exportWalletInteract;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -113,18 +103,6 @@ public class WalletsViewModel extends BaseViewModel {
         return createWalletError;
     }
 
-    public LiveData<String> exportedStore() {
-        return exportedStore;
-    }
-
-    public LiveData<ErrorEnvelope> exportWalletError() {
-        return exportWalletError;
-    }
-
-    public LiveData<ErrorEnvelope> deleteWalletError() {
-        return deleteWalletError;
-    }
-
     public LiveData<Map<String, Wallet>> updateBalance() {
         return updateBalance;
     }
@@ -139,12 +117,6 @@ public class WalletsViewModel extends BaseViewModel {
                 .subscribe(() -> onDefaultWalletChanged(wallet), this::onError);
     }
 
-    public void deleteWallet(Wallet wallet) {
-        disposable = deleteWalletInteract
-                .delete(wallet)
-                .subscribe(this::onFetchWallets, this::onDeleteWalletError);
-    }
-
     public void refreshWallets() {
         disposable = fetchWalletsInteract.loadWallets()
                 .subscribeOn(Schedulers.io())
@@ -153,7 +125,11 @@ public class WalletsViewModel extends BaseViewModel {
     }
 
     private void onWallets(Wallet[] wallets) {
-        this.wallets.postValue(wallets);
+        Map<String, Wallet> walletBalances = new HashMap<>();
+        disposable = fetchWalletsInteract.fetch(walletBalances)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this.wallets::postValue, this::onError);
     }
 
     public void findNetwork() {
@@ -220,12 +196,6 @@ public class WalletsViewModel extends BaseViewModel {
                     fetchWallets();
                     createdWallet.postValue(account);
                 }, this::onCreateWalletError);
-    }
-
-    public void exportWallet(Wallet wallet, String storePassword) {
-        exportWalletInteract
-                .export(wallet, storePassword)
-                .subscribe(exportedStore::postValue, this::onExportWalletError);
     }
 
     /**
@@ -304,20 +274,6 @@ public class WalletsViewModel extends BaseViewModel {
 
     private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets) {
         return Observable.fromCallable(() -> new ArrayList<>(Arrays.asList(wallets)));
-    }
-
-    private void onExportWalletError(Throwable throwable) {
-        //Crashlytics.logException(throwable);
-        exportWalletError.postValue(
-                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
-                        ? throwable.getMessage() : throwable.getLocalizedMessage()));
-    }
-
-    private void onDeleteWalletError(Throwable throwable) {
-        //Crashlytics.logException(throwable);
-        deleteWalletError.postValue(
-                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
-                        ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
     private void onCreateWalletError(Throwable throwable) {

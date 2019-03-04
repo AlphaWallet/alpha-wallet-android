@@ -68,7 +68,6 @@ public class WalletDataRealmSource {
                         realmWallet.setENSName(wallet.ENSname);
                         if (mainNet) realmWallet.setBalance(wallet.balance);
                         realmWallet.setName(wallet.name);
-
                         updated++;
                     } else {
                         if (mainNet && (realmWallet.getBalance() == null || !wallet.balance.equals(realmWallet.getENSName())))
@@ -76,17 +75,13 @@ public class WalletDataRealmSource {
                         if (wallet.ENSname != null && (realmWallet.getENSName() == null || !wallet.ENSname.equals(realmWallet.getENSName())))
                             realmWallet.setENSName(wallet.ENSname);
                         realmWallet.setName(wallet.name);
-
                         updated++;
                     }
                 }
-
                 realm.commitTransaction();
-                realm.close();
             } catch (Exception e) {
                 Log.e(TAG, "storeWallets: " + e.getMessage(), e);
             }
-
             return updated;
         });
     }
@@ -104,15 +99,31 @@ public class WalletDataRealmSource {
                 if (realmWallet != null) {
                     realmWallet.setName(wallet.name);
                     updated++;
+                } else {
+                    realmWallet = realm.createObject(RealmWalletData.class, wallet.address);
+                    realmWallet.setName(wallet.name);
                 }
 
                 realm.commitTransaction();
-                realm.close();
             } catch (Exception e) {
                 Log.e(TAG, "storeWallet: " + e.getMessage(), e);
             }
-
             return updated;
+        });
+    }
+
+    public Single<String> getName(String address) {
+        return Single.fromCallable(() -> {
+            String name = "";
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                        .equalTo("address", address)
+                        .findFirst();
+                name = realmWallet.getName();
+            } catch (Exception e) {
+                Log.e(TAG, "getName: " + e.getMessage(), e);
+            }
+            return name;
         });
     }
 }

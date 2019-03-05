@@ -28,7 +28,6 @@ import java.math.RoundingMode;
 
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
-
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
 
     public static final int VIEW_TYPE = 1005;

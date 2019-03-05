@@ -25,9 +25,6 @@ import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
-import org.web3j.crypto.Sign;
-
-import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 /**
  * Created by James on 21/02/2018.
@@ -96,8 +93,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         if (parser == null)
         {
-            cryptoFunctions = new CryptoFunctions();
-            parser = new ParseMagicLink(this.defaultNetwork.getValue().chainId, cryptoFunctions);
+            parser = new ParseMagicLink(new CryptoFunctions());
         }
     }
 
@@ -207,7 +203,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private void gotSignature(byte[] signature)
     {
-        String universalLink = parser.completeUniversalLink(linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(defaultNetwork.getValue().chainId, linkMessage, signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }

@@ -70,7 +70,7 @@ public final class Convert {
 
     public static String getEthString(double ethPrice)
     {
-        DecimalFormat df = new DecimalFormat("#.#####");
+        DecimalFormat df = new DecimalFormat("0.#####");
         df.setRoundingMode(RoundingMode.CEILING);
         return df.format(ethPrice);
     }
@@ -78,7 +78,7 @@ public final class Convert {
     public static String getEthStringSzabo(BigInteger szabo)
     {
         BigDecimal ethPrice = fromWei(toWei(new BigDecimal(szabo), Unit.SZABO), Unit.ETHER);
-        DecimalFormat df = new DecimalFormat("#.#####");
+        DecimalFormat df = new DecimalFormat("0.#####");
         df.setRoundingMode(RoundingMode.CEILING);
         return df.format(ethPrice);
     }

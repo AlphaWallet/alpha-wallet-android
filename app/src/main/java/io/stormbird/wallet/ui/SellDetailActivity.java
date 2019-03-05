@@ -48,6 +48,7 @@ import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 /**
  * Created by James on 21/02/2018.
@@ -391,10 +392,7 @@ public class SellDetailActivity extends BaseActivity {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
             double ethPrice = Double.parseDouble(sellPrice.getText().toString());
             if (quantity > 0 && ethPrice > 0) {
-                double usdValue = ethPrice * ethToUsd * (double) quantity;
-                DecimalFormat df = new DecimalFormat("#.##");
-                df.setRoundingMode(RoundingMode.CEILING);
-                String usdText = "$" + df.format(usdValue);
+                String usdText = "$" + getUsdString(ethPrice * ethToUsd * (double) quantity);
                 usdPrice.setText(usdText);
             }
         } catch (NumberFormatException e) {

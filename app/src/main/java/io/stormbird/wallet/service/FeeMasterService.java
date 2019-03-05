@@ -32,7 +32,6 @@ public class FeeMasterService
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
     private final PasswordStore passwordStore;
-    private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
     private static final String API = "api/";
@@ -49,9 +48,7 @@ public class FeeMasterService
     {
         if (parser == null)
         {
-            cryptoFunctions = new CryptoFunctions();
-            //TODO get chainId if need be
-            parser = new ParseMagicLink(1, cryptoFunctions);
+            parser = new ParseMagicLink(new CryptoFunctions());
         }
     }
 

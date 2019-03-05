@@ -78,11 +78,6 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
 
         initViews();
-
-        if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker(token.tokenInfo.chainId);
-            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
-        }
     }
 
     private void setUpRecentTransactionsView() {
@@ -187,7 +182,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
         receiveBtn = findViewById(R.id.button_receive);
         receiveBtn.setOnClickListener(v -> {
-            viewModel.showMyAddress(this, wallet);
+            viewModel.showMyAddress(this, wallet, token);
         });
 
         if (hasDefinition)
@@ -226,7 +221,7 @@ public class Erc20DetailActivity extends BaseActivity {
                 break;
             }
             case R.id.action_qr:
-                viewModel.showContractInfo(this, contractAddress);
+                viewModel.showContractInfo(this, token);
                 break;
         }
         return false;
@@ -251,8 +246,20 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        //stop updates
+        viewModel.cleanUp();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         viewModel.prepare();
+
+        if (token.addressMatches(myAddress)) {
+            viewModel.startEthereumTicker(token.tokenInfo.chainId);
+            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
+        }
     }
 }

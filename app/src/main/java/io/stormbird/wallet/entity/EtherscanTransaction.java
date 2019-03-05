@@ -49,7 +49,7 @@ public class EtherscanTransaction
         TransactionOperation[] o;
         TransactionInput f = null;
         if (decoder == null) decoder = new TransactionDecoder();
-        if (parser == null) parser = new ParseMagicLink(chainId, new CryptoFunctions());
+        if (parser == null) parser = new ParseMagicLink(new CryptoFunctions());
 
         if (contractAddress.length() > 0)
         {

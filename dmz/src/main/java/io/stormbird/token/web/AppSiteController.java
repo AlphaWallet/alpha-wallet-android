@@ -1,5 +1,6 @@
 package io.stormbird.token.web;
 
+import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.token.util.DateTimeFactory;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +46,6 @@ public class AppSiteController {
 
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static Map<String, File> addresses;
-    private int chainId = 1; //default to mainnet
     private static final String appleAssociationConfig = "{\n" +
             "  \"applinks\": {\n" +
             "    \"apps\": [],\n" +
@@ -57,7 +57,6 @@ public class AppSiteController {
             "    ]\n" +
             "  }\n" +
             "}";
-    private String domain = "aw.app";
     private final MagicLinkData magicLinkData = new MagicLinkData();
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
@@ -80,14 +79,14 @@ public class AppSiteController {
     )
             throws IOException, SAXException, NoHandlerFoundException
     {
-        domain = request.getServerName();
-        chainId = magicLinkData.getNetworkIdFromDomain(domain);
-        ParseMagicLink parser = new ParseMagicLink(chainId, new CryptoFunctions());
+        String domain = request.getServerName();
+        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
         try
         {
             data = parser.parseUniversalLink(universalLink);
+            data.chainId = MagicLinkInfo.getNetworkIdFromDomain(domain);
         }
         catch (SalesOrderMalformed e)
         {
@@ -118,7 +117,7 @@ public class AppSiteController {
         model.addAttribute("linkPrice", getEthString(data.price));
 
         try {
-            updateContractInfo(model, data.contractAddress);
+            updateContractInfo(model, data);
         } catch (Exception e) {
             /* The link points to a non-existing contract - most
 	     * likely from a different chainID. Now, if Ethereum node
@@ -152,15 +151,15 @@ public class AppSiteController {
             Model model
     ) throws IOException, SAXException, NoHandlerFoundException
     {
-        //TODO localise
-        String networkName = magicLinkData.getNetworkNameById(chainId);
+        String networkName = MagicLinkInfo.getNetworkNameById(data.chainId);
         model.addAttribute("link", data);
         model.addAttribute("linkValue", getEthStringSzabo(data.amount));
         model.addAttribute("title", networkName + " Currency Drop");
         model.addAttribute("currency", networkName);
+        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
 
         try {
-            updateContractInfo(model, data.contractAddress);
+            updateContractInfo(model, data);
         } catch (Exception e) {
             /* The link points to a non-existing contract - most
              * likely from a different chainID. Now, if Ethereum node
@@ -192,7 +191,7 @@ public class AppSiteController {
         model.addAttribute("linkPrice", getEthString(data.price));
 
         try {
-            updateContractInfo(model, data.contractAddress);
+            updateContractInfo(model, data);
         } catch (Exception e) {
             /* The link points to a non-existing contract - most
              * likely from a different chainID. Now, if Ethereum node
@@ -244,12 +243,12 @@ public class AppSiteController {
         return definition;
     }
 
-    private void updateContractInfo(Model model, String contractAddress) {
+    private void updateContractInfo(Model model, MagicLinkData data) {
         //find out the contract name, symbol and balance
         //have to use blocking gets here
         //TODO: we should be able to update components here instead of waiting
-        TransactionHandler txHandler = new TransactionHandler(chainId);
-        String contractName = txHandler.getName(contractAddress);
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
+        String contractName = txHandler.getName(data.contractAddress);
         model.addAttribute("contractName", contractName);
     }
 
@@ -309,8 +308,8 @@ public class AppSiteController {
             MagicLinkData data,
             TokenDefinition definition
     ) throws Exception {
-        model.addAttribute("domain", domain);
-        TransactionHandler txHandler = new TransactionHandler(chainId);
+        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
         // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
@@ -322,13 +321,16 @@ public class AppSiteController {
                 .collect(Collectors.toList());
 
         for (NonFungibleToken token : selection) {
-            String sides = token.getAttribute("countryA").text;
-            sides += " - " + token.getAttribute("countryB").text;
-            model.addAttribute("ticketSides", sides);
-            model.addAttribute("ticketDate",
-                               DateTimeFactory.getDateTime(token.getAttribute("time")).format(dateFormat));
-            model.addAttribute("ticketMatch", token.getAttribute("match").text);
-            model.addAttribute("ticketCategory", token.getAttribute("category").text);
+            if (token.getAttribute("countryA") != null)
+            {
+                String sides = token.getAttribute("countryA").text;
+                sides += " - " + token.getAttribute("countryB").text;
+                model.addAttribute("ticketSides", sides);
+                model.addAttribute("ticketDate",
+                                   DateTimeFactory.getDateTime(token.getAttribute("time")).format(dateFormat));
+                model.addAttribute("ticketMatch", token.getAttribute("match").text);
+                model.addAttribute("ticketCategory", token.getAttribute("category").text);
+            }
             break; // we only need 1 token's info. rest assumed to be the same
         }
 

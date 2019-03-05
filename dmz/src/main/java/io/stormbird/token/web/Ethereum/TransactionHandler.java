@@ -1,5 +1,6 @@
 package io.stormbird.token.web.Ethereum;
 
+import io.stormbird.token.entity.MagicLinkInfo;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -32,7 +33,7 @@ public class TransactionHandler
 
     public TransactionHandler(int networkId)
     {
-        String nodeURL = new MagicLinkData().getNodeURLByNetworkId(networkId);
+        String nodeURL = MagicLinkInfo.getNodeURLByNetworkId(networkId);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);

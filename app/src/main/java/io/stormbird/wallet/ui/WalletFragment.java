@@ -54,21 +54,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private ProgressView progressView;
     private TokensAdapter adapter;
     private FragmentMessenger homeMessager;
-    private int networkId = 0;
 
-    private Wallet wallet;
     private boolean isVisible;
-
-    @SuppressLint("ValidFragment")
-    public WalletFragment(FragmentMessenger messenger)
-    {
-        homeMessager = messenger;
-    }
-
-    public WalletFragment()
-    {
-
-    }
 
     @Nullable
     @Override
@@ -97,7 +84,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
@@ -125,6 +111,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.clearProcess();
 
         return view;
+    }
+
+    public void setTokenInterface(FragmentMessenger messenger)
+    {
+        homeMessager = messenger;
     }
 
     private void refreshList()
@@ -278,13 +269,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onDefaultWallet(Wallet wallet)
     {
-        this.wallet = wallet;
         viewModel.fetchTokens();
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        networkId = networkInfo.chainId;
     }
 
     private void onBalanceChanged(Map<String, String> balance) {
@@ -315,7 +300,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void tokensReady(Boolean dummy)
     {
-        homeMessager.TokensReady();
+        if (homeMessager != null) homeMessager.TokensReady();
     }
 
     private void fetchKnownContracts(Integer networkId)

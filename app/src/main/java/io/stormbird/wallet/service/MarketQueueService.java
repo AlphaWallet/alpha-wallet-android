@@ -75,7 +75,7 @@ public class MarketQueueService {
         {
             cryptoFunctions = new CryptoFunctions();
             //TODO get network properly if need be
-            parser = new ParseMagicLink(1, cryptoFunctions);
+            parser = new ParseMagicLink(cryptoFunctions);
         }
     }
 

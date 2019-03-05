@@ -3,6 +3,8 @@ package io.stormbird.wallet.router;
 import android.content.Context;
 import android.content.Intent;
 
+import io.stormbird.wallet.C;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.MyAddressActivity;
 
@@ -17,9 +19,10 @@ public class MyAddressRouter {
         context.startActivity(intent);
     }
 
-    public void open(Context context, String contractAddress) {
+    public void open(Context context, Wallet wallet, Token token) {
         Intent intent = new Intent(context, MyAddressActivity.class);
-        intent.putExtra(EXTRA_CONTRACT_ADDRESS, contractAddress);
+        intent.putExtra(WALLET, wallet);
+        intent.putExtra(C.EXTRA_TOKEN_ID, token);
         context.startActivity(intent);
     }
 }

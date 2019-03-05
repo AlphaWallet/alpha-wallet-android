@@ -7,11 +7,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
 import java.math.BigDecimal;
@@ -68,6 +70,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private boolean usingFeeMaster = false;
 
     private String paymasterUrlPrefix = "https://aw.app:80/api"; //default
+    private final String TAG = "ITA";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -116,6 +119,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.invalidTime().observe(this, this::invalidTime);
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
+        viewModel.txError().observe(this, this::onTxError);
         viewModel.invalidLink().observe(this, this::onBadLink);
         viewModel.network().observe(this, this::onNetwork);
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
@@ -127,37 +131,53 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Ticket.blankTicketHolder(R.string.loading,this);
     }
 
+    private void onError(ErrorEnvelope errorEnvelope)
+    {
+        Log.d(TAG, errorEnvelope.message);
+    }
+
     private void checkContractNetwork(String contractAddress)
     {
         //check for currency link - currently only xDAI
         MagicLinkData data = viewModel.getSalesOrder();
-        switch (data.contractType)
+        if (data.chainId > 0)
         {
-            case currencyLink:
-                //for currency drop link, check xDai first, then other networks
-                viewModel.switchNetwork(EthereumNetworkRepository.XDAI_ID);
-                viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
-                break;
-            default:
-                int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
-                if (checkNetworkId > 0)
-                {
-                    viewModel.switchNetwork(checkNetworkId);
-                }
-                else
-                {
-                    viewModel.checkTokenNetwork(contractAddress, "name");
-                }
-                break;
+            viewModel.switchNetwork(data.chainId);
+            viewModel.loadToken();
+        }
+        else
+        {
+            //Legacy support
+            switch (data.contractType)
+            {
+                case currencyLink:
+                    //for currency drop link, check xDai first, then other networks
+                    viewModel.switchNetwork(EthereumNetworkRepository.XDAI_ID);
+                    viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
+                    break;
+                default:
+                    //TODO: The line of code below will return a potentially incorrect value
+                    //TODO: if there are two contracts on different chains with the same address (owned by same key)
+                    int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
+                    if (checkNetworkId > 0)
+                    {
+                        viewModel.switchNetwork(checkNetworkId);
+                        viewModel.loadToken();
+                    }
+                    else
+                    {
+                        viewModel.checkTokenNetwork(contractAddress, "name");
+                    }
+                    break;
+            }
         }
     }
 
     private void onNetwork(NetworkInfo networkInfo)
     {
         chainId = networkInfo.chainId;
-        MagicLinkData magicLinkData = new MagicLinkData();
-        String domain = magicLinkData.getMagicLinkDomainFromNetworkId(chainId);
-        paymasterUrlPrefix = magicLinkData.formPaymasterURLPrefixFromDomain(domain);
+        String domain = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
+        paymasterUrlPrefix = MagicLinkInfo.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
     }
@@ -470,12 +490,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         aDialog.show();
     }
 
-    private void onError(ErrorEnvelope error) {
+    private void onTxError(ErrorEnvelope error) {
         hideDialog();
         aDialog = new AWalletAlertDialog(this);
         aDialog.setIcon(AWalletAlertDialog.ERROR);
         aDialog.setTitle(R.string.error_transaction_failed);
         aDialog.setMessage(error.message);
+        aDialog.setCancelable(true);
         aDialog.setButtonText(R.string.button_ok);
         aDialog.setButtonListener(v -> {
             aDialog.dismiss();
@@ -560,7 +581,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 {
                     //could be magicLink
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
-                    ParseMagicLink parser = new ParseMagicLink(this.chainId, cryptoFunctions);
+                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
                     if (Address.isAddress(order.contractAddress) && order.tickets.length > 0)
                     {

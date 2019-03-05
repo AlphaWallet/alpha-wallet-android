@@ -53,13 +53,11 @@ import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
-import static io.stormbird.wallet.C.ENS_SCAN_BLOCK;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.DAPP_BROWSER;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.MARKETPLACE;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
-import static io.stormbird.wallet.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
 {
@@ -89,7 +87,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dappBrowserFragment = new DappBrowserFragment();
         transactionsFragment = new TransactionsFragment();
         settingsFragment = new NewSettingsFragment();
-        walletFragment = new WalletFragment(this);
+        walletFragment = new WalletFragment();
     }
 
     @Override
@@ -144,7 +142,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.wallets().observe(this, this::onWallets);
-        viewModel.lastENSScanBlock().observe(this, this::onScanBlockReceived);
         viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
 
@@ -169,21 +166,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.refreshWallets();
     }
 
-    private void onScanBlockReceived(Long blockCheck)
-    {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putLong(ENS_SCAN_BLOCK, blockCheck).apply();
-    }
-
     private void onWallets(Wallet[] wallets)
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        long lastBlockChecked = pref.getLong(ENS_SCAN_BLOCK, 0);
-        if (wallets.length > 0)
-        {
-            viewModel.checkENSNames(wallets, lastBlockChecked);
-        }
+
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -214,6 +199,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         viewModel.showImportLink(this, clipText.toString());
                     }
                 }
+            }
+
+            if (walletFragment != null)
+            {
+                walletFragment.setTokenInterface(this);
             }
         }
         catch (Exception e)

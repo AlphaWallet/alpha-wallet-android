@@ -7,57 +7,51 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.router.EthereumInfoRouter;
+import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
+import io.stormbird.wallet.ui.widget.entity.AmountEntryItem;
 import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.BalanceUtils;
+import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.viewmodel.SendViewModel;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
-public class SendActivity extends BaseActivity implements Runnable, ItemClickListener {
+public class SendActivity extends BaseActivity implements Runnable, ItemClickListener, AmountUpdateCallback {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
     @Inject
     SendViewModelFactory sendViewModelFactory;
     SendViewModel viewModel;
+    @Inject
+    protected TokenRepositoryType tokenRepository;
 
     // In case we're sending tokens
     private boolean sendingTokens = false;
@@ -67,33 +61,20 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private Wallet wallet;
     private Token token;
     private String contractAddress;
-    private double currentEthPrice;
-    private boolean usdInput = false;
     private ENSHandler ensHandler;
     private Handler handler;
     private AWalletAlertDialog dialog;
     private int chainId;
 
     private ImageButton scanQrImageView;
-    private TextView toAddressError;
-    private TextView amountError;
     private TextView tokenBalanceText;
     private TextView tokenSymbolText;
-    private AutoCompleteTextView amountEditText;
     private AutoCompleteTextView toAddressEditText;
     private TextView pasteText;
-    private RelativeLayout amountLayout;
-    private ImageButton switchBtn;
-    private ImageButton quantityUpBtn;
-    private ImageButton quantityDownBtn;
-    private TextView usdLabel;
-    private TextView tokenSymbolLabel;
-    private TextView usdValue;
-
-    private LinearLayout tokenEquivalentLayout;
-    private TextView tokenEquivalent;
-    private TextView tokenEquivalentSymbol;
     private Button nextBtn;
+    private String currentAmount;
+
+    private AmountEntryItem amountInput;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,40 +103,16 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker(token.tokenInfo.chainId);
-            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
-            switchBtn.setVisibility(View.VISIBLE);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, chainId);
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            usdValue.setVisibility(View.GONE);
-            quantityUpBtn.setVisibility(View.VISIBLE);
-            quantityDownBtn.setVisibility(View.VISIBLE);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, chainId);
         }
     }
 
     private void initViews() {
-        amountError = findViewById(R.id.amount_error);
-        
-        amountEditText = findViewById(R.id.edit_amount);
-        amountEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                amountError.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                updateEquivalentValue();
-            }
-        });
 
         toAddressEditText = findViewById(R.id.edit_to_address);
-        toAddressError = findViewById(R.id.to_address_error);
 
         pasteText = findViewById(R.id.paste);
         pasteText.setOnClickListener(v -> {
@@ -166,70 +123,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             } catch (Exception e) {
                 Log.e(SendActivity.class.getSimpleName(), e.getMessage(), e);
             }
-        });
-
-        amountLayout = findViewById(R.id.layout_amount);
-        amountLayout.setOnClickListener(v -> {
-            amountEditText.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(amountEditText, InputMethodManager.SHOW_IMPLICIT);
-        });
-
-        usdLabel = findViewById(R.id.amount_edit_usd_symbol);
-
-        tokenSymbolLabel = findViewById(R.id.amount_edit_token_symbol);
-        tokenSymbolLabel.setText(symbol);
-
-        tokenEquivalentLayout = findViewById(R.id.layout_token_equivalent_value);
-        tokenEquivalent = findViewById(R.id.text_token_value);
-        tokenEquivalent.setText("0 ");
-        tokenEquivalentSymbol = findViewById(R.id.text_token_symbol);
-        tokenEquivalentSymbol.setText(symbol);
-        usdValue = findViewById(R.id.text_usd_value);
-
-        switchBtn = findViewById(R.id.img_switch_usd_eth);
-        switchBtn.setOnClickListener(v -> {
-            if (usdInput) {
-                usdInput = false;
-                usdLabel.setVisibility(View.GONE);
-                usdValue.setVisibility(View.VISIBLE);
-                tokenSymbolLabel.setVisibility(View.VISIBLE);
-                tokenEquivalentLayout.setVisibility(View.GONE);
-            } else {
-                usdInput = true;
-                usdLabel.setVisibility(View.VISIBLE);
-                usdValue.setVisibility(View.GONE);
-                tokenSymbolLabel.setVisibility(View.GONE);
-                tokenEquivalentLayout.setVisibility(View.VISIBLE);
-            }
-            updateEquivalentValue();
-        });
-
-        quantityUpBtn = findViewById(R.id.img_quantity_up);
-        quantityUpBtn.setOnClickListener(v -> {
-            double amount;
-            if (!amountEditText.getText().toString().isEmpty()) {
-                amount = Double.parseDouble(amountEditText.getText().toString());
-            } else {
-                amount = 0;
-            }
-            if (amount < Double.parseDouble(tokenBalanceText.getText().toString())) {
-                amount++;
-            }
-            amountEditText.setText(String.valueOf(amount));
-        });
-
-        quantityDownBtn = findViewById(R.id.img_quantity_down);
-        quantityDownBtn.setOnClickListener(v -> {
-            double amount;
-            if (!amountEditText.getText().toString().isEmpty()
-                    && Double.parseDouble(amountEditText.getText().toString()) >= 1) {
-                amount = Double.parseDouble(amountEditText.getText().toString());
-                amount--;
-            } else {
-                amount = 0;
-            }
-            amountEditText.setText(String.valueOf(amount));
         });
 
         nextBtn = findViewById(R.id.button_next);
@@ -263,67 +156,20 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         viewModel.ensFail().observe(this, ensHandler::hideENS);
     }
 
-    private void onNewEthPrice(Double ethPrice) {
-        currentEthPrice = ethPrice;
-        updateEquivalentValue();
-    }
-
-    private void updateEquivalentValue() {
-        if (usdInput) {
-            String amountStr = amountEditText.getText().toString();
-
-            if (amountStr.length() == 0) {
-                amountStr = "0";
-                tokenEquivalent.setText(amountStr);
-            } else {
-                double amount = Double.parseDouble(amountStr);
-                double equivalent = amount / currentEthPrice;
-                tokenEquivalent.setText(String.valueOf(equivalent));
-            }
-        } else {
-            String amount = amountEditText.getText().toString();
-            if (amount.length() == 0)
-                amount = "US$ 0.00";
-            usdValue.setText(amount);
-            if (isValidAmount(amount)) {
-                String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);
-                usdValue.setText(usdEquivStr);
-            }
-        }
-    }
-
     private void onNext() {
-        boolean isValid = true;
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        boolean isValid = amountInput.checkValidAmount();
 
-        dismissKeyboard();
-        amountError.setVisibility(View.GONE);
-
-
-        String amount;
-        if (usdInput) {
-            amount = tokenEquivalent.getText().toString();
-        } else {
-            amount = amountEditText.getText().toString();
-        }
-
-        if (!isValidAmount(amount)) {
-            amountError.setVisibility(View.VISIBLE);
-            amountError.setText(R.string.error_invalid_amount);
+        if (!isBalanceEnough(currentAmount)) {
+            amountInput.setError(R.string.error_insufficient_funds);
             isValid = false;
         }
 
-        if (!isBalanceEnough(amount)) {
-            amountError.setVisibility(View.VISIBLE);
-            amountError.setText(R.string.error_insufficient_funds);
-            isValid = false;
-        }
-
-        toAddressError.setVisibility(View.GONE);
         String to = ensHandler.getAddressFromEditView();
         if (to == null) return;
 
         if (isValid) {
-            BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amount, decimals);
+            BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
             viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName());
         }
     }
@@ -345,7 +191,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 break;
             }
             case R.id.action_qr:
-                viewModel.showContractInfo(this, contractAddress);
+                viewModel.showContractInfo(this, wallet, token);
                 break;
         }
         return false;
@@ -426,7 +272,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         {
             //correct chain and asset type
             String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            amountEditText.setText(ethAmount);
+            amountInput.setAmount(ethAmount);
             TextView sendText = findViewById(R.id.text_payment_request);
             sendText.setVisibility(View.VISIBLE);
             sendText.setText(R.string.transfer_request);
@@ -439,7 +285,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             BigDecimal erc20Amount = token.tokenInfo.decimals > 0
                     ? sendAmount.divide(decimalDivisor) : sendAmount;
             String erc20AmountStr = erc20Amount.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            amountEditText.setText(erc20AmountStr);
+            amountInput.setAmount(erc20AmountStr);
 
             //show function which will be called:
             TextView sendText = findViewById(R.id.text_payment_request);
@@ -486,15 +332,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
-    }
-
-    boolean isValidAmount(String eth) {
-        try {
-            String wei = BalanceUtils.EthToWei(eth);
-            return wei != null;
-        } catch (Exception e) {
-            return false;
-        }
+        amountInput.onClear();
     }
 
     boolean isBalanceEnough(String eth) {
@@ -504,13 +342,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    private void dismissKeyboard() {
-        if (getCurrentFocus() != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
     }
 
@@ -541,5 +372,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     @Override
     public void onItemClick(String url) {
         ensHandler.handleHistoryItemClick(url);
+    }
+
+    @Override
+    public void amountChanged(String newAmount)
+    {
+        currentAmount = newAmount;
     }
 }

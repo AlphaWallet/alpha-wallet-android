@@ -65,9 +65,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress) {
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromNetwork(networkInfo, wallet, lastBlock, userAddress)
+	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, Wallet wallet, long lastBlock, String userAddress) {
+		return fetchFromNetwork(network, wallet, lastBlock, userAddress)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}

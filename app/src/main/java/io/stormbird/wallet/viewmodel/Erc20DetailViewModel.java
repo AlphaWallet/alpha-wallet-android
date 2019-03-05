@@ -33,7 +33,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
-    private final MutableLiveData<Token> token = new MutableLiveData<>();
+    private final MutableLiveData<Token> tokenTicker = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
@@ -43,6 +43,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private Token token;
 
     @Nullable
     private Disposable fetchTransactionDisposable;
@@ -70,6 +71,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public LiveData<Double> ethPriceReading() {
         return ethPrice;
+    }
+
+    public void setToken(Token token)
+    {
+        this.token = token;
     }
 
     public void showMyAddress(Context context, Wallet wallet, Token token) {
@@ -104,8 +110,9 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     public void fetchTransactions(Wallet wallet) {
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchCached(network.getValue(), wallet)
+                fetchTransactionsInteract.fetchCached(network, wallet)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError);
@@ -191,11 +198,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     private void onToken(Token token) {
-        this.token.postValue(token);
+        this.tokenTicker.postValue(token);
     }
 
     public LiveData<Token> token() {
-        return token;
+        return tokenTicker;
     }
 
     public void showSendToken(Context ctx, Token token)

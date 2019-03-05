@@ -39,6 +39,7 @@ public class TransactionsViewModel extends BaseViewModel
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Boolean> clearAdapter = new MutableLiveData<>();
     private final MutableLiveData<Boolean> refreshAdapter = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> queryVisibility = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> newTransactions = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -61,9 +62,8 @@ public class TransactionsViewModel extends BaseViewModel
 
     private Handler handler = new Handler();
 
-    private boolean isVisible = false;
     private Map<String, Transaction> txMap = new ConcurrentHashMap<>();
-    private List<Transaction> txContractList = new ArrayList<>();
+    private List<Transaction> newTransactionList = new ArrayList<>();
     private int transactionCount;
     private long latestBlock = 0;
     private boolean hasNewTransactions;
@@ -100,7 +100,6 @@ public class TransactionsViewModel extends BaseViewModel
 
         handler.removeCallbacks(startFetchTransactionsTask);
 
-        isVisible = false;
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {
             fetchTransactionDisposable.dispose();
@@ -135,6 +134,7 @@ public class TransactionsViewModel extends BaseViewModel
     public LiveData<Boolean> showEmpty() { return showEmpty; }
     public LiveData<Boolean> clearAdapter() { return clearAdapter; }
     public LiveData<Boolean> refreshAdapter() { return refreshAdapter; }
+    public LiveData<Boolean> queryVisibility() { return queryVisibility; }
 
     public void prepare()
     {
@@ -213,7 +213,7 @@ public class TransactionsViewModel extends BaseViewModel
         for (Transaction tx : transactions)
         {
             txMap.put(tx.hash, tx);
-            if (Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
+            if (tx.chainId == network.getValue().chainId && Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
         }
     }
 
@@ -227,10 +227,10 @@ public class TransactionsViewModel extends BaseViewModel
         //now fetch new transactions on main account
         //find block number of last transaction
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchNetworkTransactions(wallet.getValue(), latestBlock, null)
+                fetchTransactionsInteract.fetchNetworkTransactions(network.getValue(), wallet.getValue(), latestBlock, null)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onUpdateTransactions, this::onError, this::enumerateTokens);
+                        .subscribe(this::onUpdateTransactions, this::onError, this::siftUnknownTransactions);
     }
 
     /**
@@ -238,30 +238,51 @@ public class TransactionsViewModel extends BaseViewModel
      * @param transactions
      */
     private void onUpdateTransactions(Transaction[] transactions) {
-        //check against existing transactions
-        List<Transaction> newTxs = new ArrayList<Transaction>();
+        for (Transaction tx : transactions)
+        {
+            if (tx.hash.equals("0x34f90a4d1511cf9418874d4f2120b9f4dc29eee428bc53d2c23461100946d4bf"))
+            {
+                System.out.println("yoless");
+            }
+        }
+        storeNewTransactions(transactions);
+    }
+
+    private void storeNewTransactions(Transaction[] transactions)
+    {
+        newTransactionList.clear();
         for (Transaction tx : transactions)
         {
             if (!txMap.containsKey(tx.hash))
             {
                 txMap.put(tx.hash, tx);
-                newTxs.add(tx);
-                if (Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
+                newTransactionList.add(tx);
+                if (tx.chainId == network.getValue().chainId && Long.valueOf(tx.blockNumber) > latestBlock) latestBlock = Long.valueOf(tx.blockNumber);
                 transactionCount++;
                 hasNewTransactions = true;
             }
         }
 
-        if (newTxs.size() > 0)
+        if (newTransactionList.size() > 0)
         {
             Log.d(TAG, "Found " + transactions.length + " Network transactions");
-            newTransactions.postValue(newTxs.toArray(new Transaction[0]));
+            newTransactions.postValue(newTransactionList.toArray(new Transaction[0]));
             //store new transactions, so they will appear in the transaction view, then update the view
-            disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), newTxs.toArray(new Transaction[0]))
+            disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), newTransactionList.toArray(new Transaction[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::updateDisplay, this::onError);
         }
+    }
+
+    //run through what remains in the map, see if there are any unknown tokens
+    //if we find unknown tokens fetch them and add to the token watch list
+    private void siftUnknownTransactions()
+    {
+        fetchTransactionDisposable = setupTokensInteract.getUnknownTokens(newTransactionList, tokensService)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(this::queryUnknownTokens, this::onError);
     }
 
     /**
@@ -286,11 +307,10 @@ public class TransactionsViewModel extends BaseViewModel
         //stop the spinner
         progress.postValue(false);
         Log.d(TAG, "Enumerating tokens");
-        //transactionCount += txMap.size();
-        txContractList.clear();
 
         if (wallet.getValue() != null)
         {
+            //TODO!!!: Sift for terminated tokens here
             //Fetch all stored tokens, but no eth
             fetchTransactionDisposable = Observable.fromCallable(tokensService::getAllTokens)
                     .flatMapIterable(token -> token)
@@ -299,14 +319,14 @@ public class TransactionsViewModel extends BaseViewModel
                     .filter(token -> !token.independentUpdate()) //don't scan ERC721 transactions
                     .concatMap(this::checkSpec)
                     .filter(Token::checkIntrinsicType) //Don't scan tokens that appear to be setup incorrectly
-                    .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), token.lastBlockCheck, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
+                    .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(network.getValue(), new Wallet(token.getAddress()), token.lastBlockCheck, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe(this::onContractTransactions, this::onError, this::siftUnknownTransactions);
+                    .subscribe(this::onContractTransactions, this::onError, this::finishTransactionScanCycle);
         }
         else
         {
-            siftUnknownTransactions();
+            finishTransactionScanCycle();
         }
     }
 
@@ -329,13 +349,8 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void onContractTransactions(Transaction[] transactions)
     {
-        disposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), transactions)
-                .map(this::setLatestBlock)
-                .map(this::removeFromMapTx)
-                .map(this::checkForContractTerminator)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::updateTransactionMap, this::onError);
+        storeNewTransactions(transactions);
+        setLatestBlock(transactions);
     }
 
     private Transaction[] setLatestBlock(Transaction[] transactions)
@@ -355,25 +370,6 @@ public class TransactionsViewModel extends BaseViewModel
         return transactions;
     }
 
-    private void updateTransactionMap(Transaction[] transactions)
-    {
-        txContractList.addAll(Arrays.asList(transactions));
-    }
-
-    //run through what remains in the map, see if there are any unknown tokens
-    //if we find unknown tokens fetch them and add to the token watch list
-    private void siftUnknownTransactions()
-    {
-        newTransactions.postValue(txContractList.toArray(new Transaction[0]));
-        txContractList.clear();
-
-        fetchTransactionDisposable = fetchTransactionsInteract.storeTransactions(network.getValue(), wallet.getValue(), txMap.values().toArray(new Transaction[0]))
-                .flatMap(transactions -> setupTokensInteract.getUnknownTokens(transactions, tokensService, txMap))
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::queryUnknownTokens, this::onError);
-    }
-
     /**
      * This function gets called once after the sift Single has completed. For every contract it gets, it updates the service.
      * The token view will be updated continuously while a wallet with a large number of tokens is first being imported.
@@ -388,7 +384,7 @@ public class TransactionsViewModel extends BaseViewModel
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(this::updateTokenService, this::onError, this::finishTransactionScanCycle);
+                .subscribe(this::updateTokenService, this::onError, this::enumerateTokens);
 
         if (transactionCount == 0)
         {
@@ -413,18 +409,6 @@ public class TransactionsViewModel extends BaseViewModel
         Log.d(TAG,"New Network Tx: " + transactions.length);
     }
 
-    private Transaction[] removeFromMapTx(Transaction[] transactions)
-    {
-        //first remove all these transactions from the network + cached list
-        for (Transaction t : transactions)
-        {
-            txMap.remove(t.hash);
-        }
-
-        transactionCount += transactions.length;
-        return transactions;
-    }
-
     public void forceUpdateTransactionView()
     {
         if (fetchTransactionDisposable == null)
@@ -443,6 +427,11 @@ public class TransactionsViewModel extends BaseViewModel
     private void checkIfRegularUpdateNeeded()
     {
         txMap.clear();
+        queryVisibility.postValue(true);
+    }
+
+    public void receiveVisibility(boolean isVisible)
+    {
         if (!isVisible)
         {
             //no longer any need to refresh
@@ -497,16 +486,11 @@ public class TransactionsViewModel extends BaseViewModel
     //Called from the activity when it comes into view,
     //start updating transactions
     public void startTransactionRefresh() {
-        isVisible = true;
 
         if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
         {
             checkIfRegularUpdateNeeded();
         }
-    }
-
-    public void setVisibility(boolean visibility) {
-        isVisible = visibility;
     }
 
     private void finishTransactionScanCycle()

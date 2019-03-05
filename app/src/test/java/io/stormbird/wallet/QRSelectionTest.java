@@ -60,7 +60,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress)
+            public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, Wallet wallet, long lastBlock, String userAddress)
             {
                 return null;
             }

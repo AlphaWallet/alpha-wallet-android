@@ -78,6 +78,7 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
 
         initViews();
+        viewModel.setToken(token);
     }
 
     private void setUpRecentTransactionsView() {

@@ -29,4 +29,9 @@ public class FindDefaultNetworkInteract {
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).getShortName();
     }
+
+    public NetworkInfo getNetworkInfo(int chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
 }

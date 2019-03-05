@@ -43,7 +43,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Single.fromCallable(() -> {
             Realm instance = null;
             try {
-                instance = realmManager.getRealmInstance(networkInfo, wallet);
+                instance = realmManager.getRealmInstance(wallet);
                 RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class).findAll();
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
                 return convert(txs);
@@ -58,7 +58,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     @Override
     public Transaction fetchTransaction(NetworkInfo networkInfo, Wallet wallet, String hash)
     {
-        try (Realm instance = realmManager.getRealmInstance(networkInfo, wallet))
+        try (Realm instance = realmManager.getRealmInstance(wallet))
         {
             RealmTransaction realmTx = instance.where(RealmTransaction.class)
                     .equalTo("hash", hash)
@@ -84,7 +84,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Completable.fromAction(() -> {
             Realm instance = null;
             try {
-                instance = realmManager.getRealmInstance(networkInfo, wallet);
+                instance = realmManager.getRealmInstance(wallet);
                 addRealm();
                 instance.beginTransaction();
                 for (Transaction transaction : transactions) {
@@ -116,94 +116,38 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     @Override
     public Single<Transaction[]> putAndReturnTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
         return Single.fromCallable(() -> {
-            Realm instance = null;
-            try {
-                instance = realmManager.getRealmInstance(networkInfo, wallet);
-                //1. Update existing transactions
-                Map<String, Transaction> txMap = new HashMap<>();
-                List<String> deleteList = new ArrayList<>();
-                for (Transaction tx : transactions) txMap.put(tx.hash, tx);
-
+            try (Realm instance = realmManager.getRealmInstance(wallet))
+            {
                 addRealm();
-                instance.beginTransaction();
-                RealmResults<RealmTransaction> rTx = instance.where(RealmTransaction.class).findAll();
-                for (RealmTransaction realmTx : rTx) {
-                    Transaction t = convert(realmTx);
-                    Transaction replacement = txMap.get(t.hash);
-
-                    if (t.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
-                    {
-                        System.out.println("yoless");
-                    }
-
-                    //replace transaction but don't store invalid operations
-                    if (replacement != null)
-                    {
-                        if (isBadTransaction(replacement))
-                        {
-                            deleteList.add(t.hash);
-                        }
-                        else
-                        {
-                            replace(instance, realmTx, replacement);
-                        }
-                        txMap.remove(t.hash);
-                    }
-                }
-                instance.commitTransaction();
-
-                if (deleteList.size() > 0)
+                try
                 {
                     instance.beginTransaction();
-                    for (String hash : deleteList)
+                    for (Transaction transaction : transactions)
                     {
-                        RealmResults<RealmTransaction> result = instance.where(RealmTransaction.class).equalTo("hash", hash).findAll();
-                        result.deleteAllFromRealm();
+                        if (isBadTransaction(transaction))
+                        {
+                            continue;
+                        }
+
+                        RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
+                        fill(instance, item, transaction);
                     }
                     instance.commitTransaction();
-                    deleteList.clear();
                 }
-
-                for (Transaction transaction : txMap.values()) {
-                    //Log.d(TAG, "Attempting to store: " + transaction.hash);
-                    //don't store any transaction that
-                    if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
-                    {
-                        System.out.println("yoless");
-                    }
-                    if (isBadTransaction(transaction))
-                    {
-                        //Log.d(TAG, "No Store");
-                        continue;
-                    }
-                    try
-                    {
-                        instance.beginTransaction();
-                        RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
-                        if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
-                        {
-                            System.out.println("yoless");
-                        }
-                        fill(instance, item, transaction);
-                        instance.commitTransaction();
-                    }
-                    catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
-                    {
-                        //already exists
-                        //Log.d(TAG, "Already exists: " + transaction.hash);
-                        instance.cancelTransaction(); // it can only fail within a transaction, no need to check
-                    }
+                catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
+                {
+                    //already exists
+                    //Log.d(TAG, "Already exists: " + transaction.hash);
+                    instance.cancelTransaction(); // it can only fail within a transaction, no need to check
                 }
-            } catch (Exception ex) {
-                if (instance != null && instance.isInTransaction()) {
-                    ex.printStackTrace();
-                    instance.cancelTransaction();
-                }
-            } finally {
-                if (instance != null) {
-                    instance.close();
-                    subRealm();
-                }
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+            finally
+            {
+                subRealm();
             }
             return transactions;
         });
@@ -226,7 +170,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Single.fromCallable(() -> {
             Realm realm = null;
             try {
-                realm = realmManager.getRealmInstance(networkInfo, wallet);
+                realm = realmManager.getRealmInstance(wallet);
                 return convert(realm.where(RealmTransaction.class).findFirst());
             } finally {
                 if (realm != null) {
@@ -327,6 +271,9 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     private void fill(Realm realm, RealmTransaction item, Transaction transaction) {
+
+        Log.d("DWEEB", transaction.hash + " : " + transaction.blockNumber);
+
         item.setError(transaction.error);
         item.setBlockNumber(transaction.blockNumber);
         item.setTimeStamp(transaction.timeStamp);

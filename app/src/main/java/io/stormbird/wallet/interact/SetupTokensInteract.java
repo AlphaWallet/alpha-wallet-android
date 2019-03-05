@@ -42,10 +42,9 @@ public class SetupTokensInteract {
      * Parse all transactions not associated with known tokens and pick up unknown contracts
      * @param transactions
      * @param tokensService
-     * @param txMap
      * @return
      */
-    public Single<List<String>> getUnknownTokens(Transaction[] transactions, TokensService tokensService, Map<String, Transaction> txMap)
+    public Single<List<String>> getUnknownTokens(List<Transaction> transactions, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
             List<String> unknownTokens = new ArrayList<>(badSpecTokens);
@@ -62,7 +61,6 @@ public class SetupTokensInteract {
                 }
                 if (localToken != null)
                 {
-                    txMap.remove(t.hash);
                     if (!localToken.checkIntrinsicType() && !unknownTokens.contains(localToken.getAddress()))
                     {
                         unknownTokens.add(localToken.getAddress());

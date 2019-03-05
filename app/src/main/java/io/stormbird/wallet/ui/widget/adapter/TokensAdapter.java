@@ -200,16 +200,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                         notifyItemRemoved(i);
                         notifyDataSetChanged();
                     }
-                    //updated = true;
+                    updated = true;
                     break;
                 }
             }
         }
 
-//        if (!updated && !token.isBad() && (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))
-//        {
-//            needsRefresh = true;
-//        }
+        if (!updated && canDisplayToken(token))
+        {
+            //new token
+            items.add(new TokenSortedItem(token, calculateWeight(token)));
+        }
     }
 
     private boolean canDisplayToken(Token token)

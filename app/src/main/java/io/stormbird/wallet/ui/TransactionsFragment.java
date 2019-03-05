@@ -76,7 +76,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
         systemView.showProgress(false);
 
-
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
@@ -86,6 +85,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.clearAdapter().observe(this, this::clearAdapter);
         viewModel.refreshAdapter().observe(this, this::refreshAdapter);
         viewModel.newTransactions().observe(this, this::onNewTransactions);
+        viewModel.queryVisibility().observe(this, this::onQueryVisibility);
         refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
 
         adapter.clear();
@@ -95,6 +95,11 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.prepare();
 
         return view;
+    }
+
+    private void onQueryVisibility(Boolean aBoolean)
+    {
+        viewModel.receiveVisibility(isVisible);
     }
 
     @Override
@@ -118,7 +123,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        viewModel.setVisibility(isVisible);
         viewModel.restartIfRequired();
     }
 
@@ -127,7 +131,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         super.setUserVisibleHint(isVisibleToUser);
         isVisible = isVisibleToUser;
         if (isResumed()) { // fragment created
-            viewModel.setVisibility(isVisible);
             if (isVisible) {
                 viewModel.startTransactionRefresh();
             }
@@ -138,7 +141,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onPause() {
         super.onPause();
         //stop transaction refresh
-        viewModel.setVisibility(false);
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }

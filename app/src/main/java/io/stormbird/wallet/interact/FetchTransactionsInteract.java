@@ -24,9 +24,9 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, long lastBlock, String userAddress) {
+    public Observable<Transaction[]> fetchNetworkTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
         return transactionRepository
-                .fetchNetworkTransaction(wallet, lastBlock, userAddress)
+                .fetchNetworkTransaction(networkInfo, wallet, lastBlock, userAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

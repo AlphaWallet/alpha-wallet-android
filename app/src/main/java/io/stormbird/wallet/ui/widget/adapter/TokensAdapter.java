@@ -188,10 +188,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Token thisToken = tsi.value;
                 if (thisToken.getAddress().equals(token.getAddress()))
                 {
-                    if (token.hasPositiveBalance() || token.isEthereum() || assetService.hasDefinition(token.getAddress()))
+                    if (canDisplayToken(token))
                     {
-                        tsi.value = token;
-                        notifyItemChanged(i, tsi);
+                        items.add(new TokenSortedItem(token, calculateWeight(token)));
+                        //notifyItemChanged(i, tsi);
                     }
                     else
                     {
@@ -205,10 +205,20 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
 
-        if (!updated && !token.isBad() && (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))
+        if (!updated && canDisplayToken(token))
         {
-            needsRefresh = true;
+            //new token
+            items.add(new TokenSortedItem(token, calculateWeight(token)));
         }
+    }
+
+    private boolean canDisplayToken(Token token)
+    {
+        //Add token to display list if it's the base currency, or if it has balance
+        return token != null && 
+                (token.isEthereum() ||
+                        (!token.isTerminated() && !token.isBad() &&
+                                (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress()))));
     }
 
     private void populateTokens(Token[] tokens)

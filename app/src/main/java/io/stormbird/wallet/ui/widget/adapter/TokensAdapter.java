@@ -147,35 +147,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         populateTokens(tokens);
     }
 
-    public void updateTokenCheck(Token token)
-    {
-        switch (filterType)
-        {
-            case FILTER_ASSETS:
-                if (!token.isEthereum())
-                {
-                    updateToken(token);
-                }
-                break;
-            case FILTER_CURRENCY:
-                if (token.isEthereum())
-                {
-                    updateToken(token);
-                }
-                break;
-
-            default:
-                updateToken(token);
-                break;
-        }
-    }
-
     /**
      * Update a single item in the recycler view
      *
      * @param token
      */
-    private void updateToken(Token token)
+    public void updateToken(Token token)
     {
         checkLiveToken(token);
         boolean updated = false;
@@ -191,7 +168,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     if (canDisplayToken(token))
                     {
                         items.add(new TokenSortedItem(token, calculateWeight(token)));
-                        //notifyItemChanged(i, tsi);
                     }
                     else
                     {
@@ -214,8 +190,30 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private boolean canDisplayToken(Token token)
     {
+        if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        return token != null && 
+        boolean filteredOut = false;
+
+        switch (filterType)
+        {
+            case FILTER_ASSETS:
+                if (!token.isEthereum())
+                {
+                    filteredOut = true;
+                }
+                break;
+            case FILTER_CURRENCY:
+                if (token.isEthereum())
+                {
+                    filteredOut = true;
+                }
+                break;
+            default:
+                items.add(new TokenSortedItem(token, calculateWeight(token)));
+                break;
+        }
+
+        return filteredOut &&
                 (token.isEthereum() ||
                         (!token.isTerminated() && !token.isBad() &&
                                 (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress()))));
@@ -224,45 +222,20 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void populateTokens(Token[] tokens)
     {
         int itemCount = items.size();
-        if (needsRefresh)
-        {
-            items.clear();
-        }
         items.beginBatchedUpdates();
+
+        //filter existing items
+        filterAdapterItems();
 
         items.add(total);
 
         for (Token token : tokens)
         {
-            if (token != null &&  //Add token to display list if it's the base currency, or if it has balance
-                    (token.isEthereum() ||
-                            (!token.isTerminated() && !token.isBad() &&
-                                    (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress())))))
+            if (canDisplayToken(token))
             {
                 Log.d(TAG,"ADDING: " + token.getFullName());
                 checkLiveToken(token);
-                switch (filterType)
-                {
-                    case FILTER_ALL:
-                        items.add(new TokenSortedItem(token, calculateWeight(token)));
-                        break;
-                    case FILTER_ASSETS:
-                        if (!token.isEthereum())
-                        {
-                            items.add(new TokenSortedItem(token, calculateWeight(token)));
-                        }
-                        break;
-                    case FILTER_CURRENCY:
-                        if (token.isEthereum())
-                        {
-                            items.add(new TokenSortedItem(token, calculateWeight(token)));
-                        }
-                        break;
-
-                    default:
-                        items.add(new TokenSortedItem(token, calculateWeight(token)));
-                        break;
-                }
+                items.add(new TokenSortedItem(token, calculateWeight(token)));
             }
         }
         items.endBatchedUpdates();
@@ -358,8 +331,34 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.endBatchedUpdates();
     }
 
-    public void setFilterType(int filterType) {
+    private void filterAdapterItems()
+    {
+        if (filterType == FILTER_ALL) return;
+
+        boolean hasChange = false;
+        //now filter all the tokens accordingly and refresh display
+        items.beginBatchedUpdates();
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                if (tsi.value == null) continue;
+                if (!canDisplayToken(tsi.value))
+                {
+                    items.removeItemAt(i);
+                    hasChange = true;
+                }
+            }
+        }
+        items.endBatchedUpdates();
+    }
+
+    public void setFilterType(int filterType)
+    {
         this.filterType = filterType;
+        filterAdapterItems();
     }
 
     public void clear()

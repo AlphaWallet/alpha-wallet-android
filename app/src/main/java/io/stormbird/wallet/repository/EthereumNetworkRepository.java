@@ -55,7 +55,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			new NetworkInfo(XDAI_NETWORK_NAME,
 							xDAI_SYMBOL,
 							XDAI_RPC_URL,
-							"https://blockscout.com/poa/dai/api",
+							"https://blockscout.com/poa/dai/tx/",
 							XDAI_ID,
 							false,
 							"https://dai.poa.network",

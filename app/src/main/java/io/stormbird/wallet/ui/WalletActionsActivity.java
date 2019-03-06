@@ -46,6 +46,9 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
 
     private Wallet wallet;
     private String currencySymbol;
+    private int walletCount;
+    private boolean isNewWallet;
+    private Boolean isTaskRunning;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +61,9 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         if (getIntent() != null) {
             wallet = (Wallet) getIntent().getExtras().get("wallet");
             currencySymbol = getIntent().getStringExtra("currency");
+            walletCount = getIntent().getIntExtra("walletCount", 0);
+            walletCount++;
+            isNewWallet = getIntent().getBooleanExtra("isNewWallet", false);
             initViews();
         } else {
             finish();
@@ -80,10 +86,22 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         viewModel.exportWalletError().observe(this, this::onExportError);
         viewModel.deleted().observe(this, this::onDeleteWallet);
         viewModel.exportedStore().observe(this, this::onBackupWallet);
+        viewModel.isTaskRunning().observe(this, this::onTaskStatusChanged);
+
+        if (isNewWallet) {
+            wallet.name = getString(R.string.wallet_name_template, walletCount);
+            viewModel.storeWallet(wallet);
+        }
+    }
+
+    private void onTaskStatusChanged(Boolean isTaskRunning) {
+        this.isTaskRunning = isTaskRunning;
     }
 
     private void onSaved(Integer integer) {
-        showWalletsActivity();
+        if (!isNewWallet) {
+            showWalletsActivity();
+        }
     }
 
     private void onBackupWallet(String keystore) {
@@ -128,7 +146,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
 
     private void initViews() {
         walletTitle = findViewById(R.id.wallet_title);
-        walletTitle.setText(wallet.name);
 
         walletBalance = findViewById(R.id.wallet_balance);
         walletBalance.setText(String.format("%s %s", wallet.balance, currencySymbol));
@@ -157,7 +174,13 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         };
 
         walletName = findViewById(R.id.wallet_name);
-        walletName.setText(wallet.name);
+        if (wallet.name.isEmpty()) {
+            walletName.setText(getString(R.string.wallet_name_template, walletCount));
+            save.setEnabled(true);
+        } else {
+            walletName.setText(wallet.name);
+        }
+
         walletName.addTextChangedListener(walletNameWatcher);
 
         delete = findViewById(R.id.delete);
@@ -182,16 +205,18 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 wallet.name = walletName.getText().toString();
                 viewModel.storeWallet(wallet);
                 save.setEnabled(false);
+                if (isNewWallet)
+                {
+                    viewModel.showHome(this);
+                    finish(); //drop back to home screen, no need to recreate everything
+                }
                 break;
             }
         }
     }
 
-    private void showWalletsActivity() {
-        Intent intent = new Intent(this, WalletsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("shouldRefresh", true);
-        startActivity(intent);
+    private void showWalletsActivity()
+    {
         finish();
     }
 
@@ -273,6 +298,15 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         if (aDialog != null && aDialog.isShowing()) {
             aDialog.dismiss();
             aDialog = null;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isNewWallet) {
+            viewModel.showHome(this);
+        } else {
+            finish();
         }
     }
 }

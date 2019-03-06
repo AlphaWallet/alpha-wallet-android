@@ -4,38 +4,22 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletUpdate;
-import io.stormbird.wallet.interact.CreateWalletInteract;
-import io.stormbird.wallet.interact.DeleteWalletInteract;
-import io.stormbird.wallet.interact.ExportWalletInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetDefaultWalletInteract;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 
+import java.util.*;
+
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
 
-public class WalletsViewModel extends BaseViewModel {
+public class WalletsViewModel extends BaseViewModel
+{
     private final static String TAG = WalletsViewModel.class.getSimpleName();
 
     private final CreateWalletInteract createWalletInteract;
@@ -52,7 +36,7 @@ public class WalletsViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
-    private final MutableLiveData<Map<String, Wallet>> updateBalance = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> updateBalance = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> namedWallets = new MutableLiveData<>();
     private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -68,7 +52,8 @@ public class WalletsViewModel extends BaseViewModel {
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
+            FindDefaultNetworkInteract findDefaultNetworkInteract)
+    {
         this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -79,116 +64,130 @@ public class WalletsViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
 
-    public LiveData<Wallet[]> wallets() {
+    public LiveData<Wallet[]> wallets()
+    {
         return wallets;
     }
 
-    public LiveData<Map<String, String>> namedWallets() {
+    public LiveData<Map<String, String>> namedWallets()
+    {
         return namedWallets;
     }
 
-    public LiveData<NetworkInfo> defaultNetwork() {
+    public LiveData<NetworkInfo> defaultNetwork()
+    {
         return defaultNetwork;
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
-    public LiveData<Wallet> createdWallet() {
+    public LiveData<Wallet> createdWallet()
+    {
         return createdWallet;
     }
 
-    public LiveData<ErrorEnvelope> createWalletError() {
+    public LiveData<ErrorEnvelope> createWalletError()
+    {
         return createWalletError;
     }
 
-    public LiveData<Map<String, Wallet>> updateBalance() {
+    public LiveData<Wallet> updateBalance()
+    {
         return updateBalance;
     }
 
-    public LiveData<Long> lastENSScanBlock() {
+    public LiveData<Long> lastENSScanBlock()
+    {
         return lastENSScanBlock;
     }
 
-    public void setDefaultWallet(Wallet wallet) {
+    public void setDefaultWallet(Wallet wallet)
+    {
         disposable = setDefaultWalletInteract
                 .set(wallet)
                 .subscribe(() -> onDefaultWalletChanged(wallet), this::onError);
     }
 
-    public void refreshWallets() {
-        disposable = fetchWalletsInteract.loadWallets()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::onWallets, this::onError);
+    private Wallet addWalletToMap(Wallet wallet) {
+        if (!walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
+        return wallet;
     }
 
-    private void onWallets(Wallet[] wallets) {
-        Map<String, Wallet> walletBalances = new HashMap<>();
-        disposable = fetchWalletsInteract.fetch(walletBalances)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this.wallets::postValue, this::onError);
-    }
-
-    public void findNetwork() {
+    public void findNetwork()
+    {
         progress.postValue(true);
         disposable = findDefaultNetworkInteract
                 .find()
                 .subscribe(this::onDefaultNetwork, this::onError);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
+    private void onDefaultNetwork(NetworkInfo networkInfo)
+    {
         defaultNetwork.postValue(networkInfo);
-        if (currentNetwork == null || networkInfo.chainId != currentNetwork.chainId) {
-            walletBalances.clear();
-            currentNetwork = networkInfo;
-        }
-        if (walletBalances.size() == 0) {
-            walletBalances = fetchWalletsInteract.getWalletMap(networkInfo);
-        }
-        //now load the current wallets
-        disposable = fetchWalletsInteract
-                .fetch(walletBalances)
-                .subscribe(this::onFetchWallets, this::onError);
-    }
+        currentNetwork = networkInfo;
 
-    private void onFetchWallets(Wallet[] items) {
-        progress.postValue(false);
-        wallets.postValue(items);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWalletChanged, t -> {
                 });
-
-        getWalletsBalance(items);
     }
 
-    private void onDefaultWalletChanged(Wallet wallet) {
+    private void onWallets(Wallet[] items)
+    {
         progress.postValue(false);
-        defaultWallet.postValue(wallet);
+        //can we repopulate values from map?
+        if (walletBalances.size() > 0)
+        {
+            for (Wallet w : items)
+            {
+                Wallet mapW = walletBalances.get(w.address);
+                if (mapW != null) w.balance = mapW.balance;
+            }
+        }
+        wallets.postValue(items);
     }
 
-    public void swipeRefreshWallets(long block) {
-        if (walletBalances.size() == 0) {
-            walletBalances = fetchWalletsInteract.getWalletMap(currentNetwork);
+    public void updateBalancesIfRequired(Wallet[] wallets)
+    {
+        if (walletBalances.size() == 0)
+        {
+            getWalletsBalance(wallets);
         }
+    }
+
+    private void onDefaultWalletChanged(Wallet wallet)
+    {
+        defaultWallet.postValue(wallet);
+
+        //now load the current wallets from database
+        disposable = fetchWalletsInteract
+                .fetch()
+                .subscribe(this::onWallets, this::onError);
+    }
+
+    public void swipeRefreshWallets(long block)
+    {
+        walletBalances.clear();
         //check for updates
         //check names first
-        disposable = fetchWalletsInteract.fetch(walletBalances)
+        disposable = fetchWalletsInteract.fetch()
                 .flatMap(wallets -> fetchWalletsInteract.scanForNames(wallets, block))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateNames, this::onError);
     }
 
-    public void fetchWallets() {
+    public void fetchWallets()
+    {
         progress.postValue(true);
         findNetwork();
     }
 
-    public void newWallet() {
+    public void newWallet()
+    {
         progress.setValue(true);
         createWalletInteract
                 .create()
@@ -203,40 +202,40 @@ public class WalletsViewModel extends BaseViewModel {
      *
      * @param wallets
      */
-    private void getWalletsBalance(Wallet[] wallets) {
+    private void getWalletsBalance(Wallet[] wallets)
+    {
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet
                 .map(this::addWalletToMap)
                 .flatMap(wallet -> fetchTokensInteract.fetchEth(currentNetwork, wallet)) //fetch wallet balance
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateList, this::onError, this::updateBalances);
+                .subscribe(this::updateWallet, this::onError, this::updateBalances);
     }
 
-    private Wallet addWalletToMap(Wallet wallet) {
-        if (!walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
-        return wallet;
-    }
-
-    private void updateList(Token token) {
-        if (walletBalances.containsKey(token.getAddress())) {
-            walletBalances.get(token.getAddress()).setWalletBalance(token.balance);
+    private void updateWallet(Token token)
+    {
+        if (walletBalances.containsKey(token.getAddress()))
+        {
+            Wallet wallet = walletBalances.get(token.getAddress());
+            wallet.setWalletBalance(token.balance);
+            //update wallet balance
+            updateBalance.postValue(wallet);
         }
-
-        updateBalance.postValue(walletBalances);
     }
 
-    private void updateBalances() {
-        updateBalance.postValue(walletBalances);
-
-        //store
-        if (currentNetwork.isMainNetwork) {
+    private void updateBalances()
+    {
+        progress.postValue(false);
+        if (currentNetwork.isMainNetwork)
+        {
             Wallet[] walletsFromUpdate = walletBalances.values().toArray(new Wallet[0]);
             storeWallets(walletsFromUpdate);
         }
     }
 
-    private void updateNames(WalletUpdate update) {
+    private void updateNames(WalletUpdate update)
+    {
         //update names for wallets
         //got names?
         //preserve order
@@ -248,7 +247,8 @@ public class WalletsViewModel extends BaseViewModel {
             }
         }
 
-        if (update.wallets.size() > 0) {
+        if (update.wallets.size() > 0)
+        {
             wallets.postValue(wallets.getValue());
             storeWallets(wallets.getValue());
         }
@@ -258,7 +258,8 @@ public class WalletsViewModel extends BaseViewModel {
         progress.postValue(false);
     }
 
-    private void storeWallets(Wallet[] wallets) {
+    private void storeWallets(Wallet[] wallets)
+    {
         //write wallets to DB
         disposable = fetchWalletsInteract.storeWallets(wallets, currentNetwork.isMainNetwork)
                 .subscribeOn(Schedulers.io())
@@ -266,31 +267,36 @@ public class WalletsViewModel extends BaseViewModel {
                 .subscribe(this::onStored, this::onError);
     }
 
-    private void onStored(Integer count) {
+    private void onStored(Integer count)
+    {
         Log.d(TAG, "Stored " + count + " Wallets");
     }
 
 
-
-    private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets) {
+    private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)
+    {
         return Observable.fromCallable(() -> new ArrayList<>(Arrays.asList(wallets)));
     }
 
-    private void onCreateWalletError(Throwable throwable) {
+    private void onCreateWalletError(Throwable throwable)
+    {
         //Crashlytics.logException(throwable);
         progress.postValue(false);
         createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }
 
-    public void importWallet(Activity activity) {
+    public void importWallet(Activity activity)
+    {
         importWalletRouter.openForResult(activity, IMPORT_REQUEST_CODE);
     }
 
-    public void showHome(Context context) {
+    public void showHome(Context context)
+    {
         homeRouter.open(context, true);
     }
 
-    public NetworkInfo getNetwork() {
+    public NetworkInfo getNetwork()
+    {
         return currentNetwork;
     }
 }

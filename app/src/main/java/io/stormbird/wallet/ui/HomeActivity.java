@@ -146,7 +146,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .get(HomeViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
-        viewModel.wallets().observe(this, this::onWallets);
         viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
@@ -168,8 +167,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
         }
-
-        viewModel.refreshWallets();
     }
 
     private void onWalletName(String name) {
@@ -182,11 +179,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (viewPager.getCurrentItem() == WALLET) {
                 setTitle(walletTitle);
         }
-    }
-
-    private void onWallets(Wallet[] wallets)
-    {
-
     }
 
     private void onError(ErrorEnvelope errorEnvelope)

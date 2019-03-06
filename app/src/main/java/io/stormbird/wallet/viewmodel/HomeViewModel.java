@@ -103,10 +103,6 @@ public class HomeViewModel extends BaseViewModel {
         return installIntent;
     }
 
-    public LiveData<Wallet[]> wallets() {
-        return wallets;
-    }
-
     public void prepare() {
         progress.postValue(false);
     }
@@ -216,38 +212,38 @@ public class HomeViewModel extends BaseViewModel {
         ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
-    public void refreshWallets() {
-        disposable = fetchWalletsInteract.loadWallets()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::onWallets, this::onError);
-    }
+//    public void refreshWallets() {
+//        disposable = fetchWalletsInteract.loadWallets()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
+//                .subscribe(this::onWallets, this::onError);
+//    }
+//
+//    private void onWallets(Wallet[] wallets) {
+//        //combine this with a fetch from account
+//        Map<String, Wallet> walletBalances = new HashMap<>();
+//        disposable = fetchWalletsInteract.fetch(walletBalances)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(w -> combine(w, wallets), this::onError);
+//    }
+//
+//    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB) {
+//        Map<String, Wallet> join = new HashMap<String, Wallet>();
+//        for (Wallet wallet : walletsFromFetch) {
+//            join.put(wallet.address, wallet);
+//        }
+//
+//        for (Wallet wallet : walletsFromDB) {
+//            join.put(wallet.address, wallet);
+//        }
+//
+//        wallets.postValue(join.values().toArray(new Wallet[0]));
+//    }
 
-    private void onWallets(Wallet[] wallets) {
-        //combine this with a fetch from account
-        Map<String, Wallet> walletBalances = new HashMap<>();
-        disposable = fetchWalletsInteract.fetch(walletBalances)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(w -> combine(w, wallets), this::onError);
-    }
-
-    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB) {
-        Map<String, Wallet> join = new HashMap<String, Wallet>();
-        for (Wallet wallet : walletsFromFetch) {
-            join.put(wallet.address, wallet);
-        }
-
-        for (Wallet wallet : walletsFromDB) {
-            join.put(wallet.address, wallet);
-        }
-
-        wallets.postValue(join.values().toArray(new Wallet[0]));
-    }
-
-    private void onWritten(Integer wrote) {
-        Log.d(TAG, "Wrote " + wrote + " Wallets");
-    }
+//    private void onWritten(Integer wrote) {
+//        Log.d(TAG, "Wrote " + wrote + " Wallets");
+//    }
 
     public void getWalletName() {
         disposable = fetchWalletsInteract

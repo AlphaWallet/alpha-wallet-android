@@ -3,7 +3,9 @@ package io.stormbird.wallet.repository;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Single;
 import io.realm.Realm;
@@ -24,6 +26,36 @@ public class WalletDataRealmSource {
 
     public WalletDataRealmSource(RealmManager realmManager) {
         this.realmManager = realmManager;
+    }
+
+    public Single<Wallet[]> populateWalletData(Wallet[] wallets) {
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                for (Wallet wallet : wallets)
+                {
+                    RealmWalletData data = realm.where(RealmWalletData.class)
+                            .equalTo("address", wallet.address)
+                            .findFirst();
+
+                    if (data != null)
+                    {
+                        wallet.ENSname = data.getENSName();
+                        wallet.balance = balance(data);
+                        wallet.name = data.getName();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return wallets;
+        });
+    }
+
+    private String balance(RealmWalletData data)
+    {
+        String value = data.getBalance();
+        if (value == null) return "0";
+        else return value;
     }
 
     public Single<Wallet[]> loadWallets() {

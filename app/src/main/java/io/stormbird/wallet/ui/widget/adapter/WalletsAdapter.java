@@ -104,6 +104,26 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         notifyDataSetChanged();
     }
 
+    public void updateWalletbalance(Wallet wallet)
+    {
+        boolean found = false;
+        for (Wallet w : wallets)
+        {
+            if (w.address.equals(wallet.address))
+            {
+                w.name = wallet.name;
+                w.ENSname = wallet.ENSname;
+                w.balance = wallet.balance;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) wallets.add(wallet);
+
+        notifyDataSetChanged();
+    }
+
     public void updateWalletNames(Map<String, String> namedWallets) {
         for (Wallet localWallet : wallets) {
             if (namedWallets.containsKey(localWallet.address)) {

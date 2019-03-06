@@ -46,4 +46,5 @@
     <string name="wallet_name">Wallet Name</string>
     <string name="delete_wallet">Delete Wallet</string>
     <string name="backup_keystore">Backup Keystore</string>
+    <string name="wallet_name_template">Wallet %1$d</string>
 </resources>

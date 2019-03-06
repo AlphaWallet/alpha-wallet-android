@@ -10,7 +10,7 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
 
 public interface WalletRepositoryType {
-    Single<Wallet[]> fetchWallets(Map<String, Wallet> walletBalances);
+    Single<Wallet[]> fetchWallets();
 
     Single<Wallet> findWallet(String address);
 
@@ -30,11 +30,7 @@ public interface WalletRepositoryType {
 
     Single<BigDecimal> balanceInWei(Wallet wallet);
 
-    Single<Wallet[]> loadWallets();
-
     Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked);
-
-    Map<String, Wallet> getWalletMap(NetworkInfo network);
 
     Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
 

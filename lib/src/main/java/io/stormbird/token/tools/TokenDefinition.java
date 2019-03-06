@@ -122,7 +122,7 @@ public class TokenDefinition {
                             //look for function
                             break;
                         case "contracts":
-                            System.out.println(node.getAttributes().toString());
+                            //System.out.println(node.getAttributes().toString());
                             break;
                         case "appearance":
 
@@ -553,7 +553,7 @@ public class TokenDefinition {
                 switch (node.getNodeType())
                 {
                     case Node.ATTRIBUTE_NODE:
-                        System.out.println(node.getAttributes().toString());
+                        //System.out.println(node.getAttributes().toString());
                         break;
                     case Node.ELEMENT_NODE:
                         String nodeName = node.getLocalName();
@@ -573,7 +573,7 @@ public class TokenDefinition {
                         }
                         break;
                     case Node.TEXT_NODE:
-                        System.out.println(node.getTextContent());
+                        //System.out.println(node.getTextContent());
                         break;
                 }
             }

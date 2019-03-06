@@ -53,6 +53,8 @@ public class WalletsActivity extends BaseActivity implements
 
     private boolean walletChange = false;
     private boolean isSetDefault;
+    private boolean isNewWalletCreated;
+    private NetworkInfo networkInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,12 +99,8 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
+        this.networkInfo = networkInfo;
         adapter.setNetwork(networkInfo);
-        if (getIntent() != null) {
-            if (getIntent().getBooleanExtra("shouldRefresh", false)) {
-                viewModel.refreshWallets();
-            }
-        }
     }
 
     private void onSwipeRefresh() {
@@ -212,8 +210,8 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.importWallet(this);
     }
 
-    private void onUpdatedBalance(Map<String, Wallet> balances) {
-        adapter.updateWalletBalances(balances);
+    private void onUpdatedBalance(Wallet wallet) {
+        adapter.updateWalletbalance(wallet); //updateWalletBalances(balances);
     }
 
     private void onNamedWallets(Map<String, String> walletNames) {
@@ -239,10 +237,11 @@ public class WalletsActivity extends BaseActivity implements
             sendBroadcast(new Intent(C.RESET_WALLET));
         }
 
-        if (isSetDefault) {
+        adapter.setDefaultWallet(wallet);
+
+        if (isSetDefault && !isNewWalletCreated)
+        {
             viewModel.showHome(this);
-        } else {
-            adapter.setDefaultWallet(wallet);
         }
     }
 
@@ -258,17 +257,29 @@ public class WalletsActivity extends BaseActivity implements
         } else {
             enableDisplayHomeAsUp();
             adapter.setWallets(wallets);
+            viewModel.updateBalancesIfRequired(wallets);
         }
         invalidateOptionsMenu();
     }
 
     private void onCreatedWallet(Wallet wallet) {
         hideToolbar();
-        //set new wallet
         viewModel.setDefaultWallet(wallet);
-        isSetDefault = true;
-        walletChange = true;
-        //backupWarning.show(wallet);
+        callNewWalletPage(wallet);
+        finish();
+    }
+
+    private void callNewWalletPage(Wallet wallet)
+    {
+        Intent intent = new Intent(this, WalletActionsActivity.class);
+        intent.putExtra("wallet", wallet);
+        if (networkInfo != null) {
+            intent.putExtra("currency", networkInfo.symbol);
+        }
+        intent.putExtra("walletCount", adapter.getItemCount());
+        intent.putExtra("isNewWallet", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -279,6 +290,7 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.setDefaultWallet(wallet);
         isSetDefault = true;
         walletChange = true;
+        isNewWalletCreated = false;
     }
 
     private void hideDialog() {

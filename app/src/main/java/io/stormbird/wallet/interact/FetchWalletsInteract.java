@@ -18,9 +18,9 @@ public class FetchWalletsInteract {
         this.accountRepository = accountRepository;
     }
 
-    public Single<Wallet[]> fetch(Map<String, Wallet> walletBalances) {
+    public Single<Wallet[]> fetch() {
         return accountRepository
-                .fetchWallets(walletBalances)
+                .fetchWallets()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -29,10 +29,6 @@ public class FetchWalletsInteract {
         return accountRepository.getName(address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public Single<Wallet[]> loadWallets() {
-        return accountRepository.loadWallets();
     }
 
     public Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked) {
@@ -45,9 +41,5 @@ public class FetchWalletsInteract {
 
     public Single<Integer> storeWallet(Wallet wallet) {
         return accountRepository.storeWallet(wallet);
-    }
-
-    public Map<String, Wallet> getWalletMap(NetworkInfo network) {
-        return accountRepository.getWalletMap(network);
     }
 }

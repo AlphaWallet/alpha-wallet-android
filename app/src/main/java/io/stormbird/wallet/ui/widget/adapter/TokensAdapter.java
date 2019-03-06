@@ -192,28 +192,27 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean filteredOut = false;
+        boolean allowThroughFilter = true;
 
         switch (filterType)
         {
             case FILTER_ASSETS:
-                if (!token.isEthereum())
+                if (token.isEthereum())
                 {
-                    filteredOut = true;
+                    allowThroughFilter = false;
                 }
                 break;
             case FILTER_CURRENCY:
-                if (token.isEthereum())
+                if (!token.isEthereum())
                 {
-                    filteredOut = true;
+                    allowThroughFilter = false;
                 }
                 break;
             default:
-                items.add(new TokenSortedItem(token, calculateWeight(token)));
                 break;
         }
 
-        return filteredOut &&
+        return allowThroughFilter &&
                 (token.isEthereum() ||
                         (!token.isTerminated() && !token.isBad() &&
                                 (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress()))));
@@ -223,9 +222,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         int itemCount = items.size();
         items.beginBatchedUpdates();
-
-        //filter existing items
-        filterAdapterItems();
 
         items.add(total);
 
@@ -239,20 +235,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
-
-        if (itemCount != items.size())
-        {
-            if (items.size() < itemCount)
-            {
-                needsRefresh = true;
-            }
-        }
-
-        if (needsRefresh)
-        {
-            needsRefresh = false;
-            notifyDataSetChanged();
-        }
     }
 
     private int calculateWeight(Token token)
@@ -335,22 +317,28 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (filterType == FILTER_ALL) return;
 
-        boolean hasChange = false;
         //now filter all the tokens accordingly and refresh display
-        items.beginBatchedUpdates();
+        List<Token> filterTokens = new ArrayList<>();
+
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem)
             {
                 TokenSortedItem tsi = (TokenSortedItem) si;
-                if (tsi.value == null) continue;
-                if (!canDisplayToken(tsi.value))
+                if (tsi.value != null && canDisplayToken(tsi.value))
                 {
-                    items.removeItemAt(i);
-                    hasChange = true;
+                    filterTokens.add(tsi.value);
                 }
             }
+        }
+
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(total);
+        for (Token token : filterTokens)
+        {
+            items.add(new TokenSortedItem(token, calculateWeight(token)));
         }
         items.endBatchedUpdates();
     }

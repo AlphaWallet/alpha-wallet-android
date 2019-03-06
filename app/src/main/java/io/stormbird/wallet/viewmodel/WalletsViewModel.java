@@ -239,23 +239,23 @@ public class WalletsViewModel extends BaseViewModel {
     private void updateNames(WalletUpdate update) {
         //update names for wallets
         //got names?
-        for (Wallet w : update.wallets.values()) {
-            if (walletBalances.containsKey(w.address)) {
-                walletBalances.get(w.address).ENSname = w.ENSname;
+        //preserve order
+        for (Wallet w : wallets.getValue())
+        {
+            if (update.wallets.containsKey(w.address))
+            {
+                w.ENSname = update.wallets.get(w.address).ENSname;
             }
         }
 
-        Wallet[] walletsFromFetch = walletBalances.values().toArray(new Wallet[0]);
-
         if (update.wallets.size() > 0) {
-            wallets.postValue(walletsFromFetch);
+            wallets.postValue(wallets.getValue());
+            storeWallets(wallets.getValue());
         }
 
         lastENSScanBlock.postValue(update.lastBlock);
 
         progress.postValue(false);
-
-        storeWallets(walletsFromFetch);
     }
 
     private void storeWallets(Wallet[] wallets) {

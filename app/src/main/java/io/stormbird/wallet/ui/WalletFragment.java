@@ -158,7 +158,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onToken(Token token)
     {
-        adapter.updateTokenCheck(token);
+        adapter.updateToken(token);
     }
 
     private void initTabLayout(View view) {

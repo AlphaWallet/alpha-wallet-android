@@ -426,24 +426,6 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-//    //Store contract details if the contract is live,
-//    //otherwise remove from the contract watch list
-//    private void onTokensSetup(TokenInfo tokenInfo) {
-//        //check this contract is good to add
-//        if ((tokenInfo.name == null || tokenInfo.name.length() < 3)
-//                || tokenInfo.isEnabled == false
-//                || (tokenInfo.symbol == null || tokenInfo.symbol.length() < 2))
-//        {
-//            setupTokensInteract.putDeadContract(tokenInfo.address);
-//        }
-//        else {
-//            disposable = addTokenInteract
-//                    .add(tokenInfo)
-//                    .subscribeOn(Schedulers.io())
-//                    .subscribe(this::onSaved, this::onError);
-//        }
-//    }
-
     public void onTransactionError(Throwable throwable) {
         if (throwable.getCause() instanceof ServiceErrorException)
         {

@@ -157,7 +157,6 @@
     <string name="send_universal_link">创建链接</string>
     <string name="generate_sale_transfer_link">创建销售链接</string>
     <string name="place_tickets_marketplace">放上市场待售</string>
-    <string name="invalid_ticket">无效门票</string>
     <string name="hint_time">--:--</string>
     <string name="link_expiry_time">链接过期时间</string>
     <string name="error_time">请输入有效时间</string>
@@ -305,4 +304,6 @@
     <string name="token_transfer_request">Token transfer request</string>
     <string name="generate_payment_request">Generate Payment Request</string>
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
+    <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
+    <string name="importing_tickets">Importing Tokens</string>
 </resources>

@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui;
 
 
 import android.Manifest;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;

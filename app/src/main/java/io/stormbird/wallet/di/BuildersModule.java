@@ -25,6 +25,7 @@ import io.stormbird.wallet.ui.TransactionDetailActivity;
 import io.stormbird.wallet.ui.TransactionsFragment;
 import io.stormbird.wallet.ui.TransferTicketActivity;
 import io.stormbird.wallet.ui.TransferTicketDetailActivity;
+import io.stormbird.wallet.ui.WalletActionsActivity;
 import io.stormbird.wallet.ui.WalletFragment;
 import io.stormbird.wallet.ui.WalletsActivity;
 
@@ -143,4 +144,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = Erc20DetailModule.class)
 	abstract Erc20DetailActivity bindErc20DetailActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = WalletActionsModule.class)
+	abstract WalletActionsActivity bindWalletActionsActivity();
 }

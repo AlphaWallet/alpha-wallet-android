@@ -18,6 +18,7 @@ import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 class HomeModule {
     @Provides
     HomeViewModelFactory provideTransactionsViewModelFactory(
+            PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
@@ -26,6 +27,7 @@ class HomeModule {
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
         return new HomeViewModelFactory(
+                preferenceRepository,
                 localeRepository,
                 importTokenRouter,
                 externalBrowserRouter,

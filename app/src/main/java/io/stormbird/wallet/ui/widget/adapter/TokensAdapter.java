@@ -223,12 +223,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void populateTokens(Token[] tokens)
     {
-        int itemCount = items.size();
         items.beginBatchedUpdates();
-
-        //filter existing items
-        //filterAdapterItems();
-
         items.add(total);
 
         for (Token token : tokens)

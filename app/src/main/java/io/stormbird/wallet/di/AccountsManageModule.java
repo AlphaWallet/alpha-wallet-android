@@ -26,20 +26,16 @@ class AccountsManageModule {
     WalletsViewModelFactory provideAccountsManageViewModelFactory(
 			CreateWalletInteract createWalletInteract,
 			SetDefaultWalletInteract setDefaultWalletInteract,
-			DeleteWalletInteract deleteWalletInteract,
 			FetchWalletsInteract fetchWalletsInteract,
 			FindDefaultWalletInteract findDefaultWalletInteract,
-			ExportWalletInteract exportWalletInteract,
 			ImportWalletRouter importWalletRouter,
 			HomeRouter homeRouter,
 			FetchTokensInteract fetchTokensInteract,
 			FindDefaultNetworkInteract findDefaultNetworkInteract) {
 		return new WalletsViewModelFactory(createWalletInteract,
                 setDefaultWalletInteract,
-                deleteWalletInteract,
                 fetchWalletsInteract,
                 findDefaultWalletInteract,
-                exportWalletInteract,
                 importWalletRouter,
                 homeRouter,
 				fetchTokensInteract,
@@ -58,12 +54,6 @@ class AccountsManageModule {
 	}
 
 	@Provides
-    DeleteWalletInteract provideDeleteAccountInteract(
-            WalletRepositoryType accountRepository, PasswordStore store) {
-		return new DeleteWalletInteract(accountRepository, store);
-	}
-
-	@Provides
     FetchWalletsInteract provideFetchAccountsInteract(WalletRepositoryType accountRepository) {
 		return new FetchWalletsInteract(accountRepository);
 	}
@@ -72,12 +62,6 @@ class AccountsManageModule {
     FindDefaultWalletInteract provideFindDefaultAccountInteract(WalletRepositoryType accountRepository) {
 		return new FindDefaultWalletInteract(accountRepository);
 	}
-
-	@Provides
-    ExportWalletInteract provideExportWalletInteract(
-            WalletRepositoryType walletRepository, PasswordStore passwordStore) {
-	    return new ExportWalletInteract(walletRepository, passwordStore);
-    }
 
 	@Provides
     ImportWalletRouter provideImportAccountRouter() {

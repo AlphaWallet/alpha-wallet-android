@@ -164,6 +164,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.refreshWallets();
+        viewModel.cleanDatabases(this);
     }
 
     private void onWallets(Wallet[] wallets)

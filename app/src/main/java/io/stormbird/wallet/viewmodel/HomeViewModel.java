@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -265,5 +266,37 @@ public class HomeViewModel extends BaseViewModel {
     private void onWritten(Integer wrote)
     {
         Log.d(TAG, "Wrote " + wrote + " Wallets");
+    }
+
+    public void cleanDatabases(Context ctx)
+    {
+        File[] files = ctx.getFilesDir().listFiles(new FilenameFilter()
+        {
+            @Override
+            public boolean accept(File file, String name)
+            {
+                return name.matches("^0x\\S{40}-.+-db.real\\S+")
+                        && !name.matches("^0x\\S{40}-721-db.real\\S+"); //match all deprecated databases
+            }
+        });
+
+        for (File file : files)
+        {
+            //erase file
+            deleteRecursive(file);
+        }
+
+        System.out.println("d");
+    }
+
+    private void deleteRecursive(File fileDir)
+    {
+        if (fileDir.isDirectory()) {
+            for (File child : fileDir.listFiles()) {
+                deleteRecursive(child);
+            }
+        }
+
+        fileDir.delete();
     }
 }

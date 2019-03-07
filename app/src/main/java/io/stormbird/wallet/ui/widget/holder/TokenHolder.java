@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui.widget.holder;
 
 import android.graphics.Color;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
@@ -94,6 +96,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
+            setChainColour(chainName, token.tokenInfo.chainId);
             String displayTxt = assetDefinition.getIssuerName(token.getAddress(), token.getNetworkName());
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
@@ -104,6 +107,37 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             token.setupContent(this, assetDefinition);
         } catch (Exception ex) {
             fillEmpty();
+        }
+    }
+
+    private void setChainColour(TextView chainName, int chainId)
+    {
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.MAINNET_ID:
+                chainName.setBackgroundResource(R.drawable.background_mainnet);
+                break;
+            case EthereumNetworkRepository.CLASSIC_ID:
+                chainName.setBackgroundResource(R.drawable.background_classic);
+                break;
+            case EthereumNetworkRepository.POA_ID:
+                chainName.setBackgroundResource(R.drawable.background_poa);
+                break;
+            case EthereumNetworkRepository.KOVAN_ID:
+                chainName.setBackgroundResource(R.drawable.background_kovan);
+                break;
+            case EthereumNetworkRepository.ROPSTEN_ID:
+                chainName.setBackgroundResource(R.drawable.background_ropsten);
+                break;
+            case EthereumNetworkRepository.SOKOL_ID:
+                chainName.setBackgroundResource(R.drawable.background_sokol);
+                break;
+            case EthereumNetworkRepository.RINKEBY_ID:
+                chainName.setBackgroundResource(R.drawable.background_rinkeby);
+                break;
+            case EthereumNetworkRepository.XDAI_ID:
+                chainName.setBackgroundResource(R.drawable.background_xdai);
+                break;
         }
     }
 

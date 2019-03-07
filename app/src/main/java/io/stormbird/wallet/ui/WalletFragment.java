@@ -159,7 +159,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onToken(Token token)
     {
-        adapter.updateTokenCheck(token);
+        adapter.updateToken(token);
     }
 
     private void initTabLayout(View view) {
@@ -174,7 +174,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 switch(tab.getPosition()) {
                     case 0:
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
-                        viewModel.fetchTokens();
                         break;
                     case 1:
                         adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);

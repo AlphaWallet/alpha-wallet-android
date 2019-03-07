@@ -251,7 +251,7 @@
     <string name="dialog_marketplace_success">Your tickets have been put up for sale in the Marketplace</string>
     <string name="dialog_process_error">Trade not processed</string>
     <string name="dialog_ok">OK</string>
-    <string name="toolbar_header_importing_tickets">Importing tickets</string>
+    <string name="toolbar_header_importing_tickets">Importing Tokens</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
     <string name="failed">Failed</string>
@@ -267,7 +267,6 @@
     <string name="send_universal_link">Share MagicLink</string>
     <string name="generate_sale_transfer_link">Generate MagicLink</string>
     <string name="place_tickets_marketplace">List on marketplace</string>
-    <string name="invalid_ticket">Invalid Ticket</string>
     <string name="hint_time">--:--</string>
     <string name="link_expiry_time">MagicLink Expiry Time</string>
     <string name="error_time">Please select expiry time</string>
@@ -358,7 +357,7 @@
     <string name="ticket_range_expired">Magiclink Expired</string>
     <string name="verified_contract">Verified by Stormbird</string>
     <string name="unverified_contract">Unverified Contract</string>
-    <string name="ticket_not_valid">Invalid Ticket</string>
+    <string name="ticket_not_valid">Invalid Token</string>
     <string name="ticket_not_valid_body">No valid contract at this address on this network. The contract could have been terminated or it may be on a different network. Try changing to \'Ropsten (Test)\'.</string>
     <string name="loading">Loading …</string>
     <string name="new_version_title">Update available</string>
@@ -444,4 +443,6 @@
     <string name="token_transfer_request">Token transfer request</string>
     <string name="generate_payment_request">Generate Payment Request</string>
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
+    <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
+    <string name="importing_tickets">Importing Tokens</string>
 </resources>

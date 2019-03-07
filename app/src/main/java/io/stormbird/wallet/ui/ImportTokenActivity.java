@@ -276,6 +276,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         String ethPrice = getEthString(order.price) + " " + networkSymbol;
         String priceUsd = "$" + getUsdString(viewModel.getUSDPrice() * order.price);
 
+        updateImportPageForFunction();
+
         if (order.price == 0)
         {
             String paymasterUrlPrefix;
@@ -318,29 +320,18 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private void displayImportAction()
+    private void updateImportPageForFunction()
     {
-        Token token = viewModel.getImportToken();
-        Button importTickets = findViewById(R.id.import_ticket);
-        importTickets.setVisibility(View.VISIBLE);
-        importTickets.setAlpha(1.0f);
-
         MagicLinkData data = viewModel.getSalesOrder();
-        //Customise button text
-        View baseView = findViewById(android.R.id.content);
-
         switch (data.contractType)
         {
             case spawnable:
                 importTxt.setText(R.string.token_spawn_valid);
                 importHeader.setText(R.string.import_spawnable);
-                importTickets.setText(R.string.spawn);
-                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
                 break;
             case currencyLink:
                 importTxt.setText(R.string.currency_drop);
                 importHeader.setText(R.string.currency_import);
-                importTickets.setText(R.string.action_import);
                 setTicket(false, false, false); //switch off all ticket info
                 //show currency to import
                 LinearLayout currencyCard = findViewById(R.id.layout_currency_import);
@@ -354,7 +345,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 break;
             default:
                 importTxt.setText(R.string.ticket_import_valid);
-                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
                 break;
         }
 
@@ -373,6 +363,33 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
+    private void displayImportAction()
+    {
+        Token token = viewModel.getImportToken();
+        Button importTickets = findViewById(R.id.import_ticket);
+        importTickets.setVisibility(View.VISIBLE);
+        importTickets.setAlpha(1.0f);
+
+        MagicLinkData data = viewModel.getSalesOrder();
+        //Customise button text
+        View baseView = findViewById(android.R.id.content);
+
+        switch (data.contractType)
+        {
+            case spawnable:
+                importTickets.setText(R.string.spawn);
+                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                break;
+            case currencyLink:
+                importTickets.setText(R.string.action_import);
+                break;
+            default:
+                importTxt.setText(R.string.ticket_import_valid);
+                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                break;
+        }
+    }
+
     private void onFeemasterAvailable(Boolean available)
     {
         usingFeeMaster = available;
@@ -382,13 +399,24 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
         else
         {
-            priceETH.setText(R.string.free_import_with_gas);
+            switch (viewModel.getSalesOrder().contractType)
+            {
+                case currencyLink:
+                    priceUSD.setVisibility(View.GONE);
+                    priceUSDLabel.setVisibility(View.GONE);
+                    importTxt.setVisibility(View.GONE);
+                    findViewById(R.id.text_total_cost).setVisibility(View.GONE);
+                    priceETH.setText(R.string.feemaster_service_not_available);
+                    priceETH.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    priceETH.setText(R.string.free_import_with_gas);
+                    priceETH.setVisibility(View.VISIBLE);
+                    priceUSD.setVisibility(View.GONE);
+                    priceUSDLabel.setVisibility(View.GONE);
+                    displayImportAction();
+            }
         }
-
-        priceETH.setVisibility(View.VISIBLE);
-        priceUSD.setVisibility(View.GONE);
-        priceUSDLabel.setVisibility(View.GONE);
-        displayImportAction();
     }
 
     private void invalidTime(Integer integer)

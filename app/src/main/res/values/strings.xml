@@ -445,4 +445,8 @@
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
     <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
     <string name="importing_tickets">Importing Tokens</string>
+    <string name="wallet_name">Wallet Name</string>
+    <string name="delete_wallet">Delete Wallet</string>
+    <string name="backup_keystore">Backup Keystore</string>
+    <string name="wallet_name_template">Wallet %1$d</string>
 </resources>

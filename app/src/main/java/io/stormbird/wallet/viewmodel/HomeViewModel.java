@@ -27,10 +27,10 @@ import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
+import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
@@ -40,11 +40,15 @@ import io.stormbird.wallet.util.LocaleUtils;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
+    public static final String ALPHAWALLET_DIR = "AlphaWallet";
+    public static final String ALPHAWALLET_FILE_URL = "https://awallet.io/apk";
+
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
 
+    private final PreferenceRepositoryType preferenceRepository;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final ImportTokenRouter importTokenRouter;
     private final AddTokenRouter addTokenRouter;
@@ -57,11 +61,10 @@ public class HomeViewModel extends BaseViewModel {
     private ParseMagicLink parser;
 
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
-
-    public static final String ALPHAWALLET_DIR = "AlphaWallet";
-    public static final String ALPHAWALLET_FILE_URL = "https://awallet.io/apk";
+    private final MutableLiveData<String> walletName = new MutableLiveData<>();
 
     HomeViewModel(
+            PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
             ExternalBrowserRouter externalBrowserRouter,
@@ -69,6 +72,7 @@ public class HomeViewModel extends BaseViewModel {
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
+        this.preferenceRepository = preferenceRepository;
         this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -95,19 +99,15 @@ public class HomeViewModel extends BaseViewModel {
         return transactions;
     }
 
-    public LiveData<File> installIntent()
-    {
+    public LiveData<File> installIntent() {
         return installIntent;
     }
-
-    public LiveData<Wallet[]> wallets() { return wallets; }
 
     public void prepare() {
         progress.postValue(false);
     }
 
-    public void showImportLink(Context context, String importData)
-    {
+    public void showImportLink(Context context, String importData) {
         disposable = findDefaultWalletInteract
                 .find().toObservable()
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
@@ -116,12 +116,10 @@ public class HomeViewModel extends BaseViewModel {
                 .subscribe(wallet -> importLink(wallet, context, importData), this::onError);
     }
 
-    private boolean checkWalletNotEqual(Wallet wallet, String importData)
-    {
+    private boolean checkWalletNotEqual(Wallet wallet, String importData) {
         boolean filterPass = false;
 
-        try
-        {
+        try {
             if (cryptoFunctions == null) {
                 cryptoFunctions = new CryptoFunctions();
             }
@@ -132,25 +130,20 @@ public class HomeViewModel extends BaseViewModel {
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);
 
-            if (Address.isAddress(data.contractAddress))
-            {
+            if (Address.isAddress(data.contractAddress)) {
                 filterPass = !wallet.address.equals(linkAddress);
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return filterPass;
     }
 
-    private void importLink(Wallet wallet, Context context, String importData)
-    {
+    private void importLink(Wallet wallet, Context context, String importData) {
         //valid link, remove from clipboard
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null)
-        {
+        if (clipboard != null) {
             ClipData clipData = ClipData.newPlainText("", "");
             clipboard.setPrimaryClip(clipData);
         }
@@ -165,45 +158,38 @@ public class HomeViewModel extends BaseViewModel {
         addTokenRouter.open(context, address);
     }
 
-    public void setLocale(HomeActivity activity)
-    {
+    public void setLocale(HomeActivity activity) {
         //get the current locale
         String currentLocale = localeRepository.getDefaultLocale();
         LocaleUtils.setLocale(activity, currentLocale);
     }
 
-    public void loadExternalXMLContracts()
-    {
+    public void loadExternalXMLContracts() {
         assetDefinitionService.checkExternalDirectoryAndLoad();
     }
 
-    public void downloadAndInstall(String build, Context ctx)
-    {
+    public void downloadAndInstall(String build, Context ctx) {
         createDirectory();
         downloadAPK(build, ctx);
     }
 
-    private void createDirectory()
-    {
+    private void createDirectory() {
         //create XML repository directory
         File directory = new File(
                 Environment.getExternalStorageDirectory()
                         + File.separator + ALPHAWALLET_DIR);
 
-        if (!directory.exists())
-        {
+        if (!directory.exists()) {
             directory.mkdir();
         }
     }
 
-    private void downloadAPK(String version, Context ctx)
-    {
+    private void downloadAPK(String version, Context ctx) {
         String destination = Environment.getExternalStorageDirectory()
-                + File.separator + ALPHAWALLET_DIR ;
+                + File.separator + ALPHAWALLET_DIR;
 
         File testFile = new File(destination, "AlphaWallet-" + version + ".apk");
-        if (testFile.exists())
-        {
+        if (testFile.exists()) {
             testFile.delete();
         }
         final Uri uri = Uri.parse("file://" + testFile.getPath());
@@ -216,10 +202,8 @@ public class HomeViewModel extends BaseViewModel {
         long downloadId = manager.enqueue(request);
 
         //set BroadcastReceiver to install app when .apk is downloaded
-        BroadcastReceiver onComplete = new BroadcastReceiver()
-        {
-            public void onReceive(Context ctxt, Intent intent)
-            {
+        BroadcastReceiver onComplete = new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
                 installIntent.postValue(testFile);
                 ctx.unregisterReceiver(this);
             }
@@ -228,42 +212,52 @@ public class HomeViewModel extends BaseViewModel {
         ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
-    public void refreshWallets()
-    {
-        disposable = fetchWalletsInteract.loadWallets()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::onWallets, this::onError);
-    }
+//    public void refreshWallets() {
+//        disposable = fetchWalletsInteract.loadWallets()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
+//                .subscribe(this::onWallets, this::onError);
+//    }
+//
+//    private void onWallets(Wallet[] wallets) {
+//        //combine this with a fetch from account
+//        Map<String, Wallet> walletBalances = new HashMap<>();
+//        disposable = fetchWalletsInteract.fetch(walletBalances)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(w -> combine(w, wallets), this::onError);
+//    }
+//
+//    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB) {
+//        Map<String, Wallet> join = new HashMap<String, Wallet>();
+//        for (Wallet wallet : walletsFromFetch) {
+//            join.put(wallet.address, wallet);
+//        }
+//
+//        for (Wallet wallet : walletsFromDB) {
+//            join.put(wallet.address, wallet);
+//        }
+//
+//        wallets.postValue(join.values().toArray(new Wallet[0]));
+//    }
 
-    private void onWallets(Wallet[] wallets)
-    {
-        //combine this with a fetch from account
-        Map<String, Wallet> walletBalances = new HashMap<>();
-        disposable = fetchWalletsInteract.fetch(walletBalances)
+//    private void onWritten(Integer wrote) {
+//        Log.d(TAG, "Wrote " + wrote + " Wallets");
+//    }
+
+    public void getWalletName() {
+        disposable = fetchWalletsInteract
+                .getWalletName(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(w -> combine(w, wallets), this::onError);
+                .subscribe(this::onWalletName, this::onError);
     }
 
-    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB)
-    {
-        Map<String, Wallet> join = new HashMap<String, Wallet>();
-        for (Wallet wallet : walletsFromFetch)
-        {
-            join.put(wallet.address, wallet);
-        }
-
-        for (Wallet wallet : walletsFromDB)
-        {
-            join.put(wallet.address, wallet);
-        }
-
-        wallets.postValue(join.values().toArray(new Wallet[0]));
+    private void onWalletName(String name) {
+        walletName.postValue(name);
     }
 
-    private void onWritten(Integer wrote)
-    {
-        Log.d(TAG, "Wrote " + wrote + " Wallets");
+    public LiveData<String> walletName() {
+        return walletName;
     }
 }

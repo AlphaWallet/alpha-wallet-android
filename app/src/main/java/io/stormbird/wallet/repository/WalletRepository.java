@@ -15,7 +15,9 @@ import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WalletRepository implements WalletRepositoryType
@@ -26,8 +28,6 @@ public class WalletRepository implements WalletRepositoryType
 	private final TransactionsNetworkClientType blockExplorerClient;
 	private final WalletDataRealmSource walletDataRealmSource;
 	private final OkHttpClient httpClient;
-
-	private Map<String, Wallet> walletMap = new HashMap<String, Wallet>();
 
 	public WalletRepository(
 			PreferenceRepositoryType preferenceRepositoryType,
@@ -45,33 +45,15 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Wallet[]> fetchWallets(Map<String, Wallet> walletBalances)
+	public Single<Wallet[]> fetchWallets()
 	{
 		return accountKeystoreService.fetchAccounts()
-				.flatMap(wallets -> addBalances(wallets, walletBalances));
-	}
-
-	private Single<Wallet[]> addBalances(Wallet[] wallets, Map<String, Wallet> walletBalances)
-	{
-		return Single.fromCallable(() -> {
-			if (walletBalances != null)
-			{
-				for (Wallet w : wallets)
-				{
-					if (walletBalances.get(w.address) != null)
-					{
-						w.balance = walletBalances.get(w.address).balance;
-						w.ENSname = walletBalances.get(w.address).ENSname;
-					}
-				}
-			}
-			return wallets;
-		});
+				.flatMap(walletDataRealmSource::populateWalletData);
 	}
 
 	@Override
 	public Single<Wallet> findWallet(String address) {
-		return fetchWallets(null)
+		return fetchWallets()
 				.flatMap(accounts -> {
 					for (Wallet wallet : accounts) {
 						if (wallet.sameAddress(address)) {
@@ -138,45 +120,20 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Wallet[]> loadWallets()
-	{
-		return walletDataRealmSource.loadWallets()
-				.map(this::storeWalletsInMap);
-	}
-
-	@Override
 	public Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet)
 	{
 		return walletDataRealmSource.storeWallets(wallets, isMainNet);
 	}
 
-	private Wallet[] storeWalletsInMap(Wallet[] wallets)
+	@Override
+	public Single<Integer> storeWallet(Wallet wallet)
 	{
-		for (Wallet wallet : wallets)
-		{
-			walletMap.put(wallet.address, wallet);
-		}
-
-		return wallets;
-	}
-
-	public Wallet getWallet(String address)
-	{
-		return walletMap.get(address);
+		return walletDataRealmSource.storeWallet(wallet);
 	}
 
 	@Override
-	public Map<String, Wallet> getWalletMap(NetworkInfo network)
-	{
-		if (!network.isMainNetwork)
-		{
-			Map<String, Wallet> notMainMap = new HashMap<String, Wallet>(walletMap);
-			for (Wallet wallet : notMainMap.values())
-			{
-				wallet.balance = "";
-			}
-		}
-		return walletMap;
+	public Single<String> getName(String address) {
+		return walletDataRealmSource.getName(address);
 	}
 
 	@Override

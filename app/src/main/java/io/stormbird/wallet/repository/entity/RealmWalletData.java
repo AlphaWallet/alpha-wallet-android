@@ -13,6 +13,7 @@ public class RealmWalletData extends RealmObject
     private String address;
     private String ENSName;
     private String balance;
+    private String name;
 
     public String getAddress()
     {
@@ -42,5 +43,13 @@ public class RealmWalletData extends RealmObject
     public void setBalance(String balance)
     {
         this.balance = balance;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

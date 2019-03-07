@@ -12,11 +12,13 @@ public class Wallet implements Parcelable {
     public final String address;
     public String balance;
     public String ENSname;
+    public String name;
 
 	public Wallet(String address) {
 		this.address = address;
 		this.balance = "-";
 		this.ENSname = "";
+		this.name = "";
 		//this.publicKey = padLeft(Numeric.cleanHexPrefix(address.toLowerCase()), 128);  //TODO: Get this from ecrecover
 	}
 
@@ -24,6 +26,7 @@ public class Wallet implements Parcelable {
 		address = in.readString();
 		balance = in.readString();
 		ENSname = in.readString();
+		name = in.readString();
 		//this.publicKey = padLeft(address, 128);
 	}
 
@@ -54,6 +57,7 @@ public class Wallet implements Parcelable {
 		parcel.writeString(address);
 		parcel.writeString(balance);
 		parcel.writeString(ENSname);
+		parcel.writeString(name);
 	}
 
 	public void setWalletBalance(BigDecimal balanceBD)

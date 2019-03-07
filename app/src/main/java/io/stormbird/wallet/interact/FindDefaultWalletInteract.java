@@ -19,7 +19,7 @@ public class FindDefaultWalletInteract {
 		return walletRepository
 				.getDefaultWallet()
 				.onErrorResumeNext(walletRepository
-						.fetchWallets(null)
+						.fetchWallets()
 						.to(single -> Flowable.fromArray(single.blockingGet()))
 						.firstOrError()
 						.flatMapCompletable(walletRepository::setDefaultWallet)

@@ -35,18 +35,16 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DownloadInterface;
-import io.stormbird.wallet.entity.DownloadReceiver;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.FragmentMessenger;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
@@ -205,23 +203,51 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (clipItem != null)
                 {
                     CharSequence clipText = clipItem.getText();
-                    //String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
-                    if (clipText != null && clipText.length() > 60 && clipText.length() < 300)
+                    if (clipText != null && clipText.length() > 60 && clipText.length() < 400)
                     {
-                        //let's try to import the link
-                        viewModel.showImportLink(this, clipText.toString());
+                        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                        if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
+                        {
+                            //let's try to import the link
+                            viewModel.showImportLink(this, clipText.toString());
+                        }
                     }
                 }
-            }
-
-            if (walletFragment != null)
-            {
-                walletFragment.setTokenInterface(this);
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+
+        if (walletFragment != null)
+        {
+            walletFragment.setTokenInterface(this);
+            walletFragment.checkTokenBalance("");
+        }
+        if (transactionsFragment != null)
+        {
+            transactionsFragment.setInterface(this);
+        }
+
+        viewModel.events().observe(this, this::onEvents);
+    }
+
+    private void onEvents(List<AWEvent> awEvents)
+    {
+        for (AWEvent event : awEvents)
+        {
+            switch (event.eventType)
+            {
+                case UPDATE_TOKEN_BALANCE:
+                    walletFragment.checkTokenBalance(event.payload);
+                    break;
+                case CHECK_TOKEN_TRANSACTIONS:
+                    transactionsFragment.checkTokenTransactions(event.payload);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -374,6 +400,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onDestroy();
         unregisterReceiver(downloadReceiver);
+        viewModel.onClean();
     }
 
     private void showPage(int page) {
@@ -435,6 +462,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void AddToken(String address)
     {
         viewModel.showAddToken(this, address);
+    }
+
+    @Override
+    public void AddEvent(int timeOffset, AWEvent event)
+    {
+        viewModel.addEvent(timeOffset, event);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

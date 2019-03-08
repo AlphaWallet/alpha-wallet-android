@@ -466,6 +466,11 @@ public class WalletViewModel extends BaseViewModel implements Runnable
         checkCounter = 0;
     }
 
+    public void addEvent(AWEvent event)
+    {
+        //sdf
+    }
+
     @Override
     public void run()
     {

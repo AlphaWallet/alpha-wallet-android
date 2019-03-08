@@ -18,12 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.TokenInterface;
-import io.stormbird.wallet.entity.TokensReceiver;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.TransactionsViewModel;
 import io.stormbird.wallet.viewmodel.TransactionsViewModelFactory;
@@ -48,6 +43,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private SystemView systemView;
     private TransactionsAdapter adapter;
     private Dialog dialog;
+    private FragmentMessenger homeMessager;
 
     private boolean isVisible = false;
 
@@ -100,6 +96,10 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private void onQueryVisibility(Boolean aBoolean)
     {
         viewModel.receiveVisibility(isVisible);
+        AWEvent event = new AWEvent();
+        event.payload = "";
+        event.eventType = AWEventType.CHECK_TOKEN_TRANSACTIONS;
+        homeMessager.AddEvent(10, event);
     }
 
     @Override
@@ -212,6 +212,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.openDeposit(view.getContext(), uri);
     }
 
+    /**
+     * Is called once at startup, after TokenService has been populated
+     */
     public void tokensReady()
     {
         viewModel.forceUpdateTransactionView();
@@ -251,5 +254,15 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private void refreshAdapter(Boolean aBoolean)
     {
         adapter.notifyDataSetChanged();
+    }
+
+    public void setInterface(FragmentMessenger messenger)
+    {
+        homeMessager = messenger;
+    }
+
+    public void checkTokenTransactions(String payload)
+    {
+        if (viewModel != null) viewModel.startTokenCheck(payload, isVisible);
     }
 }

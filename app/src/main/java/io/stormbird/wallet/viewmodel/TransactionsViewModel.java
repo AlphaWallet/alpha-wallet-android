@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 
@@ -54,6 +55,8 @@ public class TransactionsViewModel extends BaseViewModel
     private final TransactionDetailRouter transactionDetailRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final HomeRouter homeRouter;
+
+    private final ConcurrentLinkedQueue<String> checkQueue = new ConcurrentLinkedQueue<>();
 
     @Nullable
     private Disposable fetchTransactionDisposable;
@@ -238,13 +241,6 @@ public class TransactionsViewModel extends BaseViewModel
      * @param transactions
      */
     private void onUpdateTransactions(Transaction[] transactions) {
-        for (Transaction tx : transactions)
-        {
-            if (tx.hash.equals("0x34f90a4d1511cf9418874d4f2120b9f4dc29eee428bc53d2c23461100946d4bf"))
-            {
-                System.out.println("yoless");
-            }
-        }
         storeNewTransactions(transactions);
     }
 
@@ -424,37 +420,30 @@ public class TransactionsViewModel extends BaseViewModel
         }
     }
 
-    private void checkIfRegularUpdateNeeded()
+    private void checkTokenQueue()
     {
-        txMap.clear();
-        queryVisibility.postValue(true);
+        String address = checkQueue.poll();
+        if (address != null)
+        {
+            fetchNetworkTransactions();
+        }
+    }
+
+    public void startTokenCheck(String address, boolean isVisible)
+    {
+        checkQueue.add(address);
+        if (isVisible && fetchTransactionDisposable == null)
+        {
+            checkTokenQueue();
+        }
     }
 
     public void receiveVisibility(boolean isVisible)
     {
-        if (!isVisible)
+        if (isVisible)
         {
-            //no longer any need to refresh
-            Log.d(TAG, "Finish");
-            if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
-            {
-                fetchTransactionDisposable.dispose();
-            }
-            fetchTransactionDisposable = null; //ready to restart the fetch
-
-            handler.removeCallbacks(startFetchTransactionsTask);
-        }
-        else if (fetchTransactionDisposable == null)
-        {
-            handler.removeCallbacks(startFetchTransactionsTask);
-            Log.d(TAG, "Delayed start in " + FETCH_TRANSACTIONS_INTERVAL);
-            handler.postDelayed(
-                    startFetchTransactionsTask,
-                    FETCH_TRANSACTIONS_INTERVAL);
-        }
-        else
-        {
-            Log.d(TAG, "must already be running, wait until termination");
+            //do next update
+            checkTokenQueue();
         }
     }
 
@@ -487,14 +476,16 @@ public class TransactionsViewModel extends BaseViewModel
     //start updating transactions
     public void startTransactionRefresh() {
 
-        if (fetchTransactionDisposable == null || fetchTransactionDisposable.isDisposed()) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
+        String address = checkQueue.poll();
+        if (address != null && fetchTransactionDisposable == null) //ready to restart the fetch == null || fetchTokensDisposable.isDisposed())
         {
-            checkIfRegularUpdateNeeded();
+            forceUpdateTransactionView();
         }
     }
 
     private void finishTransactionScanCycle()
     {
+        txMap.clear();
         progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
         fetchTransactionDisposable = null;
         if (hasNewTransactions)
@@ -502,7 +493,14 @@ public class TransactionsViewModel extends BaseViewModel
             refreshAdapter.postValue(true);
             hasNewTransactions = false;
         }
-        checkIfRegularUpdateNeeded();
+
+        Log.d(TAG, "Finish");
+        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
+        {
+            fetchTransactionDisposable.dispose();
+        }
+        fetchTransactionDisposable = null; //ready to restart the fetch
+        queryVisibility.postValue(true);
     }
 
     /**

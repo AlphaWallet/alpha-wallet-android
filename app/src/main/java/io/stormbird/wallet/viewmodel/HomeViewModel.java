@@ -11,23 +11,26 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Address;
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
@@ -43,11 +46,13 @@ public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
     public static final String ALPHAWALLET_FILE_URL = "https://awallet.io/apk";
+    private static final int TIMER_FREQUENCY = 1000;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
+    private final MutableLiveData<List<AWEvent>> events = new MutableLiveData<>();
 
     private final PreferenceRepositoryType preferenceRepository;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -63,6 +68,12 @@ public class HomeViewModel extends BaseViewModel {
 
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
+
+    private Map<Integer, List<AWEvent>> eventMap = new ConcurrentHashMap<>();
+    private int eventCounter;
+
+    @Nullable
+    private Disposable timerDisposable;
 
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
@@ -104,8 +115,51 @@ public class HomeViewModel extends BaseViewModel {
         return installIntent;
     }
 
+    public LiveData<List<AWEvent>> events() {
+        return events;
+    }
+
     public void prepare() {
         progress.postValue(false);
+
+        if (timerDisposable == null || timerDisposable.isDisposed())
+        {
+            timerDisposable = Observable.interval(0, TIMER_FREQUENCY, TimeUnit.MILLISECONDS)
+                    .doOnNext(l -> checkEvents()).subscribe();
+        }
+    }
+
+    private void checkEvents()
+    {
+        List<AWEvent> currentList = eventMap.get(eventCounter);
+        if (currentList != null)
+        {
+            eventMap.remove(eventCounter);
+            events.postValue(currentList);
+        }
+        eventCounter++;
+    }
+
+    //must be greater than 1 away to avoid race condition
+    public void addEvent(int timeDuration, AWEvent event)
+    {
+        if (timeDuration < 2)
+        {
+            Log.d(TAG, "Bad event time: " + timeDuration);
+            timeDuration = 2;
+        }
+
+        List<AWEvent> futureEvents = eventMap.get(eventCounter + timeDuration);
+        if (futureEvents == null) futureEvents = new ArrayList<>();
+        futureEvents.add(event);
+    }
+
+    public void onClean()
+    {
+        if (timerDisposable != null && !timerDisposable.isDisposed())
+        {
+            timerDisposable.dispose();
+        }
     }
 
     public void showImportLink(Context context, String importData) {
@@ -212,39 +266,6 @@ public class HomeViewModel extends BaseViewModel {
 
         ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
-
-//    public void refreshWallets() {
-//        disposable = fetchWalletsInteract.loadWallets()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(Schedulers.io())
-//                .subscribe(this::onWallets, this::onError);
-//    }
-//
-//    private void onWallets(Wallet[] wallets) {
-//        //combine this with a fetch from account
-//        Map<String, Wallet> walletBalances = new HashMap<>();
-//        disposable = fetchWalletsInteract.fetch(walletBalances)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(w -> combine(w, wallets), this::onError);
-//    }
-//
-//    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB) {
-//        Map<String, Wallet> join = new HashMap<String, Wallet>();
-//        for (Wallet wallet : walletsFromFetch) {
-//            join.put(wallet.address, wallet);
-//        }
-//
-//        for (Wallet wallet : walletsFromDB) {
-//            join.put(wallet.address, wallet);
-//        }
-//
-//        wallets.postValue(join.values().toArray(new Wallet[0]));
-//    }
-
-//    private void onWritten(Integer wrote) {
-//        Log.d(TAG, "Wrote " + wrote + " Wallets");
-//    }
 
     public void getWalletName() {
         disposable = fetchWalletsInteract

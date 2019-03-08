@@ -269,7 +269,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onDefaultWallet(Wallet wallet)
     {
-        viewModel.fetchTokens();
+        //viewModel.fetchTokens();
     }
 
     private void onBalanceChanged(Map<String, String> balance) {
@@ -353,5 +353,19 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void changedLocale()
     {
 
+    }
+
+    public void checkTokenBalance(String address)
+    {
+        //check balance of this token
+        if (address.length() == 0)
+        {
+            //startup
+            viewModel.fetchTokens();
+        }
+        else
+        {
+
+        }
     }
 }

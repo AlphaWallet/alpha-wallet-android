@@ -78,10 +78,8 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(viewHolder.icon.getContext())
                     .load(favicon)
-                    .apply(new RequestOptions()
-                            .placeholder(R.mipmap.ic_launcher)
-                            .circleCrop()
-                            .fitCenter())
+                    .apply(new RequestOptions().circleCrop())
+                    .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(viewHolder.icon);
 
             viewHolder.icon.setOnClickListener(v -> listener.onDappClick(dApp));

@@ -464,4 +464,9 @@
     <string name="edit">Edit</string>
     <string name="history">History</string>
     <string name="discover_dapps">Discover DApps</string>
+    <string name="action_add">Add</string>
+    <string name="add_to_my_dapps">Add to My DApps</string>
+    <string name="edit_dapp">Edit DApp</string>
+    <string name="dapp_title">Title</string>
+    <string name="dapp_address">Address</string>
 </resources>

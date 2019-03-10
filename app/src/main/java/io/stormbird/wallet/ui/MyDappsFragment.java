@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -66,16 +67,10 @@ public class MyDappsFragment extends Fragment {
     }
 
     private void onDappEdited(DApp dapp) {
-        List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
-        for (DApp d : myDapps) {
-            if (d.getName().equals(dapp.getName())
-                    && d.getUrl().equals(dapp.getUrl())) {
-//                d.setName(newName);
-//                d.setUrl(newUrl);
-                break;
-            }
-        }
-        DappBrowserUtils.saveToPrefs(getContext(), myDapps);
+        Intent intent = new Intent(getActivity(), AddEditDappActivity.class);
+        intent.putExtra("mode", 1);
+        intent.putExtra("dapp", dapp);
+        getActivity().startActivity(intent);
     }
 
     private void onDappRemoved(DApp dapp) {

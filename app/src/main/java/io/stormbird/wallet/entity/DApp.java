@@ -1,6 +1,9 @@
 package io.stormbird.wallet.entity;
 
-public class DApp {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class DApp implements Parcelable {
     String name;
     String url;
     String category;
@@ -51,4 +54,38 @@ public class DApp {
     public void setAdded(boolean added) {
         this.added = added;
     }
+
+    protected DApp(Parcel in) {
+        name = in.readString();
+        url = in.readString();
+        category = in.readString();
+        description = in.readString();
+        added = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(url);
+        dest.writeString(category);
+        dest.writeString(description);
+        dest.writeByte((byte) (added ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<DApp> CREATOR = new Creator<DApp>() {
+        @Override
+        public DApp createFromParcel(Parcel in) {
+            return new DApp(in);
+        }
+
+        @Override
+        public DApp[] newArray(int size) {
+            return new DApp[size];
+        }
+    };
 }

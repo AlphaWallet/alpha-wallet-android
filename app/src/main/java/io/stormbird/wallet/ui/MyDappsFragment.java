@@ -23,24 +23,13 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 
 public class MyDappsFragment extends Fragment {
-    private static final String ON_DAPP_CLICK_LISTENER = "onDappClickListener";
     private MyDappsListAdapter adapter;
     private OnDappClickListener onDappClickListener;
     private AWalletAlertDialog dialog;
     private TextView noDapps;
 
-    public static MyDappsFragment newInstance(OnDappClickListener listener) {
-        MyDappsFragment f = new MyDappsFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ON_DAPP_CLICK_LISTENER, listener);
-        f.setArguments(args);
-        return f;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        onDappClickListener = (OnDappClickListener) getArguments().get(ON_DAPP_CLICK_LISTENER);
-        super.onCreate(savedInstanceState);
+    void setCallbacks(OnDappClickListener listener) {
+        onDappClickListener = listener;
     }
 
     @Nullable

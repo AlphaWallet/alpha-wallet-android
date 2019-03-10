@@ -45,6 +45,8 @@ import io.stormbird.wallet.entity.SignTransactionInterface;
 import io.stormbird.wallet.entity.URLLoadInterface;
 import io.stormbird.wallet.entity.URLLoadReceiver;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.ui.widget.OnDappClickListener;
+import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
@@ -73,7 +75,7 @@ import static io.stormbird.wallet.ui.HomeActivity.DAPP_BARCODE_READER_REQUEST_CO
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        URLLoadInterface, ItemClickListener, SignTransactionInterface
+        URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_HOME = "DAPP_HOME";
@@ -105,10 +107,10 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dappHomeFragment = DappHomeFragment.newInstance(this::onDappHomeNavClick, this::onDAppClick);
-        myDappsFragment = MyDappsFragment.newInstance(this::onDAppClick);
-        discoverDappsFragment = DiscoverDappsFragment.newInstance(this::onDAppClick);
-        browserHistoryFragment = BrowserHistoryFragment.newInstance(this::onDAppClick);
+        dappHomeFragment = new DappHomeFragment();
+        myDappsFragment = new MyDappsFragment();
+        discoverDappsFragment = new DiscoverDappsFragment();
+        browserHistoryFragment = new BrowserHistoryFragment();
     }
 
     @Override
@@ -142,12 +144,31 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void attachFragment(Fragment fragment, String tag) {
-        Fragment f = getChildFragmentManager().findFragmentByTag(tag);
-        if(f == null) {
-            getChildFragmentManager().beginTransaction()
-                    .add(R.id.frame, fragment, tag)
-                    .commit();
+        if (getChildFragmentManager().findFragmentByTag(tag) == null) {
+            if (tag.equals(DAPP_HOME)) {
+                DappHomeFragment f = (DappHomeFragment) fragment;
+                f.setCallbacks(this, this);
+                showFragment(f, tag);
+            } else if (tag.equals(DISCOVER_DAPPS)) {
+                DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
+                f.setCallbacks(this);
+                showFragment(f, tag);
+            } else if (tag.equals(MY_DAPPS)) {
+                MyDappsFragment f = (MyDappsFragment) fragment;
+                f.setCallbacks(this);
+                showFragment(f, tag);
+            } else if (tag.equals(HISTORY)) {
+                BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
+                f.setCallbacks(this);
+                showFragment(f, tag);
+            }
         }
+    }
+
+    private void showFragment(Fragment fragment, String tag) {
+        getChildFragmentManager().beginTransaction()
+                .add(R.id.frame, fragment, tag)
+                .commit();
     }
 
     private void detachFragments(boolean detachHome) {
@@ -191,6 +212,7 @@ public class DappBrowserFragment extends Fragment implements
         urlTv.getText().clear();
     }
 
+    @Override
     public void onDappHomeNavClick(int position) {
         detachFragments(true);
         switch (position) {
@@ -212,7 +234,8 @@ public class DappBrowserFragment extends Fragment implements
         }
     }
 
-    public void onDAppClick(DApp dapp) {
+    @Override
+    public void onDappClick(DApp dapp) {
         loadUrl(dapp.getUrl());
         detachFragments(true);
     }

@@ -25,25 +25,12 @@ import io.stormbird.wallet.util.Utils;
 
 
 public class DiscoverDappsFragment extends Fragment {
-    private static final String ON_DAPP_CLICK_LISTENER = "onDappClickListener";
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private DiscoverDappsListAdapter adapter;
     private OnDappClickListener onDappClickListener;
 
-    public static DiscoverDappsFragment newInstance(OnDappClickListener listener) {
-        DiscoverDappsFragment f = new DiscoverDappsFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ON_DAPP_CLICK_LISTENER, listener);
-        f.setArguments(args);
-        return f;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        if (getArguments() != null) {
-            onDappClickListener = (OnDappClickListener) getArguments().get(ON_DAPP_CLICK_LISTENER);
-        }
-        super.onCreate(savedInstanceState);
+    void setCallbacks(OnDappClickListener listener) {
+        onDappClickListener = listener;
     }
 
     @Nullable

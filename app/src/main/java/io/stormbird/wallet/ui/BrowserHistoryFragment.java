@@ -22,25 +22,14 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 
 public class BrowserHistoryFragment extends Fragment {
-    public static final String ON_DAPP_CLICK_LISTENER = "onDappClickListener";
     private BrowserHistoryAdapter adapter;
     private OnDappClickListener onDappClickListener;
     private AWalletAlertDialog dialog;
     private TextView clear;
     private TextView noHistory;
 
-    public static BrowserHistoryFragment newInstance(OnDappClickListener listener) {
-        BrowserHistoryFragment f = new BrowserHistoryFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ON_DAPP_CLICK_LISTENER, listener);
-        f.setArguments(args);
-        return f;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        onDappClickListener = (OnDappClickListener) getArguments().get(ON_DAPP_CLICK_LISTENER);
-        super.onCreate(savedInstanceState);
+    void setCallbacks(OnDappClickListener listener) {
+        onDappClickListener = listener;
     }
 
     @Nullable

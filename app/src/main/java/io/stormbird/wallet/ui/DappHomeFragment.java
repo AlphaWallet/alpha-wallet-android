@@ -22,32 +22,13 @@ import io.stormbird.wallet.util.DappBrowserUtils;
 
 
 public class DappHomeFragment extends Fragment {
-    private static final String ON_DAPP_HOME_NAV_CLICK_LISTENER = "onDappHomeNavClickListener";
-    private static final String ON_DAPP_CLICK_LISTENER = "onDappClickListener";
     private MyDappsGridAdapter adapter;
     private OnDappClickListener onDappClickListener;
     private OnDappHomeNavClickListener onDappHomeNavClickListener;
 
-    public static DappHomeFragment newInstance(OnDappHomeNavClickListener onDappHomeNavClickListener,
-                                               OnDappClickListener onDappClickListener) {
-        DappHomeFragment f = new DappHomeFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ON_DAPP_HOME_NAV_CLICK_LISTENER, onDappHomeNavClickListener);
-        args.putSerializable(ON_DAPP_CLICK_LISTENER, onDappClickListener);
-        f.setArguments(args);
-        return f;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        if (getArguments() != null) {
-            onDappClickListener =
-                    (OnDappClickListener) getArguments().get(ON_DAPP_CLICK_LISTENER);
-            onDappHomeNavClickListener =
-                    (OnDappHomeNavClickListener) getArguments().get(ON_DAPP_HOME_NAV_CLICK_LISTENER);
-
-        }
-        super.onCreate(savedInstanceState);
+    void setCallbacks(OnDappClickListener l1, OnDappHomeNavClickListener l2) {
+        onDappClickListener = l1;
+        onDappHomeNavClickListener = l2;
     }
 
     @Nullable
@@ -55,7 +36,6 @@ public class DappHomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_dapp_home, container, false);
-
         LinearLayout myDappsLayout = view.findViewById(R.id.my_dapps);
         myDappsLayout.setOnClickListener(v ->
                 onDappHomeNavClickListener.onDappHomeNavClick(0));
@@ -68,8 +48,8 @@ public class DappHomeFragment extends Fragment {
         historyLayout.setOnClickListener(v ->
                 onDappHomeNavClickListener.onDappHomeNavClick(2));
 
-        adapter = new MyDappsGridAdapter(getData(), onDappClickListener);
         RecyclerView grid = view.findViewById(R.id.my_dapps_grid);
+        adapter = new MyDappsGridAdapter(getData(), onDappClickListener);
         grid.setNestedScrollingEnabled(false);
         grid.setLayoutManager(new GridLayoutManager(getActivity(), 3));
         grid.setAdapter(adapter);

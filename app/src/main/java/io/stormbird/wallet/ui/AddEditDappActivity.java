@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DApp;
@@ -32,6 +33,8 @@ public class AddEditDappActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit_dapp);
+        toolbar();
+        setTitle("");
 
         title = findViewById(R.id.title);
         name = findViewById(R.id.dapp_title);
@@ -77,7 +80,7 @@ public class AddEditDappActivity extends BaseActivity {
                 button.setText(R.string.action_save);
                 url.setText(dapp.getUrl());
                 name.setText(dapp.getName());
-                button.setOnClickListener(v -> save());
+                button.setOnClickListener(v -> save(dapp));
                 break;
             }
             default: {
@@ -86,8 +89,17 @@ public class AddEditDappActivity extends BaseActivity {
         }
     }
 
-    private void save() {
-
+    private void save(DApp dapp) {
+        List<DApp> myDapps = DappBrowserUtils.getMyDapps(this);
+        for (DApp d : myDapps) {
+            if (d.getName().equals(dapp.getName()) &&
+                    d.getUrl().equals(dapp.getUrl())) {
+                d.setName(name.getText().toString());
+                d.setUrl(url.getText().toString());
+            }
+        }
+        DappBrowserUtils.saveToPrefs(this, myDapps);
+        finish();
     }
 
     private void add() {

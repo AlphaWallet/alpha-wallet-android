@@ -208,6 +208,10 @@
         <activity
             android:name="io.stormbird.wallet.ui.WalletActionsActivity"
             android:label="Wallet Actions" />
+
+        <activity
+            android:name="io.stormbird.wallet.ui.AddEditDappActivity"
+            android:label="Add DApp" />
     </application>
 
 </manifest>

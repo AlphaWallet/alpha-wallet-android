@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:text="@string/edit_dapp"
+                android:textColor="@color/text_dark_gray"
+                android:textSize="20sp" />
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="15dp"
+                android:layout_marginTop="15dp"
+                android:src="@drawable/ic_logo" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/dapp_title"
+                android:textColor="@color/text_dark_gray"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/dapp_title"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/background_round_blue_9dp"
+                android:completionThreshold="1"
+                android:fontFamily="@font/font_regular"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:lines="1"
+                android:maxLines="1"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:textColor="@color/text_dark_gray"
+                android:textColorHint="@color/light_gray"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/dapp_address"
+                android:textColor="@color/text_dark_gray"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/dapp_url"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/background_round_blue_9dp"
+                android:completionThreshold="1"
+                android:fontFamily="@font/font_regular"
+                android:imeOptions="actionDone"
+                android:inputType="textUri"
+                android:lines="1"
+                android:maxLines="1"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:textColor="@color/text_dark_gray"
+                android:textColorHint="@color/light_gray"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="20dp">
+
+            <Button
+                android:id="@+id/btn_confirm"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/selector_round_button"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                android:text="@string/action_add"
+                android:textAllCaps="false"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

@@ -2,7 +2,6 @@ package io.stormbird.wallet.ui;
 
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,28 +14,51 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.google.gson.Gson;
+
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.DApp;
+import io.stormbird.wallet.entity.DAppFunction;
+import io.stormbird.wallet.entity.FragmentMessenger;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.SignTransactionInterface;
+import io.stormbird.wallet.entity.URLLoadInterface;
+import io.stormbird.wallet.entity.URLLoadReceiver;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
+import io.stormbird.wallet.util.Hex;
+import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModel;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
-import io.stormbird.wallet.web3.*;
+import io.stormbird.wallet.web3.OnSignMessageListener;
+import io.stormbird.wallet.web3.OnSignPersonalMessageListener;
+import io.stormbird.wallet.web3.OnSignTransactionListener;
+import io.stormbird.wallet.web3.OnSignTypedMessageListener;
+import io.stormbird.wallet.web3.Web3View;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.TypedData;
@@ -44,18 +66,7 @@ import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SelectNetworkDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 
-import javax.inject.Inject;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.security.SignatureException;
-import java.util.List;
-
-import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.ui.HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE;
@@ -65,7 +76,10 @@ public class DappBrowserFragment extends Fragment implements
         URLLoadInterface, ItemClickListener, SignTransactionInterface
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
-
+    private static final String DAPP_HOME = "DAPP_HOME";
+    private static final String MY_DAPPS = "MY_DAPPS";
+    private static final String DISCOVER_DAPPS = "DISCOVER_DAPPS";
+    private static final String HISTORY = "HISTORY";
     private static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
     @Inject
@@ -83,6 +97,28 @@ public class DappBrowserFragment extends Fragment implements
     private AutoCompleteUrlAdapter adapter;
     private URLLoadReceiver URLReceiver;
 
+    private Fragment dappHomeFragment;
+    private Fragment myDappsFragment;
+    private Fragment discoverDappsFragment;
+    private Fragment browserHistoryFragment;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        dappHomeFragment = DappHomeFragment.newInstance(this::onDappHomeNavClick, this::onDAppClick);
+        myDappsFragment = MyDappsFragment.newInstance(this::onDAppClick);
+        discoverDappsFragment = DiscoverDappsFragment.newInstance(this::onDAppClick);
+        browserHistoryFragment = BrowserHistoryFragment.newInstance(this::onDAppClick);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter == null || !adapter.hasContext()) {
+            setupAddressBar();
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -98,9 +134,87 @@ public class DappBrowserFragment extends Fragment implements
         if (getArguments() != null && getArguments().getString("url") != null) {
             String url = getArguments().getString("url");
             loadUrl(url);
+        } else {
+            attachFragment(dappHomeFragment, DAPP_HOME);
         }
 
         return view;
+    }
+
+    private void attachFragment(Fragment fragment, String tag) {
+        Fragment f = getChildFragmentManager().findFragmentByTag(tag);
+        if(f == null) {
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.frame, fragment, tag)
+                    .commit();
+        }
+    }
+
+    private void detachFragments(boolean detachHome) {
+        Fragment fragment;
+        if (detachHome) {
+            fragment = getChildFragmentManager().findFragmentByTag(DAPP_HOME);
+            if (fragment != null && fragment.isVisible()) {
+                getChildFragmentManager().beginTransaction()
+                        .remove(fragment)
+                        .commit();
+            }
+        }
+
+        fragment = getChildFragmentManager().findFragmentByTag(MY_DAPPS);
+        if(fragment != null && fragment.isVisible()) {
+            getChildFragmentManager().beginTransaction()
+                    .remove(fragment)
+                    .commit();
+        }
+
+        fragment = getChildFragmentManager().findFragmentByTag(DISCOVER_DAPPS);
+        if(fragment != null && fragment.isVisible()) {
+            getChildFragmentManager().beginTransaction()
+                    .remove(fragment)
+                    .commit();
+        }
+
+        fragment = getChildFragmentManager().findFragmentByTag(HISTORY);
+        if(fragment != null && fragment.isVisible()) {
+            getChildFragmentManager().beginTransaction()
+                    .remove(fragment)
+                    .commit();
+        }
+    }
+
+    public void homePressed()
+    {
+        detachFragments(false);
+        attachFragment(dappHomeFragment, DAPP_HOME);
+        web3.stopLoading();
+        urlTv.getText().clear();
+    }
+
+    public void onDappHomeNavClick(int position) {
+        detachFragments(true);
+        switch (position) {
+            case 0: {
+                attachFragment(myDappsFragment, MY_DAPPS);
+                break;
+            }
+            case 1: {
+                attachFragment(discoverDappsFragment, DISCOVER_DAPPS);
+                break;
+            }
+            case 2: {
+                attachFragment(browserHistoryFragment, HISTORY);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    public void onDAppClick(DApp dapp) {
+        loadUrl(dapp.getUrl());
+        detachFragments(true);
     }
 
     @Override
@@ -120,7 +234,7 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void setupAddressBar() {
-        urlTv.setText(viewModel.getLastUrl(getContext()));
+//        urlTv.setText(viewModel.getLastUrl(getContext()));
 
         adapter = new AutoCompleteUrlAdapter(getContext(), C.DAPP_BROWSER_HISTORY);
         adapter.setListener(this);
@@ -132,24 +246,12 @@ public class DappBrowserFragment extends Fragment implements
             {
                 String urlText = urlTv.getText().toString();
                 handled = loadUrl(urlText);
+                detachFragments(true);
             }
             return handled;
         });
 
         urlTv.setOnClickListener(v -> urlTv.showDropDown());
-    }
-
-    private void dismissKeyboard()
-    {
-        try
-        {
-            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(urlTv.getWindowToken(), 0);
-        }
-        catch (NullPointerException e)
-        {
-            System.out.println("Pre - init");
-        }
     }
 
     private void initViewModel() {
@@ -162,11 +264,6 @@ public class DappBrowserFragment extends Fragment implements
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
         setupWeb3();
-
-        // Default to last opened site
-        if (web3.getUrl() == null) {
-            loadUrl(viewModel.getLastUrl(getContext()));
-        }
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
@@ -213,12 +310,6 @@ public class DappBrowserFragment extends Fragment implements
         web3.setOnSignPersonalMessageListener(this);
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (adapter == null || !adapter.hasContext()) setupAddressBar();
     }
 
     @Override
@@ -272,16 +363,16 @@ public class DappBrowserFragment extends Fragment implements
                 Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignPersonalMessageSuccessful(message, signHex);
                 //Test Sig
-                testRecoverAddressFromSignature(hexToUtf8(message.value), signHex);
+                testRecoverAddressFromSignature(Hex.hexToUtf8(message.value), signHex);
                 dialog.dismiss();
             }
         };
 
         dialog = new SignMessageDialog(getActivity(), message);
         dialog.setAddress(wallet.address);
-        dialog.setMessage(hexToUtf8(message.value));
+        dialog.setMessage(Hex.hexToUtf8(message.value));
         dialog.setOnApproveListener(v -> {
-            String convertedMessage = hexToUtf8(message.value);
+            String convertedMessage = Hex.hexToUtf8(message.value);
             String signMessage = PERSONAL_MESSAGE_PREFIX
                     + convertedMessage.length()
                     + convertedMessage;
@@ -316,18 +407,6 @@ public class DappBrowserFragment extends Fragment implements
         }
     }
 
-    public static String hexToUtf8(String hex) {
-        hex = org.web3j.utils.Numeric.cleanHexPrefix(hex);
-        ByteBuffer buff = ByteBuffer.allocate(hex.length() / 2);
-        for (int i = 0; i < hex.length(); i += 2) {
-            buff.put((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
-        }
-        buff.rewind();
-        Charset cs = Charset.forName("UTF-8");
-        CharBuffer cb = cs.decode(buff);
-        return cb.toString();
-    }
-
     private void onProgress() {
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.NONE);
@@ -354,21 +433,15 @@ public class DappBrowserFragment extends Fragment implements
         adapter.addDAppURL(url);
     }
 
-    public void homePressed()
-    {
-        urlTv.setText(DAPP_DEFAULT_URL);
-        loadUrl(DAPP_DEFAULT_URL);
-    }
-
     private boolean loadUrl(String urlText)
     {
-        urlTv.setText(urlText);
         web3.loadUrl(Utils.formatUrl(urlText));
+        urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
-        adapter.add(urlText);
+        adapter.add(Utils.formatUrl(urlText));
         adapter.notifyDataSetChanged();
-        dismissKeyboard();
+        KeyboardUtils.hideKeyboard(urlTv);
         Activity current = getActivity();
         if (current != null)
         {

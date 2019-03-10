@@ -101,4 +101,10 @@ public class MyDappsFragment extends Fragment {
             noDapps.setVisibility(View.VISIBLE);
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateData();
+    }
 }

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui;
 
+import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -84,6 +86,7 @@ public class DappBrowserFragment extends Fragment implements
     private static final String MY_DAPPS = "MY_DAPPS";
     private static final String DISCOVER_DAPPS = "DISCOVER_DAPPS";
     private static final String HISTORY = "HISTORY";
+    public static final String SEARCH = "SEARCH";
     private static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
     @Inject
@@ -107,6 +110,10 @@ public class DappBrowserFragment extends Fragment implements
     private Fragment browserHistoryFragment;
 
     private Toolbar toolbar;
+    private ImageView home;
+    private ImageView back;
+    private ImageView next;
+    private ImageView clear;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -165,6 +172,8 @@ public class DappBrowserFragment extends Fragment implements
                 BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
                 f.setCallbacks(this);
                 showFragment(f, tag);
+            } else {
+                showFragment(fragment, tag);
             }
         }
     }
@@ -176,36 +185,13 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void detachFragments(boolean detachHome) {
-        Fragment fragment;
         if (detachHome) {
-            fragment = getChildFragmentManager().findFragmentByTag(DAPP_HOME);
-            if (fragment != null && fragment.isVisible()) {
-                getChildFragmentManager().beginTransaction()
-                        .remove(fragment)
-                        .commit();
-            }
+            detachFragment(DAPP_HOME);
         }
-
-        fragment = getChildFragmentManager().findFragmentByTag(MY_DAPPS);
-        if(fragment != null && fragment.isVisible()) {
-            getChildFragmentManager().beginTransaction()
-                    .remove(fragment)
-                    .commit();
-        }
-
-        fragment = getChildFragmentManager().findFragmentByTag(DISCOVER_DAPPS);
-        if(fragment != null && fragment.isVisible()) {
-            getChildFragmentManager().beginTransaction()
-                    .remove(fragment)
-                    .commit();
-        }
-
-        fragment = getChildFragmentManager().findFragmentByTag(HISTORY);
-        if(fragment != null && fragment.isVisible()) {
-            getChildFragmentManager().beginTransaction()
-                    .remove(fragment)
-                    .commit();
-        }
+        detachFragment(MY_DAPPS);
+        detachFragment(DISCOVER_DAPPS);
+        detachFragment(HISTORY);
+        detachFragment(SEARCH);
     }
 
     public void homePressed()
@@ -261,14 +247,30 @@ public class DappBrowserFragment extends Fragment implements
         toolbar = view.findViewById(R.id.address_bar);
         toolbar.inflateMenu(R.menu.menu_bookmarks);
 
-        ImageView home = view.findViewById(R.id.home);
+        RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
+        layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        home = view.findViewById(R.id.home);
         home.setOnClickListener(v -> homePressed());
 
-        ImageView back = view.findViewById(R.id.back);
+        back = view.findViewById(R.id.back);
         back.setOnClickListener(v -> goToPreviousPage());
 
-        ImageView next = view.findViewById(R.id.next);
+        next = view.findViewById(R.id.next);
         next.setOnClickListener(v -> goToNextPage());
+
+        clear = view.findViewById(R.id.clear_url);
+        clear.setOnClickListener(v -> {
+            clearAddressBar();
+        });
+    }
+
+    private void clearAddressBar() {
+        if (urlTv.getText().toString().isEmpty()) {
+            cancelSearchSession();
+        } else {
+            urlTv.getText().clear();
+        }
     }
 
     private void goToPreviousPage() {
@@ -291,11 +293,48 @@ public class DappBrowserFragment extends Fragment implements
                 String urlText = urlTv.getText().toString();
                 handled = loadUrl(urlText);
                 detachFragments(true);
+                cancelSearchSession();
             }
             return handled;
         });
 
-        urlTv.setOnClickListener(v -> urlTv.showDropDown());
+        urlTv.setOnClickListener(v -> {
+            beginSearchSession();
+        });
+    }
+
+    private void beginSearchSession() {
+        SearchFragment f = new SearchFragment();
+        f.setCallbacks(view -> {
+            cancelSearchSession();
+        });
+        attachFragment(f, SEARCH);
+        toolbar.getMenu().clear();
+        home.setVisibility(View.GONE);
+        next.setVisibility(View.GONE);
+        back.setVisibility(View.GONE);
+        clear.setVisibility(View.VISIBLE);
+        urlTv.showDropDown();
+    }
+
+    private void cancelSearchSession() {
+        detachFragment(SEARCH);
+        toolbar.inflateMenu(R.menu.menu_bookmarks);
+        home.setVisibility(View.VISIBLE);
+        next.setVisibility(View.VISIBLE);
+        back.setVisibility(View.VISIBLE);
+        clear.setVisibility(View.GONE);
+        urlTv.dismissDropDown();
+        KeyboardUtils.hideKeyboard(urlTv);
+    }
+
+    private void detachFragment(String tag) {
+        Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
+        if (fragment != null && fragment.isVisible()) {
+            getChildFragmentManager().beginTransaction()
+                    .remove(fragment)
+                    .commit();
+        }
     }
 
     private void initViewModel() {

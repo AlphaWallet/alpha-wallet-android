@@ -115,6 +115,8 @@ public class DappBrowserFragment extends Fragment implements
     private ImageView next;
     private ImageView clear;
 
+    private String currentWebpageTitle;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -263,7 +265,7 @@ public class DappBrowserFragment extends Fragment implements
                 });
         toolbar.getMenu().findItem(R.id.action_add_to_my_dapps)
                 .setOnMenuItemClickListener(menuItem -> {
-                    addToMyDapps();
+                    viewModel.addToMyDapps(getContext(), currentWebpageTitle, urlTv.getText().toString());
                     return true;
                 });
 
@@ -283,10 +285,6 @@ public class DappBrowserFragment extends Fragment implements
         clear.setOnClickListener(v -> {
             clearAddressBar();
         });
-    }
-
-    private void addToMyDapps() {
-        //TODO
     }
 
     private void startScan() {
@@ -407,6 +405,8 @@ public class DappBrowserFragment extends Fragment implements
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
+                currentWebpageTitle = title;
+                Log.d(TAG, "onReceivedTitle: " + currentWebpageTitle);
             }
         });
 

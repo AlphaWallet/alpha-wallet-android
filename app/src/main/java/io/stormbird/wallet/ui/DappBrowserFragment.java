@@ -246,6 +246,26 @@ public class DappBrowserFragment extends Fragment implements
         swipeRefreshLayout.setOnRefreshListener(() -> web3.reload());
         toolbar = view.findViewById(R.id.address_bar);
         toolbar.inflateMenu(R.menu.menu_bookmarks);
+        toolbar.getMenu().findItem(R.id.action_reload)
+                .setOnMenuItemClickListener(menuItem -> {
+                    reloadPage();
+                    return true;
+                });
+        toolbar.getMenu().findItem(R.id.action_share)
+                .setOnMenuItemClickListener(menuItem -> {
+                    share();
+                    return true;
+                });
+        toolbar.getMenu().findItem(R.id.action_scan)
+                .setOnMenuItemClickListener(menuItem -> {
+                    startScan();
+                    return true;
+                });
+        toolbar.getMenu().findItem(R.id.action_add_to_my_dapps)
+                .setOnMenuItemClickListener(menuItem -> {
+                    addToMyDapps();
+                    return true;
+                });
 
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
@@ -263,6 +283,15 @@ public class DappBrowserFragment extends Fragment implements
         clear.setOnClickListener(v -> {
             clearAddressBar();
         });
+    }
+
+    private void addToMyDapps() {
+        //TODO
+    }
+
+    private void startScan() {
+        Intent intent = new Intent(getContext(), QRScanningActivity.class);
+        startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
     }
 
     private void clearAddressBar() {

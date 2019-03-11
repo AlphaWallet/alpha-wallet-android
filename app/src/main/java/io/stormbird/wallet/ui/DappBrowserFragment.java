@@ -309,7 +309,7 @@ public class DappBrowserFragment extends Fragment implements
             cancelSearchSession();
         });
         attachFragment(f, SEARCH);
-        toolbar.getMenu().clear();
+        toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, false);
         home.setVisibility(View.GONE);
         next.setVisibility(View.GONE);
         back.setVisibility(View.GONE);
@@ -319,7 +319,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void cancelSearchSession() {
         detachFragment(SEARCH);
-        toolbar.inflateMenu(R.menu.menu_bookmarks);
+        toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
         home.setVisibility(View.VISIBLE);
         next.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);

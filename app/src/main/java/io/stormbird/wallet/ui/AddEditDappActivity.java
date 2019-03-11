@@ -78,7 +78,7 @@ public class AddEditDappActivity extends BaseActivity {
                 button.setText(R.string.action_add);
                 name.setText(dapp.getName());
                 url.setText(dapp.getUrl());
-                button.setOnClickListener(v -> add());
+                button.setOnClickListener(v -> add(dapp));
                 break;
             }
             case MODE_EDIT: {
@@ -108,7 +108,10 @@ public class AddEditDappActivity extends BaseActivity {
         finish();
     }
 
-    private void add() {
-
+    private void add(DApp dapp) {
+        List<DApp> myDapps = DappBrowserUtils.getMyDapps(this);
+        myDapps.add(dapp);
+        DappBrowserUtils.saveToPrefs(this, myDapps);
+        finish();
     }
 }

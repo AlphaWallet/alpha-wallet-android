@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -103,6 +105,8 @@ public class DappBrowserFragment extends Fragment implements
     private Fragment myDappsFragment;
     private Fragment discoverDappsFragment;
     private Fragment browserHistoryFragment;
+
+    private Toolbar toolbar;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -254,11 +258,28 @@ public class DappBrowserFragment extends Fragment implements
         urlTv = view.findViewById(R.id.url_tv);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(() -> web3.reload());
+        toolbar = view.findViewById(R.id.address_bar);
+        toolbar.inflateMenu(R.menu.menu_bookmarks);
+
+        ImageView home = view.findViewById(R.id.home);
+        home.setOnClickListener(v -> homePressed());
+
+        ImageView back = view.findViewById(R.id.back);
+        back.setOnClickListener(v -> goToPreviousPage());
+
+        ImageView next = view.findViewById(R.id.next);
+        next.setOnClickListener(v -> goToNextPage());
+    }
+
+    private void goToPreviousPage() {
+        //TODO
+    }
+
+    private void goToNextPage() {
+        //TODO
     }
 
     private void setupAddressBar() {
-//        urlTv.setText(viewModel.getLastUrl(getContext()));
-
         adapter = new AutoCompleteUrlAdapter(getContext(), C.DAPP_BROWSER_HISTORY);
         adapter.setListener(this);
         urlTv.setAdapter(adapter);
@@ -462,7 +483,7 @@ public class DappBrowserFragment extends Fragment implements
         urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
-        adapter.add(Utils.formatUrl(urlText));
+//        adapter.add(Utils.formatUrl(urlText));
         adapter.notifyDataSetChanged();
         KeyboardUtils.hideKeyboard(urlTv);
         Activity current = getActivity();

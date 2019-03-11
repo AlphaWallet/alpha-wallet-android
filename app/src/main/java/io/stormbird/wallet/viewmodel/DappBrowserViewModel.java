@@ -3,6 +3,7 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
@@ -16,6 +17,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.ui.AddEditDappActivity;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
@@ -226,5 +228,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         if (bookmarks.contains(url)) bookmarks.remove(url);
         writeBookmarks(context, bookmarks);
+    }
+
+    public void addToMyDapps(Context context, String title, String url) {
+        Intent intent = new Intent(context, AddEditDappActivity.class);
+        DApp dapp = new DApp(title, url);
+        intent.putExtra(AddEditDappActivity.KEY_DAPP, dapp);
+        intent.putExtra(AddEditDappActivity.KEY_MODE, AddEditDappActivity.MODE_ADD);
+        context.startActivity(intent);
     }
 }

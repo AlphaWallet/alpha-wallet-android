@@ -20,6 +20,11 @@ import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.util.Utils;
 
 public class AddEditDappActivity extends BaseActivity {
+    public static final String KEY_MODE = "mode";
+    public static final String KEY_DAPP = "dapp";
+    public static final int MODE_ADD = 0;
+    public static final int MODE_EDIT = 1;
+
     private TextView title;
     private EditText name;
     private EditText url;
@@ -44,8 +49,8 @@ public class AddEditDappActivity extends BaseActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            mode = intent.getExtras().getInt("mode");
-            dapp = (DApp) intent.getExtras().get("dapp");
+            mode = intent.getExtras().getInt(KEY_MODE);
+            dapp = (DApp) intent.getExtras().get(KEY_DAPP);
         } else {
             finish();
         }
@@ -68,14 +73,15 @@ public class AddEditDappActivity extends BaseActivity {
         }
 
         switch (mode) {
-            case 0: { // Add
+            case MODE_ADD: {
                 title.setText(R.string.add_to_my_dapps);
                 button.setText(R.string.action_add);
+                name.setText(dapp.getName());
                 url.setText(dapp.getUrl());
                 button.setOnClickListener(v -> add());
                 break;
             }
-            case 1: { // Edit
+            case MODE_EDIT: {
                 title.setText(R.string.edit_dapp);
                 button.setText(R.string.action_save);
                 url.setText(dapp.getUrl());

@@ -8,6 +8,14 @@
             android:icon="@drawable/ic_dapp_view_bookmarks"
             android:orderInCategory="5"
             android:title="@string/action_view_bookmarks"
+            android:visible="false"
+            app:showAsAction="withText" />
+
+        <item
+            android:id="@+id/action_add_to_my_dapps"
+            android:icon="@drawable/ic_add_black_24dp"
+            android:orderInCategory="15"
+            android:title="@string/add_to_my_dapps"
             app:showAsAction="withText" />
 
         <item

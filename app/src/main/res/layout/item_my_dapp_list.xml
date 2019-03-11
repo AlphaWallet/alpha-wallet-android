@@ -57,8 +57,11 @@
             android:id="@+id/edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
             android:fontFamily="@font/font_bold"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
             android:text="@string/edit"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="11sp" />
@@ -68,6 +71,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_bold"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
             android:text="@string/action_remove"
             android:textColor="@color/red"
             android:textSize="11sp" />

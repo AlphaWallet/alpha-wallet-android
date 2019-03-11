@@ -378,6 +378,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void showPage(int page) {
         switch (page) {
             case DAPP_BROWSER: {
+                hideToolbar();
                 viewPager.setCurrentItem(DAPP_BROWSER);
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
@@ -386,6 +387,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             case WALLET: {
+                showToolbar();
                 viewPager.setCurrentItem(WALLET);
                 if (walletTitle == null || walletTitle.isEmpty()) {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -399,6 +401,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             case SETTINGS: {
+                showToolbar();
                 viewPager.setCurrentItem(SETTINGS);
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
@@ -407,6 +410,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             case TRANSACTIONS: {
+                showToolbar();
                 viewPager.setCurrentItem(TRANSACTIONS);
                 setTitle(getString(R.string.toolbar_header_transactions));
                 selectNavigationItem(TRANSACTIONS);
@@ -415,6 +419,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             default:
+                showToolbar();
                 viewPager.setCurrentItem(WALLET);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);

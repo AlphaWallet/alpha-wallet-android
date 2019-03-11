@@ -229,7 +229,6 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onDappClick(DApp dapp) {
         loadUrl(dapp.getUrl());
-        detachFragments(true);
     }
 
     @Override
@@ -547,13 +546,13 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
+        detachFragments(true);
+        cancelSearchSession();
         web3.loadUrl(Utils.formatUrl(urlText));
         urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
-//        adapter.add(Utils.formatUrl(urlText));
         adapter.notifyDataSetChanged();
-        KeyboardUtils.hideKeyboard(urlTv);
         Activity current = getActivity();
         if (current != null)
         {

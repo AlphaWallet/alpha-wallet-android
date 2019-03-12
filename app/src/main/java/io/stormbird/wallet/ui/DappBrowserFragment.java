@@ -80,12 +80,14 @@ public class DappBrowserFragment extends Fragment implements
         URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
+    private static final String DAPP_BROWSER = "DAPP_BROWSER";
     private static final String DAPP_HOME = "DAPP_HOME";
     private static final String MY_DAPPS = "MY_DAPPS";
     private static final String DISCOVER_DAPPS = "DISCOVER_DAPPS";
     private static final String HISTORY = "HISTORY";
     public static final String SEARCH = "SEARCH";
     private static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
+    public static final String CURRENT_FRAGMENT = "currentFragment";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -114,6 +116,7 @@ public class DappBrowserFragment extends Fragment implements
     private ImageView clear;
 
     private String currentWebpageTitle;
+    private String currentFragment;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,6 +125,12 @@ public class DappBrowserFragment extends Fragment implements
         myDappsFragment = new MyDappsFragment();
         discoverDappsFragment = new DiscoverDappsFragment();
         browserHistoryFragment = new BrowserHistoryFragment();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        attachFragment(currentFragment);
     }
 
     @Nullable
@@ -140,7 +149,16 @@ public class DappBrowserFragment extends Fragment implements
             String url = getArguments().getString("url");
             loadUrl(url);
         } else {
-            attachFragment(dappHomeFragment, DAPP_HOME);
+            if (savedInstanceState != null) {
+                currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT, "");
+                if (currentFragment.isEmpty()) {
+                    attachFragment(DAPP_HOME);
+                } else {
+                    attachFragment(currentFragment);
+                }
+            } else {
+                attachFragment(DAPP_HOME);
+            }
         }
 
         return view;
@@ -170,7 +188,30 @@ public class DappBrowserFragment extends Fragment implements
         }
     }
 
+    private void attachFragment(String tag) {
+        if (getChildFragmentManager().findFragmentByTag(tag) == null) {
+            if (tag.equals(DAPP_HOME)) {
+                DappHomeFragment f = new DappHomeFragment();
+                f.setCallbacks(this, this);
+                showFragment(f, tag);
+            } else if (tag.equals(DISCOVER_DAPPS)) {
+                DiscoverDappsFragment f = new DiscoverDappsFragment();
+                f.setCallbacks(this);
+                showFragment(f, tag);
+            } else if (tag.equals(MY_DAPPS)) {
+                MyDappsFragment f = new MyDappsFragment();
+                f.setCallbacks(this);
+                showFragment(f, tag);
+            } else if (tag.equals(HISTORY)) {
+                BrowserHistoryFragment f = new BrowserHistoryFragment();
+                f.setCallbacks(this);
+                showFragment(f, tag);
+            }
+        }
+    }
+
     private void showFragment(Fragment fragment, String tag) {
+        this.currentFragment = tag;
         getChildFragmentManager().beginTransaction()
                 .add(R.id.frame, fragment, tag)
                 .commit();
@@ -552,6 +593,7 @@ public class DappBrowserFragment extends Fragment implements
     private boolean loadUrl(String urlText)
     {
         detachFragments(true);
+        this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();
         web3.loadUrl(Utils.formatUrl(urlText));
         urlTv.setText(Utils.formatUrl(urlText));
@@ -654,5 +696,12 @@ public class DappBrowserFragment extends Fragment implements
         });
         resultDialog.setCancelable(true);
         resultDialog.show();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(CURRENT_FRAGMENT, currentFragment);
+        detachFragments(true);
     }
 }

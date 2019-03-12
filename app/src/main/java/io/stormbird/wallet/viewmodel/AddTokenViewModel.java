@@ -52,6 +52,13 @@ public class AddTokenViewModel extends BaseViewModel {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, isStormBird);
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
                 .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
+                .subscribe(this::onSaved, error -> onInterfaceCheckError(error, tokenInfo));
+    }
+
+    //fallback in case interface spec check throws an error
+    private void onInterfaceCheckError(Throwable throwable, TokenInfo tokenInfo)
+    {
+        disposable = addTokenInteract.add(tokenInfo, ContractType.ERC20, wallet.getValue())
                 .subscribe(this::onSaved, this::onError);
     }
 

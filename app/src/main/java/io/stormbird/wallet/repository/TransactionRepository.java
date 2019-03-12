@@ -279,15 +279,15 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
-		if (tokenInfo.name == null && tokenInfo.symbol == null)
+		//ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
+        if (tokenInfo.name == null && tokenInfo.symbol == null)
 		{
 			return Single.fromCallable(() -> ContractType.OTHER);
 		}
-		else if (checked != ContractType.NOT_SET && checked != ContractType.OTHER)
-		{
-			return Single.fromCallable(() -> checked);
-		}
+//		else if (checked != ContractType.NOT_SET && checked != ContractType.OTHER)
+//		{
+//			return Single.fromCallable(() -> checked);
+//		}
 		else return blockExplorerClient.checkConstructorArgs(networkInfo, tokenInfo.address);
 	}
 }

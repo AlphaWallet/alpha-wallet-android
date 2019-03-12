@@ -1072,6 +1072,14 @@ public class TokenRepository implements TokenRepositoryType {
                 Boolean isStormbird = getContractData(address, boolParam("isStormBirdContract"), Boolean.TRUE);
                 if (isStormbird == null) isStormbird = false;
 
+                //first test name
+                String name = getName(address);
+                if (name == null)
+                {
+                    //could be a proxy contract
+                    String finalAddress = getContractData(address, stringParam("implementation"), Address.class);
+                }
+
                 return new TokenInfo(
                         address,
                         getName(address),

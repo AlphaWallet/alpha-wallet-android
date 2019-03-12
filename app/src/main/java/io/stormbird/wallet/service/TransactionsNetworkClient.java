@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -215,6 +216,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			ContractType result = ContractType.OTHER;
 			try
 			{
+			    //first check for ERC20 - contract may be hiding behind a proxy
+                if (checkERC20(networkInfo, address))
+                {
+                    return ContractType.ERC20;
+                }
+
 				String response = readTransactions(networkInfo, address, "0", true, 1, 5);
 
 				if (response != null)
@@ -246,4 +253,56 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			return result;
 		});
 	}
+
+    private boolean checkERC20(NetworkInfo networkInfo, String address)
+    {
+        boolean isERC20 = false;
+        if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanTxUrl))
+        {
+            okhttp3.Response response = null;
+            StringBuilder sb = new StringBuilder();
+            sb.append(networkInfo.etherscanTxUrl);
+            sb.append("api?module=stats&action=tokensupply&contractaddress=");
+            sb.append(address);
+            sb.append("&apikey=6U31FTHW3YYHKW6CYHKKGDPHI9HEJ9PU5F");
+
+            try
+            {
+                Request request = new Request.Builder()
+                        .url(sb.toString())
+                        .get()
+                        .build();
+
+                response = httpClient.newCall(request).execute();
+
+                String result = response.body().string();
+                if (result != null && result.length() > 20)
+                {
+                    JSONObject stateData = new JSONObject(result);
+                    //{"status":"1","message":"OK","result":"92653503768584227777966602"}
+                    String value = stateData.getString("result");
+                    if (value.length() > 0)
+                    {
+                        BigInteger supply = new BigInteger(value, 10);
+                        if (supply.compareTo(BigInteger.ZERO) > 0)
+                        {
+                            isERC20 = true;
+                        }
+                    }
+                }
+            }
+            catch (InterruptedIOException e)
+            {
+                //If user switches account or network during a fetch
+                //this exception is going to be thrown because we're terminating the API call
+                //Don't display error
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return isERC20;
+    }
 }

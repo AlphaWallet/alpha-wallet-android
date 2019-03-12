@@ -26,7 +26,8 @@ public class URLLoadReceiver extends BroadcastReceiver
         {
             case PAGE_LOADED:
                 String webUrl = bundle.getString("url");
-                loadInterface.onWebpageLoaded(webUrl);
+                String webTitle = bundle.getString("title");
+                loadInterface.onWebpageLoaded(webUrl, webTitle);
                 break;
         }
     }

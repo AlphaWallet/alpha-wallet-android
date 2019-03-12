@@ -82,8 +82,8 @@ public class BrowserHistoryFragment extends Fragment {
         showOrHideViews();
     }
 
-    private void onHistoryItemRemoved(String item) {
-        DappBrowserUtils.removeFromHistory(getContext(), item);
+    private void onHistoryItemRemoved(DApp dapp) {
+        DappBrowserUtils.removeFromHistory(getContext(), dapp);
         adapter.setDapps(getData());
         showOrHideViews();
     }

@@ -14,21 +14,14 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.DApp;
 
 public class DappBrowserUtils {
+    private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
+
     public static void saveToPrefs(Context context, List<DApp> myDapps) {
         String myDappsJson = new Gson().toJson(myDapps);
         PreferenceManager
                 .getDefaultSharedPreferences(context)
                 .edit()
                 .putString("my_dapps", myDappsJson)
-                .apply();
-    }
-
-    public static void saveHistory(Context context, List<String> history) {
-        String myDappsJson = new Gson().toJson(history);
-        PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .edit()
-                .putString(C.DAPP_BROWSER_HISTORY, myDappsJson)
                 .apply();
     }
 
@@ -48,16 +41,14 @@ public class DappBrowserUtils {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String historyJson = prefs.getString(C.DAPP_BROWSER_HISTORY, "");
 
-        List<String> history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<String>>() {
-        }.getType());
-        List<DApp> adaptedHistory = new ArrayList<>();
-
-        if (!historyJson.isEmpty()) {
-            for (String s : history) {
-                adaptedHistory.add(new DApp(s, s));
-            }
+        List<DApp> history;
+        if (historyJson.isEmpty()) {
+            history = new ArrayList<>();
+        } else {
+            history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<DApp>>() {
+            }.getType());
         }
-        return adaptedHistory;
+        return history;
     }
 
     public static void clearHistory(Context context) {
@@ -68,16 +59,18 @@ public class DappBrowserUtils {
                 .apply();
     }
 
-    public static void removeFromHistory(Context context, String item) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String historyJson = prefs.getString(C.DAPP_BROWSER_HISTORY, "");
+    public static void addToHistory(Context context, DApp dapp) {
+        List<DApp> history = getBrowserHistory(context);
+        history.add(dapp);
+        saveHistory(context, history);
+    }
 
-        List<String> history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<String>>() {
-        }.getType());
+    public static void removeFromHistory(Context context, DApp dapp) {
+        List<DApp> history = getBrowserHistory(context);
 
-        for (String s : history) {
-            if (s.equals(item)) {
-                history.remove(s);
+        for (DApp d : history) {
+            if (d.getName().equals(dapp.getName())) {
+                history.remove(d);
                 break;
             }
         }
@@ -87,5 +80,22 @@ public class DappBrowserUtils {
 
     public static String getIconUrl(String url) {
         return "https://api.faviconkit.com/" + url + "/144";
+    }
+
+    public static List<DApp> getDappsList(Context context) {
+        ArrayList<DApp> dapps;
+        dapps = new Gson().fromJson(Utils.loadJSONFromAsset(context, DAPPS_LIST_FILENAME),
+                new TypeToken<List<DApp>>() {
+                }.getType());
+        return dapps;
+    }
+
+    private static void saveHistory(Context context, List<DApp> history) {
+        String myDappsJson = new Gson().toJson(history);
+        PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .edit()
+                .putString(C.DAPP_BROWSER_HISTORY, myDappsJson)
+                .apply();
     }
 }

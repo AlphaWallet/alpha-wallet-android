@@ -47,7 +47,6 @@ import io.stormbird.wallet.entity.DownloadReceiver;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.FragmentMessenger;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -237,17 +236,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         switch (viewPager.getCurrentItem())
         {
-            case DAPP_BROWSER:
-                if (dappBrowserFragment.getUrlIsBookmark())
-                {
-                    getMenuInflater().inflate(R.menu.menu_added, menu);
-                }
-                else
-                {
-                    getMenuInflater().inflate(R.menu.menu_add_bookmark, menu);
-                }
-                getMenuInflater().inflate(R.menu.menu_bookmarks, menu);
-                break;
             default:
                 getMenuInflater().inflate(R.menu.menu_add, menu);
                 break;
@@ -262,37 +250,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewModel.showAddToken(this, null);
             }
             break;
-            case android.R.id.home: {
-                dappBrowserFragment.homePressed();
-                return true;
-            }
-            case R.id.action_add_bookmark: {
-                dappBrowserFragment.addBookmark();
-                invalidateOptionsMenu();
-                return true;
-            }
-            case R.id.action_bookmarks: {
-                dappBrowserFragment.viewBookmarks();
-                return true;
-            }
-            case R.id.action_added: {
-                dappBrowserFragment.removeBookmark();
-                invalidateOptionsMenu();
-                return true;
-            }
-            case R.id.action_reload: {
-                dappBrowserFragment.reloadPage();
-                return true;
-            }
-            case R.id.action_share: {
-                dappBrowserFragment.share();
-                return true;
-            }
-            case R.id.action_scan: {
-                Intent intent = new Intent(this, QRScanningActivity.class);
-                startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
-                return true;
-            }
         }
         return super.onOptionsItemSelected(item);
     }

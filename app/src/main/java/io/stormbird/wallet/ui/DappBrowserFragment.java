@@ -34,7 +34,6 @@ import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -55,7 +54,6 @@ import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
-import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -72,12 +70,10 @@ import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.SelectNetworkDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
-import static io.stormbird.wallet.ui.HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
@@ -126,14 +122,6 @@ public class DappBrowserFragment extends Fragment implements
         myDappsFragment = new MyDappsFragment();
         discoverDappsFragment = new DiscoverDappsFragment();
         browserHistoryFragment = new BrowserHistoryFragment();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-//        if (adapter == null || !adapter.hasContext()) {
-//            setupAddressBar();
-//        }
     }
 
     @Nullable
@@ -256,12 +244,14 @@ public class DappBrowserFragment extends Fragment implements
                 });
         toolbar.getMenu().findItem(R.id.action_share)
                 .setOnMenuItemClickListener(menuItem -> {
-                    share();
+                    if (web3.getUrl() != null) {
+                        viewModel.share(getContext(), web3.getUrl());
+                    }
                     return true;
                 });
         toolbar.getMenu().findItem(R.id.action_scan)
                 .setOnMenuItemClickListener(menuItem -> {
-                    startScan();
+                    viewModel.startScan(getActivity());
                     return true;
                 });
         toolbar.getMenu().findItem(R.id.action_add_to_my_dapps)
@@ -288,11 +278,6 @@ public class DappBrowserFragment extends Fragment implements
         });
     }
 
-    private void startScan() {
-        Intent intent = new Intent(getContext(), QRScanningActivity.class);
-        startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
-    }
-
     private void clearAddressBar() {
         if (urlTv.getText().toString().isEmpty()) {
             cancelSearchSession();
@@ -312,7 +297,7 @@ public class DappBrowserFragment extends Fragment implements
     private void setupAddressBar() {
         adapter = new DappBrowserSuggestionsAdapter(
                 getContext(),
-                DappBrowserUtils.getDappsList(getContext()),
+                viewModel.getDappsMasterList(getContext()),
                 this::onItemClick
         );
         urlTv.setAdapter(adapter);
@@ -580,54 +565,8 @@ public class DappBrowserFragment extends Fragment implements
         return true;
     }
 
-    public void addBookmark()
-    {
-        if (urlTv != null && urlTv.getText() != null)
-        {
-            viewModel.addBookmark(getContext(), urlTv.getText().toString());
-        }
-    }
-
-    public void viewBookmarks()
-    {
-        if (viewModel == null) return;
-        List<String> bookmarks = viewModel.getBookmarks();
-        //display in popup
-        if (getActivity() == null) return;
-        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), bookmarks.toArray(new String[bookmarks.size()]), urlTv.getText().toString());
-        dialog.setTitle(R.string.bookmarks);
-        dialog.setButtonText(R.string.visit);
-        dialog.setOnClickListener(v1 -> {
-            String url = dialog.getSelectedItem();
-            urlTv.setText(url);
-            loadUrl(url);
-            dialog.dismiss();
-        });
-        dialog.show();
-    }
-
-    public void removeBookmark()
-    {
-        viewModel.removeBookmark(getContext(), urlTv.getText().toString());
-    }
-
-    public boolean getUrlIsBookmark()
-    {
-        return viewModel != null && urlTv != null && viewModel.getBookmarks().contains(urlTv.getText().toString());
-    }
-
     public void reloadPage() {
         web3.reload();
-    }
-
-    public void share() {
-        if (web3.getUrl() != null) {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND);
-            intent.putExtra(Intent.EXTRA_TEXT, web3.getUrl());
-            intent.setType("text/plain");
-            startActivity(intent);
-        }
     }
 
     @Override
@@ -670,13 +609,6 @@ public class DappBrowserFragment extends Fragment implements
         }
     }
 
-    public void scanQR()
-    {
-        //scanning intent
-        Intent intent = new Intent(getContext(), QRScanningActivity.class);
-        startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
-    }
-
     public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)
     {
         //result
@@ -689,7 +621,7 @@ public class DappBrowserFragment extends Fragment implements
         if (qrCode != null)
         {
             //detect if this is an address
-            if (isAddressValid(qrCode))
+            if (Utils.isAddressValid(qrCode))
             {
                 DisplayAddressFound(qrCode, messenger);
             }
@@ -722,18 +654,5 @@ public class DappBrowserFragment extends Fragment implements
         });
         resultDialog.setCancelable(true);
         resultDialog.show();
-    }
-
-    private boolean isAddressValid(String address)
-    {
-        try
-        {
-            new org.web3j.abi.datatypes.Address(address);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
     }
 }

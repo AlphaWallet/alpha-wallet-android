@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -8,23 +9,36 @@ import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.entity.DApp;
+import io.stormbird.wallet.entity.DAppFunction;
+import io.stormbird.wallet.entity.GasSettings;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Ticker;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
+import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.AddEditDappActivity;
+import io.stormbird.wallet.ui.zxing.QRScanningActivity;
+import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
+import static io.stormbird.wallet.ui.HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 public class DappBrowserViewModel extends BaseViewModel  {
@@ -195,12 +209,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return storedBookmarks;
     }
 
-    private void writeBookmarks(Context context, ArrayList<String> bookmarks)
-    {
-        String historyJson = new Gson().toJson(bookmarks);
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(C.DAPP_BROWSER_BOOKMARKS, historyJson).apply();
-    }
-
     public String getLastUrl(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(C.DAPP_LASTURL_KEY, DAPP_DEFAULT_URL);
@@ -216,25 +224,28 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return bookmarks;
     }
 
-    public void addBookmark(Context context, String url)
-    {
-        //add to list
-        bookmarks.add(url);
-        //store
-        writeBookmarks(context, bookmarks);
-    }
-
-    public void removeBookmark(Context context, String url)
-    {
-        if (bookmarks.contains(url)) bookmarks.remove(url);
-        writeBookmarks(context, bookmarks);
-    }
-
     public void addToMyDapps(Context context, String title, String url) {
         Intent intent = new Intent(context, AddEditDappActivity.class);
         DApp dapp = new DApp(title, url);
         intent.putExtra(AddEditDappActivity.KEY_DAPP, dapp);
         intent.putExtra(AddEditDappActivity.KEY_MODE, AddEditDappActivity.MODE_ADD);
         context.startActivity(intent);
+    }
+
+    public void share(Context context, String url) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, url);
+            intent.setType("text/plain");
+            context.startActivity(intent);
+    }
+
+    public void startScan(Activity activity) {
+        Intent intent = new Intent(activity, QRScanningActivity.class);
+        activity.startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
+    }
+
+    public List<DApp> getDappsMasterList(Context context) {
+        return DappBrowserUtils.getDappsList(context);
     }
 }

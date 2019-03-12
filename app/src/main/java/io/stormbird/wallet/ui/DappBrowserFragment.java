@@ -34,6 +34,8 @@ import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
+import java.util.LinkedList;
+import java.util.Stack;
 
 import javax.inject.Inject;
 
@@ -117,6 +119,10 @@ public class DappBrowserFragment extends Fragment implements
 
     private String currentWebpageTitle;
     private String currentFragment;
+
+    private DApp currentDApp;
+    private Stack<DApp> backStack = new Stack<>();
+    private Stack<DApp> nextStack = new Stack<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -325,14 +331,6 @@ public class DappBrowserFragment extends Fragment implements
         } else {
             urlTv.getText().clear();
         }
-    }
-
-    private void goToPreviousPage() {
-        //TODO
-    }
-
-    private void goToNextPage() {
-        //TODO
     }
 
     private void setupAddressBar() {
@@ -584,14 +582,57 @@ public class DappBrowserFragment extends Fragment implements
         resultDialog.show();
     }
 
+    private void goToPreviousPage() {
+        if (!backStack.empty()) {
+            nextStack.push(currentDApp);
+            currentDApp = backStack.pop();
+            loadUrl(currentDApp.getUrl(), false);
+        } else {
+            nextStack.push(currentDApp);
+            homePressed();
+        }
+    }
+
+    private void goToNextPage() {
+        if (!nextStack.empty()) {
+            backStack.push(currentDApp);
+            currentDApp = nextStack.pop();
+            loadUrl(currentDApp.getUrl(), false);
+        }
+    }
+
     @Override
     public void onWebpageLoaded(String url, String title)
     {
-        DappBrowserUtils.addToHistory(getContext(), new DApp(title, url));
+        DApp dapp = new DApp(title, url);
+        DappBrowserUtils.addToHistory(getContext(), dapp);
+    }
+
+    private boolean loadUrl(String urlText, boolean clear)
+    {
+        detachFragments(true);
+        this.currentFragment = DAPP_BROWSER;
+        cancelSearchSession();
+        web3.loadUrl(Utils.formatUrl(urlText));
+        urlTv.setText(Utils.formatUrl(urlText));
+        web3.requestFocus();
+        viewModel.setLastUrl(getContext(), urlText);
+        Activity current = getActivity();
+        if (current != null)
+        {
+            current.sendBroadcast(new Intent(RESET_TOOLBAR));
+        }
+        return true;
     }
 
     private boolean loadUrl(String urlText)
     {
+        DApp dapp = new DApp(Utils.formatUrl(urlText), Utils.formatUrl(urlText));
+        if (currentDApp != null) {
+            backStack.push(currentDApp);
+        }
+        currentDApp = dapp;
+        nextStack.clear();
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();

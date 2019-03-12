@@ -169,7 +169,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+            public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
             {
                 return null;
             }

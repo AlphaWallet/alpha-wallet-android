@@ -109,10 +109,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return assetDefinitionService.getIntroductionCode(address);
     }
 
-    public void fetchTransactions(Wallet wallet) {
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
+    public void fetchTransactions(Token token) {
+        Wallet wallet = new Wallet(token.getAddress());
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchCached(network, wallet)
+                fetchTransactionsInteract.fetchCached(wallet)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError);

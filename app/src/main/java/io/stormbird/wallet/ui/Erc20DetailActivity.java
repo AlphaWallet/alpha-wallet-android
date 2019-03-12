@@ -237,13 +237,12 @@ public class Erc20DetailActivity extends BaseActivity {
     private void onDefaultWallet(Wallet wallet) {
         recentTransactionsAdapter.setDefaultWallet(wallet);
         viewModel.updateDefaultBalance(token);
-        viewModel.fetchTransactions(wallet);
+        viewModel.fetchTransactions(token);
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         setUpTokenView();
         setUpRecentTransactionsView();
-        recentTransactionsAdapter.setDefaultNetwork(networkInfo);
     }
 
     @Override

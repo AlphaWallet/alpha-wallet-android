@@ -17,9 +17,9 @@ public class FetchTransactionsInteract {
         this.transactionRepository = transactionRepository;
     }
 
-    public Observable<Transaction[]> fetchCached(NetworkInfo network, Wallet wallet) {
+    public Observable<Transaction[]> fetchCached(Wallet wallet) {
         return transactionRepository
-                .fetchCachedTransactions(network, wallet)
+                .fetchCachedTransactions(wallet)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -31,9 +31,9 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+    public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
     {
-        return transactionRepository.storeTransactions(networkInfo, wallet, txList);
+        return transactionRepository.storeTransactions(wallet, txList);
     }
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)

@@ -70,6 +70,15 @@ public class Transaction implements Parcelable {
 		this.operations = operations;
 	}
 
+	public String getTokenAddress(String walletAddress)
+	{
+		if (operations == null || operations.length == 0)
+		{
+			return walletAddress;
+		}
+		else return to;
+	}
+
 	protected Transaction(Parcel in)
 	{
 		hash = in.readString();

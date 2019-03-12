@@ -49,9 +49,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet) {
-		Log.d(TAG, "Fetching Cached TX: " + network.name + " : " + wallet.address);
-		return fetchFromCache(network, wallet)
+	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet) {
+		Log.d(TAG, "Fetching Cached TX: " + wallet.address);
+		return fetchFromCache(wallet)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
@@ -61,7 +61,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 		Wallet wallet = new Wallet(walletAddr);
-		return inDiskCache.fetchTransaction(networkInfo, wallet, hash);
+		return inDiskCache.fetchTransaction(wallet, hash);
 	}
 
 	@Override
@@ -197,8 +197,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 		accountKeystoreService.lockAccount(signer, signerPassword);
 	}
 
-	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
-	    return inDiskCache.fetchTransaction(networkInfo, wallet);
+	private Single<Transaction[]> fetchFromCache(Wallet wallet) {
+	    return inDiskCache.fetchTransaction(wallet);
     }
 
 	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
@@ -206,7 +206,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+	public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
 	{
 		if (txList.length == 0)
 		{
@@ -214,7 +214,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		}
 		else
 		{
-			return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
+			return inDiskCache.putAndReturnTransactions(wallet, txList);
 		}
 	}
 

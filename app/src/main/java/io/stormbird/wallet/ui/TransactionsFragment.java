@@ -74,7 +74,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.showEmpty().observe(this, this::showEmptyTx);
@@ -87,8 +86,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.clear();
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
-
-        viewModel.prepare();
 
         return view;
     }
@@ -124,6 +121,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onResume() {
         super.onResume();
         viewModel.restartIfRequired();
+        viewModel.setVisibility(isVisible);
     }
 
     @Override
@@ -131,6 +129,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         super.setUserVisibleHint(isVisibleToUser);
         isVisible = isVisibleToUser;
         if (isResumed()) { // fragment created
+            viewModel.setVisibility(isVisible);
             if (isVisible) {
                 viewModel.startTransactionRefresh();
             }
@@ -144,6 +143,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
+        viewModel.setVisibility(false);
     }
 
     private void onTransactions(Transaction[] transaction) {
@@ -167,11 +167,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.setDefaultWallet(wallet);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        adapter.setDefaultNetwork(networkInfo);
-    }
-
     private void onError(ErrorEnvelope errorEnvelope) {
         if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
             showEmptyTx(true);
@@ -184,7 +179,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         if (show)
         {
             EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
-            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
             systemView.showEmpty(emptyView);
         }
         else
@@ -263,6 +257,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     public void checkTokenTransactions(String payload)
     {
-        if (viewModel != null) viewModel.startTokenCheck(payload, isVisible);
+        //if (viewModel != null) viewModel.startTokenCheck(payload, isVisible);
     }
 }

@@ -83,7 +83,7 @@ public class FetchTokensInteract {
     public Observable<Token> updateBalance(String address, Token token)
     {
         if (token == null) return Observable.fromCallable(() -> {
-            return new Token(null, BigDecimal.ZERO, 0, "");
+            return new Token(null, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
         });
         return tokenRepository.fetchActiveTokenBalance(address, token)
                 .subscribeOn(Schedulers.io())

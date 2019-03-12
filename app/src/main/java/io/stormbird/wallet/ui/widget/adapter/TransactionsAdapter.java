@@ -66,7 +66,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     private final OnTransactionClickListener onTransactionClickListener;
 
     private Wallet wallet;
-    private NetworkInfo network;
+    //private NetworkInfo network;
     private Map<String, TransactionSortedItem> checkMap = new HashMap<>();
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
@@ -115,7 +115,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         Bundle addition = new Bundle();
         addition.putString(TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL, wallet.address);
-        addition.putString(TransactionHolder.DEFAULT_SYMBOL_ADDITIONAL, network.symbol);
+        //addition.putString(TransactionHolder.DEFAULT_SYMBOL_ADDITIONAL, network.symbol);
         holder.bind(items.get(position).value, addition);
     }
 
@@ -131,11 +131,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
     public void setDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
-        notifyDataSetChanged();
-    }
-
-    public void setDefaultNetwork(NetworkInfo network) {
-        this.network = network;
         notifyDataSetChanged();
     }
 

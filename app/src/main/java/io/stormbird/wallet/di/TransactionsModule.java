@@ -14,6 +14,7 @@ import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.EventService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.TransactionsViewModelFactory;
 
@@ -27,26 +28,26 @@ class TransactionsModule {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
-            FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
             AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
             ExternalBrowserRouter externalBrowserRouter,
             HomeRouter homeRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            EventService eventService) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 fetchTransactionsInteract,
-                fetchTokensInteract,
                 setupTokensInteract,
                 addTokenInteract,
                 transactionDetailRouter,
                 externalBrowserRouter,
                 homeRouter,
                 assetDefinitionService,
-                tokensService);
+                tokensService,
+                eventService);
     }
 
     @Provides
@@ -88,10 +89,5 @@ class TransactionsModule {
     @Provides
     SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
         return new SetupTokensInteract(tokenRepository);
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
     }
 }

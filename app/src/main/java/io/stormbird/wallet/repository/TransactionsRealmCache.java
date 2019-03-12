@@ -39,7 +39,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet) {
+	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
         return Single.fromCallable(() -> {
             Realm instance = null;
             try {
@@ -56,7 +56,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	}
 
     @Override
-    public Transaction fetchTransaction(NetworkInfo networkInfo, Wallet wallet, String hash)
+    public Transaction fetchTransaction(Wallet wallet, String hash)
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
@@ -80,7 +80,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-	public Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
+	public Completable putTransactions(Wallet wallet, Transaction[] transactions) {
         return Completable.fromAction(() -> {
             Realm instance = null;
             try {
@@ -108,13 +108,12 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
     /**
      * Single thread that also returns the transactions so we can use it in as an invisible member in an obserable stream
-     * @param networkInfo
      * @param wallet
      * @param transactions
      * @return
      */
     @Override
-    public Single<Transaction[]> putAndReturnTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
+    public Single<Transaction[]> putAndReturnTransactions(Wallet wallet, Transaction[] transactions) {
         return Single.fromCallable(() -> {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
@@ -166,7 +165,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Single<Transaction> findLast(NetworkInfo networkInfo, Wallet wallet) {
+    public Single<Transaction> findLast(Wallet wallet) {
         return Single.fromCallable(() -> {
             Realm realm = null;
             try {

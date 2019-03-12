@@ -33,7 +33,7 @@ public class ERC721Token extends Token implements Parcelable
     public List<Asset> tokenBalance;
 
     public ERC721Token(TokenInfo tokenInfo, List<Asset> balanceList, long blancaTime, String networkName) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName);
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, ContractType.ERC721);
         if (balanceList != null)
         {
             tokenBalance = balanceList;

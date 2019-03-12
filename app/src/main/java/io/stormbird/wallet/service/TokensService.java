@@ -1,10 +1,12 @@
 package io.stormbird.wallet.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import android.util.SparseLongArray;
 import io.reactivex.Observable;
 import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
@@ -15,7 +17,7 @@ import static io.stormbird.wallet.C.ETHER_DECIMALS;
 public class TokensService
 {
     private final Map<String, Token> tokenMap = new ConcurrentHashMap<>();
-    private static Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
+    private static final Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
     private final Map<Integer, Token> currencies = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private boolean tokenTerminated = false;
@@ -31,13 +33,16 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
+        boolean added = false;
         if (t.isEthereum())
         {
+            if (!currencies.containsKey(t.tokenInfo.chainId)) added = true;
             currencies.put(t.tokenInfo.chainId, t);
             if (t.tokenInfo.chainId == 1) tokenMap.put(t.getAddress(), t);
         }
         else if (t.checkTokenWallet(currentAddress))
         {
+            if (!tokenMap.containsKey(currentAddress)) added = true;
             tokenMap.put(t.getAddress(), t);
             setSpec(t);
         }
@@ -274,4 +279,30 @@ public class TokensService
 
         return addresses;
     }
+
+//    public long getLastTransactionFetch(int chainId, String address)
+//    {
+//        SparseLongArray chainMap = transactionUpdateMap.get(address);
+//        if (chainMap == null)
+//        {
+//            chainMap = new SparseLongArray();
+//            transactionUpdateMap.put(address, chainMap);
+//        }
+//
+//        long value = chainMap.valueAt(chainId);
+//
+//        return value;
+//    }
+//
+//    public void setNextTransactionFetch(int chainId, String address, long updateTime)
+//    {
+//        SparseLongArray chainMap = transactionUpdateMap.get(address);
+//        if (chainMap == null)
+//        {
+//            chainMap = new SparseLongArray();
+//            transactionUpdateMap.put(address, chainMap);
+//        }
+//
+//        chainMap.put(chainId, updateTime);
+//    }
 }

@@ -319,6 +319,13 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
+    /**
+     * Loading stored token with balance from database
+     * @param network
+     * @param wallet
+     * @param address
+     * @return
+     */
     @Override
     public Token getTokenBalance(NetworkInfo network, Wallet wallet, String address)
     {
@@ -427,7 +434,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable storeBlockRead(Token token, NetworkInfo network, Wallet wallet)
+    public Disposable storeBlockRead(Token token, Wallet wallet)
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -439,7 +446,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         realm = realmManager.getRealmInstance(wallet);
                         RealmToken realmToken = realm.where(RealmToken.class)
                                 .equalTo("address", databaseKey(token))
-                                .equalTo("chainId", network.chainId)
+                                .equalTo("chainId", token.tokenInfo.chainId)
                                 .findFirst();
 
                         if (realmToken != null)
@@ -772,6 +779,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 TokenInfo info = tf.createTokenInfo(realmItem);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
                 result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
+                result[i].setTransactionUpdateTime(realmItem.getUpdatedTime(), true);
             }
         }
         return result;
@@ -786,9 +794,10 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 TokenInfo info = tf.createTokenInfo(realmItem);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
-                Token token = tf.createToken(info, realmItem, realmItem.getUpdatedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
+                Token token = tf.createToken(info, realmItem, now, network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                 if (token != null)
                 {
+                    token.setTransactionUpdateTime(realmItem.getUpdatedTime(), true);
                     token.setTokenWallet(wallet.address);
                     tokenList.add(token);
                 }

@@ -17,13 +17,13 @@ public class TransactionMemoryCache implements TransactionLocalSource {
 	private final Map<String, CacheUnit> cache = new java.util.concurrent.ConcurrentHashMap<>();
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(NetworkInfo networkInfo, Wallet wallet) {
+	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
 		return Single.fromCallable(() -> {
-			CacheUnit unit = cache.get(createKey(networkInfo, wallet));
+			CacheUnit unit = cache.get(createKey(wallet));
 			Transaction[] transactions = null;
 			if (unit != null) {
 				if (System.currentTimeMillis() - unit.create > MAX_TIME_OUT) {
-					cache.remove(createKey(networkInfo, wallet));
+					cache.remove(createKey(wallet));
 				} else {
 					transactions = unit.transactions;
 				}
@@ -34,25 +34,25 @@ public class TransactionMemoryCache implements TransactionLocalSource {
 	}
 
 	@Override
-	public Transaction fetchTransaction(NetworkInfo networkInfo, Wallet wallet, String hash)
+	public Transaction fetchTransaction(Wallet wallet, String hash)
 	{
 		return null;
 	}
 
-	private String createKey(NetworkInfo networkInfo, Wallet wallet) {
-        return networkInfo.name + wallet.address;
+	private String createKey(Wallet wallet) {
+        return wallet.address;
     }
 
     @Override
-	public Completable putTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] transactions) {
-		return Completable.fromAction(() -> cache.put(createKey(networkInfo, wallet),
+	public Completable putTransactions(Wallet wallet, Transaction[] transactions) {
+		return Completable.fromAction(() -> cache.put(createKey(wallet),
                 new CacheUnit(wallet.address, System.currentTimeMillis(), transactions)));
 	}
 
     @Override
-    public Single<Transaction> findLast(NetworkInfo networkInfo, Wallet wallet) {
+    public Single<Transaction> findLast(Wallet wallet) {
 	    return Single.fromCallable(() -> {
-            CacheUnit cacheUnit = cache.get(createKey(networkInfo, wallet));
+            CacheUnit cacheUnit = cache.get(createKey(wallet));
             return cacheUnit != null && cacheUnit.transactions != null && cacheUnit.transactions.length > 0
                     ? cacheUnit.transactions[0]
                     : null;
@@ -60,10 +60,10 @@ public class TransactionMemoryCache implements TransactionLocalSource {
     }
 
 	@Override
-	public Single<Transaction[]> putAndReturnTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+	public Single<Transaction[]> putAndReturnTransactions(Wallet wallet, Transaction[] txList)
 	{
 		return Single.fromCallable(() -> {
-								   	cache.put(createKey(networkInfo, wallet),
+								   	cache.put(createKey(wallet),
 												 new CacheUnit(wallet.address, System.currentTimeMillis(), txList));
 									   return txList;
 								   });

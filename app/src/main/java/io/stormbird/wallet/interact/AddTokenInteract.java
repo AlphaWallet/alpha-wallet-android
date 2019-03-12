@@ -34,8 +34,8 @@ public class AddTokenInteract {
         else return Observable.fromCallable(() -> token);
     }
 
-    public Disposable updateBlockRead(Token token, NetworkInfo network, Wallet wallet)
+    public Disposable updateBlockRead(Token token, Wallet wallet)
     {
-        return tokenRepository.updateBlockRead(token, network, wallet);
+        return tokenRepository.updateBlockRead(token, wallet);
     }
 }

@@ -22,21 +22,7 @@ import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.WalletDataRealmSource;
 import io.stormbird.wallet.repository.WalletRepository;
 import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.CoinmarketcapTickerService;
-import io.stormbird.wallet.service.EthplorerTokenService;
-import io.stormbird.wallet.service.FeeMasterService;
-import io.stormbird.wallet.service.GethKeystoreAccountService;
-import io.stormbird.wallet.service.ImportTokenService;
-import io.stormbird.wallet.service.MarketQueueService;
-import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.service.RealmManager;
-import io.stormbird.wallet.service.TickerService;
-import io.stormbird.wallet.service.TokenExplorerClientType;
-import io.stormbird.wallet.service.TokensService;
-import io.stormbird.wallet.service.TransactionsNetworkClient;
-import io.stormbird.wallet.service.TransactionsNetworkClientType;
+import io.stormbird.wallet.service.*;
 
 import java.io.File;
 
@@ -169,6 +155,12 @@ public class RepositoriesModule {
 	@Provides
 	TokensService provideTokensService( ) {
 		return new TokensService( );
+	}
+
+	@Singleton
+	@Provides
+	EventService provideEventService( ) {
+		return new EventService( );
 	}
 
 	@Singleton

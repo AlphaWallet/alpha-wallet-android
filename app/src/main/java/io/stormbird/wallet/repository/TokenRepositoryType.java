@@ -35,5 +35,5 @@ public interface TokenRepositoryType {
     Single<Token[]> addERC721(Wallet wallet, Token[] tokens);
     Single<String> callAddressMethod(String method, byte[] resultHash, String address);
 
-    Disposable updateBlockRead(Token token, NetworkInfo network, Wallet wallet);
+    Disposable updateBlockRead(Token token, Wallet wallet);
 }

@@ -220,35 +220,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             e.printStackTrace();
         }
 
-        if (walletFragment != null)
-        {
-            walletFragment.setTokenInterface(this);
-            walletFragment.checkTokenBalance("");
-        }
-        if (transactionsFragment != null)
-        {
-            transactionsFragment.setInterface(this);
-        }
-
         viewModel.events().observe(this, this::onEvents);
     }
 
     private void onEvents(List<AWEvent> awEvents)
     {
-        for (AWEvent event : awEvents)
-        {
-            switch (event.eventType)
-            {
-                case UPDATE_TOKEN_BALANCE:
-                    walletFragment.checkTokenBalance(event.payload);
-                    break;
-                case CHECK_TOKEN_TRANSACTIONS:
-                    transactionsFragment.checkTokenTransactions(event.payload);
-                    break;
-                default:
-                    break;
-            }
-        }
+//        for (AWEvent event : awEvents)
+//        {
+//            switch (event.eventType)
+//            {
+//                case UPDATE_TOKEN_BALANCE:
+//                    walletFragment.checkTokenBalance(event.payload);
+//                    break;
+//                case CHECK_TOKEN_TRANSACTIONS:
+//                    transactionsFragment.checkTokenTransactions(event.payload);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
     }
 
     @Override

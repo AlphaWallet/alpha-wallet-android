@@ -15,29 +15,29 @@ import java.util.List;
 
 public class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type, String networkName)
+    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type, String networkName, long lastBlockCheck)
     {
         Token thisToken;
         switch (type)
         {
             case ERC875:
             case ERC875LEGACY:
-                thisToken = new Ticket(tokenInfo, balances, updateBlancaTime, networkName);
+                thisToken = new Ticket(tokenInfo, balances, updateBlancaTime, networkName, type);
                 break;
             case ERC721:
-                //TODO:
+                //TODO: Support Legacy 721
                 thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), updateBlancaTime, networkName);
                 break;
             case ERC20:
             case ETHEREUM:
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 break;
             default:
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 break;
         }
 
-        thisToken.setInterfaceSpec(type);
+        thisToken.lastBlockCheck = lastBlockCheck;
 
         return thisToken;
     }
@@ -57,33 +57,36 @@ public class TokenFactory
             case ERC20:
                 if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
                 BigDecimal balance = new BigDecimal(realmBalance);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName);
-                thisToken.setInterfaceSpecFromRealm(realmItem);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 break;
 
             case ERC875:
             case ERC875LEGACY:
                 if (realmBalance == null) realmBalance = "";
-                thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName);
-                thisToken.setInterfaceSpecFromRealm(realmItem);
+                thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
                 break;
 
             case OTHER:
                 balance = new BigDecimal(0);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName);
-                thisToken.setInterfaceSpec(ContractType.OTHER);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
+                break;
+
+            case CURRENCY:
+                if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
+                balance = new BigDecimal(realmBalance);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, ContractType.ETHEREUM);
                 break;
 
             default:
                 balance = new BigDecimal(0);
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName);
-                thisToken.setInterfaceSpec(ContractType.NOT_SET);
+                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 break;
 
         }
 
         thisToken.restoreAuxDataFromRealm(realmItem);
         thisToken.lastBlockCheck = realmItem.getLastBlock();
+        thisToken.setTransactionUpdateTime(realmItem.getUpdatedTime(), true);
 
         return thisToken;
     }
@@ -91,14 +94,15 @@ public class TokenFactory
     public Token createToken(TokenInfo tokenInfo, ContractType type, String networkName)
     {
         Token thisToken;
+        long currentTime = System.currentTimeMillis();
         switch (type)
         {
             case ERC875:
             case ERC875LEGACY:
-                thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), 0, networkName);
+                thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), currentTime, networkName, type);
                 break;
             case ERC721:
-                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), 0, networkName);
+                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), currentTime, networkName);
                 break;
             case ETHEREUM:
                 String[] split = tokenInfo.address.split("-");
@@ -109,7 +113,7 @@ public class TokenFactory
                                       tokenInfo.decimals,
                                       true,
                                       tokenInfo.chainId),
-                        null, 0, networkName);
+                        null, currentTime, networkName, type);
                 break;
             case ERC20:
             default:
@@ -120,11 +124,11 @@ public class TokenFactory
                                       tokenInfo.decimals,
                                       true,
                                       tokenInfo.chainId),
-                        null, 0, networkName);
+                        null, currentTime, networkName, type);
                 break;
         }
 
-        thisToken.setInterfaceSpec(type);
+        thisToken.setTransactionUpdateTime(currentTime, true);
 
         return thisToken;
     }

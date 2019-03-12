@@ -12,6 +12,7 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.EventService;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 
 @Module
@@ -25,7 +26,8 @@ class HomeModule {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            EventService eventService) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -34,7 +36,8 @@ class HomeModule {
                 addTokenRouter,
                 assetDefinitionService,
                 findDefaultWalletInteract,
-                fetchWalletsInteract);
+                fetchWalletsInteract,
+                eventService);
     }
 
     @Provides

@@ -85,7 +85,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.endUpdate().observe(this, this::checkTokens);
@@ -232,6 +231,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void onResume() {
         super.onResume();
         viewModel.setVisibility(isVisible);
+        viewModel.prepare();
     }
 
     private void onTokens(Token[] tokens)
@@ -265,11 +265,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     {
         super.onDestroy();
         getContext().unregisterReceiver(tokenReceiver);
-    }
-
-    private void onDefaultWallet(Wallet wallet)
-    {
-        //viewModel.fetchTokens();
+        viewModel.clearProcess();
     }
 
     private void onBalanceChanged(Map<String, String> balance) {
@@ -346,26 +342,12 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     @Override
     public void addedToken()
     {
-        viewModel.refreshAssetDefinedTokens(); //we loaded a new token, make balance query check the contract tokens
+
     }
 
     @Override
     public void changedLocale()
     {
 
-    }
-
-    public void checkTokenBalance(String address)
-    {
-        //check balance of this token
-        if (address.length() == 0)
-        {
-            //startup
-            viewModel.fetchTokens();
-        }
-        else
-        {
-
-        }
     }
 }

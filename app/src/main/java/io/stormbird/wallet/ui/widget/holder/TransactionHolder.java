@@ -82,7 +82,9 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             return;
         }
 
-        String networkSymbol = addition.getString(DEFAULT_SYMBOL_ADDITIONAL);
+        Token token = tokensService.getToken(transaction.chainId, defaultAddress);
+
+        String networkSymbol = token.getNetworkName();
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
         TransactionOperation operation = transaction.operations == null

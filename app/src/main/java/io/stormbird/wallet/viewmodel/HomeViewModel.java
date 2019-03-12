@@ -39,6 +39,7 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.EventService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
 
@@ -62,6 +63,7 @@ public class HomeViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
+    private final EventService eventService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -69,11 +71,8 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
 
-    private Map<Integer, List<AWEvent>> eventMap = new ConcurrentHashMap<>();
-    private int eventCounter;
-
     @Nullable
-    private Disposable timerDisposable;
+    private Disposable timerDisposable = null;
 
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
@@ -83,7 +82,8 @@ public class HomeViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            EventService eventService) {
         this.preferenceRepository = preferenceRepository;
         this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
@@ -92,6 +92,7 @@ public class HomeViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
+        this.eventService = eventService;
     }
 
     @Override
@@ -125,33 +126,14 @@ public class HomeViewModel extends BaseViewModel {
         if (timerDisposable == null || timerDisposable.isDisposed())
         {
             timerDisposable = Observable.interval(0, TIMER_FREQUENCY, TimeUnit.MILLISECONDS)
-                    .doOnNext(l -> checkEvents()).subscribe();
+                    .doOnNext(l -> eventService.checkEvents()).subscribe();
         }
-    }
-
-    private void checkEvents()
-    {
-        List<AWEvent> currentList = eventMap.get(eventCounter);
-        if (currentList != null)
-        {
-            eventMap.remove(eventCounter);
-            events.postValue(currentList);
-        }
-        eventCounter++;
     }
 
     //must be greater than 1 away to avoid race condition
     public void addEvent(int timeDuration, AWEvent event)
     {
-        if (timeDuration < 2)
-        {
-            Log.d(TAG, "Bad event time: " + timeDuration);
-            timeDuration = 2;
-        }
-
-        List<AWEvent> futureEvents = eventMap.get(eventCounter + timeDuration);
-        if (futureEvents == null) futureEvents = new ArrayList<>();
-        futureEvents.add(event);
+        eventService.addEvent(timeDuration, event);
     }
 
     public void onClean()

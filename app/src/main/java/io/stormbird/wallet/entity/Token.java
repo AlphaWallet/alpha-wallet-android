@@ -9,8 +9,10 @@ import android.view.View;
 
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
@@ -41,17 +43,24 @@ public class Token implements Parcelable
     protected ContractType contractType;
     public long lastBlockCheck = 0;
     private final String shortNetworkName;
+    public long balanceUpdate;
+    public long transactionFetch;
+    public int transactionRefreshCount;
 
     public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
     protected Map<String, String> auxData;
 
-    public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName) {
+    public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
         this.balance = balance;
         this.updateBlancaTime = updateBlancaTime;
         this.shortNetworkName = networkName;
+        this.contractType = type;
+
+        balanceUpdate = getUpdateTime(updateBlancaTime);
+        setTransactionUpdateTime(updateBlancaTime, true);
     }
 
     protected Token(Parcel in) {
@@ -60,6 +69,7 @@ public class Token implements Parcelable
         updateBlancaTime = in.readLong();
         int readType = in.readInt();
         shortNetworkName = in.readString();
+        balanceUpdate = in.readLong();
         if (readType <= ContractType.CREATION.ordinal())
         {
             contractType = ContractType.values()[readType];
@@ -121,6 +131,7 @@ public class Token implements Parcelable
         dest.writeLong(updateBlancaTime);
         dest.writeInt(contractType.ordinal());
         dest.writeString(shortNetworkName);
+        dest.writeLong(balanceUpdate);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -160,6 +171,34 @@ public class Token implements Parcelable
         if (isTerminated()) return EXPIRED_CONTRACT;
         if (isBad()) return UNKNOWN_CONTRACT;
         return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
+    }
+
+    public boolean requiresBalanceUpdate()
+    {
+        if (balanceUpdate > 0 && !isTerminated() && !independentUpdate() && System.currentTimeMillis() > balanceUpdate)
+        {
+            Log.d("TOKEN", "Ready to Update: " + tokenInfo.name + " : " + getAddress());
+            balanceUpdate = getUpdateTime(System.currentTimeMillis());
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public boolean requiresTransactionRefresh()
+    {
+        if (transactionFetch > 0 && !isTerminated() && !independentUpdate() && System.currentTimeMillis() > transactionFetch)
+        {
+            Log.d("TRANSACTION", "Ready to re-fetch transactions: " + tokenInfo.name + " : " + getAddress());
+            setTransactionUpdateTime(System.currentTimeMillis(), false);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void clickReact(BaseViewModel viewModel, Context context)
@@ -651,5 +690,112 @@ public class Token implements Parcelable
         {
             return tokenInfo.name;
         }
+    }
+
+    public boolean hasRealValue()
+    {
+        switch (tokenInfo.chainId)
+        {
+            case EthereumNetworkRepository.MAINNET_ID:
+            case EthereumNetworkRepository.POA_ID:
+            case EthereumNetworkRepository.CLASSIC_ID:
+            case EthereumNetworkRepository.XDAI_ID:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private long getUpdateTime(long currentTime)
+    {
+        long updateTime = -1;
+        //calculate balance update time
+        if (!isTerminated() && currentTime >= 0)
+        {
+            if (hasRealValue())
+            {
+                if (isEthereum() || hasPositiveBalance())
+                {
+                    //schedule check in 20 seconds
+                    updateTime = 1000*20;
+                }
+                else
+                {
+                    //zero balance and not base currency, use 40 second cycle.
+                    updateTime = 1000*40;
+                }
+            }
+            else
+            {
+                //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
+                if (isEthereum())
+                {
+                    //schedule check in 30 seconds
+                    updateTime = 1000 * 40;
+                }
+                else if (hasPositiveBalance())
+                {
+                    //testnet positive balance and not base currency, use 120 second cycle.
+                    updateTime = 1000 * 160;
+                }
+                else if (tokenInfo.name != null)
+                {
+                    //zero balance - very slow update cycle
+                    updateTime = 1000 * 280;
+                }
+                else
+                {
+                    updateTime = 1000 * 360;
+                }
+            }
+        }
+        else
+        {
+            return -1;
+        }
+
+        updateTime += (long)((double)updateTime)*(0.6*Math.random()-0.2); //small variance to spread the checking load
+        updateTime += currentTime;
+
+        long millis = updateTime - System.currentTimeMillis();
+        double seconds = (double)millis / 1000.0;
+        Log.d("TOKEN", tokenInfo.name + " Reset in " + seconds);
+
+        return updateTime;
+    }
+
+    /**
+     * Heuristic
+     * @param currentTime
+     * @param firstCheck
+     */
+    public void setTransactionUpdateTime(long currentTime, boolean firstCheck)
+    {
+        long offset;
+        if (isTerminated())
+        {
+            offset = -1;
+            currentTime = 0;
+        }
+        else if (hasRealValue() && isEthereum())
+        {
+            offset = 0;
+        }
+        else if (hasRealValue() || isEthereum()) offset = (long)(5000.0 * Math.random()) + 2000;
+        else offset = (long)(10000.0 * Math.random()) + 3000;
+
+        if (offset == 0)
+        {
+            if (!firstCheck) offset += 10*1000 + (long)(10000.0 * Math.random());
+        }
+        else if (offset >= 0 && !firstCheck)
+        {
+            offset = 30*1000 + offset*2;
+        }
+
+        transactionFetch = (currentTime + offset);
+
+        if (firstCheck) transactionRefreshCount = 0;
     }
 }

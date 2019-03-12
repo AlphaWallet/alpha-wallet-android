@@ -51,13 +51,13 @@ public class Ticket extends Token implements Parcelable
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
 
-    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName);
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName);
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
     }
 

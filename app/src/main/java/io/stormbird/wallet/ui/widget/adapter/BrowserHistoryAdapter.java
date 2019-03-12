@@ -86,7 +86,7 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
         }
 
         viewHolder.remove.setOnClickListener(v ->
-                onHistoryItemRemovedListener.onHistoryItemRemoved(dApp.getName()));
+                onHistoryItemRemovedListener.onHistoryItemRemoved(dApp));
     }
 
     @Override

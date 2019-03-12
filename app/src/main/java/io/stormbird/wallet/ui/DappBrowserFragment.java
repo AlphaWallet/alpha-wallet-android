@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +41,6 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DApp;
 import io.stormbird.wallet.entity.DAppFunction;
@@ -51,10 +52,11 @@ import io.stormbird.wallet.entity.URLLoadReceiver;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.OnDappClickListener;
 import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
-import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
+import io.stormbird.wallet.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
+import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
@@ -101,7 +103,7 @@ public class DappBrowserFragment extends Fragment implements
     private NetworkInfo networkInfo;
     private SignMessageDialog dialog;
     private AWalletAlertDialog resultDialog;
-    private AutoCompleteUrlAdapter adapter;
+    private DappBrowserSuggestionsAdapter adapter;
     private URLLoadReceiver URLReceiver;
 
     private Fragment dappHomeFragment;
@@ -129,9 +131,9 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
-        if (adapter == null || !adapter.hasContext()) {
-            setupAddressBar();
-        }
+//        if (adapter == null || !adapter.hasContext()) {
+//            setupAddressBar();
+//        }
     }
 
     @Nullable
@@ -308,8 +310,11 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void setupAddressBar() {
-        adapter = new AutoCompleteUrlAdapter(getContext(), C.DAPP_BROWSER_HISTORY);
-        adapter.setListener(this);
+        adapter = new DappBrowserSuggestionsAdapter(
+                getContext(),
+                DappBrowserUtils.getDappsList(getContext()),
+                this::onItemClick
+        );
         urlTv.setAdapter(adapter);
 
         urlTv.setOnEditorActionListener((v, actionId, event) -> {
@@ -326,6 +331,22 @@ public class DappBrowserFragment extends Fragment implements
 
         urlTv.setOnClickListener(v -> {
             beginSearchSession();
+        });
+
+        urlTv.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                adapter.setHighlighted(editable.toString());
+            }
         });
     }
 
@@ -405,7 +426,6 @@ public class DappBrowserFragment extends Fragment implements
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
                 currentWebpageTitle = title;
-                Log.d(TAG, "onReceivedTitle: " + currentWebpageTitle);
             }
         });
 
@@ -539,9 +559,9 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     @Override
-    public void onWebpageLoaded(String url)
+    public void onWebpageLoaded(String url, String title)
     {
-        adapter.addDAppURL(url);
+        DappBrowserUtils.addToHistory(getContext(), new DApp(title, url));
     }
 
     private boolean loadUrl(String urlText)
@@ -552,7 +572,6 @@ public class DappBrowserFragment extends Fragment implements
         urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
-        adapter.notifyDataSetChanged();
         Activity current = getActivity();
         if (current != null)
         {

@@ -25,7 +25,6 @@ import io.stormbird.wallet.util.Utils;
 
 
 public class DiscoverDappsFragment extends Fragment {
-    private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private DiscoverDappsListAdapter adapter;
     private OnDappClickListener onDappClickListener;
 
@@ -70,10 +69,8 @@ public class DiscoverDappsFragment extends Fragment {
     }
 
     private List<DApp> getData() {
-        ArrayList<DApp> dapps;
-        dapps = new Gson().fromJson(Utils.loadJSONFromAsset(getActivity(), DAPPS_LIST_FILENAME),
-                new TypeToken<List<DApp>>() {
-                }.getType());
+        List<DApp> dapps;
+        dapps = DappBrowserUtils.getDappsList(getContext());
 
         for (DApp d : dapps) {
             for (DApp myDapp : DappBrowserUtils.getMyDapps(getContext())) {

@@ -69,4 +69,17 @@ public class Utils {
         }
         return json;
     }
+
+    public static boolean isAddressValid(String address)
+    {
+        try
+        {
+            new org.web3j.abi.datatypes.Address(address);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
 }

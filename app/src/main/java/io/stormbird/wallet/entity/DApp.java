@@ -3,6 +3,8 @@ package io.stormbird.wallet.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 public class DApp implements Parcelable {
     String name;
     String url;
@@ -88,4 +90,21 @@ public class DApp implements Parcelable {
             return new DApp[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DApp)) return false;
+        DApp dApp = (DApp) o;
+        return name.equals(dApp.name) && url.equals( dApp.url);
+    }
+
+    @Override
+    public int hashCode() {
+        Object[] a = { name, url };
+        int result = 1;
+        for (Object element : a)
+            result = 31 * result + (element == null ? 0 : element.hashCode());
+        return result;
+    }
 }

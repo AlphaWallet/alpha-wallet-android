@@ -61,7 +61,9 @@ public class DappBrowserUtils {
 
     public static void addToHistory(Context context, DApp dapp) {
         List<DApp> history = getBrowserHistory(context);
-        history.add(dapp);
+        if (!history.contains(dapp)) {
+            history.add(dapp);
+        }
         saveHistory(context, history);
     }
 

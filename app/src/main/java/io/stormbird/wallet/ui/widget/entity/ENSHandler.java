@@ -9,11 +9,12 @@ import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.ENSCallback;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 4/12/2018.
@@ -104,14 +105,14 @@ public class ENSHandler
         ensName = null;
         toAddressError.setVisibility(View.GONE);
         String to = toAddressEditText.getText().toString();
-        if (!Address.isAddress(to))
+        if (!isValidAddress(to))
         {
             String ens = to;
             to = textENS.getText().toString();
             ensName = "@" + ens + " (" + to + ")";
         }
 
-        if (!Address.isAddress(to))
+        if (!isValidAddress(to))
         {
             to = null;
             if (waitingForENS)

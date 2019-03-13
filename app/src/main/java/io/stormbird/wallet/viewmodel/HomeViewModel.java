@@ -11,18 +11,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
@@ -37,6 +33,8 @@ import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
+
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
@@ -130,7 +128,7 @@ public class HomeViewModel extends BaseViewModel {
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);
 
-            if (Address.isAddress(data.contractAddress)) {
+            if (isValidAddress(data.contractAddress)) {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {

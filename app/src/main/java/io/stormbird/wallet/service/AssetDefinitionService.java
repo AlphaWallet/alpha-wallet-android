@@ -14,9 +14,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Address;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.xml.sax.SAXException;
@@ -31,6 +28,7 @@ import java.util.*;
 
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 
 /**
@@ -303,7 +301,7 @@ public class AssetDefinitionService
 
     private void handleFileLoad(String address)
     {
-        if (Address.isAddress(address))
+        if (isValidAddress(address))
         {
             handleFile(address);
             context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
@@ -498,7 +496,7 @@ public class AssetDefinitionService
         {
             String extension = f.getName().substring(index + 1).toLowerCase();
             String name = f.getName().substring(0, index).toLowerCase();
-            return extension.equals("xml") && Address.isAddress(name);
+            return extension.equals("xml") && isValidAddress(name);
         }
 
         return false;

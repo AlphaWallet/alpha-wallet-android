@@ -1,9 +1,13 @@
 package io.stormbird.wallet.repository;
 
 import android.util.Log;
-
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.service.TransactionsNetworkClientType;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
@@ -20,12 +24,6 @@ import org.web3j.utils.Numeric;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.TransactionsNetworkClientType;
 
 import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
 
@@ -276,18 +274,18 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
+	public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		//ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
-        if (tokenInfo.name == null && tokenInfo.symbol == null)
+		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
+		if (tokenInfo.name == null && tokenInfo.symbol == null)
 		{
 			return Single.fromCallable(() -> ContractType.OTHER);
 		}
-//		else if (checked != ContractType.NOT_SET && checked != ContractType.OTHER)
-//		{
-//			return Single.fromCallable(() -> checked);
-//		}
-		else return blockExplorerClient.checkConstructorArgs(networkInfo, tokenInfo.address);
+		else if (checked != null && checked != ContractType.NOT_SET && checked != ContractType.OTHER)
+		{
+			return Single.fromCallable(() -> checked);
+		}
+		else return blockExplorerClient.checkConstructorArgs(networkInfo, address);
 	}
 }

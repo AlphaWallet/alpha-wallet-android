@@ -1,6 +1,7 @@
 package io.stormbird.wallet.interact;
 
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 
 import io.reactivex.Observable;
@@ -12,9 +13,12 @@ import io.stormbird.wallet.service.TokensService;
 public class FetchTransactionsInteract {
 
     private final TransactionRepositoryType transactionRepository;
+    private final TokenRepositoryType tokenRepository;
 
-    public FetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
+    public FetchTransactionsInteract(TransactionRepositoryType transactionRepository,
+                                     TokenRepositoryType tokenRepositoryType) {
         this.transactionRepository = transactionRepository;
+        this.tokenRepository = tokenRepositoryType;
     }
 
     public Observable<Transaction[]> fetchCached(NetworkInfo network, Wallet wallet) {
@@ -38,9 +42,8 @@ public class FetchTransactionsInteract {
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
     {
-        return transactionRepository.queryInterfaceSpec(tokenInfo)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io());
+        return  tokenRepository.resolveProxyAddress(tokenInfo.address)
+                .flatMap(address -> transactionRepository.queryInterfaceSpec(address, tokenInfo));
     }
 
     public Transaction fetchCached(String walletAddress, String hash)

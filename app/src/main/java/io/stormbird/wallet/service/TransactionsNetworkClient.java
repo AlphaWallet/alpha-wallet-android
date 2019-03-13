@@ -216,12 +216,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			ContractType result = ContractType.OTHER;
 			try
 			{
-			    //first check for ERC20 - contract may be hiding behind a proxy
-                if (checkERC20(networkInfo, address))
-                {
-                    return ContractType.ERC20;
-                }
-
 				String response = readTransactions(networkInfo, address, "0", true, 1, 5);
 
 				if (response != null)
@@ -249,6 +243,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			catch (Exception e)
 			{
 				e.printStackTrace();
+			}
+
+			if (result == ContractType.OTHER && checkERC20(networkInfo, address))
+			{
+				result = ContractType.ERC20;
 			}
 			return result;
 		});

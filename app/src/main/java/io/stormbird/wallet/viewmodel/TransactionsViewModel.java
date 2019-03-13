@@ -296,7 +296,7 @@ public class TransactionsViewModel extends BaseViewModel
                     .flatMapIterable(token -> token)
                     .filter(token -> !token.isEthereum())
                     .filter(token -> !token.isTerminated())
-                    .filter(token -> !token.independentUpdate()) //don't scan ERC721 transactions
+                    .filter(token -> (!token.independentUpdate() && !token.isERC20())) //don't scan for ERC721 or ERC20 internal transactions
                     .concatMap(this::checkSpec)
                     .filter(Token::checkIntrinsicType) //Don't scan tokens that appear to be setup incorrectly
                     .concatMap(token -> fetchTransactionsInteract.fetchNetworkTransactions(new Wallet(token.getAddress()), token.lastBlockCheck, wallet.getValue().address)) //single that fetches all the tx's from etherscan for each token from fetchSequential

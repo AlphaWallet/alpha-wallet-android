@@ -394,6 +394,7 @@ public class DappBrowserFragment extends Fragment implements
         clear.setVisibility(View.GONE);
         urlTv.dismissDropDown();
         KeyboardUtils.hideKeyboard(urlTv);
+        setBackForwardButtons();
     }
 
     private void detachFragment(String tag) {
@@ -603,6 +604,9 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void setBackForwardButtons() {
+        if (sessionHistory == null) {
+            sessionHistory = web3.copyBackForwardList();
+        }
         if (sessionHistory.getCurrentIndex() > 0) {
             back.setAlpha(1.0f);
         } else {

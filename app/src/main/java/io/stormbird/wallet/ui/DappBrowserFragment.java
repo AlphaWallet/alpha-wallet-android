@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -34,8 +35,6 @@ import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.LinkedList;
-import java.util.Stack;
 
 import javax.inject.Inject;
 
@@ -120,9 +119,7 @@ public class DappBrowserFragment extends Fragment implements
     private String currentWebpageTitle;
     private String currentFragment;
 
-    private DApp currentDApp;
-    private Stack<DApp> backStack = new Stack<>();
-    private Stack<DApp> nextStack = new Stack<>();
+    private WebBackForwardList sessionHistory;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -583,21 +580,16 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void goToPreviousPage() {
-        if (!backStack.empty()) {
-            nextStack.push(currentDApp);
-            currentDApp = backStack.pop();
-            loadUrl(currentDApp.getUrl(), false);
-        } else {
-            nextStack.push(currentDApp);
-            homePressed();
-        }
+        if (web3.canGoBack()) {
+            web3.goBack();
+            urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()-1).getUrl());
+        }qq
     }
 
     private void goToNextPage() {
-        if (!nextStack.empty()) {
-            backStack.push(currentDApp);
-            currentDApp = nextStack.pop();
-            loadUrl(currentDApp.getUrl(), false);
+        if (web3.canGoForward()) {
+            web3.goForward();
+            urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()+1).getUrl());
         }
     }
 
@@ -606,33 +598,25 @@ public class DappBrowserFragment extends Fragment implements
     {
         DApp dapp = new DApp(title, url);
         DappBrowserUtils.addToHistory(getContext(), dapp);
+        sessionHistory = web3.copyBackForwardList();
+        setBackForwardButtons();
     }
 
-    private boolean loadUrl(String urlText, boolean clear)
-    {
-        detachFragments(true);
-        this.currentFragment = DAPP_BROWSER;
-        cancelSearchSession();
-        web3.loadUrl(Utils.formatUrl(urlText));
-        urlTv.setText(Utils.formatUrl(urlText));
-        web3.requestFocus();
-        viewModel.setLastUrl(getContext(), urlText);
-        Activity current = getActivity();
-        if (current != null)
-        {
-            current.sendBroadcast(new Intent(RESET_TOOLBAR));
+    private void setBackForwardButtons() {
+        if (sessionHistory.getCurrentIndex() > 0) {
+            back.setAlpha(1.0f);
+        } else {
+            back.setAlpha(0.3f);
         }
-        return true;
+        if (sessionHistory.getCurrentIndex() < sessionHistory.getSize()-1) {
+            next.setAlpha(1.0f);
+        } else {
+            next.setAlpha(0.3f);
+        }
     }
 
     private boolean loadUrl(String urlText)
     {
-        DApp dapp = new DApp(Utils.formatUrl(urlText), Utils.formatUrl(urlText));
-        if (currentDApp != null) {
-            backStack.push(currentDApp);
-        }
-        currentDApp = dapp;
-        nextStack.clear();
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();

@@ -583,7 +583,7 @@ public class DappBrowserFragment extends Fragment implements
         if (web3.canGoBack()) {
             web3.goBack();
             urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()-1).getUrl());
-        }qq
+        }
     }
 
     private void goToNextPage() {

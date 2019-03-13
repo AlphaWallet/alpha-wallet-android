@@ -51,7 +51,12 @@ public class QRURLParser {
             return null;
         }
 
-        return isValidAddress(address) ? address : null;
+        return checkAddress(address) ? address : null;
+    }
+
+    private static boolean checkAddress(String address) {
+        if (address == null || address.length() < 2) return false;
+        return !address.startsWith("0x") || isValidAddress(address);
     }
 
     public QrUrlResult parse(String url) {

@@ -583,6 +583,7 @@ public class DappBrowserFragment extends Fragment implements
     private void goToPreviousPage() {
         if (web3.canGoBack()) {
             web3.goBack();
+            detachFragments(true);
             urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()-1).getUrl());
         }
     }
@@ -590,6 +591,7 @@ public class DappBrowserFragment extends Fragment implements
     private void goToNextPage() {
         if (web3.canGoForward()) {
             web3.goForward();
+            detachFragments(true);
             urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()+1).getUrl());
         }
     }

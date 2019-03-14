@@ -26,6 +26,7 @@ import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.viewmodel.AddTokenViewModel;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.InputAddressView;
 import io.stormbird.wallet.widget.InputView;
 
@@ -41,7 +42,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     protected AddTokenViewModelFactory addTokenViewModelFactory;
     private AddTokenViewModel viewModel;
 
-    private final Pattern findAddress = Pattern.compile("(0x)[0-9a-fA-F]{40}($|\\s)");
+    private final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
 
     public LinearLayout ticketLayout;
 
@@ -62,6 +63,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public InputView decimalsInputView;
     public InputView nameInputview;
     private String contractAddress;
+
+    private AWalletAlertDialog aDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -190,6 +193,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         if (result) {
             TokenInfo token = viewModel.tokenInfo().getValue();
             token.addTokenSetupPage(this);
+            if (token.name == null && token.symbol == null) onNoContractFound();
         }
     }
 
@@ -213,15 +217,17 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onCheck(String address)
     {
-        //is there something that appears to be an address in here?
-        if (!isValidAddress(address) && findAddress.matcher(address).find())
+        if (!isValidAddress(address))
         {
+            //if it's not a valid address is there something that appears to be an address in here?
             Matcher matcher = findAddress.matcher(address);
-            matcher.find();
-            address = matcher.group(0);
+            if (matcher.find())
+            {
+                address = matcher.group(1) + matcher.group(2);
+            }
         }
 
-        if (!address.equals(lastCheck))
+        if (isValidAddress(address) && !address.equals(lastCheck))
         {
             //let's check the address here - see if we have an eth token
             lastCheck = address;
@@ -278,5 +284,16 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             showProgress(true);
             viewModel.save(address, symbol, decimals, name, isStormbird);
         }
+    }
+
+    private void onNoContractFound()
+    {
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.no_token_found_title);
+        aDialog.setIcon(AWalletAlertDialog.NONE);
+        aDialog.setMessage(getString(R.string.no_token_found, viewModel.getNetwork().getShortName()));
+        aDialog.setButtonText(R.string.dialog_ok);
+        aDialog.setButtonListener(v -> aDialog.dismiss());
+        aDialog.show();
     }
 }

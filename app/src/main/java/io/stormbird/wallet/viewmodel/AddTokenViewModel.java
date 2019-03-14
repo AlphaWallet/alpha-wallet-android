@@ -114,6 +114,11 @@ public class AddTokenViewModel extends BaseViewModel {
         return update;
     }
 
+    public NetworkInfo getNetwork()
+    {
+        return defaultNetwork.getValue();
+    }
+
     public void showTokens(Context context)
     {
         disposable = findDefaultWalletInteract

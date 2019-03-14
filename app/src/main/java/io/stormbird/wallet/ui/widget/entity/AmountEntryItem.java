@@ -59,7 +59,7 @@ public class AmountEntryItem
 
     public void onClear()
     {
-        disposable.dispose();
+        if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
     public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, String symbol, boolean isEth)

@@ -32,6 +32,7 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -518,10 +519,7 @@ public class TokenRepository implements TokenRepositoryType {
                         balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
                     case OTHER:
-                        if (token.tokenInfo.name != null && token.tokenInfo.name.length() > 0)
-                        {
-                            Log.d(TAG, "OTHER: " + token.getFullName());
-                        }
+                        //balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
                     default:
                         break;
@@ -752,12 +750,41 @@ public class TokenRepository implements TokenRepositoryType {
                 responseValue, function.getOutputParameters());
         if (response.size() == 1)
         {
+            if (type instanceof String)
+            {
+                String value = (String)response.get(0).getValue();
+                if (value.length() == 0 && responseValue.length() > 2)
+                {
+                    value = checkBytesString(responseValue);
+                    return (T) value;
+                }
+            }
             return (T) response.get(0).getValue();
         }
         else
         {
             return null;
         }
+    }
+
+    private String checkBytesString(String responseValue) throws Exception
+    {
+        String name = "";
+        if (responseValue.length() > 0)
+        {
+            //try raw bytes
+            byte[] data = Numeric.hexStringToByteArray(responseValue);
+            //truncate zeros
+            int index = data.length - 1;
+            while (data[index] == 0 && index > 0) index--;
+            if (index != (data.length - 1))
+            {
+                data = Arrays.copyOfRange(data, 0, index+1);
+            }
+            name = new String(data, "UTF-8");
+        }
+
+        return name;
     }
 
     private String getName(String address, NetworkInfo network) throws Exception {
@@ -771,6 +798,10 @@ public class TokenRepository implements TokenRepositoryType {
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
             String name = (String)response.get(0).getValue();
+            if (responseValue.length() > 2 && name.length() == 0)
+            {
+                name = checkBytesString(responseValue);
+            }
             if (assetDefinitionService.getChainId(address) > 0)
             {
                 //does name already contain the token type

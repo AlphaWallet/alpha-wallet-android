@@ -30,14 +30,14 @@ android {
     buildToolsVersion '28.0.3'
     sourceSets {
         main {
-            //assets.srcDirs = ['../lib/contracts']
+            
         }
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
         targetSdkVersion 28
-        versionCode 43
+        versionCode 46
         versionName "1.40.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

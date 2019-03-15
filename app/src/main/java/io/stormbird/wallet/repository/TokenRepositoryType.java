@@ -36,4 +36,5 @@ public interface TokenRepositoryType {
     Single<String> callAddressMethod(String method, byte[] resultHash, String address);
 
     Disposable updateBlockRead(Token token, Wallet wallet);
+    Single<String> resolveProxyAddress(TokenInfo tokenInfo);
 }

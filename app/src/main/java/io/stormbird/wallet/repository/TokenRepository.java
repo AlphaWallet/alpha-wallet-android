@@ -32,7 +32,6 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.POA_ID;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -885,6 +885,12 @@ public class TokenRepository implements TokenRepositoryType {
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
+    private static org.web3j.abi.datatypes.Function addrParam(String param) {
+        return new Function(param,
+                            Arrays.<Type>asList(),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+    }
+
     private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
     {
         return new org.web3j.abi.datatypes.Function(
@@ -1124,6 +1130,29 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
+        });
+    }
+
+    @Override
+    public Single<String> resolveProxyAddress(TokenInfo tokenInfo)
+    {
+        return Single.fromCallable(() -> {
+            String contractAddress = tokenInfo.address;
+            try
+            {
+                NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+                String received = getContractData(networkInfo, tokenInfo.address, addrParam("implementation"), "");
+                if (received != null && isValidAddress(received))
+                {
+                    contractAddress = received;
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return contractAddress;
         });
     }
 

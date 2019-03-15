@@ -19,6 +19,7 @@ import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.realm.exceptions.RealmException;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
@@ -85,15 +86,20 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void deleteRealmToken(Realm realm, String address)
+    private void deleteRealmToken(Wallet wallet, String address)
     {
-        RealmToken realmToken = realm.where(RealmToken.class)
-                .like("address", address + "*")
-                .findFirst();
-
-        if (realmToken != null)
+        try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realmToken.deleteFromRealm();
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", address)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                realm.beginTransaction();
+                realmToken.deleteFromRealm();
+                realm.commitTransaction();
+            }
         }
     }
 
@@ -557,7 +563,8 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) {
+    private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) throws RealmException
+    {
         ERC721Token e;
         if (token instanceof ERC721Token)
         {
@@ -605,7 +612,7 @@ public class TokensRealmSource implements TokenLocalSource {
             schemaName = "ERC721";
         }
 
-        deleteRealmToken(realm, address); //in case it was recorded as normal token
+        deleteRealmToken(wallet, address); //in case it was recorded as normal token
 
         RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
                 .equalTo("address", address)

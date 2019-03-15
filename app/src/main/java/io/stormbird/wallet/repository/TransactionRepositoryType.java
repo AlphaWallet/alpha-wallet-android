@@ -20,7 +20,7 @@ public interface TransactionRepositoryType {
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList);
 
-    Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo);
+    Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);
 }

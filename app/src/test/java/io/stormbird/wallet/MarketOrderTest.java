@@ -175,7 +175,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<ContractType> queryInterfaceSpec(TokenInfo token)
+            public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
             {
                 return null;
             }

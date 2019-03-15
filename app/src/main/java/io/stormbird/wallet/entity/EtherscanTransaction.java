@@ -62,11 +62,13 @@ public class EtherscanTransaction
             ct.setType(-3);// indicate that we need to load the contract
             o[0].value = "";
             isConstructor = true;
-            //TODO: We can detect ERC20, ERC875 and other Token contracts here
             ContractType type = decoder.getContractType(input);
             ct.decimals = type.ordinal();
 
-            TokensService.setInterfaceSpec(contractAddress, type);
+            if (type != ContractType.OTHER)
+            {
+                TokensService.setInterfaceSpec(contractAddress, type);
+            }
 
             input = "Constructor"; //Placeholder - don't consume storage for the constructor
         }

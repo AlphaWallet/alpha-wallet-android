@@ -320,12 +320,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         {
             String[] strArray = getResources().getStringArray(index);
             knownContracts.addAll(Arrays.asList(strArray));
-            //initially assume all contracts added from XML have ERC20 interface
-            //TODO: Handle querying delegate contracts
-            for (String addr : strArray)
-            {
-                TokensService.setInterfaceSpec(addr, ContractType.ERC20);
-            }
         }
 
         viewModel.checkKnownContracts(knownContracts);

@@ -44,7 +44,7 @@ public class SuggestionsFilter extends Filter {
     @Override
     protected void publishResults(CharSequence constraint, FilterResults results) {
         adapter.filteredSuggestions.clear();
-        adapter.filteredSuggestions.addAll((List) results.values);
+        if (results != null && results.values != null) adapter.filteredSuggestions.addAll((List) results.values);
         adapter.notifyDataSetChanged();
     }
 }

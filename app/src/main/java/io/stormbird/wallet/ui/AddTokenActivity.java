@@ -20,23 +20,29 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Address;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.viewmodel.AddTokenViewModel;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.InputAddressView;
 import io.stormbird.wallet.widget.InputView;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static io.stormbird.wallet.C.ADDED_TOKEN;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
 
     @Inject
     protected AddTokenViewModelFactory addTokenViewModelFactory;
     private AddTokenViewModel viewModel;
+
+    private final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
 
     public LinearLayout ticketLayout;
 
@@ -55,6 +61,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public InputView decimalsInputView;
     public InputView nameInputview;
     private String contractAddress;
+
+    private AWalletAlertDialog aDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,12 +110,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                 //wait until we have an ethereum address
                 String check = inputAddressView.getAddress().toLowerCase();
                 //process the address first
-                if (check.length() > 39 && check.length() < 43) {
-                    if (!check.equals(lastCheck) && Address.isAddress(check)) {
-                        //let's check the address here - see if we have an eth token
-                        lastCheck = check; // don't get caught in a loop
-                        onCheck(check);
-                    }
+                if (check.length() > 39) {
+                    onCheck(check);
                 }
             }
 
@@ -187,6 +191,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         if (result) {
             TokenInfo token = viewModel.tokenInfo().getValue();
             token.addTokenSetupPage(this);
+            if (token.name == null && token.symbol == null) onNoContractFound();
         }
     }
 
@@ -208,8 +213,24 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onCheck(String address) {
-        viewModel.setupTokens(address);
+    private void onCheck(String address)
+    {
+        if (!isValidAddress(address))
+        {
+            //if it's not a valid address is there something that appears to be an address in here?
+            Matcher matcher = findAddress.matcher(address);
+            if (matcher.find())
+            {
+                address = matcher.group(1) + matcher.group(2);
+            }
+        }
+
+        if (isValidAddress(address) && !address.equals(lastCheck))
+        {
+            //let's check the address here - see if we have an eth token
+            lastCheck = address;
+            viewModel.setupTokens(address);
+        }
     }
 
     private void onSave() {
@@ -252,13 +273,25 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 //            price.setError(getString(R.string.error_must_numeric));
 //        }
 
-        if (!Address.isAddress(address)) {
+        if (!isValidAddress(address)) {
             inputAddressView.setError(getString(R.string.error_invalid_address));
             isValid = false;
         }
 
         if (isValid) {
             viewModel.save(address, symbol, decimals, name, viewModel.getNetworkInfo().chainId);
+            showProgress(true);
         }
+    }
+
+    private void onNoContractFound()
+    {
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.no_token_found_title);
+        aDialog.setIcon(AWalletAlertDialog.NONE);
+        aDialog.setMessage(getString(R.string.no_token_found, viewModel.getNetwork().getShortName()));
+        aDialog.setButtonText(R.string.dialog_ok);
+        aDialog.setButtonListener(v -> aDialog.dismiss());
+        aDialog.show();
     }
 }

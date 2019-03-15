@@ -4,6 +4,7 @@ import io.stormbird.wallet.entity.EthereumProtocolParser;
 import io.stormbird.wallet.entity.QrUrlResult;
 
 import static io.stormbird.wallet.entity.EthereumProtocolParser.ADDRESS_LENGTH;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by marat on 10/11/17.
@@ -34,12 +35,6 @@ public class QRURLParser {
 
     private QRURLParser() { }
 
-    // Be lenient and allow invalid characters in address
-    private static boolean isValidAddress(String address) {
-        if (address == null || address.length() < 2) return false;
-        return !address.startsWith("0x") || address.length() == ADDRESS_LENGTH;
-    }
-
     private static String extractAddress(String str) {
         String address;
         try {
@@ -56,7 +51,12 @@ public class QRURLParser {
             return null;
         }
 
-        return isValidAddress(address) ? address : null;
+        return checkAddress(address) ? address : null;
+    }
+
+    private static boolean checkAddress(String address) {
+        if (address == null || address.length() < 2) return false;
+        return !address.startsWith("0x") || isValidAddress(address);
     }
 
     public QrUrlResult parse(String url) {

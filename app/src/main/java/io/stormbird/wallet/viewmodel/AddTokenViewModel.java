@@ -4,6 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
@@ -52,12 +54,17 @@ public class AddTokenViewModel extends BaseViewModel {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, chainId);
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
                 .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSaved, error -> onInterfaceCheckError(error, tokenInfo));
     }
 
-    //fallback in case interface spec check throws an error
+    //fallback in case interface spec check throws an error.
+    //If any token data was picked up then default to ERC20 token.
     private void onInterfaceCheckError(Throwable throwable, TokenInfo tokenInfo)
     {
+        if ((tokenInfo.name != null && tokenInfo.name.length() > 0)
+            || (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0))
         disposable = addTokenInteract.add(tokenInfo, ContractType.ERC20, wallet.getValue())
                 .subscribe(this::onSaved, this::onError);
     }
@@ -108,6 +115,10 @@ public class AddTokenViewModel extends BaseViewModel {
     }
 
     public NetworkInfo getNetworkInfo() { return defaultNetwork.getValue(); }
+    public NetworkInfo getNetwork()
+    {
+        return defaultNetwork.getValue();
+    }
 
     public void showTokens(Context context)
     {

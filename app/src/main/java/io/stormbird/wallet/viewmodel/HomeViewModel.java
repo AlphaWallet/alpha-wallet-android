@@ -3,26 +3,10 @@ package io.stormbird.wallet.viewmodel;
 import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.BroadcastReceiver;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.util.Log;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -42,6 +26,13 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.EventService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
@@ -167,7 +158,7 @@ public class HomeViewModel extends BaseViewModel {
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);
 
-            if (Address.isAddress(data.contractAddress)) {
+            if (isValidAddress(data.contractAddress)) {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {

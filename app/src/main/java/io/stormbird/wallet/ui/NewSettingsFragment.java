@@ -67,6 +67,17 @@ public class NewSettingsFragment extends Fragment {
         localeSubtext = view.findViewById(R.id.locale_lang_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
 
+        TextView helpText = view.findViewById(R.id.text_version);
+        try
+        {
+            String version = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
+            helpText.setText(version);
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
         localeSubtext.setText(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
 
         updateNotificationState();

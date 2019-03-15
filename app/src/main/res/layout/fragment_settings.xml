@@ -263,14 +263,31 @@
                     android:src="@drawable/ic_about_active" />
             </RelativeLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
                 android:fontFamily="@font/font_light"
                 android:text="@string/toolbar_header_help"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/text_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:fontFamily="@font/font_light"
+                android:text=""
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+            </RelativeLayout>
         </LinearLayout>
 
         <LinearLayout

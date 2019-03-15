@@ -13,9 +13,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +28,8 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DApp;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.widget.entity.SuggestionsFilter;
+import io.stormbird.wallet.util.DappBrowserUtils;
+import io.stormbird.wallet.util.Utils;
 
 public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements Filterable {
     private final List<DApp> suggestions;
@@ -69,7 +76,25 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         }
 
         RelativeLayout layout = convertView.findViewById(R.id.layout);
-        layout.setOnClickListener(v-> listener.onItemClick(dapp.getUrl()));
+        layout.setOnClickListener(v -> listener.onItemClick(dapp.getUrl()));
+
+        ImageView icon = convertView.findViewById(R.id.icon);
+        String visibleUrl = null;
+        try {
+            visibleUrl = Utils.getDomainName(dapp.getUrl());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        String favicon;
+        if (visibleUrl != null) {
+            favicon = DappBrowserUtils.getIconUrl(visibleUrl);
+            Glide.with(icon.getContext())
+                    .load(favicon)
+                    .apply(new RequestOptions().circleCrop())
+                    .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
+                    .into(icon);
+        }
 
         name = convertView.findViewById(R.id.name);
         TextView description = convertView.findViewById(R.id.description);

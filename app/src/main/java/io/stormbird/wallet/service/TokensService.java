@@ -136,14 +136,12 @@ public class TokensService
 
     public List<Token> getAllLiveTokens()
     {
-        List<Token> tokens = new ArrayList<>();
-        tokens.add(tokenMap.get(currentAddress)); //currency token goes first
+        List<Token> tokens = new ArrayList<>(new ArrayList(currencies.values()));
+
         for (Token t : tokenMap.values())
         {
             if (!t.isEthereum() && !t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t)) tokens.add(t);
         }
-
-        tokens.addAll(new ArrayList(currencies.values()));
 
         return tokens;
     }
@@ -281,7 +279,36 @@ public class TokensService
         return addresses;
     }
 
-//    public long getLastTransactionFetch(int chainId, String address)
+    public Token getNextUpdateToken()
+    {
+        //get all tokens
+        List<Token> allTokens = getAllLiveTokens();
+        Token highestPressureToken = null;
+        float highestPressure = 0.0f;
+
+        for (Token t : allTokens)
+        {
+            if (t.balanceUpdatePressure > highestPressure)
+            {
+                highestPressureToken = t;
+                highestPressure = t.balanceUpdatePressure;
+            }
+
+            t.updateBalanceCheckPressure();
+        }
+
+        if (highestPressure > 10.0f)
+        {
+            highestPressureToken.balanceUpdatePressure = 0.0f;
+            return highestPressureToken;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    //    public long getLastTransactionFetch(int chainId, String address)
 //    {
 //        SparseLongArray chainMap = transactionUpdateMap.get(address);
 //        if (chainMap == null)

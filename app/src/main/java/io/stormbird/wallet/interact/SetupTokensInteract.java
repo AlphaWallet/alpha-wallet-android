@@ -26,7 +26,6 @@ public class SetupTokensInteract {
     private final TokenRepositoryType tokenRepository;
     public static final String UNKNOWN_CONTRACT = "[Unknown Contract]";
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
-    private List<String> badSpecTokens = new ArrayList<>();
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -44,11 +43,10 @@ public class SetupTokensInteract {
      * @param tokensService
      * @return
      */
-    public Single<List<String>> getUnknownTokens(List<Transaction> transactions, TokensService tokensService)
+    public Single<List<String>> getUnknownTokens(Transaction[] transactions, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
-            List<String> unknownTokens = new ArrayList<>(badSpecTokens);
-            badSpecTokens.clear();
+            List<String> unknownTokens = new ArrayList<>();
 
             //process the remaining transactions
             for (Transaction t : transactions)
@@ -58,13 +56,6 @@ public class SetupTokensInteract {
                 if (t.input != null && t.input.length() > 2 && localToken == null && !unknownTokens.contains(t.to))
                 {
                     if (t.error.equals("0") && !unknownTokens.contains(t.to)) unknownTokens.add(t.to); //only add token to scan if it wasn't an error transaction
-                }
-                if (localToken != null)
-                {
-                    if (!localToken.checkIntrinsicType() && !unknownTokens.contains(localToken.getAddress()))
-                    {
-                        unknownTokens.add(localToken.getAddress());
-                    }
                 }
             }
 
@@ -81,10 +72,5 @@ public class SetupTokensInteract {
     {
         tokenRepository.terminateToken(token, wallet, network);
         return token;
-    }
-
-    public void tokenHasBadSpec(String address)
-    {
-        badSpecTokens.add(address);
     }
 }

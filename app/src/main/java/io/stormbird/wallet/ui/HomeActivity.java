@@ -445,7 +445,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void TokensReady()
     {
-        transactionsFragment.tokensReady();
+
     }
 
     @Override

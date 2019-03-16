@@ -786,7 +786,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 TokenInfo info = tf.createTokenInfo(realmItem);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
                 result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
-                result[i].setTransactionUpdateTime(realmItem.getUpdatedTime(), true);
             }
         }
         return result;
@@ -804,7 +803,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 Token token = tf.createToken(info, realmItem, now, network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                 if (token != null)
                 {
-                    token.setTransactionUpdateTime(realmItem.getUpdatedTime(), true);
                     token.setTokenWallet(wallet.address);
                     tokenList.add(token);
                 }

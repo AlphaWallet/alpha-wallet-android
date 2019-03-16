@@ -44,8 +44,9 @@ public class Token implements Parcelable
     public long lastBlockCheck = 0;
     private final String shortNetworkName;
     public long balanceUpdate;
-    public long transactionFetch;
-    public int transactionRefreshCount;
+    private float balanceUpdateWeight;
+    public float balanceUpdatePressure;
+    public boolean balanceChanged;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -54,13 +55,19 @@ public class Token implements Parcelable
 
     public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
+        if (balance == null)
+        {
+            balance = BigDecimal.ZERO;
+        }
         this.balance = balance;
         this.updateBlancaTime = updateBlancaTime;
         this.shortNetworkName = networkName;
         this.contractType = type;
 
         balanceUpdate = getUpdateTime(updateBlancaTime);
-        setTransactionUpdateTime(updateBlancaTime, true);
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
+        balanceUpdatePressure = 0.0f;
+        balanceChanged = false;
     }
 
     protected Token(Parcel in) {
@@ -70,6 +77,7 @@ public class Token implements Parcelable
         int readType = in.readInt();
         shortNetworkName = in.readString();
         balanceUpdate = in.readLong();
+        balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
             contractType = ContractType.values()[readType];
@@ -179,20 +187,6 @@ public class Token implements Parcelable
         {
             Log.d("TOKEN", "Ready to Update: " + tokenInfo.name + " : " + getAddress());
             balanceUpdate = getUpdateTime(System.currentTimeMillis());
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public boolean requiresTransactionRefresh()
-    {
-        if (transactionFetch > 0 && !isTerminated() && !independentUpdate() && System.currentTimeMillis() > transactionFetch)
-        {
-            Log.d("TRANSACTION", "Ready to re-fetch transactions: " + tokenInfo.name + " : " + getAddress());
-            setTransactionUpdateTime(System.currentTimeMillis(), false);
             return true;
         }
         else
@@ -485,7 +479,7 @@ public class Token implements Parcelable
 
     public boolean isBad()
     {
-        return tokenInfo.name == null || tokenInfo.name.length() < 2;
+        return tokenInfo.symbol == null && tokenInfo.name == null;
     }
 
     public boolean checkTokenWallet(String address)
@@ -765,37 +759,83 @@ public class Token implements Parcelable
         return updateTime;
     }
 
-    /**
-     * Heuristic
-     * @param currentTime
-     * @param firstCheck
-     */
-    public void setTransactionUpdateTime(long currentTime, boolean firstCheck)
+    private float calculateBalanceUpdateWeight()
     {
-        long offset;
-        if (isTerminated())
+        float updateWeight = 0;
+        //calculate balance update time
+        if (!isTerminated() && !isBad())
         {
-            offset = -1;
-            currentTime = 0;
+            if (hasRealValue())
+            {
+                if (isEthereum() || hasPositiveBalance())
+                {
+                    updateWeight = 1.0f;
+                }
+                else
+                {
+                    updateWeight = 0.5f;
+                }
+            }
+            else
+            {
+                //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
+                if (isEthereum())
+                {
+                    updateWeight = 0.1f;
+                }
+                else if (hasPositiveBalance())
+                {
+                    updateWeight = 0.05f;
+                }
+                else if (tokenInfo.name != null)
+                {
+                    updateWeight = 0.01f;
+                }
+                else
+                {
+                    updateWeight = 0.005f;
+                }
+            }
         }
-        else if (hasRealValue() && isEthereum())
-        {
-            offset = 0;
-        }
-        else if (hasRealValue() || isEthereum()) offset = (long)(5000.0 * Math.random()) + 2000;
-        else offset = (long)(10000.0 * Math.random()) + 3000;
 
-        if (offset == 0)
-        {
-            if (!firstCheck) offset += 10*1000 + (long)(10000.0 * Math.random());
-        }
-        else if (offset >= 0 && !firstCheck)
-        {
-            offset = 30*1000 + offset*2;
-        }
+        Log.d("TOKEN", tokenInfo.name + " Update weight " + updateWeight);
 
-        transactionFetch = (currentTime + offset);
+        return updateWeight;
+    }
 
-        if (firstCheck) transactionRefreshCount = 0;
+    public boolean checkBalanceChange(List<BigInteger> balanceArray)
+    {
+        return false;
+    }
+
+    public boolean checkBalanceChange(BigDecimal balance)
+    {
+        if (balance != null && this.balance != null)
+        {
+            return !this.balance.equals(balance);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void updateBalanceCheckPressure()
+    {
+        if (!isTerminated())
+        {
+            balanceUpdatePressure += balanceUpdateWeight;
+        }
+    }
+
+    public boolean requiresTransactionRefresh()
+    {
+        if (isEthereum() && balanceChanged)
+        {
+            System.out.println("yoless");
+        }
+        boolean hasBalanceChanged = balanceChanged;
+        balanceChanged = false;
+        return hasBalanceChanged;
     }
 }

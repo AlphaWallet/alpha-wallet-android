@@ -86,7 +86,6 @@ public class TokenFactory
 
         thisToken.restoreAuxDataFromRealm(realmItem);
         thisToken.lastBlockCheck = realmItem.getLastBlock();
-        thisToken.setTransactionUpdateTime(realmItem.getUpdatedTime(), true);
 
         return thisToken;
     }
@@ -113,7 +112,7 @@ public class TokenFactory
                                       tokenInfo.decimals,
                                       true,
                                       tokenInfo.chainId),
-                        null, currentTime, networkName, type);
+                        BigDecimal.ZERO, currentTime, networkName, type);
                 break;
             case ERC20:
             default:
@@ -124,11 +123,9 @@ public class TokenFactory
                                       tokenInfo.decimals,
                                       true,
                                       tokenInfo.chainId),
-                        null, currentTime, networkName, type);
+                        BigDecimal.ZERO, currentTime, networkName, type);
                 break;
         }
-
-        thisToken.setTransactionUpdateTime(currentTime, true);
 
         return thisToken;
     }

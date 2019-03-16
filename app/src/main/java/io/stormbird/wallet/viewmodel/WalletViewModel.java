@@ -29,12 +29,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
-
 public class WalletViewModel extends BaseViewModel
 {
-    private static final long GET_BALANCE_INTERVAL = 15;
-
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
@@ -170,8 +166,6 @@ public class WalletViewModel extends BaseViewModel
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokens, this::onTokenFetchError, this::fetchFromOpensea);
-
-            fetchKnownContracts.postValue(defaultNetwork.getValue().chainId);
         }
         else
         {
@@ -230,6 +224,8 @@ public class WalletViewModel extends BaseViewModel
         //Update the tokenCache with ERC721 tokens ready for the display refresh
         tokenCache = tokensService.getAllLiveTokens().toArray(new Token[0]);
 
+        fetchKnownContracts.postValue(defaultNetwork.getValue().chainId);
+
         //store these tokens
         updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokensService.getAllClass(ERC721Token.class).toArray(new Token[0]))
                 .subscribeOn(Schedulers.io())
@@ -279,25 +275,15 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkBalances()
     {
-        //first check what needs a balance update
-        if (isVisible)
-        {
-            disposable = Observable.fromCallable(tokensService::getAllLiveTokens)
-                    .flatMapIterable(token -> token)
-                    .filter(Token::requiresBalanceUpdate)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(tokenCheckQueue::add, this::onError, this::checkTokenQueue);
-        }
-
+        checkTokenUpdates();
         checkUnknownAddresses();
     }
 
-    private void checkTokenQueue()
+    private void checkTokenUpdates()
     {
         if (isVisible && balanceCheckDisposable == null)
         {
-            Token t = tokenCheckQueue.poll();
+            Token t = tokensService.getNextUpdateToken();
 
             if (t != null)
             {
@@ -318,7 +304,7 @@ public class WalletViewModel extends BaseViewModel
     private void checkComplete()
     {
         balanceCheckDisposable = null;
-        checkTokenQueue();
+        checkTokenUpdates();
     }
 
     private void onTokenUpdate(Token token)

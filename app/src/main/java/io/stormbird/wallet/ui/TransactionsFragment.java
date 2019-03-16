@@ -46,6 +46,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private FragmentMessenger homeMessager;
 
     private boolean isVisible = false;
+    private boolean firstView = true;
 
     RecyclerView list;
 
@@ -81,7 +82,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.refreshAdapter().observe(this, this::refreshAdapter);
         viewModel.newTransactions().observe(this, this::onNewTransactions);
         viewModel.queryVisibility().observe(this, this::onQueryVisibility);
-        refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
+        refreshLayout.setOnRefreshListener(() -> viewModel.prepare());
 
         adapter.clear();
 
@@ -103,7 +104,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.try_again: {
-                viewModel.forceUpdateTransactionView();
+                viewModel.prepare();
             }
             break;
             case R.id.action_buy: {
@@ -120,8 +121,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        viewModel.restartIfRequired();
-        viewModel.setVisibility(isVisible);
+        viewModel.prepare();
     }
 
     @Override
@@ -129,9 +129,12 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         super.setUserVisibleHint(isVisibleToUser);
         isVisible = isVisibleToUser;
         if (isResumed()) { // fragment created
-            viewModel.setVisibility(isVisible);
             if (isVisible) {
-                viewModel.startTransactionRefresh();
+                if (firstView)
+                {
+                    adapter.notifyDataSetChanged(); //first time viewing, refresh each view element to ensure tokens are displayed
+                    firstView = false;
+                }
             }
         }
     }
@@ -143,7 +146,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
-        viewModel.setVisibility(false);
     }
 
     private void onTransactions(Transaction[] transaction) {
@@ -204,14 +206,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private void onDepositClick(View view, Uri uri) {
         viewModel.openDeposit(view.getContext(), uri);
-    }
-
-    /**
-     * Is called once at startup, after TokenService has been populated
-     */
-    public void tokensReady()
-    {
-        viewModel.forceUpdateTransactionView();
     }
 
     @Override

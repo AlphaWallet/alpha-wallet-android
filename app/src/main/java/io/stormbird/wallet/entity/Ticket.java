@@ -802,4 +802,20 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public List<BigInteger> getArrayBalance() { return balanceArray; }
+
+    /**
+     * Detect a change of balance for ERC875 balance
+     * @param balanceArray
+     * @return
+     */
+    @Override
+    public boolean checkBalanceChange(List<BigInteger> balanceArray)
+    {
+        if (balanceArray.size() != this.balanceArray.size()) return true; //quick check for new tokens
+        for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
+        {
+            if (!balanceArray.get(index).equals(this.balanceArray.get(index))) return true;
+        }
+        return false;
+    }
 }

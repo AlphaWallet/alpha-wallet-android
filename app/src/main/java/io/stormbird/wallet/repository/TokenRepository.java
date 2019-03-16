@@ -193,6 +193,8 @@ public class TokenRepository implements TokenRepositoryType {
         Token eth = new Token(tokenInfo, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
         eth.setTokenWallet(wallet.address);
         eth.setIsEthereum();
+        eth.balanceUpdate = System.currentTimeMillis();
+        eth.balanceUpdatePressure = 10.0f;
         currencies.put(network.chainId, eth);
     }
 
@@ -287,6 +289,7 @@ public class TokenRepository implements TokenRepositoryType {
         TokenFactory tf = new TokenFactory();
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
         Token newToken = tf.createToken(tokenInfo, interfaceSpec, network.getShortName());
+        newToken.balanceUpdatePressure = 10.0f;
 
         newToken.setTokenWallet(wallet.address);
         Log.d(TAG, "Create for store: " + tokenInfo.name);
@@ -483,11 +486,10 @@ public class TokenRepository implements TokenRepositoryType {
      * @return
      */
     private Single<Token> updateBalance(NetworkInfo network, Wallet wallet, final Token token) {
-        long lastBlockCheck = token != null ? token.lastBlockCheck : 0;
-        long nextTransactionCheck = token != null ? token.transactionFetch : 0;
-        if (token.isEthereum())
+        if (token == null) return Single.fromCallable(() -> null);
+        else if (token.isEthereum())
         {
-            return attachEth(network, wallet, lastBlockCheck, nextTransactionCheck);
+            return attachEth(network, wallet, token);
         }
         else
         return Single.fromCallable(() -> {
@@ -498,6 +500,7 @@ public class TokenRepository implements TokenRepositoryType {
                 BigDecimal balance = null;
                 TokenInfo tInfo = token.tokenInfo;
                 ContractType interfaceSpec = token.getInterfaceSpec();
+                boolean balanceChanged = false;
                 switch (interfaceSpec)
                 {
                     case NOT_SET:
@@ -509,29 +512,39 @@ public class TokenRepository implements TokenRepositoryType {
                     case ERC875:
                     case ERC875LEGACY:
                         balanceArray = wrappedCheckBalanceArray(wallet, tInfo, token);
+                        balanceChanged = token.checkBalanceChange(balanceArray);
                         break;
                     case ERC721:
                         break;
                     case ETHEREUM:
-                        balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
-                        break;
                     case ERC20:
                         balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
+                        balanceChanged = token.checkBalanceChange(balance);
                         break;
                     case OTHER:
+                        //TODO: periodic re-check of contract, may have sufficient data in future to determine token type
                         //balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
                     default:
                         break;
                 }
 
-                Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), lastBlockCheck);
-                updated.patchAuxData(token); //perform any updates we need here
-                localSource.updateTokenBalance(network, wallet, updated);
-                updated.setTokenWallet(wallet.address);
-                updated.lastBlockCheck = token.lastBlockCheck;
-                updated.transactionFetch = token.transactionFetch;
-                return updated;
+                //check if we need an update
+                if (balanceChanged)
+                {
+                    Log.d(TAG, "Token balance changed! " + tInfo.name);
+                    Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), token.lastBlockCheck);
+                    updated.patchAuxData(token); //perform any updates we need here
+                    localSource.updateTokenBalance(network, wallet, updated);
+                    updated.setTokenWallet(wallet.address);
+                    updated.lastBlockCheck = token.lastBlockCheck;
+                    updated.balanceChanged = true;
+                    return updated;
+                }
+                else
+                {
+                    return token;
+                }
             }
             catch (BadContract e)
             {
@@ -610,26 +623,35 @@ public class TokenRepository implements TokenRepositoryType {
                 .fetchEnabledToken(network, wallet, address);
     }
 
-    private Single<Token> attachEth(NetworkInfo network, Wallet wallet, long lastBlockCheck, long transactionFetch) {
+    private Single<Token> attachEth(NetworkInfo network, Wallet wallet, Token oldToken) {
         return getEthBalanceInternal(network, wallet) //use local balance fetch, uses less resources
                 .map(balance -> {
-                    Log.d(TAG, "ETH: " + balance.toPlainString());
+                    BigDecimal oldBalance = oldToken != null ? oldToken.balance : BigDecimal.ZERO;
+                    long lastBlockCheck = oldToken != null ? oldToken.lastBlockCheck : 0;
+                    Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldBalance.toPlainString());
                     if (balance.equals(BigDecimal.valueOf(-1)))
                     {
                         //network error - retrieve from cache
-                        Token b = localSource.getTokenBalance(network, wallet, wallet.address);
-                        if (b != null) balance = b.balance;
-                        else balance = BigDecimal.ZERO;
+                        balance = oldBalance;
                     }
-                    TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
-                                                   network.chainId);
-                    Token eth = new Token(info, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
-                    eth.lastBlockCheck = lastBlockCheck;
-                    eth.transactionFetch = transactionFetch;
-                    eth.setTokenWallet(wallet.address);
-                    //store token and balance
-                    localSource.updateTokenBalance(network, wallet, eth);
-                    return eth;
+
+                    if (!balance.equals(oldBalance) || oldToken == null)
+                    {
+                        Log.d(TAG, "Balance Change!");
+                        TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
+                                                       network.chainId);
+                        Token eth = new Token(info, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
+                        eth.lastBlockCheck = lastBlockCheck;
+                        eth.setTokenWallet(wallet.address);
+                        //store token and balance
+                        localSource.updateTokenBalance(network, wallet, eth);
+                        eth.balanceChanged = true;
+                        return eth;
+                    }
+                    else
+                    {
+                        return oldToken;
+                    }
                 })
                 .flatMap(token -> ethereumNetworkRepository.getTicker(network.chainId)
                         .map(ticker -> {
@@ -648,7 +670,7 @@ public class TokenRepository implements TokenRepositoryType {
      */
     @Override
     public Single<Token> getEthBalance(NetworkInfo network, Wallet wallet) {
-        return attachEth(network, wallet, 0, 0);
+        return attachEth(network, wallet, null);
     }
 
     @Override

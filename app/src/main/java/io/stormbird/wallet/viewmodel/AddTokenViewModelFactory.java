@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 
 public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
 
@@ -17,6 +18,7 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
 
     public AddTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
@@ -25,7 +27,8 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
             SetupTokensInteract setupTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TokensService tokensService) {
         this.addTokenInteract = addTokenInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.homeRouter = homeRouter;
@@ -33,11 +36,12 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract, assetDefinitionService);
+        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 }

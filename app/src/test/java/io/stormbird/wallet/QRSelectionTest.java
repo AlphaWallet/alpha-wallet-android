@@ -52,9 +52,8 @@ public class QRSelectionTest
 
         transactionRepository = new TransactionRepositoryType()
         {
-
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet)
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet)
             {
                 return null;
             }
@@ -130,7 +129,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+            public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
             {
                 return null;
             }

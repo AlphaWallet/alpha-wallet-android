@@ -97,7 +97,7 @@ public class MarketOrderTest
         transactionRepository = new TransactionRepositoryType() {
 
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet)
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet)
             {
                 return null;
             }

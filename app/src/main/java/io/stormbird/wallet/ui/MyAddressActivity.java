@@ -189,9 +189,11 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 true,
                 viewModel.getEthereumNetworkRepository().getDefaultNetwork().chainId);
         amountInput.getValue();
+        selectNetworkLayout.setVisibility(View.VISIBLE);
     }
 
     private void showAddress() {
+        selectNetworkLayout.setVisibility(View.GONE);
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }

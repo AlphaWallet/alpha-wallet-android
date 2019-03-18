@@ -31,8 +31,6 @@ import io.stormbird.wallet.service.TokensService;
  */
 public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
@@ -53,6 +51,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
+    private Token token;
 
     private byte[] linkMessage;
 
@@ -99,14 +98,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void prepare(Token token)
     {
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        defaultNetwork.postValue(networkInfo);
+        this.token = token;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -118,7 +110,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
     {
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
     }
 
     public void setWallet(Wallet wallet)
@@ -155,7 +147,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
@@ -175,7 +167,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
@@ -197,13 +189,13 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
     private void gotSignature(byte[] signature)
     {
-        String universalLink = parser.completeUniversalLink(defaultNetwork.getValue().chainId, linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }
@@ -227,7 +219,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data, token.tokenInfo.chainId)
                     .subscribe(this::onCreateTransaction, this::onError);
         }
     }
@@ -264,7 +256,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         if (asset != null)
         {
-            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails);
+            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token.tokenInfo.chainId);
         }
     }
 

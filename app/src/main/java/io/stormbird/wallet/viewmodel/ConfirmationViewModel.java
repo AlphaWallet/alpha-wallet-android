@@ -36,7 +36,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final GasSettingsRouter gasSettingsRouter;
 
     private GasSettings gasSettingsOverride = null;
-    private NetworkInfo defaultNetwork;
+    private int chainId;
 
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
@@ -57,7 +57,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null)
+                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -65,7 +65,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         progress.postValue(true);
         final byte[] data = TokenRepository.createTokenTransferData(to, amount);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -73,7 +73,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         progress.postValue(true);
         final byte[] data = getERC875TransferBytes(to, contractAddress, ids);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -103,18 +103,10 @@ public class ConfirmationViewModel extends BaseViewModel {
         gasSettings.postValue(settings);
     }
 
-    public void prepare(ConfirmationActivity ctx)
+    public void prepare(ConfirmationActivity ctx, int chainId)
     {
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-
+        this.chainId = chainId;
         fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        defaultNetwork = networkInfo;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -144,7 +136,8 @@ public class ConfirmationViewModel extends BaseViewModel {
         if (gasSettings.getValue() == null)
         {
             //deal with problem where gas settings are still null
-            disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, defaultNetwork)
+            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId);
+            disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, network)
                     .subscribe(this::onSendGasSettings, throwable -> onGasError(throwable, context));
         }
         else
@@ -169,7 +162,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     }
 
     public void openGasSettings(Activity context) {
-        gasSettingsRouter.open(context, gasSettings.getValue(), defaultNetwork.chainId);
+        gasSettingsRouter.open(context, gasSettings.getValue(), chainId);
     }
 
     /**
@@ -182,7 +175,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         if (this.gasSettings.getValue() != null //protect against race condition
                 && this.gasSettingsOverride == null //only update if user hasn't overriden
-                && defaultNetwork.chainId != EthereumNetworkRepository.XDAI_ID) //don't update xDai from received value
+                && chainId != EthereumNetworkRepository.XDAI_ID) //don't update xDai from received value
         {
             GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
             this.gasSettings.postValue(updateSettings);
@@ -221,7 +214,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
+                    .createWithSig(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload, chainId)
                     .subscribe(this::onCreateDappTransaction,
                                this::onError);
         }
@@ -229,7 +222,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         {
             byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
+                    .createWithSig(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data, chainId)
                     .subscribe(this::onCreateDappTransaction,
                                this::onError);
         }
@@ -245,19 +238,19 @@ public class ConfirmationViewModel extends BaseViewModel {
         progress.postValue(true);
         final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId);
         disposable = createTransactionInteract
-                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
     public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId)
     {
-        Token token = tokensService.getToken(defaultNetwork.chainId, contractAddress);
+        Token token = tokensService.getToken(chainId, contractAddress);
         return TokenRepository.createERC721TransferFunction(to, token, tokenId);
     }
 
     public byte[] getERC875TransferBytes(String to, String contractAddress, String tokenIds)
     {
-        Token token = tokensService.getToken(defaultNetwork.chainId, contractAddress);
+        Token token = tokensService.getToken(chainId, contractAddress);
         return TokenRepository.createTicketTransferData(to, tokenIds, token);
     }
 }

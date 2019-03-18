@@ -118,7 +118,7 @@ public class SellDetailActivity extends BaseActivity {
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
         viewModel.universalLinkReady().observe(this, this::linkReady);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.defaultWallet().observe(this, this::setupPage);
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
@@ -149,11 +149,6 @@ public class SellDetailActivity extends BaseActivity {
         finishReceiver = new FinishReceiver(this);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        setupPage();
-    }
-
     @Override
     protected void onDestroy()
     {
@@ -161,7 +156,7 @@ public class SellDetailActivity extends BaseActivity {
         unregisterReceiver(finishReceiver);
     }
 
-    private void setupPage()
+    private void setupPage(Wallet wallet)
     {
         switch (saleStatus)
         {
@@ -405,7 +400,7 @@ public class SellDetailActivity extends BaseActivity {
         if (!sellPrice.getText().toString().isEmpty()) {
             try {
                 sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getSymbol(getString(R.string.eth))));
+                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getSymbol()));
                 updateUSDBalance();
             } catch (NumberFormatException|MissingFormatArgumentException e) {
                 //silent fail, just don't update

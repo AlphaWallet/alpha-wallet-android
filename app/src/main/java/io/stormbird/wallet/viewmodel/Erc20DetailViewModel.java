@@ -31,7 +31,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     private final MutableLiveData<Double> ethPrice = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenTicker = new MutableLiveData<>();
 
@@ -147,24 +146,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return tokensService;
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        network.setValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
     private void onDefaultWallet(Wallet wallet) {
         this.wallet.postValue(wallet);
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return network;
-    }
-
-    public NetworkInfo getNetwork()
-    {
-        return network.getValue();
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -174,9 +157,9 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public void prepare()
     {
         progress.postValue(true);
-        disposable = findDefaultNetworkInteract
+        disposable = findDefaultWalletInteract
                 .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void showDetails(Context context, Transaction transaction) {
@@ -207,12 +190,12 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public void showSendToken(Context ctx, Token token)
     {
         new SendTokenRouter().open(ctx, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
-                                   true, wallet.getValue(), token, network.getValue().chainId);
+                                   true, wallet.getValue(), token);
     }
 
     public void showSendToken(Context ctx, String address, Token token)
     {
         new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
-                                   false, wallet.getValue(), token, network.getValue().chainId);
+                                   false, wallet.getValue(), token);
     }
 }

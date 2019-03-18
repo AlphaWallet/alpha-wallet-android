@@ -136,14 +136,16 @@ public class DappBrowserViewModel extends BaseViewModel  {
                             .find()).toObservable();
     }
 
+    //TODO: Justin: replace defaultNetwork with selected chain
     public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
                            error -> dAppFunction.DAppError(error, message));
     }
 
+    //TODO: Justin: replace default network with chainId from selector
     public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction, String url)
     {
         Message errorMsg = new Message<>("Error executing transaction", url, 0);
@@ -153,7 +155,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload)
+                    .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload, defaultNetwork.getValue().chainId)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
                                error -> dAppFunction.DAppError(error, errorMsg));
 
@@ -162,7 +164,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data)
+                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data, defaultNetwork.getValue().chainId)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
                                error -> dAppFunction.DAppError(error, errorMsg));
         }
@@ -175,11 +177,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
         dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
+    //TODO: Justin: remove dependency on default network and replace with your network selecter
     public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL)
     {
         String networkName = defaultNetwork.getValue().name;
         boolean mainNet = defaultNetwork.getValue().isMainNetwork;
-        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL);
+        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL, defaultNetwork().getValue().chainId);
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {

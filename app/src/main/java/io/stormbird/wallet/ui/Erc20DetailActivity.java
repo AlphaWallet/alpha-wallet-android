@@ -72,7 +72,6 @@ public class Erc20DetailActivity extends BaseActivity {
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.token().observe(this, this::onTokenData);
@@ -235,14 +234,11 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void onDefaultWallet(Wallet wallet) {
+        setUpTokenView();
+        setUpRecentTransactionsView();
         recentTransactionsAdapter.setDefaultWallet(wallet);
         viewModel.updateDefaultBalance(token);
         viewModel.fetchTransactions(token);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        setUpTokenView();
-        setUpRecentTransactionsView();
     }
 
     @Override

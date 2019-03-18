@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.MagicLinkParcel;
 import io.stormbird.wallet.entity.Wallet;
@@ -56,6 +57,7 @@ public class PurchaseTicketsActivity extends BaseActivity
     private TextView ethPrice;
     private TextView usdPrice;
     private Button purchase;
+    private int chainId;
 
 //    private TextInputLayout amountInputLayout;
 
@@ -69,6 +71,8 @@ public class PurchaseTicketsActivity extends BaseActivity
 
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(MARKET_INSTANCE);
+        chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+
 
         setContentView(R.layout.activity_purchase_ticket); //use token just provides a simple list view.
 
@@ -179,7 +183,7 @@ public class PurchaseTicketsActivity extends BaseActivity
     private void purchaseTicketsFinal()
     {
         MagicLinkParcel parcel = new MagicLinkParcel(ticketRange);
-        viewModel.buyRange(parcel);
+        viewModel.buyRange(parcel, chainId);
         KeyboardUtils.hideKeyboard(getCurrentFocus());
     }
 

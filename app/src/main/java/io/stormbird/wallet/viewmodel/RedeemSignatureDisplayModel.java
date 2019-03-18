@@ -48,17 +48,15 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private final AssetDisplayRouter assetDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
 
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<SignaturePair> signature = new MutableLiveData<>();
-
-    private final MutableLiveData<Token> token = new MutableLiveData<>();
 
     private final MutableLiveData<String> selection = new MutableLiveData<>();
     private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
 
     private Disposable memPoolSubscription;
     private List<Integer> ticketIndicies;
+    private Token token;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -93,9 +91,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public LiveData<SignaturePair> signature() {
         return signature;
     }
-    public LiveData<Token> token() {
-        return token;
-    }
     public LiveData<String> selection() {
         return selection;
     }
@@ -124,7 +119,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         progress.postValue(true);
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
-                        .updateDefaultBalance(this.token.getValue(), defaultWallet.getValue())
+                        .updateDefaultBalance(token, defaultWallet.getValue())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onToken, this::onError)).subscribe();
@@ -136,7 +131,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
      */
     private void onToken(Token token)
     {
-        this.token.setValue(token);
+        this.token = token;
 
         if (token != null && token.tokenInfo.address.equals(address) && token.hasArrayBalance())
         {
@@ -195,15 +190,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
 
     public void prepare(String address, Token ticket, TicketRange ticketRange) {
         this.address = address;
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-        this.token.setValue(ticket);
+        token = ticket;
         this.ticketIndicies = ((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -212,13 +200,13 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(ticketIndicies, this.token.getValue().getAddress())
+                        .getMessage(ticketIndicies, token.getAddress())
                         .subscribe(this::onSignMessage, this::onError))
                 .subscribe(l -> {}, t -> {});
     }
 
     private void startMemoryPoolListener() {
-        memPoolSubscription = memoryPoolInteract.burnListener(token.getValue().getAddress())
+        memPoolSubscription = memoryPoolInteract.burnListener(token.getAddress())
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(this::receiveBurnNotification, this::onBurnError);
     }
@@ -245,7 +233,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         //now run this guy through the signed message system
         if (pair != null)
         disposable = createTransactionInteract
-                .sign(defaultWallet.getValue(), pair)
+                .sign(defaultWallet.getValue(), pair, token.tokenInfo.chainId)
                 .subscribe(this::onSignedMessage, this::onError);
     }
 
@@ -263,7 +251,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     }
 
     private void markUsedIndicies(List<Uint16> burnList) {
-        Token t = token().getValue();
         for (Uint16 indexVal : burnList)
         {
             Integer index = indexVal.getValue().intValue();
@@ -283,7 +270,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         }
         else {
             disposable = signatureGenerateInteract
-                    .getMessage(ticketIndicies, this.token.getValue().getAddress())
+                    .getMessage(ticketIndicies, token.getAddress())
                     .subscribe(this::onSignMessage, this::onError);
         }
     }

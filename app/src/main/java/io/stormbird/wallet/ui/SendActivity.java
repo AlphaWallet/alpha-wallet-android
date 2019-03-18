@@ -30,6 +30,7 @@ import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.SendViewModel;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -40,6 +41,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
@@ -64,7 +66,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private ENSHandler ensHandler;
     private Handler handler;
     private AWalletAlertDialog dialog;
-    private int chainId;
+    private TextView chainName;
 
     private ImageButton scanQrImageView;
     private TextView tokenBalanceText;
@@ -95,7 +97,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
         myAddress = wallet.address;
 
         setupTokenContent();
@@ -103,10 +104,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, chainId);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, token.tokenInfo.chainId);
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, chainId);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, token.tokenInfo.chainId);
         }
     }
 
@@ -170,7 +171,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         if (isValid) {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
-            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName());
+            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName(), token.tokenInfo.chainId);
         }
     }
 
@@ -261,14 +262,13 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         {
             displayScanError();
         }
-        else if (result.chainId != chainId)
+        else
         {
-            //name of correct chain
-            String chainName = viewModel.getChainName(result.chainId);
-            String message = getString(R.string.wrong_chain, chainName);
-            displayScanError(R.string.wrong_chain_title, message);
+            //chain ID indicator
+            Utils.setChainColour(chainName, result.chainId);
         }
-        else if (result.getFunction().length() == 0 && !sendingTokens)
+
+        if (result.getFunction().length() == 0 && !sendingTokens)
         {
             //correct chain and asset type
             String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
@@ -348,6 +348,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     public void setupTokenContent() {
         tokenBalanceText = findViewById(R.id.balance_eth);
         tokenSymbolText = findViewById(R.id.symbol);
+        chainName = findViewById(R.id.text_chain_name);
 
         tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
                 ? token.tokenInfo.symbol.toUpperCase()
@@ -358,10 +359,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? token.balance.divide(decimalDivisor) : token.balance;
         ethBalance = ethBalance.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
-        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
+        String value = getEthString(ethBalance.doubleValue());
         tokenBalanceText.setText(value);
 
         tokenBalanceText.setVisibility(View.VISIBLE);
+        if (token != null) Utils.setChainColour(chainName, token.tokenInfo.chainId);
     }
 
     @Override

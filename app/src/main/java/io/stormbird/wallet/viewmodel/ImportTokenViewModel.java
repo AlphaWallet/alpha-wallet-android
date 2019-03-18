@@ -471,7 +471,7 @@ public class ImportTokenViewModel extends BaseViewModel
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                            settings.gasPrice, settings.gasLimit, tradeData)
+                            settings.gasPrice, settings.gasLimit, tradeData, order.chainId)
                     .subscribe(this::onCreateTransaction, this::onTransactionError);
 
             addTokenWatchToWallet();

@@ -78,7 +78,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
                 .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
-        viewModel.token().observe(this, this::onTicket);
         viewModel.selection().observe(this, this::onSelected);
         viewModel.burnNotice().observe(this, this::onBurned);
 
@@ -174,11 +173,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         {
             e.printStackTrace();
         }
-    }
-
-    private void onTicket(Token ticket)
-    {
-
     }
 
     private void onSelected(String selectionStr)

@@ -25,11 +25,10 @@ import static io.stormbird.wallet.ui.SellDetailActivity.SET_EXPIRY;
 
 public class SellDetailModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Double> ethereumPrice = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
 
-    private Ticket ticket;
+    private Token token;
     private ParseMagicLink parser;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -71,31 +70,16 @@ public class SellDetailModel extends BaseViewModel {
     }
     public LiveData<Double> ethereumPrice() { return ethereumPrice; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
-    public LiveData<NetworkInfo> defaultNetwork() { return defaultNetwork; }
 
-    public String getSymbol(String fallback)
+    public String getSymbol()
     {
-        if (defaultNetwork.getValue() != null)
-        {
-            return defaultNetwork.getValue().symbol;
-        }
-        else
-        {
-            return fallback;
-        }
+        return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId).symbol;
     }
 
-    public NetworkInfo getNetwork() { return defaultNetwork.getValue(); }
+    public NetworkInfo getNetwork() { return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId); }
 
-    public void prepare(Ticket ticket) {
-        this.ticket = ticket;
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
+    public void prepare(Token token) {
+        this.token = token;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -107,7 +91,7 @@ public class SellDetailModel extends BaseViewModel {
 
         //now get the ticker
         disposable = findDefaultNetworkInteract
-                .getTicker(defaultNetwork.getValue().chainId)
+                .getTicker(token.tokenInfo.chainId)
                 .subscribe(this::onTicker, this::onError);
     }
 
@@ -118,7 +102,7 @@ public class SellDetailModel extends BaseViewModel {
 
     public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
     {
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
     }
 
     public void setWallet(Wallet wallet)
@@ -140,19 +124,19 @@ public class SellDetailModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
     public void openUniversalLinkSetExpiry(Context context, String selection, double price)
     {
-        sellDetailRouter.openUniversalLink(context, ticket, selection, defaultWallet.getValue(), SET_EXPIRY, price);
+        sellDetailRouter.openUniversalLink(context, token, selection, defaultWallet.getValue(), SET_EXPIRY, price);
     }
 
     private void gotSignature(byte[] signature)
     {
         initParser();
-        String universalLink = parser.completeUniversalLink(defaultNetwork.getValue().chainId, linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }

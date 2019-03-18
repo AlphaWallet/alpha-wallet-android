@@ -94,12 +94,12 @@ public class FeeMasterService
         });
     }
 
-    private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry)
+    private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry, int chainId)
     {
         initParser();
         final byte[] tradeBytes = parser.getTradeBytes(indicesArray, contractAddress, price, expiry);
         return passwordStore.getPassword(wallet)
-                    .flatMap(password -> transactionRepository.getSignature(wallet, tradeBytes, password));
+                    .flatMap(password -> transactionRepository.getSignature(wallet, tradeBytes, password, chainId));
     }
 
     private Single<int[]> generateTicketArray(String indices, Ticket ticket)

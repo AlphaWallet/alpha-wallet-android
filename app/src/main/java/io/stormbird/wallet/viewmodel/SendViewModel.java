@@ -41,8 +41,8 @@ public class SendViewModel extends BaseViewModel {
     public LiveData<String> ensResolve() { return ensResolve; }
     public LiveData<String> ensFail() { return ensFail; }
 
-    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails) {
-        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails);
+    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails, int chainId) {
+        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails, chainId);
     }
 
     public void showMyAddress(Context context, Wallet wallet) {

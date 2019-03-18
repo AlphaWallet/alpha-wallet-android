@@ -21,6 +21,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.util.BalanceUtils;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModel;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
@@ -61,6 +62,7 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView websiteText;
     private Button sendButton;
     private TextView title;
+    private TextView chainName;
 
     private BigDecimal amount;
     private int decimals;
@@ -68,6 +70,7 @@ public class ConfirmationActivity extends BaseActivity {
     private String amountStr;
     private String toAddress;
     private Token token;
+    private int chainId;
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
@@ -101,6 +104,7 @@ public class ConfirmationActivity extends BaseActivity {
         websiteLabel = findViewById(R.id.label_website);
         websiteText = findViewById(R.id.text_website);
         title = findViewById(R.id.title_confirm);
+        chainName = findViewById(R.id.text_chain_name);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -115,7 +119,11 @@ public class ConfirmationActivity extends BaseActivity {
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+
         String amountString;
+
+        Utils.setChainColour(chainName, chainId);
 
         amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
 
@@ -241,7 +249,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(this);
+        viewModel.prepare(this, chainId);
     }
 
     private void onProgress(boolean shouldShowProgress) {

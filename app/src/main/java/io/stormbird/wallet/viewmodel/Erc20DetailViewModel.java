@@ -110,9 +110,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     public void fetchTransactions(Token token) {
-        Wallet wallet = new Wallet(token.getAddress());
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchCached(wallet)
+                fetchTransactionsInteract.fetchTransactionsFromStorage(wallet.getValue(), token)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError);

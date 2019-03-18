@@ -43,10 +43,10 @@ public class Token implements Parcelable
     protected ContractType contractType;
     public long lastBlockCheck = 0;
     private final String shortNetworkName;
-    public long balanceUpdate;
-    private float balanceUpdateWeight;
+    public float balanceUpdateWeight;
     public float balanceUpdatePressure;
     public boolean balanceChanged;
+    public boolean requiresTransactionCheck;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -64,10 +64,19 @@ public class Token implements Parcelable
         this.shortNetworkName = networkName;
         this.contractType = type;
 
-        balanceUpdate = getUpdateTime(updateBlancaTime);
         balanceUpdateWeight = calculateBalanceUpdateWeight();
         balanceUpdatePressure = 0.0f;
         balanceChanged = false;
+        requiresTransactionCheck = false;
+    }
+
+    public void transferPreviousData(Token oldToken)
+    {
+        if (oldToken != null)
+        {
+            requiresTransactionCheck = oldToken.requiresTransactionCheck;
+            lastBlockCheck = oldToken.lastBlockCheck;
+        }
     }
 
     protected Token(Parcel in) {
@@ -76,7 +85,6 @@ public class Token implements Parcelable
         updateBlancaTime = in.readLong();
         int readType = in.readInt();
         shortNetworkName = in.readString();
-        balanceUpdate = in.readLong();
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -139,7 +147,6 @@ public class Token implements Parcelable
         dest.writeLong(updateBlancaTime);
         dest.writeInt(contractType.ordinal());
         dest.writeString(shortNetworkName);
-        dest.writeLong(balanceUpdate);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -179,20 +186,6 @@ public class Token implements Parcelable
         if (isTerminated()) return EXPIRED_CONTRACT;
         if (isBad()) return UNKNOWN_CONTRACT;
         return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
-    }
-
-    public boolean requiresBalanceUpdate()
-    {
-        if (balanceUpdate > 0 && !isTerminated() && !independentUpdate() && System.currentTimeMillis() > balanceUpdate)
-        {
-            Log.d("TOKEN", "Ready to Update: " + tokenInfo.name + " : " + getAddress());
-            balanceUpdate = getUpdateTime(System.currentTimeMillis());
-            return true;
-        }
-        else
-        {
-            return false;
-        }
     }
 
     public void clickReact(BaseViewModel viewModel, Context context)
@@ -781,19 +774,19 @@ public class Token implements Parcelable
                 //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
                 if (isEthereum())
                 {
-                    updateWeight = 0.1f;
+                    updateWeight = 0.25f;
                 }
                 else if (hasPositiveBalance())
                 {
-                    updateWeight = 0.05f;
+                    updateWeight = 0.1f;
                 }
                 else if (tokenInfo.name != null)
                 {
-                    updateWeight = 0.01f;
+                    updateWeight = 0.05f;
                 }
                 else
                 {
-                    updateWeight = 0.005f;
+                    updateWeight = 0.01f;
                 }
             }
         }
@@ -830,12 +823,19 @@ public class Token implements Parcelable
 
     public boolean requiresTransactionRefresh()
     {
-        if (isEthereum() && balanceChanged)
-        {
-            System.out.println("yoless");
-        }
-        boolean hasBalanceChanged = balanceChanged;
+        boolean requiresTransactionRefresh = balanceChanged;
         balanceChanged = false;
-        return hasBalanceChanged;
+        if (hasPositiveBalance() && requiresTransactionCheck)
+        {
+            requiresTransactionRefresh = true;
+            requiresTransactionCheck = false;
+        }
+        if (isEthereum() && lastBlockCheck == 0)
+        {
+            lastBlockCheck = 1;
+            requiresTransactionRefresh = true;
+        }
+
+        return requiresTransactionRefresh;
     }
 }

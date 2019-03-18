@@ -19,8 +19,11 @@ public interface TransactionRepositoryType {
 	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList);
+	Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token);
 
     Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);
+
+    Observable<Token> hasTransactions(Wallet wallet, Token token);
 }

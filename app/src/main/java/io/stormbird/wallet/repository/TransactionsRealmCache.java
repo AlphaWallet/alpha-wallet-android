@@ -1,29 +1,15 @@
 package io.stormbird.wallet.repository;
 
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import io.stormbird.wallet.entity.ERC875ContractTransaction;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.TransactionContract;
-import io.stormbird.wallet.entity.TransactionOperation;
-import io.stormbird.wallet.entity.TransactionType;
-import io.stormbird.wallet.entity.Wallet;
+import io.reactivex.Single;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.entity.RealmTransaction;
 import io.stormbird.wallet.repository.entity.RealmTransactionContract;
 import io.stormbird.wallet.repository.entity.RealmTransactionOperation;
 import io.stormbird.wallet.service.RealmManager;
-
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmResults;
 
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
@@ -41,19 +27,79 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	@Override
 	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
         return Single.fromCallable(() -> {
-            Realm instance = null;
-            try {
-                instance = realmManager.getRealmInstance(wallet);
+            try (Realm instance = realmManager.getRealmInstance(wallet))
+            {
                 RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class).findAll();
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
                 return convert(txs);
-            } finally {
-                if (instance != null) {
-                    instance.close();
-                }
+            }
+            catch (Exception e)
+            {
+                return new Transaction[0];
             }
         });
 	}
+
+    @Override
+    public Single<Transaction[]> fetchTransactions(Wallet wallet, Token token)
+    {
+        return Single.fromCallable(() -> {
+            try (Realm instance = realmManager.getRealmInstance(wallet))
+            {
+                RealmResults<RealmTransaction> txs;
+                if (token.tokenInfo.address.equals(wallet.address))
+                {
+                    txs = instance.where(RealmTransaction.class)
+                            .beginGroup()
+                            .equalTo("chainId", token.tokenInfo.chainId)
+                            .endGroup()
+                            .and()
+                            .notEqualTo("value", "0")
+                            .sort("timeStamp", Sort.DESCENDING)
+                            .findAll();
+                }
+                else
+                {
+                    txs = instance.where(RealmTransaction.class)
+                            .beginGroup()
+                            .equalTo("chainId", token.tokenInfo.chainId)
+                            .endGroup()
+                            .and()
+                            .equalTo("to", token.tokenInfo.address)
+                            .sort("timeStamp", Sort.DESCENDING)
+                            .findAll();
+                }
+
+                return convert(txs);
+            }
+            catch (Exception e)
+            {
+                return new Transaction[0];
+            }
+        });
+    }
+
+    @Override
+    public Single<Token> hasTransactionFetch(Wallet wallet, Token token)
+    {
+        return Single.fromCallable(() -> {
+            try (Realm instance = realmManager.getRealmInstance(wallet))
+            {
+                RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class)
+                        .equalTo("chainId", token.tokenInfo.chainId)
+                        .equalTo("token", token.tokenInfo.address)
+                        .findAll();
+
+                token.requiresTransactionCheck = txs.isEmpty();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return token;
+        });
+    }
 
     @Override
     public Transaction fetchTransaction(Wallet wallet, String hash)
@@ -79,33 +125,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         }
     }
 
-    @Override
-	public Completable putTransactions(Wallet wallet, Transaction[] transactions) {
-        return Completable.fromAction(() -> {
-            Realm instance = null;
-            try {
-                instance = realmManager.getRealmInstance(wallet);
-                addRealm();
-                instance.beginTransaction();
-                for (Transaction transaction : transactions) {
-                    RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
-                    fill(instance, item, transaction);
-                }
-                instance.commitTransaction();
-            } catch (Exception ex) {
-                if (instance != null && instance.isInTransaction()) {
-                    instance.cancelTransaction();
-                }
-            } finally {
-                if (instance != null) {
-                    subRealm();
-                    instance.close();
-                }
-            }
-        })
-        .subscribeOn(Schedulers.io());
-	}
-
     /**
      * Single thread that also returns the transactions so we can use it in as an invisible member in an obserable stream
      * @param wallet
@@ -118,36 +137,28 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
                 addRealm();
-                try
+                instance.beginTransaction();
+                for (Transaction transaction : transactions)
                 {
-                    instance.beginTransaction();
-                    for (Transaction transaction : transactions)
+                    if (isBadTransaction(transaction))
                     {
-                        if (isBadTransaction(transaction))
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
+                    try
+                    {
                         RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
                         fill(instance, item, transaction);
                     }
-                    instance.commitTransaction();
+                    catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
+                    {
+                        e.printStackTrace(); //sometimes there's a tx clash, same tx may be recorded from different tokens
+                    }
                 }
-                catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
-                {
-                    //already exists
-                    //Log.d(TAG, "Already exists: " + transaction.hash);
-                    instance.cancelTransaction(); // it can only fail within a transaction, no need to check
-                }
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-            finally
-            {
+                instance.commitTransaction();
                 subRealm();
             }
+
             return transactions;
         });
     }
@@ -164,115 +175,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         }
     }
 
-    @Override
-    public Single<Transaction> findLast(Wallet wallet) {
-        return Single.fromCallable(() -> {
-            Realm realm = null;
-            try {
-                realm = realmManager.getRealmInstance(wallet);
-                return convert(realm.where(RealmTransaction.class).findFirst());
-            } finally {
-                if (realm != null) {
-                    realm.close();
-                }
-            }
-        })
-        .observeOn(Schedulers.io());
-    }
-
-    private void replace(Realm realm, RealmTransaction item, Transaction transaction) {
-        item.setError(transaction.error);
-        item.setBlockNumber(transaction.blockNumber);
-        item.setTimeStamp(transaction.timeStamp);
-        item.setNonce(transaction.nonce);
-        item.setFrom(transaction.from);
-        item.setTo(transaction.to);
-        item.setValue(transaction.value);
-        item.setGas(transaction.gas);
-        item.setGasPrice(transaction.gasPrice);
-        item.setInput(transaction.input);
-        item.setGasUsed(transaction.gasUsed);
-        item.setChainId(transaction.chainId);
-
-        if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
-        {
-            System.out.println("yoless");
-        }
-
-        int len = item.getOperations().size();
-
-        //Log.d(TAG, "Replace Tx " + transaction.hash + " : Sz: " + transaction.operations.length);
-        for (int i = 0; i < transaction.operations.length; i++)
-        {
-            boolean addedOperation = false;
-            boolean addedContract = false;
-
-            TransactionOperation operation = transaction.operations[i];
-            RealmTransactionOperation realmOperation;
-            if (i < len)
-            {
-                realmOperation = item.getOperations().get(i);
-            }
-            else
-            {
-                addedOperation = true;
-                realmOperation = realm.createObject(RealmTransactionOperation.class);
-            }
-
-            realmOperation.setTransactionId(operation.transactionId);
-            realmOperation.setViewType(operation.viewType);
-            realmOperation.setFrom(operation.from);
-            realmOperation.setTo(operation.to);
-            realmOperation.setValue(operation.value);
-
-            RealmTransactionContract realmContract;
-            if (realmOperation.getContract() != null)
-            {
-                realmContract = realmOperation.getContract();
-            }
-            else
-            {
-                addedContract = true;
-                realmContract = realm.createObject(RealmTransactionContract.class);
-            }
-
-            realmContract.setAddress(operation.contract.address);
-            realmContract.setName(operation.contract.name);
-            realmContract.setSymbol(operation.contract.symbol);
-
-            switch (operation.contract.contractType())
-            {
-                case ERC875_CONTRACT_TYPE:
-                    ERC875ContractTransaction ct = (ERC875ContractTransaction) operation.contract;
-                    realmContract.setBalance(ct.balance);
-                    realmContract.setType(ct.type);
-                    realmContract.setIndices(ct.getIndicesString());
-                    realmContract.setContractType(ERC875_CONTRACT_TYPE);
-                    realmContract.setOperation(ct.operation.ordinal());
-                    realmContract.setOtherParty(ct.otherParty);
-                    break;
-                case NORMAL_CONTRACT_TYPE:
-                    realmContract.setTotalSupply(operation.contract.totalSupply);
-                    realmContract.setDecimals(operation.contract.decimals);
-                    realmContract.setContractType(NORMAL_CONTRACT_TYPE);
-                    break;
-            }
-
-            if (addedContract)
-            {
-                realmOperation.setContract(realmContract);
-            }
-            if (addedOperation)
-            {
-                item.getOperations().add(realmOperation);
-            }
-        }
-    }
-
     private void fill(Realm realm, RealmTransaction item, Transaction transaction) {
-
-        Log.d("DWEEB", transaction.hash + " : " + transaction.blockNumber);
-
         item.setError(transaction.error);
         item.setBlockNumber(transaction.blockNumber);
         item.setTimeStamp(transaction.timeStamp);
@@ -285,13 +188,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setInput(transaction.input);
         item.setGasUsed(transaction.gasUsed);
         item.setChainId(transaction.chainId);
-
-        if (transaction.hash.equals("0x127652a07b7c514b5ce853a2fba7f70f1244d211a7bd9e4ed94afa1863e67f3e"))
-        {
-            System.out.println("yoless");
-        }
-
-        //Log.d(TAG, "Write Tx " + transaction.hash + " : Sz: " + transaction.operations.length);
 
         for (TransactionOperation operation : transaction.operations) {
             RealmTransactionOperation realmOperation = realm.createObject(RealmTransactionOperation.class);

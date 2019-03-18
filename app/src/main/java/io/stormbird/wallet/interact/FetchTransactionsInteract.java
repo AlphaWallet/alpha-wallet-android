@@ -28,6 +28,11 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<Token> hasTransactions(Wallet wallet, Token token)
+    {
+        return transactionRepository.hasTransactions(wallet, token);
+    }
+
     public Observable<Transaction[]> fetchNetworkTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
         return transactionRepository
                 .fetchNetworkTransaction(networkInfo, wallet, lastBlock, userAddress)
@@ -38,6 +43,11 @@ public class FetchTransactionsInteract {
     public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
     {
         return transactionRepository.storeTransactions(wallet, txList);
+    }
+
+    public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token)
+    {
+        return transactionRepository.fetchTransactionsFromStorage(wallet, token);
     }
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
@@ -59,7 +69,7 @@ public class FetchTransactionsInteract {
 
     private TokenInfo addSpecToService(TokenInfo info, ContractType contractType)
     {
-        TokensService.setInterfaceSpec(info.address, contractType);
+        TokensService.setInterfaceSpec(info.chainId, info.address, contractType);
         return info;
     }
 }

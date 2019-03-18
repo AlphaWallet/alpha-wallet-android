@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.POA_ID;
+import static io.stormbird.wallet.util.Utils.isAlNum;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -193,7 +194,6 @@ public class TokenRepository implements TokenRepositoryType {
         Token eth = new Token(tokenInfo, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
         eth.setTokenWallet(wallet.address);
         eth.setIsEthereum();
-        eth.balanceUpdate = System.currentTimeMillis();
         eth.balanceUpdatePressure = 10.0f;
         currencies.put(network.chainId, eth);
     }
@@ -537,7 +537,7 @@ public class TokenRepository implements TokenRepositoryType {
                     updated.patchAuxData(token); //perform any updates we need here
                     localSource.updateTokenBalance(network, wallet, updated);
                     updated.setTokenWallet(wallet.address);
-                    updated.lastBlockCheck = token.lastBlockCheck;
+                    updated.transferPreviousData(token);
                     updated.balanceChanged = true;
                     return updated;
                 }
@@ -627,8 +627,6 @@ public class TokenRepository implements TokenRepositoryType {
         return getEthBalanceInternal(network, wallet) //use local balance fetch, uses less resources
                 .map(balance -> {
                     BigDecimal oldBalance = oldToken != null ? oldToken.balance : BigDecimal.ZERO;
-                    long lastBlockCheck = oldToken != null ? oldToken.lastBlockCheck : 0;
-                    Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldBalance.toPlainString());
                     if (balance.equals(BigDecimal.valueOf(-1)))
                     {
                         //network error - retrieve from cache
@@ -637,15 +635,15 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(oldBalance) || oldToken == null)
                     {
-                        Log.d(TAG, "Balance Change!");
+                        Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldBalance.toPlainString());
                         TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
                                                        network.chainId);
                         Token eth = new Token(info, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
-                        eth.lastBlockCheck = lastBlockCheck;
                         eth.setTokenWallet(wallet.address);
                         //store token and balance
                         localSource.updateTokenBalance(network, wallet, eth);
                         eth.balanceChanged = true;
+                        eth.transferPreviousData(oldToken);
                         return eth;
                     }
                     else
@@ -778,7 +776,8 @@ public class TokenRepository implements TokenRepositoryType {
                 if (value.length() == 0 && responseValue.length() > 2)
                 {
                     value = checkBytesString(responseValue);
-                    return (T) value;
+                    if (!isAlNum(value)) value = "";
+                    return (T)value;
                 }
             }
             return (T) response.get(0).getValue();

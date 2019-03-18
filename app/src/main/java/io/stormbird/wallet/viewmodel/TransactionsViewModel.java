@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.text.format.DateUtils;
 import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -17,15 +16,14 @@ import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.EventService;
 import io.stormbird.wallet.service.TokensService;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-
-import static io.stormbird.wallet.entity.TransactionDecoder.isEndContract;
 
 public class TransactionsViewModel extends BaseViewModel
 {
@@ -36,7 +34,6 @@ public class TransactionsViewModel extends BaseViewModel
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Boolean> clearAdapter = new MutableLiveData<>();
     private final MutableLiveData<Boolean> refreshAdapter = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> queryVisibility = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> newTransactions = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -46,7 +43,6 @@ public class TransactionsViewModel extends BaseViewModel
     private final SetupTokensInteract setupTokensInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final EventService eventService;
 
     private final TransactionDetailRouter transactionDetailRouter;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -57,11 +53,14 @@ public class TransactionsViewModel extends BaseViewModel
     @Nullable
     private Disposable eventTimer;
     @Nullable
-    private Disposable handleTerminatedContracts;
+    private Disposable queryUnknownTokensDisposable;
 
     private final ConcurrentLinkedQueue<Token> eventQueue;
+    private final ConcurrentLinkedQueue<UnknownToken> unknownTokens;
 
+    private Map<String, Transaction> txMap = new HashMap<>();
     private boolean hasNewTransactions;
+    private boolean parseTransactions;
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -73,8 +72,7 @@ public class TransactionsViewModel extends BaseViewModel
             ExternalBrowserRouter externalBrowserRouter,
             HomeRouter homeRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService,
-            EventService eventService) {
+            TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -85,8 +83,9 @@ public class TransactionsViewModel extends BaseViewModel
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.eventService = eventService;
         this.eventQueue = new ConcurrentLinkedQueue<>();
+        this.unknownTokens = new ConcurrentLinkedQueue<>();
+        this.parseTransactions = false;
     }
 
     @Override
@@ -102,6 +101,11 @@ public class TransactionsViewModel extends BaseViewModel
         if (eventTimer != null && !eventTimer.isDisposed())
         {
             eventTimer.dispose();
+        }
+
+        if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed())
+        {
+            queryUnknownTokensDisposable.dispose();
         }
     }
 
@@ -134,6 +138,44 @@ public class TransactionsViewModel extends BaseViewModel
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(eventQueue::add, this::onError, this::checkTransactionQueue);
+
+        checkUnknownTokens();
+    }
+
+    //TODO: Check unknowns at startup
+    private void checkUnknownTokens()
+    {
+        if (queryUnknownTokensDisposable == null && !unknownTokens.isEmpty())
+        {
+            UnknownToken t = unknownTokens.poll();
+
+            if (tokensService.getToken(t.chainId, t.address) == null)
+            {
+                queryUnknownTokensDisposable = setupTokensInteract.addToken(t.address, t.chainId) //fetch tokenInfo
+                        .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
+                        .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet().getValue())) //add to database
+                        .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe(this::updateTokenService, this::onError, this::reCheckUnknowns);
+            }
+        }
+
+        if (!parseTransactions && tokensService.checkHasLoaded())
+        {
+            parseTransactions = true;
+            //check transactions see if there are missing tokens
+            disposable = setupTokensInteract.getUnknownTokens(txMap.values().toArray(new Transaction[0]), tokensService)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(this::addUnknownTokens);
+        }
+    }
+
+    private void reCheckUnknowns()
+    {
+        queryUnknownTokensDisposable = null;
+        checkUnknownTokens();
     }
 
     private void checkTransactionQueue()
@@ -144,6 +186,7 @@ public class TransactionsViewModel extends BaseViewModel
 
             if (t != null)
             {
+                Log.d(TAG, "Checking Tx for: " + t.getFullName());
                 NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
                 String userAddress = t.isEthereum() ? null : t.getAddress(); //only specify address if we're scanning token transactions - not all are relevant to us.
                 fetchTransactionDisposable =
@@ -151,10 +194,6 @@ public class TransactionsViewModel extends BaseViewModel
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onError, this::checkTransactionQueue);
-            }
-            else
-            {
-                Log.d("TOKEN", "Completed Queue");
             }
         }
     }
@@ -170,7 +209,6 @@ public class TransactionsViewModel extends BaseViewModel
     public LiveData<Boolean> showEmpty() { return showEmpty; }
     public LiveData<Boolean> clearAdapter() { return clearAdapter; }
     public LiveData<Boolean> refreshAdapter() { return refreshAdapter; }
-    public LiveData<Boolean> queryVisibility() { return queryVisibility; }
 
     public void prepare()
     {
@@ -218,7 +256,6 @@ public class TransactionsViewModel extends BaseViewModel
      * @param transactions transaction array returned from query
      */
     private void onTransactions(Transaction[] transactions) {
-        Map<String, Transaction> txMap = new HashMap<>();
         for (Transaction tx : transactions)
         {
             if (!txMap.containsKey(tx.hash))
@@ -234,24 +271,27 @@ public class TransactionsViewModel extends BaseViewModel
     private void onUpdateTransactions(Transaction[] transactions, Token token)
     {
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
-        Map<String, Transaction> txMap = new HashMap<>();
+        List<Transaction> newTxs = new ArrayList<>();
+
         for (Transaction tx : transactions)
         {
             if (!txMap.containsKey(tx.hash))
             {
+                newTxs.add(tx);
                 Long blockNumber = Long.valueOf(tx.blockNumber);
                 txMap.put(tx.hash, tx);
                 if (blockNumber > token.lastBlockCheck) token.lastBlockCheck = blockNumber;
             }
         }
 
+        token.requiresTransactionCheck = false;
+
         if (txMap.size() > 0)
         {
             Log.d(TAG, "Found " + transactions.length + " Network transactions");
-            Collection<Transaction> txList = txMap.values();
-            newTransactions.postValue(txList.toArray(new Transaction[0]));
+            newTransactions.postValue(newTxs.toArray(new Transaction[0]));
             //store new transactions, so they will appear in the transaction view, then update the view
-            disposable = fetchTransactionsInteract.storeTransactions(wallet.getValue(), txList.toArray(new Transaction[0]))
+            disposable = fetchTransactionsInteract.storeTransactions(wallet.getValue(), newTxs.toArray(new Transaction[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(txs -> siftUnknownTransactions(txs, token), this::onError);
@@ -264,30 +304,23 @@ public class TransactionsViewModel extends BaseViewModel
     //run through the newly received tokens from a currency and see if there's any unknown tokens
     private void siftUnknownTransactions(Transaction[] transactions, Token token)
     {
-        if (token.isEthereum()) //only get unknown transactions for base accounts
+        if (token == null || token.isEthereum()) //only get unknown transactions for base accounts
         {
-            fetchTransactionDisposable = setupTokensInteract.getUnknownTokens(transactions, tokensService)
+            disposable = setupTokensInteract.getUnknownTokens(transactions, tokensService)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe(unknownTokenAddresses -> queryUnknownTokens(unknownTokenAddresses, token.tokenInfo.chainId), this::onError);
+                    .subscribe(this::addUnknownTokens, this::onError);
         }
     }
 
     /**
      * This function gets called once after the sift Single has completed. For every contract it gets, it updates the service.
      * The token view will be updated continuously while a wallet with a large number of tokens is first being imported.
-     * @param unknownTokens
+     * @param unknowns
      */
-    private void queryUnknownTokens(List<String> unknownTokens, int chainId)
+    private void addUnknownTokens(List<UnknownToken> unknowns)
     {
-        fetchTransactionDisposable = Observable.fromIterable(unknownTokens)
-                .flatMap(address -> setupTokensInteract.addToken(address, chainId)) //fetch tokenInfo
-                .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet().getValue())) //add to database
-                .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(this::updateTokenService, this::onError);
+        unknownTokens.addAll(unknowns);
     }
 
     /**
@@ -297,15 +330,6 @@ public class TransactionsViewModel extends BaseViewModel
     private void updateTokenService(Token token)
     {
         tokensService.addToken(token);
-    }
-
-    public void receiveVisibility(boolean isVisible)
-    {
-        if (isVisible)
-        {
-            //do next update
-            //checkTokenQueue();
-        }
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -323,25 +347,6 @@ public class TransactionsViewModel extends BaseViewModel
 
     public void openDeposit(Context context, Uri uri) {
         externalBrowserRouter.open(context, uri);
-    }
-
-    private void finishTransactionScanCycle()
-    {
-        progress.postValue(false); //ensure spinner is off on completion (in case user forced update)
-        fetchTransactionDisposable = null;
-        if (hasNewTransactions)
-        {
-            refreshAdapter.postValue(true);
-            hasNewTransactions = false;
-        }
-
-        Log.d(TAG, "Finish");
-        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
-        {
-            fetchTransactionDisposable.dispose();
-        }
-        fetchTransactionDisposable = null; //ready to restart the fetch
-        queryVisibility.postValue(true);
     }
 
     /**

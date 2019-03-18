@@ -81,7 +81,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.clearAdapter().observe(this, this::clearAdapter);
         viewModel.refreshAdapter().observe(this, this::refreshAdapter);
         viewModel.newTransactions().observe(this, this::onNewTransactions);
-        viewModel.queryVisibility().observe(this, this::onQueryVisibility);
         refreshLayout.setOnRefreshListener(() -> viewModel.prepare());
 
         adapter.clear();
@@ -89,15 +88,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         tokenReceiver = new TokensReceiver(getActivity(), this);
 
         return view;
-    }
-
-    private void onQueryVisibility(Boolean aBoolean)
-    {
-        viewModel.receiveVisibility(isVisible);
-        AWEvent event = new AWEvent();
-        event.payload = "";
-        event.eventType = AWEventType.CHECK_TOKEN_TRANSACTIONS;
-        homeMessager.AddEvent(10, event);
     }
 
     @Override
@@ -247,10 +237,5 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void setInterface(FragmentMessenger messenger)
     {
         homeMessager = messenger;
-    }
-
-    public void checkTokenTransactions(String payload)
-    {
-        //if (viewModel != null) viewModel.startTokenCheck(payload, isVisible);
     }
 }

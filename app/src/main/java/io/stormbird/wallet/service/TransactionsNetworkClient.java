@@ -280,6 +280,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                     String value = stateData.getString("result");
                     if (value.length() > 0)
                     {
+                    	System.out.println("ERC20: " + value);
                         BigInteger supply = new BigInteger(value, 10);
                         if (supply.compareTo(BigInteger.ZERO) > 0)
                         {

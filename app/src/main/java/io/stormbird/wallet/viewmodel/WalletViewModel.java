@@ -41,8 +41,6 @@ public class WalletViewModel extends BaseViewModel
 
     private final MutableLiveData<String> checkAddr = new MutableLiveData<>();
 
-    private final ConcurrentLinkedQueue<Token> tokenCheckQueue;
-
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
@@ -105,7 +103,6 @@ public class WalletViewModel extends BaseViewModel
         this.openseaService = openseaService;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        tokenCheckQueue = new ConcurrentLinkedQueue<>();
     }
 
     public LiveData<Token[]> tokens() {
@@ -142,10 +139,12 @@ public class WalletViewModel extends BaseViewModel
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable.dispose();
+            balanceTimerDisposable = null;
         }
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed())
         {
             balanceCheckDisposable.dispose();
+            balanceCheckDisposable = null;
         }
     }
 
@@ -177,6 +176,24 @@ public class WalletViewModel extends BaseViewModel
     private void onTokens(Token[] tokens)
     {
         tokensService.addTokens(tokens);
+        checkTransactionUpdate();
+    }
+
+    private void checkTransactionUpdate()
+    {
+        //check each token that has balance to see if it needs to have a transaction check
+        disposable = Observable.fromCallable(tokensService::getAllLiveTokens)
+                .flatMapIterable(token -> token)
+                .filter(Token::hasPositiveBalance)
+                .flatMap(token -> fetchTransactionsInteract.hasTransactions(defaultWallet.getValue(), token))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(Schedulers.computation())
+                .subscribe(this::checkedToken, this::onError);
+    }
+
+    private void checkedToken(Token token)
+    {
+        Log.d("WVM", "Checked: [" + token.requiresTransactionCheck + "] : " + token.getFullName());
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -275,6 +292,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkBalances()
     {
+        tokensService.updateTokenPressure();
         checkTokenUpdates();
         checkUnknownAddresses();
     }
@@ -283,20 +301,16 @@ public class WalletViewModel extends BaseViewModel
     {
         if (isVisible && balanceCheckDisposable == null)
         {
-            Token t = tokensService.getNextUpdateToken();
+            Token t = tokensService.getNextSelection();
 
             if (t != null)
             {
-                Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress());
+                Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
                 balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, defaultWallet.getValue())
                     .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokenUpdate, this::tkError, this::checkComplete);
-            }
-            else
-            {
-                Log.d("TOKEN", "Completed Queue");
             }
         }
     }
@@ -461,7 +475,7 @@ public class WalletViewModel extends BaseViewModel
     private void resolvedToken(TokenInfo info)
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.address), defaultWallet.getValue()))
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet.getValue()))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

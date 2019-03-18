@@ -40,4 +40,24 @@ public class Utils {
         Matcher m = p.matcher(url.toLowerCase());
         return m.matches();
     }
+
+    public static boolean isAlNum(String testStr)
+    {
+        boolean result = false;
+        if (testStr != null && testStr.length() > 0)
+        {
+            result = true;
+            for (int i = 0; i < testStr.length(); i++)
+            {
+                char c = testStr.charAt(i);
+                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !(c == '+') && !(c == ',') && !(c == ';'))
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
 }

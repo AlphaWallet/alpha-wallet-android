@@ -5,6 +5,7 @@ package io.stormbird.wallet.interact;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +13,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.service.TokensService;
 
@@ -43,23 +40,31 @@ public class SetupTokensInteract {
      * @param tokensService
      * @return
      */
-    public Single<List<String>> getUnknownTokens(Transaction[] transactions, TokensService tokensService)
+    public Single<List<UnknownToken>> getUnknownTokens(Transaction[] transactions, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
-            List<String> unknownTokens = new ArrayList<>();
+            Map<String, UnknownToken> unknownTokenMap = new HashMap<>();
+            //List<UnknownToken> unknownTokens = new ArrayList<>();
 
             //process the remaining transactions
             for (Transaction t : transactions)
             {
                 Token localToken = tokensService.getToken(t.chainId, t.to);
 
-                if (t.input != null && t.input.length() > 2 && localToken == null && !unknownTokens.contains(t.to))
+                if (localToken != null && localToken.tokenInfo.chainId != t.chainId)
                 {
-                    if (t.error.equals("0") && !unknownTokens.contains(t.to)) unknownTokens.add(t.to); //only add token to scan if it wasn't an error transaction
+                    System.out.println("Collision!");
+                    if (localToken.isBad()) localToken = null;
+                }
+
+                if (t.input != null && t.input.length() > 2 && localToken == null
+                        && t.to != null && t.to.length() > 0 && !unknownTokenMap.containsKey(t.to) && t.error.equals("0"))
+                {
+                    unknownTokenMap.put(t.to, new UnknownToken(t.chainId, t.to));//only add token to scan if it wasn't an error transaction
                 }
             }
 
-            return unknownTokens;
+            return new ArrayList<>(unknownTokenMap.values());
         });
     }
 

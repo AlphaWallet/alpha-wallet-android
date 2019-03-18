@@ -235,7 +235,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private void onInterfaceSpec(ContractType spec, String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
         token.setInterfaceSpec(spec);
-        TokensService.setInterfaceSpec(token.getAddress(), spec);
+        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
         createTicketTransfer(to, token, indexList, gasPrice, gasLimit);
     }
 

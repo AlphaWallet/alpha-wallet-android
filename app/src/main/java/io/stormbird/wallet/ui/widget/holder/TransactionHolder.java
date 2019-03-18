@@ -83,8 +83,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
 
         Token token = tokensService.getToken(transaction.chainId, defaultAddress);
-
-        String networkSymbol = token.getNetworkName();
+        String networkSymbol = "";
+        if (token != null) networkSymbol = token.getNetworkName();
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
         TransactionOperation operation = transaction.operations == null
@@ -121,7 +121,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         int colourResource;
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        String name = tokensService.getTokenName(ct.address);
+        String name = tokensService.getTokenName(trans.chainId, ct.address);
         Token token = tokensService.getToken(trans.chainId, ct.address);
 
         address.setText(name);
@@ -227,9 +227,9 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         TransactionOperation operation = transaction.operations[0];
 
-        String name = tokensService.getTokenName(operation.contract.address);
-        String symbol = tokensService.getTokenSymbol(operation.contract.address);
-        int decimals = tokensService.getTokenDecimals(operation.contract.address);
+        String name = tokensService.getTokenName(transaction.chainId, operation.contract.address);
+        String symbol = tokensService.getTokenSymbol(transaction.chainId, operation.contract.address);
+        int decimals = tokensService.getTokenDecimals(transaction.chainId, operation.contract.address);
         Token token = tokensService.getToken(transaction.chainId, operation.contract.address);
 
         String from = operation.from;

@@ -63,6 +63,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Observable<Token> hasTransactions(Wallet wallet, Token token)
+	{
+		return inDiskCache.hasTransactionFetch(wallet, token).toObservable();
+	}
+
+	@Override
 	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, Wallet wallet, long lastBlock, String userAddress) {
 		return fetchFromNetwork(network, wallet, lastBlock, userAddress)
 				.observeOn(Schedulers.newThread())
@@ -204,11 +210,17 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token)
+	{
+		return inDiskCache.fetchTransactions(wallet, token);
+	}
+
+	@Override
 	public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
 	{
 		if (txList.length == 0)
 		{
-			return noTransations();
+			return noTransactions();
 		}
 		else
 		{
@@ -216,7 +228,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		}
 	}
 
-	private Single<Transaction[]> noTransations()
+	private Single<Transaction[]> noTransactions()
 	{
 		return Single.fromCallable(() -> new Transaction[0]);
 	}
@@ -276,10 +288,10 @@ public class TransactionRepository implements TransactionRepositoryType {
 	public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
 	{
 		NetworkInfo networkInfo = networkRepository.getNetworkByChain(tokenInfo.chainId);
-		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
+		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.chainId, tokenInfo.address);
 		if (tokenInfo.name == null && tokenInfo.symbol == null)
 		{
-			return Single.fromCallable(() -> ContractType.DELETED_ACCOUNT);
+			return Single.fromCallable(() -> ContractType.NOT_SET);
 		}
 		else if (checked != null && checked != ContractType.NOT_SET && checked != ContractType.OTHER)
 		{

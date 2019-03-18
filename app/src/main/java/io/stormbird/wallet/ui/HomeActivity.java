@@ -219,26 +219,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             e.printStackTrace();
         }
-
-        viewModel.events().observe(this, this::onEvents);
-    }
-
-    private void onEvents(List<AWEvent> awEvents)
-    {
-//        for (AWEvent event : awEvents)
-//        {
-//            switch (event.eventType)
-//            {
-//                case UPDATE_TOKEN_BALANCE:
-//                    walletFragment.checkTokenBalance(event.payload);
-//                    break;
-//                case CHECK_TOKEN_TRANSACTIONS:
-//                    transactionsFragment.checkTokenTransactions(event.payload);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
     }
 
     @Override
@@ -445,19 +425,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void TokensReady()
     {
-
+        if (transactionsFragment != null) transactionsFragment.resetTokens();
     }
 
     @Override
     public void AddToken(String address)
     {
         viewModel.showAddToken(this, address);
-    }
-
-    @Override
-    public void AddEvent(int timeOffset, AWEvent event)
-    {
-        viewModel.addEvent(timeOffset, event);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

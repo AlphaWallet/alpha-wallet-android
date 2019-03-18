@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import android.util.SparseArray;
 import android.util.SparseLongArray;
 import io.reactivex.Observable;
 import io.stormbird.wallet.entity.ContractType;
@@ -16,14 +17,16 @@ import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
 public class TokensService
 {
-    private final Map<String, Token> tokenMap = new ConcurrentHashMap<>();
-    private static final Map<String, ContractType> interfaceSpecMap = new ConcurrentHashMap<>();
+    private final Map<String, SparseArray<Token>> tokenMap = new ConcurrentHashMap<>();
+    private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
     private final Map<Integer, Token> currencies = new ConcurrentHashMap<>();
     private String currentAddress = null;
-    private boolean tokenTerminated = false;
+    private Token nextSelection;
+    private boolean loaded;
 
     public TokensService() {
-
+        nextSelection = null;
+        loaded = false;
     }
 
     /**
@@ -33,30 +36,39 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
-        boolean added = false;
         if (t.isEthereum())
         {
-            if (!currencies.containsKey(t.tokenInfo.chainId)) added = true;
             currencies.put(t.tokenInfo.chainId, t);
-            if (t.tokenInfo.chainId == 1) tokenMap.put(t.getAddress(), t);
+            if (t.tokenInfo.chainId == 1) addToken(1, t);
         }
         else if (t.checkTokenWallet(currentAddress))
         {
-            if (!tokenMap.containsKey(currentAddress)) added = true;
-            tokenMap.put(t.getAddress(), t);
-            setSpec(t);
+            addToken(t.tokenInfo.chainId, t);
         }
 
         return t;
     }
 
+    private void addToken(int chainId, Token t)
+    {
+        SparseArray<Token> tokenAddr = tokenMap.get(t.getAddress());
+        if (tokenAddr == null)
+        {
+            tokenAddr = new SparseArray<>();
+            tokenMap.put(t.getAddress(), tokenAddr);
+        }
+        tokenAddr.put(chainId, t);
+        setSpec(t);
+    }
+
     private void setSpec(Token t)
     {
-        if (interfaceSpecMap.get(t.getAddress()) != null)
+        SparseArray<ContractType> types = interfaceSpecMap.get(t.getAddress());
+        if (types != null && types.get(t.tokenInfo.chainId, null) != null)
         {
             if (t.getInterfaceSpec() == null || t.getInterfaceSpec() == ContractType.NOT_SET || t.getInterfaceSpec() == ContractType.OTHER)
             {
-                t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()));
+                t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()).get(t.tokenInfo.chainId));
             }
         }
     }
@@ -69,19 +81,20 @@ public class TokensService
             {
                 return currencies.get(chainId);
             }
-            else
+            else if (tokenMap.containsKey(addr))
             {
-                return tokenMap.get(addr);
+                return tokenMap.get(addr).get(chainId, null);
             }
         }
-        else return null;
+
+        return null;
     }
 
-    public String getTokenName(String addr)
+    public String getTokenName(int chainId, String addr)
     {
         if (addr == null) return "[Unknown contract]";
         String name = addr;
-        Token token = tokenMap.get(addr);
+        Token token = getToken(chainId, addr);
         if (token != null)
         {
             if (token.isTerminated())
@@ -97,11 +110,11 @@ public class TokensService
         return name;
     }
 
-    public String getTokenSymbol(String addr)
+    public String getTokenSymbol(int chainId, String addr)
     {
         String symbol = "TOK";
         if (addr == null) return symbol;
-        Token token = tokenMap.get(addr);
+        Token token = getToken(chainId, addr);
         if (token != null)
         {
             symbol = token.tokenInfo.symbol;
@@ -110,11 +123,11 @@ public class TokensService
         return symbol;
     }
 
-    public int getTokenDecimals(String addr)
+    public int getTokenDecimals(int chainId, String addr)
     {
         int decimals = ETHER_DECIMALS;
         if (addr == null) return decimals;
-        Token token = tokenMap.get(addr);
+        Token token = getToken(chainId, addr);
         if (token != null)
         {
             decimals = token.tokenInfo.decimals;
@@ -131,31 +144,45 @@ public class TokensService
 
     public List<Token> getAllTokens()
     {
-        return new ArrayList<Token>(tokenMap.values());
+        List<Token> tokens = new ArrayList<>();
+        for (String address : tokenMap.keySet())
+        {
+            tokens.addAll(getAllAtAddress(address));
+        }
+
+        return tokens;
+    }
+
+    private List<Token> getAllAtAddress(String addr)
+    {
+        List<Token> tokens = new ArrayList<>();
+        SparseArray<Token> locals = tokenMap.get(addr);
+        if (locals != null)
+        {
+            for (int i = 0; i < locals.size(); i++)
+            {
+                tokens.add(locals.valueAt(i));
+            }
+        }
+
+        return tokens;
     }
 
     public List<Token> getAllLiveTokens()
     {
         List<Token> tokens = new ArrayList<>(new ArrayList(currencies.values()));
 
-        for (Token t : tokenMap.values())
+        for (String addr : tokenMap.keySet())
         {
-            if (!t.isEthereum() && !t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t)) tokens.add(t);
+            List<Token> chainTokens = getAllAtAddress(addr);
+            for (Token t : chainTokens)
+            {
+                if (!t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t))
+                    tokens.add(t);
+            }
         }
 
         return tokens;
-    }
-
-    public boolean getTerminationReport()
-    {
-        boolean terminated = tokenTerminated;
-        tokenTerminated = false;
-        return terminated;
-    }
-
-    public void setTerminationFlag()
-    {
-        tokenTerminated = true; //walletView picks this up to perform a refresh
     }
 
     public void addTokens(Token[] tokens)
@@ -165,11 +192,14 @@ public class TokensService
             t.setRequireAuxRefresh();
             addToken(t);
         }
+
+        loaded = true;
     }
 
     public List<String> reduceToUnknown(List<String> addrs)
     {
-        for (Token t : tokenMap.values())
+        List<Token> allTokens = getAllTokens();
+        for (Token t : allTokens)
         {
             if (addrs.contains(t.getAddress()))
             {
@@ -186,14 +216,21 @@ public class TokensService
     }
     public String getCurrentAddress() { return this.currentAddress; }
 
-    public static void setInterfaceSpec(String address, ContractType functionSpec)
+    public static void setInterfaceSpec(int chainId, String address, ContractType functionSpec)
     {
-        interfaceSpecMap.put(address.toLowerCase(), functionSpec);
+        SparseArray<ContractType> types = interfaceSpecMap.get(address);
+        if (types == null)
+        {
+            types = new SparseArray<>();
+            interfaceSpecMap.put(address, types);
+        }
+        types.put(chainId, functionSpec);
     }
 
-    public static ContractType checkInterfaceSpec(String address)
+    public static ContractType checkInterfaceSpec(int chainId, String address)
     {
-        ContractType type = interfaceSpecMap.get(address.toLowerCase());
+        SparseArray<ContractType> types = interfaceSpecMap.get(address);
+        ContractType type = types != null ? type = types.get(chainId) : null;
         if (type != null)
         {
             return type;
@@ -204,17 +241,21 @@ public class TokensService
         }
     }
 
-    public ContractType getInterfaceSpec(String address)
+    public ContractType getInterfaceSpec(int chainId, String address)
     {
-        address = address.toLowerCase();
-        ContractType result = ContractType.OTHER;
-        if (interfaceSpecMap.containsKey(address)) return interfaceSpecMap.get(address);
-        else if (tokenMap.containsKey(address))
+        SparseArray<ContractType> types = interfaceSpecMap.get(address);
+        ContractType result = types != null ? result = types.get(chainId) : ContractType.OTHER;
+
+        if (result == ContractType.OTHER && tokenMap.containsKey(address))
         {
-            Token token = tokenMap.get(address);
-            if (token.getInterfaceSpec() != null)
+            List<Token> tokens = getAllAtAddress(address);
+            for (Token token : tokens)
             {
-                result = tokenMap.get(address).getInterfaceSpec();
+                if (token.tokenInfo.chainId == chainId && token.getInterfaceSpec() != null)
+                {
+                    result = token.getInterfaceSpec();
+                    break;
+                }
             }
         }
 
@@ -224,7 +265,7 @@ public class TokensService
     public List<Token> getAllClass(Class<?> tokenClass)
     {
         List<Token> classTokens = new ArrayList<>();
-        for (Token t : tokenMap.values())
+        for (Token t : getAllTokens())
         {
             if (tokenClass.isInstance(t))
             {
@@ -236,7 +277,7 @@ public class TokensService
 
     public void clearBalanceOf(Class<?> tokenClass)
     {
-        for (Token t : tokenMap.values())
+        for (Token t : getAllTokens())
         {
             if (tokenClass.isInstance(t))
             {
@@ -279,7 +320,7 @@ public class TokensService
         return addresses;
     }
 
-    public Token getNextUpdateToken()
+    public void updateTokenPressure()
     {
         //get all tokens
         List<Token> allTokens = getAllLiveTokens();
@@ -299,13 +340,25 @@ public class TokensService
 
         if (highestPressure > 10.0f)
         {
-            highestPressureToken.balanceUpdatePressure = 0.0f;
-            return highestPressureToken;
+            nextSelection = highestPressureToken;
         }
         else
         {
-            return null;
+            nextSelection = null;
         }
+    }
+
+    public Token getNextSelection()
+    {
+        Token next = nextSelection;
+        if (next != null) next.balanceUpdatePressure = 0.0f;
+        nextSelection = null;
+        return next;
+    }
+
+    public boolean checkHasLoaded()
+    {
+        return loaded;
     }
 
     //    public long getLastTransactionFetch(int chainId, String address)

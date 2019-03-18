@@ -14,7 +14,6 @@ import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.EventService;
 import io.stormbird.wallet.service.TokensService;
 
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
@@ -29,7 +28,6 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     private final HomeRouter homeRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final EventService eventService;
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -41,8 +39,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             ExternalBrowserRouter externalBrowserRouter,
             HomeRouter homeRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService,
-            EventService eventService) {
+            TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -53,7 +50,6 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.eventService = eventService;
     }
 
     @NonNull
@@ -69,7 +65,6 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
                 externalBrowserRouter,
                 homeRouter,
                 assetDefinitionService,
-                tokensService,
-                eventService);
+                tokensService);
     }
 }

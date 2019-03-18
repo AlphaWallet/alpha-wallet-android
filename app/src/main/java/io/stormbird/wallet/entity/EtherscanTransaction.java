@@ -67,7 +67,7 @@ public class EtherscanTransaction
 
             if (type != ContractType.OTHER)
             {
-                TokensService.setInterfaceSpec(contractAddress, type);
+                TokensService.setInterfaceSpec(chainId, contractAddress, type);
             }
 
             input = "Constructor"; //Placeholder - don't consume storage for the constructor

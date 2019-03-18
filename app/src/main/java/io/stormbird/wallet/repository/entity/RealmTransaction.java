@@ -19,6 +19,7 @@ public class RealmTransaction extends RealmObject {
     private String input;
     private String error;
     private int chainId;
+    private String token;
     private RealmList<RealmTransactionOperation> operations;
 
     public String getHash() {
@@ -129,5 +130,15 @@ public class RealmTransaction extends RealmObject {
     public void setChainId(int chainId)
     {
         this.chainId = chainId;
+    }
+
+    public String getToken()
+    {
+        return token;
+    }
+
+    public void setToken(String token)
+    {
+        this.token = token;
     }
 }

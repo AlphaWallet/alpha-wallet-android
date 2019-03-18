@@ -151,7 +151,7 @@ public class WalletDataRealmSource {
                 RealmWalletData realmWallet = realm.where(RealmWalletData.class)
                         .equalTo("address", address)
                         .findFirst();
-                name = realmWallet.getName();
+                if (realmWallet != null) name = realmWallet.getName();
             } catch (Exception e) {
                 Log.e(TAG, "getName: " + e.getMessage(), e);
             }

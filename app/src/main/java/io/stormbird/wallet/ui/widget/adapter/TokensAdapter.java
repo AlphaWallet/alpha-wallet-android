@@ -189,6 +189,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         {
             //new token
             items.add(new TokenSortedItem(token, calculateWeight(token)));
+            notifyDataSetChanged();
         }
     }
 

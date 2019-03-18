@@ -175,6 +175,12 @@ public class MarketOrderTest
             }
 
             @Override
+            public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token)
+            {
+                return null;
+            }
+
+            @Override
             public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
             {
                 return null;
@@ -182,6 +188,12 @@ public class MarketOrderTest
 
             @Override
             public Transaction fetchCachedTransaction(String walletAddr, String hash)
+            {
+                return null;
+            }
+
+            @Override
+            public Observable<Token> hasTransactions(Wallet wallet, Token token)
             {
                 return null;
             }

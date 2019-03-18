@@ -12,7 +12,6 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.EventService;
 
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final PreferenceRepositoryType preferenceRepository;
@@ -23,7 +22,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final EventService eventService;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -33,8 +31,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract,
-            EventService eventService) {
+            FetchWalletsInteract fetchWalletsInteract) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -43,7 +40,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.assetDefinitionService = assetDefinitionService;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.eventService = eventService;
     }
 
     @NonNull
@@ -57,8 +53,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 addTokenRouter,
                 assetDefinitionService,
                 findDefaultWalletInteract,
-                fetchWalletsInteract,
-                eventService
+                fetchWalletsInteract
                 );
     }
 }

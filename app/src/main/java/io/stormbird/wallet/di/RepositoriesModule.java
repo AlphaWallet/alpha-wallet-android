@@ -159,12 +159,6 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	EventService provideEventService( ) {
-		return new EventService( );
-	}
-
-	@Singleton
-	@Provides
 	MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
 												 TransactionRepositoryType transactionRepository,
 												 PasswordStore passwordStore) {

@@ -176,24 +176,6 @@ public class WalletViewModel extends BaseViewModel
     private void onTokens(Token[] tokens)
     {
         tokensService.addTokens(tokens);
-        checkTransactionUpdate();
-    }
-
-    private void checkTransactionUpdate()
-    {
-        //check each token that has balance to see if it needs to have a transaction check
-        disposable = Observable.fromCallable(tokensService::getAllLiveTokens)
-                .flatMapIterable(token -> token)
-                .filter(Token::hasPositiveBalance)
-                .flatMap(token -> fetchTransactionsInteract.hasTransactions(defaultWallet.getValue(), token))
-                .subscribeOn(Schedulers.computation())
-                .observeOn(Schedulers.computation())
-                .subscribe(this::checkedToken, this::onError);
-    }
-
-    private void checkedToken(Token token)
-    {
-        Log.d("WVM", "Checked: [" + token.requiresTransactionCheck + "] : " + token.getFullName());
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -318,7 +300,18 @@ public class WalletViewModel extends BaseViewModel
     private void checkComplete()
     {
         balanceCheckDisposable = null;
+        checkUIUpdates();
         checkTokenUpdates();
+    }
+
+    private void checkUIUpdates()
+    {
+        disposable = Observable.fromCallable(tokensService::getAllTokens)
+                .flatMapIterable(token -> token)
+                .filter(Token::walletUIUpdateRequired)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(tokenUpdate::postValue, this::onError);
     }
 
     private void onTokenUpdate(Token token)

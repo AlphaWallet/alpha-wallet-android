@@ -28,11 +28,6 @@ public class FetchTransactionsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Token> hasTransactions(Wallet wallet, Token token)
-    {
-        return transactionRepository.hasTransactions(wallet, token);
-    }
-
     public Observable<Transaction[]> fetchNetworkTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
         return transactionRepository
                 .fetchNetworkTransaction(networkInfo, wallet, lastBlock, userAddress)

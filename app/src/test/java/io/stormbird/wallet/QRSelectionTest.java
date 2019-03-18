@@ -151,12 +151,6 @@ public class QRSelectionTest
             {
                 return null;
             }
-
-            @Override
-            public Observable<Token> hasTransactions(Wallet wallet, Token token)
-            {
-                return null;
-            }
         };
 
         signatureGenerateInteract = new SignatureGenerateInteract(null)

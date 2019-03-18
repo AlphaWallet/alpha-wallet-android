@@ -80,28 +80,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public Single<Token> hasTransactionFetch(Wallet wallet, Token token)
-    {
-        return Single.fromCallable(() -> {
-            try (Realm instance = realmManager.getRealmInstance(wallet))
-            {
-                RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class)
-                        .equalTo("chainId", token.tokenInfo.chainId)
-                        .equalTo("token", token.tokenInfo.address)
-                        .findAll();
-
-                token.requiresTransactionCheck = txs.isEmpty();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return token;
-        });
-    }
-
-    @Override
     public Transaction fetchTransaction(Wallet wallet, String hash)
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))

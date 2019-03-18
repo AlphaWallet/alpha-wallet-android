@@ -191,12 +191,6 @@ public class MarketOrderTest
             {
                 return null;
             }
-
-            @Override
-            public Observable<Token> hasTransactions(Wallet wallet, Token token)
-            {
-                return null;
-            }
         };
 
         marketService = new MarketQueueService(null, null, transactionRepository, passwordStore);

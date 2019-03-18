@@ -288,15 +288,32 @@ public class TokenRepository implements TokenRepositoryType {
     {
         TokenFactory tf = new TokenFactory();
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-        Token newToken = tf.createToken(tokenInfo, interfaceSpec, network.getShortName());
-        newToken.balanceUpdatePressure = 10.0f;
 
+        //check balance before we store it
+        List<BigInteger> balanceArray = null;
+        BigDecimal balance = BigDecimal.ZERO;
+        switch (interfaceSpec)
+        {
+            case ERC875:
+            case ERC875LEGACY:
+                balanceArray = wrappedCheckBalanceArray(wallet, tokenInfo, null);
+                break;
+            case ETHEREUM:
+            case ERC20:
+                balance = wrappedCheckUintBalance(wallet, tokenInfo, null);
+                break;
+            default:
+                break;
+        }
+        Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), 0);
         newToken.setTokenWallet(wallet.address);
         Log.d(TAG, "Create for store: " + tokenInfo.name);
 
+        if (newToken.hasPositiveBalance()) newToken.walletUIUpdateRequired = true;
+
         return localSource.saveToken(
-                    wallet,
-                    newToken);
+                wallet,
+                newToken);
     }
 
     //TODO: This should be called on a per-token basis. User will usually only have one token, so currently it's ok
@@ -546,10 +563,6 @@ public class TokenRepository implements TokenRepositoryType {
                     return token;
                 }
             }
-            catch (BadContract e)
-            {
-                return token;
-            }
             catch (Exception e)
             {
                 e.printStackTrace();
@@ -566,13 +579,22 @@ public class TokenRepository implements TokenRepositoryType {
      * @param token
      * @return
      */
-    private BigDecimal wrappedCheckUintBalance(Wallet wallet, TokenInfo tokenInfo, Token token) throws Exception
+    private BigDecimal wrappedCheckUintBalance(Wallet wallet, TokenInfo tokenInfo, Token token)
     {
-        BigDecimal balance = getBalance(wallet, tokenInfo);
-        if (balance.compareTo(BigDecimal.valueOf(NODE_COMMS_ERROR)) == 0)
+        BigDecimal balance = BigDecimal.ZERO;
+        try
         {
-            balance = token.balance;
+            balance = getBalance(wallet, tokenInfo);
+            if (token != null && balance.compareTo(BigDecimal.valueOf(NODE_COMMS_ERROR)) == 0)
+            {
+                balance = token.balance;
+            }
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         return balance;
     }
 
@@ -585,14 +607,14 @@ public class TokenRepository implements TokenRepositoryType {
      * @param token
      * @return
      */
-    private List<BigInteger> wrappedCheckBalanceArray(Wallet wallet, TokenInfo tInfo, Token token) throws Exception
+    private List<BigInteger> wrappedCheckBalanceArray(Wallet wallet, TokenInfo tInfo, Token token)
     {
         List<BigInteger> balance = getBalanceArray(wallet, tInfo);
 
         if (balance.size() > 0)
         {
             BigInteger firstVal = balance.get(0);
-            if (firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
+            if (token != null && firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
             {
                 //comms error, use previous token balance
                 balance = token.getArrayBalance();

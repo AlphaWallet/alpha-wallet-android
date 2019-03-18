@@ -63,12 +63,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Token> hasTransactions(Wallet wallet, Token token)
-	{
-		return inDiskCache.hasTransactionFetch(wallet, token).toObservable();
-	}
-
-	@Override
 	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, Wallet wallet, long lastBlock, String userAddress) {
 		return fetchFromNetwork(network, wallet, lastBlock, userAddress)
 				.observeOn(Schedulers.newThread())

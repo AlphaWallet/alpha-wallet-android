@@ -46,7 +46,7 @@ public class Token implements Parcelable
     public float balanceUpdateWeight;
     public float balanceUpdatePressure;
     public boolean balanceChanged;
-    public boolean requiresTransactionCheck;
+    public boolean walletUIUpdateRequired;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -67,14 +67,13 @@ public class Token implements Parcelable
         balanceUpdateWeight = calculateBalanceUpdateWeight();
         balanceUpdatePressure = 0.0f;
         balanceChanged = false;
-        requiresTransactionCheck = false;
+        walletUIUpdateRequired = false;
     }
 
     public void transferPreviousData(Token oldToken)
     {
         if (oldToken != null)
         {
-            requiresTransactionCheck = oldToken.requiresTransactionCheck;
             lastBlockCheck = oldToken.lastBlockCheck;
         }
     }
@@ -821,16 +820,18 @@ public class Token implements Parcelable
         }
     }
 
+    public boolean walletUIUpdateRequired()
+    {
+        boolean requiresUpdate = walletUIUpdateRequired;
+        walletUIUpdateRequired = false;
+        return requiresUpdate;
+    }
+
     public boolean requiresTransactionRefresh()
     {
         boolean requiresTransactionRefresh = balanceChanged;
         balanceChanged = false;
-        if (hasPositiveBalance() && requiresTransactionCheck)
-        {
-            requiresTransactionRefresh = true;
-            requiresTransactionCheck = false;
-        }
-        if (isEthereum() && lastBlockCheck == 0)
+        if ((hasPositiveBalance() || isEthereum()) && lastBlockCheck == 0) //check transactions for native currency plus tokens with balance
         {
             lastBlockCheck = 1;
             requiresTransactionRefresh = true;

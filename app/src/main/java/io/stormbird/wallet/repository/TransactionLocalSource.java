@@ -11,7 +11,6 @@ import io.reactivex.Single;
 public interface TransactionLocalSource {
 	Single<Transaction[]> fetchTransaction(Wallet wallet);
 	Single<Transaction[]> fetchTransactions(Wallet wallet, Token token);
-	Single<Token> hasTransactionFetch(Wallet wallet, Token token);
 	Transaction fetchTransaction(Wallet wallet, String hash);
 	Single<Transaction[]> putAndReturnTransactions(Wallet wallet, Transaction[] txList);
 }

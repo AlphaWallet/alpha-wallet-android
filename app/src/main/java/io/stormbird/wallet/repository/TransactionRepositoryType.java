@@ -24,6 +24,4 @@ public interface TransactionRepositoryType {
     Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);
-
-    Observable<Token> hasTransactions(Wallet wallet, Token token);
 }

@@ -142,7 +142,6 @@ public class TransactionsViewModel extends BaseViewModel
         checkUnknownTokens();
     }
 
-    //TODO: Check unknowns at startup
     private void checkUnknownTokens()
     {
         if (queryUnknownTokensDisposable == null && !unknownTokens.isEmpty())
@@ -283,8 +282,6 @@ public class TransactionsViewModel extends BaseViewModel
                 if (blockNumber > token.lastBlockCheck) token.lastBlockCheck = blockNumber;
             }
         }
-
-        token.requiresTransactionCheck = false;
 
         if (txMap.size() > 0)
         {

@@ -100,20 +100,99 @@
     <View
         android:id="@+id/anchor"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="0dp"
         android:layout_below="@id/progressBar" />
 
-    <Button
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/secondary_toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go"
-        android:visibility="gone" />
+        android:layout_below="@id/anchor"
+        android:layout_gravity="center"
+        android:background="@color/white">
+
+        <RelativeLayout
+            android:id="@+id/select_network_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp">
+
+            <View
+                android:id="@+id/network_icon"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/background_round_primary" />
+
+            <TextView
+                android:id="@+id/current_network"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/network_icon"
+                android:ellipsize="end"
+                android:fontFamily="@font/font_semibold"
+                android:singleLine="true"
+                android:text="@string/ethereum"
+                android:textAllCaps="true"
+                android:textColor="@color/text_dark_gray"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@id/current_network"
+                android:paddingTop="5dp"
+                android:src="@drawable/ic_dropdown_caret" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/select_network_layout"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:fontFamily="@font/font_regular"
+                android:gravity="center_vertical"
+                android:textColor="@color/text_dark_gray"
+                android:text="1000.0000"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/symbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_toEndOf="@id/balance"
+                android:fontFamily="@font/font_semibold"
+                android:text="ETH"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="15sp" />
+        </RelativeLayout>
+
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/progressBar"
+        android:layout_below="@+id/secondary_toolbar"
         android:focusable="true"
         android:focusableInTouchMode="true">
 

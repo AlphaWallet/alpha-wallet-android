@@ -26,6 +26,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -47,6 +48,7 @@ import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.FragmentMessenger;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.SignTransactionInterface;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.URLLoadInterface;
 import io.stormbird.wallet.entity.URLLoadReceiver;
 import io.stormbird.wallet.entity.Wallet;
@@ -55,6 +57,7 @@ import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
+import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -71,9 +74,11 @@ import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.SelectNetworkDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
+import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class DappBrowserFragment extends Fragment implements
@@ -115,6 +120,11 @@ public class DappBrowserFragment extends Fragment implements
     private ImageView back;
     private ImageView next;
     private ImageView clear;
+    private RelativeLayout selectNetworkLayout;
+    private View currentNetworkIcon;
+    private TextView currentNetwork;
+    private TextView balance;
+    private TextView symbol;
 
     private String currentWebpageTitle;
     private String currentFragment;
@@ -320,6 +330,27 @@ public class DappBrowserFragment extends Fragment implements
         clear.setOnClickListener(v -> {
             clearAddressBar();
         });
+
+        selectNetworkLayout = view.findViewById(R.id.select_network_layout);
+        selectNetworkLayout.setOnClickListener(v -> selectNetwork());
+        currentNetworkIcon = view.findViewById(R.id.network_icon);
+        currentNetwork = view.findViewById(R.id.current_network);
+        balance = view.findViewById(R.id.balance);
+        symbol = view.findViewById(R.id.symbol);
+    }
+
+    private void selectNetwork() {
+        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), networkInfo.name);
+        dialog.setOnClickListener(v1 -> {
+            if (!networkInfo.name.equals(dialog.getSelectedItem())) {
+                viewModel.setNetwork(dialog.getSelectedItem());
+                getActivity().sendBroadcast(new Intent(RESET_WALLET));
+                balance.setVisibility(View.GONE);
+                symbol.setVisibility(View.GONE);
+            }
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 
     private void clearAddressBar() {
@@ -411,6 +442,14 @@ public class DappBrowserFragment extends Fragment implements
                 .get(DappBrowserViewModel.class);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.token().observe(this, this::onUpdateBalance);
+    }
+
+    private void onUpdateBalance(Token token) {
+        balance.setVisibility(View.VISIBLE);
+        symbol.setVisibility(View.VISIBLE);
+        balance.setText(BalanceUtils.weiToEth(token.balance).toString());
+        symbol.setText(token.tokenInfo.symbol);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -420,6 +459,8 @@ public class DappBrowserFragment extends Fragment implements
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         this.networkInfo = networkInfo;
+        currentNetwork.setText(networkInfo.name);
+        Utils.setChainColour(currentNetworkIcon, networkInfo.chainId);
     }
 
     private void setupWeb3() {

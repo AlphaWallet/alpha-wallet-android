@@ -24,14 +24,16 @@ public class DappBrowserModule {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
-            ConfirmationRouter confirmationRouter) {
+            ConfirmationRouter confirmationRouter,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
                 fetchTokensInteract,
-                confirmationRouter);
+                confirmationRouter,
+                ethereumNetworkRepository);
     }
 
     @Provides

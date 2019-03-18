@@ -44,7 +44,10 @@ public class TokensService
     {
         if (interfaceSpecMap.get(t.getAddress()) != null)
         {
-            t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()));
+            if (t.getInterfaceSpec() == null || t.getInterfaceSpec() == ContractType.NOT_SET || t.getInterfaceSpec() == ContractType.OTHER)
+            {
+                t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()));
+            }
         }
     }
 
@@ -149,19 +152,17 @@ public class TokensService
         }
     }
 
-    public Observable<List<String>> reduceToUnknown(List<String> addrs)
+    public List<String> reduceToUnknown(List<String> addrs)
     {
-        return Observable.fromCallable(() -> {
-            for (Token t : tokenMap.values())
+        for (Token t : tokenMap.values())
+        {
+            if (addrs.contains(t.getAddress()))
             {
-                if (addrs.contains(t.getAddress()))
-                {
-                    addrs.remove(t.getAddress());
-                }
+                addrs.remove(t.getAddress());
             }
+        }
 
-            return addrs;
-        });
+        return addrs;
     }
 
     public void setCurrentAddress(String currentAddress)

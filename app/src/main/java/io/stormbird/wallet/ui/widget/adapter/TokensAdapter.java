@@ -139,7 +139,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public boolean checkTokens()
     {
-        return needsRefresh;
+        boolean refresh = needsRefresh;
+        needsRefresh = false;
+        return refresh;
     }
 
     public void setTokens(Token[] tokens)

@@ -32,11 +32,11 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -889,6 +889,12 @@ public class TokenRepository implements TokenRepositoryType {
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
+    private static org.web3j.abi.datatypes.Function addrParam(String param) {
+        return new Function(param,
+                            Arrays.<Type>asList(),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+    }
+
     private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
     {
         return new org.web3j.abi.datatypes.Function(
@@ -1159,6 +1165,28 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
+        });
+    }
+
+    @Override
+    public Single<String> resolveProxyAddress(String address)
+    {
+        return Single.fromCallable(() -> {
+            String contractAddress = address;
+            try
+            {
+                String received = getContractData(address, addrParam("implementation"), "");
+                if (received != null && isValidAddress(received))
+                {
+                    contractAddress = received;
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return contractAddress;
         });
     }
 

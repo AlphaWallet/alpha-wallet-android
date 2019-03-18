@@ -288,6 +288,10 @@ public class TransactionDecoder
         addFunction("setApprovalForAll(address,bool)", ERC721, false);
         addFunction("getApproved(address,address,uint256)", ERC721, false);
         addFunction("isApprovedForAll(address,address)", ERC721, false);
+        addFunction("transfer(address,uint256)", ERC721, false);
+        addFunction("giveBirth(uint256,uint256)", ERC721, false);
+        addFunction("breedWithAuto(uint256,uint256)", ERC721, false);
+        addFunction("createSaleAuction(uint256,uint256,uint256,uint256)", ERC721, false);
 
         addFunction("dropCurrency(uint32,uint32,uint32,uint8,bytes32,bytes32,address)", CURRENCY, true);
         addFunction("withdraw(uint256)", CURRENCY, false); //0x2e1a7d4d0000000000000000000000000000000000000000000000000000000000000001
@@ -327,7 +331,7 @@ public class TransactionDecoder
             }
         }
 
-        if (highestCount >= 2)
+        if (highestCount >= 2 || (highestCount == 1 && functionCount.size() == 1))
         {
             return highestType;
         }

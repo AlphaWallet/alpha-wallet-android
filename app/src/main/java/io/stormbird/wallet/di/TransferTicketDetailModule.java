@@ -74,8 +74,9 @@ public class TransferTicketDetailModule {
     }
 
     @Provides
-    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository) {
-        return new FetchTransactionsInteract(transactionRepository);
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
+                                                               TokenRepositoryType tokenRepositoryType) {
+        return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
     }
 
     @Provides

@@ -839,4 +839,9 @@ public class Token implements Parcelable
 
         return requiresTransactionRefresh;
     }
+
+    public boolean getIsSent(Transaction transaction)
+    {
+        return transaction.from.equalsIgnoreCase(tokenWallet);
+    }
 }

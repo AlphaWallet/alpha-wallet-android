@@ -10,9 +10,12 @@ import android.webkit.URLUtil;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.widget.TextView;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
+
+import static io.stormbird.token.entity.MagicLinkInfo.getNetworkNameById;
 
 public class Utils {
 
@@ -91,5 +94,7 @@ public class Utils {
                 view.setBackgroundResource(R.drawable.background_xdai);
                 break;
         }
+
+        ((TextView)view).setText(getNetworkNameById(chainId));
     }
 }

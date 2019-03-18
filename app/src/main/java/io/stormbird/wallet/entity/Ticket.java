@@ -801,4 +801,19 @@ public class Ticket extends Token implements Parcelable
         }
         return false;
     }
+
+    @Override
+    public boolean getIsSent(Transaction transaction)
+    {
+        boolean isSent = true;
+        TransactionOperation operation = transaction.operations == null
+                || transaction.operations.length == 0 ? null : transaction.operations[0];
+
+        if (operation != null)
+        {
+            ERC875ContractTransaction ct = (ERC875ContractTransaction) operation.contract;
+            if (ct.type > 0) isSent = false;
+        }
+        return isSent;
+    }
 }

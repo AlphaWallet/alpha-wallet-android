@@ -133,7 +133,7 @@ public abstract class C {
     }
 
     public static final String DAPP_LASTURL_KEY = "dappURL";
-    public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
+    public static final String DAPP_BROWSER_HISTORY = "DAPP_BROWSER_HISTORY";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
 

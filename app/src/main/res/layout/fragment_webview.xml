@@ -1,35 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <android.support.v7.widget.Toolbar
         android:id="@+id/address_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"
-        android:orientation="vertical"
-        android:padding="10dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimaryDark"
+        android:theme="@style/AppTheme.Toolbar"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
-        <AutoCompleteTextView
-            android:id="@+id/url_tv"
+        <RelativeLayout
+            android:id="@+id/address_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background_address_bar"
-            android:completionThreshold="1"
-            android:dropDownAnchor="@id/anchor"
-            android:fontFamily="@font/font_regular"
-            android:imeOptions="actionGo"
-            android:inputType="textUri"
-            android:padding="5dp" />
+            android:animateLayoutChanges="true"
+            android:orientation="horizontal"
+            android:paddingStart="5dp">
 
-        <View
-            android:id="@+id/anchor"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
+            <ImageView
+                android:id="@+id/back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:alpha="0.3"
+                android:padding="5dp"
+                android:src="@drawable/ic_browser_back" />
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/back"
+                android:alpha="0.3"
+                android:padding="5dp"
+                android:src="@drawable/ic_browser_next" />
+
+            <AutoCompleteTextView
+                android:id="@+id/url_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_toEndOf="@id/next"
+                android:layout_toStartOf="@id/home"
+                android:animateLayoutChanges="true"
+                android:background="@drawable/background_address_bar"
+                android:completionThreshold="1"
+                android:dropDownAnchor="@id/anchor"
+                android:fontFamily="@font/font_regular"
+                android:hint="@string/search_or_type_web_address"
+                android:imeOptions="actionGo"
+                android:inputType="textUri"
+                android:padding="5dp"
+                android:paddingRight="35dp" />
+
+            <ImageView
+                android:id="@+id/clear_url"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignRight="@id/url_tv"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="3dp"
+                android:padding="3dp"
+                android:src="@drawable/ic_clear"
+                android:tint="@color/light_gray"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_browser_home" />
+
+        </RelativeLayout>
+    </android.support.v7.widget.Toolbar>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -40,6 +97,12 @@
         android:indeterminate="false"
         android:progressDrawable="@drawable/background_horizontal_progress" />
 
+    <View
+        android:id="@+id/anchor"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/progressBar" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,6 +110,7 @@
         android:visibility="gone" />
 
     <FrameLayout
+        android:id="@+id/frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/progressBar"

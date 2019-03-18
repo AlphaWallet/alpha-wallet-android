@@ -282,6 +282,7 @@ public class Web3View extends WebView {
             {
                 Intent intent = new Intent(PAGE_LOADED);
                 intent.putExtra("url", url);
+                intent.putExtra("title", view.getTitle());
                 getContext().sendBroadcast(intent);
             }
             else

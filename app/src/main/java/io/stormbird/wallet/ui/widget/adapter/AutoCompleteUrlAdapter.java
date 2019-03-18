@@ -20,8 +20,6 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.widget.entity.UrlFilter;
 
-import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
-
 public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
 {
     private final List<String> history;
@@ -141,7 +139,8 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
 
     public void addDAppURL(String url)
     {
-        if (url.contains(DAPP_DEFAULT_URL)) return; // don't record the homepage
+//        if (url.contains(DAPP_DEFAULT_URL)) return;
+        // don't record the homepage
 
         String checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");
         for (String item : history)

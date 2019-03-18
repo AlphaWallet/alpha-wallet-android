@@ -7,6 +7,10 @@ import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +22,6 @@ import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import static io.stormbird.token.entity.MagicLinkInfo.getNetworkNameById;
 
 public class Utils {
-
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -67,8 +70,10 @@ public class Utils {
         return result;
     }
 
-    public static void setChainColour(View view, int chainId) {
-        switch (chainId) {
+    public static void setChainColour(View view, int chainId)
+    {
+        switch (chainId)
+        {
             case EthereumNetworkRepository.MAINNET_ID:
                 view.setBackgroundResource(R.drawable.background_mainnet);
                 break;
@@ -93,6 +98,45 @@ public class Utils {
             case EthereumNetworkRepository.XDAI_ID:
                 view.setBackgroundResource(R.drawable.background_xdai);
                 break;
+        }
+    }
+
+    public static String getDomainName(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        String domain = uri.getHost();
+        if (domain != null) {
+            return domain.startsWith("www.") ? domain.substring(4) : domain;
+        } else {
+            return "";
+        }
+    }
+
+    public static String loadJSONFromAsset(Context context, String fileName) {
+        String json = null;
+        try {
+            InputStream is = context.getAssets().open(fileName);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+    public static boolean isAddressValid(String address)
+    {
+        try
+        {
+            new org.web3j.abi.datatypes.Address(address);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
         }
     }
 }

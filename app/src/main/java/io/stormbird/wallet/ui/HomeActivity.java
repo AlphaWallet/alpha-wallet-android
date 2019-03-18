@@ -4,11 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -32,20 +28,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -55,11 +43,11 @@ import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.DAPP_BROWSER;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.MARKETPLACE;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
+import javax.inject.Inject;
+import java.io.File;
+import java.lang.reflect.Method;
+
+import static io.stormbird.wallet.widget.AWalletBottomNavigationView.*;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
 {
@@ -112,6 +100,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(4);
+        viewPager.setPageTransformer(true, new DepthPageTransformer());
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -234,17 +223,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         switch (viewPager.getCurrentItem())
         {
-            case DAPP_BROWSER:
-                if (dappBrowserFragment.getUrlIsBookmark())
-                {
-                    getMenuInflater().inflate(R.menu.menu_added, menu);
-                }
-                else
-                {
-                    getMenuInflater().inflate(R.menu.menu_add_bookmark, menu);
-                }
-                getMenuInflater().inflate(R.menu.menu_bookmarks, menu);
-                break;
             default:
                 getMenuInflater().inflate(R.menu.menu_add, menu);
                 break;
@@ -259,37 +237,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewModel.showAddToken(this, null);
             }
             break;
-            case android.R.id.home: {
-                dappBrowserFragment.homePressed();
-                return true;
-            }
-            case R.id.action_add_bookmark: {
-                dappBrowserFragment.addBookmark();
-                invalidateOptionsMenu();
-                return true;
-            }
-            case R.id.action_bookmarks: {
-                dappBrowserFragment.viewBookmarks();
-                return true;
-            }
-            case R.id.action_added: {
-                dappBrowserFragment.removeBookmark();
-                invalidateOptionsMenu();
-                return true;
-            }
-            case R.id.action_reload: {
-                dappBrowserFragment.reloadPage();
-                return true;
-            }
-            case R.id.action_share: {
-                dappBrowserFragment.share();
-                return true;
-            }
-            case R.id.action_scan: {
-                Intent intent = new Intent(this, QRScanningActivity.class);
-                startActivityForResult(intent, DAPP_BARCODE_READER_REQUEST_CODE);
-                return true;
-            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -376,6 +323,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void showPage(int page) {
         switch (page) {
             case DAPP_BROWSER: {
+                hideToolbar();
                 viewPager.setCurrentItem(DAPP_BROWSER);
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
@@ -384,6 +332,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             case WALLET: {
+                showToolbar();
                 viewPager.setCurrentItem(WALLET);
                 if (walletTitle == null || walletTitle.isEmpty()) {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -397,6 +346,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             case SETTINGS: {
+                showToolbar();
                 viewPager.setCurrentItem(SETTINGS);
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
@@ -405,6 +355,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             case TRANSACTIONS: {
+                showToolbar();
                 viewPager.setCurrentItem(TRANSACTIONS);
                 setTitle(getString(R.string.toolbar_header_transactions));
                 selectNavigationItem(TRANSACTIONS);
@@ -413,6 +364,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             }
             default:
+                showToolbar();
                 viewPager.setCurrentItem(WALLET);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
@@ -647,5 +599,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         }
         return super.onPrepareOptionsPanel(view, menu);
+    }
+
+    public class DepthPageTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.75f;
+
+        public void transformPage(View view, float position) {
+            int pageWidth = view.getWidth();
+
+            if (position < -1) {
+                view.setAlpha(0);
+            } else if (position <= 0) {
+                view.setAlpha(1);
+                view.setTranslationX(0);
+                view.setScaleX(1);
+                view.setScaleY(1);
+            } else if (position <= 1) {
+                view.setAlpha(1 - position);
+                view.setTranslationX(pageWidth * -position);
+                float scaleFactor = MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position));
+                view.setScaleX(scaleFactor);
+                view.setScaleY(scaleFactor);
+            } else {
+                view.setAlpha(0);
+            }
+        }
     }
 }

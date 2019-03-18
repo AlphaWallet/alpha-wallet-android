@@ -6,6 +6,9 @@ import android.text.TextUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 
 import io.stormbird.wallet.web3.entity.Message;
 
@@ -142,5 +145,17 @@ public class Hex {
             return containsHexPrefix(message.value)
                     ? new String(hexStringToByteArray(message.value)) : message.value;
         }
+    }
+
+    public static String hexToUtf8(String hex) {
+        hex = org.web3j.utils.Numeric.cleanHexPrefix(hex);
+        ByteBuffer buff = ByteBuffer.allocate(hex.length() / 2);
+        for (int i = 0; i < hex.length(); i += 2) {
+            buff.put((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
+        }
+        buff.rewind();
+        Charset cs = Charset.forName("UTF-8");
+        CharBuffer cb = cs.decode(buff);
+        return cb.toString();
     }
 }

@@ -90,11 +90,14 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (token != null)
         {
             tokenSymbol = token.tokenInfo.symbol;
-            Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            chainName.setText(token.getNetworkName());
-            chainName.setVisibility(View.VISIBLE);
+            if (chainName != null)
+            {
+                Utils.setChainColour(chainName, token.tokenInfo.chainId);
+                chainName.setText(token.getNetworkName());
+                chainName.setVisibility(View.VISIBLE);
+            }
         }
-        else
+        else if (chainName != null)
         {
             chainName.setVisibility(View.GONE);
         }

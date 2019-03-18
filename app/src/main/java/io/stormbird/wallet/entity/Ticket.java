@@ -11,6 +11,7 @@ import android.widget.TextView;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
 
+import io.stormbird.wallet.util.Utils;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
@@ -35,6 +36,8 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
+
+import static io.stormbird.wallet.util.Utils.isAlNum;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -635,26 +638,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return isDynamic;
-    }
-
-    private boolean isAlNum(String testStr)
-    {
-        boolean result = false;
-        if (testStr != null && testStr.length() > 0)
-        {
-            result = true;
-            for (int i = 0; i < testStr.length(); i++)
-            {
-                char c = testStr.charAt(i);
-                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !(c == '+') && !(c == ',') && !(c == ';'))
-                {
-                    result = false;
-                    break;
-                }
-            }
-        }
-
-        return result;
     }
 
     private String getTokenTitle(NonFungibleToken nonFungibleToken)

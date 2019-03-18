@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Patterns;
 import android.util.TypedValue;
+import android.view.View;
 import android.webkit.URLUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.stormbird.wallet.C;
+import io.stormbird.wallet.R;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 
 public class Utils {
 
@@ -59,5 +62,34 @@ public class Utils {
         }
 
         return result;
+    }
+
+    public static void setChainColour(View view, int chainId) {
+        switch (chainId) {
+            case EthereumNetworkRepository.MAINNET_ID:
+                view.setBackgroundResource(R.drawable.background_mainnet);
+                break;
+            case EthereumNetworkRepository.CLASSIC_ID:
+                view.setBackgroundResource(R.drawable.background_classic);
+                break;
+            case EthereumNetworkRepository.POA_ID:
+                view.setBackgroundResource(R.drawable.background_poa);
+                break;
+            case EthereumNetworkRepository.KOVAN_ID:
+                view.setBackgroundResource(R.drawable.background_kovan);
+                break;
+            case EthereumNetworkRepository.ROPSTEN_ID:
+                view.setBackgroundResource(R.drawable.background_ropsten);
+                break;
+            case EthereumNetworkRepository.SOKOL_ID:
+                view.setBackgroundResource(R.drawable.background_sokol);
+                break;
+            case EthereumNetworkRepository.RINKEBY_ID:
+                view.setBackgroundResource(R.drawable.background_rinkeby);
+                break;
+            case EthereumNetworkRepository.XDAI_ID:
+                view.setBackgroundResource(R.drawable.background_xdai);
+                break;
+        }
     }
 }

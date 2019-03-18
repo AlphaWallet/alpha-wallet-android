@@ -58,8 +58,6 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = ConfirmationModule.class)
 	abstract ConfirmationActivity bindConfirmationModule();
-	@ContributesAndroidInjector
-	abstract MyAddressActivity bindMyAddressModule();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = GasSettingsModule.class)
@@ -148,4 +146,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletActionsModule.class)
 	abstract WalletActionsActivity bindWalletActionsActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = MyAddressModule.class)
+	abstract MyAddressActivity bindMyAddressActivity();
 }

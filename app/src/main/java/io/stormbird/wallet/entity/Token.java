@@ -602,7 +602,14 @@ public class Token implements Parcelable
         BigDecimal value = new BigDecimal(valueStr);
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
         int scale = 4;
-        return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+        if (value.compareTo(BigDecimal.valueOf(0.0001)) < 0)
+        {
+            return "~0.00"; // very small amount of eth
+        }
+        else
+        {
+            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+        }
     }
 
     public String getTransactionValue(Transaction transaction, Context context)

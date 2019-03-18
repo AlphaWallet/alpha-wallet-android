@@ -94,7 +94,5 @@ public class Utils {
                 view.setBackgroundResource(R.drawable.background_xdai);
                 break;
         }
-
-        ((TextView)view).setText(getNetworkNameById(chainId));
     }
 }

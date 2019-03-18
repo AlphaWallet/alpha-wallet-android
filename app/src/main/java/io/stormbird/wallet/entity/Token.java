@@ -591,6 +591,29 @@ public class Token implements Parcelable
         return name;
     }
 
+    public String getScaledBalance()
+    {
+        return getScaledValue(balance, tokenInfo.decimals);
+    }
+
+    public static String getScaledValue(BigDecimal value, long decimals)
+    {
+        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
+        int scale = 4;
+        if (value.equals(BigDecimal.ZERO))
+        {
+            return "0";
+        }
+        if (value.compareTo(BigDecimal.valueOf(0.0001)) < 0)
+        {
+            return "~0.00"; // very small amount of eth
+        }
+        else
+        {
+            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+        }
+    }
+
     /**
      * Universal scaled value method
      * @param valueStr
@@ -599,16 +622,18 @@ public class Token implements Parcelable
      */
     public static String getScaledValue(String valueStr, long decimals) {
         // Perform decimal conversion
-        BigDecimal value = new BigDecimal(valueStr);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = 4;
-        if (value.compareTo(BigDecimal.valueOf(0.0001)) < 0)
+        if (decimals > 1 && valueStr != null && valueStr.length() > 0 && Character.isDigit(valueStr.charAt(0)))
         {
-            return "~0.00"; // very small amount of eth
+            BigDecimal value = new BigDecimal(valueStr);
+            return getScaledValue(value, decimals); //represent balance transfers according to 'decimals' contract indicator property
+        }
+        else if (valueStr != null)
+        {
+            return valueStr;
         }
         else
         {
-            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            return "0";
         }
     }
 
@@ -698,64 +723,6 @@ public class Token implements Parcelable
             default:
                 return false;
         }
-    }
-
-    private long getUpdateTime(long currentTime)
-    {
-        long updateTime = -1;
-        //calculate balance update time
-        if (!isTerminated() && currentTime >= 0)
-        {
-            if (hasRealValue())
-            {
-                if (isEthereum() || hasPositiveBalance())
-                {
-                    //schedule check in 20 seconds
-                    updateTime = 1000*20;
-                }
-                else
-                {
-                    //zero balance and not base currency, use 40 second cycle.
-                    updateTime = 1000*40;
-                }
-            }
-            else
-            {
-                //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
-                if (isEthereum())
-                {
-                    //schedule check in 30 seconds
-                    updateTime = 1000 * 40;
-                }
-                else if (hasPositiveBalance())
-                {
-                    //testnet positive balance and not base currency, use 120 second cycle.
-                    updateTime = 1000 * 160;
-                }
-                else if (tokenInfo.name != null)
-                {
-                    //zero balance - very slow update cycle
-                    updateTime = 1000 * 280;
-                }
-                else
-                {
-                    updateTime = 1000 * 360;
-                }
-            }
-        }
-        else
-        {
-            return -1;
-        }
-
-        updateTime += (long)((double)updateTime)*(0.6*Math.random()-0.2); //small variance to spread the checking load
-        updateTime += currentTime;
-
-        long millis = updateTime - System.currentTimeMillis();
-        double seconds = (double)millis / 1000.0;
-        Log.d("TOKEN", tokenInfo.name + " Reset in " + seconds);
-
-        return updateTime;
     }
 
     private float calculateBalanceUpdateWeight()

@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import io.stormbird.token.tools.Convert;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -448,7 +449,7 @@ public class DappBrowserFragment extends Fragment implements
     private void onUpdateBalance(Token token) {
         balance.setVisibility(View.VISIBLE);
         symbol.setVisibility(View.VISIBLE);
-        balance.setText(BalanceUtils.weiToEth(token.balance).toString());
+        balance.setText(token.getScaledBalance());
         symbol.setText(token.tokenInfo.symbol);
     }
 

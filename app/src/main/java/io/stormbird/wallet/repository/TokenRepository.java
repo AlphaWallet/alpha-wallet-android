@@ -817,14 +817,23 @@ public class TokenRepository implements TokenRepositoryType {
         {
             //try raw bytes
             byte[] data = Numeric.hexStringToByteArray(responseValue);
-            //truncate zeros
-            int index = data.length - 1;
-            while (data[index] == 0 && index > 0) index--;
-            if (index != (data.length - 1))
+            //check leading bytes for non-zero
+            if (data[0] != 0)
             {
-                data = Arrays.copyOfRange(data, 0, index+1);
+                //truncate zeros
+                int index = data.length - 1;
+                while (data[index] == 0 && index > 0)
+                    index--;
+                if (index != (data.length - 1))
+                {
+                    data = Arrays.copyOfRange(data, 0, index + 1);
+                }
+                name = new String(data, "UTF-8");
             }
-            name = new String(data, "UTF-8");
+            else
+            {
+                System.out.println("yoless");
+            }
         }
 
         return name;
@@ -1132,7 +1141,6 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-
                 return new TokenInfo(
                         address,
                         getName(address, network),

@@ -48,6 +48,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_MODE = "mode";
+    public static final String OVERRIDE_DEFAULT = "override";
     public static final int MODE_ADDRESS = 100;
     public static final int MODE_POS = 101;
 
@@ -71,23 +72,29 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private AmountEntryItem amountInput = null;
     private NetworkInfo networkInfo;
     private int currentMode = MODE_ADDRESS;
+    private int overrideNetwork;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        overrideNetwork = 0;
         setContentView(R.layout.activity_my_address);
         initViews();
         initViewModel();
         getInfo();
         getPreviousMode();
-    }
 
+        viewModel.prepare();
+    }
+    
     private void getPreviousMode() {
         Intent intent = getIntent();
         if (intent != null) {
             int mode = intent.getIntExtra(KEY_MODE, MODE_ADDRESS);
             if (mode == MODE_POS) {
+                overrideNetwork = intent.getIntExtra(OVERRIDE_DEFAULT, 1);
+                networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
                 showPointOfSaleMode();
             }
         }
@@ -115,13 +122,20 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private void initViewModel() {
         viewModel = ViewModelProviders.of(this, myAddressViewModelFactory).get(MyAddressViewModel.class);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.prepare();
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
-        this.networkInfo = networkInfo;
-        currentNetwork.setText(networkInfo.name);
-        Utils.setChainColour(networkIcon, networkInfo.chainId);
+        if (token != null && overrideNetwork == 0)
+        {
+            this.networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(token.tokenInfo.chainId);
+        }
+        else
+        {
+            this.networkInfo = networkInfo;
+        }
+
+        currentNetwork.setText(this.networkInfo.name);
+        Utils.setChainColour(networkIcon, this.networkInfo.chainId);
     }
 
     @Override
@@ -185,9 +199,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         amountInput = new AmountEntryItem(
                 this,
                 viewModel.getTokenRepository(),
-                viewModel.getEthereumNetworkRepository().getDefaultNetwork().symbol,
+                networkInfo.symbol,
                 true,
-                viewModel.getEthereumNetworkRepository().getDefaultNetwork().chainId);
+                networkInfo.chainId);
         amountInput.getValue();
         selectNetworkLayout.setVisibility(View.VISIBLE);
     }
@@ -210,12 +224,13 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private void selectNetwork() {
         SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), networkInfo.name, true);
         dialog.setOnClickListener(v1 -> {
-            viewModel.setNetwork(dialog.getSelectedItem());
+            NetworkInfo info = viewModel.setNetwork(dialog.getSelectedItem());
 
             // restart activity
-            if (!networkInfo.name.equals(dialog.getSelectedItem())) {
+            if (info != null && !networkInfo.name.equals(dialog.getSelectedItem())) {
                 Intent intent = getIntent();
                 intent.putExtra(KEY_MODE, MODE_POS);
+                intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
                 finish();
                 startActivity(intent);
             }
@@ -270,7 +285,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         //generate payment request link
         //EIP681 format
         BigDecimal weiAmount = Convert.toWei(newAmount, Convert.Unit.ETHER);
-        EIP681Request request = new EIP681Request(displayAddress, viewModel.getEthereumNetworkRepository().getDefaultNetwork().chainId, weiAmount);
+        EIP681Request request = new EIP681Request(displayAddress, networkInfo.chainId, weiAmount);
         String eip681String = request.generateRequest();
         qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));
     }

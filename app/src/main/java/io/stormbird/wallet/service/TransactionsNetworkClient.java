@@ -278,7 +278,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                     JSONObject stateData = new JSONObject(result);
                     //{"status":"1","message":"OK","result":"92653503768584227777966602"}
                     String value = stateData.getString("result");
-                    if (value.length() > 0)
+                    if (value.length() > 0 && Character.isDigit(value.charAt(0)))
                     {
                     	System.out.println("ERC20: " + value);
                         BigInteger supply = new BigInteger(value, 10);

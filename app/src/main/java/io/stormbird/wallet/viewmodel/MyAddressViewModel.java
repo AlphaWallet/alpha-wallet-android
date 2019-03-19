@@ -58,14 +58,16 @@ public class MyAddressViewModel extends BaseViewModel {
         return networkList;
     }
 
-    public void setNetwork(String selectedRpcServer) {
+    public NetworkInfo setNetwork(String selectedRpcServer) {
         NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
         for (NetworkInfo networkInfo : networks) {
             if (networkInfo.name.equals(selectedRpcServer)) {
                 ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
                 defaultNetwork.postValue(networkInfo);
-                return;
+                return networkInfo;
             }
         }
+
+        return null;
     }
 }

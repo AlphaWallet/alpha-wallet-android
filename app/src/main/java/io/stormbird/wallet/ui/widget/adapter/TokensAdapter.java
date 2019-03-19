@@ -245,10 +245,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private int calculateWeight(Token token)
     {
-        int weight = 0;
+        int weight = 1000; //ensure base eth types are always displayed first
         String tokenName = token.getFullName();
         if(token.isEthereum()) return token.tokenInfo.chainId;
-        if(token.isBad()) return Integer.MAX_VALUE;
+        if(token.isBad()) return 99999999;
 
         int i = 4;
         int pos = 0;
